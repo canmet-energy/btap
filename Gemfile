@@ -1,4 +1,3 @@
-#Chris lives here too!
 source 'http://rubygems.org'
 gem 'rake', '~> 11.2.2'
 
