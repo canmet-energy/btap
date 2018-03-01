@@ -1,10 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>zone_report_variables</name>
+  <name>btap_report_variables</name>
   <uid>4eebfbce-73a9-431d-9df6-997f0027f26d</uid>
-  <version_id>7e332638-3f78-4cd5-a7fc-633291edae6a</version_id>
-  <version_modified>20170131T211801Z</version_modified>
-  <xml_checksum>CDAB1616</xml_checksum>
+  <version_id>4c6dc358-da7f-416d-8be0-34b75078a0ad</version_id>
+  <version_modified>20180228T202816Z</version_modified>
+  <xml_checksum>70EC291E</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAP Zone Report Variables</display_name>
   <description>Adds a bunch of output variables that are useful for understanding zone conditions.  Does not create a report.</description>
@@ -103,7 +103,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5BF29980</checksum>
+      <checksum>E3214A55</checksum>
     </file>
   </files>
 </measure>
