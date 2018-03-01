@@ -1,5 +1,5 @@
 
-#This is where CHris lives. 
+
 
 ## Prerequisites. 
 + OpenStudio 2.4.1 installed. 
