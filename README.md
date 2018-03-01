@@ -1,3 +1,6 @@
+
+#This is where CHris lives. 
+
 ## Prerequisites. 
 + OpenStudio 2.4.1 installed. 
 + Ruby 2.2.4 with bundler gem installed. 

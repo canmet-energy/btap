@@ -1,4 +1,3 @@
-#Phylroy Lives here. 
 source 'http://rubygems.org'
 gem 'rake', '~> 11.2.2'
 
