@@ -1,40 +1,60 @@
-# NRCan Housing Archetype Database
+# Building Technology Assessment Platform (BTAP)
 
 
 ## Contents
 --------
 1) [Introduction](#introduction)
-1) [Objective][#objective]
-1) [Scope][#scope] 
-1) [Housing Archetype Classification][] 
-1) [Archetype database format][] 
+2) [Objective](#objective)
+3) [Scope](#scope) 
+4) [Commercial Building Archetypes](#commercial-building_archetypes) 
+	1) [Creating New Building Archetypes](#creating-new-building-archetypes)
+    	1) [3D Geometry and Space-type Method](#3d-geometry-and-spacetype-method)
+        1) [Building Story Method](#building-story-method)
+    1) [Ruleset Development](#ruleset-development)
+    1) [Regional Data-Sources](#regional-data-sources)
+    	1) [Fuel Use by System Type](#fuel-use-by-system-type)
+        1) [Utility Rates](#utility-rates)
+1) [Energy Conservation Measure Libraries](#energy-conservation-measure-libraries)
+1) [Generating Data Results](#generating-data-results)
+    1) [OpenStudio Spreadsheet Method](#openstudio-spreadsheet-method)
+    1) [OpenStudio PAT Method](#openstudio-pat-method)
+1) [Outputs](#output)
+	1) [3D HTML Viewer](#3d-html-viewer)
+    1) [OSM File](#osm-file)
+    1) [EnergyPlus HTML Output](#energyplus-html-output)
+    1) [OpenStudio HTML Output](#openstudio-html-output)
+    1) [QAQC JSON Output](#btap-qaqc-json-output)
 
 
 ## Introduction 
 
-NRCan is developing a framework to assist in the analysis of the energy performance of technologies used in commercial buildings. The framework is developed upon the U.S National Renewable Energy Laboratory's [Openstudio](https://www.openstudio.net/) software development kit. It consists of four distinct components. 
+NRCan is developing a framework to assist in the analysis of the energy performance of technologies used in commercial buildings. The framework is developed upon the U.S National Renewable Energy Laboratory's [Openstudio](https://www.openstudio.net/) software development kit. The software and data are opensource and available for download, inspection and modification.  It consists of four distinct components. 
 
 * The [Standards project](https://github.com/NREL/openstudio-standards) which is a rules based engine that automates the creation of 'archetypes' for specific vintages.
 * The Costing Project: Automatcially cost the baseline archetypes as well as some upgrade through an expert system. 
 * The Energy Conservation Measures Project: A library of scripts that will apply canadian energy conservation measures to a building if applicable.
-* The Solutions Database: This will be a database of thousands of optimized runs using the archetypes, costing and measures components.    
-* 
+* The Solutions Database: This will be a database of optimized runs using the archetypes, costing and measures components.    
+* Data- Visualization: Creation of visualizations of the simulation data like [this](https://canmet-energy.github.io/parallel-coordinates/) to better support designers and researchers. 
+
 ## Objective
 
 NRCan is developing the Building Technology Assesment Platform (BTAP) to allow researchers, energy consultants, governments and utiltiies to: 
 
-* Develop their own specific archetypes for their specific region. 
-* Develop their own vintages ruleset for their location, or nationwide. 
-* Analyse the performance of combined building technologies on the BTAP archetype set.
+* Enable the development of their own specific building archetypes for their needs. 
+* Analyse the performance of combined building technology performance on the specific building design or on a set of building types.
 * Examine the results database of our national runs to use in their own analysis. 
 
 
 ## Scope
-This work is predominately focused on new construction for the time being. However older vintages can be developed. 
+This work is predominately focused on new construction for the time being. However older vintages can be developed. The vintages are mapped to the [National Energy Code for Buildings](http://www.nrcan.gc.ca/energy/efficiency/buildings/eenb/codes/4037), and uses this as the sole input for building generation. 
 
 ## Commercial Building Archetypes
 
-BTAP comes with 16 built-in commercial building archetypes. The archetypes are based on the U.S. DOE reference building archetypes. The 16 building types are: 
+The commercial btap archetypes are created in two steps, the development of a spacetype geometric model, and then a ruleset that is applied to the model that populates the model with correct envelope and HVAC charecteristics for various geographic locations in Canada and the US. 
+
+BTAP comes with 16 built-in commercial building spacetype geometric models. The are based on the U.S. DOE reference building archetypes, but gutted of everything except the geometry and space type information.  
+
+The 16 building types are: 
 
 |BUILDING TYPE NAME|FLOOR AREA (FT2)|NUMBER OF FLOORS|
 |-----------------|----------------|----------------|
@@ -55,7 +75,9 @@ BTAP comes with 16 built-in commercial building archetypes. The archetypes are b
 |Large Hotel|	122,120|	6|
 |Midrise Apartment|	33,740|	4|
 
-These building types form the basis of simulation modelling in Canada and the US, due to the availability of these models from US DOE for decades. The standards project supports the vintage standards: 
+A ruleset is then applied to these skeleton geometric models to add the correct envelope and HVAC systems depending on the ruleset vintage and the model's city being considered.  
+
+The standards project supports these vintage building codes: 
 * ASHRAE90.1-2004
 * ASHRAE90.1-2007
 * ASHRAE90.1-2010
@@ -67,7 +89,9 @@ These building types form the basis of simulation modelling in Canada and the US
 * NECB 2017*
 
 
-### Archetype Development Inputs
+NRCan is repsonsible for the development of the Canadian rulesets. The NECB 2015 and 2017 are under development. 
+
+### Creating New Building Archetypes
 
 The standards project was developed to quickly generate new archetype buildings quickly based on NECB rulesets. To create a new archetype you need define the shape of the building and provide information on what activities are going on in the building.
 
@@ -75,19 +99,19 @@ The standards project was developed to quickly generate new archetype buildings 
 
 The geometry and spaces can be created using the Sketchup plug-in for OpenStudio as well as the Openstudio App. The spaces must be assigned to an NECB space-type standard name. The space type contains information on schedules, lighting, outdoor air, plug loads, and heating and cooling as well as what typical HVAC systems are installed to support the space use activities.  The space-types are clearly defined in the NECB standard. This is the basis of how the building in generated by the standards engine. A complete listing of the NECB 2011 spacetypes can be found in section A-8.4.3.3 in the NECB 2011. You can programmatically access the space types in json format in the [NECB 2011 data folder](https://github.com/NREL/openstudio-standards/tree/master/lib/openstudio-standards/standards/necb/necb_2011/data) You can also request a Openstudio library file that contains all the NECB spacetypes to populate your model. 
 
-#### Floor Area / Building Story method. 
+#### Building Story Method
+(This is under development.) 
+
 Another non-geometry method that NRCan is developing is to simply give: 
 * the floor area 
 * the number of floors 
 * the weighted percentage of spacetypes used in the building.
 * the aspect ratio
 
-This will create a rectangular model with all the space types represented.  This is currently under development, but may be useful in data-driven analysis.  
-
-With this information, BTAP can fill in all the other information to create the HVAC, envelope, and schedule for the building model. 
+This will create a rectangular model with all the space types represented.  This is currently under development, but may be useful in data-driven analysis.  With this information, BTAP can fill in all the other information to create the HVAC, envelope, and schedule for the building model. 
 
 
-#### Vintage Ruleset Development
+### Ruleset Development
 
 NRCan is responsible for the development of the NECB vintage ruleset. These NECB rulesets can be modified through programming and changing data inputs. The ruleset was developed using an object oriented design and simple inheritance. For example, the main ruleset code for the NECB 2011 code logic, written in Ruby, is contained [here](https://github.com/NREL/openstudio-standards/tree/nrcan/lib/openstudio-standards/standards/necb/necb_2011) in the NECB2011 class.   
 
@@ -97,10 +121,10 @@ The data and code are used as inputs to create NECB reference archetypes.
 
 Subsequent versions of the NECB standard are simply sub-classes of the NECB 2011 ruleset. This allows us to create new rulesets for other vintages based on the NECB very quickly as we simply code what has changed in the data and the logic, and reuse the code from the previous vintages.  The same design we developed with NREL is used for the A90.1 rulesets. 
 
-### Regional Information
-BTAP uses the climate file used in the simulation to determine the Heating Degree-Day (HDD) to set the correct envelope charecteristics for the climate, the utilty rates, and the costing information. The available weather locations are contained [here]()
+### Regional Datasources
+BTAP uses the climate file used in the simulation to determine the Heating Degree-Day (HDD) to set the correct envelope charecteristics for the climate, the utilty rates, and the costing information. 
 
-#### Regional Fuel Use by System Type. 
+#### Fuel Use by System Type 
 The standards used the climate file to decide what fuel types to assign to the building. Currenlty the resolution is at the provincial level. You can see the fuel types that are used by system and plant equipment defined in this JSON file [here](https://github.com/NREL/openstudio-standards/blob/nrcan/lib/openstudio-standards/standards/necb/necb_2011/data/regional_fuel_use.json)
 
 This is rather coarse, but this can be improved easily as more data becomes available at the city level. 
@@ -108,11 +132,16 @@ This is rather coarse, but this can be improved easily as more data becomes avai
 #### Utility Rates
 The archetypes use two methods to determine the utility energy costs. BTAP will output the National Energy Board Rates automatically with each run. It will also calculate time of use and block charge rates separately. These block charges rates were obtained from a survey of utilities across the country. A list of the utility rates can be found [here](https://github.com/canmet-energy/btap/blob/master/measures/BTAPUtilityTariffs/resources/Energy%20rates_2015.xls)
 
-## ECM Libraries
+## Energy Conservation Measure Libraries
+The Openstudio framework supports a scripted Ruby language environment to develop ECMs. This ECMs take in a set of arguments and modify the base building model. ECMs can change envelope conductivity, replace hvac systems, modify schedules, introduce control strategies and more. BTAP utilizes this feature of OpenStudio to modify the building model in an automated fashion. This is use in our parametric analysis of design scenarios.  The benefit of these measure is that they can be applied to ANY OpenStudio model. So the measures that we are developing for the archetypes can also be used by modellers on their projects. We are currently in the process of developing measures specifically for BTAP users in a consistent manner.
+
+NREL has developed a [Measures Writing Guide](http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/) to help uses develop their own measures. 
+
+There is also a on-line database of measures that have been developed by NREL and crowd sourced by users on the [Building Component Library Website](https://bcl.nrel.gov/)
 
 
 
-## Generating NECB archetype runs. 
+## Generating Data 
 There are many ways to generate the NECB models and run them to run the simulation and produce results. The preferred ways are using NREL's OpenStudio Spreadsheet, and to use The Openstudio PAT 2.0 tool. Both methods can use Amazon to create the runs and output the data. Both methods allow for parametric and optimization numerical methods. 
 
 The CreateNECBPrototype measure contained in the projects require as input:
@@ -122,28 +151,37 @@ The CreateNECBPrototype measure contained in the projects require as input:
 Subsequent measures can be added to the analysis as needed. 
 
 
-### NREL OpenStudio Spreadsheet Method
-This method required you to install the ruby language interpreter on your system as well as git. It uses a spreadsheet to input data to run the archetype generator measure as well as any other measures. Full instructions on how to invoke the spreadsheet method on contained [here](https://github.com/canmet-energy/necb-analysis-spreadsheet)
+### OpenStudio Spreadsheet Method
+This method required you to install the ruby language interpreter on your system as well as git. It uses a spreadsheet to input data to run the archetype generator measure as well as any other measures. Full instructions on how to invoke the spreadsheet method on contained [here](https://github.com/canmet-energy/necb-analysis-spreadsheet). This methodology will be deprecated soon in favor of using PAT 2.0. 
 
-### NREL OpenStudio PAT Method
-This method simply requires you to install a recent version of OpenStudio on your Mac or PC and a git client. Instructions on how to run the analysis will be contained here soon. 
+### OpenStudio PAT Method
+This method simply requires you to install a recent version of OpenStudio on your Mac or PC and a git client and run the load the BTAP project contained in this repository. Instructions on how to run the analysis will be contained here soon. Detailed instruction on PAT 2.0 itself can be found [here](http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_analysis_tool_2/)
 
 
 ## Outputs
 
-The simulation produces various outputs. 
+The btap simulation analysis produces various outputs. You can find a sample of a full national run of 16 building types over ~70 cities in this [git repository](https://github.com/canmet-energy/necb_2011_reference_buildings) 
 
 ### 3D HTML Viewer
-The analysis produces a 3d model that can be reviewed to ensure geometry is correct. Here is a sample. 
+The analysis produces a 3D HTML model of the geometry that can be reviewed to ensure geometry is correct. 
 
-### The Resultant Model file. 
-The model files are created and available in the database result. This is to allow users to inspect the model and alter it and run it manually if they wish. 
+### OSM File 
+The OpenStudio model files are created and available in the database result. This is to allow users to inspect the model and alter it and run it manually if they wish. 
 
-### The EnergyPlus Output
+### EnergyPlus HTML Output
+This is the EnergyPlus HTML file
 
-### The OpenStudio Output
+### OpenStudio HTML Output
+This is the more detailed OpenStudio HTML report, which includes graphs. 
 
-### The BTAP JSON Output
+### QAQC JSON Output
+
+The BTAP JSON format is a custom output format that contains high level information about the simulation. JSON format is a popular web and database standards with support built in for all modern languages and is supported by database engines like MongoDB and SQLite. It is supported also by recent versions of Excel and Tableau. It is extremely fast to parse and easy to read by humans as it follows a tree hierarchy structure. 
+
+The output of this is a subset of the output available by EnergyPlus. Data is being added to the BTAP JSON file on a regular basis as needed.  For a full list of outputs available from EnergyPlus,  please refer to the [EnergyPlus Input/Output Documentation](https://bigladdersoftware.com/epx/docs/8-8/input-output-reference/) 
+
+Below is an example of the output of a single Full Service Restaurant model in JSON. Multiple JSON files can be concatenated together for analysis in big data software analytic tools like tableau.  
+
 
 ```json
 {
