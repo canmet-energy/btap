@@ -1,23 +1,14 @@
-require 'bundler/gem_tasks'
-begin
-  Bundler.setup
-rescue Bundler::BundlerError => e
-  $stderr.puts e.message
-  $stderr.puts 'Run `bundle install` to install missing gems'
-  exit e.status_code
-end
-
 require 'rake/testtask'
 namespace :test do
   #create test list
   array = []
-  array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/create_DOE_prototype_building_test.rb'
-  array << 'measures/BTAPEnvelopeWallMeasures/tests/IncreaseInsulationRValueForExteriorWalls_01_Test.rb'
-  array << 'measures/BTAPModifyConductancesByPercentage/tests/btap_modify_conductances_by_percentage_test.rb'
-  array << 'measures/BTAPOpenstudioResults/tests/OpenStudioResults_Test.rb'
-  array << 'measures/BTAPReportVariables/tests/zone_report_variables_test.rb'
-  array << 'measures/BTAPResults/tests/OpenStudioResults_Test.rb'
-  array << 'measures/BTAPUtilityTariffs/tests/UtilityTariffs_Test.rb'
+  array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/BTAPCreateNECBPrototypeBuildings_test.rb'
+  # array << 'measures/BTAPEnvelopeWallMeasures/tests/IncreaseInsulationRValueForExteriorWalls_01_Test.rb'
+  # array << 'measures/BTAPModifyConductancesByPercentage/tests/btap_modify_conductances_by_percentage_test.rb'
+  # array << 'measures/BTAPOpenstudioResults/tests/OpenStudioResults_Test.rb'
+  # array << 'measures/BTAPReportVariables/tests/zone_report_variables_test.rb'
+  # array << 'measures/BTAPResults/tests/OpenStudioResults_Test.rb'
+  # array << 'measures/BTAPUtilityTariffs/tests/UtilityTariffs_Test.rb'
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
     t.libs << 'test'
