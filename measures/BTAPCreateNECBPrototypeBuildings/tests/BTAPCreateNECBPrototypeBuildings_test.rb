@@ -23,29 +23,38 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
 
     # test arguments and defaults
     arguments = measure.arguments(model)
+    #check number of arguments.
     assert_equal(3, arguments.size)
+    #check argument 0
     assert_equal('building_type', arguments[0].name)
+    assert_equal('SmallOffice', arguments[0].defaultValueAsString)
+    #check argument 1
     assert_equal('template', arguments[1].name)
-    assert_equal('epw_file', arguments[2].name)
     assert_equal('NECB2011', arguments[1].defaultValueAsString)
+    #check argument 2
+    assert_equal('epw_file', arguments[2].name)
+    assert_equal('CAN_AB_Banff.CS.711220_CWEC2016.epw', arguments[1].defaultValueAsString)
+
 
     # set argument values to values and run the measure
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
-    #argument 0
+    #set argument 0
     building_type = arguments[0].clone
     assert(building_type.setValue('FullServiceRestaurant'))
     argument_map['building_type'] = building_type
 
-    #argument 1
+    #set argument 1
     template = arguments[1].clone
     assert(template.setValue('NECB2011'))
     argument_map['template'] = template
 
-    #argument 2
+    #set argument 2
     epw_file = arguments[2].clone
     assert(epw_file.setValue('CAN_AB_Banff.CS.711220_CWEC2016.epw'))
     argument_map['epw_file'] = epw_file
+
+    #run the measure
     measure.run(model, runner, argument_map)
     result = runner.result
     assert(result.value.valueName == 'Success')
