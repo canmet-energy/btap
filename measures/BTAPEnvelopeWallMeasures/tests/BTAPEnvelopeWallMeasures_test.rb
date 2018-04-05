@@ -1,7 +1,6 @@
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
-
 begin
   require 'openstudio_measure_tester/test_helper'
 rescue LoadError
@@ -9,10 +8,12 @@ rescue LoadError
 end
 require_relative '../measure.rb'
 require 'minitest/autorun'
-class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
+
+
+class BTAPExteriorWallMeasure_Test < Minitest::Test
   def test_create_building()
     # create an instance of the measure
-    measure = BTAPCreateNECBPrototypeBuilding.new
+    measure = BTAPExteriorWallMeasure.new
 
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -25,33 +26,32 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     #check number of arguments.
     assert_equal(3, arguments.size)
     #check argument 0
-    assert_equal('building_type', arguments[0].name)
-    assert_equal('SmallOffice', arguments[0].defaultValueAsString)
+    assert_equal('ecm_exterior_wall_conductance', arguments[0].name)
+    assert_equal(0.183, arguments[0].defaultValueAsDouble)
     #check argument 1
-    assert_equal('template', arguments[1].name)
-    assert_equal('NECB2011', arguments[1].defaultValueAsString)
+    assert_equal('ecm_start_angle_in_degrees', arguments[1].name)
+    assert_equal(0.0, arguments[1].defaultValueAsDouble)
     #check argument 2
-    assert_equal('epw_file', arguments[2].name)
-    assert_equal('CAN_AB_Banff.CS.711220_CWEC2016.epw', arguments[2].defaultValueAsString)
-
+    assert_equal('ecm_end_angle_in_degrees', arguments[2].name)
+    assert_equal(360.0, arguments[2].defaultValueAsDouble)
 
     # set argument values to values and run the measure
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
     #set argument 0
-    building_type = arguments[0].clone
-    assert(building_type.setValue('FullServiceRestaurant'))
-    argument_map['building_type'] = building_type
+    ecm_exterior_wall_conductance = arguments[0].clone
+    assert(ecm_exterior_wall_conductance.setValue(0.183))
+    argument_map['ecm_exterior_wall_conductance'] = ecm_exterior_wall_conductance
 
     #set argument 1
-    template = arguments[1].clone
-    assert(template.setValue('NECB2011'))
-    argument_map['template'] = template
+    ecm_start_angle_in_degrees = arguments[1].clone
+    assert(ecm_start_angle_in_degrees.setValue(0.0))
+    argument_map['ecm_start_angle_in_degrees'] = ecm_start_angle_in_degrees
 
     #set argument 2
-    epw_file = arguments[2].clone
-    assert(epw_file.setValue('CAN_AB_Banff.CS.711220_CWEC2016.epw'))
-    argument_map['epw_file'] = epw_file
+    ecm_end_angle_in_degrees = arguments[2].clone
+    assert(ecm_end_angle_in_degrees.setValue(360.0))
+    argument_map['ecm_end_angle_in_degrees'] = ecm_end_angle_in_degrees
 
     #run the measure
     measure.run(model, runner, argument_map)

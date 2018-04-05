@@ -4,26 +4,44 @@
 require 'erb'
 
 #start the measure
-class BTAPReportVariables < OpenStudio::Ruleset::ReportingUserScript
+class BTAPReportVariables < OpenStudio::Measure::ReportingMeasure
 
   # human readable name
   def name
-    return "BTAP Zone Report Variables"
+    return "BTAP Report Variable"
   end
 
   # human readable description
   def description
-    return "Adds a bunch of output variables that are useful for understanding zone conditions.  Does not create a report."
+    return "Adds E+ output variables.   Does not create a report."
   end
 
   # human readable description of modeling approach
   def modeler_description
-    return ""
+    return "Get output variables from a E+ run and enter them in the variables as an array like '[\"variable_name_1\",\"variable_name_2\"]' and set the reporting frequency accordingly."
   end
 
   # define the arguments that the user will input
   def arguments()
     args = OpenStudio::Ruleset::OSArgumentVector.new
+
+    variable_names = OpenStudio::Ruleset::OSArgument::makeStringArgument('variable_names', reporting_frequency_chs, true)
+    variable_names.setDisplayName("variable_names")
+    variable_names.setDefaultValue('[
+        "Heating Coil Air Heating Rate",
+        "Boiler Heating Rate","Cooling Coil Total Cooling Rate",
+        "Water Heater Heating Rate",
+        "Facility Total Electric Demand Power",
+        "Zone Air System Sensible Heating Rate",
+        "Zone Air System Sensible Cooling Rate",
+        "Zone Total Internal Total Heating Rate",
+        "Zone Total Internal Latent Gain rate",
+        "Total Internal Radiant Heating Rate",
+        "Total Internal Convective Heating Rate",
+        "Zone Air Heat Balance Outdoor Air Transfer Rate"
+      ]')
+    args << variable_names
+
 
     #make an argument for the timestep
     reporting_frequency_chs = OpenStudio::StringVector.new
@@ -33,69 +51,28 @@ class BTAPReportVariables < OpenStudio::Ruleset::ReportingUserScript
     reporting_frequency = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('reporting_frequency', reporting_frequency_chs, true)
     reporting_frequency.setDisplayName("Reporting Frequency.")
     reporting_frequency.setDefaultValue("timestep")
-    args << reporting_frequency    
+    args << reporting_frequency
 
     return args
-  end 
-  
+  end
+
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
-    
+
     result = OpenStudio::IdfObjectVector.new
-    
+
     # use the built-in error checking 
     if !runner.validateUserArguments(arguments(), user_arguments)
       return result
     end
-    
-    reporting_frequency = runner.getStringArgumentValue("reporting_frequency",user_arguments)
+
+    variable_names = runner.getStringArgumentValue("variable_names", user_arguments)
+    reporting_frequency = runner.getStringArgumentValue("reporting_frequency", user_arguments)
 
     out_var_names = []
-    
-    # Outdoor Air conditions
-    #out_var_names << "Heating Coil Air Heating Energy"
-    out_var_names << "Heating Coil Air Heating Rate"
-
-    out_var_names << "Boiler Heating Rate"
-    #out_var_names << "Boiler Heating Energy"
-
-    out_var_names << "Cooling Coil Total Cooling Rate"
-    #out_var_names << "Cooling Coil Total Cooling Energy"
-
-    out_var_names << "Water Heater Heating Rate"
-    #out_var_names << "Water Heater Heating Energy"
-
-    #out_var_names << "Facility Total HVAC Electric Demand Power"
-    out_var_names << "Facility Total Electric Demand Power"
-
-    #out_var_names << "Heating Coil Gas Energy"
-    #out_var_names << "Heating Coil Gas Rate"
-    #out_var_names << "Heating Coil Electric Energy"
-    #out_var_names << "Heating Coil Electric Power"
-
-    #out_var_names << "Cooling Coil Sensible Cooling Rate"
-    #out_var_names << "Cooling Coil Sensible Cooling Energy"
-    #out_var_names << "Cooling Coil Latent Cooling Rate"
-    #out_var_names << "Cooling Coil Latent Cooling Energy"
-    #out_var_names << "Cooling Coil Electric Power"
-    #out_var_names << "Cooling Coil Electric Energy"
-    #out_var_names << "Cooling Coil Runtime Fraction"
-    #out_var_names << "Coil System Part Load Ratio"
-    #out_var_names << "Coil System Frost Control Status"
-
-    out_var_names << 'Zone Air System Sensible Heating Rate'
-    out_var_names << 'Zone Air System Sensible Cooling Rate'
-    #out_var_names << 'Zone Total Internal Total Heating Energy'
-    out_var_names << 'Zone Total Internal Total Heating Rate'
-    #out_var_names << 'Zone Total Internal Latent Gain Energy'
-    out_var_names << 'Zone Total Internal Latent Gain rate'
-
-    out_var_names << 'Total Internal Radiant Heating Rate'
-    out_var_names << 'Total Internal Convective Heating Rate'
-    out_var_names << 'Zone Air Heat Balance Outdoor Air Transfer Rate'
-
-
+    #convert string to array
+    eval("out_var_names = #{variable_names}")
 
     # Request the variables
     out_var_names.each do |out_var_name|
@@ -103,10 +80,10 @@ class BTAPReportVariables < OpenStudio::Ruleset::ReportingUserScript
       result << request
       runner.registerInfo("Adding output variable for '#{out_var_name}' reporting #{reporting_frequency}")
     end
-    
+
     return result
   end
-  
+
   # define what happens when the measure is run
   def run(runner, user_arguments)
     super(runner, user_arguments)
@@ -138,7 +115,7 @@ class BTAPReportVariables < OpenStudio::Ruleset::ReportingUserScript
     sqlFile.close()
 
     return true
- 
+
   end
 
 end

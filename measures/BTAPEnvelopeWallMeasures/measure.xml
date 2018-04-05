@@ -1,18 +1,40 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>increase_insulation_r_value_for_exterior_walls</name>
-  <uid>3fdf9c39-d305-449b-a4b5-077166af5a67</uid>
-  <version_id>e210c46f-7aa3-4428-a085-dc7456d98e7e</version_id>
-  <version_modified>20170519T182312Z</version_modified>
-  <xml_checksum>0F858D9E</xml_checksum>
-  <class_name>IncreaseInsulationRValueForExteriorWalls</class_name>
-  <display_name>BTAP Envelope Wall measure packages</display_name>
-  <description>Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. Costs for a construction can be adjusted</description>
-  <modeler_description>Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in air exposed exterior walls to a specified value. Find constructions used for exterior walls, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. Layer to change could be Material, No Mass Material, or Air Gap Material. If the Insulation layer is "Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is "No Mass Material? or "Air Gap Material? the Thermal Resistance can be directly entered. If the construction doesn't appear to have an insulation layer it will not be altered. Surfaces with "Adiabatic" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on "Adiabatic" surfaces will not be altered. Constructions for surfaces with a "Ground" boundary condition will also not be altered. Constructions with an insulation layer that already exceeds the requested R-Value will also not be altered.&#xd;&#xd;&#xd;&#xd;&#xd;
-&#xd;&#xd;&#xd;&#xd;&#xd;
-The resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.&#xd;&#xd;&#xd;&#xd;&#xd;
-  </modeler_description>
-  <arguments/>
+  <name>btap_exterior_wall_measure</name>
+  <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
+  <version_id>c9ce6c37-a214-41bd-a781-c9b3faae11a5</version_id>
+  <version_modified>20180405T174924Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPExteriorWallMeasure</class_name>
+  <display_name>BTAPExteriorWallMeasure</display_name>
+  <description>Changes exterior wall construction's thermal conductances</description>
+  <modeler_description>method</modeler_description>
+  <arguments>
+    <argument>
+      <name>ecm_exterior_wall_conductance</name>
+      <display_name>Exterior Wall Conductance (W/m2 K)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.183</default_value>
+    </argument>
+    <argument>
+      <name>ecm_start_angle_in_degrees</name>
+      <display_name>Start Angle [deg]</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>ecm_end_angle_in_degrees</name>
+      <display_name>End Angle [deg]</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>360</default_value>
+    </argument>
+  </arguments>
   <outputs/>
   <provenances/>
   <tags>
@@ -25,56 +47,44 @@ The resulting construction will retain the cost data from the source constructio
       <datatype>string</datatype>
     </attribute>
     <attribute>
-      <name>Measure Function</name>
-      <value>Measure</value>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
       <datatype>string</datatype>
     </attribute>
     <attribute>
-      <name>Requires EnergyPlus Results</name>
-      <value>false</value>
-      <datatype>boolean</datatype>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
     </attribute>
     <attribute>
-      <name>Uses SketchUp API</name>
-      <value>false</value>
-      <datatype>boolean</datatype>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
     </attribute>
   </attributes>
   <files>
     <file>
-      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
-      <filetype>osm</filetype>
+      <filename>btap_exterior_wall_measure_test.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>10AA8866</checksum>
+      <checksum>4D334284</checksum>
     </file>
     <file>
-      <filename>ReverseTranslatedModel.osm</filename>
+      <filename>example_model.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>0B94403D</checksum>
+      <checksum>53D14E69</checksum>
     </file>
     <file>
       <version>
         <software_program>OpenStudio</software_program>
-        <identifier>0.11.5</identifier>
-        <min_compatible>0.11.5</min_compatible>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
       </version>
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>26D5E1F5</checksum>
-    </file>
-    <file>
-      <filename>IncreaseInsulationRValueForExteriorWalls_01_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D6C65D4A</checksum>
-    </file>
-    <file>
-      <filename>mike.xlsx</filename>
-      <filetype>xlsx</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>02EE8ABB</checksum>
+      <checksum>855B2BF8</checksum>
     </file>
   </files>
 </measure>

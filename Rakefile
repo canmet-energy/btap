@@ -3,7 +3,7 @@ namespace :test do
   #create test list
   array = []
   array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/BTAPCreateNECBPrototypeBuildings_test.rb'
-  # array << 'measures/BTAPEnvelopeWallMeasures/tests/IncreaseInsulationRValueForExteriorWalls_01_Test.rb'
+  # array << 'measures/BTAPEnvelopeWallMeasures/tests/BTAPEnvelopeWallMeasures_test.rb'
   # array << 'measures/BTAPModifyConductancesByPercentage/tests/btap_modify_conductances_by_percentage_test.rb'
   # array << 'measures/BTAPOpenstudioResults/tests/OpenStudioResults_Test.rb'
   # array << 'measures/BTAPReportVariables/tests/zone_report_variables_test.rb'

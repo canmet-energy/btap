@@ -6,7 +6,7 @@ require_relative '../measure.rb'
 
 require 'fileutils'
 
-class ZoneReportVariables_Test < MiniTest::Unit::TestCase
+class ZoneReportVariables_Test < Minitest::Test
 
   # class level variable
   @@co = OpenStudio::Runmanager::ConfigOptions.new(true)
