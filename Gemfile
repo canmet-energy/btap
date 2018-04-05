@@ -21,6 +21,8 @@ else
   gem 'ruby-prof', '~> 0.15.1', platform: :ruby
 end
 gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
+
+#These gems are present only in nrcan's standards and nrcan's OS server aws image.
 gem 'roo'
 gem 'aes'
 gem 'rest-client','2.0.2'
