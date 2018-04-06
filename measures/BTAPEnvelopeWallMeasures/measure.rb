@@ -24,22 +24,55 @@ class BTAPExteriorWallMeasure < OpenStudio::Measure::ModelMeasure
     args = OpenStudio::Ruleset::OSArgumentVector.new
 
     # Conductance value entered
-    ecm_exterior_wall_conductance = OpenStudio::Ruleset::OSArgument.makeDoubleArgument("ecm_exterior_wall_conductance", true)
+    ecm_exterior_wall_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_wall_conductance", true)
     ecm_exterior_wall_conductance.setDisplayName('Exterior Wall Conductance (W/m2 K)')
-    ecm_exterior_wall_conductance.setDefaultValue(0.183)
+    ecm_exterior_wall_conductance.setDefaultValue('baseline')
     args << ecm_exterior_wall_conductance
 
-    #Entered start angle
-    ecm_start_angle_in_degrees= OpenStudio::Ruleset::OSArgument.makeDoubleArgument("ecm_start_angle_in_degrees", true)
-    ecm_start_angle_in_degrees.setDisplayName('Start Angle [deg]')
-    ecm_start_angle_in_degrees.setDefaultValue(0)
-    args << ecm_start_angle_in_degrees
+    ecm_exterior_roof_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_roof_conductance", true)
+    ecm_exterior_roof_conductance.setDisplayName('Exterior Roof Conductance (W/m2 K)')
+    ecm_exterior_roof_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_roof_conductance
 
-    #End angle
-    ecm_end_angle_in_degrees = OpenStudio::Ruleset::OSArgument.makeDoubleArgument("ecm_end_angle_in_degrees", true)
-    ecm_end_angle_in_degrees.setDisplayName('End Angle [deg]')
-    ecm_end_angle_in_degrees.setDefaultValue(360)
-    args << ecm_end_angle_in_degrees
+    ecm_exterior_floor_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_floor_conductance", true)
+    ecm_exterior_floor_conductance.setDisplayName('Exterior Floor Conductance (W/m2 K)')
+    ecm_exterior_floor_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_floor_conductance
+
+    ecm_ground_wall_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_ground_wall_conductance", true)
+    ecm_ground_wall_conductance.setDisplayName('Exterior Ground Wall Conductance (W/m2 K)')
+    ecm_ground_wall_conductance.setDefaultValue('baseline')
+    args << ecm_ground_wall_conductance
+
+    ecm_ground_roof_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_ground_roof_conductance", true)
+    ecm_ground_roof_conductance.setDisplayName('Ground Roof Conductance (W/m2 K)')
+    ecm_ground_roof_conductance.setDefaultValue('baseline')
+    args << ecm_ground_roof_conductance
+
+    ecm_ground_floor_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_ground_floor_conductance", true)
+    ecm_ground_floor_conductance.setDisplayName('Ground Floor Conductance (W/m2 K)')
+    ecm_ground_floor_conductance.setDefaultValue('baseline')
+    args << ecm_ground_floor_conductance
+
+    ecm_exterior_window_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_window_conductance", true)
+    ecm_exterior_window_conductance.setDisplayName('Window Conductance (W/m2 K)')
+    ecm_exterior_window_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_window_conductance
+
+    ecm_exterior_skylight_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_skylight_conductance", true)
+    ecm_exterior_skylight_conductance.setDisplayName('Skylight Conductance (W/m2 K)')
+    ecm_exterior_skylight_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_skylight_conductance
+
+    ecm_exterior_door_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_door_conductance", true)
+    ecm_exterior_door_conductance.setDisplayName('Door Conductance (W/m2 K)')
+    ecm_exterior_door_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_door_conductance
+
+    ecm_exterior_overhead_door_conductance = OpenStudio::Ruleset::OSArgument.makeStringArgument("ecm_exterior_overhead_door_conductance", true)
+    ecm_exterior_overhead_door_conductance.setDisplayName('Overhead Door Conductance (W/m2 K)')
+    ecm_exterior_overhead_door_conductance.setDefaultValue('baseline')
+    args << ecm_exterior_overhead_door_conductance
 
     return args
   end
@@ -53,10 +86,12 @@ class BTAPExteriorWallMeasure < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+
+    ecm_exterior_wall_conductance = runner.getStringArgumentValue('ecm_exterior_wall_conductance', user_arguments)
+    return true if ecm_exterior_wall_conductance == "baseline"
+
     # assign the user inputs to variables
-    ecm_exterior_wall_conductance = runner.getDoubleArgumentValue('ecm_exterior_wall_conductance',user_arguments)
-    ecm_start_angle_in_degrees = runner.getDoubleArgumentValue('ecm_start_angle_in_degrees',user_arguments)
-    ecm_end_angle_in_degrees = runner.getDoubleArgumentValue('ecm_end_angle_in_degrees',user_arguments)
+    ecm_exterior_wall_conductance = ecm_exterior_wall_conductance.to_f
 
     #check if conductance is negative or 0
     if ecm_exterior_wall_conductance <= 0
@@ -65,87 +100,32 @@ class BTAPExteriorWallMeasure < OpenStudio::Measure::ModelMeasure
     end
 
     #Get surfaces from model
-    surfaces = model.getSurfaces
-    exterior_wall = []
-    exterior_wall_construction = []
-    exterior_wall_construction_name = []
+    model.getDefaultConstructionSets.each do |default_surface_construction_set|
 
-    #loop through ea surface to find exterior walls and store construction info
-    surfaces.each do |surface|
-      if surface.outsideBoundaryCondition == "Outdoors" and surface.surfaceType == "Wall"
-        #add wall
-        exterior_wall << surface
-        temp_ext_wall_construction  = surface.construction.get
+      # convert conductance values to rsi values. (Note: we should really be only using conductances)
+      wall_rsi = 1.0 / ecm_exterior_wall_conductance
+      floor_rsi = nil
+      roof_rsi = nil
+      ground_wall_rsi = nil
+      ground_floor_rsi = nil
+      ground_roof_rsi = nil
+      door_rsi = nil
+      window_rsi = nil
+      BTAP::Resources::Envelope::ConstructionSets.customize_default_surface_construction_set_rsi!(model,
+                                                                                                  new_name,
+                                                                                                  default_surface_construction_set,
+                                                                                                  wall_rsi, floor_rsi, roof_rsi,
+                                                                                                  ground_wall_rsi, ground_floor_rsi, ground_roof_rsi,
+                                                                                                  window_rsi, nil, nil,
+                                                                                                  window_rsi, nil, nil,
+                                                                                                  door_rsi,
+                                                                                                  door_rsi, nil, nil,
+                                                                                                  door_rsi,
+                                                                                                  window_rsi, nil, nil,
+                                                                                                  window_rsi, nil, nil,
+                                                                                                  window_rsi, nil, nil)
 
-        if not exterior_wall_construction_name.include?(temp_ext_wall_construction.name.to_s)
-          exterior_wall_construction << temp_ext_wall_construction.to_Construction.get
-        end
-        exterior_wall_construction_name<<temp_ext_wall_construction.name.to_s
-
-        #puts("#{}")
-      end
     end
-
-    #loop through each construction and increase thickness of a single layer
-    exterior_wall_construction.each do |wall_construction|
-      layer_counter = 0
-
-      #current construction's conductance
-      current_exterior_wall_conductance = wall_construction.thermalConductance.to_f
-
-      #Change factor
-      change_factor = ecm_exterior_wall_conductance/current_exterior_wall_conductance
-
-      #target conductance in ip units
-      ecm_exterior_wall_conductance_ip=OpenStudio.convert(ecm_exterior_wall_conductance, 'W/m^2*K', 'Btu/ft^2*hr*R').get
-
-
-      #counts how many layers there are in the construction
-      wall_construction.layers.each do |layer|
-        layer_counter = layer_counter + 1
-      end
-
-      if layer_counter == 0
-        #error
-
-      elsif layer_counter == 1 #one layer
-
-
-
-
-      elsif layer_counter >=2 # 2 layer
-        layer_counter2 = 0
-        wall_construction.layers.each do |layer|
-          layer_counter2 = layer_counter2 + 1
-          puts("wall_construction #{wall_construction}")
-
-          if layer_counter2==2
-            insulation_layer_name = layer.name.to_s
-            puts("layer #{layer}")
-            puts("insulation_layer_name#{insulation_layer_name}")
-            wall_construction.construction_set_u_value(wall_construction, ecm_exterior_wall_conductance_ip, insulation_layer_name, intended_surface_type = 'ExteriorWall', false, false)
-          end
-        end
-      end
-    end
-
-
-
-
-
-    # report initial condition of model
-    #runner.registerInitialCondition("The building started with #{model.getSpaces.size} spaces.")
-
-
-
-
-
-
-    # echo the new space's name back to the user
-    #runner.registerInfo("Space #{new_space.name} was added.")
-
-    # report final condition of model
-    #runner.registerFinalCondition("The building finished with #{model.getSpaces.size} spaces.")
 
     return true
 
