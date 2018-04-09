@@ -476,8 +476,6 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     glass_layer = construction.layers.first.to_SimpleGlazing.get
     glass_layer.setVisibleTransmittance(target_tvis)
     glass_layer.setName("#{glass_layer.name} TVis #{target_tvis.round(3)}")
-    puts "Setting TVis for #{construction.name} to #{target_tvis}"
-    puts "Actual is #{construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value} "
 
     # Modify the construction name
     construction.setName("#{construction.name} TVis #{target_tvis.round(2)}")
