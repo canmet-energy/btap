@@ -50,6 +50,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
   # define the arguments that the user will input
   def arguments(model)
     args = OpenStudio::Ruleset::OSArgumentVector.new
+    # Conductances for all surfaces and subsurfaces.
     (@surface_index + @sub_surface_index).each do |surface|
       ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       statement = "
@@ -60,7 +61,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       eval(statement)
     end
 
-    #SHGC
+    # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       statement = "
@@ -71,7 +72,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       eval(statement)
     end
 
-    #Visible Transmittance
+    # Visible Transmittance
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       statement = "
@@ -81,7 +82,6 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       args << #{ecm_name}"
       eval(statement)
     end
-
 
     return args
   end
@@ -150,7 +150,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     #get subsurfaces by type for ease of use.
     ext_windows = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["FixedWindow", "OperableWindow"])
     ext_skylights = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["Skylight", "TubularDaylightDiffuser", "TubularDaylightDome"])
-    ext_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["Door", "GlassDoor"])
+    ext_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["Door"])
     ext_glass_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["GlassDoor"])
     ext_overhead_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["OverheadDoor"])
 
