@@ -99,7 +99,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       ecm_cond_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       value = runner.getStringArgumentValue("#{ecm_cond_name}",user_arguments)
       unless value == @baseline
-        if value != @baseline and value.to_f > 3.5 or value.to_f < 0.005
+        if value != @baseline and value.to_f > 5.0 or value.to_f < 0.005
           message = "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}."
           runner.registerError(message)
           puts message
@@ -155,7 +155,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     ext_overhead_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["OverheadDoor"])
 
     #Surfaces
-    (outdoor_surfaces).each do |surface|
+    (outdoor_surfaces + ground_surfaces).each do |surface|
       ecm_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
       conductance = runner.getStringArgumentValue("#{ecm_name}", user_arguments)
       conductance = nil if conductance == @baseline
@@ -219,7 +219,8 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
           else
             standard.construction_set_u_value(new_construction,
                                               target_u_value_ip.to_f,
-                                              find_and_set_insulaton_layer(model, new_construction).name.get,
+                                              find_and_set_insulaton_layer(model,
+                                                                           new_construction).name.get,
                                               intended_surface_type = nil,
                                               false,
                                               false
@@ -229,13 +230,35 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
           BTAP::Resources::Envelope::Constructions::find_and_set_insulaton_layer(model, [new_construction])
           case surface.surfaceType
             when 'Wall'
+              standard.construction_set_u_value(new_construction,
+                                                target_u_value_ip.to_f,
+                                                find_and_set_insulaton_layer(model,
+                                                                             new_construction).name.get,
+                                                intended_surface_type = nil,
+                                                false,
+                                                false
+              )
+=begin
               standard.construction_set_underground_wall_c_factor(new_construction,
                                                                   target_u_value_ip.to_f,
-                                                                  find_and_set_insulaton_layer(model, new_construction).name.get)
+                                                                  find_and_set_insulaton_layer(model,
+                                                                  new_construction).name.get)
+=end
             when 'RoofCeiling', 'Floor'
+              standard.construction_set_u_value(new_construction,
+                                                target_u_value_ip.to_f,
+                                                find_and_set_insulaton_layer(model,
+                                                                             new_construction).name.get,
+                                                intended_surface_type = nil,
+                                                false,
+                                                false
+              )
+=begin
               standard.construction_set_slab_f_factor(new_construction,
                                                       target_u_value_ip.to_f,
-                                                      find_and_set_insulaton_layer(model, new_construction).name.get)
+                                                      find_and_set_insulaton_layer(model,
+                                                      new_construction).name.get)
+=end
           end
       end
       new_construction.setName(new_construction_name)

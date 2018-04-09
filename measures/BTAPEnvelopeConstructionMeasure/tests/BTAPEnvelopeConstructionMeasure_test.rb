@@ -12,7 +12,7 @@ require 'minitest/autorun'
 
 
 class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
-  def test_create_building()
+  def setup()
     @surface_index =[
         {"boundary_condition" => "Outdoors",  "construction_type" => "opaque", "surface_type" => "Wall"},
         {"boundary_condition" => "Outdoors",  "construction_type" => "opaque", "surface_type" => "RoofCeiling"},
@@ -32,9 +32,10 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         {"boundary_condition" => "Outdoors", "construction_type" => "glazing",  "surface_type" => "GlassDoor"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque",   "surface_type" => "OverheadDoor"}
     ]
+  end
 
 
-
+  def test_create_building()
 
     # Create an instance of the measure
     measure = BTAPEnvelopeConstructionMeasure.new
@@ -42,15 +43,11 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     # Create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-
     # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
     model = create_model("FullServiceRestaurant",
                          'NECB HDD Method',
                          'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
                          "NECB2011")
-
-
-
 
     # Test arguments and defaults
     arguments = measure.arguments(model)
@@ -116,13 +113,13 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     ext_overhead_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["OverheadDoor"])
 
     #opaque surfaces
-    (outdoor_surfaces + ext_doors +ext_overhead_doors).each do |surface|
+    (outdoor_surfaces + ext_doors +ext_overhead_doors + ground_surfaces).each do |surface|
       ecm_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
       assert_equal(values[ecm_name].to_f.round(3), BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)) unless values[ecm_name] == @baseline
     end
 
     #glazing subsurfaces
-    (ext_windows + ext_glass_doors +ext_skylights).each do |surface|
+    (ext_windows + ext_glass_doors + ext_skylights).each do |surface|
       ecm_cond_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
       ecm_shgc_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
       ecm_tvis_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
