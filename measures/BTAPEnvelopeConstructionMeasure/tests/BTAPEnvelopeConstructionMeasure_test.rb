@@ -147,7 +147,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
   def create_model(building_type, climate_zone, epw_file, template)
     osm_directory = "#{Dir.pwd}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
-    Dir.mkdir_f(osm_directory) unless Dir.exist?(osm_directory)
+    Dir.mkdir_p(osm_directory) unless Dir.exist?(osm_directory)
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
     #create model
