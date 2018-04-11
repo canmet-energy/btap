@@ -44,7 +44,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
-    model = create_model("FullServiceRestaurant",
+    model = create_model("LargeOffice",
                          'NECB HDD Method',
                          'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
                          "NECB2011")
