@@ -14,7 +14,7 @@ git clone https://github.com/canmet-energy/btap.git
 ```
 
 ## Opening the PAT project and setting up the server
-Launch PAT and open the project foler in the btap folder on c:. for example the path would be 
+Launch PAT and open the project folder in the btap folder on c:. for example the path would be 
 ```
 C:/btap/pat_projects/necb_national_prototype_scan
 ```
