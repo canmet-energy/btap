@@ -4,8 +4,202 @@
 # start the measure
 class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
+  ### BTAP Measure helper methods.
+
+  #  A wrapper for outputing feedback to users and developers.
+  #  runner_register("InitialCondition",   "Your Information Message Here", runner)
+  #  runner_register("Info",    "Your Information Message Here", runner)
+  #  runner_register("Warning", "Your Information Message Here", runner)
+  #  runner_register("Error",   "Your Information Message Here", runner)
+  #  runner_register("Debug",   "Your Information Message Here", runner)
+  #  runner_register("FinalCondition",   "Your Information Message Here", runner)
+  #  @params type [String]
+  #  @params runner [OpenStudio::Ruleset::OSRunner] # or a nil.
+  def runner_register(runner, type, text)
+    #dump to console if @debug is set to true
+    puts "#{type.upcase}: #{text}" if @debug == true
+    #dump to runner.
+    if runner.is_a?(OpenStudio::Ruleset::OSRunner)
+      case type.downcase
+        when "info"
+          runner.registerInfo(text)
+        when "warning"
+          runner.registerWarning(text)
+        when "error"
+          runner.registerError(text)
+        when "notapplicable"
+          runner.registerAsNotApplicable(text)
+        when "finalcondition"
+          runner.registerFinalCondition(text)
+        when "initialcondition"
+          runner.registerInitialCondition(text)
+        when "debug"
+        when "macro"
+        else
+          raise("Runner Register type #{type.downcase} not info,warning,error,notapplicable,finalcondition,initialcondition,macro.")
+      end
+    end
+  end
+
+  def runner_register_value(runner, name, value)
+    if runner.is_a?(OpenStudio::Ruleset::OSRunner)
+      runner.registerValue(name, value.to_s)
+      BTAP::runner_register("Info", "#{name} = #{value} has been registered in the runner", runner)
+    end
+  end
+
+  def copy_model(model)
+    copy_model = OpenStudio::Model::Model.new
+    # remove existing objects from model
+    handles = OpenStudio::UUIDVector.new
+    copy_model.objects.each do |obj|
+      handles << obj.handle
+    end
+    copy_model.removeObjects(handles)
+    # put contents of new_model into model_to_replace
+    copy_model.addObjects(model.toIdfFile.objects)
+    return copy_model
+  end
+
+  def compare_osm_files(model_true, model_compare)
+    only_model_true = [] # objects only found in the true model
+    only_model_compare = [] # objects only found in the compare model
+    both_models = [] # objects found in both models
+    diffs = [] # differences between the two models
+    num_ignored = 0 # objects not compared because they don't have names
+
+    # Define types of objects to skip entirely during the comparison
+    object_types_to_skip = [
+        'OS:EnergyManagementSystem:Sensor', # Names are UIDs
+        'OS:EnergyManagementSystem:Program', # Names are UIDs
+        'OS:EnergyManagementSystem:Actuator', # Names are UIDs
+        'OS:Connection', # Names are UIDs
+        'OS:PortList', # Names are UIDs
+        'OS:Building', # Name includes timestamp of creation
+        'OS:ModelObjectList' # Names are UIDs
+    ]
+
+    # Find objects in the true model only or in both models
+    model_true.getModelObjects.sort.each do |true_object|
+
+      # Skip comparison of certain object types
+      next if object_types_to_skip.include?(true_object.iddObject.name)
+
+      # Skip comparison for objects with no name
+      unless true_object.iddObject.hasNameField
+        num_ignored += 1
+        next
+      end
+
+      # Find the object with the same name in the other model
+      compare_object = model_compare.getObjectByTypeAndName(true_object.iddObject.type, true_object.name.to_s)
+      if compare_object.empty?
+        only_model_true << true_object
+      else
+        both_models << [true_object, compare_object.get]
+      end
+    end
+
+    # Report a diff for each object found in only the true model
+    only_model_true.each do |true_object|
+      diffs << "A #{true_object.iddObject.name} called '#{true_object.name}' was found only in the before model"
+    end
+
+    # Find objects in compare model only
+    model_compare.getModelObjects.sort.each do |compare_object|
+
+      # Skip comparison of certain object types
+      next if object_types_to_skip.include?(compare_object.iddObject.name)
+
+      # Skip comparison for objects with no name
+      unless compare_object.iddObject.hasNameField
+        num_ignored += 1
+        next
+      end
+
+      # Find the object with the same name in the other model
+      true_object = model_true.getObjectByTypeAndName(compare_object.iddObject.type, compare_object.name.to_s)
+      if true_object.empty?
+        only_model_compare << compare_object
+      end
+    end
+
+    # Report a diff for each object found in only the compare model
+    only_model_compare.each do |compare_object|
+      #diffs << "An object called #{compare_object.name} of type #{compare_object.iddObject.name} was found only in the compare model"
+      diffs << "A #{compare_object.iddObject.name} called '#{compare_object.name}' was found only in the after model"
+    end
+
+    # Compare objects found in both models field by field
+    both_models.each do |b|
+      true_object = b[0]
+      compare_object = b[1]
+      idd_object = true_object.iddObject
+
+      true_object_num_fields = true_object.numFields
+      compare_object_num_fields = compare_object.numFields
+
+      # loop over fields skipping handle
+      (1...[true_object_num_fields, compare_object_num_fields].max).each do |i|
+
+        field_name = idd_object.getField(i).get.name
+
+        # Don't compare node, branch, or port names because they are populated with IDs
+        next if field_name.include?('Node Name')
+        next if field_name.include?('Branch Name')
+        next if field_name.include?('Inlet Port')
+        next if field_name.include?('Outlet Port')
+        next if field_name.include?('Inlet Node')
+        next if field_name.include?('Outlet Node')
+        next if field_name.include?('Port List')
+        next if field_name.include?('Cooling Control Zone or Zone List Name')
+        next if field_name.include?('Heating Control Zone or Zone List Name')
+        next if field_name.include?('Heating Zone Fans Only Zone or Zone List Name')
+
+        # Don't compare the names of schedule type limits
+        # because they appear to be created non-deteministically
+        next if field_name.include?('Schedule Type Limits Name')
+
+        # Get the value from the true object
+        true_value = ""
+        if i < true_object_num_fields
+          true_value = true_object.getString(i).to_s
+        end
+        true_value = "-" if true_value.empty?
+
+        # Get the same value from the compare object
+        compare_value = ""
+        if i < compare_object_num_fields
+          compare_value = compare_object.getString(i).to_s
+        end
+        compare_value = "-" if compare_value.empty?
+
+        # Round long numeric fields
+        true_value = true_value.to_f.round(5) unless true_value.to_f.zero?
+        compare_value = compare_value.to_f.round(5) unless compare_value.to_f.zero?
+
+        # Move to the next field if no difference was found
+        next if true_value == compare_value
+
+        # Report the difference
+        diffs << "For #{true_object.iddObject.name} called '#{true_object.name}' field '#{field_name}': before model = #{true_value}, after model = #{compare_value}"
+
+      end
+
+    end
+
+    return diffs
+  end
+
+  #Constructor to set global variables
   def initialize()
     super()
+
+    #Set to true if debugging measure.
+    @debug = true
+
+    @standard = Standard.new
+
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
     @surface_index =[
@@ -30,7 +224,6 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     #this is the 'do nothing value and most arguments should have. '
     @baseline = 'baseline'
   end
-
 
   # human readable name
   def name
@@ -92,17 +285,16 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
+      runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
       return false
     end
     # conductance values should be between 3.5 and 0.005 U-Value (R-value 1 to R-Value 1000)
     (@surface_index + @sub_surface_index).each do |surface|
       ecm_cond_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      value = runner.getStringArgumentValue("#{ecm_cond_name}",user_arguments)
+      value = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
       unless value == @baseline
         if value != @baseline and value.to_f > 5.0 or value.to_f < 0.005
-          message = "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}."
-          runner.registerError(message)
-          puts message
+          runner_register(runner, 'Error', "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}.")
           return false
         end
       end
@@ -112,12 +304,10 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     # SHGC should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_shgc_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
-      value = runner.getStringArgumentValue("#{ecm_shgc_name}",user_arguments)
+      value = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
       unless value == @baseline
         if value != @baseline and value.to_f >= 1.0 or value.to_f <= 0.0
-          message = "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}."
-          runner.registerError(message)
-          puts message
+          runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}.")
           return false
         end
       end
@@ -126,12 +316,10 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     # TVis should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_tvis_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
-      value = runner.getStringArgumentValue("#{ecm_tvis_name}",user_arguments)
+      value = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
       unless value == @baseline
         if value != @baseline and value.to_f >= 1.0 or value.to_f <= 0.0
-          message = "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}."
-          runner.registerError(message)
-          puts message
+          runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}.")
           return false
         end
       end
@@ -146,24 +334,31 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     outdoor_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Outdoors")
     outdoor_subsurfaces = BTAP::Geometry::Surfaces::get_subsurfaces_from_surfaces(outdoor_surfaces)
     ground_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Ground")
-
-    #get subsurfaces by type for ease of use.
     ext_windows = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["FixedWindow", "OperableWindow"])
     ext_skylights = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["Skylight", "TubularDaylightDiffuser", "TubularDaylightDome"])
     ext_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["Door"])
     ext_glass_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["GlassDoor"])
     ext_overhead_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(outdoor_subsurfaces, ["OverheadDoor"])
 
-    #Surfaces
-    (outdoor_surfaces + ground_surfaces).each do |surface|
+    #Ext and Ground Surfaces
+    (outdoor_surfaces + ground_surfaces).sort.each do |surface|
       ecm_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
       conductance = runner.getStringArgumentValue("#{ecm_name}", user_arguments)
       conductance = nil if conductance == @baseline
-      appy_changes_to_surfaces(model, surface, conductance.to_f)
+      apply_changes_to_surface( model,
+                                surface,
+                               conductance.to_f)
+      #report change as Info
+      surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
+      before_measure_surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(OpenStudio::Model::getSurfaceByName(before_measure_model, surface.name.to_s).get)
+      if before_measure_surface_conductance.round(3) != surface_conductance.round(3)
+        runner_register(runner,
+                        'Info',
+                        "#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}.")
+      end
     end
-
     #Subsurfaces
-    (ext_doors + ext_overhead_doors + ext_windows + ext_glass_doors +ext_skylights).each do |surface|
+    (ext_doors + ext_overhead_doors + ext_windows + ext_glass_doors +ext_skylights).sort.each do |surface|
       ecm_cond_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
       ecm_shgc_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
       ecm_tvis_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
@@ -173,19 +368,33 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       shgc = nil if shgc == @baseline
       conductance = nil if conductance == @baseline
       tvis = nil if tvis == @baseline
-      appy_changes_to_surfaces(model,
+      apply_changes_to_surface(model,
                                surface,
                                conductance.to_f,
                                shgc.to_f,
                                tvis.to_f)
+
+      #report change as Info
+      surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
+      before_surface = OpenStudio::Model::getSubSurfaceByName(before_measure_model, surface.name.to_s).get
+      before_measure_surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(before_surface)
+      if before_measure_surface_conductance.round(3) != surface_conductance.round(3)
+        runner_register(runner,
+                        'Info',
+                        "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}.")
+      end
     end
 
     #This will produce a JSON 'diff' of the original osm and the final osm.
-    runner.registerFinalCondition(JSON.pretty_generate(compare_osm_files(before_measure_model, model)))
+    runner_register(runner,
+                    'FinalCondition',
+                    JSON.pretty_generate(compare_osm_files(before_measure_model, model)))
     return true
   end
 
-  def appy_changes_to_surfaces(model, surface, conductance = nil, shgc = nil, tvis = nil)
+  ################## Support methods for this measure.
+
+  def apply_changes_to_surface(model, surface, conductance = nil, shgc = nil, tvis = nil)
     #If user has no changes...do nothing and return true.
     return true if conductance.nil? and shgc.nil?
     standard = Standard.new()
@@ -200,7 +409,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     if new_construction.empty?
       #create new construction.
       #create a copy
-      new_construction = self.deep_copy(model, construction)
+      new_construction = self.construction_deep_copy(model, construction)
       case surface.outsideBoundaryCondition
         when 'Outdoors'
           if standard.construction_simple_glazing?(new_construction)
@@ -273,7 +482,7 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
   #@param model [OpenStudio::Model::Model]
   #@param construction <String>
   #@return [String] new_construction
-  def deep_copy(model, construction)
+  def construction_deep_copy(model, construction)
     construction = BTAP::Common::validate_array(model, construction, "Construction").first
     new_construction = construction.clone.to_Construction.get
     #interating through layers."
@@ -331,151 +540,6 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     return return_material
   end
 
-
-  def compare_osm_files(model_true, model_compare)
-
-    only_model_true = [] # objects only found in the true model
-    only_model_compare = [] # objects only found in the compare model
-    both_models = [] # objects found in both models
-    diffs = [] # differences between the two models
-    num_ignored = 0 # objects not compared because they don't have names
-
-    # Define types of objects to skip entirely during the comparison
-    object_types_to_skip = [
-        'OS:EnergyManagementSystem:Sensor', # Names are UIDs
-        'OS:EnergyManagementSystem:Program', # Names are UIDs
-        'OS:EnergyManagementSystem:Actuator', # Names are UIDs
-        'OS:Connection', # Names are UIDs
-        'OS:PortList', # Names are UIDs
-        'OS:Building', # Name includes timestamp of creation
-        'OS:ModelObjectList' # Names are UIDs
-    ]
-
-    # Find objects in the true model only or in both models
-    model_true.getModelObjects.sort.each do |true_object|
-
-      # Skip comparison of certain object types
-      next if object_types_to_skip.include?(true_object.iddObject.name)
-
-      # Skip comparison for objects with no name
-      unless true_object.iddObject.hasNameField
-        num_ignored += 1
-        next
-      end
-
-      # Find the object with the same name in the other model
-      compare_object = model_compare.getObjectByTypeAndName(true_object.iddObject.type, true_object.name.to_s)
-      if compare_object.empty?
-        only_model_true << true_object
-      else
-        both_models << [true_object, compare_object.get]
-      end
-    end
-
-    # Report a diff for each object found in only the true model
-    only_model_true.each do |true_object|
-      diffs << "A #{true_object.iddObject.name} called '#{true_object.name}' was found only in the true model"
-    end
-
-    # Find objects in compare model only
-    model_compare.getModelObjects.sort.each do |compare_object|
-
-      # Skip comparison of certain object types
-      next if object_types_to_skip.include?(compare_object.iddObject.name)
-
-      # Skip comparison for objects with no name
-      unless compare_object.iddObject.hasNameField
-        num_ignored += 1
-        next
-      end
-
-      # Find the object with the same name in the other model
-      true_object = model_true.getObjectByTypeAndName(compare_object.iddObject.type, compare_object.name.to_s)
-      if true_object.empty?
-        only_model_compare << compare_object
-      end
-    end
-
-    # Report a diff for each object found in only the compare model
-    only_model_compare.each do |compare_object|
-      #diffs << "An object called #{compare_object.name} of type #{compare_object.iddObject.name} was found only in the compare model"
-      diffs << "A #{compare_object.iddObject.name} called '#{compare_object.name}' was found only in the compare model"
-    end
-
-    # Compare objects found in both models field by field
-    both_models.each do |b|
-      true_object = b[0]
-      compare_object = b[1]
-      idd_object = true_object.iddObject
-
-      true_object_num_fields = true_object.numFields
-      compare_object_num_fields = compare_object.numFields
-
-      # loop over fields skipping handle
-      (1...[true_object_num_fields, compare_object_num_fields].max).each do |i|
-
-        field_name = idd_object.getField(i).get.name
-
-        # Don't compare node, branch, or port names because they are populated with IDs
-        next if field_name.include?('Node Name')
-        next if field_name.include?('Branch Name')
-        next if field_name.include?('Inlet Port')
-        next if field_name.include?('Outlet Port')
-        next if field_name.include?('Inlet Node')
-        next if field_name.include?('Outlet Node')
-        next if field_name.include?('Port List')
-        next if field_name.include?('Cooling Control Zone or Zone List Name')
-        next if field_name.include?('Heating Control Zone or Zone List Name')
-        next if field_name.include?('Heating Zone Fans Only Zone or Zone List Name')
-
-        # Don't compare the names of schedule type limits
-        # because they appear to be created non-deteministically
-        next if field_name.include?('Schedule Type Limits Name')
-
-        # Get the value from the true object
-        true_value = ""
-        if i < true_object_num_fields
-          true_value = true_object.getString(i).to_s
-        end
-        true_value = "-" if true_value.empty?
-
-        # Get the same value from the compare object
-        compare_value = ""
-        if i < compare_object_num_fields
-          compare_value = compare_object.getString(i).to_s
-        end
-        compare_value = "-" if compare_value.empty?
-
-        # Round long numeric fields
-        true_value = true_value.to_f.round(5) unless true_value.to_f.zero?
-        compare_value = compare_value.to_f.round(5) unless compare_value.to_f.zero?
-
-        # Move to the next field if no difference was found
-        next if true_value == compare_value
-
-        # Report the difference
-        diffs << "For #{true_object.iddObject.name} called '#{true_object.name}' field '#{field_name}': true model = #{true_value}, compare model = #{compare_value}"
-
-      end
-
-    end
-
-    return diffs
-  end
-
-  def copy_model(model)
-    copy_model = OpenStudio::Model::Model.new
-    # remove existing objects from model
-    handles = OpenStudio::UUIDVector.new
-    copy_model.objects.each do |obj|
-      handles << obj.handle
-    end
-    copy_model.removeObjects(handles)
-    # put contents of new_model into model_to_replace
-    copy_model.addObjects(model.toIdfFile.objects)
-    return copy_model
-  end
-
   # Sets the T-vis of a simple glazing construction to a specified value
   # by modifying the thickness of the insulation layer.
   #
@@ -504,7 +568,6 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     construction.setName("#{construction.name} TVis #{target_tvis.round(2)}")
     return true
   end
-
 
 end
 
