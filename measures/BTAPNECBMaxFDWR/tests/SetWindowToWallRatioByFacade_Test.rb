@@ -47,12 +47,110 @@ require_relative '../measure.rb'
 require 'minitest/autorun'
 
 class SetWindowToWallRatioByFacade_Test < Minitest::Test
-  # def setup
-  # end
+  def setup
 
-  # def teardown
-  # end
 
+
+    # create an instance of the measure
+
+  end
+
+  def create_model_by_local_osm_file(filename)
+    # load the test model
+    translator = OpenStudio::OSVersion::VersionTranslator.new
+    path = OpenStudio::Path.new(File.dirname(__FILE__) + filename)
+    model = translator.loadModel(path)
+    assert(!model.empty?)
+    return  model.get
+  end
+
+  def create_necb_protype_model(building_type, climate_zone, epw_file, template)
+    osm_directory = "#{Dir.pwd}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
+    FileUtils.mkdir_p (osm_directory) unless Dir.exist?(osm_directory)
+    #Get Weather climate zone from lookup
+    weather = BTAP::Environment::WeatherFile.new(epw_file)
+    #create model
+    building_name = "#{template}_#{building_type}"
+    puts "Creating #{building_name}"
+    prototype_creator = Standard.build(building_name)
+    model = prototype_creator.model_create_prototype_model(climate_zone,
+                                                           epw_file,
+                                                           osm_directory,
+                                                           @debug,
+                                                           model)
+    #set weather file to epw_file passed to model.
+    weather.set_weather_file(model)
+    return model
+  end
+
+  def test_arguments_and_defaults
+    # Create an instance of the measure
+    measure = BTAPEnvelopeConstructionMeasure.new
+
+    # Create an instance of a runner
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+
+
+    # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
+    model = create_necb_protype_model("LargeOffice",
+                                      'NECB HDD Method',
+                                      'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
+                                      "NECB2011")
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    #check number of arguments.
+    assert_equal(26, arguments.size)
+
+    (@surface_index + @sub_surface_index).each_with_index do |surface,index|
+      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      assert_equal(ecm_name, arguments[index].name)
+      assert_equal('baseline', arguments[index].defaultValueAsString)
+    end
+  end
+
+
+  def test_SetWindowToWallRatioByFacade_with_model
+    measure = SetWindowToWallRatioByFacade.new
+    # create an instance of a runner
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+
+    #load model
+    model = create_model_by_local_osm_file('/EnvelopeAndLoadTestModel_01.osm')
+
+    # get arguments
+    arguments = measure.arguments(model)
+
+    # set argument values to good values and run the measure on model with spaces
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+
+    wwr = arguments[0].clone
+    assert(wwr.setValue(0.4))
+    argument_map['wwr'] = wwr
+
+    sillHeight = arguments[1].clone
+    assert(sillHeight.setValue(30.0))
+    argument_map['sillHeight'] = sillHeight
+
+    facade = arguments[2].clone
+    assert(facade.setValue('South'))
+    argument_map['facade'] = facade
+
+    measure.run(model, runner, argument_map)
+    result = runner.result
+    # show_output(result)
+    assert(result.value.valueName == 'Success')
+    assert(result.warnings.size == 2)
+    assert(result.info.size == 2)
+
+    # save the model
+    # output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/test.osm")
+    # model.save(output_file_path,true)
+  end
+
+
+=begin
   def test_SetWindowToWallRatioByFacade_fail
     # create an instance of the measure
     measure = SetWindowToWallRatioByFacade.new
@@ -327,4 +425,6 @@ class SetWindowToWallRatioByFacade_Test < Minitest::Test
     # assert(result.warnings.size == 0)
     # assert(result.info.size == 1)
   end
+
+=end
 end
