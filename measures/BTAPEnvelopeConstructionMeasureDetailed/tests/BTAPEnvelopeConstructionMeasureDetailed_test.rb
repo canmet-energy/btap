@@ -11,7 +11,7 @@ require_relative '../measure.rb'
 require 'minitest/autorun'
 
 
-class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
+class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
   def setup()
     @surface_index =[
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Wall"},
@@ -38,7 +38,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
   def test_arguments_and_defaults
     # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasure.new
+    measure = BTAPEnvelopeConstructionMeasureDetailed.new
 
     # Create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -68,7 +68,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
   def test_envelope_changes()
 
     # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasure.new
+    measure = BTAPEnvelopeConstructionMeasureDetailed.new
 
     # Create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
