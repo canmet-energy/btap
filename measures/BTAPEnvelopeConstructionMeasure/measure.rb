@@ -283,6 +283,8 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
+    values = {}
+
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
@@ -292,11 +294,14 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     (@surface_index + @sub_surface_index).each do |surface|
       ecm_cond_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       value = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
-      unless value == @baseline
-        if value != @baseline and value.to_f > 5.0 or value.to_f < 0.005
+      if value == @baseline
+        values[ecm_cond_name] = nil
+      else
+        if value.to_f > 5.0 or value.to_f < 0.005
           runner_register(runner, 'Error', "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}.")
           return false
         end
+        values[ecm_cond_name] = value.to_f
       end
     end
 
@@ -305,11 +310,14 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_shgc_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       value = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
-      unless value == @baseline
-        if value != @baseline and value.to_f >= 1.0 or value.to_f <= 0.0
+      if value == @baseline
+        values[ecm_cond_name] = nil
+      else
+        if value.to_f >= 1.0 or value.to_f <= 0.0
           runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}.")
           return false
         end
+        values[ecm_shgc_name] = value.to_f
       end
     end
 
@@ -317,20 +325,37 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       ecm_tvis_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       value = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
-      unless value == @baseline
-        if value != @baseline and value.to_f >= 1.0 or value.to_f <= 0.0
+      if value == @baseline
+        values[ecm_cond_name] = nil
+      else
+        if value.to_f >= 1.0 or value.to_f <= 0.0
           runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}.")
           return false
         end
+        values[ecm_tvis_name] = value.to_f
       end
     end
 
+    #get Arguments into a hash.
 
 
     # Make a copy of the model before the measure is applied.
+    report = change_construction_properties_in_model(model, values)
+
+    runner_register(runner,
+                    'FinalCondition',
+                    report)
+    return true
+  end
+
+
+
+  def change_construction_properties_in_model(model, values)
+    puts JSON.pretty_generate(values)
+    #copy orginal model for reporting.
     before_measure_model = copy_model(model)
-
-
+    #report change as Info
+    info = ""
     outdoor_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Outdoors")
     outdoor_subsurfaces = BTAP::Geometry::Surfaces::get_subsurfaces_from_surfaces(outdoor_surfaces)
     ground_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Ground")
@@ -342,19 +367,15 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
     #Ext and Ground Surfaces
     (outdoor_surfaces + ground_surfaces).sort.each do |surface|
-      ecm_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
-      conductance = runner.getStringArgumentValue("#{ecm_name}", user_arguments)
-      conductance = nil if conductance == @baseline
-      apply_changes_to_surface( model,
-                                surface,
-                               conductance.to_f)
+      ecm_cond_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
+      apply_changes_to_surface(model,
+                               surface,
+                               values[ecm_cond_name])
       #report change as Info
       surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
       before_measure_surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(OpenStudio::Model::getSurfaceByName(before_measure_model, surface.name.to_s).get)
       if before_measure_surface_conductance.round(3) != surface_conductance.round(3)
-        runner_register(runner,
-                        'Info',
-                        "#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}.")
+        info << "#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}."
       end
     end
     #Subsurfaces
@@ -362,34 +383,22 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       ecm_cond_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
       ecm_shgc_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
       ecm_tvis_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
-      conductance = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
-      shgc = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
-      tvis = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
-      shgc = nil if shgc == @baseline
-      conductance = nil if conductance == @baseline
-      tvis = nil if tvis == @baseline
       apply_changes_to_surface(model,
                                surface,
-                               conductance.to_f,
-                               shgc.to_f,
-                               tvis.to_f)
+                               values[ecm_cond_name],
+                               values[ecm_shgc_name],
+                               values[ecm_tvis_name])
 
-      #report change as Info
+
       surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
       before_surface = OpenStudio::Model::getSubSurfaceByName(before_measure_model, surface.name.to_s).get
       before_measure_surface_conductance = BTAP::Geometry::Surfaces.get_surface_construction_conductance(before_surface)
       if before_measure_surface_conductance.round(3) != surface_conductance.round(3)
-        runner_register(runner,
-                        'Info',
-                        "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}.")
+        info << "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance for #{surface.name.to_s} changed from #{before_measure_surface_conductance.round(3)} to #{surface_conductance.round(3)}."
       end
     end
-
-    #This will produce a JSON 'diff' of the original osm and the final osm.
-    runner_register(runner,
-                    'FinalCondition',
-                    JSON.pretty_generate(compare_osm_files(before_measure_model, model)))
-    return true
+    info << JSON.pretty_generate(compare_osm_files(before_measure_model, model))
+    return info
   end
 
   ################## Support methods for this measure.
@@ -399,10 +408,13 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     return true if conductance.nil? and shgc.nil?
     standard = Standard.new()
     construction = OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get
-    new_construction_name_suffix = ""
-    new_construction_name_suffix << "#{surface.construction.get.name.to_s} Cond=#{conductance.round(3)}" unless conductance.nil?
-    new_construction_name_suffix << "#{surface.construction.get.name.to_s} SHGC=#{shgc.round(3)}" unless shgc.nil?
-    new_construction_name_suffix << "#{surface.construction.get.name.to_s} TVis=#{shgc.round(3)}" unless tvis.nil?
+    new_construction_name_suffix = ":{"
+    new_construction_name_suffix << " \"cond\"=>#{conductance.round(3)}" unless conductance.nil?
+    new_construction_name_suffix << " \"shgc\"=>#{shgc.round(3)}" unless shgc.nil?
+    new_construction_name_suffix << " \"tvis\"=>#{tvis.round(3)}" unless tvis.nil?
+    new_construction_name_suffix << "}"
+
+
     new_construction_name = "#{surface.construction.get.name.to_s}-#{new_construction_name_suffix}"
     new_construction = OpenStudio::Model::getConstructionByName(surface.model, new_construction_name)
     target_u_value_ip = OpenStudio.convert(conductance.to_f, 'W/m^2*K', 'Btu/ft^2*hr*R').get
