@@ -102,7 +102,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     args = OpenStudio::Ruleset::OSArgumentVector.new
     # Conductances for all surfaces and subsurfaces.
     (@surface_index + @sub_surface_index).each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       statement = "
       #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
       #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)')
@@ -113,7 +113,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
 
     # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
+      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       statement = "
       #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
       #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} SHGC')
@@ -124,7 +124,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
 
     # Visible Transmittance
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
+      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       statement = "
       #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
       #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance')
@@ -192,8 +192,10 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
       end
     end
 
-    #get Arguments into a hash.
-
+    #Store values in runner this will be used for data_viz.
+    values.each do |key, value|
+      runner_register_value(runner, "ecm_#{key}", value)
+    end
 
     # Make a copy of the model before the measure is applied.
     report = Standard.new.change_construction_properties_in_model(model, values)
