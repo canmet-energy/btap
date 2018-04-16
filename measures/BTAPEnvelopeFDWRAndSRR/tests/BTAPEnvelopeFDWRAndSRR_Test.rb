@@ -103,7 +103,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # Test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
-    assert_equal(4, arguments.size)
+    assert_equal(3, arguments.size)
 
     wwr = arguments[0].clone
     assert(wwr.setValue(0.4))
