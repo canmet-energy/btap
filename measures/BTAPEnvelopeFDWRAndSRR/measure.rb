@@ -62,18 +62,6 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     sillHeight.setDisplayName('Sill Height (in).')
     sillHeight.setDefaultValue(30.0)
     args << sillHeight
-
-    # make choice argument for facade
-    choices = OpenStudio::StringVector.new
-    choices << 'North'
-    choices << 'East'
-    choices << 'South'
-    choices << 'West'
-    facade = OpenStudio::Measure::OSArgument.makeChoiceArgument('facade', choices, true)
-    facade.setDisplayName('Cardinal Direction.')
-    facade.setDefaultValue('South')
-    args << facade
-
     return args
   end
 
@@ -98,6 +86,11 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    if (srr <= 0) || (srr >= 1)
+      runner.registerError('Skylight Ratio must be greater than 0 and less than 1.')
+      return false
+    end
+
     # check reasonableness of fraction
     if sillHeight <= 0
       runner.registerError('Sill height must be > 0.')
@@ -114,8 +107,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     unit_sillHeight_si = OpenStudio.createUnit('m').get
     unit_area_ip = OpenStudio.createUnit('ft^2').get
     unit_area_si = OpenStudio.createUnit('m^2').get
-    unit_cost_per_area_ip = OpenStudio.createUnit('1/ft^2').get # $/ft^2 does not work
-    unit_cost_per_area_si = OpenStudio.createUnit('1/m^2').get
+
 
     # define starting units
     sillHeight_ip = OpenStudio::Quantity.new(sillHeight / 12, unit_sillHeight_ip)
@@ -141,78 +133,34 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     # flag to track warning for new windows without construction
     empty_const_warning = false
 
-    # calculate initial envelope cost as negative value
-    envelope_cost = 0
-    constructions = model.getConstructions
-    constructions.each do |construction|
-      const_llcs = construction.lifeCycleCosts
-      const_llcs.each do |const_llc|
-        if const_llc.category == 'Construction'
-          envelope_cost += const_llc.totalCost * -1
-        end
-      end
-    end
 
     # loop through surfaces finding exterior walls with proper orientation
-    surfaces = model.getSurfaces
-    surfaces.each do |s|
-      next if s.surfaceType != 'Wall'
-      next if s.outsideBoundaryCondition != 'Outdoors'
-      if s.space.empty?
-        runner.registerWarning("#{s.name} doesn't have a parent space and won't be included in the measure reporting or modifications.")
+    outdoors_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), "Outdoors")
+    walls = BTAP::Geometry::Surfaces::filter_by_surface_types(outdoors_surfaces, 'Wall')
+
+    walls.each do |surface|
+      if surface.space.empty?
+        runner.registerWarning("#{surface.name} doesn't have a parent space and won't be included in the measure reporting or modifications.")
         next
       end
-
-      # get the absoluteAzimuth for the surface so we can categorize it
-      absoluteAzimuth = OpenStudio.convert(s.azimuth, 'rad', 'deg').get + s.space.get.directionofRelativeNorth + model.getBuilding.northAxis
-      absoluteAzimuth -= 360.0 until absoluteAzimuth < 360.0
-
-      if facade == 'North'
-        next if !((absoluteAzimuth >= 315.0) || (absoluteAzimuth < 45.0))
-      elsif facade == 'East'
-        next if !((absoluteAzimuth >= 45.0) && (absoluteAzimuth < 135.0))
-      elsif facade == 'South'
-        next if !((absoluteAzimuth >= 135.0) && (absoluteAzimuth < 225.0))
-      elsif facade == 'West'
-        next if !((absoluteAzimuth >= 225.0) && (absoluteAzimuth < 315.0))
-      else
-        runner.registerError('Unexpected value of facade: ' + facade + '.')
-        return false
-      end
-      exterior_walls = true
-
-      # get surface area adjusting for zone multiplier
-      space = s.space
-      if !space.empty?
-        zone = space.get.thermalZone
-      end
-      if !zone.empty?
-        zone_multiplier = zone.get.multiplier
-        if (zone_multiplier > 1) && !space_warning_issued.include?(space.get.name.to_s)
-          runner.registerInfo("Space #{space.get.name} in thermal zone #{zone.get.name} has a zone multiplier of #{zone_multiplier}. Adjusting area calculations.")
-          space_warning_issued << space.get.name.to_s
-        end
-      else
-        zone_multiplier = 1 # space is not in a thermal zone
-        runner.registerWarning("Space #{space.get.name} is not in a thermal zone and won't be included in in the simulation. Windows will still be altered with an assumed zone multiplier of 1")
-      end
-      surface_gross_area = s.grossArea * zone_multiplier
+      # get surface_gross_area accounting for zone_multiplier
+      space = surface.space
+      zone = space.get.thermalZone unless space.empty?
+      zone.empty? ? zone_multiplier = 1 : zone_multiplier = zone.get.multiplier
+      surface_gross_area = surface.grossArea * zone_multiplier
 
       # loop through sub surfaces and add area including multiplier
       ext_window_area = 0
-      s.subSurfaces.each do |subSurface|
+      surface.subSurfaces.each do |subSurface|
         ext_window_area += subSurface.grossArea * subSurface.multiplier * zone_multiplier
-        if subSurface.multiplier > 1
-          runner.registerInfo("Sub-surface #{subSurface.name} in space #{space.get.name} has a sub-surface multiplier of #{subSurface.multiplier}. Adjusting area calculations.")
-        end
       end
 
       starting_gross_ext_wall_area += surface_gross_area
       starting_ext_window_area += ext_window_area
 
-      new_window = s.setWindowToWallRatio(wwr, sillHeight_si.value, true)
+      new_window = surface.setWindowToWallRatio(wwr, sillHeight_si.value, true)
       if new_window.empty?
-        runner.registerWarning("The requested window to wall ratio for surface '#{s.name}' was too large. Fenestration was not altered for this surface.")
+        runner.registerWarning("The requested window to wall ratio for surface '#{surface.name}' was too large. Fenestration was not altered for this surface.")
       else
         windows_added = true
         # warn user if resulting window doesn't have a construction, as it will result in failed simulation. In the future may use logic from starting windows to apply construction to new window.
@@ -228,40 +176,19 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     starting_wwr = format('%.02f', (starting_ext_window_area / starting_gross_ext_wall_area))
     runner.registerInitialCondition("The model's initial window to wall ratio for #{facade} facing exterior walls was #{starting_wwr}.")
 
-    if !exterior_walls
-      runner.registerAsNotApplicable("The model has no exterior #{facade.downcase} walls and was not altered")
-      return true
-    elsif !windows_added
+    if !windows_added
       runner.registerAsNotApplicable("The model has exterior #{facade.downcase} walls, but no windows could be added with the requested window to wall ratio")
       return true
     end
 
     # data for final condition wwr
-    surfaces = model.getSurfaces
-    surfaces.each do |s|
-      next if s.surfaceType != 'Wall'
-      next if s.outsideBoundaryCondition != 'Outdoors'
+    walls.each do |s|
       if s.space.empty?
         runner.registerWarning("#{s.name} doesn't have a parent space and won't be included in the measure reporting or modifications.")
         next
       end
 
-      # get the absoluteAzimuth for the surface so we can categorize it
-      absoluteAzimuth = OpenStudio.convert(s.azimuth, 'rad', 'deg').get + s.space.get.directionofRelativeNorth + model.getBuilding.northAxis
-      absoluteAzimuth -= 360.0 until absoluteAzimuth < 360.0
 
-      if facade == 'North'
-        next if !((absoluteAzimuth >= 315.0) || (absoluteAzimuth < 45.0))
-      elsif facade == 'East'
-        next if !((absoluteAzimuth >= 45.0) && (absoluteAzimuth < 135.0))
-      elsif facade == 'South'
-        next if !((absoluteAzimuth >= 135.0) && (absoluteAzimuth < 225.0))
-      elsif facade == 'West'
-        next if !((absoluteAzimuth >= 225.0) && (absoluteAzimuth < 315.0))
-      else
-        runner.registerError('Unexpected value of facade: ' + facade + '.')
-        return false
-      end
 
       # get surface area adjusting for zone multiplier
       space = s.space
@@ -303,20 +230,11 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     increase_window_area_si = OpenStudio::Quantity.new(final_ext_window_area - starting_ext_window_area, unit_area_si)
     increase_window_area_ip = OpenStudio.convert(increase_window_area_si, unit_area_ip).get
 
-    # calculate final envelope cost as positive value
-    constructions = model.getConstructions
-    constructions.each do |construction|
-      const_llcs = construction.lifeCycleCosts
-      const_llcs.each do |const_llc|
-        if const_llc.category == 'Construction'
-          envelope_cost += const_llc.totalCost
-        end
-      end
-    end
+
 
     # report final condition
     final_wwr = format('%.02f', (final_ext_window_area / final_gross_ext_wall_area))
-    runner.registerFinalCondition("The model's final window to wall ratio for #{facade} facing exterior walls is #{final_wwr}. Window area increased by #{neat_numbers(increase_window_area_ip.value, 0)} (ft^2). The material and construction costs increased by $#{neat_numbers(envelope_cost, 0)}.")
+    runner.registerFinalCondition("The model's final window to wall ratio for #{facade} facing exterior walls is #{final_wwr}. Window area increased by #{neat_numbers(increase_window_area_ip.value, 0)} (ft^2).")
 
     return true
   end
