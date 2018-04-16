@@ -36,17 +36,16 @@
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
-
+require 'openstudio-standards'
 begin
   require 'openstudio_measure_tester/test_helper'
 rescue LoadError
   puts 'OpenStudio Measure Tester Gem not installed -- will not be able to aggregate and dashboard the results of tests'
 end
-
 require_relative '../measure.rb'
 require 'minitest/autorun'
 
-class SetWindowToWallRatioByFacade_Test < Minitest::Test
+class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   def setup
 
 
@@ -83,35 +82,11 @@ class SetWindowToWallRatioByFacade_Test < Minitest::Test
     return model
   end
 
-  def test_arguments_and_defaults
-    # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasure.new
 
-    # Create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-
-    # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
-    model = create_necb_protype_model("LargeOffice",
-                                      'NECB HDD Method',
-                                      'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
-                                      "NECB2011")
-
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
-    #check number of arguments.
-    assert_equal(26, arguments.size)
-
-    (@surface_index + @sub_surface_index).each_with_index do |surface,index|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      assert_equal(ecm_name, arguments[index].name)
-      assert_equal('baseline', arguments[index].defaultValueAsString)
-    end
-  end
 
 
   def test_SetWindowToWallRatioByFacade_with_model
-    measure = SetWindowToWallRatioByFacade.new
+    measure = BTAPEnvelopeFDWRandSRR.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
@@ -125,15 +100,24 @@ class SetWindowToWallRatioByFacade_Test < Minitest::Test
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
 
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    #check number of arguments.
+    assert_equal(4, arguments.size)
+
     wwr = arguments[0].clone
     assert(wwr.setValue(0.4))
     argument_map['wwr'] = wwr
 
-    sillHeight = arguments[1].clone
+    srr = arguments[1].clone
+    assert(srr.setValue(0.05))
+    argument_map['srr'] = srr
+
+    sillHeight = arguments[2].clone
     assert(sillHeight.setValue(30.0))
     argument_map['sillHeight'] = sillHeight
 
-    facade = arguments[2].clone
+    facade = arguments[3].clone
     assert(facade.setValue('South'))
     argument_map['facade'] = facade
 

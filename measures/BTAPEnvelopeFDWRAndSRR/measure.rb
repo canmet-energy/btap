@@ -34,10 +34,10 @@
 # *******************************************************************************
 
 
-class SetWindowToWallRatioByFacade < OpenStudio::Measure::ModelMeasure
+class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   # override name to return the name of your script
   def name
-    return 'Set Window to Wall Ratio by Facade'
+    return 'Set FDWR and SRR for model. '
   end
 
   # return a vector of arguments
@@ -49,6 +49,13 @@ class SetWindowToWallRatioByFacade < OpenStudio::Measure::ModelMeasure
     wwr.setDisplayName('Window to Wall Ratio (fraction).')
     wwr.setDefaultValue(0.4)
     args << wwr
+
+    # make double argument for wwr
+    srr = OpenStudio::Measure::OSArgument.makeDoubleArgument('srr', true)
+    srr.setDisplayName('Skylight to Roof Ratio (fraction).')
+    srr.setDefaultValue(0.05)
+    args << srr
+
 
     # make double argument for sillHeight
     sillHeight = OpenStudio::Measure::OSArgument.makeDoubleArgument('sillHeight', true)
@@ -80,6 +87,7 @@ class SetWindowToWallRatioByFacade < OpenStudio::Measure::ModelMeasure
     end
 
     # assign the user inputs to variables
+    srr = runner.getDoubleArgumentValue('srr', user_arguments)
     wwr = runner.getDoubleArgumentValue('wwr', user_arguments)
     sillHeight = runner.getDoubleArgumentValue('sillHeight', user_arguments)
     facade = runner.getStringArgumentValue('facade', user_arguments)
@@ -315,4 +323,4 @@ class SetWindowToWallRatioByFacade < OpenStudio::Measure::ModelMeasure
 end
 
 # this allows the measure to be used by the application
-SetWindowToWallRatioByFacade.new.registerWithApplication
+BTAPEnvelopeFDWRandSRR.new.registerWithApplication
