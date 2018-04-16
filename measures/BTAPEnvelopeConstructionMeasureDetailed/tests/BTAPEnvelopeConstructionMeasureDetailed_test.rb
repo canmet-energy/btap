@@ -58,8 +58,8 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     assert_equal(26, arguments.size)
 
     (@surface_index + @sub_surface_index).each_with_index do |surface, index|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      assert_equal(ecm_name, arguments[index].name)
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      assert_equal(name, arguments[index].name)
       assert_equal('baseline', arguments[index].defaultValueAsString)
     end
   end
@@ -92,33 +92,33 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     values = {}
     conductance = 3.5
     (@surface_index + @sub_surface_index).each_with_index do |surface, index|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       argument = arguments[index].clone
       assert(argument.setValue(conductance.to_s))
-      argument_map[ecm_name] = argument
-      values[ecm_name] =conductance
+      argument_map[name] = argument
+      values[name] =conductance
     end
 
     conductance_argument_size = (@surface_index + @sub_surface_index).size
     #SHGC
     shgc = 0.999
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       argument = arguments[conductance_argument_size + index].clone
       assert(argument.setValue(shgc.to_s))
-      argument_map[ecm_name] = argument
-      values[ecm_name] =shgc
+      argument_map[name] = argument
+      values[name] =shgc
     end
 
     #SHGC
     shgc_argument_size = @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.size
     tvis = 0.999
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       argument = arguments[conductance_argument_size + shgc_argument_size + index].clone
       assert(argument.setValue(tvis.to_s))
-      argument_map[ecm_name] = argument
-      values[ecm_name] =tvis
+      argument_map[name] = argument
+      values[name] =tvis
     end
 
     #run the measure
@@ -167,10 +167,10 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     #opaque surfaces
     opaque_surfaces = outdoor_surfaces + ext_doors +ext_overhead_doors + ground_surfaces
     opaque_surfaces.sort.each do |surface|
-      ecm_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
-      unless values[ecm_name] == @baseline
+      name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
+      unless values[name] == @baseline
         assert_equal(
-            values[ecm_name].to_f.round(3),
+            values[name].to_f.round(3),
             BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)
         )
       end
@@ -179,15 +179,15 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     #glazing subsurfaces
     glazing_subsurfaces = ext_windows + ext_glass_doors + ext_skylights
     glazing_subsurfaces.sort.each do |surface|
-      ecm_cond_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
-      ecm_shgc_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
-      ecm_tvis_name = "ecm_#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
-      assert_equal(values[ecm_cond_name].to_f.round(3), BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)) unless values[ecm_cond_name] == @baseline
+      cond_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
+      shgc_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
+      tvis_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
+      assert_equal(values[cond_name].to_f.round(3), BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)) unless values[cond_name] == @baseline
       construction = OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get
-      assert_equal(values[ecm_shgc_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getSolarHeatGainCoefficient.value.round(3)) unless values[ecm_shgc_name] == @baseline
+      assert_equal(values[shgc_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getSolarHeatGainCoefficient.value.round(3)) unless values[shgc_name] == @baseline
       construction = OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get
-      error_message = "Setting TVis for #{construction.name} to #{values[ecm_tvis_name].to_f.round(3)} failed. Actual is #{construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value}"
-      assert_equal(values[ecm_tvis_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value.round(3), error_message) unless values[ecm_tvis_name] == @baseline
+      error_message = "Setting TVis for #{construction.name} to #{values[tvis_name].to_f.round(3)} failed. Actual is #{construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value}"
+      assert_equal(values[tvis_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value.round(3), error_message) unless values[tvis_name] == @baseline
     end
   end
 

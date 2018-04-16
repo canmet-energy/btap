@@ -102,34 +102,34 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     args = OpenStudio::Ruleset::OSArgumentVector.new
     # Conductances for all surfaces and subsurfaces.
     (@surface_index + @sub_surface_index).each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
+      #{name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(name, true)
+      #{name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)')
+      #{name}.setDefaultValue(@baseline)
+      args << #{name}"
       eval(statement)
     end
 
     # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} SHGC')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
+      #{name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(name, true)
+      #{name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} SHGC')
+      #{name}.setDefaultValue(@baseline)
+      args << #{name}"
       eval(statement)
     end
 
     # Visible Transmittance
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
+      #{name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(name, true)
+      #{name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance')
+      #{name}.setDefaultValue(@baseline)
+      args << #{name}"
       eval(statement)
     end
 
@@ -148,47 +148,47 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     end
     # conductance values should be between 3.5 and 0.005 U-Value (R-value 1 to R-Value 1000)
     (@surface_index + @sub_surface_index).each do |surface|
-      ecm_cond_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      value = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
+      cond_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      value = runner.getStringArgumentValue("#{cond_name}", user_arguments)
       if value == @baseline
-        values[ecm_cond_name] = nil
+        values[cond_name] = nil
       else
         if value.to_f > 5.0 or value.to_f < 0.005
-          runner_register(runner, 'Error', "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}.")
+          runner_register(runner, 'Error', "Conductance must be between 5.0 and 0.005. You entered #{value} for #{cond_name}.")
           return false
         end
-        values[ecm_cond_name] = value.to_f
+        values[cond_name] = value.to_f
       end
     end
 
 
     # SHGC should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_shgc_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
-      value = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
+      shgc_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
+      value = runner.getStringArgumentValue("#{shgc_name}", user_arguments)
       if value == @baseline
-        values[ecm_cond_name] = nil
+        values[cond_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
-          runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}.")
+          runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{shgc_name}.")
           return false
         end
-        values[ecm_shgc_name] = value.to_f
+        values[shgc_name] = value.to_f
       end
     end
 
     # TVis should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_tvis_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
-      value = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
+      tvis_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
+      value = runner.getStringArgumentValue("#{tvis_name}", user_arguments)
       if value == @baseline
-        values[ecm_cond_name] = nil
+        values[cond_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
-          runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}.")
+          runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{tvis_name}.")
           return false
         end
-        values[ecm_tvis_name] = value.to_f
+        values[tvis_name] = value.to_f
       end
     end
 
