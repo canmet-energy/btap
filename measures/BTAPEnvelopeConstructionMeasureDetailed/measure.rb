@@ -148,7 +148,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     end
     # conductance values should be between 3.5 and 0.005 U-Value (R-value 1 to R-Value 1000)
     (@surface_index + @sub_surface_index).each do |surface|
-      ecm_cond_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      ecm_cond_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       value = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
       if value == @baseline
         values[ecm_cond_name] = nil
@@ -164,10 +164,10 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
 
     # SHGC should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_shgc_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
+      ecm_shgc_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       value = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
       if value == @baseline
-        values[ecm_cond_name] = nil
+        values[ecm_shgc_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
           runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}.")
@@ -179,10 +179,10 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
 
     # TVis should be between zero and 1.
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_tvis_name = "ecm_#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
+      ecm_tvis_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       value = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
       if value == @baseline
-        values[ecm_cond_name] = nil
+        values[ecm_tvis_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
           runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}.")
