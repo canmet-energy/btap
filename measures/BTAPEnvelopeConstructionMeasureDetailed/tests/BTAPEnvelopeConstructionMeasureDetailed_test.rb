@@ -33,7 +33,7 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "OverheadDoor"}
     ]
 
-
+    @baseline = 'baseline'
   end
 
   def test_arguments_and_defaults
@@ -101,7 +101,7 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
 
     conductance_argument_size = (@surface_index + @sub_surface_index).size
     #SHGC
-    shgc = 0.999
+    shgc = @baseline
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
       name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       argument = arguments[conductance_argument_size + index].clone

@@ -166,11 +166,11 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       shgc_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       value = runner.getStringArgumentValue("#{shgc_name}", user_arguments)
-      if value == @baseline
-        values[cond_name] = nil
+      if value == @baseline or value.nil?
+        values[shgc_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
-          runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{shgc_name}.")
+          runner_register(runner, 'Error', "SHGCphyl must be between 0.0 and 1.0. You entered #{value} for #{shgc_name}.")
           return false
         end
         values[shgc_name] = value.to_f
@@ -182,7 +182,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
       tvis_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       value = runner.getStringArgumentValue("#{tvis_name}", user_arguments)
       if value == @baseline
-        values[cond_name] = nil
+        values[tvis_name] = nil
       else
         if value.to_f >= 1.0 or value.to_f <= 0.0
           runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{tvis_name}.")
@@ -192,11 +192,13 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
       end
     end
 
-    #get Arguments into a hash.
-
-
     # Make a copy of the model before the measure is applied.
     report = @standard.change_construction_properties_in_model(model, values)
+
+    #Store values in runner this will be used for data_viz.
+    values.each do |key, value|
+      runner_register_value(runner, "ecm_#{key}", value)
+    end
 
     runner_register(runner,
                     'FinalCondition',
