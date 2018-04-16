@@ -1,6 +1,7 @@
 require 'rake/testtask'
 namespace :test do
   #create test list
+  sh 'openstudio measure --update_all measures/'
   array = []
   array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/BTAPCreateNECBPrototypeBuildings_test.rb'
   array << 'measures/BTAPEnvelopeConstructionMeasureDetailed/tests/BTAPEnvelopeConstructionMeasureDetailed_test.rb'

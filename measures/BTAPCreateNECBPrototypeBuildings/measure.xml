@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>ae90fsd7-a651-467a-bc8d-29d310b0f937</uid>
-  <version_id>97e50b3e-5990-4cba-8df8-b21548a2c9e0</version_id>
-  <version_modified>20180228T202815Z</version_modified>
+  <version_id>6302cb09-dfa9-44fb-9320-57ea0a7f7ea1</version_id>
+  <version_modified>20180416T184706Z</version_modified>
   <xml_checksum>057E8D9D</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>Create NECB Prototype Building</display_name>
@@ -402,12 +402,6 @@
       <checksum>D6C32D5E</checksum>
     </file>
     <file>
-      <filename>create_DOE_prototype_building_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BB24E09E</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>1.11.2</identifier>
@@ -417,6 +411,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>5E869BBD</checksum>
+    </file>
+    <file>
+      <filename>BTAPCreateNECBPrototypeBuildings_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>570DD7EE</checksum>
     </file>
   </files>
 </measure>

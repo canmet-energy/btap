@@ -1,38 +1,222 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>btap_exterior_wall_measure</name>
+  <name>btap_envelope_construction_measure_detailed</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>c9ce6c37-a214-41bd-a781-c9b3faae11a5</version_id>
-  <version_modified>20180405T174924Z</version_modified>
+  <version_id>e89e8187-5c1a-4308-abac-98a224db5e2d</version_id>
+  <version_modified>20180416T185824Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
-  <class_name>BTAPExteriorWallMeasure</class_name>
-  <display_name>BTAPExteriorWallMeasure</display_name>
-  <description>Changes exterior wall construction's thermal conductances</description>
-  <modeler_description>method</modeler_description>
+  <class_name>BTAPEnvelopeConstructionMeasureDetailed</class_name>
+  <display_name>BTAPEnvelopeConstructionMeasureDetailed</display_name>
+  <description>Changes exterior wall construction's thermal conductances, Visible Transmittance and SHGC where application for each surface type.</description>
+  <modeler_description>Changes exterior wall construction's thermal conductances, Visible Transmittance and SHGC where application for each surface type.</modeler_description>
   <arguments>
     <argument>
-      <name>ecm_exterior_wall_conductance</name>
-      <display_name>Exterior Wall Conductance (W/m2 K)</display_name>
-      <type>Double</type>
+      <name>ecm_outdoors_wall_conductance</name>
+      <display_name>Outdoors Wall Conductance (W/m2 K)</display_name>
+      <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0.183</default_value>
+      <default_value>baseline</default_value>
     </argument>
     <argument>
-      <name>ecm_start_angle_in_degrees</name>
-      <display_name>Start Angle [deg]</display_name>
-      <type>Double</type>
+      <name>ecm_outdoors_roofceiling_conductance</name>
+      <display_name>Outdoors RoofCeiling Conductance (W/m2 K)</display_name>
+      <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
+      <default_value>baseline</default_value>
     </argument>
     <argument>
-      <name>ecm_end_angle_in_degrees</name>
-      <display_name>End Angle [deg]</display_name>
-      <type>Double</type>
+      <name>ecm_outdoors_floor_conductance</name>
+      <display_name>Outdoors Floor Conductance (W/m2 K)</display_name>
+      <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>360</default_value>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_ground_wall_conductance</name>
+      <display_name>Ground Wall Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_ground_roofceiling_conductance</name>
+      <display_name>Ground RoofCeiling Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_ground_floor_conductance</name>
+      <display_name>Ground Floor Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_fixedwindow_conductance</name>
+      <display_name>Outdoors FixedWindow Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_operablewindow_conductance</name>
+      <display_name>Outdoors OperableWindow Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_skylight_conductance</name>
+      <display_name>Outdoors Skylight Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdiffuser_conductance</name>
+      <display_name>Outdoors TubularDaylightDiffuser Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdome_conductance</name>
+      <display_name>Outdoors TubularDaylightDome Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_door_conductance</name>
+      <display_name>Outdoors Door Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_glassdoor_conductance</name>
+      <display_name>Outdoors GlassDoor Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_overheaddoor_conductance</name>
+      <display_name>Outdoors OverheadDoor Conductance (W/m2 K)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_fixedwindow_shgc</name>
+      <display_name>Outdoors FixedWindow SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_operablewindow_shgc</name>
+      <display_name>Outdoors OperableWindow SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_skylight_shgc</name>
+      <display_name>Outdoors Skylight SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdiffuser_shgc</name>
+      <display_name>Outdoors TubularDaylightDiffuser SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdome_shgc</name>
+      <display_name>Outdoors TubularDaylightDome SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_glassdoor_shgc</name>
+      <display_name>Outdoors GlassDoor SHGC</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_fixedwindow_tvis</name>
+      <display_name>Outdoors FixedWindow Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_operablewindow_tvis</name>
+      <display_name>Outdoors OperableWindow Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_skylight_tvis</name>
+      <display_name>Outdoors Skylight Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdiffuser_tvis</name>
+      <display_name>Outdoors TubularDaylightDiffuser Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_tubulardaylightdome_tvis</name>
+      <display_name>Outdoors TubularDaylightDome Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
+    </argument>
+    <argument>
+      <name>ecm_outdoors_glassdoor_tvis</name>
+      <display_name>Outdoors GlassDoor Visible Transmittance</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>baseline</default_value>
     </argument>
   </arguments>
   <outputs/>
@@ -64,16 +248,10 @@
   </attributes>
   <files>
     <file>
-      <filename>btap_exterior_wall_measure_test.rb</filename>
+      <filename>BTAPEnvelopeConstructionMeasureDetailed_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4D334284</checksum>
-    </file>
-    <file>
-      <filename>example_model.osm</filename>
-      <filetype>osm</filetype>
-      <usage_type>test</usage_type>
-      <checksum>53D14E69</checksum>
+      <checksum>92AC922F</checksum>
     </file>
     <file>
       <version>
@@ -84,7 +262,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>855B2BF8</checksum>
+      <checksum>DF7BE5FE</checksum>
     </file>
   </files>
 </measure>
