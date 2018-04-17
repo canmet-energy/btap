@@ -11,6 +11,7 @@ gem "bcl", "~> 0.5"
 
 gem 'colored', '~> 1.2'
 
+
 # gem 'openstudio_measure_tester', path: "../OpenStudio-measure-tester-gem"
 gem 'openstudio_measure_tester', github: "NREL/OpenStudio-measure-tester-gem"
 
