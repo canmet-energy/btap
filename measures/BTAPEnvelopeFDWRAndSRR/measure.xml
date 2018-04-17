@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>c567a0bf-a7d9-4a06-afe9-bf7df79e6bf8</uid>
-  <version_id>032dbaf1-d232-42f9-aaf7-309051239cc6</version_id>
-  <version_modified>20180416T195636Z</version_modified>
+  <version_id>35b2d77e-d92a-4d5c-90bd-54271831281f</version_id>
+  <version_modified>20180417T175857Z</version_modified>
   <xml_checksum>6DE831F7</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
   <display_name>Set FDWR and SRR for model. </display_name>
@@ -36,32 +36,6 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>30</default_value>
-    </argument>
-    <argument>
-      <name>facade</name>
-      <display_name>Cardinal Direction.</display_name>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>South</default_value>
-      <choices>
-        <choice>
-          <value>North</value>
-          <display_name>North</display_name>
-        </choice>
-        <choice>
-          <value>East</value>
-          <display_name>East</display_name>
-        </choice>
-        <choice>
-          <value>South</value>
-          <display_name>South</display_name>
-        </choice>
-        <choice>
-          <value>West</value>
-          <display_name>West</display_name>
-        </choice>
-      </choices>
     </argument>
   </arguments>
   <outputs/>
@@ -111,6 +85,12 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <checksum>0B94403D</checksum>
     </file>
     <file>
+      <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>764DAE6A</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>0.10.2</identifier>
@@ -119,13 +99,7 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9F79D2FF</checksum>
-    </file>
-    <file>
-      <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F06EB3D2</checksum>
+      <checksum>F53BE40E</checksum>
     </file>
   </files>
 </measure>

@@ -47,11 +47,6 @@ require 'minitest/autorun'
 
 class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   def setup
-
-
-
-    # create an instance of the measure
-
   end
 
   def create_model_by_local_osm_file(filename)
@@ -103,17 +98,25 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # Test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
-    assert_equal(3, arguments.size)
+    assert_equal(5, arguments.size)
 
     wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
+    assert(wwr.setValue('0.4'))
     argument_map['wwr'] = wwr
 
-    srr = arguments[1].clone
-    assert(srr.setValue(0.05))
+    wwr_limit_or_max = arguments[1].clone
+    assert(wwr_limit_or_max.setValue('maximize'))
+    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
+
+    srr = arguments[2].clone
+    assert(srr.setValue('0.05'))
     argument_map['srr'] = srr
 
-    sillHeight = arguments[2].clone
+    srr_limit_or_max = arguments[3].clone
+    assert(srr_limit_or_max.setValue('maximize'))
+    argument_map['srr_limit_or_max'] = srr_limit_or_max
+
+    sillHeight = arguments[4].clone
     assert(sillHeight.setValue(30.0))
     argument_map['sillHeight'] = sillHeight
 

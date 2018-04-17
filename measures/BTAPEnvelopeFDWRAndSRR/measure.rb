@@ -35,9 +35,23 @@
 
 
 class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
+  def initialize()
+    super()
+    @templates = [
+        'NECB2011',
+        'NECB2015'
+    ]
+
+    @limit_or_max_values = [
+        'limit',
+        'maximize'
+    ]
+  end
+
+
   # override name to return the name of your script
   def name
-    return 'Set FDWR and SRR for model. '
+    return 'Set FDWR and SRR for model. Or set Max NECB values based on NECB or epw HDD value. '
   end
 
   # return a vector of arguments
@@ -45,16 +59,37 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     args = OpenStudio::Measure::OSArgumentVector.new
 
     # make double argument for wwr
-    wwr = OpenStudio::Measure::OSArgument.makeDoubleArgument('wwr', true)
-    wwr.setDisplayName('Window to Wall Ratio (fraction).')
-    wwr.setDefaultValue(0.4)
+    wwr = OpenStudio::Measure::OSArgument.makeStringArgument('wwr', true)
+    wwr.setDisplayName("FDWR (fraction) or a standard value of one of #{@templates}")
+    wwr.setDefaultValue('NECB2011')
     args << wwr
 
+    # make choice argument for wwr_limit_or_max
+    choices = OpenStudio::StringVector.new
+    @limit_or_max_values.each do |choice|
+      choices << choice
+    end
+    wwr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('wwr_limit_or_max', choices, true)
+    wwr_limit_or_max.setDisplayName("FDWR Limit or Maximize?")
+    wwr_limit_or_max.setDefaultValue('maximize')
+    args << wwr_limit_or_max
+
+
     # make double argument for wwr
-    srr = OpenStudio::Measure::OSArgument.makeDoubleArgument('srr', true)
-    srr.setDisplayName('Skylight to Roof Ratio (fraction).')
-    srr.setDefaultValue(0.05)
+    srr = OpenStudio::Measure::OSArgument.makeStringArgument('srr', true)
+    srr.setDisplayName("SSR (fraction) or a standard value of one of #{@templates}")
+    srr.setDefaultValue('NECB2011')
     args << srr
+
+    # make choice argument for srr_limit_or_max
+    choices = OpenStudio::StringVector.new
+    @limit_or_max_values.each do |choice|
+      choices << choice
+    end
+    srr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('srr_limit_or_max', choices, true)
+    srr_limit_or_max.setDisplayName("SRR Limit or Maximize?")
+    srr_limit_or_max.setDefaultValue('maximize')
+    args << srr_limit_or_max
 
 
     # make double argument for sillHeight
@@ -69,35 +104,59 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
+    #Check to see if argument is a template name and a MAX
+    #First get HDD from file.
+    #Get SRR and FDWR Max values.
+    #
+
+
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
 
     # assign the user inputs to variables
-    srr = runner.getDoubleArgumentValue('srr', user_arguments)
-    wwr = runner.getDoubleArgumentValue('wwr', user_arguments)
+    srr = runner.getStringArgumentValue('srr', user_arguments)
+    wwr = runner.getStringArgumentValue('wwr', user_arguments)
+    srr_limit_or_max = runner.getStringArgumentValue('srr_limit_or_max', user_arguments)
+    wwr_limit_or_max = runner.getStringArgumentValue('wwr_limit_or_max', user_arguments)
     sillHeight = runner.getDoubleArgumentValue('sillHeight', user_arguments)
 
 
     # check reasonableness of fraction
-    if (wwr <= 0) || (wwr >= 1)
-      runner.registerError('Window to Wall Ratio must be greater than 0 and less than 1.')
-      return false
-    end
-
-    if (srr <= 0) || (srr >= 1)
-      runner.registerError('Skylight Ratio must be greater than 0 and less than 1.')
-      return false
+    if @templates.include?(wwr)
+      #Get template FDWR value from standard.
+    else
+      if (wwr.to_f <= 0) || (wwr.to_f >= 1)
+        runner.registerError("Window to Wall Ratio must be greater than 0 and less than 1 or one of the following templates #{@templates}")
+        return false
+      else
+        wwr = wwr.to_f
+      end
     end
 
     # check reasonableness of fraction
-    if sillHeight <= 0
+    if @templates.include?(srr)
+      #Get template FDWR value from standard.
+    else
+      if (srr.to_f <= 0) || (srr.to_f >= 1)
+        runner.registerError("Window to Wall Ratio must be greater than 0 and less than 1 or one of the following templates #{@templates}")
+        return false
+      else
+        srr = srr.to_f
+      end
+    end
+
+
+
+
+    # check reasonableness of fraction
+    if sillHeight.to_f <= 0
       runner.registerError('Sill height must be > 0.')
       return false
-    elsif sillHeight > 360
+    elsif sillHeight.to_f > 360
       runner.registerWarning("#{sillHeight} inches seems like an unusually high sill height.")
-    elsif sillHeight > 9999
+    elsif sillHeight.to_f > 9999
       runner.registerError("#{sillHeight} inches is above the measure limit for sill height.")
       return false
     end
@@ -189,7 +248,6 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
       end
 
 
-
       # get surface area adjusting for zone multiplier
       space = s.space
       if !space.empty?
@@ -214,22 +272,10 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
       final_ext_window_area += ext_window_area
     end
 
-    # short def to make numbers pretty (converts 4125001.25641 to 4,125,001.26 or 4,125,001). The definition be called through this measure
-    def neat_numbers(number, roundto = 2) # round to 0 or 2)
-      # round to zero or two decimals
-      if roundto == 2
-        number = format '%.2f', number
-      else
-        number = number.round
-      end
-      # regex to add commas
-      number.to_s.reverse.gsub(/([0-9]{3}(?=([0-9])))/, '\\1,').reverse
-    end
 
     # get delta in ft^2 for final - starting window area
     increase_window_area_si = OpenStudio::Quantity.new(final_ext_window_area - starting_ext_window_area, unit_area_si)
     increase_window_area_ip = OpenStudio.convert(increase_window_area_si, unit_area_ip).get
-
 
 
     # report final condition
@@ -238,6 +284,19 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
 
     return true
   end
+
+  # short def to make numbers pretty (converts 4125001.25641 to 4,125,001.26 or 4,125,001). The definition be called through this measure
+  def neat_numbers(number, roundto = 2) # round to 0 or 2)
+    # round to zero or two decimals
+    if roundto == 2
+      number = format '%.2f', number
+    else
+      number = number.round
+    end
+    # regex to add commas
+    number.to_s.reverse.gsub(/([0-9]{3}(?=([0-9])))/, '\\1,').reverse
+  end
+
 end
 
 # this allows the measure to be used by the application
