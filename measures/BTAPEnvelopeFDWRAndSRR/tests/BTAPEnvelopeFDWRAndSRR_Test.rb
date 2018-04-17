@@ -117,10 +117,6 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     assert(sillHeight.setValue(30.0))
     argument_map['sillHeight'] = sillHeight
 
-    facade = arguments[3].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
-
     measure.run(model, runner, argument_map)
     result = runner.result
     show_output(result)

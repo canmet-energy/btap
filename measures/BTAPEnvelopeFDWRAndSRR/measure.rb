@@ -78,7 +78,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     srr = runner.getDoubleArgumentValue('srr', user_arguments)
     wwr = runner.getDoubleArgumentValue('wwr', user_arguments)
     sillHeight = runner.getDoubleArgumentValue('sillHeight', user_arguments)
-    facade = runner.getStringArgumentValue('facade', user_arguments)
+
 
     # check reasonableness of fraction
     if (wwr <= 0) || (wwr >= 1)
@@ -174,7 +174,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     # report initial condition wwr
     # the initial and final ratios does not currently account for either sub-surface or zone multipliers.
     starting_wwr = format('%.02f', (starting_ext_window_area / starting_gross_ext_wall_area))
-    runner.registerInitialCondition("The model's initial window to wall ratio for #{facade} facing exterior walls was #{starting_wwr}.")
+    runner.registerInitialCondition("The model's initial window to wall ratio was #{starting_wwr}.")
 
     if !windows_added
       runner.registerAsNotApplicable("The model has exterior #{facade.downcase} walls, but no windows could be added with the requested window to wall ratio")
@@ -234,7 +234,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
 
     # report final condition
     final_wwr = format('%.02f', (final_ext_window_area / final_gross_ext_wall_area))
-    runner.registerFinalCondition("The model's final window to wall ratio for #{facade} facing exterior walls is #{final_wwr}. Window area increased by #{neat_numbers(increase_window_area_ip.value, 0)} (ft^2).")
+    runner.registerFinalCondition("The model's final window to wall ratio  is #{final_wwr}. Window area increased by #{neat_numbers(increase_window_area_ip.value, 0)} (ft^2).")
 
     return true
   end
