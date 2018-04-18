@@ -55,7 +55,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     path = OpenStudio::Path.new(File.dirname(__FILE__) + filename)
     model = translator.loadModel(path)
     assert(!model.empty?)
-    return  model.get
+    return model.get
   end
 
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
@@ -78,9 +78,8 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   end
 
 
+  def test_arguments
 
-
-  def test_SetWindowToWallRatioByFacade_with_model
     measure = BTAPEnvelopeFDWRandSRR.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -94,30 +93,52 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # set argument values to good values and run the measure on model with spaces
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
-
     # Test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
     assert_equal(5, arguments.size)
 
+  end
+
+  def test_SetFDWR_Maximize
+
+    limit_or_max = 'Maximize'
+
+    measure = BTAPEnvelopeFDWRandSRR.new
+    # create an instance of a runner
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+
+    #load model
+    model = create_model_by_local_osm_file('/EnvelopeAndLoadTestModel_01.osm')
+
+    # get arguments
+    arguments = measure.arguments(model)
+
+    # set argument values to good values and run the measure on model with spaces
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+
+
     wwr = arguments[0].clone
-    assert(wwr.setValue('0.4'))
+    assert(wwr.setValue('0.04'))
     argument_map['wwr'] = wwr
 
     wwr_limit_or_max = arguments[1].clone
-    assert(wwr_limit_or_max.setValue('maximize'))
+    assert(wwr_limit_or_max.setValue(limit_or_max))
     argument_map['wwr_limit_or_max'] = wwr_limit_or_max
 
     srr = arguments[2].clone
-    assert(srr.setValue('0.05'))
+    assert(srr.setValue('0.004'))
     argument_map['srr'] = srr
 
     srr_limit_or_max = arguments[3].clone
-    assert(srr_limit_or_max.setValue('maximize'))
+    assert(srr_limit_or_max.setValue(limit_or_max))
     argument_map['srr_limit_or_max'] = srr_limit_or_max
 
     sillHeight = arguments[4].clone
-    assert(sillHeight.setValue(30.0))
+    assert(sillHeight.setValue(0.75))
     argument_map['sillHeight'] = sillHeight
 
     measure.run(model, runner, argument_map)
@@ -131,47 +152,15 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   end
 
 
-=begin
-  def test_SetWindowToWallRatioByFacade_fail
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
+  def test_SetFDWR_Limit
 
+    limit_or_max = 'Limit'
+    measure = BTAPEnvelopeFDWRandSRR.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    # make an empty model
-    model = OpenStudio::Model::Model.new
-
-    # get arguments and test that they are what we are expecting
-    arguments = measure.arguments(model)
-    assert_equal(3, arguments.size)
-    assert_equal('wwr', arguments[0].name)
-    assert_equal('sillHeight', arguments[1].name)
-    assert_equal('facade', arguments[2].name)
-
-    # set argument values to bad values and run the measure
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-    wwr = arguments[0].clone
-    assert(wwr.setValue('20'))
-    argument_map['wwr'] = wwr
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    assert(result.value.valueName == 'Fail')
-  end
-
-  def test_SetWindowToWallRatioByFacade_with_model
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
-
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # load the test model
-    translator = OpenStudio::OSVersion::VersionTranslator.new
-    path = OpenStudio::Path.new(File.dirname(__FILE__) + '/EnvelopeAndLoadTestModel_01.osm')
-    model = translator.loadModel(path)
-    assert(!model.empty?)
-    model = model.get
+    #load model
+    model = create_model_by_local_osm_file('/EnvelopeAndLoadTestModel_01.osm')
 
     # get arguments
     arguments = measure.arguments(model)
@@ -179,43 +168,46 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # set argument values to good values and run the measure on model with spaces
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+
+
     wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
+    assert(wwr.setValue('0.04'))
     argument_map['wwr'] = wwr
 
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
+    wwr_limit_or_max = arguments[1].clone
+    assert(wwr_limit_or_max.setValue(limit_or_max))
+    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
 
-    facade = arguments[2].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
+    srr = arguments[2].clone
+    assert(srr.setValue('0.004'))
+    argument_map['srr'] = srr
+
+    srr_limit_or_max = arguments[3].clone
+    assert(srr_limit_or_max.setValue(limit_or_max))
+    argument_map['srr_limit_or_max'] = srr_limit_or_max
+
+    sillHeight = arguments[4].clone
+    assert(sillHeight.setValue(0.75))
+    argument_map['sillHeight'] = sillHeight
 
     measure.run(model, runner, argument_map)
     result = runner.result
-    # show_output(result)
-    assert(result.value.valueName == 'Success')
-    assert(result.warnings.size == 2)
-    assert(result.info.size == 2)
+    show_output(result)
+
 
     # save the model
     # output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/test.osm")
     # model.save(output_file_path,true)
   end
 
-  def test_SetWindowToWallRatioByFacade_with_model_RotationTest
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
 
+
+  def run_ratio_measure(model, inp_srr, inp_srr_limit_or_max, inp_wwr, inp_wwr_limit_or_max, inp_sill_height)
+    measure = BTAPEnvelopeFDWRandSRR.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # load the test model
-    translator = OpenStudio::OSVersion::VersionTranslator.new
-    path = OpenStudio::Path.new(File.dirname(__FILE__) + '/EnvelopeAndLoadTestModel_02_RotatedSpaceAndBuilding.osm')
-    model = translator.loadModel(path)
-    assert(!model.empty?)
-    model = model.get
 
     # get arguments
     arguments = measure.arguments(model)
@@ -223,189 +215,31 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # set argument values to good values and run the measure on model with spaces
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
-    wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
-    argument_map['wwr'] = wwr
-
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
-
-    facade = arguments[2].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
-
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    show_output(result)
-    assert(result.value.valueName == 'Success')
-    # assert(result.warnings.size == 2)
-    # assert(result.info.size == 2)
-
-    # save the model in an output directory
-    output_dir = File.expand_path('output', File.dirname(__FILE__))
-    FileUtils.mkdir output_dir unless Dir.exist? output_dir
-    model.save("#{output_dir}/test.osm", true)
-  end
-
-  def test_SetWindowToWallRatioByFacade_with_model_MinimalCost
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
-
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # load the test model
-    translator = OpenStudio::OSVersion::VersionTranslator.new
-    path = OpenStudio::Path.new(File.dirname(__FILE__) + '/EnvelopeAndLoadTestModel_01.osm')
-    model = translator.loadModel(path)
-    assert(!model.empty?)
-    model = model.get
-
-    # get arguments
+    # Test arguments and defaults
     arguments = measure.arguments(model)
 
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
     wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
+    assert(wwr.setValue(inp_wwr))
     argument_map['wwr'] = wwr
 
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
+    wwr_limit_or_max = arguments[1].clone
+    assert(wwr_limit_or_max.setValue('Maximum'))
+    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
 
-    facade = arguments[2].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
+    srr = arguments[2].clone
+    assert(srr.setValue(inp_srr))
+    argument_map['srr'] = srr
 
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    # show_output(result)
-    assert(result.value.valueName == 'Success')
-    assert(result.warnings.size == 2)
-    assert(result.info.size == 2)
+    srr_limit_or_max = arguments[3].clone
+    assert(srr_limit_or_max.setValue(inp_srr_limit_or_max))
+    argument_map['srr_limit_or_max'] = srr_limit_or_max
+
+    sill_height = arguments[4].clone
+    assert(sill_height.setValue(inp_sill_height))
+    argument_map['sill_height'] = sill_height
+    return argument_map, measure, runner
   end
 
-  def test_SetWindowToWallRatioByFacade_with_model_NoCost
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
 
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # load the test model
-    translator = OpenStudio::OSVersion::VersionTranslator.new
-    path = OpenStudio::Path.new(File.dirname(__FILE__) + '/EnvelopeAndLoadTestModel_01.osm')
-    model = translator.loadModel(path)
-    assert(!model.empty?)
-    model = model.get
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
-    argument_map['wwr'] = wwr
-
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
-
-    facade = arguments[2].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
-
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    # show_output(result)
-    assert(result.value.valueName == 'Success')
-    assert(result.warnings.size == 2)
-    assert(result.info.size == 2)
-  end
-
-  def test_SetWindowToWallRatioByFacade_ReverseTranslatedModel
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
-
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # load the test model
-    translator = OpenStudio::OSVersion::VersionTranslator.new
-    path = OpenStudio::Path.new(File.dirname(__FILE__) + '/ReverseTranslatedModel.osm')
-    model = translator.loadModel(path)
-    assert(!model.empty?)
-    model = model.get
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
-    argument_map['wwr'] = wwr
-
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
-
-    facade = arguments[2].clone
-    assert(facade.setValue('East'))
-    argument_map['facade'] = facade
-
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    # show_output(result)
-    assert(result.value.valueName == 'Success')
-    assert(result.warnings.size == 1)
-    assert(result.info.empty?)
-  end
-
-  def test_SetWindowToWallRatioByFacade_EmptySpaceNoLoadsOrSurfaces
-    # create an instance of the measure
-    measure = SetWindowToWallRatioByFacade.new
-
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # make an empty model
-    model = OpenStudio::Model::Model.new
-
-    # add a space to the model without any geometry or loads, want to make sure measure works or fails gracefully
-    new_space = OpenStudio::Model::Space.new(model)
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    wwr = arguments[0].clone
-    assert(wwr.setValue(0.4))
-    argument_map['wwr'] = wwr
-
-    sillHeight = arguments[1].clone
-    assert(sillHeight.setValue(30.0))
-    argument_map['sillHeight'] = sillHeight
-
-    facade = arguments[2].clone
-    assert(facade.setValue('South'))
-    argument_map['facade'] = facade
-
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    # show_output(result)
-    assert(result.value.valueName == 'NA')
-    # assert(result.warnings.size == 0)
-    # assert(result.info.size == 1)
-  end
-
-=end
 end

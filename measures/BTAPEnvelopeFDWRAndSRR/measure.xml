@@ -2,11 +2,11 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>c567a0bf-a7d9-4a06-afe9-bf7df79e6bf8</uid>
-  <version_id>35b2d77e-d92a-4d5c-90bd-54271831281f</version_id>
-  <version_modified>20180417T175857Z</version_modified>
+  <version_id>1f16189a-5831-41b2-8864-b519525a8c4b</version_id>
+  <version_modified>20180418T212659Z</version_modified>
   <xml_checksum>6DE831F7</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
-  <display_name>Set FDWR and SRR for model. </display_name>
+  <display_name>Set FDWR and SRR for model. Or set Max NECB values based on NECB or epw HDD value. </display_name>
   <description>This measure will set the window to wall ratio for exterior surfaces with a specified orientation. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.</description>
   <modeler_description>This measure identifies exterior surfaces of the proper orientation. Then it runs a method that removes existing windows and applies a new window with a specified window to wall ratio and sill height. The construction chosen for the new window is defaulted to what is assigned to the space, or inherited from a higher level object, such as the building. If the baseline model uses hard assigned constructions you may not get the expected results.&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;
 &#xd;&#xd;&#xd;&#xd;&#xd;&#xd;
@@ -15,19 +15,55 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
   <arguments>
     <argument>
       <name>wwr</name>
-      <display_name>Window to Wall Ratio (fraction).</display_name>
-      <type>Double</type>
+      <display_name>FDWR (fraction) or a standard value of one of ["NECB2011", "NECB2015"]</display_name>
+      <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0.4</default_value>
+      <default_value>NECB2011</default_value>
+    </argument>
+    <argument>
+      <name>wwr_limit_or_max</name>
+      <display_name>FDWR Limit or Maximize?</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Maximize</default_value>
+      <choices>
+        <choice>
+          <value>Limit</value>
+          <display_name>Limit</display_name>
+        </choice>
+        <choice>
+          <value>Maximize</value>
+          <display_name>Maximize</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>srr</name>
-      <display_name>Skylight to Roof Ratio (fraction).</display_name>
-      <type>Double</type>
+      <display_name>SSR (fraction) or a standard value of one of ["NECB2011", "NECB2015"]</display_name>
+      <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0.05</default_value>
+      <default_value>NECB2011</default_value>
+    </argument>
+    <argument>
+      <name>srr_limit_or_max</name>
+      <display_name>SRR Limit or Maximize?</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Maximize</default_value>
+      <choices>
+        <choice>
+          <value>Limit</value>
+          <display_name>Limit</display_name>
+        </choice>
+        <choice>
+          <value>Maximize</value>
+          <display_name>Maximize</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>sillHeight</name>
@@ -88,7 +124,7 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>764DAE6A</checksum>
+      <checksum>DF08E30A</checksum>
     </file>
     <file>
       <version>
@@ -99,7 +135,19 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F53BE40E</checksum>
+      <checksum>31744602</checksum>
+    </file>
+    <file>
+      <filename>test.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D42284FD</checksum>
+    </file>
+    <file>
+      <filename>large_office.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D8719984</checksum>
     </file>
   </files>
 </measure>

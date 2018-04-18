@@ -43,9 +43,12 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     ]
 
     @limit_or_max_values = [
-        'limit',
-        'maximize'
+        'Limit',
+        'Maximize'
     ]
+
+    #Assuming a skylight area of this.
+    @skylight_fixture_area = 0.0625
   end
 
 
@@ -71,7 +74,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     end
     wwr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('wwr_limit_or_max', choices, true)
     wwr_limit_or_max.setDisplayName("FDWR Limit or Maximize?")
-    wwr_limit_or_max.setDefaultValue('maximize')
+    wwr_limit_or_max.setDefaultValue('Maximize')
     args << wwr_limit_or_max
 
 
@@ -88,7 +91,7 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     end
     srr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('srr_limit_or_max', choices, true)
     srr_limit_or_max.setDisplayName("SRR Limit or Maximize?")
-    srr_limit_or_max.setDefaultValue('maximize')
+    srr_limit_or_max.setDefaultValue('Maximize')
     args << srr_limit_or_max
 
 
@@ -103,11 +106,10 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-
-    initial_wwr = get_outdoor_subsurface_ratio(model, surface_type = "Wall")
-    initial_srr = get_outdoor_subsurface_ratio(model, surface_type = "RoofCeiling")
+    standard = Standard.new()
+    initial_wwr = standard.get_outdoor_subsurface_ratio(model, surface_type = "Wall")
+    initial_srr = standard.get_outdoor_subsurface_ratio(model, surface_type = "RoofCeiling")
     runner.registerInitialCondition("The model's initial FDWR = #{initial_wwr} SRR = #{initial_srr}")
-
 
 
     # use the built-in error checking
@@ -158,95 +160,23 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
       runner.registerError("#{sillHeight} inches is above the measure limit for sill height.")
       return false
     end
-    sillHeight_si = sillHeight.to_f
-
 
     # flag to track warning for new windows without construction
-    empty_const_warning = false
-    surface_type = "Wall"
-    model.getSpaces.sort.each do |space|
-      space.surfaces.sort.each do |surface|
-        zone = surface.space.get.thermalZone
-        zone_multiplier = nil
-        zone.empty? ? zone_multiplier = 1 : zone_multiplier = zone.get.multiplier
-        if surface.outsideBoundaryCondition == 'Outdoors' and surface.surfaceType == surface_type
-          new_window = surface.setWindowToWallRatio(wwr, sillHeight_si, true)
-          if new_window.empty?
-            runner.registerWarning("The requested window to wall ratio for surface '#{surface.name}' was too large. Fenestration was not altered for this surface.")
-          else
-            windows_added = true
-            # warn user if resulting window doesn't have a construction, as it will result in failed simulation. In the future may use logic from starting windows to apply construction to new window.
-            if new_window.get.construction.empty? && (empty_const_warning == false)
-              runner.registerWarning('one or more resulting windows do not have constructions. This script is intended to be used with models using construction sets versus hard assigned constructions.')
-              empty_const_warning = true
-            end
-          end
-        end
-      end
+    if wwr_limit_or_max.downcase == 'Maximize'.downcase
+      standard.apply_max_fdwr(model, runner, sillHeight.to_f, wwr.to_f)
+    else
+      standard.apply_limit_to_subsurface_ratio(model, wwr, surface_type = "Wall")
     end
-
-    wwr = get_outdoor_subsurface_ratio(model, surface_type = "Wall")
-    srr = get_outdoor_subsurface_ratio(model, surface_type = "RoofCeiling")
+    if srr_limit_or_max.downcase  == 'Maximize'.downcase
+      standard.apply_max_srr(model, runner, srr.to_f,@skylight_fixture_area)
+    else
+      standard.apply_limit_to_subsurface_ratio(model, srr, surface_type = "RoofCeiling")
+    end
+    wwr = standard.get_outdoor_subsurface_ratio(model, surface_type = "Wall")
+    srr = standard.get_outdoor_subsurface_ratio(model, surface_type = "RoofCeiling")
     runner.registerFinalCondition("The model's initial FDWR = #{wwr} SRR = #{srr}")
     return true
   end
-
-
-
-
-  # This method will limit the FDWR of the building. It will use the existing windows and only reduce the hieght of the
-  # Windows if neccesary. This is the least intrusive method.
-  def limit_surface_to_subsurface_ratio(model, fdwr_lim, surface_type = "Wall")
-    fdwr = get_outdoor_subsurface_ratio(model, surface_type)
-    if fdwr <= fdwr_lim
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "Building FDWR of #{fdwr} is already lower than limit of #{wwr_lim.round}%.")
-      return true
-    end
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.standards.Model', "Reducing the size of all windows (by shrinking to centroid) to reduce window area down to the limit of #{wwr_lim.round}%.")
-    # Determine the factors by which to reduce the window / door area
-    mult = fdwr_lim / fdwr
-    # Reduce the window area if any of the categories necessary
-    model.getSpaces.sort.each do |space|
-      # Loop through all surfaces in this space
-      space.surfaces.sort.each do |surface|
-        # Skip non-outdoor surfaces
-        next unless surface.outsideBoundaryCondition == 'Outdoors'
-        # Skip non-walls
-        next unless surface.surfaceType == surface_type
-        # Subsurfaces in this surface
-        surface.subSurfaces.sort.each do |ss|
-          # Reduce the size of the window
-          red = 1.0 - mult
-          sub_surface_reduce_area_by_percent_by_shrinking_toward_centroid(ss, red)
-        end
-      end
-    end
-    return true
-  end
-
-
-  def get_outdoor_subsurface_ratio(model, surface_type = "Wall")
-    surface_area = 0.0
-    sub_surface_area = 0
-    all_surfaces = []
-    all_sub_surfaces = []
-    model.getSpaces.sort.each do |space|
-      zone = space.thermalZone
-      zone_multiplier = nil
-      zone.empty? ? zone_multiplier = 1 : zone_multiplier = zone.get.multiplier
-      space.surfaces.sort.each do |surface|
-        if surface.outsideBoundaryCondition == 'Outdoors' and surface.surfaceType == surface_type
-          surface_area += surface.grossArea * zone_multiplier
-          surface.subSurfaces.sort.each do |sub_surface|
-            sub_surface_area += sub_surface.grossArea * sub_surface.multiplier * zone_multiplier
-          end
-        end
-      end
-    end
-    return fdwr = (sub_surface_area / surface_area)
-  end
-
-
 end
 
 # this allows the measure to be used by the application
