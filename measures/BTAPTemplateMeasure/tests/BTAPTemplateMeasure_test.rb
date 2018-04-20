@@ -52,6 +52,8 @@ class BTAPTemplateMeasure_Test < Minitest::Test
 
   def test_sample_create_a_building_from_scratch()
 
+    #Create/Load Model to test against
+    model = nil
     # Set up your argument list to test.
     input_arguments = {
         "a_string_argument" => "MyString",
@@ -59,39 +61,12 @@ class BTAPTemplateMeasure_Test < Minitest::Test
         "a_string_double_argument" => "888888.8",
         "a_choice_argument" => "NA"
     }
-
     # Create an instance of the measure
-    self.class.name.demodulize
-    measure = BTAPTemplateMeasure.new
-    arguments = measure.arguments(model)
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    # Set the arguements in the argument map
-    input_arguments.each_with_index do |(key, value), index|
-      argument = arguments[index].clone
-      assert(argument.setValue(value))
-      argument_map[key] = argument
-    end
-
-    #run the measure
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    assert(result.value.valueName == 'Success')
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success')
   end
 
-  def copy_model(model)
-    copy_model = OpenStudio::Model::Model.new
-    # remove existing objects from model
-    handles = OpenStudio::UUIDVector.new
-    copy_model.objects.each do |obj|
-      handles << obj.handle
-    end
-    copy_model.removeObjects(handles)
-    # put contents of new_model into model_to_replace
-    copy_model.addObjects(model.toIdfFile.objects)
-    return copy_model
-  end
+
 
   ##### Helper methods
 
@@ -134,4 +109,37 @@ class BTAPTemplateMeasure_Test < Minitest::Test
     weather.set_weather_file(model)
     return model
   end
+
+  def run_measure(input_arguments, model)
+    self.class.name.demodulize
+    measure = BTAPTemplateMeasure.new
+    arguments = measure.arguments(model)
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    # Set the arguements in the argument map
+    input_arguments.each_with_index do |(key, value), index|
+      argument = arguments[index].clone
+      assert(argument.setValue(value))
+      argument_map[key] = argument
+    end
+
+    #run the measure
+    measure.run(model, runner, argument_map)
+    runner
+  end
+
+  def copy_model(model)
+    copy_model = OpenStudio::Model::Model.new
+    # remove existing objects from model
+    handles = OpenStudio::UUIDVector.new
+    copy_model.objects.each do |obj|
+      handles << obj.handle
+    end
+    copy_model.removeObjects(handles)
+    # put contents of new_model into model_to_replace
+    copy_model.addObjects(model.toIdfFile.objects)
+    return copy_model
+  end
+
 end
