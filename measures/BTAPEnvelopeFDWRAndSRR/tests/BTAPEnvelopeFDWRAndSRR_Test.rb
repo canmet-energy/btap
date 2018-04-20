@@ -47,6 +47,14 @@ require 'minitest/autorun'
 
 class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   def setup
+
+        '{
+            "wwr" => "0.04",
+            "wwr_limit_or_max" => "Maximize",
+            "srr" => "0.05",
+            "srr_limit_or_max" => "Maximize",
+            "sillHeight" => 0.75
+        }'
   end
 
   def create_model_by_local_osm_file(filename)
@@ -57,6 +65,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     assert(!model.empty?)
     return model.get
   end
+
 
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
     osm_directory = "#{Dir.pwd}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
@@ -122,7 +131,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
 
 
     wwr = arguments[0].clone
-    assert(wwr.setValue('0.04'))
+    assert(wwr.setValue(limit_or_max))
     argument_map['wwr'] = wwr
 
     wwr_limit_or_max = arguments[1].clone
@@ -130,7 +139,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     argument_map['wwr_limit_or_max'] = wwr_limit_or_max
 
     srr = arguments[2].clone
-    assert(srr.setValue('0.004'))
+    assert(srr.setValue('0.05'))
     argument_map['srr'] = srr
 
     srr_limit_or_max = arguments[3].clone
@@ -181,7 +190,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     argument_map['wwr_limit_or_max'] = wwr_limit_or_max
 
     srr = arguments[2].clone
-    assert(srr.setValue('0.004'))
+    assert(srr.setValue('0.05'))
     argument_map['srr'] = srr
 
     srr_limit_or_max = arguments[3].clone
@@ -201,7 +210,6 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/test.osm")
     # model.save(output_file_path,true)
   end
-
 
 
   def run_ratio_measure(model, inp_srr, inp_srr_limit_or_max, inp_wwr, inp_wwr_limit_or_max, inp_sill_height)

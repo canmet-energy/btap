@@ -106,7 +106,15 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-    standard = Standard.new()
+
+
+
+
+
+    hdd = nil
+    standard = standard = Standard.new
+
+
     initial_wwr = standard.get_outdoor_subsurface_ratio(model, surface_type = "Wall")
     initial_srr = standard.get_outdoor_subsurface_ratio(model, surface_type = "RoofCeiling")
     runner.registerInitialCondition("The model's initial FDWR = #{initial_wwr} SRR = #{initial_srr}")
@@ -124,10 +132,19 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     wwr_limit_or_max = runner.getStringArgumentValue('wwr_limit_or_max', user_arguments)
     sillHeight = runner.getDoubleArgumentValue('sillHeight', user_arguments)
 
+    if @templates.include?(wwr) or @templates.include?(srr)
+      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.")  if model.weatherFile.empty?
+      standard = Standard.build("#{wwr}_LargeOffice")
+      hdd = standard.get_necb_hdd18(model)
+    end
 
-    # check reasonableness of fraction
+      # check reasonableness of fraction
     if @templates.include?(wwr)
-      #Get template FDWR value from standard.
+      #if wwr = 'NECB2011' or 'NECB2015' get proper wwr for hdd of model
+      standard = Standard.build("#{wwr}_LargeOffice")
+      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.")  if model.weatherFile.empty?
+      hdd = standard.get_necb_hdd18(model)
+      srr = standard.get_standards_constant('skylight_to_roof_ratio_max_value')
     else
       if (wwr.to_f <= 0) || (wwr.to_f >= 1)
         runner.registerError("Window to Wall Ratio must be greater than 0 and less than 1 or one of the following templates #{@templates}")
@@ -139,7 +156,9 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
 
     # check reasonableness of fraction
     if @templates.include?(srr)
-      #Get template FDWR value from standard.
+      #if wwr = 'NECB2011' or 'NECB2015' get proper wwr for hdd of model
+      standard = Standard.build("#{wwr}_LargeOffice")
+      srr = standard.get_standards_constant('skylight_to_roof_ratio_max_value')
     else
       if (srr.to_f <= 0) || (srr.to_f >= 1)
         runner.registerError("Window to Wall Ratio must be greater than 0 and less than 1 or one of the following templates #{@templates}")
