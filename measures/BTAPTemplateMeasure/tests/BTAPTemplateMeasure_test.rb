@@ -13,7 +13,7 @@ require 'minitest/autorun'
 
 class BTAPTemplateMeasure_Test < Minitest::Test
   def setup()
-    @arguments_expected = [
+    @arguments_interface = [
         {
             "name" => "a_string_argument",
             "type" => "String",
@@ -80,8 +80,8 @@ class BTAPTemplateMeasure_Test < Minitest::Test
     # Test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
-    assert_equal(@arguments_expected.size, arguments.size)
-    (@arguments_expected).each_with_index do |argument_expected, index|
+    assert_equal(@arguments_interface.size, arguments.size)
+    (@arguments_interface).each_with_index do |argument_expected, index|
       assert_equal(argument_expected['name'], arguments[index].name)
       assert_equal(argument_expected['display_name'], arguments[index].displayName)
       assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString)

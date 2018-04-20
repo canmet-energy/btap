@@ -22,7 +22,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
   #Use the constructor to set global variables
   def initialize()
     super()
-    @arguments = [
+    @arguments_interface = [
         {
             "name" => "a_string_argument",
             "argument_type" => "String",
@@ -41,7 +41,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
         {
             "name" => "a_string_double_argument",
             "argument_type" => "StringDouble",
-            "argument_display_name" => "A Double numermic Argument (double)",
+            "argument_display_name" => "A String based Double numeric Argument (double)",
             "default_value" => "NA",
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
@@ -75,7 +75,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
   def arguments(model)
     args = OpenStudio::Ruleset::OSArgumentVector.new
     # Conductances for all surfaces and subsurfaces.
-    @arguments.each do |argument|
+    @arguments_interface.each do |argument|
       case argument['argument_type']
         when "String"
           statement = "
@@ -93,7 +93,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
           eval(statement)
         when "Choice"
           statement = "
-          #{argument['name']} = OpenStudio::Measure::OSArgument.makeChoiceArgument(#{argument['name']},#{argument['choices']} true)
+          #{argument['name']} = OpenStudio::Measure::OSArgument.makeChoiceArgument(#{argument['name']},#{argument['choices'].to_s},  true)
           #{argument['name']}.setDisplayName('#{argument['display_name']}')
           #{argument['name']}.setDefaultValue(#{argument['default_value'].to_s})
           args << #{argument['name']}"
@@ -125,7 +125,7 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     end
 
     # Validate arguments
-    @arguments.each do |argument|
+    @arguments_interface.each do |argument|
 
       case argument['argument_type']
         when "String", "Choice"
