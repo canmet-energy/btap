@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>c567a0bf-a7d9-4a06-afe9-bf7df79e6bf8</uid>
-  <version_id>9f960063-122f-495c-81d3-0f0ca0987b46</version_id>
-  <version_modified>20180420T201759Z</version_modified>
+  <version_id>5aa781f6-9ae4-418d-8f05-e9c9873d37f4</version_id>
+  <version_modified>20180420T204353Z</version_modified>
   <xml_checksum>6DE831F7</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
   <display_name>Set FDWR and SRR for model. Or set Max NECB values based on NECB or epw HDD value. </display_name>
@@ -133,12 +133,6 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <checksum>D8719984</checksum>
     </file>
     <file>
-      <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>72C34D46</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>0.10.2</identifier>
@@ -148,6 +142,12 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>E10F5A26</checksum>
+    </file>
+    <file>
+      <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1AFA4387</checksum>
     </file>
   </files>
 </measure>

@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000b235f40></error>
   <name>btap_report_variables</name>
   <uid>4eebfbce-73a9-431d-9df6-997f0027f26d</uid>
-  <version_id>4c6dc358-da7f-416d-8be0-34b75078a0ad</version_id>
-  <version_modified>20180228T202816Z</version_modified>
+  <version_id>55ce2d29-4282-4d21-885a-a69f0e7e12ef</version_id>
+  <version_modified>20180420T225425Z</version_modified>
   <xml_checksum>70EC291E</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAP Zone Report Variables</display_name>
@@ -92,7 +93,7 @@
       <filename>zone_report_variables_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8BEB1692</checksum>
+      <checksum>97060590</checksum>
     </file>
     <file>
       <version>
@@ -103,7 +104,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E3214A55</checksum>
+      <checksum>86A94157</checksum>
     </file>
   </files>
 </measure>

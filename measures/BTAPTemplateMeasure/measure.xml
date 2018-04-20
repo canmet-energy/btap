@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>uninitialized constant BTAPTemplateMeasure</error>
   <name>btap_envelope_construction_measure_detailed</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>512f24ac-8bd4-4635-a3e7-e2a2de3c8935</version_id>
-  <version_modified>20180420T204353Z</version_modified>
+  <version_id>7c462a7e-b620-4422-9e83-78584349b25a</version_id>
+  <version_modified>20180420T225425Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPEnvelopeConstructionMeasureDetailed</class_name>
   <display_name>BTAPEnvelopeConstructionMeasureDetailed</display_name>
@@ -248,12 +249,6 @@
   </attributes>
   <files>
     <file>
-      <filename>BTAPEnvelopeConstructionMeasureDetailed_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>92AC922F</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.3.0</identifier>
@@ -262,7 +257,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FF7295A8</checksum>
+      <checksum>92B7F79B</checksum>
+    </file>
+    <file>
+      <filename>BTAPTemplateMeasure_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0DBC51E7</checksum>
     </file>
   </files>
 </measure>
