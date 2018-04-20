@@ -61,7 +61,8 @@ class BTAPTemplateMeasure_Test < Minitest::Test
     }
 
     # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasureDetailed.new
+    self.class.name.demodulize
+    measure = BTAPTemplateMeasure.new
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
