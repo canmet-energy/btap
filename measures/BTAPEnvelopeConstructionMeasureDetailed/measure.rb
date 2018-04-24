@@ -5,7 +5,40 @@
 class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasure
 
   ### BTAP Measure helper methods.
-
+  #  A wrapper for outputing feedback to users and developers.
+  #  runner_register("InitialCondition",   "Your Information Message Here", runner)
+  #  runner_register("Info",    "Your Information Message Here", runner)
+  #  runner_register("Warning", "Your Information Message Here", runner)
+  #  runner_register("Error",   "Your Information Message Here", runner)
+  #  runner_register("Debug",   "Your Information Message Here", runner)
+  #  runner_register("FinalCondition",   "Your Information Message Here", runner)
+  #  @params type [String]
+  #  @params runner [OpenStudio::Ruleset::OSRunner] # or a nil.
+  def runner_register(runner, type, text)
+    #dump to console if @debug is set to true
+    puts "#{type.upcase}: #{text}" if @debug == true
+    #dump to runner.
+    if runner.is_a?(OpenStudio::Ruleset::OSRunner)
+      case type.downcase
+        when "info"
+          runner.registerInfo(text)
+        when "warning"
+          runner.registerWarning(text)
+        when "error"
+          runner.registerError(text)
+        when "notapplicable"
+          runner.registerAsNotApplicable(text)
+        when "finalcondition"
+          runner.registerFinalCondition(text)
+        when "initialcondition"
+          runner.registerInitialCondition(text)
+        when "debug"
+        when "macro"
+        else
+          raise("Runner Register type #{type.downcase} not info,warning,error,notapplicable,finalcondition,initialcondition,macro.")
+      end
+    end
+  end
 
 
   def runner_register_value(runner, name, value)

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_construction_measure_detailed</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>b871e0d1-deb4-4e36-a878-c3e183f7d257</version_id>
-  <version_modified>20180424T003020Z</version_modified>
+  <version_id>a90909a4-2d78-4cde-9c73-2cb7fa76d741</version_id>
+  <version_modified>20180424T003744Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPEnvelopeConstructionMeasureDetailed</class_name>
   <display_name>BTAPEnvelopeConstructionMeasureDetailed</display_name>
@@ -262,7 +262,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>92C3EE8C</checksum>
+      <checksum>80875D6A</checksum>
     </file>
   </files>
 </measure>
