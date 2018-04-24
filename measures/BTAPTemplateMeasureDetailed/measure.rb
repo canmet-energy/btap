@@ -29,41 +29,20 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)'
     @measure_interface_detailed = [
         {
-            "name" => "packaged_or_detailed",
-            "type" => "String",
-            "display_name" => "Use Packaged or Detailed input",
-            "default_value" => "Detailed",
-            "choices" => ["Packaged", "Detailed"],
-            "is_required" => true
-        },
-        {
-            "name" => "json_package_input",
-            "type" => "String",
-            "display_name" => "JSON input for measure",
-            "default_value" => '{
-                                  "a_string_argument": "MyString",
-                                  "a_double_argument": 10.0,
-                                  "a_string_double_argument": "75.3",
-                                  "a_choice_argument": "choice_1"
-            }',
-            "is_required" => false
-        },
-        {
             "name" => "a_string_argument",
             "type" => "String",
             "display_name" => "A String Argument (string)",
             "default_value" => "The Default Value",
-            "is_required" => false
+            "is_required" => true
         },
         {
             "name" => "a_double_argument",
             "type" => "Double",
-            "display_name" => "A Double numeric Argument",
+            "display_name" => "A Double numeric Argument (double)",
             "default_value" => 0,
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
-            "units" => "units",
-            "is_required" => false
+            "is_required" => true
         },
         {
             "name" => "a_string_double_argument",
@@ -72,9 +51,8 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
             "default_value" => "NA",
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
-            "valid_strings" => ["NA"],
-            "units" => "units",
-            "is_required" => false
+            "valid_strings" => ["Baseline", "NA"],
+            "is_required" => true
         },
         {
             "name" => "a_choice_argument",
@@ -82,9 +60,8 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
             "display_name" => "A Choice String Argument ",
             "default_value" => "choice_1",
             "choices" => ["choice_1", "choice_2"],
-            "is_required" => false
+            "is_required" => true
         }
-
     ]
 
   end
@@ -96,7 +73,7 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     # Gets arguments from interfaced and puts them in a hash with there display name. This also does a check on ranges to
     # ensure that the values inputted are valid based on your @measure_interface array of hashes.
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
-    puts JSON.pretty_generate(arguments)
+    #puts JSON.pretty_generate(arguments)
     return false if false == arguments
     #You can now access the input argument by the name.
     # arguments['a_string_argument']
@@ -144,7 +121,6 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
           arg = OpenStudio::Ruleset::OSArgument.makeStringArgument("#{argument['name']}", argument['is_required'])
           arg.setDisplayName("#{argument['display_name']}")
           arg.setDefaultValue("#{argument['default_value']}")
-          arg.setUnits("#{argument['units']}")
 
         when "Double"
           arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument("#{argument['name']}", argument['is_required'])
@@ -180,8 +156,6 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
       return_value = false
     end
 
-
-
     # Validate arguments
     errors = ""
     @measure_interface_detailed.each do |argument|
@@ -189,10 +163,10 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
       return_value = true
       case argument['type']
         when "String", "Choice"
-          value = runner.getStringArgumentValue(argument['name'], user_arguments)
+          value = runner.getStringArgumentValue("#{argument['name']}", user_arguments)
           values[argument['name']] = value
         when "Double"
-          value = runner.getDoubleArgumentValue(argument['name'], user_arguments)
+          value = runner.getDoubleArgumentValue("#{argument['name']}", user_arguments)
           if (not argument["max_double_value"].nil? and value.to_f >= argument["max_double_value"]) or
               (not argument["min_double_value"].nil? and value.to_f <= argument["min_double_value"])
             error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}.\n Please enter a value withing the expected range.\n"

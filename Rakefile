@@ -3,6 +3,7 @@ namespace :test do
   #create test list
   sh 'openstudio measure --update_all measures/'
   array = []
+  array << 'measures/BTAPTemplateMeasureDetailed/tests/BTAPTemplateMeasure_test.rb'
   array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/BTAPCreateNECBPrototypeBuildings_test.rb'
   array << 'measures/BTAPEnvelopeConstructionMeasureDetailed/tests/BTAPEnvelopeConstructionMeasureDetailed_test.rb'
   array << 'measures/BTAPEnvelopeConstructionMeasurePackaged/tests/BTAPEnvelopeConstructionMeasurePackaged_test.rb'
@@ -13,7 +14,6 @@ namespace :test do
     t.test_files = array
   end
 end
-
 
 
 

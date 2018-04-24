@@ -16,26 +16,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
 
 
     @measure_interface_detailed = [
-        {
-            "name" => "packaged_or_detailed",
-            "type" => "String",
-            "display_name" => "Use Packaged or Detailed input",
-            "default_value" => "Detailed",
-            "choices" => ["Packaged", "Detailed"],
-            "is_required" => true
-        },
-        {
-            "name" => "json_package_input",
-            "type" => "String",
-            "display_name" => "JSON input for measure",
-            "default_value" => '{
-                                  "a_string_argument": "MyString",
-                                  "a_double_argument": 10.0,
-                                  "a_string_double_argument": "75.3",
-                                  "a_choice_argument": "choice_1"
-            }',
-            "is_required" => false
-        },
+
         {
             "name" => "a_string_argument",
             "type" => "String",
@@ -46,11 +27,10 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
         {
             "name" => "a_double_argument",
             "type" => "Double",
-            "display_name" => "A Double numeric Argument",
+            "display_name" => "A Double numeric Argument (double)",
             "default_value" => 0,
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
-            "units" => "units",
             "is_required" => false
         },
         {
@@ -61,7 +41,6 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
             "valid_strings" => ["NA"],
-            "units" => "units",
             "is_required" => false
         },
         {
@@ -84,10 +63,67 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
 
   end
 
-  def dont_test_sample_create_a_building_from_scratch()
+  def test_sample()
 
-    #Create/Load Model to test against
+    ####### Test Model Creation######
+    #You'll need a seed model to test against. You have a few options.
+    # If you are only testing arguments, you can use an empty model like I am doing here.
+    # Option 1: Model CreationCreate Empty Model object and start doing things to it. Here I am creating an empty model
+    # and adding surface geometry to the model
     model = OpenStudio::Model::Model.new
+    # and adding surface geometry to the model using the wizard.
+    BTAP::Geometry::Wizards.create_shape_rectangle(model,
+                                                   length = 100.0,
+                                                   width = 100.0,
+                                                   above_ground_storys = 3,
+                                                   under_ground_storys = 1,
+                                                   floor_to_floor_height = 3.8,
+                                                   plenum_height = 1,
+                                                   perimeter_zone_depth = 4.57,
+                                                   initial_height = 0.0)
+    # If we wanted to apply some aspects of a standard to our model we can by using a factory method to bring the
+    # standards we want into our tests. So to bring the necb2011 we write.
+    necb2011_standard = Standard.build('NECB2011')
+
+    # could add some example contructions if we want. This method will populate the model with some
+    # constructions and apply it to the model
+    necb2011_standard.model_clear_and_set_example_constructions(model)
+
+    # While debugging and testing, it is sometimes nice to make a copy of the model as it was.
+    before_measure_model = copy_model(model)
+
+    # You can save your file anytime you want here I am saving to the
+    BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "saved_file.osm"))
+
+    #We can even call the standard methods to apply to the model.
+    necb2011_standard.model_add_design_days_and_weather_file(model, 'NECB HDD Method', 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw')
+
+    puts BTAP::FileIO.compare_osm_files(before_measure_model, model)
+    necb2011_standard.apply_standard_construction_properties(model) # standards candidate
+
+
+    # Another simple way is to create an NECB
+    # building using the helper method below.
+    #Option #2 NECB method.
+    #   model = create_necb_protype_model(
+    #      "LargeOffice",
+    #     'NECB HDD Method',
+    #      'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
+    #      "NECB2011"
+    #   )
+
+    # You can also run annually the model directly.
+    #   necb2011_standard.model_run_simulation_and_log_errors( model, File.join(File.dirname(__FILE__),"output" ))
+
+    # Or a quick sizing run if you need something fast.
+    #   necb2011_standard.model_run_sizing_run(model, File.join(File.dirname(__FILE__),"output" ))
+
+    # Another simple way is to create an NECB
+    # building using the helper method below.
+    # Option #3 Load osm file.
+    # model = BTAP::FileIO.load_osm(filepath)
+
+
     # Set up your argument list to test.
     input_arguments = {
         "a_string_argument" => "MyString",
@@ -97,38 +133,13 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     }
     # Create an instance of the measure
     runner = run_measure(input_arguments, model)
+
+
     assert(runner.result.value.valueName == 'Success')
   end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ##### Helper methods
+  ##### Helper methods Do notouch unless you know the consequences.
 
   def test_arguments_and_defaults
     # Create an instance of the measure
@@ -162,7 +173,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
           puts "Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
           run_measure(input_arguments, model)
           runner = run_measure(input_arguments, model)
-          assert(runner.result.value.valueName != 'Success',"Checks did not stop a lower than limit value of #{over_max_value} for #{argument['name']}" )
+          assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_max_value} for #{argument['name']}")
         end
         #Check over max
         if not argument['min_double_value'].nil?
@@ -174,7 +185,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
           puts "Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
           run_measure(input_arguments, model)
           runner = run_measure(input_arguments, model)
-          assert(runner.result.value.valueName != 'Success',"Checks did not stop a lower than limit value of #{over_min_value} for #{argument['name']}" )
+          assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_min_value} for #{argument['name']}")
         end
 
       end
@@ -185,11 +196,10 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
         puts "Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
         run_measure(input_arguments, model)
         runner = run_measure(input_arguments, model)
-        assert(runner.result.value.valueName != 'Success',"Checks did not stop a lower than limit value of #{over_min_value} for #{argument['name']}" )
+        assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_min_value} for #{argument['name']}")
       end
     end
   end
-
 
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
 
@@ -211,7 +221,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     return model
   end
 
-  def run_measure(hash_input_arguments, model)
+  def run_measure(input_arguments, model)
 
     # This will create a instance of the measure you wish to test. It does this based on the test class name.
     measure = get_measure_object()
@@ -220,15 +230,12 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    # Set the arguements in the argument map by searching for the correct argument
-    hash_input_arguments.each_with_index do |(key, value), index|
-      arguments.each do |arg|
-        if arg.name == key
-          argument = arg.clone
-          assert(argument.setValue(value), "Could not set value for #{key} to #{value}")
-          argument_map[key] = argument
-        end
-      end
+    # Set the arguements in the argument map
+    input_arguments.each_with_index do |(key, value), index|
+      argument = arguments[index].clone
+
+      assert(argument.setValue(value), "Could not set value for #{key} to #{value}")
+      argument_map[key] = argument
     end
 
     #run the measure
