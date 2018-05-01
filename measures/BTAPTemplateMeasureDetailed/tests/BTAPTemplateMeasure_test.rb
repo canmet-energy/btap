@@ -14,6 +14,9 @@ require 'minitest/autorun'
 class BTAPTemplateMeasureDetailed_Test < Minitest::Test
   def setup()
 
+    #Measure type ["JSON", "ARGS", "ARGS-DOUBLE"]
+    @@measure_input_type = "ARGS"
+
 
     @measure_interface_detailed = [
 
@@ -151,12 +154,20 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
 
     # Test arguments and defaults
     arguments = measure.arguments(model)
-    #check number of arguments.
-    assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
-    (@measure_interface_detailed).each_with_index do |argument_expected, index|
-      assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
-      assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
-      assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+    #convert whatever the input was into a hash. Then test.
+
+    case @measure_input_type
+      when "ARGS"
+
+        #check number of arguments.
+        assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+        (@measure_interface_detailed).each_with_index do |argument_expected, index|
+          assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
+          assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
+          assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+        end
+      when "JSON"
+      when ""
     end
   end
 

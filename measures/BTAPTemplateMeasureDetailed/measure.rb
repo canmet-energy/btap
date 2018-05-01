@@ -22,6 +22,7 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
   #Use the constructor to set global variables
   def initialize()
     super()
+    @measure_input_type = "ARGS"
 
     # Put in this array of hashes all the variables that you need in your measure. Your choice of types are Sting, Double,
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
@@ -87,26 +88,6 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
   end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   ###################Helper functions
 
   # define the arguments that the user will input
@@ -143,13 +124,36 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     return args
   end
 
+  def get_hash_of_arguments(user_arguments,runner)
+    values = {}
+    @measure_interface_detailed.each do |argument|
+      case @measure_input_type
+        when "ARGS"
+          case argument['type']
+            when "String", "Choice"
+              values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
+            when "Double"
+              values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
+            when "StringDouble"
+              value = runner.getStringArgumentValue(argument['name'], user_arguments)
+              if valid_float?( value)
+                value = value.to_f
+              end
+              values[argument['name']] = value
+          end
+        when "JSON"
+        when "ARGS-DOUBLE"
+      end
+    end
+    return values
+  end
+
 
   def validate_and_get_arguments_in_hash(model, runner, user_arguments)
-     def valid_float?(str)
-       !!Float(str) rescue false
-     end
+
+
     return_value = true
-    values = {}
+    values = get_hash_of_arguments(user_arguments,runner)
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
@@ -159,24 +163,16 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     # Validate arguments
     errors = ""
     @measure_interface_detailed.each do |argument|
-
-      return_value = true
       case argument['type']
-        when "String", "Choice"
-          value = runner.getStringArgumentValue("#{argument['name']}", user_arguments)
-          values[argument['name']] = value
         when "Double"
-          value = runner.getDoubleArgumentValue("#{argument['name']}", user_arguments)
+          value = values[argument['name']]
           if (not argument["max_double_value"].nil? and value.to_f >= argument["max_double_value"]) or
               (not argument["min_double_value"].nil? and value.to_f <= argument["min_double_value"])
             error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}.\n Please enter a value withing the expected range.\n"
             errors << error
-          else
-            values[argument['name']] = value
           end
         when "StringDouble"
-
-          value = runner.getStringArgumentValue(argument['name'], user_arguments)
+          value = values[argument['name']]
           if (not argument["valid_strings"].include?(value)) and (not valid_float?(value))
             error = "#{argument['name']} must be a string that can be converted to a float, or one of these #{argument["valid_strings"]}. You have entered #{value}\n"
             errors << error
@@ -184,10 +180,6 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
               (not argument["min_double_value"].nil? and value.to_f <= argument["min_double_value"])
             error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}. Please enter a stringdouble value in the expected range.\n"
             errors << error
-          else
-            if argument['valid_strings'].include?(argument['valid_strings']) or valid_float?(value)
-              values[argument['name']] = value
-            end
           end
       end
     end
@@ -197,6 +189,9 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
       return false
     end
     return values
+  end
+  def valid_float?(str)
+    !!Float(str) rescue false
   end
 
 
