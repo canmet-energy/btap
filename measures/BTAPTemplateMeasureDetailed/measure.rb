@@ -22,7 +22,8 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
   #Use the constructor to set global variables
   def initialize()
     super()
-    @measure_input_type = "ARGS"
+    @use_json_package = false
+    @use_string_double = false
 
     # Put in this array of hashes all the variables that you need in your measure. Your choice of types are Sting, Double,
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
@@ -49,7 +50,7 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
             "name" => "a_string_double_argument",
             "type" => "StringDouble",
             "display_name" => "A String Double numeric Argument (double)",
-            "default_value" => "NA",
+            "default_value" => 23.0,
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
             "valid_strings" => ["Baseline", "NA"],
@@ -61,6 +62,13 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
             "display_name" => "A Choice String Argument ",
             "default_value" => "choice_1",
             "choices" => ["choice_1", "choice_2"],
+            "is_required" => true
+        },
+        {
+            "name" => "a_bool_argument",
+            "type" => "Bool",
+            "display_name" => "A Boolean Argument ",
+            "default_value" => false,
             "is_required" => true
         }
     ]
@@ -93,67 +101,99 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
   # define the arguments that the user will input
   def arguments(model)
     args = OpenStudio::Ruleset::OSArgumentVector.new
-    # Conductances for all surfaces and subsurfaces.
-    @measure_interface_detailed.each do |argument|
-      arg = nil
-      statement = nil
-      case argument['type']
-        when "String"
-          arg = OpenStudio::Ruleset::OSArgument.makeStringArgument("#{argument['name']}", argument['is_required'])
-          arg.setDisplayName("#{argument['display_name']}")
-          arg.setDefaultValue("#{argument['default_value']}")
 
-        when "Double"
-          arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument("#{argument['name']}", argument['is_required'])
-          arg.setDisplayName("#{argument['display_name']}")
-          arg.setDefaultValue("#{argument['default_value']}".to_f)
-
-        when "Choice"
-          arg = OpenStudio::Measure::OSArgument.makeChoiceArgument("#{argument['name']}", argument['choices'], argument['is_required'])
-          arg.setDisplayName(argument['display_name'])
-          arg.setDefaultValue('choice_1')
-
-
-        when "StringDouble"
-          arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-          arg.setDisplayName(argument['display_name'])
-          arg.setDefaultValue(argument['default_value'])
+    if true == @use_json_package
+      #Set up package version of input.
+      json_default = {}
+      @measure_interface_detailed.each do |argument|
+        json_default[argument['name']] = argument["default_value"]
       end
+      default = JSON.pretty_generate( json_default )
+      arg = OpenStudio::Ruleset::OSArgument.makeStringArgument('json_input', true)
+      arg.setDisplayName('Contains a json version of the input as a single package.')
+      arg.setDefaultValue( default )
+      puts default
       args << arg
+    else
+      # Conductances for all surfaces and subsurfaces.
+      @measure_interface_detailed.each do |argument|
+        arg = nil
+        statement = nil
+        case argument['type']
+          when "String"
+            arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
+            arg.setDisplayName(argument['display_name'])
+            arg.setDefaultValue(argument['default_value'].to_s)
+
+          when "Double"
+            arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
+            arg.setDisplayName("#{argument['display_name']}")
+            arg.setDefaultValue("#{argument['default_value']}".to_f)
+
+          when "Choice"
+            arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
+            arg.setDisplayName(argument['display_name'])
+            arg.setDefaultValue('choice_1')
+
+          when "Bool"
+            arg = OpenStudio::Measure::OSArgument.makeBoolArgument(argument['name'], argument['is_required'])
+            arg.setDisplayName(argument['display_name'])
+            arg.setDefaultValue(argument['default_value'])
+
+
+          when "StringDouble"
+            arg = nil
+            if @use_string_double == false
+              arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
+              arg.setDefaultValue(argument['default_value'].to_f)
+            else
+              arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
+              arg.setDefaultValue(argument['default_value'])
+            end
+            arg.setDisplayName(argument['display_name'])
+        end
+        args << arg
+      end
     end
     return args
   end
 
-  def get_hash_of_arguments(user_arguments,runner)
+  def get_hash_of_arguments(user_arguments, runner)
     values = {}
+    if @use_json_package
+      return JSON.parse(runner.getStringArgumentValue('json_input', user_arguments))
+    else
+
     @measure_interface_detailed.each do |argument|
-      case @measure_input_type
-        when "ARGS"
-          case argument['type']
-            when "String", "Choice"
-              values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
-            when "Double"
-              values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
-            when "StringDouble"
-              value = runner.getStringArgumentValue(argument['name'], user_arguments)
-              if valid_float?( value)
-                value = value.to_f
-              end
-              values[argument['name']] = value
+
+      case argument['type']
+        when "String", "Choice"
+          values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
+        when "Double"
+          values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
+        when "Bool"
+          values[argument['name']] = runner.getBoolArgumentValue(argument['name'], user_arguments)
+        when "StringDouble"
+          value = nil
+          if @use_string_double == false
+            value = (runner.getDoubleArgumentValue(argument['name'], user_arguments).to_f)
+          else
+            value = runner.getStringArgumentValue(argument['name'], user_arguments)
+            if valid_float?(value)
+              value = value.to_f
+            end
           end
-        when "JSON"
-        when "ARGS-DOUBLE"
+          values[argument['name']] = value
       end
+    end
     end
     return values
   end
 
 
   def validate_and_get_arguments_in_hash(model, runner, user_arguments)
-
-
     return_value = true
-    values = get_hash_of_arguments(user_arguments,runner)
+    values = get_hash_of_arguments(user_arguments, runner)
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
@@ -190,6 +230,7 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     end
     return values
   end
+
   def valid_float?(str)
     !!Float(str) rescue false
   end

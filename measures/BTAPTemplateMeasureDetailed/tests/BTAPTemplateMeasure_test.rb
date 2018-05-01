@@ -14,10 +14,8 @@ require 'minitest/autorun'
 class BTAPTemplateMeasureDetailed_Test < Minitest::Test
   def setup()
 
-    #Measure type ["JSON", "ARGS", "ARGS-DOUBLE"]
-    @@measure_input_type = "ARGS"
-
-
+    @use_json_package = false
+    @use_string_double = false
     @measure_interface_detailed = [
 
         {
@@ -40,7 +38,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
             "name" => "a_string_double_argument",
             "type" => "StringDouble",
             "display_name" => "A String Double numeric Argument (double)",
-            "default_value" => "NA",
+            "default_value" => 23.0,
             "max_double_value" => 100.0,
             "min_double_value" => 0.0,
             "valid_strings" => ["NA"],
@@ -53,6 +51,13 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
             "default_value" => "choice_1",
             "choices" => ["choice_1", "choice_2"],
             "is_required" => false
+        },
+        {
+            "name" => "a_bool_argument",
+            "type" => "Bool",
+            "display_name" => "A Boolean Argument ",
+            "default_value" => false,
+            "is_required" => true
         }
 
     ]
@@ -61,7 +66,8 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
         "a_string_argument" => "MyString",
         "a_double_argument" => 50.0,
         "a_string_double_argument" => "50.0",
-        "a_choice_argument" => "choice_1"
+        "a_choice_argument" => "choice_1",
+        "a_bool_argument" => true
     }
 
   end
@@ -131,9 +137,20 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     input_arguments = {
         "a_string_argument" => "MyString",
         "a_double_argument" => 10.0,
-        "a_string_double_argument" => "75.3",
+        "a_string_double_argument" => 75.3,
         "a_choice_argument" => "choice_1"
     }
+
+    json_input_argument = {
+    "json_input"=> '{
+                      "a_string_argument": "The Default Value",
+                      "a_double_argument": 0,
+                      "a_string_double_argument": 23.0,
+                      "a_choice_argument": "choice_1",
+                      "a_bool_argument": false
+}'
+    }
+
     # Create an instance of the measure
     runner = run_measure(input_arguments, model)
 
@@ -156,19 +173,25 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     arguments = measure.arguments(model)
     #convert whatever the input was into a hash. Then test.
 
-    case @measure_input_type
-      when "ARGS"
-
-        #check number of arguments.
-        assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
-        (@measure_interface_detailed).each_with_index do |argument_expected, index|
-          assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
-          assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
-          assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+    #check number of arguments.
+    if @use_json_package
+      assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+    else
+      assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+      (@measure_interface_detailed).each_with_index do |argument_expected, index|
+        assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
+        assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
+        case argument_type(arguments[index])
+          when "String", "Choice"
+            assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+          when "Double", "Integer"
+            assert_equal(argument_expected['default_value'].to_f, arguments[index].defaultValueAsDouble.to_f, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+          when "Bool"
+            assert_equal(argument_expected['default_value'], arguments[index].defaultValueAsBool, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
         end
-      when "JSON"
-      when ""
+      end
     end
+
   end
 
   def test_argument_ranges
@@ -200,7 +223,7 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
         end
 
       end
-      if argument['type'] == 'StringDouble' and not argument["valid_strings"].nil?
+      if (argument['type'] == 'StringDouble') and (not argument["valid_strings"].nil?) and @use_string_double
         model = OpenStudio::Model::Model.new
         input_arguments = @good_input_arguments.clone
         input_arguments[argument['name']] = SecureRandom.uuid.to_s
@@ -241,11 +264,17 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    #Check if
+
     # Set the arguements in the argument map
     input_arguments.each_with_index do |(key, value), index|
       argument = arguments[index].clone
-
-      assert(argument.setValue(value), "Could not set value for #{key} to #{value}")
+      if argument_type(argument) == "Double"
+        #forces it to a double if it is a double.
+        assert(argument.setValue(value.to_f), "Could not set value for #{key} to #{value}")
+      else
+        assert(argument.setValue(value), "Could not set value for #{key} to #{value}")
+      end
       argument_map[key] = argument
     end
 
@@ -264,6 +293,33 @@ class BTAPTemplateMeasureDetailed_Test < Minitest::Test
       return false
     end
     return measure
+  end
+
+  def argument_type(argument)
+    case argument.type.value
+      when 0
+        return "Bool"
+      when 1 #Double
+        return "Double"
+      when 2 #Quantity
+        return "Quantity"
+      when 3 #Integer
+        return "Integer"
+      when 4
+        return "String"
+      when 5 #Choice
+        return "Choice"
+      when 6 #Path
+        return "Path"
+      when 7 #Separator
+        return "Separator"
+      else
+        return "Blah"
+    end
+  end
+
+  def valid_float?(str)
+    !!Float(str) rescue false
   end
 
   def copy_model(model)
