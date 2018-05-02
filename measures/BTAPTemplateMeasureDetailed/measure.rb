@@ -1,9 +1,11 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
-
+require_relative 'resources/BTAPMeasureHelper'
 # start the measure
-class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
+class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
 
+  #Adds helper functions to make life a bit easier and consistent.
+  include(BTAPMeasureHelper)
   # human readable name
   def name
     return "BTAPTemplateMeasure"
@@ -22,10 +24,13 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
   #Use the constructor to set global variables
   def initialize()
     super()
+    #Set to true if you want to package the arguments as json.
     @use_json_package = false
+    #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
+    # continous optimization algorigthms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
     @use_string_double = false
 
-    # Put in this array of hashes all the variables that you need in your measure. Your choice of types are Sting, Double,
+    # Put in this array of hashes all the input variables that you need in your measure. Your choice of types are Sting, Double,
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
     # create all the variables, validate the ranges and types you need,  and make them available in the 'run' method as a hash after
     # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)'
@@ -72,7 +77,6 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
             "is_required" => true
         }
     ]
-
   end
 
   # define what happens when the measure is run
@@ -88,156 +92,13 @@ class BTAPTemplateMeasureDetailed < OpenStudio::Measure::ModelMeasure
     # arguments['a_string_argument']
     # arguments['a_double_argument']
     # etc......
-    # So write your measure here!
-
+    # So write your measure code here!
 
     #Do something.
     return true
   end
-
-
-  ###################Helper functions
-
-  # define the arguments that the user will input
-  def arguments(model)
-    args = OpenStudio::Ruleset::OSArgumentVector.new
-
-    if true == @use_json_package
-      #Set up package version of input.
-      json_default = {}
-      @measure_interface_detailed.each do |argument|
-        json_default[argument['name']] = argument["default_value"]
-      end
-      default = JSON.pretty_generate( json_default )
-      arg = OpenStudio::Ruleset::OSArgument.makeStringArgument('json_input', true)
-      arg.setDisplayName('Contains a json version of the input as a single package.')
-      arg.setDefaultValue( default )
-      puts default
-      args << arg
-    else
-      # Conductances for all surfaces and subsurfaces.
-      @measure_interface_detailed.each do |argument|
-        arg = nil
-        statement = nil
-        case argument['type']
-          when "String"
-            arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue(argument['default_value'].to_s)
-
-          when "Double"
-            arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName("#{argument['display_name']}")
-            arg.setDefaultValue("#{argument['default_value']}".to_f)
-
-          when "Choice"
-            arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue('choice_1')
-
-          when "Bool"
-            arg = OpenStudio::Measure::OSArgument.makeBoolArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue(argument['default_value'])
-
-
-          when "StringDouble"
-            arg = nil
-            if @use_string_double == false
-              arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
-              arg.setDefaultValue(argument['default_value'].to_f)
-            else
-              arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-              arg.setDefaultValue(argument['default_value'])
-            end
-            arg.setDisplayName(argument['display_name'])
-        end
-        args << arg
-      end
-    end
-    return args
-  end
-
-  def get_hash_of_arguments(user_arguments, runner)
-    values = {}
-    if @use_json_package
-      return JSON.parse(runner.getStringArgumentValue('json_input', user_arguments))
-    else
-
-    @measure_interface_detailed.each do |argument|
-
-      case argument['type']
-        when "String", "Choice"
-          values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
-        when "Double"
-          values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
-        when "Bool"
-          values[argument['name']] = runner.getBoolArgumentValue(argument['name'], user_arguments)
-        when "StringDouble"
-          value = nil
-          if @use_string_double == false
-            value = (runner.getDoubleArgumentValue(argument['name'], user_arguments).to_f)
-          else
-            value = runner.getStringArgumentValue(argument['name'], user_arguments)
-            if valid_float?(value)
-              value = value.to_f
-            end
-          end
-          values[argument['name']] = value
-      end
-    end
-    end
-    return values
-  end
-
-
-  def validate_and_get_arguments_in_hash(model, runner, user_arguments)
-    return_value = true
-    values = get_hash_of_arguments(user_arguments, runner)
-    # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
-      runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
-      return_value = false
-    end
-
-    # Validate arguments
-    errors = ""
-    @measure_interface_detailed.each do |argument|
-      case argument['type']
-        when "Double"
-          value = values[argument['name']]
-          if (not argument["max_double_value"].nil? and value.to_f >= argument["max_double_value"]) or
-              (not argument["min_double_value"].nil? and value.to_f <= argument["min_double_value"])
-            error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}.\n Please enter a value withing the expected range.\n"
-            errors << error
-          end
-        when "StringDouble"
-          value = values[argument['name']]
-          if (not argument["valid_strings"].include?(value)) and (not valid_float?(value))
-            error = "#{argument['name']} must be a string that can be converted to a float, or one of these #{argument["valid_strings"]}. You have entered #{value}\n"
-            errors << error
-          elsif (not argument["max_double_value"].nil? and value.to_f >= argument["max_double_value"]) or
-              (not argument["min_double_value"].nil? and value.to_f <= argument["min_double_value"])
-            error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}. Please enter a stringdouble value in the expected range.\n"
-            errors << error
-          end
-      end
-    end
-    #If any errors return false, else return the hash of argument values for user to use in measure.
-    if errors != ""
-      runner.registerError(errors)
-      return false
-    end
-    return values
-  end
-
-  def valid_float?(str)
-    !!Float(str) rescue false
-  end
-
-
 end
 
 
 # register the measure to be used by the application
-BTAPTemplateMeasureDetailed.new.registerWithApplication
+BTAPModelMeasure.new.registerWithApplication
