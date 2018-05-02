@@ -13,11 +13,12 @@ require 'minitest/autorun'
 
 
 class BTAPModelMeasure_Test < Minitest::Test
+  # Brings in helper methods to simplify argument testing of json and standard argument methods.
   include(BTAPMeasureTestHelper)
   def setup()
 
     @use_json_package = false
-    @use_string_double = false
+    @use_string_double = true
     @measure_interface_detailed = [
 
         {

@@ -44,13 +44,12 @@ module BTAPMeasureHelper
 
 
           when "StringDouble"
-            arg = nil
             if @use_string_double == false
               arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
               arg.setDefaultValue(argument['default_value'].to_f)
             else
               arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-              arg.setDefaultValue(argument['default_value'])
+              arg.setDefaultValue(argument['default_value'].to_s)
             end
             arg.setDisplayName(argument['display_name'])
         end
@@ -60,6 +59,7 @@ module BTAPMeasureHelper
     return args
   end
 
+  #returns a hash of the user inputs for you to use in your measure.
   def get_hash_of_arguments(user_arguments, runner)
     values = {}
     if @use_json_package
@@ -92,7 +92,7 @@ module BTAPMeasureHelper
     return values
   end
 
-
+  # boilerplate that validated ranges of inputs.
   def validate_and_get_arguments_in_hash(model, runner, user_arguments)
     return_value = true
     values = get_hash_of_arguments(user_arguments, runner)
@@ -132,7 +132,7 @@ module BTAPMeasureHelper
     end
     return values
   end
-
+  # Helper method to see if str is a valid float.
   def valid_float?(str)
     !!Float(str) rescue false
   end
@@ -142,6 +142,7 @@ end
 module BTAPMeasureTestHelper
   ##### Helper methods Do notouch unless you know the consequences.
 
+  #Boiler plate to default values and number of arguments against what is in your test's setup method.
   def test_arguments_and_defaults
     # Create an instance of the measure
     measure = get_measure_object()
@@ -156,8 +157,6 @@ module BTAPMeasureTestHelper
 
     #check number of arguments.
     if @use_json_package
-      puts arguments[0].defaultValueAsString
-      puts arguments
       assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
     else
       assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
@@ -176,7 +175,7 @@ module BTAPMeasureTestHelper
     end
 
   end
-
+  # Test argument ranges.
   def test_argument_ranges
 
     (@measure_interface_detailed).each_with_index do |argument|
@@ -226,6 +225,7 @@ module BTAPMeasureTestHelper
 
   end
 
+  # helper method to create necb archetype as a starting point for testing.
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
 
     osm_directory = "#{Dir.pwd}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
@@ -246,6 +246,7 @@ module BTAPMeasureTestHelper
     return model
   end
 
+  # Custom way to run the measure in the test.
   def run_measure(input_arguments, model)
 
     # This will create a instance of the measure you wish to test. It does this based on the test class name.
@@ -259,7 +260,6 @@ module BTAPMeasureTestHelper
 
     # Set the arguements in the argument map use json or real arguments.
     if @use_json_package
-      puts input_arguments
       argument = arguments[0].clone
       assert(argument.setValue(input_arguments['json_input']), "Could not set value for 'json_input' to #{input_arguments['json_input']}")
       argument_map['json_input'] = argument
@@ -270,7 +270,7 @@ module BTAPMeasureTestHelper
           #forces it to a double if it is a double.
           assert(argument.setValue(value.to_f), "Could not set value for #{key} to #{value}")
         else
-          assert(argument.setValue(value), "Could not set value for #{key} to #{value}")
+          assert(argument.setValue(value.to_s), "Could not set value for #{key} to #{value}")
         end
         argument_map[key] = argument
       end
@@ -282,6 +282,7 @@ module BTAPMeasureTestHelper
   end
 
 
+  #Fancy way of getting the measure object automatically.
   def get_measure_object()
     measure_class_name = self.class.name.to_s.match(/(BTAP.*)(\_Test)/i).captures[0]
     measure = nil
@@ -293,6 +294,7 @@ module BTAPMeasureTestHelper
     return measure
   end
 
+  #Determines the OS argument type dynamically.
   def argument_type(argument)
     case argument.type.value
       when 0
@@ -316,10 +318,12 @@ module BTAPMeasureTestHelper
     end
   end
 
+  # Valid float helper.
   def valid_float?(str)
     !!Float(str) rescue false
   end
 
+  #Method does a deep copy of a model.
   def copy_model(model)
     copy_model = OpenStudio::Model::Model.new
     # remove existing objects from model

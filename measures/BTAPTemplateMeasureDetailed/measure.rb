@@ -28,7 +28,7 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
     @use_json_package = false
     #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
     # continous optimization algorigthms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
-    @use_string_double = false
+    @use_string_double = true
 
     # Put in this array of hashes all the input variables that you need in your measure. Your choice of types are Sting, Double,
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
