@@ -127,7 +127,6 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
       #create model
       building_name = "#{template}_#{building_type}"
       puts "Creating #{building_name}"
-      puts "Creating #{building_name}"
       prototype_creator = Standard.build(building_name)
       model = prototype_creator.model_create_prototype_model(climate_zone,
                                                              epw_file,
