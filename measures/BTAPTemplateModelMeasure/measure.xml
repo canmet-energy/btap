@@ -1,11 +1,11 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>btap_template_measure_detailed</name>
+  <name>btap_model_measure</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>270d01fb-a304-49e7-b626-99782db211a4</version_id>
-  <version_modified>20180424T003020Z</version_modified>
+  <version_id>9f90961d-764f-4669-bf31-a21233039353</version_id>
+  <version_modified>20180503T144004Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
-  <class_name>BTAPTemplateMeasureDetailed</class_name>
+  <class_name>BTAPModelMeasure</class_name>
   <display_name>BTAPTemplateMeasure</display_name>
   <description>This template measure is used to ensure consistancy in detailed BTAP measures.</description>
   <modeler_description>This template measure is used to ensure consistancy in BTAP measures.</modeler_description>
@@ -32,7 +32,7 @@
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>NA</default_value>
+      <default_value>23.0</default_value>
     </argument>
     <argument>
       <name>a_choice_argument</name>
@@ -49,6 +49,24 @@
         <choice>
           <value>choice_2</value>
           <display_name>choice_2</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>a_bool_argument</name>
+      <display_name>A Boolean Argument </display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
@@ -90,13 +108,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CE1B7E7D</checksum>
+      <checksum>76690527</checksum>
     </file>
     <file>
-      <filename>BTAPTemplateMeasure_test.rb</filename>
+      <filename>BTAPTemplateModelMeasure_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C7AAF3BF</checksum>
+      <checksum>5E7EBF34</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6BD92789</checksum>
     </file>
   </files>
 </measure>
