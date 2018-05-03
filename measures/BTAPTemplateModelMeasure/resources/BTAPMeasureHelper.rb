@@ -3,7 +3,7 @@ module BTAPMeasureHelper
 
   # define the arguments that the user will input
   def arguments(model)
-    args = OpenStudio::Ruleset::OSArgumentVector.new
+    args = OpenStudio::Measure::OSArgumentVector.new
 
     if true == @use_json_package
       #Set up package version of input.
