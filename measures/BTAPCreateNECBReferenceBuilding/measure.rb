@@ -68,72 +68,21 @@ class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
     return false if false == arguments
 
     #Set the standard to be used.
-    standard = Standard.build(arguments['necb_standard'])
+    standard = Standard.build("NECB2011_FullServiceRestaurant")
     epw_file = 'CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw'
     climate_zone = 'NECB HDD Method'
     sizing_run_dir = Dir.pwd
     building_type = nil
     debug = false
-    #This method will make sure the osm file has the basics, and will set the @space_type_map and @space_multiplier_map
-    @space_type_map = standard.get_space_type_maps_from_model(model)
-    standard.validate_initial_model(model)
-    raise('hell') if @space_type_map.nil?
-    # prototype generation.
-    model.getThermostatSetpointDualSetpoints(&:remove)
-
-    model.yearDescription.get.setDayofWeekforStartDay('Sunday')
-    standard.model_add_design_days_and_weather_file(model, climate_zone, epw_file) # Standards
-    standard.model_add_ground_temperatures(model, nil, climate_zone) # prototype candidate
-    standard.set_occ_sensor_spacetypes(model, @space_type_map)
-    standard.model_add_loads(model) # standards candidate
-    standard.model_apply_infiltration_standard(model) # standards candidate
-    standard.model_modify_surface_convection_algorithm(model) # standards
-    standard.model_add_constructions(model, 'FullServiceRestaurant', climate_zone) # prototype candidate
-    standard.apply_standard_construction_properties(model) # standards candidate
-    standard.apply_standard_window_to_wall_ratio(model) # standards candidate
-    standard.apply_standard_skylight_to_roof_ratio(model) # standards candidate
-    standard.model_create_thermal_zones(model, @space_multiplier_map) # standards candidate
-    # For some building types, stories are defined explicitly
-
-    raise("sizing run 0 failed!") if standard.model_run_sizing_run(model, "#{sizing_run_dir}/SR0") == false
-
-    # Create Reference HVAC Systems.
-    standard.model_add_hvac(model, epw_file) # standards for NECB Prototype for NREL candidate
-    #standard.model_add_swh(model, @instvarbuilding_type, climate_zone, @prototype_input, epw_file)
-    standard.model_apply_sizing_parameters(model)
-
-    # set a larger tolerance for unmet hours from default 0.2 to 1.0C
-    model.getOutputControlReportingTolerances.setToleranceforTimeHeatingSetpointNotMet(1.0)
-    model.getOutputControlReportingTolerances.setToleranceforTimeCoolingSetpointNotMet(1.0)
-    raise("sizing run 1 failed!") if standard.model_run_sizing_run(model, "#{sizing_run_dir}/SR1") == false
 
 
-    # This is needed for NECB2011 as a workaround for sizing the reheat boxes
-    model.getAirTerminalSingleDuctVAVReheats.each {|iobj| standard.air_terminal_single_duct_vav_reheat_set_heating_cap(iobj)}
-    # Apply the prototype HVAC assumptions
-    # which include sizing the fan pressure rises based
-    # on the flow rate of the system.
-    standard.model_apply_prototype_hvac_assumptions(model, building_type, climate_zone)
-    # for 90.1-2010 Outpatient, AHU2 set minimum outdoor air flow rate as 0
-    # AHU1 doesn't have economizer
-    #  standard.model_modify_oa_controller(model)
-    # For operating room 1&2 in 2010 and 2013, VAV minimum air flow is set by schedule
-    #   standard.model_reset_or_room_vav_minimum_damper(@prototype_input, model)
-    # Apply the HVAC efficiency standard
-    standard.model_apply_hvac_efficiency_standard(model, climate_zone)
-    # Fix EMS references.
-    # Temporary workaround for OS issue #2598
-    #  standard.model_temp_fix_ems_references(model)
-    # Add daylighting controls per standard
-    # only four zones in large hotel have daylighting controls
-    # todo: YXC to merge to the main function
-    #   standard.model_add_daylighting_controls(model) # to be removed after refactor.
-    # Add output variables for debugging
-    standard.model_request_timeseries_outputs(model) if debug
-    # If measure model is passed, then replace measure model with new model created here.
     return true
   end
+
+
 end
+
+
 
 
 # register the measure to be used by the application
