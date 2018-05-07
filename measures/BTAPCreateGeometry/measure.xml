@@ -1,0 +1,126 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_create_geometry</name>
+  <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
+  <version_id>718ef9e4-a821-4b38-ba65-833a474d208e</version_id>
+  <version_modified>20180507T144138Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPCreateGeometry</class_name>
+  <display_name>BTAPCreateGeometry</display_name>
+  <description>This template measure is used to ensure consistency in detailed BTAP measures.</description>
+  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <arguments>
+    <argument>
+      <name>a_string_argument</name>
+      <display_name>A String Argument (string)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>The Default Value</default_value>
+    </argument>
+    <argument>
+      <name>a_double_argument</name>
+      <display_name>A Double numeric Argument (double)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>a_string_double_argument</name>
+      <display_name>A String Double numeric Argument (double)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>23.0</default_value>
+    </argument>
+    <argument>
+      <name>a_choice_argument</name>
+      <display_name>A Choice String Argument </display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>choice_1</default_value>
+      <choices>
+        <choice>
+          <value>choice_1</value>
+          <display_name>choice_1</display_name>
+        </choice>
+        <choice>
+          <value>choice_2</value>
+          <display_name>choice_2</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>a_bool_argument</name>
+      <display_name>A Boolean Argument </display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>E7C0CF9C</checksum>
+    </file>
+    <file>
+      <filename>BTAPTemplateMeasure_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5E7EBF34</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FD2A0DF6</checksum>
+    </file>
+  </files>
+</measure>
