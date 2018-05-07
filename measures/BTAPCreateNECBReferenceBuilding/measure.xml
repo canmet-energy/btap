@@ -1,72 +1,304 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>btap_model_measure</name>
+  <name>btap_create_necb_reference_building</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>9f90961d-764f-4669-bf31-a21233039353</version_id>
-  <version_modified>20180503T144004Z</version_modified>
+  <version_id>83fcbea0-886d-43b7-9370-b9dfe112c9c0</version_id>
+  <version_modified>20180504T202119Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
-  <class_name>BTAPModelMeasure</class_name>
-  <display_name>BTAPTemplateMeasure</display_name>
-  <description>This template measure is used to ensure consistancy in detailed BTAP measures.</description>
-  <modeler_description>This template measure is used to ensure consistancy in BTAP measures.</modeler_description>
+  <class_name>BTAPCreateNECBReferenceBuilding</class_name>
+  <display_name>BTAPCreateNECBReferenceBuilding</display_name>
+  <description>This measure will take an osm file with NECB spacetypes and create a reference building for research purposes only. </description>
+  <modeler_description>This measure will selectively apply the rules of the NECB to a building.</modeler_description>
   <arguments>
     <argument>
-      <name>a_string_argument</name>
-      <display_name>A String Argument (string)</display_name>
-      <type>String</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>The Default Value</default_value>
-    </argument>
-    <argument>
-      <name>a_double_argument</name>
-      <display_name>A Double numeric Argument (double)</display_name>
-      <type>Double</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>a_string_double_argument</name>
-      <display_name>A String Double numeric Argument (double)</display_name>
-      <type>String</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>23.0</default_value>
-    </argument>
-    <argument>
-      <name>a_choice_argument</name>
-      <display_name>A Choice String Argument </display_name>
+      <name>necb_standard</name>
+      <display_name>Select the NECB Standard that you wish to apply to your proposed model.</display_name>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>choice_1</default_value>
+      <default_value>NECB2011</default_value>
       <choices>
         <choice>
-          <value>choice_1</value>
-          <display_name>choice_1</display_name>
+          <value>NECB2011</value>
+          <display_name>NECB2011</display_name>
         </choice>
         <choice>
-          <value>choice_2</value>
-          <display_name>choice_2</display_name>
+          <value>NECB2015</value>
+          <display_name>NECB2015</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>a_bool_argument</name>
-      <display_name>A Boolean Argument </display_name>
-      <type>Boolean</type>
+      <name>weather_file</name>
+      <display_name>Select the NECB Standard that you wish to apply to your proposed model.</display_name>
+      <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
+      <default_value>CAN_AB_Banff.CS.711220_CWEC2016.epw</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>CAN_AB_Banff.CS.711220_CWEC2016.epw</value>
+          <display_name>CAN_AB_Banff.CS.711220_CWEC2016.epw</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw</value>
+          <display_name>CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw</value>
+          <display_name>CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw</value>
+          <display_name>CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw</value>
+          <display_name>CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw</value>
+          <display_name>CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Lethbridge.AP.712430_CWEC2016.epw</value>
+          <display_name>CAN_AB_Lethbridge.AP.712430_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw</value>
+          <display_name>CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw</value>
+          <display_name>CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw</value>
+          <display_name>CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw</value>
+          <display_name>CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw</value>
+          <display_name>CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw</value>
+          <display_name>CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Kamloops.AP.718870_CWEC2016.epw</value>
+          <display_name>CAN_BC_Kamloops.AP.718870_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw</value>
+          <display_name>CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw</value>
+          <display_name>CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw</value>
+          <display_name>CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Summerland.717680_CWEC2016.epw</value>
+          <display_name>CAN_BC_Summerland.717680_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw</value>
+          <display_name>CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw</value>
+          <display_name>CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw</value>
+          <display_name>CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_MB_The.Pas.AP.718670_CWEC2016.epw</value>
+          <display_name>CAN_MB_The.Pas.AP.718670_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw</value>
+          <display_name>CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw</value>
+          <display_name>CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NB_Miramichi.AP.717440_CWEC2016.epw</value>
+          <display_name>CAN_NB_Miramichi.AP.717440_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NB_Saint.John.AP.716090_CWEC2016.epw</value>
+          <display_name>CAN_NB_Saint.John.AP.716090_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw</value>
+          <display_name>CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw</value>
+          <display_name>CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw</value>
+          <display_name>CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw</value>
+          <display_name>CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NS_CFB.Greenwood.713970_CWEC2016.epw</value>
+          <display_name>CAN_NS_CFB.Greenwood.713970_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NS_CFB.Shearwater.716010_CWEC2016.epw</value>
+          <display_name>CAN_NS_CFB.Shearwater.716010_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw</value>
+          <display_name>CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw</value>
+          <display_name>CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NT_Yellowknife.AP.719360_CWEC2016.epw</value>
+          <display_name>CAN_NT_Yellowknife.AP.719360_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Armstrong.AP.718410_CWEC2016.epw</value>
+          <display_name>CAN_ON_Armstrong.AP.718410_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_CFB.Trenton.716210_CWEC2016.epw</value>
+          <display_name>CAN_ON_CFB.Trenton.716210_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw</value>
+          <display_name>CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_London.Intl.AP.716230_CWEC2016.epw</value>
+          <display_name>CAN_ON_London.Intl.AP.716230_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Moosonee.AP.713980_CWEC2016.epw</value>
+          <display_name>CAN_ON_Moosonee.AP.713980_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Mount.Forest.716310_CWEC2016.epw</value>
+          <display_name>CAN_ON_Mount.Forest.716310_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw</value>
+          <display_name>CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw</value>
+          <display_name>CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw</value>
+          <display_name>CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw</value>
+          <display_name>CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw</value>
+          <display_name>CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw</value>
+          <display_name>CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_PE_Charlottetown.AP.717060_CWEC2016.epw</value>
+          <display_name>CAN_PE_Charlottetown.AP.717060_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw</value>
+          <display_name>CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw</value>
+          <display_name>CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw</value>
+          <display_name>CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw</value>
+          <display_name>CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw</value>
+          <display_name>CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw</value>
+          <display_name>CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw</value>
+          <display_name>CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw</value>
+          <display_name>CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw</value>
+          <display_name>CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Roberval.AP.717280_CWEC2016.epw</value>
+          <display_name>CAN_QC_Roberval.AP.717280_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw</value>
+          <display_name>CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Schefferville.AP.718280_CWEC2016.epw</value>
+          <display_name>CAN_QC_Schefferville.AP.718280_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw</value>
+          <display_name>CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw</value>
+          <display_name>CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw</value>
+          <display_name>CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_SK_North.Battleford.AP.718760_CWEC2016.epw</value>
+          <display_name>CAN_SK_North.Battleford.AP.718760_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw</value>
+          <display_name>CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw</value>
+          <display_name>CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw</display_name>
         </choice>
       </choices>
     </argument>
@@ -108,19 +340,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>76690527</checksum>
-    </file>
-    <file>
-      <filename>BTAPTemplateModelMeasure_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5E7EBF34</checksum>
+      <checksum>D0AEDE6F</checksum>
     </file>
     <file>
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6BD92789</checksum>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>BTAPCreateNECBReferenceBuilding_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AC6CEBD6</checksum>
+    </file>
+    <file>
+      <filename>NECB2011FullServiceRestaurant.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A0499CC7</checksum>
     </file>
   </files>
 </measure>

@@ -27,3 +27,4 @@ gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standard
 gem 'roo'
 gem 'aes'
 gem 'rest-client','2.0.2'
+gem 'pry'

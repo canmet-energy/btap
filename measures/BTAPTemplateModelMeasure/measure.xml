@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_model_measure</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>9f90961d-764f-4669-bf31-a21233039353</version_id>
-  <version_modified>20180503T144004Z</version_modified>
+  <version_id>a78b1e8a-0318-40a2-9a82-82842230f1be</version_id>
+  <version_modified>20180504T202120Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPModelMeasure</class_name>
   <display_name>BTAPTemplateMeasure</display_name>
@@ -120,7 +120,7 @@
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6BD92789</checksum>
+      <checksum>3D94B7AC</checksum>
     </file>
   </files>
 </measure>
