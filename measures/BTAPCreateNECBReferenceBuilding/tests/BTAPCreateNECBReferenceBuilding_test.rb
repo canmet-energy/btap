@@ -20,6 +20,7 @@ class NECB2011
     model = load_initial_osm(@geometry_file) # standard candidate
 
     model.yearDescription.get.setDayofWeekforStartDay('Sunday')
+
     model_add_design_days_and_weather_file(model, climate_zone, epw_file) # Standards
     model_add_ground_temperatures(model, @instvarbuilding_type, climate_zone) # prototype candidate
     model_apply_sizing_parameters(model)
@@ -105,22 +106,12 @@ class BTAPCreateNECBReferenceBuilding_Test < Minitest::Test
   end
 
   def test_sample()
-    if @use_json_package
-      input_arguments = {
-          "json_input" => '{
-        "necb_standard" : "NECB2011",
-        "weather_file" : "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw
-    }"'
-      }
 
-    else
-      # Set up your argument list to test.
-      input_arguments = {
-          "necb_standard" => "NECB2011",
-          "weather_file" => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw'
-      }
-    end
-
+    input_arguments = {
+        "necb_standard" => "NECB2011",
+        "weather_file" => 'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw'
+    }
+    input_arguments = {"json_input" => JSON.pretty_generate(input_arguments)} if @use_json_package
 
     true_model = self.create_necb_protype_model(
         'FullServiceRestaurant',
@@ -136,10 +127,8 @@ class BTAPCreateNECBReferenceBuilding_Test < Minitest::Test
 
     # Create an instance of the measure
     runner = run_measure(input_arguments, measure_model)
-    puts show_output(runner.result)
-    puts BTAP::FileIO.compare_osm_files(true_model, measure_model)
-
-
-    #assert(runner.result.value.valueName == 'Success')
+    diffs =  BTAP::FileIO.compare_osm_files(true_model, measure_model)
+    assert(diffs.size == 0, "There were differences in model files. #{diffs}")
+    assert(runner.result.value.valueName == 'Success', "Measure has failed. #{}")
   end
 end
