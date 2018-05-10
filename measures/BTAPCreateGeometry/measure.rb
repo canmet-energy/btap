@@ -52,7 +52,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
             "is_required" => true
         },
         {
-            "name" => "a_double_argument",
+            "name" => "total_floor_area",
             "type" => "Double",
             "display_name" => "Total building area (m2)",
             "default_value" => 50000,
@@ -83,9 +83,27 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
             "type" => "Integer",
             "display_name" => "Number of above grade floors",
             "default_value" => 3,
-            "max_double_value" => 200.0,
-            "min_double_value" => 1.0,
+            "max_integer_value" => 200,
+            "min_integer_value" => 1,
             "is_required" => true
+        },
+        {
+            "name" => "floor_to_floor_height",
+            "type" => "Double",
+            "display_name" => "Floor to floor height (m)",
+            "default_value" => 3.8,
+            "max_double_value" => 10.0,
+            "min_double_value" => 2.0,
+            "is_required" => false
+        },
+        {
+            "name" => "plenum_height",
+            "type" => "Double",
+            "display_name" => "Plenum height (m)",
+            "default_value" => 1,
+            "max_double_value" => 2.0,
+            "min_double_value" => 0.1,
+            "is_required" => false
         }
     ]
   end
@@ -93,10 +111,13 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     #Runs parent run method.
+	puts "B"
     super(model, runner, user_arguments)
+	puts "B"
     # Gets arguments from interfaced and puts them in a hash with there display name. This also does a check on ranges to
     # ensure that the values inputted are valid based on your @measure_interface array of hashes.
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
+	puts "B"
     #puts JSON.pretty_generate(arguments)
     return false if false == arguments
     #You can now access the input argument by the name.
@@ -108,23 +129,29 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
 	# Create a new model
     model = OpenStudio::Model::Model.new
 	
+	# Name the new model
+	
 	# Depending on the shape requested create the geometry.
     # "choices" => ["Courtyard", "H shape", "L shape", "Rectangular", "T shape", "U shape"],
 	if arguments['building_shape'] == 'Courtyard'
 	
 		# Figure out dimensions from inputs
-        length = MATH::sqrt(floor_area / aspect_ratio)
-        width = MATH::sqrt(floor_area * aspect_ratio)
+		floor_area=arguments['total_floor_area']/arguments['above_grade_floors']
+        b = Math::sqrt((9/8)*(floor_area / arguments['aspect_ratio']))
+        a = b * arguments['aspect_ratio']
+		# Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
+		perimeter_depth=[([a,b].min/9),4.57].min
 		
-		BTAP::Geometry::Wizard::create_shape_courtyard(model,
-          length = 50,
-          width = 30,
-          courtyard_length = 15,
-          courtyard_width = 5,
-          num_floors = 3,
-          floor_to_floor_height = 3.8,
-          plenum_height = 1,
-          perimeter_zone_depth = 4.57)
+		# Generate the geometry
+		BTAP::Geometry::Wizards::create_shape_courtyard(model,
+          length = a,
+          width = b,
+          courtyard_length = a/3,
+          courtyard_width = b/3,
+          num_floors = arguments['above_grade_floors'],
+          floor_to_floor_height = arguments['floor_to_floor_height'],
+          plenum_height = arguments['plenum_height'],
+          perimeter_zone_depth = perimeter_depth)
 	end
 	
 

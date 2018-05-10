@@ -1,74 +1,105 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>invalid null reference Expected argument 1 of type std::vector&lt; openstudio::measure::OSArgument >::value_type const &amp;, but got NilClass nil
+	in SWIG method 'push'</error>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>718ef9e4-a821-4b38-ba65-833a474d208e</version_id>
-  <version_modified>20180507T144138Z</version_modified>
+  <version_id>22d964f0-d515-4a14-93fe-8c8cc1fe1383</version_id>
+  <version_modified>20180510T212320Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
-  <description>This template measure is used to ensure consistency in detailed BTAP measures.</description>
-  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <description>Create standard building shapes and define spaces. The total floor area, and number of floors are specified. The building is assumed to be in thirds (thus for the courtyard the middle third is the void)</description>
+  <modeler_description>Defines the geometry of the building based on the given inputs. Uses BTAP::Geometry::Wizards::create_shape_* methods</modeler_description>
   <arguments>
     <argument>
-      <name>a_string_argument</name>
-      <display_name>A String Argument (string)</display_name>
+      <name>building_name</name>
+      <display_name>Building name</display_name>
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>The Default Value</default_value>
+      <default_value>building</default_value>
     </argument>
     <argument>
-      <name>a_double_argument</name>
-      <display_name>A Double numeric Argument (double)</display_name>
+      <name>building_shape</name>
+      <display_name>Building shape</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>Courtyard</value>
+          <display_name>Courtyard</display_name>
+        </choice>
+        <choice>
+          <value>H shape</value>
+          <display_name>H shape</display_name>
+        </choice>
+        <choice>
+          <value>L shape</value>
+          <display_name>L shape</display_name>
+        </choice>
+        <choice>
+          <value>Rectangular</value>
+          <display_name>Rectangular</display_name>
+        </choice>
+        <choice>
+          <value>T shape</value>
+          <display_name>T shape</display_name>
+        </choice>
+        <choice>
+          <value>U shape</value>
+          <display_name>U shape</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>total_floor_area</name>
+      <display_name>Total building area (m2)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>50000</default_value>
+    </argument>
+    <argument>
+      <name>aspect_ratio</name>
+      <display_name>Aspect ratio (width/length; width faces south before rotation)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>rotation</name>
+      <display_name>Rotation (degrees clockwise)</display_name>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
     </argument>
     <argument>
-      <name>a_string_double_argument</name>
-      <display_name>A String Double numeric Argument (double)</display_name>
-      <type>String</type>
+      <name>above_grade_floors</name>
+      <display_name>Number of above grade floors</display_name>
+      <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>23.0</default_value>
+      <default_value>3</default_value>
     </argument>
     <argument>
-      <name>a_choice_argument</name>
-      <display_name>A Choice String Argument </display_name>
-      <type>Choice</type>
-      <required>true</required>
+      <name>floor_to_floor_height</name>
+      <display_name>Floor to floor height (m)</display_name>
+      <type>Double</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>choice_1</default_value>
-      <choices>
-        <choice>
-          <value>choice_1</value>
-          <display_name>choice_1</display_name>
-        </choice>
-        <choice>
-          <value>choice_2</value>
-          <display_name>choice_2</display_name>
-        </choice>
-      </choices>
+      <default_value>3.8</default_value>
     </argument>
     <argument>
-      <name>a_bool_argument</name>
-      <display_name>A Boolean Argument </display_name>
-      <type>Boolean</type>
-      <required>true</required>
+      <name>plenum_height</name>
+      <display_name>Plenum height (m)</display_name>
+      <type>Double</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
+      <default_value>1</default_value>
     </argument>
   </arguments>
   <outputs/>
@@ -100,6 +131,18 @@
   </attributes>
   <files>
     <file>
+      <filename>BTAPCreateGeometry_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>70E79E70</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B5E1D32D</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.3.0</identifier>
@@ -108,19 +151,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E7C0CF9C</checksum>
-    </file>
-    <file>
-      <filename>BTAPTemplateMeasure_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5E7EBF34</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FD2A0DF6</checksum>
+      <checksum>2B81264A</checksum>
     </file>
   </files>
 </measure>

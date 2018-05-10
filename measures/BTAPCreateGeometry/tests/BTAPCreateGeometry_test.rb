@@ -12,7 +12,7 @@ require_relative '../resources/BTAPMeasureHelper.rb'
 require 'minitest/autorun'
 
 
-class BTAPModelMeasure_Test < Minitest::Test
+class BTAPCreateGeometry_Test < Minitest::Test
   # Brings in helper methods to simplify argument testing of json and standard argument methods.
   include(BTAPMeasureTestHelper)
   def setup()
@@ -20,57 +20,86 @@ class BTAPModelMeasure_Test < Minitest::Test
     @use_json_package = false
     @use_string_double = true
     @measure_interface_detailed = [
-
         {
-            "name" => "a_string_argument",
+            "name" => "building_name",
             "type" => "String",
-            "display_name" => "A String Argument (string)",
-            "default_value" => "The Default Value",
-            "is_required" => false
-        },
-        {
-            "name" => "a_double_argument",
-            "type" => "Double",
-            "display_name" => "A Double numeric Argument (double)",
-            "default_value" => 0,
-            "max_double_value" => 100.0,
-            "min_double_value" => 0.0,
-            "is_required" => false
-        },
-        {
-            "name" => "a_string_double_argument",
-            "type" => "StringDouble",
-            "display_name" => "A String Double numeric Argument (double)",
-            "default_value" => 23.0,
-            "max_double_value" => 100.0,
-            "min_double_value" => 0.0,
-            "valid_strings" => ["NA"],
-            "is_required" => false
-        },
-        {
-            "name" => "a_choice_argument",
-            "type" => "Choice",
-            "display_name" => "A Choice String Argument ",
-            "default_value" => "choice_1",
-            "choices" => ["choice_1", "choice_2"],
-            "is_required" => false
-        },
-        {
-            "name" => "a_bool_argument",
-            "type" => "Bool",
-            "display_name" => "A Boolean Argument ",
-            "default_value" => false,
+            "display_name" => "Building name",
+            "default_value" => "building",
             "is_required" => true
+        },
+		{
+            "name" => "building_shape",
+            "type" => "Choice",
+            "display_name" => "Building shape",
+            "default_value" => "Rectangular",
+            "choices" => ["Courtyard", "H shape", "L shape", "Rectangular", "T shape", "U shape"],
+            "is_required" => true
+        },
+        {
+            "name" => "total_floor_area",
+            "type" => "Double",
+            "display_name" => "Total building area (m2)",
+            "default_value" => 50000,
+            "max_double_value" => 10000000.0,
+            "min_double_value" => 10.0,
+            "is_required" => true
+        },
+        {
+            "name" => "aspect_ratio",
+            "type" => "Double",
+            "display_name" => "Aspect ratio (width/length; width faces south before rotation)",
+            "default_value" => 1.0,
+            "max_double_value" => 10.0,
+            "min_double_value" => 0.1,
+            "is_required" => true
+        },
+        {
+            "name" => "rotation",
+            "type" => "Double",
+            "display_name" => "Rotation (degrees clockwise)",
+            "default_value" => 0.0,
+            "max_double_value" => 360.0,
+            "min_double_value" => 0.0,
+            "is_required" => true
+        },
+        {
+            "name" => "above_grade_floors",
+            "type" => "Integer",
+            "display_name" => "Number of above grade floors",
+            "default_value" => 3,
+            "max_double_value" => 200.0,
+            "min_double_value" => 1.0,
+            "is_required" => true
+        },
+        {
+            "name" => "floor_to_floor_height",
+            "type" => "Double",
+            "display_name" => "Floor to floor height (m)",
+            "default_value" => 3.8,
+            "max_double_value" => 10.0,
+            "min_double_value" => 2.0,
+            "is_required" => false
+        },
+        {
+            "name" => "plenum_height",
+            "type" => "Double",
+            "display_name" => "Plenum height (m)",
+            "default_value" => 1,
+            "max_double_value" => 2.0,
+            "min_double_value" => 0.1,
+            "is_required" => false
         }
-
     ]
 
     @good_input_arguments = {
-        "a_string_argument" => "MyString",
-        "a_double_argument" => 50.0,
-        "a_string_double_argument" => "50.0",
-        "a_choice_argument" => "choice_1",
-        "a_bool_argument" => true
+        "building_name" => "courtyard",
+        "building_shape" => "Courtyard",
+        "total_floor_area" => 5000,
+        "aspect_ratio" => 2.0,
+        "rotation" => 0.0,
+        "above_grade_floors" => 2,
+        "floor_to_floor_height" => 3.2,
+        "plenum_height" => 1.2
     }
 
   end
@@ -92,6 +121,13 @@ class BTAPModelMeasure_Test < Minitest::Test
                                                    plenum_height = 1,
                                                    perimeter_zone_depth = 4.57,
                                                    initial_height = 0.0)
+												   
+												   
+    # Create an instance of the measure
+    runner = run_measure(@good_input_arguments, model)
+    puts show_output(runner.result)
+	
+	
     # If we wanted to apply some aspects of a standard to our model we can by using a factory method to bring the
     # standards we want into our tests. So to bring the necb2011 we write.
     necb2011_standard = Standard.build('NECB2011')

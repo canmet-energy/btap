@@ -3,7 +3,7 @@ module BTAPMeasureHelper
 
   # define the arguments that the user will input
   def arguments(model)
-    args = OpenStudio::Ruleset::OSArgumentVector.new
+    args = OpenStudio::Measure::OSArgumentVector.new
 
     if true == @use_json_package
       #Set up package version of input.
@@ -12,7 +12,7 @@ module BTAPMeasureHelper
         json_default[argument['name']] = argument["default_value"]
       end
       default = JSON.pretty_generate( json_default )
-      arg = OpenStudio::Ruleset::OSArgument.makeStringArgument('json_input', true)
+      arg = OpenStudio::Measure::OSArgument.makeStringArgument('json_input', true)
       arg.setDisplayName('Contains a json version of the input as a single package.')
       arg.setDefaultValue( default )
       args << arg
@@ -23,14 +23,19 @@ module BTAPMeasureHelper
         statement = nil
         case argument['type']
           when "String"
-            arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
+            arg = OpenStudio::Measure::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
             arg.setDisplayName(argument['display_name'])
             arg.setDefaultValue(argument['default_value'].to_s)
 
           when "Double"
-            arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
+            arg = OpenStudio::Measure::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
             arg.setDisplayName("#{argument['display_name']}")
             arg.setDefaultValue("#{argument['default_value']}".to_f)
+
+          when "Integer"
+            arg = OpenStudio::Measure::OSArgument.makeIntegerArgument(argument['name'], argument['is_required'])
+            arg.setDisplayName("#{argument['display_name']}")
+            arg.setDefaultValue("#{argument['default_value']}".to_i)
 
           when "Choice"
             arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
@@ -45,10 +50,10 @@ module BTAPMeasureHelper
 
           when "StringDouble"
             if @use_string_double == false
-              arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
+              arg = OpenStudio::Measure::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
               arg.setDefaultValue(argument['default_value'].to_f)
             else
-              arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
+              arg = OpenStudio::Measure::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
               arg.setDefaultValue(argument['default_value'].to_s)
             end
             arg.setDisplayName(argument['display_name'])
@@ -73,6 +78,8 @@ module BTAPMeasureHelper
             values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
           when "Double"
             values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
+          when "Integer"
+            values[argument['name']] = runner.getIntegerArgumentValue(argument['name'], user_arguments)
           when "Bool"
             values[argument['name']] = runner.getBoolArgumentValue(argument['name'], user_arguments)
           when "StringDouble"
@@ -113,6 +120,13 @@ module BTAPMeasureHelper
             error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value.to_f} for this #{argument['name']}.\n Please enter a value withing the expected range.\n"
             errors << error
           end
+        when "Integer"
+          value = values[argument['name']]
+          if (not argument["max_integer_value"].nil? and value.to_i > argument["max_integer_value"].to_i) or
+              (not argument["min_integer_value"].nil? and value.to_i < argument["min_integer_value"].to_i)
+            error = "#{argument['name']} must be between #{argument["min_integer_value"]} and #{argument["max_integer_value"]}. You entered #{value.to_i} for this #{argument['name']}.\n Please enter a value withing the expected range.\n"
+            errors << error
+          end
         when "StringDouble"
           value = values[argument['name']]
           if (not argument["valid_strings"].include?(value)) and (not valid_float?(value))
@@ -140,7 +154,7 @@ module BTAPMeasureHelper
 end
 
 module BTAPMeasureTestHelper
-  ##### Helper methods Do notouch unless you know the consequences.
+  ##### Helper methods Do not touch unless you know the consequences.
 
   #Boiler plate to default values and number of arguments against what is in your test's setup method.
   def test_arguments_and_defaults
@@ -180,37 +194,66 @@ module BTAPMeasureTestHelper
 
     (@measure_interface_detailed).each_with_index do |argument|
       if argument['type'] == 'Double' or argument['type'] == 'StringDouble'
-        puts "testing range for #{argument['name']} "
-        #Check over max
+        puts "Testing range for #{argument['name']} "
+        #Check 1% over max
         if not argument['max_double_value'].nil?
-          puts "testing max limit"
+          puts "  Testing max limit"
           model = OpenStudio::Model::Model.new
           input_arguments = @good_input_arguments.clone
-          over_max_value = argument['max_double_value'].to_f + 1.0
+          over_max_value = argument['max_double_value'].to_f * 1.01
           over_max_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
           input_arguments[argument['name']] = over_max_value
-          puts "Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
+          puts "  Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
           input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
-          run_measure(input_arguments, model)
           runner = run_measure(input_arguments, model)
-          assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_max_value} for #{argument['name']}")
-          puts "Success: Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
+          assert(runner.result.value.valueName != 'Success', "  Checks did not stop a greater than limit value of #{over_max_value} for #{argument['name']}")
+          puts "  Success: Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
         end
-        #Check over max
+        #Check 1% under min
         if not argument['min_double_value'].nil?
-          puts "testing min limit"
+          puts "  Testing min limit"
           model = OpenStudio::Model::Model.new
           input_arguments = @good_input_arguments.clone
-          over_min_value = argument['min_double_value'].to_f - 1.0
-          over_min_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
-          input_arguments[argument['name']] = over_min_value
-          puts "Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
+          under_min_value = argument['min_double_value'].to_f * 0.99
+          under_min_value = under_min_value.to_s if argument['type'].downcase == "StringDouble".downcase
+          input_arguments[argument['name']] = under_min_value
+          puts "  Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
           input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
           runner = run_measure(input_arguments, model)
-          assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_min_value} for #{argument['name']}")
-          puts "Success:Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
+          assert(runner.result.value.valueName != 'Success', "  Checks did not stop a less than limit value of #{under_min_value} for #{argument['name']}")
+          puts "  Success: Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
         end
-
+      end
+      if argument['type'] == 'Integer' or argument['type'] == 'StringInteger'
+        puts "Testing range for #{argument['name']} "
+        #Check 1 over max
+        if not argument['max_integer_value'].nil?
+          puts "  Testing max limit"
+          model = OpenStudio::Model::Model.new
+          input_arguments = @good_input_arguments.clone
+          over_max_value = argument['max_integer_value'].to_i + 1
+          over_max_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
+          input_arguments[argument['name']] = over_max_value
+          puts "  Testing argument #{argument['name']} max limit of #{argument['max_integer_value']}"
+          input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+          runner = run_measure(input_arguments, model)
+          assert(runner.result.value.valueName != 'Success', "  Checks did not stop a greater than limit value of #{over_max_value} for #{argument['name']}")
+          puts "  Success: Testing argument #{argument['name']} max limit of #{argument['max_integer_value']}"
+        end
+        #Check 1 under min
+        if not argument['min_integer_value'].nil?
+          puts "  Testing min limit"
+          model = OpenStudio::Model::Model.new
+          input_arguments = @good_input_arguments.clone
+          under_min_value = argument['min_integer_value'].to_i - 1
+          under_min_value = under_min_value.to_s if argument['type'].downcase == "StringDouble".downcase
+          input_arguments[argument['name']] = under_min_value
+          puts "  Testing argument #{argument['name']} min limit of #{argument['min_integer_value']}"
+          input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+          runner = run_measure(input_arguments, model)
+          assert(runner.result.value.valueName != 'Success', "  Checks did not stop a less than limit value of #{under_min_value} for #{argument['name']}")
+          puts "  Success: Testing argument #{argument['name']} min limit of #{argument['min_integer_value']}"
+        end
       end
       if (argument['type'] == 'StringDouble') and (not argument["valid_strings"].nil?) and @use_string_double
         model = OpenStudio::Model::Model.new
@@ -258,7 +301,7 @@ module BTAPMeasureTestHelper
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     #Check if
 
-    # Set the arguements in the argument map use json or real arguments.
+    # Set the arguments in the argument map use json or real arguments.
     if @use_json_package
       argument = arguments[0].clone
       assert(argument.setValue(input_arguments['json_input']), "Could not set value for 'json_input' to #{input_arguments['json_input']}")
