@@ -40,7 +40,7 @@ module BTAPMeasureHelper
           when "Choice"
             arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
             arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue('choice_1')
+            arg.setDefaultValue(argument['default_value'].to_s)
 
           when "Bool"
             arg = OpenStudio::Measure::OSArgument.makeBoolArgument(argument['name'], argument['is_required'])
@@ -171,24 +171,26 @@ module BTAPMeasureTestHelper
 
     #check number of arguments.
     if @use_json_package
-      assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+      assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the argument expected #{@measure_interface_detailed} and this is the actual #{arguments}")
     else
-      assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+      assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the argument expected #{@measure_interface_detailed} and this is the actual #{arguments}")
       (@measure_interface_detailed).each_with_index do |argument_expected, index|
         assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
         assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
         case argument_type(arguments[index])
           when "String", "Choice"
             assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
-          when "Double", "Integer"
+          when "Double"
             assert_equal(argument_expected['default_value'].to_f, arguments[index].defaultValueAsDouble.to_f, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+          when "Integer"
+            assert_equal(argument_expected['default_value'].to_i, arguments[index].defaultValueAsInteger.to_i, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
           when "Bool"
             assert_equal(argument_expected['default_value'], arguments[index].defaultValueAsBool, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
         end
       end
     end
-
   end
+  
   # Test argument ranges.
   def test_argument_ranges
 
@@ -201,6 +203,7 @@ module BTAPMeasureTestHelper
           model = OpenStudio::Model::Model.new
           input_arguments = @good_input_arguments.clone
           over_max_value = argument['max_double_value'].to_f * 1.01
+		  over_max_value = 0.01 unless over_max_value != 0
           over_max_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
           input_arguments[argument['name']] = over_max_value
           puts "  Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
@@ -215,6 +218,7 @@ module BTAPMeasureTestHelper
           model = OpenStudio::Model::Model.new
           input_arguments = @good_input_arguments.clone
           under_min_value = argument['min_double_value'].to_f * 0.99
+		  under_min_value = -0.01 unless under_min_value != 0
           under_min_value = under_min_value.to_s if argument['type'].downcase == "StringDouble".downcase
           input_arguments[argument['name']] = under_min_value
           puts "  Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"

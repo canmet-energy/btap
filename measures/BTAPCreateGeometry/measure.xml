@@ -1,11 +1,9 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>invalid null reference Expected argument 1 of type std::vector&lt; openstudio::measure::OSArgument >::value_type const &amp;, but got NilClass nil
-	in SWIG method 'push'</error>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>22d964f0-d515-4a14-93fe-8c8cc1fe1383</version_id>
-  <version_modified>20180510T212320Z</version_modified>
+  <version_id>fbc29c55-c475-4153-8f3a-d18564f5dbb8</version_id>
+  <version_modified>20180511T000047Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
@@ -26,6 +24,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Rectangular</default_value>
       <choices>
         <choice>
           <value>Courtyard</value>
@@ -80,7 +79,7 @@
     <argument>
       <name>above_grade_floors</name>
       <display_name>Number of above grade floors</display_name>
-      <type>Double</type>
+      <type>Integer</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3</default_value>
@@ -137,12 +136,6 @@
       <checksum>70E79E70</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B5E1D32D</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.3.0</identifier>
@@ -151,7 +144,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2B81264A</checksum>
+      <checksum>C7A23DB6</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B747ED1B</checksum>
     </file>
   </files>
 </measure>

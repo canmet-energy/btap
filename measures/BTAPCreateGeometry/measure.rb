@@ -110,14 +110,14 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
 
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
+  
     #Runs parent run method.
-	puts "B"
     super(model, runner, user_arguments)
-	puts "B"
+	
     # Gets arguments from interfaced and puts them in a hash with there display name. This also does a check on ranges to
     # ensure that the values inputted are valid based on your @measure_interface array of hashes.
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
-	puts "B"
+	
     #puts JSON.pretty_generate(arguments)
     return false if false == arguments
     #You can now access the input argument by the name.
