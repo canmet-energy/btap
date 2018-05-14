@@ -1,9 +1,9 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
-
+require_relative 'resources/BTAPMeasureHelper'
 # start the measure
 class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasure
-
+  include(BTAPMeasureHelper)
   ### BTAP Measure helper methods.
   #  A wrapper for outputing feedback to users and developers.
   #  runner_register("InitialCondition",   "Your Information Message Here", runner)
@@ -51,9 +51,16 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
   #Constructor to set global variables
   def initialize()
     super()
+    #Set to true if you want to package the arguments as json.
+    @use_json_package = false
+    #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
+    # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
+    @use_string_double = true
 
     #Set to true if debugging measure.
     @debug = true
+    #this is the 'do nothing value and most arguments should have. '
+    @baseline = 'baseline'
 
 
 
@@ -78,8 +85,51 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
         {"boundary_condition" => "Outdoors", "construction_type" => "glazing", "surface_type" => "GlassDoor"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "OverheadDoor"}
     ]
-    #this is the 'do nothing value and most arguments should have. '
-    @baseline = 'baseline'
+
+
+    @measure_interface_detailed = []
+    #Conductances
+    (@surface_index + @sub_surface_index).each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)",
+          "default_value" => @baseline,
+          "max_double_value" => 5.0,
+          "min_double_value" => 0.005,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
+    end
+
+
+    # SHGC
+    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} SHGC",
+          "default_value" => @baseline,
+          "max_double_value" => 1.0,
+          "min_double_value" => 0.0,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
+    end
+
+    # Visible Transmittance
+    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance",
+          "default_value" => @baseline,
+          "max_double_value" => 1.0,
+          "min_double_value" => 0.0,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
+    end
   end
 
   # human readable name
@@ -97,108 +147,15 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     return "Changes exterior wall construction's thermal conductances, Visible Transmittance and SHGC where application for each surface type."
   end
 
-  # define the arguments that the user will input
-  def arguments(model)
-    args = OpenStudio::Ruleset::OSArgumentVector.new
-    # Conductances for all surfaces and subsurfaces.
-    (@surface_index + @sub_surface_index).each do |surface|
-      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
-      eval(statement)
-    end
 
-    # SHGC
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
-      statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} SHGC')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
-      eval(statement)
-    end
-
-    # Visible Transmittance
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
-      statement = "
-      #{ecm_name} = OpenStudio::Ruleset::OSArgument.makeStringArgument(ecm_name, true)
-      #{ecm_name}.setDisplayName('#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance')
-      #{ecm_name}.setDefaultValue(@baseline)
-      args << #{ecm_name}"
-      eval(statement)
-    end
-
-    return args
-  end
 
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
-    values = {}
-    # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
-      runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
-      return false
-    end
-    # conductance values should be between 3.5 and 0.005 U-Value (R-value 1 to R-Value 1000)
-    (@surface_index + @sub_surface_index).each do |surface|
-      ecm_cond_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      value = runner.getStringArgumentValue("#{ecm_cond_name}", user_arguments)
-      if value == @baseline
-        values[ecm_cond_name] = nil
-      else
-        if value.to_f > 5.0 or value.to_f < 0.005
-          runner_register(runner, 'Error', "Conductance must be between 5.0 and 0.005. You entered #{value} for #{ecm_cond_name}.")
-          return false
-        end
-        values[ecm_cond_name] = value.to_f
-      end
-    end
-
-
-    # SHGC should be between zero and 1.
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_shgc_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
-      value = runner.getStringArgumentValue("#{ecm_shgc_name}", user_arguments)
-      if value == @baseline
-        values[ecm_shgc_name] = nil
-      else
-        if value.to_f >= 1.0 or value.to_f <= 0.0
-          runner_register(runner, 'Error', "SHGC must be between 0.0 and 1.0. You entered #{value} for #{ecm_shgc_name}.")
-          return false
-        end
-        values[ecm_shgc_name] = value.to_f
-      end
-    end
-
-    # TVis should be between zero and 1.
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      ecm_tvis_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
-      value = runner.getStringArgumentValue("#{ecm_tvis_name}", user_arguments)
-      if value == @baseline
-        values[ecm_tvis_name] = nil
-      else
-        if value.to_f >= 1.0 or value.to_f <= 0.0
-          runner_register(runner, 'Error', "Tvis must be between 0.0 and 1.0. You entered #{value} for #{ecm_tvis_name}.")
-          return false
-        end
-        values[ecm_tvis_name] = value.to_f
-      end
-    end
-
-    #Store values in runner this will be used for data_viz.
-    values.each do |key, value|
-      runner_register_value(runner, "ecm_#{key}", value)
-    end
-
+    arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
     # Make a copy of the model before the measure is applied.
-    report = Standard.new.change_construction_properties_in_model(model, values)
+    report = Standard.new.change_construction_properties_in_model(model, arguments)
 
     runner_register(runner,
                     'FinalCondition',
