@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>fbc29c55-c475-4153-8f3a-d18564f5dbb8</version_id>
-  <version_modified>20180511T000047Z</version_modified>
+  <version_id>affeffdb-7f60-4752-ae79-08b088a9948c</version_id>
+  <version_modified>20180514T183452Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
@@ -150,7 +150,7 @@
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B747ED1B</checksum>
+      <checksum>B30CC120</checksum>
     </file>
   </files>
 </measure>
