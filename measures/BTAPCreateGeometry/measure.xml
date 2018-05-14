@@ -1,0 +1,156 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_create_geometry</name>
+  <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
+  <version_id>fbc29c55-c475-4153-8f3a-d18564f5dbb8</version_id>
+  <version_modified>20180511T000047Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPCreateGeometry</class_name>
+  <display_name>BTAPCreateGeometry</display_name>
+  <description>Create standard building shapes and define spaces. The total floor area, and number of floors are specified. The building is assumed to be in thirds (thus for the courtyard the middle third is the void)</description>
+  <modeler_description>Defines the geometry of the building based on the given inputs. Uses BTAP::Geometry::Wizards::create_shape_* methods</modeler_description>
+  <arguments>
+    <argument>
+      <name>building_name</name>
+      <display_name>Building name</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>building</default_value>
+    </argument>
+    <argument>
+      <name>building_shape</name>
+      <display_name>Building shape</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Rectangular</default_value>
+      <choices>
+        <choice>
+          <value>Courtyard</value>
+          <display_name>Courtyard</display_name>
+        </choice>
+        <choice>
+          <value>H shape</value>
+          <display_name>H shape</display_name>
+        </choice>
+        <choice>
+          <value>L shape</value>
+          <display_name>L shape</display_name>
+        </choice>
+        <choice>
+          <value>Rectangular</value>
+          <display_name>Rectangular</display_name>
+        </choice>
+        <choice>
+          <value>T shape</value>
+          <display_name>T shape</display_name>
+        </choice>
+        <choice>
+          <value>U shape</value>
+          <display_name>U shape</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>total_floor_area</name>
+      <display_name>Total building area (m2)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>50000</default_value>
+    </argument>
+    <argument>
+      <name>aspect_ratio</name>
+      <display_name>Aspect ratio (width/length; width faces south before rotation)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>rotation</name>
+      <display_name>Rotation (degrees clockwise)</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>above_grade_floors</name>
+      <display_name>Number of above grade floors</display_name>
+      <type>Integer</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3</default_value>
+    </argument>
+    <argument>
+      <name>floor_to_floor_height</name>
+      <display_name>Floor to floor height (m)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3.8</default_value>
+    </argument>
+    <argument>
+      <name>plenum_height</name>
+      <display_name>Plenum height (m)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPCreateGeometry_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>70E79E70</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C7A23DB6</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B747ED1B</checksum>
+    </file>
+  </files>
+</measure>

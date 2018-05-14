@@ -9,18 +9,18 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
   include(BTAPMeasureHelper)
   # human readable name
   def name
-    #BEFORE YOU DO anything.. please generate a new <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
+    #BEFORE YOU DO anything.. please generate a new <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid> and add this to the measure.xml file
     return "BTAPTemplateMeasure"
   end
 
   # human readable description
   def description
-    return "This template measure is used to ensure consistancy in detailed BTAP measures."
+    return "This template measure is used to ensure consistency in detailed BTAP measures."
   end
 
   # human readable description of modeling approach
   def modeler_description
-    return "This template measure is used to ensure consistancy in BTAP measures."
+    return "This template measure is used to ensure consistency in BTAP measures."
   end
 
   #Use the constructor to set global variables
@@ -29,7 +29,7 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
     #Set to true if you want to package the arguments as json.
     @use_json_package = false
     #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
-    # continous optimization algorigthms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
+    # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
     @use_string_double = true
 
     # Put in this array of hashes all the input variables that you need in your measure. Your choice of types are Sting, Double,
