@@ -9,6 +9,7 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
   include(BTAPMeasureHelper)
   # human readable name
   def name
+    #BEFORE YOU DO anything.. please generate a new <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
     return "BTAPTemplateMeasure"
   end
 
