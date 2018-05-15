@@ -10,6 +10,8 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
     #BEFORE YOU DO anything.. please generate a new <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid> and add this to the measure.xml file
+    # You can generate a new UUID using the ruby command
+    # ruby -e 'require "securerandom";  puts SecureRandom.uuid '
     return "BTAPTemplateMeasure"
   end
 
