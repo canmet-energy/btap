@@ -19,7 +19,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     @use_json_package = false
     #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
     # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
-    @use_string_double = true
+    @use_string_double = false
 
     #Set to true if debugging measure.
     @debug = true
@@ -108,12 +108,12 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "outdoors_door_conductance" => 3.5,
         "outdoors_glassdoor_conductance" => 3.5,
         "outdoors_overheaddoor_conductance" => 3.5,
-        "outdoors_fixedwindow_shgc" => "baseline",
-        "outdoors_operablewindow_shgc" => "baseline",
-        "outdoors_skylight_shgc" => "baseline",
-        "outdoors_tubulardaylightdiffuser_shgc" => "baseline",
-        "outdoors_tubulardaylightdome_shgc" => "baseline",
-        "outdoors_glassdoor_shgc" => "baseline",
+        "outdoors_fixedwindow_shgc" => 0.4,
+        "outdoors_operablewindow_shgc" =>0.4,
+        "outdoors_skylight_shgc" => 0.4,
+        "outdoors_tubulardaylightdiffuser_shgc" => 0.4,
+        "outdoors_tubulardaylightdome_shgc" => 0.4,
+        "outdoors_glassdoor_shgc" => 0.4,
         "outdoors_fixedwindow_tvis" => 0.999,
         "outdoors_operablewindow_tvis" => 0.999,
         "outdoors_skylight_tvis" => 0.999,
@@ -164,7 +164,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     conductance_argument_size = (@surface_index + @sub_surface_index).size
     #SHGC
-    shgc = @baseline
+    shgc = 0.244
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
       name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       argument = arguments[conductance_argument_size + index].clone
