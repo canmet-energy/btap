@@ -8,11 +8,26 @@ rescue LoadError
   puts 'OpenStudio Measure Tester Gem not installed -- will not be able to aggregate and dashboard the results of tests'
 end
 require_relative '../measure.rb'
+require_relative '../resources/BTAPMeasureHelper.rb'
 require 'minitest/autorun'
 
 
-class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
+class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
+  include(BTAPMeasureTestHelper)
   def setup()
+    #Set to true if you want to package the arguments as json.
+    @use_json_package = false
+    #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
+    # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
+    @use_string_double = true
+
+    #Set to true if debugging measure.
+    @debug = true
+    #this is the 'do nothing value and most arguments should have. '
+    @baseline = 'baseline'
+
+    #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
+    # an array to work around is programmatically easier.
     @surface_index =[
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Wall"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "RoofCeiling"},
@@ -33,42 +48,90 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "OverheadDoor"}
     ]
 
-    @baseline = 'baseline'
-  end
 
-  def test_arguments_and_defaults
-    # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasureDetailed.new
-
-    # Create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-
-    # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
-    model = create_necb_protype_model(
-        "LargeOffice",
-        'NECB HDD Method',
-        'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
-        "NECB2011"
-    )
-
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
-    #check number of arguments.
-    assert_equal(26, arguments.size)
-
-    (@surface_index + @sub_surface_index).each_with_index do |surface, index|
-      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      assert_equal(name, arguments[index].name)
-      assert_equal('baseline', arguments[index].defaultValueAsString)
+    @measure_interface_detailed = []
+    #Conductances
+    (@surface_index + @sub_surface_index).each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)",
+          "default_value" => @baseline,
+          "max_double_value" => 5.0,
+          "min_double_value" => 0.005,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
     end
+
+
+    # SHGC
+    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} SHGC",
+          "default_value" => @baseline,
+          "max_double_value" => 1.0,
+          "min_double_value" => 0.0,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
+    end
+
+    # Visible Transmittance
+    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
+      @measure_interface_detailed  << {
+          "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis",
+          "type" => "StringDouble",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance",
+          "default_value" => @baseline,
+          "max_double_value" => 1.0,
+          "min_double_value" => 0.0,
+          "valid_strings" => [@baseline],
+          "is_required" => false
+      }
+    end
+
+    @good_input_arguments = {
+        "outdoors_wall_conductance" => 3.5,
+        "outdoors_roofceiling_conductance" => 3.5,
+        "outdoors_floor_conductance" => 3.5,
+        "ground_wall_conductance" => 3.5,
+        "ground_roofceiling_conductance" => 3.5,
+        "ground_floor_conductance" => 3.5,
+        "outdoors_fixedwindow_conductance" => 3.5,
+        "outdoors_operablewindow_conductance" => 3.5,
+        "outdoors_skylight_conductance" => 3.5,
+        "outdoors_tubulardaylightdiffuser_conductance" => 3.5,
+        "outdoors_tubulardaylightdome_conductance" => 3.5,
+        "outdoors_door_conductance" => 3.5,
+        "outdoors_glassdoor_conductance" => 3.5,
+        "outdoors_overheaddoor_conductance" => 3.5,
+        "outdoors_fixedwindow_shgc" => "baseline",
+        "outdoors_operablewindow_shgc" => "baseline",
+        "outdoors_skylight_shgc" => "baseline",
+        "outdoors_tubulardaylightdiffuser_shgc" => "baseline",
+        "outdoors_tubulardaylightdome_shgc" => "baseline",
+        "outdoors_glassdoor_shgc" => "baseline",
+        "outdoors_fixedwindow_tvis" => 0.999,
+        "outdoors_operablewindow_tvis" => 0.999,
+        "outdoors_skylight_tvis" => 0.999,
+        "outdoors_tubulardaylightdiffuser_tvis" => 0.999,
+        "outdoors_tubulardaylightdome_tvis" => 0.999,
+        "outdoors_glassdoor_tvis" => 0.999
+    }
+
   end
+
+
 
 
   def test_envelope_changes()
 
     # Create an instance of the measure
-    measure = BTAPEnvelopeConstructionMeasureDetailed.new
+    measure = get_measure_object()
+
 
     # Create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -94,7 +157,7 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     (@surface_index + @sub_surface_index).each_with_index do |surface, index|
       name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
       argument = arguments[index].clone
-      assert(argument.setValue(conductance.to_s))
+      assert(argument.setValue(conductance.to_f))
       argument_map[name] = argument
       values[name] =conductance
     end
@@ -105,7 +168,7 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
       name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
       argument = arguments[conductance_argument_size + index].clone
-      assert(argument.setValue(shgc.to_s))
+      assert(argument.setValue(shgc.to_f))
       argument_map[name] = argument
       values[name] =shgc
     end
@@ -116,7 +179,7 @@ class BTAPEnvelopeConstructionMeasureDetailed_Test < Minitest::Test
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
       name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
       argument = arguments[conductance_argument_size + shgc_argument_size + index].clone
-      assert(argument.setValue(tvis.to_s))
+      assert(argument.setValue(tvis.to_f))
       argument_map[name] = argument
       values[name] =tvis
     end

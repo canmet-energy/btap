@@ -2,7 +2,9 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 require_relative 'resources/BTAPMeasureHelper'
 # start the measure
-class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasure
+class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
+  attr_accessor :use_json_package, :use_string_double
+
   include(BTAPMeasureHelper)
   ### BTAP Measure helper methods.
   #  A wrapper for outputing feedback to users and developers.
@@ -55,14 +57,12 @@ class BTAPEnvelopeConstructionMeasureDetailed < OpenStudio::Measure::ModelMeasur
     @use_json_package = false
     #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
     # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
-    @use_string_double = true
+    @use_string_double = false
 
     #Set to true if debugging measure.
     @debug = true
     #this is the 'do nothing value and most arguments should have. '
     @baseline = 'baseline'
-
-
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
@@ -166,4 +166,4 @@ end
 
 
 # register the measure to be used by the application
-BTAPEnvelopeConstructionMeasureDetailed.new.registerWithApplication
+BTAPEnvelopeConstructionMeasure.new.registerWithApplication
