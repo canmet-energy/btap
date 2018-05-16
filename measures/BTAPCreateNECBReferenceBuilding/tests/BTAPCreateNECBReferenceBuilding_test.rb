@@ -38,7 +38,7 @@ class NECB2011
     model_add_daylighting_controls(model)
 
 
-    model_add_constructions(model, 'NECB', climate_zone) # prototype candidate
+    model_add_constructions(model, 'FullServiceRestaurant', climate_zone) # prototype candidate
     apply_standard_construction_properties(model) # standards candidate
     apply_standard_window_to_wall_ratio(model) # standards candidate
     apply_standard_skylight_to_roof_ratio(model) # standards candidate

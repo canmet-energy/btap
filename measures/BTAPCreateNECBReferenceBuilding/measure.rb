@@ -1,6 +1,7 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 require_relative 'resources/BTAPMeasureHelper'
+require_relative 'resources/btap_additions'
 # start the measure
 
 class NECB2011
@@ -257,7 +258,7 @@ class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
     standard.set_occ_sensor_spacetypes(model)
 
     # Apply Default Contruction Sets
-    standard.model_add_constructions(model, "NECB", climate_zone) # prototype candidate
+    standard.model_add_constructions(model, "FullServiceRestaurant", climate_zone) # prototype candidate
     #Apply Standard construction Propeties
     standard.apply_standard_construction_properties(model) # standards candidate
 

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>7353d86e-d166-4f32-a572-27ce8e65ebb5</uid>
-  <version_id>5dbabe28-15c7-4191-a9d5-677388ad6084</version_id>
-  <version_modified>20180516T155326Z</version_modified>
+  <version_id>4df49c3f-00a6-47c9-9e0e-3e5cfebfc9bf</version_id>
+  <version_modified>20180516T163938Z</version_modified>
   <xml_checksum>4A4E44A5</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAP Utility Tariffs Model Setup</display_name>
@@ -76,16 +76,28 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>btap_additions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DE79BCDE</checksum>
-    </file>
-    <file>
       <filename>Standards.Construction.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>9C6C6E51</checksum>
+    </file>
+    <file>
+      <filename>Standards.Model.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>46874C01</checksum>
+    </file>
+    <file>
+      <filename>btap_additions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6DC45CBD</checksum>
+    </file>
+    <file>
+      <filename>building_envelope.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6ED0F4FE</checksum>
     </file>
   </files>
 </measure>

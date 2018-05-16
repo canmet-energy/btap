@@ -1,5 +1,6 @@
 
 # Start the measure
+require_relative 'resources/btap_additions'
 class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
   
   require 'openstudio-standards'
