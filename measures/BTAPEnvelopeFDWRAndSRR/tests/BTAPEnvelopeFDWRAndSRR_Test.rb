@@ -42,19 +42,93 @@ begin
 rescue LoadError
   puts 'OpenStudio Measure Tester Gem not installed -- will not be able to aggregate and dashboard the results of tests'
 end
+require_relative '../resources/BTAPMeasureHelper'
 require_relative '../measure.rb'
 require 'minitest/autorun'
 
 class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
+  include(BTAPMeasureTestHelper)
   def setup
+    @use_json_package = false
+    @use_string_double = false
+    @templates = [
+        'NECB2011',
+        'NECB2015'
+    ]
+    @limit_or_max_values = [
+        'Limit',
+        'Maximize'
+    ]
+    #Assuming a skylight area of this.
+    @skylight_fixture_area = 0.0625
+    @measure_interface_detailed = [
 
-        '{
-            "wwr" => "0.04",
-            "wwr_limit_or_max" => "Maximize",
-            "srr" => "0.05",
-            "srr_limit_or_max" => "Maximize",
-            "sillHeight" => 0.75
-        }'
+        {
+            "name" => "wwr",
+            "type" => "StringDouble",
+            "display_name" => "FDWR (fraction) or a standard value of one of #{@templates}",
+            "default_value" => 0.5,
+            "max_double_value" => 1.0,
+            "min_double_value" => 0.0,
+            "valid_strings" => @templates,
+            "is_required" => false
+        },
+        {
+            "name" => "wwr_limit_or_max",
+            "type" => "Choice",
+            "display_name" => "FDWR Limit or Maximize?",
+            "default_value" => "Maximize",
+            "choices" => @limit_or_max_values,
+            "is_required" => false
+        },
+        {
+            "name" => "sillHeight",
+            "type" => "Double",
+            "display_name" => "Sill height (m)",
+            "default_value" => 30.0,
+            "max_double_value" => 100.0,
+            "min_double_value" => 0.0,
+            "is_required" => true
+        },
+        {
+            "name" => "srr",
+            "type" => "StringDouble",
+            "display_name" => "FDWR (fraction) or a standard value of one of #{@templates}",
+            "default_value" => 0.5,
+            "max_double_value" => 1.0,
+            "min_double_value" => 0.0,
+            "valid_strings" => @templates,
+            "is_required" => false
+        },
+        {
+            "name" => "srr_limit_or_max",
+            "type" => "Choice",
+            "display_name" => "SRR Limit or Maximize?",
+            "default_value" => "Maximize",
+            "choices" => @limit_or_max_values,
+            "is_required" => false
+        },
+        {
+            "name" => "skylight_fixture_area",
+            "type" => "Double",
+            "display_name" => "Area of skylight fixtures used (m2)",
+            "default_value" => 0.0625,
+            "max_double_value" => 5.0,
+            "min_double_value" => 0.0,
+            "is_required" => false
+        }
+
+    ]
+
+    @good_input_arguments = {
+        "wwr" => 0.3,
+        "wwr_limit_or_max" => "Maximize",
+        "sillHeight" => 30.0,
+        "srr" => 0.05,
+        "srr_limit_or_max" => "Maximize",
+        "skylight_fixture_area" => 0.0625
+    }
+
   end
 
   def create_model_by_local_osm_file(filename)
@@ -87,27 +161,7 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
   end
 
 
-  def test_arguments
 
-    measure = BTAPEnvelopeFDWRandSRR.new
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    #load model
-    model = create_model_by_local_osm_file('/EnvelopeAndLoadTestModel_01.osm')
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
-    #check number of arguments.
-    assert_equal(5, arguments.size)
-
-  end
 
   def test_SetFDWR_Maximize
 
@@ -126,31 +180,18 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # set argument values to good values and run the measure on model with spaces
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
 
+    input_arguments = {
+        "wwr" => 0.3,
+        "wwr_limit_or_max" => "Maximize",
+        "sillHeight" => 1.0,
+        "srr" => 0.05,
+        "srr_limit_or_max" => "Maximize",
+        "skylight_fixture_area" => 0.0625
+    }
 
-    wwr = arguments[0].clone
-    assert(wwr.setValue(limit_or_max))
-    argument_map['wwr'] = wwr
+    runner = run_measure(input_arguments, model)
 
-    wwr_limit_or_max = arguments[1].clone
-    assert(wwr_limit_or_max.setValue(limit_or_max))
-    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
-
-    srr = arguments[2].clone
-    assert(srr.setValue('0.05'))
-    argument_map['srr'] = srr
-
-    srr_limit_or_max = arguments[3].clone
-    assert(srr_limit_or_max.setValue(limit_or_max))
-    argument_map['srr_limit_or_max'] = srr_limit_or_max
-
-    sillHeight = arguments[4].clone
-    assert(sillHeight.setValue(0.75))
-    argument_map['sillHeight'] = sillHeight
-
-    measure.run(model, runner, argument_map)
     result = runner.result
     show_output(result)
 
@@ -159,95 +200,5 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/test.osm")
     # model.save(output_file_path,true)
   end
-
-
-  def test_SetFDWR_Limit
-
-    limit_or_max = 'Limit'
-    measure = BTAPEnvelopeFDWRandSRR.new
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    #load model
-    model = create_model_by_local_osm_file('/EnvelopeAndLoadTestModel_01.osm')
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
-
-
-    wwr = arguments[0].clone
-    assert(wwr.setValue('0.04'))
-    argument_map['wwr'] = wwr
-
-    wwr_limit_or_max = arguments[1].clone
-    assert(wwr_limit_or_max.setValue(limit_or_max))
-    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
-
-    srr = arguments[2].clone
-    assert(srr.setValue('0.05'))
-    argument_map['srr'] = srr
-
-    srr_limit_or_max = arguments[3].clone
-    assert(srr_limit_or_max.setValue(limit_or_max))
-    argument_map['srr_limit_or_max'] = srr_limit_or_max
-
-    sillHeight = arguments[4].clone
-    assert(sillHeight.setValue(0.75))
-    argument_map['sillHeight'] = sillHeight
-
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    show_output(result)
-
-
-    # save the model
-    # output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "/test.osm")
-    # model.save(output_file_path,true)
-  end
-
-
-  def run_ratio_measure(model, inp_srr, inp_srr_limit_or_max, inp_wwr, inp_wwr_limit_or_max, inp_sill_height)
-    measure = BTAPEnvelopeFDWRandSRR.new
-    # create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-
-    # get arguments
-    arguments = measure.arguments(model)
-
-    # set argument values to good values and run the measure on model with spaces
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
-
-    # Test arguments and defaults
-    arguments = measure.arguments(model)
-
-
-    wwr = arguments[0].clone
-    assert(wwr.setValue(inp_wwr))
-    argument_map['wwr'] = wwr
-
-    wwr_limit_or_max = arguments[1].clone
-    assert(wwr_limit_or_max.setValue('Maximum'))
-    argument_map['wwr_limit_or_max'] = wwr_limit_or_max
-
-    srr = arguments[2].clone
-    assert(srr.setValue(inp_srr))
-    argument_map['srr'] = srr
-
-    srr_limit_or_max = arguments[3].clone
-    assert(srr_limit_or_max.setValue(inp_srr_limit_or_max))
-    argument_map['srr_limit_or_max'] = srr_limit_or_max
-
-    sill_height = arguments[4].clone
-    assert(sill_height.setValue(inp_sill_height))
-    argument_map['sill_height'] = sill_height
-    return argument_map, measure, runner
-  end
-
 
 end

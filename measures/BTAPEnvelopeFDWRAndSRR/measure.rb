@@ -33,22 +33,85 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-
+require_relative 'resources/BTAPMeasureHelper'
+require_relative 'resources/btap_additions'
 class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
+  attr_accessor :use_json_package, :use_string_double
+  include(BTAPMeasureHelper)
+
   def initialize()
     super()
+    @use_json_package = false
+    @use_string_double = false
     @templates = [
         'NECB2011',
         'NECB2015'
     ]
-
     @limit_or_max_values = [
         'Limit',
         'Maximize'
     ]
-
     #Assuming a skylight area of this.
     @skylight_fixture_area = 0.0625
+    @measure_interface_detailed = [
+
+        {
+            "name" => "wwr",
+            "type" => "StringDouble",
+            "display_name" => "FDWR (fraction) or a standard value of one of #{@templates}",
+            "default_value" => 0.5,
+            "max_double_value" => 1.0,
+            "min_double_value" => 0.0,
+            "valid_strings" => @templates,
+            "is_required" => false
+        },
+        {
+            "name" => "wwr_limit_or_max",
+            "type" => "Choice",
+            "display_name" => "FDWR Limit or Maximize?",
+            "default_value" => "Maximize",
+            "choices" => @limit_or_max_values,
+            "is_required" => false
+        },
+        {
+            "name" => "sillHeight",
+            "type" => "Double",
+            "display_name" => "Sill height (m)",
+            "default_value" => 30.0,
+            "max_double_value" => 100.0,
+            "min_double_value" => 0.0,
+            "is_required" => true
+        },
+        {
+            "name" => "srr",
+            "type" => "StringDouble",
+            "display_name" => "FDWR (fraction) or a standard value of one of #{@templates}",
+            "default_value" => 0.5,
+            "max_double_value" => 1.0,
+            "min_double_value" => 0.0,
+            "valid_strings" => @templates,
+            "is_required" => false
+        },
+        {
+            "name" => "srr_limit_or_max",
+            "type" => "Choice",
+            "display_name" => "SRR Limit or Maximize?",
+            "default_value" => "Maximize",
+            "choices" => @limit_or_max_values,
+            "is_required" => false
+        },
+        {
+            "name" => "skylight_fixture_area",
+            "type" => "Double",
+            "display_name" => "Area of skylight fixtures used (m2)",
+            "default_value" => 0.0625,
+            "max_double_value" => 5.0,
+            "min_double_value" => 0.0,
+            "is_required" => false
+        }
+
+    ]
+
   end
 
 
@@ -58,57 +121,11 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   end
 
   # return a vector of arguments
-  def arguments(model)
-    args = OpenStudio::Measure::OSArgumentVector.new
 
-    # make double argument for wwr
-    wwr = OpenStudio::Measure::OSArgument.makeStringArgument('wwr', true)
-    wwr.setDisplayName("FDWR (fraction) or a standard value of one of #{@templates}")
-    wwr.setDefaultValue('NECB2011')
-    args << wwr
-
-    # make choice argument for wwr_limit_or_max
-    choices = OpenStudio::StringVector.new
-    @limit_or_max_values.each do |choice|
-      choices << choice
-    end
-    wwr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('wwr_limit_or_max', choices, true)
-    wwr_limit_or_max.setDisplayName("FDWR Limit or Maximize?")
-    wwr_limit_or_max.setDefaultValue('Maximize')
-    args << wwr_limit_or_max
-
-
-    # make double argument for wwr
-    srr = OpenStudio::Measure::OSArgument.makeStringArgument('srr', true)
-    srr.setDisplayName("SSR (fraction) or a standard value of one of #{@templates}")
-    srr.setDefaultValue('NECB2011')
-    args << srr
-
-    # make choice argument for srr_limit_or_max
-    choices = OpenStudio::StringVector.new
-    @limit_or_max_values.each do |choice|
-      choices << choice
-    end
-    srr_limit_or_max = OpenStudio::Measure::OSArgument.makeChoiceArgument('srr_limit_or_max', choices, true)
-    srr_limit_or_max.setDisplayName("SRR Limit or Maximize?")
-    srr_limit_or_max.setDefaultValue('Maximize')
-    args << srr_limit_or_max
-
-
-    # make double argument for sillHeight
-    sillHeight = OpenStudio::Measure::OSArgument.makeDoubleArgument('sillHeight', true)
-    sillHeight.setDisplayName('Sill Height (in).')
-    sillHeight.setDefaultValue(30.0)
-    args << sillHeight
-    return args
-  end
 
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-
-
-
 
 
     hdd = nil
@@ -126,23 +143,30 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     end
 
     # assign the user inputs to variables
-    srr = runner.getStringArgumentValue('srr', user_arguments)
-    wwr = runner.getStringArgumentValue('wwr', user_arguments)
-    srr_limit_or_max = runner.getStringArgumentValue('srr_limit_or_max', user_arguments)
-    wwr_limit_or_max = runner.getStringArgumentValue('wwr_limit_or_max', user_arguments)
-    sillHeight = runner.getDoubleArgumentValue('sillHeight', user_arguments)
+    arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
+    return false if false == arguments
+
+
+
+
+    srr = arguments['srr']
+    wwr = arguments['wwr']
+    srr_limit_or_max = arguments['srr_limit_or_max']
+    wwr_limit_or_max = arguments['wwr_limit_or_max']
+    sillHeight = arguments['sillHeight']
+
 
     if @templates.include?(wwr) or @templates.include?(srr)
-      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.")  if model.weatherFile.empty?
+      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.") if model.weatherFile.empty?
       standard = Standard.build("#{wwr}_LargeOffice")
       hdd = standard.get_necb_hdd18(model)
     end
 
-      # check reasonableness of fraction
+    # check reasonableness of fraction
     if @templates.include?(wwr)
       #if wwr = 'NECB2011' or 'NECB2015' get proper wwr for hdd of model
       standard = Standard.build("#{wwr}_LargeOffice")
-      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.")  if model.weatherFile.empty?
+      raise("No weatherfile path was specified for model. Please ensure a weather file was added to the model.") if model.weatherFile.empty?
       hdd = standard.get_necb_hdd18(model)
       srr = standard.get_standards_constant('skylight_to_roof_ratio_max_value')
     else
@@ -186,8 +210,8 @@ class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
     else
       standard.apply_limit_to_subsurface_ratio(model, wwr, surface_type = "Wall")
     end
-    if srr_limit_or_max.downcase  == 'Maximize'.downcase
-      standard.apply_max_srr(model, runner, srr.to_f,@skylight_fixture_area)
+    if srr_limit_or_max.downcase == 'Maximize'.downcase
+      standard.apply_max_srr(model, runner, srr.to_f, @skylight_fixture_area)
     else
       standard.apply_limit_to_subsurface_ratio(model, srr, surface_type = "RoofCeiling")
     end

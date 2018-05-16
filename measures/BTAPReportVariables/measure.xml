@@ -1,10 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000b769278></error>
+  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000be74608></error>
   <name>btap_report_variables</name>
   <uid>4eebfbce-73a9-431d-9df6-997f0027f26d</uid>
-  <version_id>0134c6bb-8714-4cf8-9289-12e4f99b8aef</version_id>
-  <version_modified>20180501T152452Z</version_modified>
+  <version_id>87bce516-4dbc-4f9a-bdb8-3f3ef979f78d</version_id>
+  <version_modified>20180516T170101Z</version_modified>
   <xml_checksum>70EC291E</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAP Zone Report Variables</display_name>
@@ -105,6 +105,42 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>86A94157</checksum>
+    </file>
+    <file>
+      <filename>fileio.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>55494222</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9C6C6E51</checksum>
+    </file>
+    <file>
+      <filename>Standards.Model.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>46874C01</checksum>
+    </file>
+    <file>
+      <filename>btap_additions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6DC45CBD</checksum>
+    </file>
+    <file>
+      <filename>building_envelope.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6ED0F4FE</checksum>
     </file>
   </files>
 </measure>
