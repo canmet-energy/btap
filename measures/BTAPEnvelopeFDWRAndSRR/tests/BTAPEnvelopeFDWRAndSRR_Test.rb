@@ -201,8 +201,4 @@ class BTAPEnvelopeFDWRandSRR_Test < Minitest::Test
     # model.save(output_file_path,true)
   end
 
-
-
-
-
 end

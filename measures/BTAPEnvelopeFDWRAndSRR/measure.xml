@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>c567a0bf-a7d9-4a06-afe9-bf7df79e6bf8</uid>
-  <version_id>6ae5dc29-8d93-4bd3-9b0a-bbb0d8784847</version_id>
-  <version_modified>20180501T152451Z</version_modified>
+  <version_id>91353d31-b957-4bd2-bb98-01b97ea1daee</version_id>
+  <version_modified>20180516T155328Z</version_modified>
   <xml_checksum>6DE831F7</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
   <display_name>Set FDWR and SRR for model. Or set Max NECB values based on NECB or epw HDD value. </display_name>
@@ -16,42 +16,16 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
     <argument>
       <name>wwr</name>
       <display_name>FDWR (fraction) or a standard value of one of ["NECB2011", "NECB2015"]</display_name>
-      <type>String</type>
-      <required>true</required>
+      <type>Double</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>NECB2011</default_value>
+      <default_value>0.5</default_value>
     </argument>
     <argument>
       <name>wwr_limit_or_max</name>
       <display_name>FDWR Limit or Maximize?</display_name>
       <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>Maximize</default_value>
-      <choices>
-        <choice>
-          <value>Limit</value>
-          <display_name>Limit</display_name>
-        </choice>
-        <choice>
-          <value>Maximize</value>
-          <display_name>Maximize</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>srr</name>
-      <display_name>SSR (fraction) or a standard value of one of ["NECB2011", "NECB2015"]</display_name>
-      <type>String</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>NECB2011</default_value>
-    </argument>
-    <argument>
-      <name>srr_limit_or_max</name>
-      <display_name>SRR Limit or Maximize?</display_name>
-      <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>Maximize</default_value>
       <choices>
@@ -67,11 +41,45 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
     </argument>
     <argument>
       <name>sillHeight</name>
-      <display_name>Sill Height (in).</display_name>
+      <display_name>Sill height (m)</display_name>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>30</default_value>
+    </argument>
+    <argument>
+      <name>srr</name>
+      <display_name>FDWR (fraction) or a standard value of one of ["NECB2011", "NECB2015"]</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.5</default_value>
+    </argument>
+    <argument>
+      <name>srr_limit_or_max</name>
+      <display_name>SRR Limit or Maximize?</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Maximize</default_value>
+      <choices>
+        <choice>
+          <value>Limit</value>
+          <display_name>Limit</display_name>
+        </choice>
+        <choice>
+          <value>Maximize</value>
+          <display_name>Maximize</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>skylight_fixture_area</name>
+      <display_name>Area of skylight fixtures used (m2)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.0625</default_value>
     </argument>
   </arguments>
   <outputs/>
@@ -129,13 +137,37 @@ The measure doesn?t have any cost or lifecycle arguments, however If lifecycle o
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E10F5A26</checksum>
+      <checksum>60981FB5</checksum>
     </file>
     <file>
       <filename>BTAPEnvelopeFDWRAndSRR_Test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1AFA4387</checksum>
+      <checksum>8C701C19</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>fileio.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>55494222</checksum>
+    </file>
+    <file>
+      <filename>btap_additions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DE79BCDE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9C6C6E51</checksum>
     </file>
   </files>
 </measure>

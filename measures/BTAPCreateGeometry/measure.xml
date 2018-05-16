@@ -1,9 +1,11 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>invalid null reference Expected argument 1 of type std::vector&lt; openstudio::measure::OSArgument >::value_type const &amp;, but got NilClass nil
+	in SWIG method 'push'</error>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>affeffdb-7f60-4752-ae79-08b088a9948c</version_id>
-  <version_modified>20180514T183452Z</version_modified>
+  <version_id>b3dbb00b-0d64-4cf2-82ad-7d36d57f5ff5</version_id>
+  <version_modified>20180516T155328Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
@@ -150,7 +152,25 @@
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B30CC120</checksum>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>fileio.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>55494222</checksum>
+    </file>
+    <file>
+      <filename>btap_additions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DE79BCDE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9C6C6E51</checksum>
     </file>
   </files>
 </measure>

@@ -15,6 +15,21 @@ namespace :test do
   end
 end
 
+desc 'Update Common Resources from TemplateModelMeasure'
+task :update_resources do
+  # Find all files in measures/BTAPTemplateModelMeasure/resources
+  files =  Dir.glob("measures/BTAPTemplateModelMeasure/resources/*.*").map(&File.method(:realpath))
+  folders =  Dir.glob("measures/*/resources").map(&File.method(:realpath))
+  #copy files over
+  folders.each do |folder|
+    files.each do |file|
+      FileUtils.cp(file, folder)
+      puts "Copied #{file} to #{folder}"
+    end unless folder.include?('BTAPTemplateModelMeasure')
+  end
+
+end
+
 
 
 

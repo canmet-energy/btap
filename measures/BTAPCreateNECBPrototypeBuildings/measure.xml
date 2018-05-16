@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>ae90fsd7-a651-467a-bc8d-29d310b0f937</uid>
-  <version_id>e4d17df9-ece0-413e-80d5-d94e7fd74c85</version_id>
-  <version_modified>20180504T202119Z</version_modified>
+  <version_id>c1ff5f4e-91cc-42fe-9b39-a785250f519e</version_id>
+  <version_modified>20180516T155329Z</version_modified>
   <xml_checksum>057E8D9D</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>Create NECB Prototype Building</display_name>
@@ -417,6 +417,30 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>4734EBED</checksum>
+    </file>
+    <file>
+      <filename>fileio.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>55494222</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>btap_additions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DE79BCDE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9C6C6E51</checksum>
     </file>
   </files>
 </measure>
