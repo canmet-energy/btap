@@ -13,6 +13,7 @@ namespace :test do
     t.libs << 'test'
     t.test_files = array
   end
+
 end
 
 desc 'Update Common Resources from TemplateModelMeasure'

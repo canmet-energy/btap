@@ -282,7 +282,6 @@ class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-
 end
 
 
