@@ -23,7 +23,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     @use_string_double = false
 
     #Use percentages instead of values
-    @use_percentages = true
+    @use_percentages = false
 
     #Set to true if debugging measure.
     @debug = true
