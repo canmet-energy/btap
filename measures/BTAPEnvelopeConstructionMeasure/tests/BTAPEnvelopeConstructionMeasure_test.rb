@@ -14,12 +14,16 @@ require 'minitest/autorun'
 
 class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
   include(BTAPMeasureTestHelper)
+
   def setup()
     #Set to true if you want to package the arguments as json.
     @use_json_package = false
     #Set to true if you want to want to allow strings and doubles in stringdouble types. Set to false to force to use doubles. The latter is used for certain
     # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
     @use_string_double = false
+
+    #Use percentages instead of values
+    @use_percentages = true
 
     #Set to true if debugging measure.
     @debug = true
@@ -49,16 +53,39 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     ]
 
 
+    conductance_units = "Conductance (W/m2 K)"
+    shgc_units = ""
+    tvis_units = ""
+    max_conductance_value = 5.0
+    min_conductance_value = 0.005
+    max_shgc_value = 1.0
+    min_shgc_value = 0.0
+    max_tvis_value = 1.0
+    min_tvis_value = 0.0
+
+
+    if @use_percentages
+      conductance_units = "Percent Change (%)"
+      shgc_units = "Percent Change (%)"
+      tvis_units = "Percent Change (%)"
+      max_conductance_value = 10000.0
+      min_conductance_value = -10000.0
+      max_shgc_value = 10000.0
+      min_shgc_value = -10000.0
+      max_tvis_value = 10000.0
+      min_tvis_value = -10000.0
+    end
+
     @measure_interface_detailed = []
     #Conductances
     (@surface_index + @sub_surface_index).each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} #{conductance_units}",
           "default_value" => @baseline,
-          "max_double_value" => 5.0,
-          "min_double_value" => 0.005,
+          "max_double_value" => max_conductance_value,
+          "min_double_value" => min_conductance_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
@@ -67,13 +94,13 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} SHGC",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} #{shgc_units}",
           "default_value" => @baseline,
-          "max_double_value" => 1.0,
-          "min_double_value" => 0.0,
+          "max_double_value" => max_shgc_value,
+          "min_double_value" => min_shgc_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
@@ -81,18 +108,17 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     # Visible Transmittance
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance #{tvis_units}",
           "default_value" => @baseline,
-          "max_double_value" => 1.0,
-          "min_double_value" => 0.0,
+          "max_double_value" => max_tvis_value,
+          "min_double_value" => min_tvis_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
     end
-
     @good_input_arguments = {
         "outdoors_wall_conductance" => 3.5,
         "outdoors_roofceiling_conductance" => 3.5,
@@ -109,7 +135,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "outdoors_glassdoor_conductance" => 3.5,
         "outdoors_overheaddoor_conductance" => 3.5,
         "outdoors_fixedwindow_shgc" => 0.4,
-        "outdoors_operablewindow_shgc" =>0.4,
+        "outdoors_operablewindow_shgc" => 0.4,
         "outdoors_skylight_shgc" => 0.4,
         "outdoors_tubulardaylightdiffuser_shgc" => 0.4,
         "outdoors_tubulardaylightdome_shgc" => 0.4,
@@ -123,8 +149,6 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     }
 
   end
-
-
 
 
   def test_envelope_changes()
