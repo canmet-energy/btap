@@ -60,6 +60,9 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     # continuous optimization algorithms. You may have to re-examine your input in PAT as this fundamentally changes the measure.
     @use_string_double = false
 
+    #Use percentages instead of values
+    @use_percentages = true
+
     #Set to true if debugging measure.
     @debug = true
     #this is the 'do nothing value and most arguments should have. '
@@ -88,16 +91,39 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     ]
 
 
+    conductance_units = "Conductance (W/m2 K)"
+    shgc_units = ""
+    tvis_units = ""
+    max_conductance_value = 5.0
+    min_conductance_value = 0.005
+    max_shgc_value = 1.0
+    min_shgc_value = 0.0
+    max_tvis_value = 1.0
+    min_tvis_value = 0.0
+
+
+    if @use_percentages
+      conductance_units = "Percent Change (%)"
+      shgc_units = "Percent Change (%)"
+      tvis_units = "Percent Change (%)"
+      max_conductance_value = 10000.0
+      min_conductance_value = -10000.0
+      max_shgc_value = 10000.0
+      min_shgc_value = -10000.0
+      max_tvis_value = 10000.0
+      min_tvis_value = -10000.0
+    end
+
     @measure_interface_detailed = []
     #Conductances
     (@surface_index + @sub_surface_index).each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Conductance (W/m2 K)",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} #{conductance_units}",
           "default_value" => @baseline,
-          "max_double_value" => 5.0,
-          "min_double_value" => 0.005,
+          "max_double_value" => max_conductance_value,
+          "min_double_value" => min_conductance_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
@@ -106,13 +132,13 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
     # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} SHGC",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} #{shgc_units}",
           "default_value" => @baseline,
-          "max_double_value" => 1.0,
-          "min_double_value" => 0.0,
+          "max_double_value" => max_shgc_value,
+          "min_double_value" => min_shgc_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
@@ -120,13 +146,13 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
     # Visible Transmittance
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
-      @measure_interface_detailed  << {
+      @measure_interface_detailed << {
           "name" => "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis",
           "type" => "StringDouble",
-          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance",
+          "display_name" => "#{surface['boundary_condition']} #{surface['surface_type']} Visible Transmittance #{tvis_units}",
           "default_value" => @baseline,
-          "max_double_value" => 1.0,
-          "min_double_value" => 0.0,
+          "max_double_value" => max_tvis_value,
+          "min_double_value" => min_tvis_value,
           "valid_strings" => [@baseline],
           "is_required" => false
       }
@@ -149,14 +175,13 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
   end
 
 
-
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
     # Make a copy of the model before the measure is applied.
-    report = Standard.new.change_construction_properties_in_model(model, arguments)
+    report = Standard.new.change_construction_properties_in_model(model, arguments, @use_percentages)
 
     runner_register(runner,
                     'FinalCondition',
