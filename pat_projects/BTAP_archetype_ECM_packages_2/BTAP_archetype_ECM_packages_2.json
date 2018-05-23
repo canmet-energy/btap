@@ -1,0 +1,1628 @@
+{
+  "analysis": {
+    "display_name": "BTAP_archetype_ECM_packages_2",
+    "name": "BTAP_archetype_ECM_packages_2",
+    "output_variables": [],
+    "problem": {
+      "workflow": [
+        {
+          "name": "btap_create_necb_prototype_building",
+          "display_name": "Create NECB Prototype Building",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPCreateNECBPrototypeBuilding",
+          "measure_definition_directory": "./measures/BTAPCreateNECBPrototypeBuildings",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPCreateNECBPrototypeBuildings",
+          "measure_definition_display_name": "Create NECB Prototype Building",
+          "measure_definition_name": "btap_create_necb_prototype_building",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "ae90fsd7-a651-467a-bc8d-29d310b0f937",
+          "measure_definition_version_uuid": "97e50b3e-5990-4cba-8df8-b21548a2c9e0",
+          "uuid": "ae90fsd7-a651-467a-bc8d-29d310b0f937",
+          "version_uuid": "97e50b3e-5990-4cba-8df8-b21548a2c9e0",
+          "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "Template.",
+              "display_name_short": "template",
+              "name": "template",
+              "value_type": "string",
+              "default_value": "NECB2011",
+              "value": "NECB2011"
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Building Type.",
+                "display_name_short": "building_type",
+                "name": "building_type",
+                "value_type": "string",
+                "default_value": "SmallOffice",
+                "value": "LargeOffice",
+                "choice_display_names": [
+                  "SecondarySchool",
+                  "PrimarySchool",
+                  "SmallOffice",
+                  "MediumOffice",
+                  "LargeOffice",
+                  "SmallHotel",
+                  "LargeHotel",
+                  "Warehouse",
+                  "RetailStandalone",
+                  "RetailStripmall",
+                  "QuickServiceRestaurant",
+                  "FullServiceRestaurant",
+                  "MidriseApartment",
+                  "HighriseApartment",
+                  "Hospital",
+                  "Outpatient"
+                ]
+              },
+              "display_name": "Building Type.",
+              "display_name_short": "building_type",
+              "variable_type": "variable",
+              "minimum": "SmallOffice",
+              "maximum": "SmallOffice",
+              "static_value": "LargeOffice",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "LargeOffice",
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": "Warehouse",
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": "HighriseApartment",
+                        "weight": 0.3333333333333333
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "SmallOffice"
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Climate File",
+                "display_name_short": "epw_file",
+                "name": "epw_file",
+                "value_type": "string",
+                "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "choice_display_names": [
+                  "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                  "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+                  "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                  "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+                  "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+                  "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+                  "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+                  "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+                  "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+                  "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+                  "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+                  "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+                  "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+                  "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+                  "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+                  "CAN_BC_Summerland.717680_CWEC2016.epw",
+                  "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+                  "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                  "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+                  "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+                  "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+                  "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+                  "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+                  "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+                  "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+                  "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+                  "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+                  "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+                  "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+                  "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+                  "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+                  "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+                  "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                  "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+                  "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+                  "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+                  "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+                  "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+                  "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+                  "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+                  "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+                  "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+                  "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+                  "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+                  "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                  "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+                  "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+                  "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+                  "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+                  "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+                  "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                  "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+                  "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+                  "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+                  "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+                  "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+                  "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+                  "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+                  "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+                  "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+                  "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+                  "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+                ]
+              },
+              "display_name": "Climate File",
+              "display_name_short": "epw_file",
+              "variable_type": "variable",
+              "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "static_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+                        "weight": 0.5
+                      },
+                      {
+                        "value": "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+                        "weight": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 0
+        },
+        {
+          "name": "btap_view_model",
+          "display_name": "ViewModel",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPViewModel",
+          "measure_definition_directory": "./measures/BTAPViewModel",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPViewModel",
+          "measure_definition_display_name": "ViewModel",
+          "measure_definition_name": "btap_view_model",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "f4669f10-fda5-489d-8e1c-7ca3c2d40378",
+          "measure_definition_version_uuid": "b381aaf5-97c4-40a6-9bf7-f1c3d80ddef4",
+          "uuid": "f4669f10-fda5-489d-8e1c-7ca3c2d40378",
+          "version_uuid": "b381aaf5-97c4-40a6-9bf7-f1c3d80ddef4",
+          "description": "Visualize an OpenStudio model in a web based viewer",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "adjust_window_to_wall_ratios",
+          "display_name": "Adjust Window to Wall Ratios",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AdjustWindowToWallRatios",
+          "measure_definition_directory": "./measures/AdjustWindowToWallRatios",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\AdjustWindowToWallRatios",
+          "measure_definition_display_name": "Adjust Window to Wall Ratios",
+          "measure_definition_name": "adjust_window_to_wall_ratios",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "aafc3640-fc91-11e3-a3ac-0800200c9a66",
+          "measure_definition_version_uuid": "a4b82ac6-8cc7-42b9-b856-f4ab9f86a6eb",
+          "uuid": "aafc3640-fc91-11e3-a3ac-0800200c9a66",
+          "version_uuid": "a4b82ac6-8cc7-42b9-b856-f4ab9f86a6eb",
+          "description": "This measure will adjust the window to wall ratio for all exterior surfaces. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.",
+          "taxonomy": "Envelope.Fenestration",
+          "arguments": [
+            {
+              "display_name": "Window to Wall Ratio Multiplier.",
+              "display_name_short": "wwr_multiplier",
+              "name": "wwr_multiplier",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "Sill Height (in).",
+              "display_name_short": "sillHeight",
+              "name": "sillHeight",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 30
+            }
+          ],
+          "variables": [],
+          "workflow_index": 2
+        },
+        {
+          "name": "btap_envelope_construction_measure_detailed",
+          "display_name": "BTAPEnvelopeConstructionMeasureDetailed",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPEnvelopeConstructionMeasureDetailed",
+          "measure_definition_directory": "./measures/BTAPEnvelopeConstructionMeasureDetailed",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPEnvelopeConstructionMeasureDetailed",
+          "measure_definition_display_name": "BTAPEnvelopeConstructionMeasureDetailed",
+          "measure_definition_name": "btap_envelope_construction_measure_detailed",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "224561f4-8ccc-4f60-8118-34b85359d6f7",
+          "measure_definition_version_uuid": "a90909a4-2d78-4cde-9c73-2cb7fa76d741",
+          "uuid": "224561f4-8ccc-4f60-8118-34b85359d6f7",
+          "version_uuid": "a90909a4-2d78-4cde-9c73-2cb7fa76d741",
+          "description": "Changes exterior wall construction's thermal conductances, Visible Transmittance and SHGC where application for each surface type.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Outdoors Wall Conductance (W/m2 K)",
+              "display_name_short": "outdoors_wall_conductance",
+              "name": "outdoors_wall_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors RoofCeiling Conductance (W/m2 K)",
+              "display_name_short": "outdoors_roofceiling_conductance",
+              "name": "outdoors_roofceiling_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors Floor Conductance (W/m2 K)",
+              "display_name_short": "outdoors_floor_conductance",
+              "name": "outdoors_floor_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Ground Wall Conductance (W/m2 K)",
+              "display_name_short": "ground_wall_conductance",
+              "name": "ground_wall_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Ground RoofCeiling Conductance (W/m2 K)",
+              "display_name_short": "ground_roofceiling_conductance",
+              "name": "ground_roofceiling_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Ground Floor Conductance (W/m2 K)",
+              "display_name_short": "ground_floor_conductance",
+              "name": "ground_floor_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors FixedWindow Conductance (W/m2 K)",
+              "display_name_short": "outdoors_fixedwindow_conductance",
+              "name": "outdoors_fixedwindow_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors OperableWindow Conductance (W/m2 K)",
+              "display_name_short": "outdoors_operablewindow_conductance",
+              "name": "outdoors_operablewindow_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors Skylight Conductance (W/m2 K)",
+              "display_name_short": "outdoors_skylight_conductance",
+              "name": "outdoors_skylight_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDiffuser Conductance (W/m2 K)",
+              "display_name_short": "outdoors_tubulardaylightdiffuser_conductance",
+              "name": "outdoors_tubulardaylightdiffuser_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDome Conductance (W/m2 K)",
+              "display_name_short": "outdoors_tubulardaylightdome_conductance",
+              "name": "outdoors_tubulardaylightdome_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors Door Conductance (W/m2 K)",
+              "display_name_short": "outdoors_door_conductance",
+              "name": "outdoors_door_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors GlassDoor Conductance (W/m2 K)",
+              "display_name_short": "outdoors_glassdoor_conductance",
+              "name": "outdoors_glassdoor_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors OverheadDoor Conductance (W/m2 K)",
+              "display_name_short": "outdoors_overheaddoor_conductance",
+              "name": "outdoors_overheaddoor_conductance",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors FixedWindow SHGC",
+              "display_name_short": "outdoors_fixedwindow_shgc",
+              "name": "outdoors_fixedwindow_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors OperableWindow SHGC",
+              "display_name_short": "outdoors_operablewindow_shgc",
+              "name": "outdoors_operablewindow_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors Skylight SHGC",
+              "display_name_short": "outdoors_skylight_shgc",
+              "name": "outdoors_skylight_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDiffuser SHGC",
+              "display_name_short": "outdoors_tubulardaylightdiffuser_shgc",
+              "name": "outdoors_tubulardaylightdiffuser_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDome SHGC",
+              "display_name_short": "outdoors_tubulardaylightdome_shgc",
+              "name": "outdoors_tubulardaylightdome_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors GlassDoor SHGC",
+              "display_name_short": "outdoors_glassdoor_shgc",
+              "name": "outdoors_glassdoor_shgc",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors FixedWindow Visible Transmittance",
+              "display_name_short": "outdoors_fixedwindow_tvis",
+              "name": "outdoors_fixedwindow_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors OperableWindow Visible Transmittance",
+              "display_name_short": "outdoors_operablewindow_tvis",
+              "name": "outdoors_operablewindow_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors Skylight Visible Transmittance",
+              "display_name_short": "outdoors_skylight_tvis",
+              "name": "outdoors_skylight_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDiffuser Visible Transmittance",
+              "display_name_short": "outdoors_tubulardaylightdiffuser_tvis",
+              "name": "outdoors_tubulardaylightdiffuser_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors TubularDaylightDome Visible Transmittance",
+              "display_name_short": "outdoors_tubulardaylightdome_tvis",
+              "name": "outdoors_tubulardaylightdome_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            },
+            {
+              "display_name": "Outdoors GlassDoor Visible Transmittance",
+              "display_name_short": "outdoors_glassdoor_tvis",
+              "name": "outdoors_glassdoor_tvis",
+              "value_type": "string",
+              "default_value": "baseline",
+              "value": "baseline"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 3
+        },
+        {
+          "name": "improve_motor_efficiency",
+          "display_name": "Improve Motor Efficiency in Selected Fans and Pumps",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ImproveMotorEfficiency",
+          "measure_definition_directory": "./measures/ImproveMotorEfficiency",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\ImproveMotorEfficiency",
+          "measure_definition_display_name": "Improve Motor Efficiency in Selected Fans and Pumps",
+          "measure_definition_name": "improve_motor_efficiency",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "52013ba9-7b9b-4ffd-bc67-d4c0fa05d7ae",
+          "measure_definition_version_uuid": "c701c1d4-c2b3-47cf-84a9-7d02493b0e48",
+          "uuid": "52013ba9-7b9b-4ffd-bc67-d4c0fa05d7ae",
+          "version_uuid": "c701c1d4-c2b3-47cf-84a9-7d02493b0e48",
+          "description": "The assessment team observed opportunities for motor efficiency improvements on HVAC systems. These motors are asynchronous induction motors.\rThere are currently motors on the market that are far superior to standard efficiency motors. These come in both premium efficiency and ultra-efficiency which exceed NEMA Premium standards. These motors utilize a die cast copper rotor which reduces the energy requirements of the motor and allows the motor to run cooler. The motor also features an improved heat dissipation system and new low-friction bearings; both of which help extend the life of the motor. The motor also has a smaller weight and size compared to the standard efficiency motors. These high efficiency motors are showing efficiency improvements on the order of 3-10% more efficient than current standard efficiency motors.\rFor all of the three-phase, asynchronous induction motors feeding AHU supply fans, specify premium or ultra-efficiency motors. The belts associated with the largest motors, longest run times, and that run closest to full load should be given priority when making replacements.",
+          "taxonomy": "HVAC.Distribution",
+          "arguments": [
+            {
+              "display_name": "Choose a Plant or Air Loop to Alter.",
+              "display_name_short": "object",
+              "name": "object",
+              "value_type": "string",
+              "default_value": "*All Plant and Air Loops*",
+              "value": "*All Plant and Air Loops*"
+            },
+            {
+              "display_name": "Set Motor Efficiency(%).",
+              "display_name_short": "motor_eff",
+              "name": "motor_eff",
+              "value_type": "double",
+              "default_value": 96,
+              "value": 96
+            },
+            {
+              "display_name": "Remove Baseline Costs From Effected Fans and Pumps?",
+              "display_name_short": "remove_costs",
+              "name": "remove_costs",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Material and Installation Costs per Motor ($).",
+              "display_name_short": "material_cost",
+              "name": "material_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs per Motor ($).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 20,
+              "value": 20
+            },
+            {
+              "display_name": "O & M Costs per Motor ($).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 4
+        },
+        {
+          "name": "reduce_electric_equipment_loads_by_percentage",
+          "display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_directory": "./measures/ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_definition_name": "reduce_electric_equipment_loads_by_percentage",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "0902e302-70db-4339-99b0-17f08bc93629",
+          "measure_definition_version_uuid": "a0678b43-c998-4b1b-a668-d7470adef8a3",
+          "uuid": "0902e302-70db-4339-99b0-17f08bc93629",
+          "version_uuid": "a0678b43-c998-4b1b-a668-d7470adef8a3",
+          "description": "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
+          "taxonomy": "Equipment.Electric Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Electric Equipment Power Reduction (%).",
+              "display_name_short": "elecequip_power_reduction_percent",
+              "name": "elecequip_power_reduction_percent",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 30
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Electric Equipment per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 5
+        },
+        {
+          "name": "reduce_lighting_loads_by_percentage",
+          "display_name": "Reduce Lighting Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
+          "measure_definition_directory": "./measures/ReduceLightingLoadsByPercentage",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\ReduceLightingLoadsByPercentage",
+          "measure_definition_display_name": "Reduce Lighting Loads by Percentage",
+          "measure_definition_name": "reduce_lighting_loads_by_percentage",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "791f3404-a28b-4a80-ba3f-e15b339e39ea",
+          "measure_definition_version_uuid": "f18c843f-bac7-4dcc-816d-dbd3fdaae530",
+          "uuid": "791f3404-a28b-4a80-ba3f-e15b339e39ea",
+          "version_uuid": "f18c843f-bac7-4dcc-816d-dbd3fdaae530",
+          "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
+          "taxonomy": "Electric Lighting.Lighting Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Lighting Power Reduction (%).",
+              "display_name_short": "lighting_power_reduction_percent",
+              "name": "lighting_power_reduction_percent",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 30
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 6
+        },
+        {
+          "name": "replace_hva_cwith_gsh_pand_doas",
+          "display_name": "Replace HVAC with GSHP and DOAS",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReplaceHVACwithGSHPandDOAS",
+          "measure_definition_directory": "./measures/deb22245-dcf9-4167-814c-2296e8f0e4e8",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\deb22245-dcf9-4167-814c-2296e8f0e4e8",
+          "measure_definition_display_name": "Replace HVAC with GSHP and DOAS",
+          "measure_definition_name": "replace_hva_cwith_gsh_pand_doas",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "6063c5f5-f88c-49ae-8ded-63baf3212087",
+          "measure_definition_version_uuid": "771da53d-3b0d-44c5-afb9-203dc95b3549",
+          "uuid": "6063c5f5-f88c-49ae-8ded-63baf3212087",
+          "version_uuid": "771da53d-3b0d-44c5-afb9-203dc95b3549",
+          "description": "Measure replaces existing HVAC system (if any) with a Ground Source Heat Pump (GSHP) with DOAS HVAC system (one DOAS per floor).  The GSHP with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types except storage spaces like stairwells, mechanical/electrical rooms etc.",
+          "taxonomy": "HVAC.Whole System",
+          "arguments": [
+            {
+              "display_name": "This space type should be part of a ceiling return air plenum.",
+              "display_name_short": "ceiling_return_plenum_space_type",
+              "name": "ceiling_return_plenum_space_type",
+              "value_type": "string",
+              "default_value": "Entry way",
+              "value": "Entry way"
+            },
+            {
+              "display_name": "GSHP DX Heating Coil Heating COP",
+              "display_name_short": "gshp_htg_cop",
+              "name": "gshp_htg_cop",
+              "value_type": "double",
+              "default_value": 4,
+              "value": 4
+            },
+            {
+              "display_name": "GSHP DX Cooling Coil Cooling EER",
+              "display_name_short": "gshp_clg_eer",
+              "name": "gshp_clg_eer",
+              "value_type": "double",
+              "default_value": 14,
+              "value": 14
+            },
+            {
+              "display_name": "GSHP Fan Type: PSC or ECM?",
+              "display_name_short": "gshp_fan_type",
+              "name": "gshp_fan_type",
+              "value_type": "string",
+              "default_value": "PSC",
+              "value": "PSC"
+            },
+            {
+              "display_name": "Number of Bore Holes",
+              "display_name_short": "bore_hole_no",
+              "name": "bore_hole_no",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "Bore Hole Length (ft)",
+              "display_name_short": "bore_hole_length",
+              "name": "bore_hole_length",
+              "value_type": "double",
+              "default_value": 200,
+              "value": 200
+            },
+            {
+              "display_name": "Bore Hole Radius (inch)",
+              "display_name_short": "bore_hole_radius",
+              "name": "bore_hole_radius",
+              "value_type": "double",
+              "default_value": 6,
+              "value": 6
+            },
+            {
+              "display_name": "Ground Conductivity (Btu/hr.F.R",
+              "display_name_short": "ground_k_value",
+              "name": "ground_k_value",
+              "value_type": "double",
+              "default_value": 0.75,
+              "value": 0.75
+            },
+            {
+              "display_name": "Grout Conductivity (Btu/hr.F.R",
+              "display_name_short": "grout_k_value",
+              "name": "grout_k_value",
+              "value_type": "double",
+              "default_value": 0.75,
+              "value": 0.75
+            },
+            {
+              "display_name": "Supplemental Heating Boiler?",
+              "display_name_short": "supplemental_boiler",
+              "name": "supplemental_boiler",
+              "value_type": "string",
+              "default_value": "No",
+              "value": "No"
+            },
+            {
+              "display_name": "boiler normal capacity (MBtuh)",
+              "display_name_short": "boiler_cap",
+              "name": "boiler_cap",
+              "value_type": "double",
+              "default_value": 500,
+              "value": 500
+            },
+            {
+              "display_name": "Boiler Thermal Efficiency",
+              "display_name_short": "boiler_eff",
+              "name": "boiler_eff",
+              "value_type": "double",
+              "default_value": 0.9,
+              "value": 0.9
+            },
+            {
+              "display_name": "Boiler Fuel Type",
+              "display_name_short": "boiler_fuel_type",
+              "name": "boiler_fuel_type",
+              "value_type": "string",
+              "default_value": "NaturalGas",
+              "value": "NaturalGas"
+            },
+            {
+              "display_name": "Boiler Design Heating Water Outlet Temperature (F)",
+              "display_name_short": "boiler_hw_st",
+              "name": "boiler_hw_st",
+              "value_type": "double",
+              "default_value": 120,
+              "value": 120
+            },
+            {
+              "display_name": "DOAS Fan Flow Control - Variable means DCV controls",
+              "display_name_short": "doas_fan_type",
+              "name": "doas_fan_type",
+              "value_type": "string",
+              "default_value": "Variable",
+              "value": "Variable"
+            },
+            {
+              "display_name": "DOAS Energy Recovery?",
+              "display_name_short": "doas_erv",
+              "name": "doas_erv",
+              "value_type": "string",
+              "default_value": "none",
+              "value": "none"
+            },
+            {
+              "display_name": "DOAS Direct Evaporative Cooling?",
+              "display_name_short": "doas_evap",
+              "name": "doas_evap",
+              "value_type": "string",
+              "default_value": "none",
+              "value": "none"
+            },
+            {
+              "display_name": "DOAS DX Cooling EER",
+              "display_name_short": "doas_dx_eer",
+              "name": "doas_dx_eer",
+              "value_type": "double",
+              "default_value": 10,
+              "value": 10
+            },
+            {
+              "display_name": "Total Cost for HVAC System ($).",
+              "display_name_short": "cost_total_hvac_system",
+              "name": "cost_total_hvac_system",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Apply recommended availability and ventilation schedules for air handlers?",
+              "display_name_short": "remake_schedules",
+              "name": "remake_schedules",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Add Entry way space type to GSHP system?",
+              "display_name_short": "Entry way",
+              "name": "Entry way",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Open area space type to GSHP system?",
+              "display_name_short": "Open area",
+              "name": "Open area",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Plenum space type to GSHP system?",
+              "display_name_short": "Plenum",
+              "name": "Plenum",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Small office space type to GSHP system?",
+              "display_name_short": "Small office",
+              "name": "Small office",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Utility space type to GSHP system?",
+              "display_name_short": "Utility",
+              "name": "Utility",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            }
+          ],
+          "variables": [],
+          "workflow_index": 7
+        },
+        {
+          "name": "chilled_beamwith_doas",
+          "display_name": "Chilled Beam with DOAS",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ChilledBeamwithDOAS",
+          "measure_definition_directory": "./measures/b7c94297-e347-4449-8446-b5ea15cf5cf7",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\b7c94297-e347-4449-8446-b5ea15cf5cf7",
+          "measure_definition_display_name": "Chilled Beam with DOAS",
+          "measure_definition_name": "chilled_beamwith_doas",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "823db928-e67d-4593-a13c-01aefe1fed95",
+          "measure_definition_version_uuid": "8d8d2efa-2051-407b-9e47-665c144cc1a6",
+          "uuid": "823db928-e67d-4593-a13c-01aefe1fed95",
+          "version_uuid": "8d8d2efa-2051-407b-9e47-665c144cc1a6",
+          "description": "Measure replaces existing HVAC system (if any) with a chilled beam system with DOAS HVAC system (one DOAS per floor).  The chilled beam with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types selected by the user. Heating can be provided by baseboards or in floor radiant.",
+          "taxonomy": "HVAC.Whole System",
+          "arguments": [
+            {
+              "display_name": "This space type should be part of a ceiling return air plenum.",
+              "display_name_short": "ceilingReturnPlenumSpaceType",
+              "name": "ceilingReturnPlenumSpaceType",
+              "value_type": "string",
+              "default_value": "Utility",
+              "value": "Utility"
+            },
+            {
+              "display_name": "Chilled Beam Type",
+              "display_name_short": "chilled_beam_type",
+              "name": "chilled_beam_type",
+              "value_type": "string",
+              "default_value": "Passive",
+              "value": "Passive"
+            },
+            {
+              "display_name": "Zone Heating Type",
+              "display_name_short": "heating_type",
+              "name": "heating_type",
+              "value_type": "string",
+              "default_value": "Baseboard",
+              "value": "Baseboard"
+            },
+            {
+              "display_name": "Boiler Thermal Efficiency",
+              "display_name_short": "boilerEff",
+              "name": "boilerEff",
+              "value_type": "double",
+              "default_value": 0.9,
+              "value": 0.9
+            },
+            {
+              "display_name": "Boiler Fuel Type",
+              "display_name_short": "boilerFuelType",
+              "name": "boilerFuelType",
+              "value_type": "string",
+              "default_value": "NaturalGas",
+              "value": "NaturalGas"
+            },
+            {
+              "display_name": "Boiler Design Heating Water Outlet Temperature (F)",
+              "display_name_short": "boilerHWST",
+              "name": "boilerHWST",
+              "value_type": "double",
+              "default_value": 140,
+              "value": 140
+            },
+            {
+              "display_name": "How Water Loop Temperature (F)",
+              "display_name_short": "hw_loop_temp",
+              "name": "hw_loop_temp",
+              "value_type": "double",
+              "default_value": 140,
+              "value": 140
+            },
+            {
+              "display_name": "Chiller COP",
+              "display_name_short": "chiller_cop",
+              "name": "chiller_cop",
+              "value_type": "double",
+              "default_value": 3,
+              "value": 3
+            },
+            {
+              "display_name": "Chiller Condenser Type",
+              "display_name_short": "chiller_condenser",
+              "name": "chiller_condenser",
+              "value_type": "string",
+              "default_value": "AirCooled",
+              "value": "AirCooled"
+            },
+            {
+              "display_name": "Chiller Design Chilled Water Outlet Temperature (F)",
+              "display_name_short": "chillerCHWST",
+              "name": "chillerCHWST",
+              "value_type": "double",
+              "default_value": 54,
+              "value": 54
+            },
+            {
+              "display_name": "Chilled Water Loop Temperature (F)",
+              "display_name_short": "chw_loop_temp",
+              "name": "chw_loop_temp",
+              "value_type": "double",
+              "default_value": 54,
+              "value": 54
+            },
+            {
+              "display_name": "Cooling Tower Type",
+              "display_name_short": "cooling_tower",
+              "name": "cooling_tower",
+              "value_type": "string",
+              "default_value": "VariableSpeed",
+              "value": "VariableSpeed"
+            },
+            {
+              "display_name": "DOAS Energy Recovery?",
+              "display_name_short": "doasERV",
+              "name": "doasERV",
+              "value_type": "string",
+              "default_value": "none",
+              "value": "none"
+            },
+            {
+              "display_name": "DOAS Heating Coil Type",
+              "display_name_short": "doasHeatingCoil",
+              "name": "doasHeatingCoil",
+              "value_type": "string",
+              "default_value": "Gas",
+              "value": "Gas"
+            },
+            {
+              "display_name": "DOAS Cooling Coil Type",
+              "display_name_short": "doasCoolingCoil",
+              "name": "doasCoolingCoil",
+              "value_type": "string",
+              "default_value": "none",
+              "value": "none"
+            },
+            {
+              "display_name": "DOAS DX COP (if applicable)",
+              "display_name_short": "dx_cop",
+              "name": "dx_cop",
+              "value_type": "double",
+              "default_value": 3,
+              "value": 3
+            },
+            {
+              "display_name": "DOAS Direct Evaporative Cooling?",
+              "display_name_short": "doasEvap",
+              "name": "doasEvap",
+              "value_type": "string",
+              "default_value": "none",
+              "value": "none"
+            },
+            {
+              "display_name": "Total Cost for HVAC System ($).",
+              "display_name_short": "costTotalHVACSystem",
+              "name": "costTotalHVACSystem",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Apply recommended availability and ventilation schedules for air handlers?",
+              "display_name_short": "remake_schedules",
+              "name": "remake_schedules",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Add Utility space type to Chilled Beam system?",
+              "display_name_short": "Utility",
+              "name": "Utility",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Small office space type to Chilled Beam system?",
+              "display_name_short": "Small office",
+              "name": "Small office",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Open area space type to Chilled Beam system?",
+              "display_name_short": "Open area",
+              "name": "Open area",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Entry way space type to Chilled Beam system?",
+              "display_name_short": "Entry way",
+              "name": "Entry way",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Add Plenum space type to Chilled Beam system?",
+              "display_name_short": "Plenum",
+              "name": "Plenum",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            }
+          ],
+          "variables": [],
+          "workflow_index": 8
+        },
+        {
+          "name": "add_energy_recovery_ventilator",
+          "display_name": "AddEnergyRecoveryVentilator",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AddEnergyRecoveryVentilator",
+          "measure_definition_directory": "./measures/739acc9c-ee2b-49eb-a7b9-afc0a559ed82",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\739acc9c-ee2b-49eb-a7b9-afc0a559ed82",
+          "measure_definition_display_name": "AddEnergyRecoveryVentilator",
+          "measure_definition_name": "add_energy_recovery_ventilator",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+          "measure_definition_version_uuid": "d164ce55-1dad-4fd6-a19e-73eac59d09c9",
+          "uuid": "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+          "version_uuid": "d164ce55-1dad-4fd6-a19e-73eac59d09c9",
+          "description": "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+          "taxonomy": "HVAC.Energy Recovery",
+          "arguments": [
+            {
+              "display_name": "!!!!*** This Measure is not Applicable to loaded Model. Read the description and choose an appropriate baseline model. ***!!!!",
+              "display_name_short": "info_widget",
+              "name": "info_widget",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Apply the measure to ",
+              "display_name_short": "air_loop_widget",
+              "name": "air_loop_widget",
+              "value_type": "string",
+              "default_value": "*All air loops*",
+              "value": "*All air loops*"
+            },
+            {
+              "display_name": "Sensible Effectiveness at 100% Heating Air Flow",
+              "display_name_short": "sensible_eff_at_100_heating",
+              "name": "sensible_eff_at_100_heating",
+              "value_type": "double",
+              "default_value": 0.76,
+              "value": 0.76
+            },
+            {
+              "display_name": "Latent Effectiveness at 100% Heating Air Flow",
+              "display_name_short": "latent_eff_at_100_heating",
+              "name": "latent_eff_at_100_heating",
+              "value_type": "double",
+              "default_value": 0.68,
+              "value": 0.68
+            },
+            {
+              "display_name": "Sensible Effectiveness at 75% Heating Air Flow",
+              "display_name_short": "sensible_eff_at_75_heating",
+              "name": "sensible_eff_at_75_heating",
+              "value_type": "double",
+              "default_value": 0.81,
+              "value": 0.81
+            },
+            {
+              "display_name": "Latent Effectiveness at 75% Heating Air Flow",
+              "display_name_short": "latent_eff_at_75_heating",
+              "name": "latent_eff_at_75_heating",
+              "value_type": "double",
+              "default_value": 0.73,
+              "value": 0.73
+            },
+            {
+              "display_name": "Sensible Effectiveness at 100% Cooling Air Flow",
+              "display_name_short": "sensible_eff_at_100_cooling",
+              "name": "sensible_eff_at_100_cooling",
+              "value_type": "double",
+              "default_value": 0.76,
+              "value": 0.76
+            },
+            {
+              "display_name": "Latent Effectiveness at 100% Cooling Air Flow",
+              "display_name_short": "latent_eff_at_100_cooling",
+              "name": "latent_eff_at_100_cooling",
+              "value_type": "double",
+              "default_value": 0.68,
+              "value": 0.68
+            },
+            {
+              "display_name": "Sensible Effectiveness at 75% Cooling Air Flow",
+              "display_name_short": "sensible_eff_at_75_cooling",
+              "name": "sensible_eff_at_75_cooling",
+              "value_type": "double",
+              "default_value": 0.81,
+              "value": 0.81
+            },
+            {
+              "display_name": "Latent Effectiveness at 75% Cooling Air Flow",
+              "display_name_short": "latent_eff_at_75_cooling",
+              "name": "latent_eff_at_75_cooling",
+              "value_type": "double",
+              "default_value": 0.73,
+              "value": 0.73
+            },
+            {
+              "display_name": "Heat Exchanger Type.",
+              "display_name_short": "heat_exchanger_type_widget",
+              "name": "heat_exchanger_type_widget",
+              "value_type": "string",
+              "default_value": "Rotary",
+              "value": "Rotary"
+            },
+            {
+              "display_name": "Nominal electric power [W]",
+              "display_name_short": "nominal_electric_power",
+              "name": "nominal_electric_power",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            }
+          ],
+          "variables": [],
+          "workflow_index": 9
+        },
+        {
+          "name": "btap_utility_tariffs_model_setup",
+          "display_name": "BTAP Utility Tariffs Model Setup",
+          "measure_type": "EnergyPlusMeasure",
+          "measure_definition_class_name": "BTAPUtilityTariffsModelSetup",
+          "measure_definition_directory": "./measures/BTAPUtilityTariffs",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPUtilityTariffs",
+          "measure_definition_display_name": "BTAP Utility Tariffs Model Setup",
+          "measure_definition_name": "btap_utility_tariffs_model_setup",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "7353d86e-d166-4f32-a572-27ce8e65ebb5",
+          "measure_definition_version_uuid": "caa5e3dc-680d-48aa-9a51-d296566a480f",
+          "uuid": "7353d86e-d166-4f32-a572-27ce8e65ebb5",
+          "version_uuid": "caa5e3dc-680d-48aa-9a51-d296566a480f",
+          "description": "Add the selected utility rate, as well as set the time step and lifecycle costing parameters.",
+          "taxonomy": "Economics.Life Cycle Cost Analysis",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 10
+        },
+        {
+          "name": "btap_results",
+          "display_name": "BTAP Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "BTAPResults",
+          "measure_definition_directory": "./measures/BTAPResults",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPResults",
+          "measure_definition_display_name": "BTAP Results",
+          "measure_definition_name": "btap_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "98aec261-d860-4ffa-9537-fa32cd356857",
+          "measure_definition_version_uuid": "b0b0c8b6-62a4-49e7-b2ba-a9f717ca2d38",
+          "uuid": "98aec261-d860-4ffa-9537-fa32cd356857",
+          "version_uuid": "b0b0c8b6-62a4-49e7-b2ba-a9f717ca2d38",
+          "description": "This measure creates BTAP result values used for NRCan analyses.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Generate Hourly Report.",
+              "display_name_short": "generate_hourly_report",
+              "name": "generate_hourly_report",
+              "value_type": "string",
+              "default_value": "false",
+              "value": "false"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 11
+        },
+        {
+          "name": "openstudio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/BTAPOpenstudioResults",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_packages_2\\measures\\BTAPOpenstudioResults",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "openstudio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "774bdba5-d2ec-4bed-80e2-b50327efeeac",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "774bdba5-d2ec-4bed-80e2-b50327efeeac",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "building_summary_section",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "annual_overview_section",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "monthly_overview_section",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "utility_bills_rates_section",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "envelope_section_section",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "space_type_breakdown_section",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "space_type_details_section",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "interior_lighting_section",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "plug_loads_section",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "exterior_light_section",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "water_use_section",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "hvac_load_profile",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "zone_condition_section",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "zone_summary_section",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "zone_equipment_detail_section",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "air_loops_detail_section",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "plant_loops_detail_section",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "outdoor_air_section",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "cost_summary_section",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "source_energy_section",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "schedules_overview_section",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 12
+        }
+      ],
+      "algorithm": {
+        "experiment_type": "full_factorial",
+        "number_of_samples": 2,
+        "seed": 1,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 0,
+        "objective_functions": []
+      },
+      "analysis_type": "doe"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/dummy.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/dummy.epw"
+    },
+    "file_format_version": 1,
+    "server_scripts": {}
+  }
+}

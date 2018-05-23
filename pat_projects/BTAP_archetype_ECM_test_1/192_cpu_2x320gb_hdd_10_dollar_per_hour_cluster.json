@@ -1,0 +1,15 @@
+{
+  "cluster_name": "192_cpu_2x320gb_hdd_10_dollar_per_hour",
+  "connected": false,
+  "server_instance_type": "c3.8xlarge",
+  "worker_instance_type": "c3.8xlarge",
+  "user_id": "",
+  "worker_node_number": 5,
+  "aws_tags": [],
+  "openstudio_server_version": "2.4.1-nrcan",
+  "cluster_status": "terminated",
+  "server": {
+    "dns": null
+  },
+  "ami_lookup_version": 3
+}

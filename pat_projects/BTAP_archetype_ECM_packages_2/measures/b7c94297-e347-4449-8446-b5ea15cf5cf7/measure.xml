@@ -1,0 +1,399 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>chilled_beamwith_doas</name>
+  <uid>823db928-e67d-4593-a13c-01aefe1fed95</uid>
+  <version_id>8d8d2efa-2051-407b-9e47-665c144cc1a6</version_id>
+  <version_modified>20180515T210210Z</version_modified>
+  <xml_checksum>4435983D</xml_checksum>
+  <class_name>ChilledBeamwithDOAS</class_name>
+  <display_name>Chilled Beam with DOAS</display_name>
+  <description>Measure replaces existing HVAC system (if any) with a chilled beam system with DOAS HVAC system (one DOAS per floor).  The chilled beam with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types selected by the user. Heating can be provided by baseboards or in floor radiant.</description>
+  <modeler_description>Airloops are dedicated to ventilation (DOAS) and have constant speed fan operation, gas furnace or hot water heating, single speed DX, two speed DX, chilled water, or no cooling and optional energy recovery and/or direct evaporative cooling.  Conditioning is provided at the zone level with active or passive chilled beams. The user can select in floor radiant or baseboards for zone level heating. The plant consists of a hot water loop with a boiler and a chilled water loop with a air cooled or water cooled chiller (if a water cooled chiller is sleeted then the script creates a condenser loop and has the option between a single speed or variable speed cooling tower).</modeler_description>
+  <arguments>
+    <argument>
+      <name>ceilingReturnPlenumSpaceType</name>
+      <display_name>This space type should be part of a ceiling return air plenum.</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>chilled_beam_type</name>
+      <display_name>Chilled Beam Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Passive</default_value>
+      <choices>
+        <choice>
+          <value>Active</value>
+          <display_name>Active</display_name>
+        </choice>
+        <choice>
+          <value>Passive</value>
+          <display_name>Passive</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>heating_type</name>
+      <display_name>Zone Heating Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Baseboard</default_value>
+      <choices>
+        <choice>
+          <value>Baseboard</value>
+          <display_name>Baseboard</display_name>
+        </choice>
+        <choice>
+          <value>Radiant Floors</value>
+          <display_name>Radiant Floors</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>boilerEff</name>
+      <display_name>Boiler Thermal Efficiency</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.9</default_value>
+    </argument>
+    <argument>
+      <name>boilerFuelType</name>
+      <display_name>Boiler Fuel Type</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>NaturalGas</default_value>
+      <choices>
+        <choice>
+          <value>NaturalGas</value>
+          <display_name>NaturalGas</display_name>
+        </choice>
+        <choice>
+          <value>PropaneGas</value>
+          <display_name>PropaneGas</display_name>
+        </choice>
+        <choice>
+          <value>FuelOil#1</value>
+          <display_name>FuelOil#1</display_name>
+        </choice>
+        <choice>
+          <value>FuelOil#2</value>
+          <display_name>FuelOil#2</display_name>
+        </choice>
+        <choice>
+          <value>Electricity</value>
+          <display_name>Electricity</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>boilerHWST</name>
+      <display_name>Boiler Design Heating Water Outlet Temperature (F)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>140</default_value>
+    </argument>
+    <argument>
+      <name>hw_loop_temp</name>
+      <display_name>How Water Loop Temperature (F)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>140</default_value>
+    </argument>
+    <argument>
+      <name>chiller_cop</name>
+      <display_name>Chiller COP</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3</default_value>
+    </argument>
+    <argument>
+      <name>chiller_condenser</name>
+      <display_name>Chiller Condenser Type</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>AirCooled</default_value>
+      <choices>
+        <choice>
+          <value>AirCooled</value>
+          <display_name>AirCooled</display_name>
+        </choice>
+        <choice>
+          <value>WaterCooled</value>
+          <display_name>WaterCooled</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>chillerCHWST</name>
+      <display_name>Chiller Design Chilled Water Outlet Temperature (F)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>54</default_value>
+    </argument>
+    <argument>
+      <name>chw_loop_temp</name>
+      <display_name>Chilled Water Loop Temperature (F)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>54</default_value>
+    </argument>
+    <argument>
+      <name>cooling_tower</name>
+      <display_name>Cooling Tower Type</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>VariableSpeed</default_value>
+      <choices>
+        <choice>
+          <value>SingleSpeed</value>
+          <display_name>SingleSpeed</display_name>
+        </choice>
+        <choice>
+          <value>VariableSpeed</value>
+          <display_name>VariableSpeed</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>doasERV</name>
+      <display_name>DOAS Energy Recovery?</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>none</default_value>
+      <choices>
+        <choice>
+          <value>plate w/o economizer lockout</value>
+          <display_name>plate w/o economizer lockout</display_name>
+        </choice>
+        <choice>
+          <value>plate w/ economizer lockout</value>
+          <display_name>plate w/ economizer lockout</display_name>
+        </choice>
+        <choice>
+          <value>rotary wheel w/o economizer lockout</value>
+          <display_name>rotary wheel w/o economizer lockout</display_name>
+        </choice>
+        <choice>
+          <value>rotary wheel w/ economizer lockout</value>
+          <display_name>rotary wheel w/ economizer lockout</display_name>
+        </choice>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>doasHeatingCoil</name>
+      <display_name>DOAS Heating Coil Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Gas</default_value>
+      <choices>
+        <choice>
+          <value>Gas</value>
+          <display_name>Gas</display_name>
+        </choice>
+        <choice>
+          <value>Water</value>
+          <display_name>Water</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>doasCoolingCoil</name>
+      <display_name>DOAS Cooling Coil Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>none</default_value>
+      <choices>
+        <choice>
+          <value>SingleDX</value>
+          <display_name>SingleDX</display_name>
+        </choice>
+        <choice>
+          <value>TwoSpeedDX</value>
+          <display_name>TwoSpeedDX</display_name>
+        </choice>
+        <choice>
+          <value>Water</value>
+          <display_name>Water</display_name>
+        </choice>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>dx_cop</name>
+      <display_name>DOAS DX COP (if applicable)</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3</default_value>
+    </argument>
+    <argument>
+      <name>doasEvap</name>
+      <display_name>DOAS Direct Evaporative Cooling?</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>none</default_value>
+      <choices>
+        <choice>
+          <value>Direct Evaporative Cooler</value>
+          <display_name>Direct Evaporative Cooler</display_name>
+        </choice>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>costTotalHVACSystem</name>
+      <display_name>Total Cost for HVAC System ($).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>remake_schedules</name>
+      <display_name>Apply recommended availability and ventilation schedules for air handlers?</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>true</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>HVAC.Whole System</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.3.0</identifier>
+        <min_compatible>1.8.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>6AD0A2D9</checksum>
+    </file>
+    <file>
+      <filename>AedgOfficeHvacWshpDoas_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6E9C8413</checksum>
+    </file>
+    <file>
+      <filename>AEDG_HVAC_GenericTestModel_0225_a.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ED45BF2B</checksum>
+    </file>
+    <file>
+      <filename>measure-backup-1.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7DA88440</checksum>
+    </file>
+    <file>
+      <filename>measure-backup.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5EC116F9</checksum>
+    </file>
+    <file>
+      <filename>test_arguments.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2BA7A96A</checksum>
+    </file>
+    <file>
+      <filename>OsLib_AedgMeasures.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>400D07BE</checksum>
+    </file>
+    <file>
+      <filename>OsLib_Constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1DBDBCB3</checksum>
+    </file>
+    <file>
+      <filename>OsLib_Geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>730B5D71</checksum>
+    </file>
+    <file>
+      <filename>OsLib_HelperMethods.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>15A9730B</checksum>
+    </file>
+    <file>
+      <filename>OsLib_HVAC.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>EE065D34</checksum>
+    </file>
+    <file>
+      <filename>OsLib_LightingAndEquipment.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E76DE29C</checksum>
+    </file>
+    <file>
+      <filename>OsLib_Schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C53CDDCD</checksum>
+    </file>
+  </files>
+</measure>

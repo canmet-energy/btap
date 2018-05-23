@@ -1,0 +1,553 @@
+{
+  "analysis": {
+    "display_name": "BTAP_archetype_ECM_test_1",
+    "name": "BTAP_archetype_ECM_test_1",
+    "output_variables": [],
+    "problem": {
+      "workflow": [
+        {
+          "name": "btap_create_necb_prototype_building",
+          "display_name": "Create NECB Prototype Building",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPCreateNECBPrototypeBuilding",
+          "measure_definition_directory": "./measures/BTAPCreateNECBPrototypeBuildings",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\BTAPCreateNECBPrototypeBuildings",
+          "measure_definition_display_name": "Create NECB Prototype Building",
+          "measure_definition_name": "btap_create_necb_prototype_building",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "ae90fsd7-a651-467a-bc8d-29d310b0f937",
+          "measure_definition_version_uuid": "97e50b3e-5990-4cba-8df8-b21548a2c9e0",
+          "uuid": "ae90fsd7-a651-467a-bc8d-29d310b0f937",
+          "version_uuid": "97e50b3e-5990-4cba-8df8-b21548a2c9e0",
+          "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "Template.",
+              "display_name_short": "template",
+              "name": "template",
+              "value_type": "string",
+              "default_value": "NECB2011",
+              "value": "NECB2011"
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Building Type.",
+                "display_name_short": "building_type",
+                "name": "building_type",
+                "value_type": "string",
+                "default_value": "SmallOffice",
+                "value": "LargeOffice",
+                "choice_display_names": [
+                  "SecondarySchool",
+                  "PrimarySchool",
+                  "SmallOffice",
+                  "MediumOffice",
+                  "LargeOffice",
+                  "SmallHotel",
+                  "LargeHotel",
+                  "Warehouse",
+                  "RetailStandalone",
+                  "RetailStripmall",
+                  "QuickServiceRestaurant",
+                  "FullServiceRestaurant",
+                  "MidriseApartment",
+                  "HighriseApartment",
+                  "Hospital",
+                  "Outpatient"
+                ]
+              },
+              "display_name": "Building Type.",
+              "display_name_short": "building_type",
+              "variable_type": "variable",
+              "minimum": "SmallOffice",
+              "maximum": "SmallOffice",
+              "static_value": "LargeOffice",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "LargeOffice",
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": "Warehouse",
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": "HighriseApartment",
+                        "weight": 0.3333333333333333
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "SmallOffice"
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Climate File",
+                "display_name_short": "epw_file",
+                "name": "epw_file",
+                "value_type": "string",
+                "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "choice_display_names": [
+                  "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                  "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+                  "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                  "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+                  "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+                  "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+                  "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+                  "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+                  "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+                  "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+                  "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+                  "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+                  "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+                  "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+                  "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+                  "CAN_BC_Summerland.717680_CWEC2016.epw",
+                  "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+                  "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                  "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+                  "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+                  "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+                  "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+                  "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+                  "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+                  "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+                  "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+                  "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+                  "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+                  "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+                  "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+                  "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+                  "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+                  "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                  "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+                  "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+                  "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+                  "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+                  "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+                  "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+                  "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+                  "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+                  "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+                  "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+                  "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+                  "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                  "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+                  "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+                  "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+                  "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+                  "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+                  "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                  "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+                  "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+                  "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+                  "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+                  "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+                  "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+                  "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+                  "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+                  "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+                  "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+                  "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+                ]
+              },
+              "display_name": "Climate File",
+              "display_name_short": "epw_file",
+              "variable_type": "variable",
+              "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "static_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+                        "weight": 0.5
+                      },
+                      {
+                        "value": "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+                        "weight": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 0
+        },
+        {
+          "name": "btap_view_model",
+          "display_name": "ViewModel",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPViewModel",
+          "measure_definition_directory": "./measures/BTAPViewModel",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\BTAPViewModel",
+          "measure_definition_display_name": "ViewModel",
+          "measure_definition_name": "btap_view_model",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "f4669f10-fda5-489d-8e1c-7ca3c2d40378",
+          "measure_definition_version_uuid": "b381aaf5-97c4-40a6-9bf7-f1c3d80ddef4",
+          "uuid": "f4669f10-fda5-489d-8e1c-7ca3c2d40378",
+          "version_uuid": "b381aaf5-97c4-40a6-9bf7-f1c3d80ddef4",
+          "description": "Visualize an OpenStudio model in a web based viewer",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "set_boiler_thermal_efficiency",
+          "display_name": "SetBoilerThermalEfficiency",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetBoilerThermalEfficiency",
+          "measure_definition_directory": "./measures/c298267a-1424-43c2-a770-9f9c288007e7",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\c298267a-1424-43c2-a770-9f9c288007e7",
+          "measure_definition_display_name": "SetBoilerThermalEfficiency",
+          "measure_definition_name": "set_boiler_thermal_efficiency",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "fee282f5-e3d7-43ea-b996-bc7dead34927",
+          "measure_definition_version_uuid": "eb286b13-160c-4b01-a9df-3d058ae3f1be",
+          "uuid": "fee282f5-e3d7-43ea-b996-bc7dead34927",
+          "version_uuid": "eb286b13-160c-4b01-a9df-3d058ae3f1be",
+          "description": "Boiler thermal efficiency affects heating  energy consumption. The measure offers two options to set the boiler thermal efficiency. Option 1 allows users to specify the efficiency inputs directly. Option 2 determines the boiler thermal efficiency based on the boiler type, the boiler capacity, the fuel type and the prescriptive requirement in ASHRAE Standard 90.1. Option 2 is only applicable to natural gas or oil fired boilers. ",
+          "taxonomy": "HVAC.Heating",
+          "arguments": [
+            {
+              "display_name": "!!!!*** This Measure is not Applicable to loaded Model. Read the description and choose an appropriate baseline model. ***!!!!",
+              "display_name_short": "info_widget",
+              "name": "info_widget",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 2
+        },
+        {
+          "name": "btap_utility_tariffs_model_setup",
+          "display_name": "BTAP Utility Tariffs Model Setup",
+          "measure_type": "EnergyPlusMeasure",
+          "measure_definition_class_name": "BTAPUtilityTariffsModelSetup",
+          "measure_definition_directory": "./measures/BTAPUtilityTariffs",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\BTAPUtilityTariffs",
+          "measure_definition_display_name": "BTAP Utility Tariffs Model Setup",
+          "measure_definition_name": "btap_utility_tariffs_model_setup",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "7353d86e-d166-4f32-a572-27ce8e65ebb5",
+          "measure_definition_version_uuid": "caa5e3dc-680d-48aa-9a51-d296566a480f",
+          "uuid": "7353d86e-d166-4f32-a572-27ce8e65ebb5",
+          "version_uuid": "caa5e3dc-680d-48aa-9a51-d296566a480f",
+          "description": "Add the selected utility rate, as well as set the time step and lifecycle costing parameters.",
+          "taxonomy": "Economics.Life Cycle Cost Analysis",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 3
+        },
+        {
+          "name": "btap_results",
+          "display_name": "BTAP Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "BTAPResults",
+          "measure_definition_directory": "./measures/BTAPResults",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\BTAPResults",
+          "measure_definition_display_name": "BTAP Results",
+          "measure_definition_name": "btap_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "98aec261-d860-4ffa-9537-fa32cd356857",
+          "measure_definition_version_uuid": "b0b0c8b6-62a4-49e7-b2ba-a9f717ca2d38",
+          "uuid": "98aec261-d860-4ffa-9537-fa32cd356857",
+          "version_uuid": "b0b0c8b6-62a4-49e7-b2ba-a9f717ca2d38",
+          "description": "This measure creates BTAP result values used for NRCan analyses.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Generate Hourly Report.",
+              "display_name_short": "generate_hourly_report",
+              "name": "generate_hourly_report",
+              "value_type": "string",
+              "default_value": "false",
+              "value": "false"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 4
+        },
+        {
+          "name": "openstudio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/BTAPOpenstudioResults",
+          "measure_definition_directory_local": "C:\\Users\\prajakar\\projects\\others\\BTAP ecms\\BTAP_archetype_ECM_test_1\\measures\\BTAPOpenstudioResults",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "openstudio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "774bdba5-d2ec-4bed-80e2-b50327efeeac",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "774bdba5-d2ec-4bed-80e2-b50327efeeac",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "building_summary_section",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "annual_overview_section",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "monthly_overview_section",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "utility_bills_rates_section",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "envelope_section_section",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "space_type_breakdown_section",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "space_type_details_section",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "interior_lighting_section",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "plug_loads_section",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "exterior_light_section",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "water_use_section",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "hvac_load_profile",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "zone_condition_section",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "zone_summary_section",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "zone_equipment_detail_section",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "air_loops_detail_section",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "plant_loops_detail_section",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "outdoor_air_section",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "cost_summary_section",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "source_energy_section",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "schedules_overview_section",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 5
+        }
+      ],
+      "algorithm": {
+        "experiment_type": "full_factorial",
+        "number_of_samples": 2,
+        "seed": 1,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 0,
+        "objective_functions": []
+      },
+      "analysis_type": "doe"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/dummy.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/dummy.epw"
+    },
+    "file_format_version": 1,
+    "server_scripts": {}
+  }
+}
