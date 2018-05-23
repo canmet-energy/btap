@@ -8,6 +8,7 @@ namespace :test do
   array << 'measures/BTAPCreateNECBReferenceBuilding/tests/BTAPCreateNECBReferenceBuilding_test.rb'
   array << 'measures/BTAPEnvelopeConstructionMeasure/tests/BTAPEnvelopeConstructionMeasure_test.rb'
   array << 'measures/BTAPEnvelopeFDWRAndSRR/tests/BTAPEnvelopeFDWRAndSRR_Test.rb'
+  array << 'measures/BTAPLightingPowerDensityMeasure/tests/lighting_power_density_measure_test.rb'
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
     t.libs << 'test'

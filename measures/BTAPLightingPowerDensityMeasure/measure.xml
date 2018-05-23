@@ -1,0 +1,95 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>lighting_power_density_measure</name>
+  <uid>f3199e3f-1579-499f-a0e1-174e1271c43b</uid>
+  <version_id>a780eaf1-167a-4fb7-9bf3-1a90b718b854</version_id>
+  <version_modified>20180404T152203Z</version_modified>
+  <xml_checksum>3DFEA804</xml_checksum>
+  <class_name>LightingPowerDensityMeasure</class_name>
+  <display_name>Lighting Power Density Measure</display_name>
+  <description>This measures adjusts the LPD max for selected or all space types. It adjusts the LPD by scalar or actual value.</description>
+  <modeler_description>Open Studio 2.4, April 2018</modeler_description>
+  <arguments>
+    <argument>
+      <name>space_type</name>
+      <display_name>List_of_space_types_to_apply</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>*Entire Building*</default_value>
+      <choices>
+        <choice>
+          <value>{75718db7-0b33-4bf5-97b2-f1c9c44a641a}</value>
+          <display_name>*Entire Building*</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>lpd_type</name>
+      <display_name>Lighting Power Density Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>percent</default_value>
+      <choices>
+        <choice>
+          <value>value(W/ft^2)</value>
+          <display_name>value(W/ft^2)</display_name>
+        </choice>
+        <choice>
+          <value>value(W/m^2)</value>
+          <display_name>value(W/m^2)</display_name>
+        </choice>
+        <choice>
+          <value>percent</value>
+          <display_name>percent</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>lpd_value</name>
+      <display_name>Lighting Power Density Value</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.8</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Electric Lighting.Electric Lighting Controls</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>example_model.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>53D14E69</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.4.0</identifier>
+        <min_compatible>2.4.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>0E3BC834</checksum>
+    </file>
+    <file>
+      <filename>lighting_power_density_measure_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>59C94830</checksum>
+    </file>
+  </files>
+</measure>
