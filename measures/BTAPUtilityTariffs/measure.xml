@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>7353d86e-d166-4f32-a572-27ce8e65ebb5</uid>
-  <version_id>e2d0d88d-db37-416c-8647-c0891f9225c1</version_id>
-  <version_modified>20180528T143350Z</version_modified>
+  <version_id>9a25168e-935a-478c-b2cd-939729957352</version_id>
+  <version_modified>20180529T191059Z</version_modified>
   <xml_checksum>4A4E44A5</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAP Utility Tariffs Model Setup</display_name>
@@ -70,12 +70,6 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
-    </file>
-    <file>
       <filename>Standards.Model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -98,6 +92,12 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>C024389B</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>309C0821</checksum>
     </file>
   </files>
 </measure>
