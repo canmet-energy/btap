@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_reference_building</name>
   <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
-  <version_id>fc521ac1-0e70-4c8e-a0fb-a1f5f470cbf8</version_id>
-  <version_modified>20180529T191101Z</version_modified>
+  <version_id>fe6f8214-ece8-4ca8-87d7-3e7f141b6114</version_id>
+  <version_modified>20180529T202106Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateNECBReferenceBuilding</class_name>
   <display_name>BTAPCreateNECBReferenceBuilding</display_name>
@@ -356,12 +356,6 @@
       <checksum>46874C01</checksum>
     </file>
     <file>
-      <filename>BTAPCreateNECBReferenceBuilding_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A214D13B</checksum>
-    </file>
-    <file>
       <filename>btap_additions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -389,6 +383,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>309C0821</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A214D13B</checksum>
     </file>
   </files>
 </measure>

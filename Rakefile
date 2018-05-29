@@ -3,13 +3,14 @@ namespace :test do
   #create test list
   sh 'openstudio measure --update_all measures/'
   array = []
-  array << 'measures_development/BTAPTemplateModelMeasure/tests/BTAPTemplateModelMeasure_test.rb'
-  array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/BTAPCreateNECBPrototypeBuildings_test.rb'
-  array << 'measures/BTAPCreateNECBReferenceBuilding/tests/BTAPCreateNECBReferenceBuilding_test.rb'
-  array << 'measures/BTAPEnvelopeConstructionMeasure/tests/BTAPEnvelopeConstructionMeasure_test.rb'
-  array << 'measures/BTAPEnvelopeFDWRAndSRR/tests/BTAPEnvelopeFDWRAndSRR_Test.rb'
-  array << 'measures/BTAPResults/tests/OpenStudioResults_Test.rb'
-  array << 'measures/BTAPOpenstudioResults/tests/OpenStudioResults_Test.rb'
+  array << 'measures_development/BTAPTemplateModelMeasure/tests/test.rb'
+  array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/test.rb'
+  array << 'measures/BTAPCreateNECBReferenceBuilding/tests/test.rb'
+  array << 'measures/BTAPEnvelopeConstructionMeasure/tests/test.rb'
+  array << 'measures/BTAPEnvelopeFDWRAndSRR/tests/test.rb'
+  array << 'measures/BTAPResults/tests/test.rb'
+  array << 'measures/BTAPOpenstudioResults/tests/test.rb'
+  array << 'measures/BTAPIdealAirLoadsMeasure/tests/test.rb'
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
     t.libs << 'test'

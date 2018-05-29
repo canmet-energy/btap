@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>openstudio_results</name>
   <uid>a25386cd-60e4-46bc-8b11-c755f379d916</uid>
-  <version_id>34fb657a-cb81-44ae-9fbd-2d177d33a120</version_id>
-  <version_modified>20180529T191101Z</version_modified>
+  <version_id>1e5f9991-6ae5-43bf-9704-57cdc4700e5a</version_id>
+  <version_modified>20180529T202105Z</version_modified>
   <xml_checksum>557BF06F</xml_checksum>
   <class_name>OpenStudioResults</class_name>
   <display_name>OpenStudio Results</display_name>
@@ -574,12 +574,6 @@
       <checksum>7DC1F0A7</checksum>
     </file>
     <file>
-      <filename>OpenStudioResults_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>50A163F9</checksum>
-    </file>
-    <file>
       <filename>HeatingOnly.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
@@ -643,6 +637,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>309C0821</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>50A163F9</checksum>
     </file>
   </files>
 </measure>
