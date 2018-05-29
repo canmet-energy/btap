@@ -1,10 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000be74608></error>
+  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000aad5c50></error>
   <name>btap_report_variables</name>
   <uid>4eebfbce-73a9-431d-9df6-997f0027f26d</uid>
-  <version_id>87bce516-4dbc-4f9a-bdb8-3f3ef979f78d</version_id>
-  <version_modified>20180516T170101Z</version_modified>
+  <version_id>2f831bc5-1aa1-412b-92ee-a5f81da86cab</version_id>
+  <version_modified>20180529T202831Z</version_modified>
   <xml_checksum>70EC291E</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAP Zone Report Variables</display_name>
@@ -119,12 +119,6 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
-    </file>
-    <file>
       <filename>Standards.Model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -141,6 +135,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6ED0F4FE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>309C0821</checksum>
     </file>
   </files>
 </measure>

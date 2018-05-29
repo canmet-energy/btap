@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_view_model</name>
   <uid>f4669f10-fda5-489d-8e1c-7ca3c2d40378</uid>
-  <version_id>68c16904-c414-4814-bebb-ccff7b26eeda</version_id>
-  <version_modified>20180516T163940Z</version_modified>
+  <version_id>80c1fc1a-2011-439c-b7ff-d9e219b64fdc</version_id>
+  <version_modified>20180529T202106Z</version_modified>
   <xml_checksum>1E1F8B97</xml_checksum>
   <class_name>BTAPViewModel</class_name>
   <display_name>ViewModel</display_name>
@@ -33,12 +33,6 @@
       <filetype>in</filetype>
       <usage_type>resource</usage_type>
       <checksum>64866EE7</checksum>
-    </file>
-    <file>
-      <filename>ViewModel_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>705A2705</checksum>
     </file>
     <file>
       <filename>ExampleModel.osm</filename>
@@ -82,12 +76,6 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
-    </file>
-    <file>
       <filename>Standards.Model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -104,6 +92,18 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6ED0F4FE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>309C0821</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>705A2705</checksum>
     </file>
   </files>
 </measure>

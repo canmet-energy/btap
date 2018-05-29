@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>7353d86e-d166-4f32-a572-27ce8e65ebb5</uid>
-  <version_id>4df49c3f-00a6-47c9-9e0e-3e5cfebfc9bf</version_id>
-  <version_modified>20180516T163938Z</version_modified>
+  <version_id>43f1375f-4537-4bd5-a9ab-2ff905550f2a</version_id>
+  <version_modified>20180529T202104Z</version_modified>
   <xml_checksum>4A4E44A5</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAP Utility Tariffs Model Setup</display_name>
@@ -33,12 +33,6 @@
       <filetype>xls</filetype>
       <usage_type>resource</usage_type>
       <checksum>843F0E1E</checksum>
-    </file>
-    <file>
-      <filename>UtilityTariffs_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>58F01880</checksum>
     </file>
     <file>
       <filename>neb_end_use_prices.csv</filename>
@@ -76,12 +70,6 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
-    </file>
-    <file>
       <filename>Standards.Model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -98,6 +86,18 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6ED0F4FE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>309C0821</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C024389B</checksum>
     </file>
   </files>
 </measure>

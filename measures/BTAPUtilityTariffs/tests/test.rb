@@ -19,12 +19,13 @@
 
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
+require_relative '../resources/BTAPMeasureHelper.rb'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils' 
 
-class UtilityTariffsTest < MiniTest::Unit::TestCase
-  
+class BTAPUtilityTariffsModelSetup_test < Minitest::Test
+  include(BTAPMeasureTestHelper)
   Building_types = [
     'FullServiceRestaurant',
     'HighriseApartment',
@@ -48,11 +49,15 @@ class UtilityTariffsTest < MiniTest::Unit::TestCase
   def set_test(building_type,epw_path)
     output_folder = "#{File.dirname(__FILE__)}/output"
     # create an instance of the measure, a runner and an empty model
-    measure = UtilityTariffsModelSetup.new
+    measure = BTAPUtilityTariffsModelSetup.new
     runner = OpenStudio::Ruleset::OSRunner.new
     #load osm file. 
-    model = OpenStudio::Model::Model.new
-    model.create_prototype_building(building_type,'NECB 2011','NECB HDD Method',epw_path,output_folder)
+    model = create_necb_protype_model(
+              building_type,
+             'NECB HDD Method',
+              epw_path,
+              "NECB2011"
+           )
     BTAP::runner_register("INFO", "EPW file is #{epw_path}", runner)
     # Change the simulation to only run the weather file
     # and not run the sizing day simulations
@@ -207,8 +212,8 @@ class UtilityTariffsTest < MiniTest::Unit::TestCase
   
   
   
-  def test_CAN_NU_Resolute_719240_CWEC 
-    set_test('FullServiceRestaurant',"CAN_NU_Resolute.719240_CWEC.epw")
+  def test_CAN_BC_Vancouver
+    set_test('FullServiceRestaurant',"CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw")
   end
   
 #  def test_SecondarySchool 

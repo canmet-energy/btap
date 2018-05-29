@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>ae90fsd7-a651-467a-bc8d-29d310b0f937</uid>
-  <version_id>9606a73c-f416-4b4b-9a99-220be726be5c</version_id>
-  <version_modified>20180516T163940Z</version_modified>
+  <version_id>042d4317-ead1-4413-8185-6aca453bc587</version_id>
+  <version_modified>20180529T202106Z</version_modified>
   <xml_checksum>057E8D9D</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>Create NECB Prototype Building</display_name>
@@ -402,12 +402,6 @@
       <checksum>D6C32D5E</checksum>
     </file>
     <file>
-      <filename>BTAPCreateNECBPrototypeBuildings_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>570DD7EE</checksum>
-    </file>
-    <file>
       <filename>fileio.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -418,12 +412,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
     </file>
     <file>
       <filename>Standards.Model.rb</filename>
@@ -453,6 +441,18 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6ED0F4FE</checksum>
+    </file>
+    <file>
+      <filename>Standards.Construction.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>309C0821</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>570DD7EE</checksum>
     </file>
   </files>
 </measure>
