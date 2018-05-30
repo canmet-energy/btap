@@ -1,10 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000aad5c50></error>
+  <error>undefined local variable or method `reporting_frequency_chs' for #&lt;BTAPReportVariables:0x0000000c597868></error>
   <name>btap_report_variables</name>
   <uid>4eebfbce-73a9-431d-9df6-997f0027f26d</uid>
-  <version_id>2f831bc5-1aa1-412b-92ee-a5f81da86cab</version_id>
-  <version_modified>20180529T202831Z</version_modified>
+  <version_id>83e5b2be-5541-46b9-b1bf-794a651d8039</version_id>
+  <version_modified>20180530T155602Z</version_modified>
   <xml_checksum>70EC291E</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAP Zone Report Variables</display_name>

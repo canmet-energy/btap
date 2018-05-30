@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>ideal_loads_options</name>
   <uid>ae756607-68ba-4615-87df-a0870beede98</uid>
-  <version_id>6acbf367-fd6d-4ebb-a316-b6215b984483</version_id>
-  <version_modified>20180419T185750Z</version_modified>
+  <version_id>39587776-bc8d-4ef1-b76b-ae82ac3fcc5f</version_id>
+  <version_modified>20180530T155558Z</version_modified>
   <xml_checksum>DAE0171F</xml_checksum>
   <class_name>IdealLoadsOptions</class_name>
   <display_name>Ideal Loads Options</display_name>
@@ -381,6 +381,12 @@
       <checksum>95B6B6A5</checksum>
     </file>
     <file>
+      <filename>IdealLoadsOptions_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5CC02045</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>1.4.2</identifier>
@@ -389,13 +395,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>EC83EE00</checksum>
-    </file>
-    <file>
-      <filename>IdealLoadsOptions_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5CC02045</checksum>
+      <checksum>AB956F28</checksum>
     </file>
   </files>
 </measure>

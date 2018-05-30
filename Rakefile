@@ -11,12 +11,13 @@ namespace :test do
   array << 'measures/BTAPResults/tests/test.rb'
   array << 'measures/BTAPOpenstudioResults/tests/test.rb'
   array << 'measures/BTAPIdealAirLoadsMeasure/tests/test.rb'
+  array << 'measures/BTAPIdealAirLoadsOptionsEplus/tests/IdealLoadsOptions_Test.rb'
+
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
     t.libs << 'test'
     t.test_files = array
   end
-
 end
 
 desc 'Update Common Resources from TemplateModelMeasure'
