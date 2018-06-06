@@ -1,0 +1,8 @@
+{
+   "created_at" : "20180606T170411Z",
+   "hash" : "1BC6EB80",
+   "seed_file" : "/home/osdev/btap/measures/btap_open_studio_results/tests/output/test_edge_model/TestOutput.osm",
+   "steps" : [],
+   "updated_at" : "20180606T170411Z",
+   "weather_file" : "/home/osdev/btap/measures/btap_open_studio_results/tests/USA_CO_Golden-NREL.724666_TMY3.epw"
+}
