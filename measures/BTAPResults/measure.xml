@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>cannot load such file -- rubyXL</error>
   <name>btap_results</name>
   <uid>98aec261-d860-4ffa-9537-fa32cd356857</uid>
-  <version_id>cc308e4f-e7a4-459e-8d7e-c0099242187a</version_id>
-  <version_modified>20180529T202106Z</version_modified>
+  <version_id>dc3cf726-8024-4f81-9c55-349c821bc69a</version_id>
+  <version_modified>20180606T125405Z</version_modified>
   <xml_checksum>C3418C13</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -68,17 +69,6 @@
       <checksum>6B0BD83E</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>1.14.0</identifier>
-        <min_compatible>1.14.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>10B41562</checksum>
-    </file>
-    <file>
       <filename>neb_end_use_prices.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -125,6 +115,17 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>01C059E0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.14.0</identifier>
+        <min_compatible>1.14.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>6EBD4AB5</checksum>
     </file>
   </files>
 </measure>
