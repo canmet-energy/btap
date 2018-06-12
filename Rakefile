@@ -4,14 +4,21 @@ namespace :test do
   sh 'openstudio measure --update_all measures/'
   array = []
   array << 'measures_development/BTAPTemplateModelMeasure/tests/test.rb'
-  array << 'measures/BTAPCreateNECBPrototypeBuildings/tests/test.rb'
-  array << 'measures/BTAPCreateNECBReferenceBuilding/tests/test.rb'
-  array << 'measures/BTAPEnvelopeConstructionMeasure/tests/test.rb'
-  array << 'measures/BTAPEnvelopeFDWRAndSRR/tests/test.rb'
-  array << 'measures/BTAPResults/tests/test.rb'
-  array << 'measures/BTAPOpenstudioResults/tests/test.rb'
-  array << 'measures/BTAPIdealAirLoadsMeasure/tests/test.rb'
-  array << 'measures/BTAPIdealAirLoadsOptionsEplus/tests/IdealLoadsOptions_Test.rb'
+  array << 'measures/btap_create_necb_prototype_building/tests/test.rb'
+  array << 'measures/btap_create_necb_reference_building/tests/test.rb'
+  array << 'measures/btap_envelope_construction_measure/tests/test.rb'
+  array << 'measures/btap_envelope_fdwr_and_srr/tests/test.rb'
+  array << 'measures/btap_ideal_air_loads_measure/tests/test.rb'
+  array << 'measures/btap_ideal_air_loads_options_eplus/tests/test.rb'
+  array << 'measures/btap_open_studio_results/tests/test.rb'
+  #array << 'measures/btap_report_variables/tests/test.rb'
+  array << 'measures/btap_results/tests/test.rb'
+  #array << 'measures/btap_utility_tariffs/tests/test.rb'
+  #array << 'measures/btap_view_model/tests/test.rb'
+
+
+
+
 
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
