@@ -1,6 +1,6 @@
 
 OS:Version,
-  {24c7d462-48f0-422d-8027-decb9c647fd7}, !- Handle
+  {aec2351e-9f8e-4cf5-b51e-209ae1fbe82e}, !- Handle
   2.4.3;                                  !- Version Identifier
 
 OS:Site,
@@ -33174,7 +33174,7 @@ OS:AirLoopHVAC,
   ExerciseCenterFlr1 ZN - EmployeeLoungeFlr1 ZN - RestroomFlr1 ZN SAC, !- Name
   ,                                       !- Controller List Name
   {11571fda-f919-41f0-a5fc-8fa7dafcbd55}, !- Availability Schedule
-  {7f2436fd-273d-4684-9425-a1c1cef8ffa6}, !- Availability Manager List Name
+  {f4eea716-b9aa-4e55-af9d-78c77a22033b}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -33191,7 +33191,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {7f2436fd-273d-4684-9425-a1c1cef8ffa6}, !- Handle
+  {f4eea716-b9aa-4e55-af9d-78c77a22033b}, !- Handle
   ExerciseCenterFlr1 ZN - EmployeeLoungeFlr1 ZN - RestroomFlr1 ZN SAC AvailabilityManagerAssignmentList, !- Name
   {9c507f6d-3ace-488f-90c9-08efe21f8d72}; !- Availability Manager Name 1
 
@@ -33834,7 +33834,7 @@ OS:AirLoopHVAC,
   FrontLoungeFlr1 ZN SAC,                 !- Name
   ,                                       !- Controller List Name
   {11571fda-f919-41f0-a5fc-8fa7dafcbd55}, !- Availability Schedule
-  {bf9cbb9a-331f-4855-9178-b346ea16b84c}, !- Availability Manager List Name
+  {d461c02b-235c-492c-a0a3-40ef258f6325}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -33851,7 +33851,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {bf9cbb9a-331f-4855-9178-b346ea16b84c}, !- Handle
+  {d461c02b-235c-492c-a0a3-40ef258f6325}, !- Handle
   FrontLoungeFlr1 ZN SAC AvailabilityManagerAssignmentList, !- Name
   {a32bbb4b-6156-4249-970a-76bbd23fbf9f}; !- Availability Manager Name 1
 
@@ -34370,7 +34370,7 @@ OS:AirLoopHVAC,
   FrontOfficeFlr1 ZN SAC,                 !- Name
   ,                                       !- Controller List Name
   {fc3325a1-1a85-470b-87da-f26d040203af}, !- Availability Schedule
-  {1ac333ab-3d2e-4be6-bc5d-67ba3e023426}, !- Availability Manager List Name
+  {720155ed-6a15-475c-8115-9efc5bf8e3ce}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -34387,7 +34387,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {1ac333ab-3d2e-4be6-bc5d-67ba3e023426}, !- Handle
+  {720155ed-6a15-475c-8115-9efc5bf8e3ce}, !- Handle
   FrontOfficeFlr1 ZN SAC AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -34906,7 +34906,7 @@ OS:AirLoopHVAC,
   MeetingRoomFlr1 ZN SAC,                 !- Name
   ,                                       !- Controller List Name
   {fc3325a1-1a85-470b-87da-f26d040203af}, !- Availability Schedule
-  {2e93ca7f-47de-4ef9-b520-b6b7c931c5d6}, !- Availability Manager List Name
+  {b77424d6-d28a-4cec-9414-837ce9c92eb2}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -34923,7 +34923,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {2e93ca7f-47de-4ef9-b520-b6b7c931c5d6}, !- Handle
+  {b77424d6-d28a-4cec-9414-837ce9c92eb2}, !- Handle
   MeetingRoomFlr1 ZN SAC AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -36311,7 +36311,7 @@ OS:PlantLoop,
   ,                                       !- Demand Side Branch List Name
   ,                                       !- Demand Side Connector List Name
   Optimal,                                !- Load Distribution Scheme
-  {15dd03c4-15c4-41ef-a110-aa553bbd429e}, !- Availability Manager List Name
+  {fd546ab9-1970-4fab-8f3a-0f960f587dd5}, !- Availability Manager List Name
   ,                                       !- Plant Loop Demand Calculation Scheme
   ,                                       !- Common Pipe Simulation
   ,                                       !- Pressure Simulation Type
@@ -36325,7 +36325,7 @@ OS:PlantLoop,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {15dd03c4-15c4-41ef-a110-aa553bbd429e}, !- Handle
+  {fd546ab9-1970-4fab-8f3a-0f960f587dd5}, !- Handle
   Main Service Water Loop AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -41372,7 +41372,7 @@ OS:PlantLoop,
   ,                                       !- Demand Side Branch List Name
   ,                                       !- Demand Side Connector List Name
   Optimal,                                !- Load Distribution Scheme
-  {9ce9a11f-ac42-4c85-a398-fa4581a94f28}, !- Availability Manager List Name
+  {b5d3912d-c63f-4b72-be89-cd01530a8d72}, !- Availability Manager List Name
   ,                                       !- Plant Loop Demand Calculation Scheme
   ,                                       !- Common Pipe Simulation
   ,                                       !- Pressure Simulation Type
@@ -41386,7 +41386,7 @@ OS:PlantLoop,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {9ce9a11f-ac42-4c85-a398-fa4581a94f28}, !- Handle
+  {b5d3912d-c63f-4b72-be89-cd01530a8d72}, !- Handle
   Laundry Service Water Loop AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -42248,25 +42248,25 @@ OS:AvailabilityManager:NightCycle,
   1,                                      !- Thermostat Tolerance {deltaC}
   ,                                       !- Cycling Run Time Control Type
   ,                                       !- Cycling Run Time {s}
-  {4062c548-ebf7-4488-ace8-ec31cba0475f}, !- Control Zone or Zone List Name
-  {b85f44c3-7848-461f-9afc-a9cd41a96c08}, !- Cooling Control Zone or Zone List Name
-  {8f61367b-624d-4240-b484-38f3109df5a9}, !- Heating Control Zone or Zone List Name
-  {bf908deb-66d0-4654-9bb8-942146d51744}; !- Heating Zone Fans Only Zone or Zone List Name
+  {f74ce819-b672-4a6b-90cc-fa5d7ecc2487}, !- Control Zone or Zone List Name
+  {90b5056f-6ebc-4c3e-9aeb-fec8fbe0d3ec}, !- Cooling Control Zone or Zone List Name
+  {196ae60e-d903-41dd-b369-ab79f5bcfedd}, !- Heating Control Zone or Zone List Name
+  {95b2bedc-e686-40fe-8903-4ee599f0dd63}; !- Heating Zone Fans Only Zone or Zone List Name
 
 OS:ModelObjectList,
-  {4062c548-ebf7-4488-ace8-ec31cba0475f}, !- Handle
+  {f74ce819-b672-4a6b-90cc-fa5d7ecc2487}, !- Handle
   Availability Manager Night Cycle 1 Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {b85f44c3-7848-461f-9afc-a9cd41a96c08}, !- Handle
+  {90b5056f-6ebc-4c3e-9aeb-fec8fbe0d3ec}, !- Handle
   Availability Manager Night Cycle 1 Cooling Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {8f61367b-624d-4240-b484-38f3109df5a9}, !- Handle
+  {196ae60e-d903-41dd-b369-ab79f5bcfedd}, !- Handle
   Availability Manager Night Cycle 1 Heating Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {bf908deb-66d0-4654-9bb8-942146d51744}, !- Handle
+  {95b2bedc-e686-40fe-8903-4ee599f0dd63}, !- Handle
   Availability Manager Night Cycle 1 Heating Zone Fans Only Zone List; !- Name
 
 OS:AvailabilityManager:NightCycle,
@@ -42278,25 +42278,25 @@ OS:AvailabilityManager:NightCycle,
   1,                                      !- Thermostat Tolerance {deltaC}
   ,                                       !- Cycling Run Time Control Type
   ,                                       !- Cycling Run Time {s}
-  {efb43c4e-749d-44c9-a824-d5d528fc6f67}, !- Control Zone or Zone List Name
-  {18b54e36-57af-4afa-966a-a7d6d56f6faf}, !- Cooling Control Zone or Zone List Name
-  {3420c5a3-e412-4c51-9211-6ee944a805a5}, !- Heating Control Zone or Zone List Name
-  {98a23ba1-e2ab-4866-9f30-8a283ee2a7c1}; !- Heating Zone Fans Only Zone or Zone List Name
+  {90ba7936-564b-438e-83ce-8e9875b064a6}, !- Control Zone or Zone List Name
+  {6ae4a1a9-ff60-45ab-960b-1bd6919392c3}, !- Cooling Control Zone or Zone List Name
+  {1b748091-9be9-4f5e-914a-e0c99bc4d4bd}, !- Heating Control Zone or Zone List Name
+  {d6e6989b-1a4b-4bc4-ba66-232a1f298951}; !- Heating Zone Fans Only Zone or Zone List Name
 
 OS:ModelObjectList,
-  {efb43c4e-749d-44c9-a824-d5d528fc6f67}, !- Handle
+  {90ba7936-564b-438e-83ce-8e9875b064a6}, !- Handle
   Availability Manager Night Cycle 2 Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {18b54e36-57af-4afa-966a-a7d6d56f6faf}, !- Handle
+  {6ae4a1a9-ff60-45ab-960b-1bd6919392c3}, !- Handle
   Availability Manager Night Cycle 2 Cooling Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {3420c5a3-e412-4c51-9211-6ee944a805a5}, !- Handle
+  {1b748091-9be9-4f5e-914a-e0c99bc4d4bd}, !- Handle
   Availability Manager Night Cycle 2 Heating Control Zone List; !- Name
 
 OS:ModelObjectList,
-  {98a23ba1-e2ab-4866-9f30-8a283ee2a7c1}, !- Handle
+  {d6e6989b-1a4b-4bc4-ba66-232a1f298951}, !- Handle
   Availability Manager Night Cycle 2 Heating Zone Fans Only Zone List; !- Name
 
 OS:Curve:Biquadratic,
@@ -44886,22 +44886,22 @@ OS:SizingPeriod:DesignDay,
   ASHRAEClearSky;                         !- Solar Model Indicator
 
 OS:Output:Variable,
-  {099cefd6-3a52-4579-937d-595b8e42d185}, !- Handle
-  {0c08e7cb-4793-4338-b4f8-a106b8656a0e}, !- Name
+  {e68b781e-c3bd-4297-b76e-2ac5cba93cde}, !- Handle
+  {585b2ee2-b0e9-4981-a700-eff6ab70d2f4}, !- Name
   ,                                       !- Key Value
   Zone Air Relative Humidity,             !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {dc441b10-742e-414b-8673-d7330f5577ea}, !- Handle
-  {8af764a6-0a88-4d74-9149-63c59984f55d}, !- Name
+  {d2951ddf-594b-447c-a17d-f9c3980a8e9a}, !- Handle
+  {d4711fa0-12cd-48bd-9627-82793b251b6b}, !- Name
   ,                                       !- Key Value
   Zone Air Temperature,                   !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {8f05249c-e7b2-459d-bf15-6827c986911b}, !- Handle
-  {85a7de70-d409-4f5d-befe-22f2d7b6648f}, !- Name
+  {31ab90c6-fcf1-4be1-9ebc-9bd7c666d7e1}, !- Handle
+  {884547b4-02dc-4b2d-a59b-1e99d6c23a9b}, !- Name
   ,                                       !- Key Value
   Site Outdoor Air Drybulb Temperature,   !- Variable Name
   monthly;                                !- Reporting Frequency

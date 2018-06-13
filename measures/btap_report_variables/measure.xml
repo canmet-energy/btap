@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_report_variables</name>
   <uid>b423ae4d-4899-49b4-b447-535a94f2640c</uid>
-  <version_id>efef3756-a689-44fd-af42-867e0d5db420</version_id>
-  <version_modified>20180605T185153Z</version_modified>
+  <version_id>fd4c1062-b4a5-484f-8a18-c0f4fcc0ff2a</version_id>
+  <version_modified>20180613T204345Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAPReportVariables</display_name>
@@ -66,12 +66,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>btap_report_variables_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E4676291</checksum>
-    </file>
     <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>

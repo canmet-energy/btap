@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>ideal_loads_options</name>
   <uid>f4a1be3f-0d82-4486-b6bb-1a123e034e8f</uid>
-  <version_id>bbf48384-ee24-4903-a815-c0d349a0bf5f</version_id>
-  <version_modified>20180605T184847Z</version_modified>
+  <version_id>9c60de23-d09c-4810-9846-46f20d196b5c</version_id>
+  <version_modified>20180613T204350Z</version_modified>
   <xml_checksum>E97C8C86</xml_checksum>
   <class_name>IdealLoadsOptions</class_name>
   <display_name>BTAPIdealAirLoadsOptionsEplus</display_name>
@@ -268,18 +268,6 @@
   </attributes>
   <files>
     <file>
-      <filename>btap_ideal_air_loads_options_eplus_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>774510CF</checksum>
-    </file>
-    <file>
-      <filename>IdealLoadsOptions_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5CC02045</checksum>
-    </file>
-    <file>
       <filename>test_v2.4_office_ideal.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
@@ -307,6 +295,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>7BC1B59D</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5CC02045</checksum>
     </file>
   </files>
 </measure>

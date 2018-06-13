@@ -1,6 +1,6 @@
 
 OS:Version,
-  {7e69c0bb-89b2-48e4-80e5-34d8b3083b85}, !- Handle
+  {f418739f-0ff5-4805-bb1a-7ba30d19bf3d}, !- Handle
   2.4.3;                                  !- Version Identifier
 
 OS:Site,
@@ -291,22 +291,22 @@ OS:Schedule:Day,
   0;                                      !- Value Until Time 1
 
 OS:Output:Variable,
-  {ac14b4c2-c11e-4f33-8084-d0db3aa30e45}, !- Handle
-  {6a5985de-cb6e-4fc2-bce4-90a841b2b3f3}, !- Name
+  {c930e963-312d-4272-b39b-2e33a320dfe2}, !- Handle
+  {8b7f5e8f-8269-4d46-b060-ea03ec5eecab}, !- Name
   ,                                       !- Key Value
   Zone Air Relative Humidity,             !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {7ecbbac2-9ba3-43f1-b73b-dd4c0ebdd8fb}, !- Handle
-  {917f11ce-cb4a-4b1d-b334-37c9870e2968}, !- Name
+  {4dcad610-15c8-4808-a8a0-5d12b9f42fe2}, !- Handle
+  {5d74a4f9-e627-4818-9e91-8edb0b989f91}, !- Name
   ,                                       !- Key Value
   Zone Air Temperature,                   !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {6a942740-c2eb-4707-828a-57b9d9699b15}, !- Handle
-  {e1a9a7d9-a0b1-467a-8eb0-39537e088a9f}, !- Name
+  {a0549397-3c74-4855-9bac-de49a5085c2e}, !- Handle
+  {4578878a-e5dc-4385-90d9-9d82a7ddc9d5}, !- Name
   ,                                       !- Key Value
   Site Outdoor Air Drybulb Temperature,   !- Variable Name
   monthly;                                !- Reporting Frequency

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>openstudio_results</name>
   <uid>a7437013-6d3a-414a-8a4e-8bcba833188d</uid>
-  <version_id>4a374839-36e8-4d87-9158-f2a26b346b41</version_id>
-  <version_modified>20180605T185039Z</version_modified>
+  <version_id>df676e18-0017-48b0-b718-86f286ba753d</version_id>
+  <version_modified>20180613T204350Z</version_modified>
   <xml_checksum>AE2941B3</xml_checksum>
   <class_name>OpenStudioResults</class_name>
   <display_name>BTAPOpenStudioResults</display_name>
@@ -494,12 +494,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>btap_openstudio_results_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F87CA97C</checksum>
-    </file>
     <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>

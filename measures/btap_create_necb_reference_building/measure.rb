@@ -1,165 +1,8 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 require_relative 'resources/BTAPMeasureHelper'
-require_relative 'resources/btap_additions'
 # start the measure
 
-class NECB2011
-
-  def model_temp_fix_ems_references(model)
-    # Internal Variables
-    model.getEnergyManagementSystemInternalVariables.sort.each do |var|
-      # Get the reference field value
-      ref = var.internalDataIndexKeyName
-      # Convert to UUID
-      uid = OpenStudio.toUUID(ref)
-      # Get the model object with this UID
-      obj = model.getModelObject(uid)
-      # If it exists, replace the UID with the object name
-      if obj.is_initialized
-        var.setInternalDataIndexKeyName(obj.get.name.get)
-      end
-    end
-
-    return true
-  end
-
-  # @return [Bool] returns true if successful, false if not
-  def set_occ_sensor_spacetypes(model, space_type_map = @space_type_map)
-    building_type = 'Space Function'
-    space_type_map.each do |space_type_name, space_names|
-      space_names.sort.each do |space_name|
-        space = model.getSpaceByName(space_name)
-        next if space.empty?
-        space = space.get
-
-        # Check if space type for this space matches NECB2011 specific space type
-        # for occupancy sensor that is area dependent. Note: space.floorArea in m2.
-
-        if (space_type_name == 'Storage area' && space.floorArea < 100) ||
-            (space_type_name == 'Storage area - refrigerated' && space.floorArea < 100) ||
-            (space_type_name == 'Hospital - medical supply' && space.floorArea < 100) ||
-            (space_type_name == 'Office - enclosed' && space.floorArea < 25)
-          # If there is only one space assigned to this space type, then reassign this stub
-          # to the @@template duplicate with appendage " - occsens", otherwise create a new stub
-          # for this space. Required to use reduced LPD by NECB2011 0.9 factor.
-          space_type_name_occsens = space_type_name + ' - occsens'
-          stub_space_type_occsens = model.getSpaceTypeByName("#{building_type} #{space_type_name_occsens}")
-
-          if stub_space_type_occsens.empty?
-            # create a new space type just once for space_type_name appended with " - occsens"
-            stub_space_type_occsens = OpenStudio::Model::SpaceType.new(model)
-            stub_space_type_occsens.setStandardsBuildingType(building_type)
-            stub_space_type_occsens.setStandardsSpaceType(space_type_name_occsens)
-            stub_space_type_occsens.setName("#{building_type} #{space_type_name_occsens}")
-            space_type_apply_rendering_color(stub_space_type_occsens)
-            space.setSpaceType(stub_space_type_occsens)
-          else
-            # reassign occsens space type stub already created...
-            stub_space_type_occsens = stub_space_type_occsens.get
-            space.setSpaceType(stub_space_type_occsens)
-          end
-        end
-      end
-    end
-    return true
-  end
-
-
-  # Creates thermal zones to contain each space, as defined for each building in the
-  # system_to_space_map inside the Prototype.building_name
-  # e.g. (Prototype.secondary_school.rb) file.
-  #
-  # @param (see #add_constructions)
-  # @return [Bool] returns true if successful, false if not
-  ## FROM hvac_systems modified.
-  def model_create_thermal_zones(model, space_multiplier_map = nil)
-    space_multiplier_map = @space_multiplier_map if space_multiplier_map.nil?
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Started creating thermal zones')
-    space_multiplier_map = {} if space_multiplier_map.nil?
-
-    # Remove any Thermal zones assigned
-    model.getThermalZones.each(&:remove)
-
-    # Create a thermal zone for each space in the self
-    model.getSpaces.sort.each do |space|
-      zone = OpenStudio::Model::ThermalZone.new(model)
-      zone.setName("#{space.name} ZN")
-      unless space_multiplier_map[space.name.to_s].nil? || (space_multiplier_map[space.name.to_s] == 1)
-        zone.setMultiplier(space_multiplier_map[space.name.to_s])
-      end
-      space.setThermalZone(zone)
-
-      # Skip thermostat for spaces with no space type
-      next if space.spaceType.empty?
-
-      # Add a thermostat
-      space_type_name = space.spaceType.get.name.get
-      thermostat_name = space_type_name + ' Thermostat'
-      thermostat = model.getThermostatSetpointDualSetpointByName(thermostat_name)
-      if thermostat.empty?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Thermostat #{thermostat_name} not found for space name: #{space.name}")
-      else
-        thermostat_clone = thermostat.get.clone(model).to_ThermostatSetpointDualSetpoint.get
-        zone.setThermostatSetpointDualSetpoint(thermostat_clone)
-        # Set Ideal loads to thermal zone for sizing for NECB needs. We need this for sizing.
-        ideal_loads = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
-        ideal_loads.addToThermalZone(zone)
-      end
-    end
-
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished creating thermal zones')
-  end
-
-
-  def model_modify_oa_controller(model)
-    #do nothing
-  end
-
-  def model_reset_or_room_vav_minimum_damper(model,model1)
-    #do nothing
-  end
-
-  def validate_initial_model(model)
-
-    if model.getBuildingStorys.empty?
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Please assign Spaces to BuildingStorys in the geometry model.")
-    end
-    if model.getThermalZones.empty?
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Please assign Spaces to ThermalZones in the geometry model.")
-    end
-    if model.getBuilding.standardsNumberOfStories.empty?
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Please define Building.standardsNumberOfStories in the geometry model.")
-    end
-    if model.getBuilding.standardsNumberOfAboveGroundStories.empty?
-      OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Please define Building.standardsNumberOfAboveStories in the geometry model.")
-    end
-
-    if @space_type_map.nil? || @space_type_map.empty?
-      @space_type_map = get_space_type_maps_from_model(model)
-      if @space_type_map.nil? || @space_type_map.empty?
-        OpenStudio.logFree(OpenStudio::Error, 'openstudio.model.Model', "Please assign SpaceTypes in the geometry model or in standards database #{@space_type_map}.")
-      else
-        @space_type_map = @space_type_map.sort.to_h
-        OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Loaded space type map from osm file")
-      end
-    end
-
-    # ensure that model is intersected correctly.
-    model.getSpaces.each { |space1| model.getSpaces.each { |space2| space1.intersectSurfaces(space2) } }
-    # Get multipliers from TZ in model. Need this for HVAC contruction.
-    @space_multiplier_map = {}
-    model.getSpaces.sort.each do |space|
-      @space_multiplier_map[space.name.get] = space.multiplier if space.multiplier > 1
-    end
-    OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', 'Finished adding geometry')
-    unless @space_multiplier_map.empty?
-      OpenStudio.logFree(OpenStudio::Info, 'openstudio.model.Model', "Found mulitpliers for space #{@space_multiplier_map}")
-    end
-    return model
-  end
-
-end
 
 class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
 
@@ -255,10 +98,10 @@ class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
     standard.model_apply_infiltration_standard(model) # standards candidate
 
     #Apply Occupancy Sensor Standard
-    standard.set_occ_sensor_spacetypes(model)
+    standard.set_occ_sensor_spacetypes(model, standard.space_type_map)
 
     # Apply Default Contruction Sets
-    standard.model_add_constructions(model, "FullServiceRestaurant", climate_zone) # prototype candidate
+    standard.model_add_constructions(model, "FullServiceRestaurant", climate_zone) # prototype candidate.. need to change out dependancy for FullService restaurant eventually.
     #Apply Standard construction Propeties
     standard.apply_standard_construction_properties(model) # standards candidate
 

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_reference_building</name>
   <uid>a1260b05-7c15-4aff-94d6-f9340d7dc3ec</uid>
-  <version_id>22bc34ac-5685-4429-a775-46c28fe13291</version_id>
-  <version_modified>20180605T183007Z</version_modified>
+  <version_id>8e4e1c3c-e408-4ac5-ae4d-4448b55224d6</version_id>
+  <version_modified>20180613T204350Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBReferenceBuilding</class_name>
   <display_name>BTAPCreateNECBReferenceBuilding</display_name>
@@ -329,12 +329,6 @@
       <checksum>53D14E69</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A214D13B</checksum>
-    </file>
-    <file>
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -377,14 +371,21 @@
       <checksum>46874C01</checksum>
     </file>
     <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CDFD3A93</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
+        <min_compatible>2.4.1</min_compatible>
       </version>
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>453BEC73</checksum>
+      <checksum>46DC2B12</checksum>
     </file>
   </files>
 </measure>

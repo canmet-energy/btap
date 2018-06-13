@@ -11,14 +11,17 @@ require_relative '../measure.rb'
 require_relative '../resources/BTAPMeasureHelper.rb'
 require 'minitest/autorun'
 
+
+#Rewriting class for test purposes.. since the shw is not implemented we need to monkey patch this.. when the swh is
+# completed by Chris Kirney, we will update this to use the actual method.
 class NECB2011
   def model_create_prototype_model(climate_zone, epw_file, sizing_run_dir = Dir.pwd, debug = false, measure_model = nil)
     building_type = @instvarbuilding_type
     raise 'no building_type!' if @instvarbuilding_type.nil?
     model = nil
     # prototype generation.
-    model = load_initial_osm(@geometry_file) # standard candidate
-
+    model = load_geometry_osm(@geometry_file) # standard candidate
+    validate_initial_model(model)
     model.yearDescription.get.setDayofWeekforStartDay('Sunday')
 
     model_add_design_days_and_weather_file(model, climate_zone, epw_file) # Standards

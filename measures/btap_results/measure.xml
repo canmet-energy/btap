@@ -2,11 +2,11 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>8431136d-36d0-4414-b6ec-e58a4f4ec1d7</version_id>
-  <version_modified>20180605T185249Z</version_modified>
+  <version_id>2cd17b4f-39a4-4bdc-a462-98013775b8d6</version_id>
+  <version_modified>20180613T204350Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
-  <display_name>BTAPResults</display_name>
+  <display_name>BTAP Results</display_name>
   <description>This measure creates BTAP result values used for NRCan analyses.</description>
   <modeler_description>Grabs data from OS model and sql database and keeps them in the </modeler_description>
   <arguments>
@@ -17,6 +17,24 @@
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
+    </argument>
+    <argument>
+      <name>template_type</name>
+      <display_name>NECB template for QAQC</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>NECB2011</default_value>
+      <choices>
+        <choice>
+          <value>NECB2011</value>
+          <display_name>NECB2011</display_name>
+        </choice>
+        <choice>
+          <value>NECB2015</value>
+          <display_name>NECB2015</display_name>
+        </choice>
+      </choices>
     </argument>
   </arguments>
   <outputs/>
@@ -33,34 +51,10 @@
   </attributes>
   <files>
     <file>
-      <filename>btap_results_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7D595D23</checksum>
-    </file>
-    <file>
-      <filename>example_model.osm</filename>
-      <filetype>osm</filetype>
-      <usage_type>test</usage_type>
-      <checksum>39B6E26C</checksum>
-    </file>
-    <file>
-      <filename>USA_CO_Golden-NREL.724666_TMY3.epw</filename>
-      <filetype>epw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BDF687C1</checksum>
-    </file>
-    <file>
       <filename>report.html.in</filename>
       <filetype>in</filetype>
       <usage_type>resource</usage_type>
       <checksum>3F69E3FB</checksum>
-    </file>
-    <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>01C059E0</checksum>
     </file>
     <file>
       <filename>BTAPMeasureHelper.rb</filename>
@@ -135,6 +129,12 @@
       <checksum>46874C01</checksum>
     </file>
     <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>71A7A6F5</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -143,7 +143,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4B358B11</checksum>
+      <checksum>D7694E8F</checksum>
     </file>
   </files>
 </measure>

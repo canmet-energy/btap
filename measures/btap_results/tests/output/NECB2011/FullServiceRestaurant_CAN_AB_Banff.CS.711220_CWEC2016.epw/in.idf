@@ -6,7 +6,7 @@ Timestep,
   6;                                      !- Number of Timesteps per Hour
 
 LifeCycleCost:Parameters,
-  {f2587730-483c-4557-807a-acc4a263b131}, !- Name
+  {9af8b538-4028-45b7-bcc5-6e7df21e46d7}, !- Name
   EndOfYear,                              !- Discounting Convention
   ConstantDollar,                         !- Inflation Approach
   0.03,                                   !- Real Discount Rate
@@ -201,7 +201,7 @@ LifeCycleCost:UsePriceEscalation,
   1.0950;                                 !- Year Escalation 30
 
 Building,
-  -FullServiceRestaurant-NECB HDD Method-CAN_AB_Banff.CS.711220_CWEC2016.epw created: 2018-06-06 17:19:44 +0000, !- Name
+  NECB_2011FullServiceRestaurant,         !- Name
   0,                                      !- North Axis {deg}
   City,                                   !- Terrain
   0.04,                                   !- Loads Convergence Tolerance Value
@@ -583,7 +583,7 @@ Schedule:Day:Interval,
   22;                                     !- Value Until Time 4
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {ca0a6231-4d40-429f-a0f3-57ffa65512de}, !- Name
+  Schedule:Week:Daily {5ea5968f-8e44-4f1e-99d5-08696acb00cd}, !- Name
   NECB-B-Thermostat Setpoint-Heating Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -600,7 +600,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Heating,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {ca0a6231-4d40-429f-a0f3-57ffa65512de}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {5ea5968f-8e44-4f1e-99d5-08696acb00cd}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -653,7 +653,7 @@ Schedule:Day:Interval,
   24;                                     !- Value Until Time 3
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {5f37fb53-3658-439d-8fe3-cb3eadd40c98}, !- Name
+  Schedule:Week:Daily {85a3bdbe-cb7d-4192-b3be-15a1dcd1441b}, !- Name
   NECB-B-Thermostat Setpoint-Cooling Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -670,7 +670,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Cooling,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {5f37fb53-3658-439d-8fe3-cb3eadd40c98}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {85a3bdbe-cb7d-4192-b3be-15a1dcd1441b}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -854,7 +854,7 @@ Schedule:Day:Interval,
   1;                                      !- Value Until Time 3
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {88aa33eb-251c-410c-856d-c071009f6346}, !- Name
+  Schedule:Week:Daily {73ca9b72-9c1a-460e-8548-33e9a8343ddf}, !- Name
   Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN NECB System 3 PSZ Occ Sch Sunday, !- Sunday Schedule:Day Name
   Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN NECB System 3 PSZ Occ Sch Monday, !- Monday Schedule:Day Name
   Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN NECB System 3 PSZ Occ Sch Tuesday, !- Tuesday Schedule:Day Name
@@ -871,7 +871,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN NECB System 3 PSZ Occ Sch, !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {88aa33eb-251c-410c-856d-c071009f6346}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {73ca9b72-9c1a-460e-8548-33e9a8343ddf}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -1839,20 +1839,6 @@ ScheduleTypeLimits,
   availability;                           !- Unit Type
 
 ScheduleTypeLimits,
-  Temperature Schedule Type Limits,       !- Name
-  0,                                      !- Lower Limit Value {BasedOnField A3}
-  100,                                    !- Upper Limit Value {BasedOnField A3}
-  Continuous,                             !- Numeric Type
-  temperature;                            !- Unit Type
-
-ScheduleTypeLimits,
-  Temperature Schedule Type Limits 1,     !- Name
-  0,                                      !- Lower Limit Value {BasedOnField A3}
-  100,                                    !- Upper Limit Value {BasedOnField A3}
-  Continuous,                             !- Numeric Type
-  temperature;                            !- Unit Type
-
-ScheduleTypeLimits,
   Velocity,                               !- Name
   0,                                      !- Lower Limit Value {BasedOnField A3}
   ,                                       !- Upper Limit Value {BasedOnField A3}
@@ -2182,152 +2168,7 @@ Schedule:Day:Interval,
   0.1;                                    !- Value Until Time 13
 
 Schedule:Day:Interval,
-  NECB-B-Service Water Heating Default,   !- Name
-  Fractional,                             !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  01:00,                                  !- Time 1 {hh:mm}
-  0.6,                                    !- Value Until Time 1
-  02:00,                                  !- Time 2 {hh:mm}
-  0.5,                                    !- Value Until Time 2
-  09:00,                                  !- Time 3 {hh:mm}
-  0.05,                                   !- Value Until Time 3
-  11:00,                                  !- Time 4 {hh:mm}
-  0.7,                                    !- Value Until Time 4
-  12:00,                                  !- Time 5 {hh:mm}
-  0.4,                                    !- Value Until Time 5
-  13:00,                                  !- Time 6 {hh:mm}
-  0.5,                                    !- Value Until Time 6
-  15:00,                                  !- Time 7 {hh:mm}
-  0.6,                                    !- Value Until Time 7
-  16:00,                                  !- Time 8 {hh:mm}
-  0.4,                                    !- Value Until Time 8
-  18:00,                                  !- Time 9 {hh:mm}
-  0.3,                                    !- Value Until Time 9
-  19:00,                                  !- Time 10 {hh:mm}
-  0.4,                                    !- Value Until Time 10
-  20:00,                                  !- Time 11 {hh:mm}
-  0.5,                                    !- Value Until Time 11
-  22:00,                                  !- Time 12 {hh:mm}
-  0.8,                                    !- Value Until Time 12
-  24:00,                                  !- Time 13 {hh:mm}
-  0.9;                                    !- Value Until Time 13
-
-Schedule:Day:Interval,
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Name
-  Fractional,                             !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  01:00,                                  !- Time 1 {hh:mm}
-  0.6,                                    !- Value Until Time 1
-  02:00,                                  !- Time 2 {hh:mm}
-  0.5,                                    !- Value Until Time 2
-  09:00,                                  !- Time 3 {hh:mm}
-  0.05,                                   !- Value Until Time 3
-  11:00,                                  !- Time 4 {hh:mm}
-  0.7,                                    !- Value Until Time 4
-  12:00,                                  !- Time 5 {hh:mm}
-  0.4,                                    !- Value Until Time 5
-  13:00,                                  !- Time 6 {hh:mm}
-  0.5,                                    !- Value Until Time 6
-  15:00,                                  !- Time 7 {hh:mm}
-  0.6,                                    !- Value Until Time 7
-  16:00,                                  !- Time 8 {hh:mm}
-  0.4,                                    !- Value Until Time 8
-  18:00,                                  !- Time 9 {hh:mm}
-  0.3,                                    !- Value Until Time 9
-  19:00,                                  !- Time 10 {hh:mm}
-  0.4,                                    !- Value Until Time 10
-  20:00,                                  !- Time 11 {hh:mm}
-  0.5,                                    !- Value Until Time 11
-  22:00,                                  !- Time 12 {hh:mm}
-  0.8,                                    !- Value Until Time 12
-  24:00,                                  !- Time 13 {hh:mm}
-  0.9;                                    !- Value Until Time 13
-
-Schedule:Day:Interval,
-  NECB-B-Service Water Heating Sat Day,   !- Name
-  Fractional,                             !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  01:00,                                  !- Time 1 {hh:mm}
-  0.7,                                    !- Value Until Time 1
-  02:00,                                  !- Time 2 {hh:mm}
-  0.6,                                    !- Value Until Time 2
-  09:00,                                  !- Time 3 {hh:mm}
-  0.05,                                   !- Value Until Time 3
-  11:00,                                  !- Time 4 {hh:mm}
-  0.7,                                    !- Value Until Time 4
-  12:00,                                  !- Time 5 {hh:mm}
-  0.4,                                    !- Value Until Time 5
-  13:00,                                  !- Time 6 {hh:mm}
-  0.5,                                    !- Value Until Time 6
-  15:00,                                  !- Time 7 {hh:mm}
-  0.6,                                    !- Value Until Time 7
-  16:00,                                  !- Time 8 {hh:mm}
-  0.4,                                    !- Value Until Time 8
-  18:00,                                  !- Time 9 {hh:mm}
-  0.3,                                    !- Value Until Time 9
-  19:00,                                  !- Time 10 {hh:mm}
-  0.4,                                    !- Value Until Time 10
-  20:00,                                  !- Time 11 {hh:mm}
-  0.5,                                    !- Value Until Time 11
-  22:00,                                  !- Time 12 {hh:mm}
-  0.8,                                    !- Value Until Time 12
-  24:00,                                  !- Time 13 {hh:mm}
-  0.9;                                    !- Value Until Time 13
-
-Schedule:Day:Interval,
-  NECB-B-Service Water Heating Sun|Hol Day, !- Name
-  Fractional,                             !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  01:00,                                  !- Time 1 {hh:mm}
-  0.5,                                    !- Value Until Time 1
-  02:00,                                  !- Time 2 {hh:mm}
-  0.6,                                    !- Value Until Time 2
-  09:00,                                  !- Time 3 {hh:mm}
-  0.05,                                   !- Value Until Time 3
-  11:00,                                  !- Time 4 {hh:mm}
-  0.7,                                    !- Value Until Time 4
-  12:00,                                  !- Time 5 {hh:mm}
-  0.4,                                    !- Value Until Time 5
-  13:00,                                  !- Time 6 {hh:mm}
-  0.5,                                    !- Value Until Time 6
-  15:00,                                  !- Time 7 {hh:mm}
-  0.6,                                    !- Value Until Time 7
-  16:00,                                  !- Time 8 {hh:mm}
-  0.4,                                    !- Value Until Time 8
-  18:00,                                  !- Time 9 {hh:mm}
-  0.3,                                    !- Value Until Time 9
-  19:00,                                  !- Time 10 {hh:mm}
-  0.4,                                    !- Value Until Time 10
-  20:00,                                  !- Time 11 {hh:mm}
-  0.5,                                    !- Value Until Time 11
-  22:00,                                  !- Time 12 {hh:mm}
-  0.8,                                    !- Value Until Time 12
-  24:00,                                  !- Time 13 {hh:mm}
-  0.5;                                    !- Value Until Time 13
-
-Schedule:Day:Interval,
   Schedule Day 1,                         !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  0;                                      !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 10,                        !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  60;                                     !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 11,                        !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  0;                                      !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 12,                        !- Name
   ,                                       !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
   24:00,                                  !- Time 1 {hh:mm}
@@ -2342,66 +2183,17 @@ Schedule:Day:Interval,
 
 Schedule:Day:Interval,
   Schedule Day 3,                         !- Name
-  Temperature,                            !- Schedule Type Limits Name
+  ,                                       !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
   24:00,                                  !- Time 1 {hh:mm}
-  22;                                     !- Value Until Time 1
+  0;                                      !- Value Until Time 1
 
 Schedule:Day:Interval,
   Schedule Day 4,                         !- Name
-  Temperature,                            !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  60;                                     !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 5,                         !- Name
   ,                                       !- Schedule Type Limits Name
   No,                                     !- Interpolate to Timestep
   24:00,                                  !- Time 1 {hh:mm}
-  0.2;                                    !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 6,                         !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  0.05;                                   !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 7,                         !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  60;                                     !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 8,                         !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  0.2;                                    !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Schedule Day 9,                         !- Name
-  ,                                       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  0.05;                                   !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Service Water Loop Temp - 140F Default, !- Name
-  Temperature Schedule Type Limits,       !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  60.0000000000001;                       !- Value Until Time 1
-
-Schedule:Day:Interval,
-  Water Heater Ambient Temp Schedule - 70F Default, !- Name
-  Temperature Schedule Type Limits 1,     !- Schedule Type Limits Name
-  No,                                     !- Interpolate to Timestep
-  24:00,                                  !- Time 1 {hh:mm}
-  21.1111111111111;                       !- Value Until Time 1
+  0;                                      !- Value Until Time 1
 
 Schedule:Day:Interval,
   Work Efficiency Schedule Default,       !- Name
@@ -2411,7 +2203,7 @@ Schedule:Day:Interval,
   0;                                      !- Value Until Time 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {95b21314-8ed7-4cfb-a678-0e785f72283a}, !- Name
+  Schedule:Week:Daily {d66dc867-c062-412c-abf8-65106f888e47}, !- Name
   Air Velocity Schedule Default,          !- Sunday Schedule:Day Name
   Air Velocity Schedule Default,          !- Monday Schedule:Day Name
   Air Velocity Schedule Default,          !- Tuesday Schedule:Day Name
@@ -2428,14 +2220,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Air Velocity Schedule,                  !- Name
   Velocity,                               !- Schedule Type Limits Name
-  Schedule:Week:Daily {95b21314-8ed7-4cfb-a678-0e785f72283a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {d66dc867-c062-412c-abf8-65106f888e47}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {925e33b4-afc8-4043-bc30-9aa75e812211}, !- Name
+  Schedule:Week:Daily {b58abe4f-2c59-4385-a483-e4a5a1d198da}, !- Name
   Always On Default,                      !- Sunday Schedule:Day Name
   Always On Default,                      !- Monday Schedule:Day Name
   Always On Default,                      !- Tuesday Schedule:Day Name
@@ -2452,14 +2244,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Always On,                              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {925e33b4-afc8-4043-bc30-9aa75e812211}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {b58abe4f-2c59-4385-a483-e4a5a1d198da}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {4722c5be-ddf9-49b6-ab9f-b6772144b12c}, !- Name
+  Schedule:Week:Daily {d6ba852d-9157-4e51-9851-e9d729cb6f79}, !- Name
   Clothing Schedule Default Winter Clothes, !- Sunday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Monday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Tuesday Schedule:Day Name
@@ -2476,14 +2268,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Clothing Schedule,                      !- Name
   Any Number,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {4722c5be-ddf9-49b6-ab9f-b6772144b12c}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {d6ba852d-9157-4e51-9851-e9d729cb6f79}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {6c918c9c-1717-44ce-a6d6-756921325f4a}, !- Name
+  Schedule:Week:Daily {bf0830d6-f764-4b08-9c57-ca38a49f9ffb}, !- Name
   Economizer Max OA Fraction 100 pct Default, !- Sunday Schedule:Day Name
   Economizer Max OA Fraction 100 pct Default, !- Monday Schedule:Day Name
   Economizer Max OA Fraction 100 pct Default, !- Tuesday Schedule:Day Name
@@ -2500,14 +2292,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Economizer Max OA Fraction 100 pct,     !- Name
   ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {6c918c9c-1717-44ce-a6d6-756921325f4a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {bf0830d6-f764-4b08-9c57-ca38a49f9ffb}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {236dcc2a-a9e0-4e8f-845e-8f14722ce38d}, !- Name
+  Schedule:Week:Daily {f3831f17-76b6-4e77-b623-b1a6866457c3}, !- Name
   NECB-Activity Default,                  !- Sunday Schedule:Day Name
   NECB-Activity Default,                  !- Monday Schedule:Day Name
   NECB-Activity Default,                  !- Tuesday Schedule:Day Name
@@ -2524,14 +2316,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-Activity,                          !- Name
   ActivityLevel,                          !- Schedule Type Limits Name
-  Schedule:Week:Daily {236dcc2a-a9e0-4e8f-845e-8f14722ce38d}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {f3831f17-76b6-4e77-b623-b1a6866457c3}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {4e9eed8b-ccdb-4489-abac-abb3e497e8a6}, !- Name
+  Schedule:Week:Daily {34ed3ab1-74d9-4f42-9352-dd2f6c546813}, !- Name
   NECB-B-Electric-Equipment Sun|Hol Day,  !- Sunday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -2548,14 +2340,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Electric-Equipment,              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {4e9eed8b-ccdb-4489-abac-abb3e497e8a6}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {34ed3ab1-74d9-4f42-9352-dd2f6c546813}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {44e1cc06-8844-475a-af32-383649ab45e0}, !- Name
+  Schedule:Week:Daily {3e5567cd-8296-4ab2-98bd-d93136d74ae9}, !- Name
   NECB-B-Lighting Sun|Hol Day,            !- Sunday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Monday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Tuesday Schedule:Day Name
@@ -2572,14 +2364,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Lighting,                        !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {44e1cc06-8844-475a-af32-383649ab45e0}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {3e5567cd-8296-4ab2-98bd-d93136d74ae9}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {c65b5945-a0cb-41ef-b815-36e14ae64e44}, !- Name
+  Schedule:Week:Daily {bfd502bb-6a5e-40f3-9c5d-7d868866c6c1}, !- Name
   NECB-B-Occupancy Sun|Hol Day,           !- Sunday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Monday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Tuesday Schedule:Day Name
@@ -2596,278 +2388,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Occupancy,                       !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {c65b5945-a0cb-41ef-b815-36e14ae64e44}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {bfd502bb-6a5e-40f3-9c5d-7d868866c6c1}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {0b266c05-9126-4216-b4dd-7370db06bca5}, !- Name
-  NECB-B-Service Water Heating Sun|Hol Day, !- Sunday Schedule:Day Name
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Monday Schedule:Day Name
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Tuesday Schedule:Day Name
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Wednesday Schedule:Day Name
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Thursday Schedule:Day Name
-  NECB-B-Service Water Heating Default|Wkdy Day, !- Friday Schedule:Day Name
-  NECB-B-Service Water Heating Sat Day,   !- Saturday Schedule:Day Name
-  NECB-B-Service Water Heating Default,   !- Holiday Schedule:Day Name
-  NECB-B-Service Water Heating Default,   !- SummerDesignDay Schedule:Day Name
-  NECB-B-Service Water Heating Default,   !- WinterDesignDay Schedule:Day Name
-  NECB-B-Service Water Heating Default,   !- CustomDay1 Schedule:Day Name
-  NECB-B-Service Water Heating Default;   !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  NECB-B-Service Water Heating,           !- Name
-  Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {0b266c05-9126-4216-b4dd-7370db06bca5}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {f5b17b13-4da1-4f2d-ba45-4a69e4681231}, !- Name
-  Schedule Day 3,                         !- Sunday Schedule:Day Name
-  Schedule Day 3,                         !- Monday Schedule:Day Name
-  Schedule Day 3,                         !- Tuesday Schedule:Day Name
-  Schedule Day 3,                         !- Wednesday Schedule:Day Name
-  Schedule Day 3,                         !- Thursday Schedule:Day Name
-  Schedule Day 3,                         !- Friday Schedule:Day Name
-  Schedule Day 3,                         !- Saturday Schedule:Day Name
-  Schedule Day 3,                         !- Holiday Schedule:Day Name
-  Schedule Day 3,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 3,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 3,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 3;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 1,                     !- Name
-  Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {f5b17b13-4da1-4f2d-ba45-4a69e4681231}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {71dd1d61-30d6-480f-be89-1aca0b8a32be}, !- Name
-  Schedule Day 4,                         !- Sunday Schedule:Day Name
-  Schedule Day 4,                         !- Monday Schedule:Day Name
-  Schedule Day 4,                         !- Tuesday Schedule:Day Name
-  Schedule Day 4,                         !- Wednesday Schedule:Day Name
-  Schedule Day 4,                         !- Thursday Schedule:Day Name
-  Schedule Day 4,                         !- Friday Schedule:Day Name
-  Schedule Day 4,                         !- Saturday Schedule:Day Name
-  Schedule Day 4,                         !- Holiday Schedule:Day Name
-  Schedule Day 4,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 4,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 4,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 4;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 2,                     !- Name
-  Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {71dd1d61-30d6-480f-be89-1aca0b8a32be}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {49147f0a-00e2-4715-b9d4-d64b99eaf65a}, !- Name
-  Schedule Day 5,                         !- Sunday Schedule:Day Name
-  Schedule Day 5,                         !- Monday Schedule:Day Name
-  Schedule Day 5,                         !- Tuesday Schedule:Day Name
-  Schedule Day 5,                         !- Wednesday Schedule:Day Name
-  Schedule Day 5,                         !- Thursday Schedule:Day Name
-  Schedule Day 5,                         !- Friday Schedule:Day Name
-  Schedule Day 5,                         !- Saturday Schedule:Day Name
-  Schedule Day 5,                         !- Holiday Schedule:Day Name
-  Schedule Day 5,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 5,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 5,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 5;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 3,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {49147f0a-00e2-4715-b9d4-d64b99eaf65a}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {5b05c572-b9d8-4302-9d07-2714c63319a6}, !- Name
-  Schedule Day 6,                         !- Sunday Schedule:Day Name
-  Schedule Day 6,                         !- Monday Schedule:Day Name
-  Schedule Day 6,                         !- Tuesday Schedule:Day Name
-  Schedule Day 6,                         !- Wednesday Schedule:Day Name
-  Schedule Day 6,                         !- Thursday Schedule:Day Name
-  Schedule Day 6,                         !- Friday Schedule:Day Name
-  Schedule Day 6,                         !- Saturday Schedule:Day Name
-  Schedule Day 6,                         !- Holiday Schedule:Day Name
-  Schedule Day 6,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 6,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 6,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 6;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 4,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {5b05c572-b9d8-4302-9d07-2714c63319a6}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {669ac533-2226-4f65-bee0-4ad5f646dac3}, !- Name
-  Schedule Day 7,                         !- Sunday Schedule:Day Name
-  Schedule Day 7,                         !- Monday Schedule:Day Name
-  Schedule Day 7,                         !- Tuesday Schedule:Day Name
-  Schedule Day 7,                         !- Wednesday Schedule:Day Name
-  Schedule Day 7,                         !- Thursday Schedule:Day Name
-  Schedule Day 7,                         !- Friday Schedule:Day Name
-  Schedule Day 7,                         !- Saturday Schedule:Day Name
-  Schedule Day 7,                         !- Holiday Schedule:Day Name
-  Schedule Day 7,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 7,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 7,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 7;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 5,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {669ac533-2226-4f65-bee0-4ad5f646dac3}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {0765fdc0-0a55-458a-bea0-6aea413fa55e}, !- Name
-  Schedule Day 8,                         !- Sunday Schedule:Day Name
-  Schedule Day 8,                         !- Monday Schedule:Day Name
-  Schedule Day 8,                         !- Tuesday Schedule:Day Name
-  Schedule Day 8,                         !- Wednesday Schedule:Day Name
-  Schedule Day 8,                         !- Thursday Schedule:Day Name
-  Schedule Day 8,                         !- Friday Schedule:Day Name
-  Schedule Day 8,                         !- Saturday Schedule:Day Name
-  Schedule Day 8,                         !- Holiday Schedule:Day Name
-  Schedule Day 8,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 8,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 8,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 8;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 6,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {0765fdc0-0a55-458a-bea0-6aea413fa55e}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {65850df5-9c5b-46b9-9759-39baa5426b14}, !- Name
-  Schedule Day 9,                         !- Sunday Schedule:Day Name
-  Schedule Day 9,                         !- Monday Schedule:Day Name
-  Schedule Day 9,                         !- Tuesday Schedule:Day Name
-  Schedule Day 9,                         !- Wednesday Schedule:Day Name
-  Schedule Day 9,                         !- Thursday Schedule:Day Name
-  Schedule Day 9,                         !- Friday Schedule:Day Name
-  Schedule Day 9,                         !- Saturday Schedule:Day Name
-  Schedule Day 9,                         !- Holiday Schedule:Day Name
-  Schedule Day 9,                         !- SummerDesignDay Schedule:Day Name
-  Schedule Day 9,                         !- WinterDesignDay Schedule:Day Name
-  Schedule Day 9,                         !- CustomDay1 Schedule:Day Name
-  Schedule Day 9;                         !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 7,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {65850df5-9c5b-46b9-9759-39baa5426b14}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {b40952c3-1d6b-43a3-b099-d69add61755b}, !- Name
-  Schedule Day 10,                        !- Sunday Schedule:Day Name
-  Schedule Day 10,                        !- Monday Schedule:Day Name
-  Schedule Day 10,                        !- Tuesday Schedule:Day Name
-  Schedule Day 10,                        !- Wednesday Schedule:Day Name
-  Schedule Day 10,                        !- Thursday Schedule:Day Name
-  Schedule Day 10,                        !- Friday Schedule:Day Name
-  Schedule Day 10,                        !- Saturday Schedule:Day Name
-  Schedule Day 10,                        !- Holiday Schedule:Day Name
-  Schedule Day 10,                        !- SummerDesignDay Schedule:Day Name
-  Schedule Day 10,                        !- WinterDesignDay Schedule:Day Name
-  Schedule Day 10,                        !- CustomDay1 Schedule:Day Name
-  Schedule Day 10;                        !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Schedule Ruleset 8,                     !- Name
-  ,                                       !- Schedule Type Limits Name
-  Schedule:Week:Daily {b40952c3-1d6b-43a3-b099-d69add61755b}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {0fc89abb-d697-4f1c-9c39-00e25ab238ba}, !- Name
-  Service Water Loop Temp - 140F Default, !- Sunday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Monday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Tuesday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Wednesday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Thursday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Friday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Saturday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- Holiday Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- SummerDesignDay Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- WinterDesignDay Schedule:Day Name
-  Service Water Loop Temp - 140F Default, !- CustomDay1 Schedule:Day Name
-  Service Water Loop Temp - 140F Default; !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Service Water Loop Temp - 140F,         !- Name
-  Temperature Schedule Type Limits,       !- Schedule Type Limits Name
-  Schedule:Week:Daily {0fc89abb-d697-4f1c-9c39-00e25ab238ba}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {1c14a75f-d44a-44b1-93c1-125eb777fa1c}, !- Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Sunday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Monday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Tuesday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Wednesday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Thursday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Friday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Saturday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- Holiday Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- SummerDesignDay Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- WinterDesignDay Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default, !- CustomDay1 Schedule:Day Name
-  Water Heater Ambient Temp Schedule - 70F Default; !- CustomDay2 Schedule:Day Name
-
-Schedule:Year,
-  Water Heater Ambient Temp Schedule - 70F, !- Name
-  Temperature Schedule Type Limits 1,     !- Schedule Type Limits Name
-  Schedule:Week:Daily {1c14a75f-d44a-44b1-93c1-125eb777fa1c}, !- Schedule:Week Name 1
-  1,                                      !- Start Month 1
-  1,                                      !- Start Day 1
-  12,                                     !- End Month 1
-  31;                                     !- End Day 1
-
-Schedule:Week:Daily,
-  Schedule:Week:Daily {257001d9-0945-4fd7-93a5-a1df710397d3}, !- Name
+  Schedule:Week:Daily {9fb3f443-ec4a-4841-8b2d-e9549ad6590d}, !- Name
   Work Efficiency Schedule Default,       !- Sunday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Monday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Tuesday Schedule:Day Name
@@ -2884,7 +2412,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   Work Efficiency Schedule,               !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {257001d9-0945-4fd7-93a5-a1df710397d3}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {9fb3f443-ec4a-4841-8b2d-e9549ad6590d}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -3814,353 +3342,6 @@ PlantEquipmentList,
   Primary Boiler 58kBtu/hr 0.85 AFUE,     !- Equipment Name 1
   Boiler:HotWater,                        !- Equipment Object Type 2
   Secondary Boiler 0kBtu/hr 0.85 AFUE;    !- Equipment Name 2
-
-PlantLoop,
-  Main Service Water Loop,                !- Name
-  Water,                                  !- Fluid Type
-  ,                                       !- User Defined Fluid Type
-  Main Service Water Loop Operation Schemes, !- Plant Equipment Operation Scheme Name
-  Node 43,                                !- Loop Temperature Setpoint Node Name
-  60,                                     !- Maximum Loop Temperature {C}
-  10,                                     !- Minimum Loop Temperature {C}
-  Autosize,                               !- Maximum Loop Flow Rate {m3/s}
-  0,                                      !- Minimum Loop Flow Rate {m3/s}
-  Autocalculate,                          !- Plant Loop Volume {m3}
-  Node 42,                                !- Plant Side Inlet Node Name
-  Node 43,                                !- Plant Side Outlet Node Name
-  Main Service Water Loop Supply Branches, !- Plant Side Branch List Name
-  Main Service Water Loop Supply Connector List, !- Plant Side Connector List Name
-  Node 45,                                !- Demand Side Inlet Node Name
-  Node 46,                                !- Demand Side Outlet Node Name
-  Main Service Water Loop Demand Branches, !- Demand Side Branch List Name
-  Main Service Water Loop Demand Connector List, !- Demand Side Connector List Name
-  Optimal,                                !- Load Distribution Scheme
-  ,                                       !- Availability Manager List Name
-  SingleSetpoint,                         !- Plant Loop Demand Calculation Scheme
-  ;                                       !- Common Pipe Simulation
-
-Sizing:Plant,
-  Main Service Water Loop,                !- Plant or Condenser Loop Name
-  Heating,                                !- Loop Type
-  60.0000000000001,                       !- Design Loop Exit Temperature {C}
-  5,                                      !- Loop Design Temperature Difference {deltaC}
-  NonCoincident,                          !- Sizing Option
-  1,                                      !- Zone Timesteps in Averaging Window
-  None;                                   !- Coincident Sizing Factor Mode
-
-BranchList,
-  Main Service Water Loop Supply Branches, !- Name
-  Main Service Water Loop Supply Inlet Branch, !- Branch Name 1
-  Main Service Water Loop Supply Branch 1, !- Branch Name 2
-  Main Service Water Loop Supply Branch 2, !- Branch Name 3
-  Main Service Water Loop Supply Outlet Branch; !- Branch Name 4
-
-ConnectorList,
-  Main Service Water Loop Supply Connector List, !- Name
-  Connector:Splitter,                     !- Connector Object Type 1
-  Main Service Water Loop Supply Splitter, !- Connector Name 1
-  Connector:Mixer,                        !- Connector Object Type 2
-  Main Service Water Loop Supply Mixer;   !- Connector Name 2
-
-Connector:Splitter,
-  Main Service Water Loop Supply Splitter, !- Name
-  Main Service Water Loop Supply Inlet Branch, !- Inlet Branch Name
-  Main Service Water Loop Supply Branch 1, !- Outlet Branch Name 1
-  Main Service Water Loop Supply Branch 2; !- Outlet Branch Name 2
-
-Connector:Mixer,
-  Main Service Water Loop Supply Mixer,   !- Name
-  Main Service Water Loop Supply Outlet Branch, !- Outlet Branch Name
-  Main Service Water Loop Supply Branch 1, !- Inlet Branch Name 1
-  Main Service Water Loop Supply Branch 2; !- Inlet Branch Name 2
-
-Branch,
-  Main Service Water Loop Supply Inlet Branch, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pump:ConstantSpeed,                     !- Component Object Type 1
-  Service Water Loop Pump,                !- Component Name 1
-  Node 42,                                !- Component Inlet Node Name 1
-  Node 48;                                !- Component Outlet Node Name 1
-
-Pump:ConstantSpeed,
-  Service Water Loop Pump,                !- Name
-  Node 42,                                !- Inlet Node Name
-  Node 48,                                !- Outlet Node Name
-  Autosize,                               !- Design Flow Rate {m3/s}
-  29891,                                  !- Design Pump Head {Pa}
-  Autosize,                               !- Design Power Consumption {W}
-  0.7,                                    !- Motor Efficiency
-  0,                                      !- Fraction of Motor Inefficiencies to Fluid Stream
-  Intermittent,                           !- Pump Control Type
-  ,                                       !- Pump Flow Rate Schedule Name
-  ,                                       !- Pump Curve Name
-  ,                                       !- Impeller Diameter {m}
-  ,                                       !- Rotational Speed {rev/min}
-  ,                                       !- Zone Name
-  ,                                       !- Skin Loss Radiative Fraction
-  PowerPerFlowPerPressure,                !- Design Power Sizing Method
-  348701.1,                               !- Design Electric Power per Unit Flow Rate {W/(m3/s)}
-  1.282051282;                            !- Design Shaft Power per Unit Flow Rate per Unit Head
-
-Branch,
-  Main Service Water Loop Supply Branch 1, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  WaterHeater:Mixed,                      !- Component Object Type 1
-  200gal NaturalGas Water Heater - 200kBtu/hr 0.807 Therm Eff, !- Component Name 1
-  Node 44,                                !- Component Inlet Node Name 1
-  Node 49;                                !- Component Outlet Node Name 1
-
-WaterHeater:Mixed,
-  200gal NaturalGas Water Heater - 200kBtu/hr 0.807 Therm Eff, !- Name
-  0.75708235679397,                       !- Tank Volume {m3}
-  Service Water Loop Temp - 140F,         !- Setpoint Temperature Schedule Name
-  2,                                      !- Deadband Temperature Difference {deltaC}
-  82.2222222222223,                       !- Maximum Temperature Limit {C}
-  Cycle,                                  !- Heater Control Type
-  58614.2140344444,                       !- Heater Maximum Capacity {W}
-  ,                                       !- Heater Minimum Capacity {W}
-  0,                                      !- Heater Ignition Minimum Flow Rate {m3/s}
-  0,                                      !- Heater Ignition Delay {s}
-  NaturalGas,                             !- Heater Fuel Type
-  0.807222539674442,                      !- Heater Thermal Efficiency
-  SWH-EFFFPLR-NECB2011,                   !- Part Load Factor Curve Name
-  20,                                     !- Off Cycle Parasitic Fuel Consumption Rate {W}
-  NaturalGas,                             !- Off Cycle Parasitic Fuel Type
-  0.8,                                    !- Off Cycle Parasitic Heat Fraction to Tank
-  0,                                      !- On Cycle Parasitic Fuel Consumption Rate {W}
-  NaturalGas,                             !- On Cycle Parasitic Fuel Type
-  0,                                      !- On Cycle Parasitic Heat Fraction to Tank
-  Schedule,                               !- Ambient Temperature Indicator
-  Water Heater Ambient Temp Schedule - 70F, !- Ambient Temperature Schedule Name
-  ,                                       !- Ambient Temperature Zone Name
-  ,                                       !- Ambient Temperature Outdoor Air Node Name
-  10.8859753632854,                       !- Off Cycle Loss Coefficient to Ambient Temperature {W/K}
-  1,                                      !- Off Cycle Loss Fraction to Zone
-  10.8859753632854,                       !- On Cycle Loss Coefficient to Ambient Temperature {W/K}
-  1,                                      !- On Cycle Loss Fraction to Zone
-  ,                                       !- Peak Use Flow Rate {m3/s}
-  ,                                       !- Use Flow Rate Fraction Schedule Name
-  ,                                       !- Cold Water Supply Temperature Schedule Name
-  Node 44,                                !- Use Side Inlet Node Name
-  Node 49,                                !- Use Side Outlet Node Name
-  1,                                      !- Use Side Effectiveness
-  ,                                       !- Source Side Inlet Node Name
-  ,                                       !- Source Side Outlet Node Name
-  1,                                      !- Source Side Effectiveness
-  Autosize,                               !- Use Side Design Flow Rate {m3/s}
-  Autosize,                               !- Source Side Design Flow Rate {m3/s}
-  1.5,                                    !- Indirect Water Heating Recovery Time {hr}
-  IndirectHeatPrimarySetpoint,            !- Source Side Flow Control Mode
-  ,                                       !- Indirect Alternate Setpoint Temperature Schedule Name
-  General;                                !- End-Use Subcategory
-
-Curve:Cubic,
-  SWH-EFFFPLR-NECB2011,                   !- Name
-  0.7576,                                 !- Coefficient1 Constant
-  1.0071,                                 !- Coefficient2 x
-  -1.4443,                                !- Coefficient3 x**2
-  0.6844,                                 !- Coefficient4 x**3
-  0,                                      !- Minimum Value of x {BasedOnField A2}
-  1;                                      !- Maximum Value of x {BasedOnField A2}
-
-Branch,
-  Main Service Water Loop Supply Branch 2, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Pipe Adiabatic 3,                       !- Component Name 1
-  Node 50,                                !- Component Inlet Node Name 1
-  Node 51;                                !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Pipe Adiabatic 3,                       !- Name
-  Node 50,                                !- Inlet Node Name
-  Node 51;                                !- Outlet Node Name
-
-Branch,
-  Main Service Water Loop Supply Outlet Branch, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Pipe Adiabatic 5,                       !- Component Name 1
-  Node 53,                                !- Component Inlet Node Name 1
-  Node 43;                                !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Pipe Adiabatic 5,                       !- Name
-  Node 53,                                !- Inlet Node Name
-  Node 43;                                !- Outlet Node Name
-
-SetpointManager:Scheduled,
-  Service hot water setpoint manager,     !- Name
-  Temperature,                            !- Control Variable
-  Service Water Loop Temp - 140F,         !- Schedule Name
-  Node 43;                                !- Setpoint Node or NodeList Name
-
-BranchList,
-  Main Service Water Loop Demand Branches, !- Name
-  Main Service Water Loop Demand Inlet Branch, !- Branch Name 1
-  Main Service Water Loop Demand Branch 1, !- Branch Name 2
-  Main Service Water Loop Demand Branch 2, !- Branch Name 3
-  Main Service Water Loop Demand Branch 3, !- Branch Name 4
-  Main Service Water Loop Demand Bypass Branch, !- Branch Name 5
-  Main Service Water Loop Demand Outlet Branch; !- Branch Name 6
-
-ConnectorList,
-  Main Service Water Loop Demand Connector List, !- Name
-  Connector:Splitter,                     !- Connector Object Type 1
-  Main Service Water Loop Demand Splitter, !- Connector Name 1
-  Connector:Mixer,                        !- Connector Object Type 2
-  Main Service Water Loop Demand Mixer;   !- Connector Name 2
-
-Connector:Splitter,
-  Main Service Water Loop Demand Splitter, !- Name
-  Main Service Water Loop Demand Inlet Branch, !- Inlet Branch Name
-  Main Service Water Loop Demand Branch 1, !- Outlet Branch Name 1
-  Main Service Water Loop Demand Branch 2, !- Outlet Branch Name 2
-  Main Service Water Loop Demand Branch 3, !- Outlet Branch Name 3
-  Main Service Water Loop Demand Bypass Branch; !- Outlet Branch Name 4
-
-Connector:Mixer,
-  Main Service Water Loop Demand Mixer,   !- Name
-  Main Service Water Loop Demand Outlet Branch, !- Outlet Branch Name
-  Main Service Water Loop Demand Branch 1, !- Inlet Branch Name 1
-  Main Service Water Loop Demand Branch 2, !- Inlet Branch Name 2
-  Main Service Water Loop Demand Branch 3, !- Inlet Branch Name 3
-  Main Service Water Loop Demand Bypass Branch; !- Inlet Branch Name 4
-
-Branch,
-  Main Service Water Loop Demand Inlet Branch, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Pipe Adiabatic 6,                       !- Component Name 1
-  Node 45,                                !- Component Inlet Node Name 1
-  Node 54;                                !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Pipe Adiabatic 6,                       !- Name
-  Node 45,                                !- Inlet Node Name
-  Node 54;                                !- Outlet Node Name
-
-Branch,
-  Main Service Water Loop Demand Branch 1, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Pipe Adiabatic 4,                       !- Component Name 1
-  Node 47,                                !- Component Inlet Node Name 1
-  Node 52;                                !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Pipe Adiabatic 4,                       !- Name
-  Node 47,                                !- Inlet Node Name
-  Node 52;                                !- Outlet Node Name
-
-Branch,
-  Main Service Water Loop Demand Branch 2, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  WaterUse:Connections,                   !- Component Object Type 1
-  Water Use Connections 1,                !- Component Name 1
-  Node 56,                                !- Component Inlet Node Name 1
-  Node 57;                                !- Component Outlet Node Name 1
-
-WaterUse:Connections,
-  Water Use Connections 1,                !- Name
-  Node 56,                                !- Inlet Node Name
-  Node 57,                                !- Outlet Node Name
-  ,                                       !- Supply Water Storage Tank Name
-  ,                                       !- Reclamation Water Storage Tank Name
-  ,                                       !- Hot Water Supply Temperature Schedule Name
-  ,                                       !- Cold Water Supply Temperature Schedule Name
-  ,                                       !- Drain Water Heat Exchanger Type
-  ,                                       !- Drain Water Heat Exchanger Destination
-  ,                                       !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
-  Dining Service Water Use 0.38gal/min;   !- Water Use Equipment Name 1
-
-WaterUse:Equipment,
-  Dining Service Water Use 0.38gal/min,   !- Name
-  General,                                !- End-Use Subcategory
-  2.39515451281452e-05,                   !- Peak Flow Rate {m3/s}
-  NECB-B-Service Water Heating,           !- Flow Rate Fraction Schedule Name
-  Schedule Ruleset 5,                     !- Target Temperature Schedule Name
-  ,                                       !- Hot Water Supply Temperature Schedule Name
-  ,                                       !- Cold Water Supply Temperature Schedule Name
-  Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN, !- Zone Name
-  Schedule Ruleset 3,                     !- Sensible Fraction Schedule Name
-  Schedule Ruleset 4;                     !- Latent Fraction Schedule Name
-
-Branch,
-  Main Service Water Loop Demand Branch 3, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  WaterUse:Connections,                   !- Component Object Type 1
-  Water Use Connections 2,                !- Component Name 1
-  Node 58,                                !- Component Inlet Node Name 1
-  Node 59;                                !- Component Outlet Node Name 1
-
-WaterUse:Connections,
-  Water Use Connections 2,                !- Name
-  Node 58,                                !- Inlet Node Name
-  Node 59,                                !- Outlet Node Name
-  ,                                       !- Supply Water Storage Tank Name
-  ,                                       !- Reclamation Water Storage Tank Name
-  ,                                       !- Hot Water Supply Temperature Schedule Name
-  ,                                       !- Cold Water Supply Temperature Schedule Name
-  ,                                       !- Drain Water Heat Exchanger Type
-  ,                                       !- Drain Water Heat Exchanger Destination
-  ,                                       !- Drain Water Heat Exchanger U-Factor Times Area {W/K}
-  Kitchen Service Water Use 0.07gal/min;  !- Water Use Equipment Name 1
-
-WaterUse:Equipment,
-  Kitchen Service Water Use 0.07gal/min,  !- Name
-  General,                                !- End-Use Subcategory
-  4.49574007408925e-06,                   !- Peak Flow Rate {m3/s}
-  NECB-B-Service Water Heating,           !- Flow Rate Fraction Schedule Name
-  Schedule Ruleset 8,                     !- Target Temperature Schedule Name
-  ,                                       !- Hot Water Supply Temperature Schedule Name
-  ,                                       !- Cold Water Supply Temperature Schedule Name
-  Sp-Kitchen Sys-3 Flr-1 Sch-B HPlcmt-north ZN, !- Zone Name
-  Schedule Ruleset 6,                     !- Sensible Fraction Schedule Name
-  Schedule Ruleset 7;                     !- Latent Fraction Schedule Name
-
-Branch,
-  Main Service Water Loop Demand Bypass Branch, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Main Service Water Loop Demand Bypass Pipe, !- Component Name 1
-  Main Service Water Loop Demand Bypass Pipe Inlet Node, !- Component Inlet Node Name 1
-  Main Service Water Loop Demand Bypass Pipe Outlet Node; !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Main Service Water Loop Demand Bypass Pipe, !- Name
-  Main Service Water Loop Demand Bypass Pipe Inlet Node, !- Inlet Node Name
-  Main Service Water Loop Demand Bypass Pipe Outlet Node; !- Outlet Node Name
-
-Branch,
-  Main Service Water Loop Demand Outlet Branch, !- Name
-  ,                                       !- Pressure Drop Curve Name
-  Pipe:Adiabatic,                         !- Component Object Type 1
-  Pipe Adiabatic 7,                       !- Component Name 1
-  Node 55,                                !- Component Inlet Node Name 1
-  Node 46;                                !- Component Outlet Node Name 1
-
-Pipe:Adiabatic,
-  Pipe Adiabatic 7,                       !- Name
-  Node 55,                                !- Inlet Node Name
-  Node 46;                                !- Outlet Node Name
-
-PlantEquipmentOperationSchemes,
-  Main Service Water Loop Operation Schemes, !- Name
-  PlantEquipmentOperation:HeatingLoad,    !- Control Scheme Object Type 1
-  Main Service Water Loop Heating Operation Scheme, !- Control Scheme Name 1
-  Always On Discrete;                     !- Control Scheme Schedule Name 1
-
-PlantEquipmentOperation:HeatingLoad,
-  Main Service Water Loop Heating Operation Scheme, !- Name
-  0,                                      !- Load Range Lower Limit 1 {W}
-  1000000000,                             !- Load Range Upper Limit 1 {W}
-  Main Service Water Loop Heating Equipment List; !- Range Equipment List Name 1
-
-PlantEquipmentList,
-  Main Service Water Loop Heating Equipment List, !- Name
-  WaterHeater:Mixed,                      !- Equipment Object Type 1
-  200gal NaturalGas Water Heater - 200kBtu/hr 0.807 Therm Eff; !- Equipment Name 1
 
 OutputControl:ReportingTolerances,
   1,                                      !- Tolerance for Time Heating Setpoint Not Met {deltaC}

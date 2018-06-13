@@ -1,4 +1,4 @@
-Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.06 17:20
+Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.13 20:45
 ! <Version>, Version ID
  Version, 8.9
 ! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
@@ -30,7 +30,7 @@ Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
 ! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
 Site:Location,Banff CS AB CAN CWEC2016 WMO#=711220,51.19,-115.55,-7.00,1396.90,85631,1.0178
 ! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
- Building Information,-FullServiceRestaurant-NECB HDD Method-CAN_AB_Banff.CS.711220_CWEC2016.epw created: 2018-06-06 17:19:44 +0000,0.000,City,4.00000E-002,0.20000,FullInteriorAndExterior,25,6
+ Building Information,NECB_2011FullServiceRestaurant,0.000,City,4.00000E-002,0.20000,FullInteriorAndExterior,25,6
 ! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
 Inside Convection Algorithm,TARP
 ! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
@@ -76,7 +76,6 @@ Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.
  ElectricEquipment Internal Gains Nominal, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP,NECB-B-ELECTRIC-EQUIPMENT,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,1394.041,10.000,199.790,0.000,0.500,0.000,0.500,General,139.404,1254.637
 ! <Shadowing/Sun Position Calculations Annual Simulations>, Calculation Method, Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm, External Shading Calculation Method, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
 Shadowing/Sun Position Calculations Annual Simulations,AverageOverDaysInFrequency,7,15000,SutherlandHodgman,SimpleSkyDiffuseModeling,InternalCalculation,No,No,No
-! <Water Heater Information>,Type,Name,Volume {m3},Maximum Capacity {W},Standard Rated Recovery Efficiency, Standard Rated Energy Factor
 ! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s/m2},Volume Flow Rate/Exterior Surface Area {m3/s/m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
  ZoneInfiltration Airflow Stats Nominal, ATTIC INFILTRATION,ALWAYS ON DISCRETE,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,511.15,0.0,0.142,2.785E-004,2.500E-004,0.599,0.000,0.000,0.224,0.000
  ZoneInfiltration Airflow Stats Nominal, DINING INFILTRATION,ALWAYS ON DISCRETE,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,4.230E-002,1.138E-004,2.500E-004,0.134,0.000,0.000,0.224,0.000
@@ -154,7 +153,6 @@ Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
  DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1 17KBTU/HR 14.0SEER, 4766.6, 3.09, 10.55, 11.12, 10.40
  Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 1, Design Size Nominal Capacity [W], 16734.29239
  Component Sizing Information, Fan:ConstantVolume, FAN CONSTANT VOLUME 1, Design Size Maximum Flow Rate [m3/s], 0.30214
-Water Heater Information,WaterHeater:Mixed,200GAL NATURALGAS WATER HEATER - 200KBTU/HR 0.807 THERM EFF,0.7570,58614.2,0.802,0.4329
  Component Sizing Information, PlantLoop, HOT WATER LOOP, Maximum Loop Flow Rate [m3/s], 2.52924E-004
  Component Sizing Information, PlantLoop, HOT WATER LOOP, Plant Loop Volume [m3], 3.03509E-002
  Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Design Flow Rate [m3/s], 2.52924E-004
@@ -165,11 +163,6 @@ Water Heater Information,WaterHeater:Mixed,200GAL NATURALGAS WATER HEATER - 200K
  Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 0KBTU/HR 0.85 AFUE, Design Size Nominal Capacity [W], 16999.59882
  Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 0KBTU/HR 0.85 AFUE, User-Specified Nominal Capacity [W], 1.00000E-003
  Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 0KBTU/HR 0.85 AFUE, Design Size Design Water Flow Rate [m3/s], 2.52924E-004
- Component Sizing Information, PlantLoop, MAIN SERVICE WATER LOOP, Maximum Loop Flow Rate [m3/s], 2.84473E-005
- Component Sizing Information, PlantLoop, MAIN SERVICE WATER LOOP, Plant Loop Volume [m3], 3.41367E-003
- Component Sizing Information, Pump:ConstantSpeed, SERVICE WATER LOOP PUMP, Design Flow Rate [m3/s], 2.84473E-005
- Component Sizing Information, Pump:ConstantSpeed, SERVICE WATER LOOP PUMP, Design Power Consumption [W], 1.55736
- Component Sizing Information, WaterHeater:Mixed, 200GAL NATURALGAS WATER HEATER - 200KBTU/HR 0.807 THERM EFF, Use Side Design Flow Rate [m3/s], 2.84473E-005
 ! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
 ! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
 ! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
@@ -180,9 +173,9 @@ Environment:WarmupDays,  6
 ! <Tabular Report>,Style,Unit Conversion
 Tabular Report,HTML,None
 ! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
- Warmup Convergence Information,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,RunPeriod: RUN PERIOD 1,3.2724398071E-002,2.8640130067E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
- Warmup Convergence Information,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,RunPeriod: RUN PERIOD 1,9.5099967540E-002,0.3310382818,Pass,Pass,0.1383756867,0.3923146864,Pass,Pass
- Warmup Convergence Information,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,RunPeriod: RUN PERIOD 1,0.1111286536,0.4383382693,Pass,Pass,0.3590804712,1.6045098700,Pass,Pass
+ Warmup Convergence Information,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,RunPeriod: RUN PERIOD 1,3.2817365186E-002,2.8818258174E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,RunPeriod: RUN PERIOD 1,0.1019365822,0.3645707419,Pass,Pass,0.1157840895,0.3433204231,Pass,Pass
+ Warmup Convergence Information,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,RunPeriod: RUN PERIOD 1,0.1111224177,0.4537971606,Pass,Pass,0.4284019130,1.7644905206,Pass,Pass
 ! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
 Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
 End of Data

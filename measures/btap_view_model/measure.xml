@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_view_model</name>
   <uid>a7a14e83-c319-4d66-b143-97630df94dbe</uid>
-  <version_id>f8a19e8a-d2b0-447b-97cd-c212e07bc2db</version_id>
-  <version_modified>20180605T185653Z</version_modified>
+  <version_id>a3503434-3484-4c96-b8a8-1b079ca751ff</version_id>
+  <version_modified>20180613T204351Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPViewModel</class_name>
   <display_name>BTAPViewModel</display_name>
@@ -23,12 +23,6 @@
     </attribute>
   </attributes>
   <files>
-    <file>
-      <filename>btap_view_model_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1237E69A</checksum>
-    </file>
     <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>
