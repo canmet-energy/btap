@@ -1,10 +1,9 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>/home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so: undefined symbol: rb_cObject - /home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so</error>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>34c820cf-b55d-4bdf-b654-48e5bd9beef8</uid>
-  <version_id>9828898a-008c-4431-8194-6b47eaa0db27</version_id>
-  <version_modified>20180614T144817Z</version_modified>
+  <version_id>fc77fef2-3297-4503-be12-c090e8595a61</version_id>
+  <version_modified>20180614T163059Z</version_modified>
   <xml_checksum>D1E2AA62</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAPUtilityTariffsModelSetup</display_name>
@@ -63,7 +62,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>47016DE7</checksum>
+      <checksum>5E1F4A42</checksum>
     </file>
   </files>
 </measure>
