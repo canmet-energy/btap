@@ -283,7 +283,7 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
       #Store simulation year. 
       @simulation_year = Time.parse(date_times[0].to_s).year
       #store data values
-      @runner.registerInfo("Total Time = #{(Time.new - @start_time).round}sec.")
+      #@runner.registerInfo("Total Time = #{(Time.new - @start_time).round}sec.")
 
       
       vals = ts.values
@@ -648,7 +648,7 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
 
       full_date = []
       full_date << 'Full Date:' << '' << '' << ''
-      
+      return false if selection[0].nil?
       puts selection[0]['start_date_time']
       start_date_time = selection[0]['start_date_time']
       end_date_time = selection[0]['end_date_time']
