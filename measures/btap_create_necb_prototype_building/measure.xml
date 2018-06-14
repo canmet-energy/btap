@@ -1,10 +1,9 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>/home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so: undefined symbol: rb_cObject - /home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so</error>
   <name>btap_create_necb_prototype_building</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>64c3a1cb-2f3f-4117-a846-e12a0cce2e18</version_id>
-  <version_modified>20180613T204350Z</version_modified>
+  <version_id>906f93cf-f9f6-417f-94c0-a26c508b7f71</version_id>
+  <version_modified>20180614T162709Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
@@ -412,7 +411,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C451A59D</checksum>
+      <checksum>68C6CA4E</checksum>
     </file>
   </files>
 </measure>
