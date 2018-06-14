@@ -34,7 +34,6 @@
 # *******************************************************************************
 
 require_relative 'resources/BTAPMeasureHelper'
-require_relative 'resources/btap_additions'
 class BTAPEnvelopeFDWRandSRR < OpenStudio::Measure::ModelMeasure
   attr_accessor :use_json_package, :use_string_double
   include(BTAPMeasureHelper)

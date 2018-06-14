@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>2cd17b4f-39a4-4bdc-a462-98013775b8d6</version_id>
-  <version_modified>20180613T204350Z</version_modified>
+  <version_id>809d0e1a-f6d3-4958-98fa-5f3656420531</version_id>
+  <version_modified>20180614T144817Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -63,24 +63,6 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>btap_additions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6DC45CBD</checksum>
-    </file>
-    <file>
-      <filename>building_envelope.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6ED0F4FE</checksum>
-    </file>
-    <file>
-      <filename>fileio.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>55494222</checksum>
-    </file>
-    <file>
       <filename>neb_end_use_prices.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -115,18 +97,6 @@
       <filetype>erb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7DC1F0A7</checksum>
-    </file>
-    <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>309C0821</checksum>
-    </file>
-    <file>
-      <filename>Standards.Model.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>46874C01</checksum>
     </file>
     <file>
       <filename>test.rb</filename>

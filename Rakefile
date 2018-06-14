@@ -1,11 +1,10 @@
 require 'rake/testtask'
 namespace :test do
   #create test list
-  sh 'openstudio measure --update_all measures/'
+  #sh 'openstudio measure --update_all measures/'
   array = []
-  array << 'measures_development/BTAPTemplateModelMeasure/tests/test.rb'
-  array << 'measures/btap_create_necb_prototype_building/tests/test.rb'
   array << 'measures/btap_create_necb_reference_building/tests/test.rb'
+  array << 'measures_development/BTAPTemplateModelMeasure/tests/test.rb'
   array << 'measures/btap_envelope_construction_measure/tests/test.rb'
   array << 'measures/btap_envelope_fdwr_and_srr/tests/test.rb'
   array << 'measures/btap_ideal_air_loads_measure/tests/test.rb'
@@ -17,15 +16,18 @@ namespace :test do
   #array << 'measures/btap_view_model/tests/test.rb'
 
 
-
-
-
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|
     t.libs << 'test'
     t.test_files = array
   end
 end
+
+desc 'Update Measures'
+Rake::TestTask.new('measure-xml-update') do |t|
+  sh 'openstudio measure --update_all measures/'
+end
+
 
 desc 'Update Common Resources from TemplateModelMeasure'
 task :update_resources do

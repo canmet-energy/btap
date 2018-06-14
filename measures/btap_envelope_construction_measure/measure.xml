@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_construction_measure</name>
   <uid>5765296d-8457-4f6e-a674-d141756acbd9</uid>
-  <version_id>298e707a-f1a9-449e-b3e7-3b436b339d7e</version_id>
-  <version_modified>20180605T183007Z</version_modified>
+  <version_id>5603849f-42e8-493d-8061-30fa3f86b9a4</version_id>
+  <version_modified>20180614T144816Z</version_modified>
   <xml_checksum>E2523304</xml_checksum>
   <class_name>BTAPEnvelopeConstructionMeasure</class_name>
   <display_name>BTAPEnvelopeConstructionMeasureDetailed</display_name>
@@ -233,23 +233,6 @@
   </attributes>
   <files>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.4.1</identifier>
-        <min_compatible>2.4.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>1B2ECB17</checksum>
-    </file>
-    <file>
-      <filename>btap_envelope_construction_measure_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BAC1A633</checksum>
-    </file>
-    <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
@@ -268,34 +251,15 @@
       <checksum>3D94B7AC</checksum>
     </file>
     <file>
-      <filename>btap_additions.rb</filename>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.4.1</identifier>
+        <min_compatible>2.4.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6DC45CBD</checksum>
-    </file>
-    <file>
-      <filename>building_envelope.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6ED0F4FE</checksum>
-    </file>
-    <file>
-      <filename>fileio.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>55494222</checksum>
-    </file>
-    <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>309C0821</checksum>
-    </file>
-    <file>
-      <filename>Standards.Model.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>46874C01</checksum>
+      <usage_type>script</usage_type>
+      <checksum>88459072</checksum>
     </file>
   </files>
 </measure>

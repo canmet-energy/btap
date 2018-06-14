@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>8e64e2c6-aeb2-427d-a261-4ccc37a05627</uid>
-  <version_id>aa653166-af87-48cf-b61b-f0706ddf766b</version_id>
-  <version_modified>20180605T184731Z</version_modified>
+  <version_id>41946d25-df20-4e9b-9bcf-071ec5b30d72</version_id>
+  <version_modified>20180614T144816Z</version_modified>
   <xml_checksum>825E3A16</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
   <display_name>BTAPEnvelopeFDWRAndSRR </display_name>
@@ -93,12 +93,6 @@
   </attributes>
   <files>
     <file>
-      <filename>btap_envelope_fdwr_and_srr_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6AE88697</checksum>
-    </file>
-    <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
@@ -173,7 +167,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>49D1D164</checksum>
+      <checksum>27CACE7E</checksum>
     </file>
   </files>
 </measure>

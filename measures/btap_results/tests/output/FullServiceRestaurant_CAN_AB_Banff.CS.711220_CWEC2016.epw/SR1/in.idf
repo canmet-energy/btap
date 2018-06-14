@@ -6,7 +6,7 @@ Timestep,
   6;                                      !- Number of Timesteps per Hour
 
 LifeCycleCost:Parameters,
-  {78bfe094-2bb2-4a73-8da8-f530cba7faf3}, !- Name
+  {78e9fd0c-de39-4b74-8d78-24b3f4dda77e}, !- Name
   EndOfYear,                              !- Discounting Convention
   ConstantDollar,                         !- Inflation Approach
   0.03,                                   !- Real Discount Rate
@@ -583,7 +583,7 @@ Schedule:Day:Interval,
   22;                                     !- Value Until Time 4
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {52b500ce-1db0-4b58-9bce-3108c3d0644a}, !- Name
+  Schedule:Week:Daily {35913cbc-d96e-47a4-ba58-4a0b1a43ef15}, !- Name
   NECB-B-Thermostat Setpoint-Heating Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -600,7 +600,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Heating,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {52b500ce-1db0-4b58-9bce-3108c3d0644a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {35913cbc-d96e-47a4-ba58-4a0b1a43ef15}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -653,7 +653,7 @@ Schedule:Day:Interval,
   24;                                     !- Value Until Time 3
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {80c9fdf2-a0ef-4b11-ae04-00dfc17dcb68}, !- Name
+  Schedule:Week:Daily {560510b5-49db-458b-91cb-e1009c2244ac}, !- Name
   NECB-B-Thermostat Setpoint-Cooling Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -670,7 +670,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Cooling,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {80c9fdf2-a0ef-4b11-ae04-00dfc17dcb68}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {560510b5-49db-458b-91cb-e1009c2244ac}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -2056,7 +2056,7 @@ Schedule:Day:Interval,
   0;                                      !- Value Until Time 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {b547ae63-bae4-47b4-b06d-6a18fa3f25ac}, !- Name
+  Schedule:Week:Daily {2b33222f-aadf-439e-b6f9-754eb138e642}, !- Name
   Air Velocity Schedule Default,          !- Sunday Schedule:Day Name
   Air Velocity Schedule Default,          !- Monday Schedule:Day Name
   Air Velocity Schedule Default,          !- Tuesday Schedule:Day Name
@@ -2073,14 +2073,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Air Velocity Schedule,                  !- Name
   Velocity,                               !- Schedule Type Limits Name
-  Schedule:Week:Daily {b547ae63-bae4-47b4-b06d-6a18fa3f25ac}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {2b33222f-aadf-439e-b6f9-754eb138e642}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {6c620e2d-ac03-49ac-916e-43ff5f51d53a}, !- Name
+  Schedule:Week:Daily {f7f8838d-aa49-4bdb-a105-24dbd02e3414}, !- Name
   Always On Default,                      !- Sunday Schedule:Day Name
   Always On Default,                      !- Monday Schedule:Day Name
   Always On Default,                      !- Tuesday Schedule:Day Name
@@ -2097,14 +2097,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Always On,                              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {6c620e2d-ac03-49ac-916e-43ff5f51d53a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {f7f8838d-aa49-4bdb-a105-24dbd02e3414}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {74374a95-1348-4811-a0b2-620f5ad2d37e}, !- Name
+  Schedule:Week:Daily {43b90702-63aa-4ce7-b0fc-347347473228}, !- Name
   Clothing Schedule Default Winter Clothes, !- Sunday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Monday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Tuesday Schedule:Day Name
@@ -2121,14 +2121,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Clothing Schedule,                      !- Name
   Any Number,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {74374a95-1348-4811-a0b2-620f5ad2d37e}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {43b90702-63aa-4ce7-b0fc-347347473228}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {40c452ac-1376-4290-9fe7-bba8f1166204}, !- Name
+  Schedule:Week:Daily {21459899-0d49-453f-b60d-ba77f7fa390f}, !- Name
   NECB-Activity Default,                  !- Sunday Schedule:Day Name
   NECB-Activity Default,                  !- Monday Schedule:Day Name
   NECB-Activity Default,                  !- Tuesday Schedule:Day Name
@@ -2145,14 +2145,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-Activity,                          !- Name
   ActivityLevel,                          !- Schedule Type Limits Name
-  Schedule:Week:Daily {40c452ac-1376-4290-9fe7-bba8f1166204}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {21459899-0d49-453f-b60d-ba77f7fa390f}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {db67583d-e61f-4768-a256-55cb4c8646a6}, !- Name
+  Schedule:Week:Daily {ad19dc2f-5be0-461e-8eed-a24f5dce61e1}, !- Name
   NECB-B-Electric-Equipment Sun|Hol Day,  !- Sunday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -2169,14 +2169,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Electric-Equipment,              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {db67583d-e61f-4768-a256-55cb4c8646a6}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {ad19dc2f-5be0-461e-8eed-a24f5dce61e1}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {d7ec23c8-4c06-493b-9585-0eff87d10666}, !- Name
+  Schedule:Week:Daily {e6b3bf6e-dbb9-49d7-a15d-cac2fa1bd845}, !- Name
   NECB-B-Lighting Sun|Hol Day,            !- Sunday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Monday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Tuesday Schedule:Day Name
@@ -2193,14 +2193,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Lighting,                        !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {d7ec23c8-4c06-493b-9585-0eff87d10666}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {e6b3bf6e-dbb9-49d7-a15d-cac2fa1bd845}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {dede1eb4-1dfd-4c01-a20a-0d281d79370c}, !- Name
+  Schedule:Week:Daily {1efc45e8-5e77-4555-b233-fdc55830d890}, !- Name
   NECB-B-Occupancy Sun|Hol Day,           !- Sunday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Monday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Tuesday Schedule:Day Name
@@ -2217,14 +2217,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Occupancy,                       !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {dede1eb4-1dfd-4c01-a20a-0d281d79370c}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {1efc45e8-5e77-4555-b233-fdc55830d890}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {bdf55473-6e06-41ca-93d2-4d515931af5a}, !- Name
+  Schedule:Week:Daily {fd907cfb-869f-4a80-8ce1-542c949a688b}, !- Name
   Work Efficiency Schedule Default,       !- Sunday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Monday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Tuesday Schedule:Day Name
@@ -2241,7 +2241,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   Work Efficiency Schedule,               !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {bdf55473-6e06-41ca-93d2-4d515931af5a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {fd907cfb-869f-4a80-8ce1-542c949a688b}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1

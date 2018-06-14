@@ -1,6 +1,6 @@
 
 OS:Version,
-  {d2180d74-6120-4d42-9219-d78e02bdfb39}, !- Handle
+  {fdfa4633-6385-4ac8-aecc-96ab4e27b744}, !- Handle
   2.4.3;                                  !- Version Identifier
 
 OS:SimulationControl,
@@ -2779,7 +2779,7 @@ OS:AirLoopHVAC,
   Air Loop HVAC 1,                        !- Name
   ,                                       !- Controller List Name
   {2a10bc52-cb2d-4a4a-a91e-d59204a88546}, !- Availability Schedule
-  {b981a499-9f83-4263-bd30-136326207214}, !- Availability Manager List Name
+  {9c213c54-48fc-4fee-be96-d2f3c59a3b93}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -2796,7 +2796,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {b981a499-9f83-4263-bd30-136326207214}, !- Handle
+  {9c213c54-48fc-4fee-be96-d2f3c59a3b93}, !- Handle
   Air Loop HVAC 1 AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -4283,7 +4283,7 @@ OS:AirLoopHVAC,
   VAV with Reheat,                        !- Name
   ,                                       !- Controller List Name
   {2a10bc52-cb2d-4a4a-a91e-d59204a88546}, !- Availability Schedule
-  {41613a9b-1dc5-4eab-93e5-0790de7eead3}, !- Availability Manager List Name
+  {683d1d4b-d627-43dd-8a68-f7d53890c6a8}, !- Availability Manager List Name
   AutoSize,                               !- Design Supply Air Flow Rate {m3/s}
   ,                                       !- Branch List Name
   ,                                       !- Connector List Name
@@ -4300,7 +4300,7 @@ OS:AirLoopHVAC,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {41613a9b-1dc5-4eab-93e5-0790de7eead3}, !- Handle
+  {683d1d4b-d627-43dd-8a68-f7d53890c6a8}, !- Handle
   VAV with Reheat AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -4678,7 +4678,7 @@ OS:PlantLoop,
   ,                                       !- Demand Side Branch List Name
   ,                                       !- Demand Side Connector List Name
   Optimal,                                !- Load Distribution Scheme
-  {6e79bb3f-fba4-4e4c-bc7f-fcce73bae8aa}, !- Availability Manager List Name
+  {2f5ce714-170b-4167-9eab-5b131c96cba8}, !- Availability Manager List Name
   ,                                       !- Plant Loop Demand Calculation Scheme
   ,                                       !- Common Pipe Simulation
   ,                                       !- Pressure Simulation Type
@@ -4692,7 +4692,7 @@ OS:PlantLoop,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {6e79bb3f-fba4-4e4c-bc7f-fcce73bae8aa}, !- Handle
+  {2f5ce714-170b-4167-9eab-5b131c96cba8}, !- Handle
   Hot Water Loop AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -5233,7 +5233,7 @@ OS:PlantLoop,
   ,                                       !- Demand Side Branch List Name
   ,                                       !- Demand Side Connector List Name
   Optimal,                                !- Load Distribution Scheme
-  {c6a64eac-70a3-4d66-85b4-1a84b64c1b26}, !- Availability Manager List Name
+  {dc101c08-3fab-4c12-b140-5ada6a4b6969}, !- Availability Manager List Name
   ,                                       !- Plant Loop Demand Calculation Scheme
   ,                                       !- Common Pipe Simulation
   ,                                       !- Pressure Simulation Type
@@ -5247,7 +5247,7 @@ OS:PlantLoop,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {c6a64eac-70a3-4d66-85b4-1a84b64c1b26}, !- Handle
+  {dc101c08-3fab-4c12-b140-5ada6a4b6969}, !- Handle
   Chilled Water Loop AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -5933,7 +5933,7 @@ OS:PlantLoop,
   ,                                       !- Demand Side Branch List Name
   ,                                       !- Demand Side Connector List Name
   Optimal,                                !- Load Distribution Scheme
-  {d456063c-f1c8-459a-8b35-85a362e7c6fe}, !- Availability Manager List Name
+  {7d0db96d-1d92-4f7f-80e7-9eb7bc23df30}, !- Availability Manager List Name
   ,                                       !- Plant Loop Demand Calculation Scheme
   ,                                       !- Common Pipe Simulation
   ,                                       !- Pressure Simulation Type
@@ -5947,7 +5947,7 @@ OS:PlantLoop,
   ;                                       !- Supply Splitter Name
 
 OS:AvailabilityManagerAssignmentList,
-  {d456063c-f1c8-459a-8b35-85a362e7c6fe}, !- Handle
+  {7d0db96d-1d92-4f7f-80e7-9eb7bc23df30}, !- Handle
   Condenser Water Loop AvailabilityManagerAssignmentList, !- Name
   ;                                       !- Availability Manager Name 1
 
@@ -6574,22 +6574,22 @@ OS:Schedule:Compact,
   40.0;                                   !- Field 28
 
 OS:Output:Variable,
-  {d00a208b-3675-475b-bfc3-582a6c00e2b5}, !- Handle
-  {af87cccc-f121-478c-a1d3-5628b85e0381}, !- Name
+  {5049523b-f86f-4607-956b-2b91031bfa5a}, !- Handle
+  {cf296cba-ed85-485c-ad30-aad5fa0f512c}, !- Name
   ,                                       !- Key Value
   Zone Air Relative Humidity,             !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {804386be-7aa0-43e6-ac5b-ea1e31084225}, !- Handle
-  {125c3e82-ea81-44d3-81ee-7c29a2f91770}, !- Name
+  {327bffb7-3562-4123-9930-6e83ad4174b7}, !- Handle
+  {bc44da69-50ed-4cfb-be61-c2a07606e66a}, !- Name
   ,                                       !- Key Value
   Zone Air Temperature,                   !- Variable Name
   hourly;                                 !- Reporting Frequency
 
 OS:Output:Variable,
-  {50a200f4-00e4-40e7-8613-e703412d5ed9}, !- Handle
-  {29f46077-a0c3-4bfc-9fe1-b262e6571222}, !- Name
+  {e19f750e-92f2-4827-88bb-501201668e5a}, !- Handle
+  {7cb1a55c-cbdc-46c4-8be9-658cea9bcf51}, !- Name
   ,                                       !- Key Value
   Site Outdoor Air Drybulb Temperature,   !- Variable Name
   monthly;                                !- Reporting Frequency

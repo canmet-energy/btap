@@ -1,9 +1,9 @@
 {
-  "os_standards_revision": "9bbd240",
+  "os_standards_revision": "5bcefcb",
   "os_standards_version": "0.2.2",
   "openstudio_version": "2.4.3.29a61f6637",
   "energyplus_version": "8.9.0",
-  "date": "2018-06-13 20:45:29 +0000",
+  "date": "2018-06-14 14:55:04 +0000",
   "building": {
     "name": "NECB_2011FullServiceRestaurant",
     "conditioned_floor_area_m2": 511.15331569,

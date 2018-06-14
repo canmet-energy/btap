@@ -1,4 +1,4 @@
-Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.13 20:44,
+Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.14 14:54,
    ************* Beginning Zone Sizing Calculations
    ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 1", Blank Schedule Type Limits Name input -- will not be validated.
    ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 2", Blank Schedule Type Limits Name input -- will not be validated.
@@ -37,4 +37,4 @@ Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.13 20:44,
    *************
    ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
    ************* EnergyPlus Sizing Error Summary. During Sizing: 5 Warning; 0 Severe Errors.
-   ************* EnergyPlus Completed Successfully-- 9 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  1.15sec
+   ************* EnergyPlus Completed Successfully-- 9 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  1.17sec
