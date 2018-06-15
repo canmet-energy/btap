@@ -7,6 +7,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     return 'BTAPCreateNECBPrototypeBuilding'
   end
 
+  
   # Human readable description
   def description
     return 'This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.'

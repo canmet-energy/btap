@@ -4,7 +4,8 @@ require 'csv'
 
 #start the measure
 class BTAPUtilityTariffsModelSetup < OpenStudio::Measure::EnergyPlusMeasure 
-
+ 
+ 
   require 'openstudio-standards'
   require 'fileutils'
 
