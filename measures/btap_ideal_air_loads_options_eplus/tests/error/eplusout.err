@@ -1,0 +1,18 @@
+Program Version,EnergyPlus, Version 8.8.0-7c3bbe4830, YMD=2018.06.14 18:07,IDD_Version 8.8.0
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-CORE_ZN SYS-3 FLR-1 SCH-A HPLCMT-CORE ZN
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-PERIMETER_ZN_1 SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-PERIMETER_ZN_2 SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-PERIMETER_ZN_3 SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN
+   ** Severe  ** Sizing:Zone Name, duplicate name=SP-PERIMETER_ZN_4 SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN
+   ** Severe  ** GetZoneSizingInput: Errors with invalid names in Sizing:Zone objects.
+   **   ~~~   ** ...These will not be read in.  Other errors may occur.
+   **  Fatal  ** Sizing:Zone: Errors found in getting input. Program terminates.
+   ...Summary of Errors that led to program termination:
+   ..... Reference severe error count=7
+   ..... Last severe error=GetZoneSizingInput: Errors with invalid names in Sizing:Zone objects.
+   ************* Warning:  Node connection errors not checked - most system input has not been read (see previous warning).
+   ************* Fatal error -- final processing.  Program exited before simulations began.  See previous error messages.
+   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 0 Warning; 7 Severe Errors.
+   ************* EnergyPlus Terminated--Fatal Error Detected. 0 Warning; 7 Severe Errors; Elapsed Time=00hr 00min  0.46sec
