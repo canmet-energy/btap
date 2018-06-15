@@ -69,6 +69,11 @@ Enter your AWS creditials here..See the requirements above for details on how to
 ### Invoking Simulations
 
 #### Start the Cluster
+
+##### Workaround for 2.4.3
+NRCan is currently using 2.4.3 server to run the measures.  However, NREL has not added the custom nrcan version to PAT as yet. To workaround this, please use this script to start the server. https://github.com/canmet-energy/start_aws_server You may use the standard way below, but it may not work. 
+
+##### Standard way
 To start the cluster, ensure all the fields are completed on the RUN tab and hit the green "Start" button next to "Cluster Status" This may take up to 10 minutes depending on how slow your internet connect is. The Status should turn blue while it is starting.  Once it turns green with a checkmark the cluster should be activated. 
 
 You can inspect the cluster images running on the Amazon website.  Click on the "View AWS Console" and enter your Amazon username and password. Click on the EC2 console and you should see 5 instances running. One server and 4 workers if you picked the 40 cpu. Note this costs a total of $0.56x5 dollars an hour. 
