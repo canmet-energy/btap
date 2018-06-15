@@ -21,14 +21,14 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            ~/.rbenv/shims/bundle install --jobs=4 --retry=3        
+            bundle install --jobs=4 --retry=3        
       
 
       # run tests!
       - run:
           name: run tests
           command: |
-           ~/.rbenv/shims/bundle exec rake test:measure-tests
+           bundle exec rake test:measure-tests
 
       # collect reports
       - store_test_results:
