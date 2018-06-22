@@ -4,7 +4,7 @@ require 'openstudio-standards'
 class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScript
   # Define the name of the Measure.
   def name
-    return 'BTAPCreateNECBPrototypeBuilding'
+    return 'BTAPCreateNECBPrototypeBuildingScale'
   end
 
   

@@ -2,12 +2,12 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building_scale</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>a21e8bce-a602-4c26-a81c-ad7b6e918fc7</version_id>
-  <version_modified>20180622T180455Z</version_modified>
+  <version_id>016fe907-3c83-4c19-a7b7-6aeb64e198ae</version_id>
+  <version_modified>20180622T193016Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuildingScale</class_name>
-  <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
-  <description>This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.  It can also apply a scaling factor to adjust the size of the geometry of the generated model.</description>
+  <display_name>BTAPCreateNECBPrototypeBuildingScale</display_name>
+  <description>This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.  This measure can also scale the building geometry.</description>
   <modeler_description>This will replaced the model object with a brand new model. It effectively ignores the seed model.</modeler_description>
   <arguments>
     <argument>
@@ -424,7 +424,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>334279E1</checksum>
+      <checksum>386C3560</checksum>
     </file>
     <file>
       <version>
@@ -435,7 +435,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6919522D</checksum>
+      <checksum>5F0DCDF7</checksum>
     </file>
   </files>
 </measure>
