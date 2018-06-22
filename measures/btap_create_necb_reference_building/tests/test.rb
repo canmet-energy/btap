@@ -14,13 +14,19 @@ require 'minitest/autorun'
 
 #Rewriting class for test purposes.. since the shw is not implemented we need to monkey patch this.. when the swh is
 # completed by Chris Kirney, we will update this to use the actual method.
+#Adding x_scale, y_scale, and z_scale so that this test works with new NECB2011 class which requires these varibles.
+#This will no longer be an issue when this method is removed.  Note that if the scaling variables are not changed the
+#new scaling method should never be called.
 class NECB2011
-  def model_create_prototype_model(climate_zone, epw_file, sizing_run_dir = Dir.pwd, debug = false, measure_model = nil)
+  def model_create_prototype_model(climate_zone, epw_file, sizing_run_dir = Dir.pwd, debug = false, measure_model = nil, x_scale = 1.0, y_scale = 1.0, z_scale = 1.0)
     building_type = @instvarbuilding_type
     raise 'no building_type!' if @instvarbuilding_type.nil?
     model = nil
     # prototype generation.
     model = load_geometry_osm(@geometry_file) # standard candidate
+    if x_scale != 1.0 && y_scale != 1.0 && z_scale != 1.0
+      scale_model_geometry(model, x_scale, y_scale, z_scale)
+    end
     validate_initial_model(model)
     model.yearDescription.get.setDayofWeekforStartDay('Sunday')
 
