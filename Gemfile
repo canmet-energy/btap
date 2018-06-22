@@ -21,7 +21,8 @@ else
   # requires native extensions
   gem 'ruby-prof', '~> 0.15.1', platform: :ruby
 end
-gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
+gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan_scale'
+#gem "openstudio-standards", path: '~/openstudio-standards/'
 
 #These gems are present only in nrcan's standards and nrcan's OS server aws image.
 gem 'roo'
