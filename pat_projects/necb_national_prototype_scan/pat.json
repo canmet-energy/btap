@@ -1,6 +1,6 @@
 {
   "projectName": "necb_national_prototype_scan",
-  "projectDir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan",
+  "projectDir": "C:\\btap\\pat_projects\\necb_national_prototype_scan",
   "analysisName": "necb_national_prototype_scan",
   "seed": "dummy.osm",
   "weatherFile": "dummy.epw",
@@ -26,7 +26,7 @@
         "storage": "2 x 320 GB",
         "cost": "$1.68/hr"
       },
-      "user_id": "chrisk",
+      "user_id": "",
       "worker_node_number": 5,
       "aws_tags": [],
       "openstudio_server_version": {
@@ -59,13 +59,13 @@
         "ami": "ami-4e5b1a31",
         "recommend": ""
       },
-      "cluster_status": "running",
+      "cluster_status": "terminated",
       "server": {
         "dns": null
       }
     },
     "credentials": {
-      "yamlFilename": "NRCan Cedentials",
+      "yamlFilename": "nrcan key",
       "accessKey": "AKIA****",
       "region": "us-east-1"
     }
@@ -129,16 +129,16 @@
   "openstudioMD5": "",
   "measures": [
     {
-      "measure_dir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_create_necb_prototype_building",
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_create_necb_prototype_building",
       "name": "btap_create_necb_prototype_building",
-      "directory": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_create_necb_prototype_building",
+      "directory": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_create_necb_prototype_building",
       "uid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
       "uuid": "{3e9acd53-8602-4749-a655-7cbbe48e8b30}",
       "version_id": "906f93cf-f9f6-417f-94c0-a26c508b7f71",
       "version_uuid": "{906f93cf-f9f6-417f-94c0-a26c508b7f71}",
       "version_modified": "20180614T162709Z",
       "xml_checksum": "2C38F48B",
-      "display_name": "BTAPCreateNECBPrototypeBuilding_test",
+      "display_name": "BTAPCreateNECBPrototypeBuilding",
       "class_name": "BTAPCreateNECBPrototypeBuilding",
       "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
       "modeler_description": "This will replaced the model object with a brand new model. It effectively ignores the seed model.",
@@ -919,17 +919,17 @@
       "seed": "dummy.osm",
       "workflow_index": 0,
       "options": [],
-      "instanceId": 0.07194642853324362,
+      "instanceId": 0.8044538685233056,
       "skip": false,
       "$$hashKey": "object:22538",
       "showWarningText": false,
-      "unlockStatus": true,
+      "unlockStatus": false,
       "outputMeasure": false
     },
     {
-      "measure_dir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_measure",
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_measure",
       "name": "btap_ideal_air_loads_measure",
-      "directory": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_measure",
+      "directory": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_measure",
       "uid": "b01d7a54-7061-4c52-9cde-e89aed93f8a2",
       "uuid": "{b01d7a54-7061-4c52-9cde-e89aed93f8a2}",
       "version_id": "ad79d27d-520c-4026-a174-1cfb56a47e6c",
@@ -963,15 +963,160 @@
       "seed": "dummy.osm",
       "workflow_index": 1,
       "options": [],
-      "instanceId": 0.0799457758508304,
+      "instanceId": 0.7194261407516147,
       "skip": false,
       "$$hashKey": "object:1919",
       "outputMeasure": false
     },
     {
-      "measure_dir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_options_eplus",
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_view_model",
+      "name": "btap_view_model",
+      "directory": "C:/Users/phylr/btap/measures/btap_view_model",
+      "uid": "a7a14e83-c319-4d66-b143-97630df94dbe",
+      "uuid": "{a7a14e83-c319-4d66-b143-97630df94dbe}",
+      "version_id": "5a912a92-b6b3-4f23-8528-3b980dd43de7",
+      "version_uuid": "{5a912a92-b6b3-4f23-8528-3b980dd43de7}",
+      "version_modified": "20180614T144817Z",
+      "xml_checksum": "17C66553",
+      "display_name": "BTAPViewModel",
+      "class_name": "BTAPViewModel",
+      "description": "Visualize an OpenStudio model in a web based viewer",
+      "modeler_description": "Converts the OpenStudio model to vA3C JSON format and renders using Three.js",
+      "tags": "Reporting.QAQC",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        }
+      ],
+      "arguments": [],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/14/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 2,
+      "options": [],
+      "instanceId": 0.8663147757790899,
+      "skip": false,
+      "$$hashKey": "object:7628"
+    },
+    {
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_report_variables",
+      "name": "btap_report_variables",
+      "directory": "C:/Users/phylr/btap/measures/btap_report_variables",
+      "uid": "b423ae4d-4899-49b4-b447-535a94f2640c",
+      "uuid": "{b423ae4d-4899-49b4-b447-535a94f2640c}",
+      "version_id": "5edace42-fca3-412a-91e7-14aa22811c9c",
+      "version_uuid": "{5edace42-fca3-412a-91e7-14aa22811c9c}",
+      "version_modified": "20180614T144816Z",
+      "xml_checksum": "17C66553",
+      "display_name": "BTAPReportVariables",
+      "class_name": "BTAPReportVariables",
+      "description": "Adds E+ output variables.   Does not create a report.",
+      "modeler_description": "Get output variables from a E+ run and enter them in the variables as an array like '[\"variable_name_1\",\"variable_name_2\"]' and set the reporting frequency accordingly.",
+      "tags": "Reporting.QAQC",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "variable_names",
+          "display_name": "variable_names",
+          "description": "",
+          "type": "String",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+          "display_name_short": "variable_names",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+            "minimum": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+            "mean": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+            "deltaX": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+            "stdDev": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]",
+            "default_value": "[\n        \"Heating Coil Air Heating Rate\",\n        \"Boiler Heating Rate\",\"Cooling Coil Total Cooling Rate\",\n        \"Water Heater Heating Rate\",\n        \"Facility Total Electric Demand Power\",\n        \"Zone Air System Sensible Heating Rate\",\n        \"Zone Air System Sensible Cooling Rate\",\n        \"Zone Total Internal Total Heating Rate\",\n        \"Zone Total Internal Latent Gain rate\",\n        \"Total Internal Radiant Heating Rate\",\n        \"Total Internal Convective Heating Rate\",\n        \"Zone Air Heat Balance Outdoor Air Transfer Rate\"\n      ]"
+          },
+          "$$hashKey": "object:7717"
+        },
+        {
+          "name": "reporting_frequency",
+          "display_name": "Reporting Frequency.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "timestep",
+          "choice_values": [
+            "detailed",
+            "timestep",
+            "hourly"
+          ],
+          "choice_display_names": [
+            "detailed",
+            "timestep",
+            "hourly"
+          ],
+          "display_name_short": "reporting_frequency",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "detailed",
+              "timestep",
+              "hourly"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "timestep",
+            "minimum": "timestep",
+            "mean": "timestep",
+            "deltaX": "timestep",
+            "stdDev": "timestep",
+            "default_value": "timestep"
+          },
+          "$$hashKey": "object:7718"
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/14/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 3,
+      "options": [],
+      "instanceId": 0.7440486663740775,
+      "skip": true,
+      "$$hashKey": "object:7629"
+    },
+    {
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_options_eplus",
       "name": "ideal_loads_options",
-      "directory": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_options_eplus",
+      "directory": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_options_eplus",
       "uid": "f4a1be3f-0d82-4486-b6bb-1a123e034e8f",
       "uuid": "{f4a1be3f-0d82-4486-b6bb-1a123e034e8f}",
       "version_id": "9c60de23-d09c-4810-9846-46f20d196b5c",
@@ -1527,17 +1672,58 @@
       "author": "",
       "type": "EnergyPlusMeasure",
       "seed": "dummy.osm",
-      "workflow_index": 2,
+      "workflow_index": 4,
       "options": [],
-      "instanceId": 0.6788793137038025,
+      "instanceId": 0.48864142098094865,
       "skip": true,
       "$$hashKey": "object:1965",
       "outputMeasure": false
     },
     {
-      "measure_dir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_results",
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_utility_tariffs",
+      "name": "btap_utility_tariffs_model_setup",
+      "directory": "C:/Users/phylr/btap/measures/btap_utility_tariffs",
+      "uid": "34c820cf-b55d-4bdf-b654-48e5bd9beef8",
+      "uuid": "{34c820cf-b55d-4bdf-b654-48e5bd9beef8}",
+      "version_id": "fc77fef2-3297-4503-be12-c090e8595a61",
+      "version_uuid": "{fc77fef2-3297-4503-be12-c090e8595a61}",
+      "version_modified": "20180614T163059Z",
+      "xml_checksum": "D1E2AA62",
+      "display_name": "BTAPUtilityTariffsModelSetup",
+      "class_name": "BTAPUtilityTariffsModelSetup",
+      "description": "BTAPUtilityTariffs",
+      "modeler_description": "BTAPUtilityTariffs",
+      "tags": "Economics.Life Cycle Cost Analysis",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "EnergyPlusMeasure"
+        }
+      ],
+      "arguments": [],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/14/2018",
+      "author": "",
+      "type": "EnergyPlusMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 5,
+      "options": [],
+      "instanceId": 0.4314417023087054,
+      "skip": false,
+      "$$hashKey": "object:7786"
+    },
+    {
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_results",
       "name": "btap_results",
-      "directory": "C:/Users/ckirney/projects/btap-working-env/pat_projects/necb_national_prototype_scan/measures/btap_results",
+      "directory": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_results",
       "uid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
       "uuid": "{bf37e1c6-de70-457b-a3ac-21aa57b7bc58}",
       "version_id": "ca362d8f-1c12-4d82-a841-cb1db2600ee4",
@@ -1623,23 +1809,23 @@
       "bcl_update": false,
       "location": "my",
       "add": "",
-      "open": true,
+      "open": false,
       "addedToProject": true,
       "date": "6/15/2018",
       "author": "",
       "type": "ReportingMeasure",
       "seed": "dummy.osm",
-      "workflow_index": 3,
+      "workflow_index": 6,
       "options": [],
-      "instanceId": 0.9147805948848446,
+      "instanceId": 0.1930693080128736,
       "skip": false,
       "$$hashKey": "object:2501",
       "outputMeasure": false
     },
     {
-      "measure_dir": "C:\\Users\\ckirney\\projects\\btap-working-env\\pat_projects\\necb_national_prototype_scan\\measures\\btap_open_studio_results",
+      "measure_dir": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_open_studio_results",
       "name": "openstudio_results",
-      "directory": "C:/Users/ckirney/projects/btap-working-env/pat_projects/necb_national_prototype_scan/measures/btap_open_studio_results",
+      "directory": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_open_studio_results",
       "uid": "a7437013-6d3a-414a-8a4e-8bcba833188d",
       "uuid": "{a7437013-6d3a-414a-8a4e-8bcba833188d}",
       "version_id": "ee4c7d7c-d8e7-4ecc-a5ca-de54a09cf164",
@@ -2275,15 +2461,15 @@
       "bcl_update": false,
       "location": "my",
       "add": "",
-      "open": true,
+      "open": false,
       "addedToProject": true,
       "date": "6/14/2018",
       "author": "",
       "type": "ReportingMeasure",
       "seed": "dummy.osm",
-      "workflow_index": 4,
+      "workflow_index": 7,
       "options": [],
-      "instanceId": 0.007241220910374047,
+      "instanceId": 0.39173416530235294,
       "skip": false,
       "$$hashKey": "object:2500",
       "outputMeasure": false
@@ -2309,1207 +2495,6 @@
     }
   },
   "designAlternatives": [],
-  "analysisID": "ebd970b4-f352-47c1-a813-1ecd28fbeca2\r",
-  "datapoints": [
-    {
-      "_id": "cf99e4fa-07f4-4e32-9cb1-3cdc33613e4c",
-      "id": "cf99e4fa-07f4-4e32-9cb1-3cdc33613e4c",
-      "name": "DOE Autogenerated 43",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "10989582-3b13-4bf8-975a-a1f215267f17",
-      "id": "10989582-3b13-4bf8-975a-a1f215267f17",
-      "name": "DOE Autogenerated 44",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "a936d5f0-bf65-4c74-9e33-f7f4af8aa926",
-      "id": "a936d5f0-bf65-4c74-9e33-f7f4af8aa926",
-      "name": "DOE Autogenerated 45",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "7955a5c9-d97b-4de9-bfaf-96e6e6c1ff2e",
-      "id": "7955a5c9-d97b-4de9-bfaf-96e6e6c1ff2e",
-      "name": "DOE Autogenerated 46",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "87c21261-78e3-4145-b33f-15fc51676fab",
-      "id": "87c21261-78e3-4145-b33f-15fc51676fab",
-      "name": "DOE Autogenerated 47",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "55248ea8-6239-4d69-aab8-909bfd5ae3c0",
-      "id": "55248ea8-6239-4d69-aab8-909bfd5ae3c0",
-      "name": "DOE Autogenerated 48",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "204a42d3-e785-4561-b553-3ea7206469fe",
-      "id": "204a42d3-e785-4561-b553-3ea7206469fe",
-      "name": "DOE Autogenerated 49",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4f4213e6-3ce8-43d4-a98c-f4c4b10e8538",
-      "id": "4f4213e6-3ce8-43d4-a98c-f4c4b10e8538",
-      "name": "DOE Autogenerated 50",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f6e63746-7ff2-48d9-9b71-35792c582927",
-      "id": "f6e63746-7ff2-48d9-9b71-35792c582927",
-      "name": "DOE Autogenerated 51",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c8538a76-7228-4394-aac3-724f2e51619b",
-      "id": "c8538a76-7228-4394-aac3-724f2e51619b",
-      "name": "DOE Autogenerated 52",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4ead5499-5b49-45b3-8d0a-30b1cbb08d40",
-      "id": "4ead5499-5b49-45b3-8d0a-30b1cbb08d40",
-      "name": "DOE Autogenerated 53",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5ac9578e-532a-4428-a9ec-233b41e2d3c4",
-      "id": "5ac9578e-532a-4428-a9ec-233b41e2d3c4",
-      "name": "DOE Autogenerated 54",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e706ba2a-f0f7-44f5-bdfb-88ff14f3d3bf",
-      "id": "e706ba2a-f0f7-44f5-bdfb-88ff14f3d3bf",
-      "name": "DOE Autogenerated 55",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "9ff38c4e-daec-4ef5-87d2-50f68fe9ca16",
-      "id": "9ff38c4e-daec-4ef5-87d2-50f68fe9ca16",
-      "name": "DOE Autogenerated 56",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "cfa3a894-a820-4117-81eb-36375b4ce8de",
-      "id": "cfa3a894-a820-4117-81eb-36375b4ce8de",
-      "name": "DOE Autogenerated 57",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4a5c6edb-84f1-480e-9528-8a44301f1808",
-      "id": "4a5c6edb-84f1-480e-9528-8a44301f1808",
-      "name": "DOE Autogenerated 58",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4561b12d-9696-4deb-8b63-7ed0eb708422",
-      "id": "4561b12d-9696-4deb-8b63-7ed0eb708422",
-      "name": "DOE Autogenerated 59",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c340da36-eb9f-4bb4-a0b0-6bac14e8baa3",
-      "id": "c340da36-eb9f-4bb4-a0b0-6bac14e8baa3",
-      "name": "DOE Autogenerated 60",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "92ef6842-301a-4df6-b1b4-d14ff0e4737f",
-      "id": "92ef6842-301a-4df6-b1b4-d14ff0e4737f",
-      "name": "DOE Autogenerated 61",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "2100ae3f-0ae3-4765-ac0a-e2d1c1a854c8",
-      "id": "2100ae3f-0ae3-4765-ac0a-e2d1c1a854c8",
-      "name": "DOE Autogenerated 62",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "80e62a67-88c7-4c9c-8d09-f99a38893846",
-      "id": "80e62a67-88c7-4c9c-8d09-f99a38893846",
-      "name": "DOE Autogenerated 63",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f5ce8487-764e-4375-9d19-eb7345d9d439",
-      "id": "f5ce8487-764e-4375-9d19-eb7345d9d439",
-      "name": "DOE Autogenerated 64",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ad55dd8e-9aff-48c7-adfd-18f5262ec16d",
-      "id": "ad55dd8e-9aff-48c7-adfd-18f5262ec16d",
-      "name": "DOE Autogenerated 65",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "8b11b0e2-2185-4554-b9d8-934124790b01",
-      "id": "8b11b0e2-2185-4554-b9d8-934124790b01",
-      "name": "DOE Autogenerated 66",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c6e9da93-279d-404d-8b4e-898e8fad3713",
-      "id": "c6e9da93-279d-404d-8b4e-898e8fad3713",
-      "name": "DOE Autogenerated 67",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "2528f069-5121-407f-8064-cec0015081dd",
-      "id": "2528f069-5121-407f-8064-cec0015081dd",
-      "name": "DOE Autogenerated 68",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "b4c1936b-633e-4498-b68e-ae5af7d8b355",
-      "id": "b4c1936b-633e-4498-b68e-ae5af7d8b355",
-      "name": "DOE Autogenerated 69",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "6c6bda2e-25cd-4eca-afac-500ff1e18578",
-      "id": "6c6bda2e-25cd-4eca-afac-500ff1e18578",
-      "name": "DOE Autogenerated 70",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "317eb33a-823b-4380-b129-2f2bfc2c05ff",
-      "id": "317eb33a-823b-4380-b129-2f2bfc2c05ff",
-      "name": "DOE Autogenerated 71",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "89de93a9-f00b-4ac2-be32-793ce3b4fe96",
-      "id": "89de93a9-f00b-4ac2-be32-793ce3b4fe96",
-      "name": "DOE Autogenerated 72",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "84de39e5-a3dc-439a-bd98-0cd3c479005d",
-      "id": "84de39e5-a3dc-439a-bd98-0cd3c479005d",
-      "name": "DOE Autogenerated 73",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "3c37ace2-4f82-49d4-8181-80db7d6f06f6",
-      "id": "3c37ace2-4f82-49d4-8181-80db7d6f06f6",
-      "name": "DOE Autogenerated 74",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "1a76cdc1-58ac-466d-99d8-6cb745e9cd91",
-      "id": "1a76cdc1-58ac-466d-99d8-6cb745e9cd91",
-      "name": "DOE Autogenerated 75",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "86ea967d-b15a-4fba-9d97-1ae316cd9b7c",
-      "id": "86ea967d-b15a-4fba-9d97-1ae316cd9b7c",
-      "name": "DOE Autogenerated 76",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "8910548b-cf7f-4a55-b4f4-942bbe9be83a",
-      "id": "8910548b-cf7f-4a55-b4f4-942bbe9be83a",
-      "name": "DOE Autogenerated 77",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f755b49c-8f09-4e11-a79c-dba3ce37fa07",
-      "id": "f755b49c-8f09-4e11-a79c-dba3ce37fa07",
-      "name": "DOE Autogenerated 78",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "98fb8812-2b99-41d5-9464-4f145984de46",
-      "id": "98fb8812-2b99-41d5-9464-4f145984de46",
-      "name": "DOE Autogenerated 79",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e8e3f5a7-3c83-4f4a-a255-98662138bd43",
-      "id": "e8e3f5a7-3c83-4f4a-a255-98662138bd43",
-      "name": "DOE Autogenerated 80",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "22166a06-ade2-4827-88dd-aa0423582ab5",
-      "id": "22166a06-ade2-4827-88dd-aa0423582ab5",
-      "name": "DOE Autogenerated 81",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "0e96251e-d5c3-4d2f-9eab-42e94f26a8fb",
-      "id": "0e96251e-d5c3-4d2f-9eab-42e94f26a8fb",
-      "name": "DOE Autogenerated 82",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "d7c8408b-fed2-47c7-9324-0ad86bfe1eb7",
-      "id": "d7c8408b-fed2-47c7-9324-0ad86bfe1eb7",
-      "name": "DOE Autogenerated 83",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "499bc3eb-793b-43b9-af82-42dee8e4034e",
-      "id": "499bc3eb-793b-43b9-af82-42dee8e4034e",
-      "name": "DOE Autogenerated 84",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "73b37034-1601-49f2-8803-f3b9f68d675f",
-      "id": "73b37034-1601-49f2-8803-f3b9f68d675f",
-      "name": "DOE Autogenerated 85",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "30f60cad-d631-4d1a-acf2-124a16d16513",
-      "id": "30f60cad-d631-4d1a-acf2-124a16d16513",
-      "name": "DOE Autogenerated 86",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "06469ab7-4ed8-4c3c-9bf9-31ac020cfbc0",
-      "id": "06469ab7-4ed8-4c3c-9bf9-31ac020cfbc0",
-      "name": "DOE Autogenerated 87",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "abc98239-4532-4585-9662-381933bf92aa",
-      "id": "abc98239-4532-4585-9662-381933bf92aa",
-      "name": "DOE Autogenerated 88",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4805fdff-580b-47d1-b19a-7e0ee6bcf0c9",
-      "id": "4805fdff-580b-47d1-b19a-7e0ee6bcf0c9",
-      "name": "DOE Autogenerated 89",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ebf9bed5-2fbb-4d92-b44e-5bf8a06bcd3d",
-      "id": "ebf9bed5-2fbb-4d92-b44e-5bf8a06bcd3d",
-      "name": "DOE Autogenerated 90",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "894366fe-8bfd-4ef4-9ff6-8706e27a0fb4",
-      "id": "894366fe-8bfd-4ef4-9ff6-8706e27a0fb4",
-      "name": "DOE Autogenerated 91",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "69553975-4fb4-422c-89ff-a01985453037",
-      "id": "69553975-4fb4-422c-89ff-a01985453037",
-      "name": "DOE Autogenerated 92",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5853462e-8c66-4626-8016-bdb66c33fdff",
-      "id": "5853462e-8c66-4626-8016-bdb66c33fdff",
-      "name": "DOE Autogenerated 93",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "d10baf7c-e667-4045-aa42-0193ce9120a1",
-      "id": "d10baf7c-e667-4045-aa42-0193ce9120a1",
-      "name": "DOE Autogenerated 94",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f3bebeac-ed63-474a-b71e-9ded8aa58315",
-      "id": "f3bebeac-ed63-474a-b71e-9ded8aa58315",
-      "name": "DOE Autogenerated 95",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "b87c317c-0643-4e23-8bd6-3df72d5df620",
-      "id": "b87c317c-0643-4e23-8bd6-3df72d5df620",
-      "name": "DOE Autogenerated 96",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "517d3bfa-4349-4583-b9a5-7ad889c53e40",
-      "id": "517d3bfa-4349-4583-b9a5-7ad889c53e40",
-      "name": "DOE Autogenerated 97",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "aedffb3e-c418-4e1d-bd5a-1bab3d0b1c69",
-      "id": "aedffb3e-c418-4e1d-bd5a-1bab3d0b1c69",
-      "name": "DOE Autogenerated 98",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "dff5376e-17ef-4b13-bfaa-be86f1e8d037",
-      "id": "dff5376e-17ef-4b13-bfaa-be86f1e8d037",
-      "name": "DOE Autogenerated 99",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "91010111-69df-471f-93cd-dedae8e2caf7",
-      "id": "91010111-69df-471f-93cd-dedae8e2caf7",
-      "name": "DOE Autogenerated 100",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "38a57583-d7e1-4c64-8340-44e7b644370f",
-      "id": "38a57583-d7e1-4c64-8340-44e7b644370f",
-      "name": "DOE Autogenerated 101",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "438f1716-1f75-44be-ba38-e1b1f5e0857e",
-      "id": "438f1716-1f75-44be-ba38-e1b1f5e0857e",
-      "name": "DOE Autogenerated 102",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "94ca0848-c01a-4ee5-978b-e49f5897059f",
-      "id": "94ca0848-c01a-4ee5-978b-e49f5897059f",
-      "name": "DOE Autogenerated 103",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "8a0207ca-e171-41a2-bcf1-1efe93609f1d",
-      "id": "8a0207ca-e171-41a2-bcf1-1efe93609f1d",
-      "name": "DOE Autogenerated 104",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "aae10974-f5a5-43f5-b110-4c5e2b834e6e",
-      "id": "aae10974-f5a5-43f5-b110-4c5e2b834e6e",
-      "name": "DOE Autogenerated 105",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "354251f1-ea27-4ae1-81c0-50c3edf450f1",
-      "id": "354251f1-ea27-4ae1-81c0-50c3edf450f1",
-      "name": "DOE Autogenerated 106",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "7346b90b-3860-455c-8bba-64152d506d2e",
-      "id": "7346b90b-3860-455c-8bba-64152d506d2e",
-      "name": "DOE Autogenerated 107",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "afa79cf4-98fd-4c2c-8a58-443fc77cd5ca",
-      "id": "afa79cf4-98fd-4c2c-8a58-443fc77cd5ca",
-      "name": "DOE Autogenerated 108",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "0a83de46-ff9d-4cca-9bb5-1d77bdb9073a",
-      "id": "0a83de46-ff9d-4cca-9bb5-1d77bdb9073a",
-      "name": "DOE Autogenerated 109",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "deb33b19-37d9-439f-bddb-997f5b422f28",
-      "id": "deb33b19-37d9-439f-bddb-997f5b422f28",
-      "name": "DOE Autogenerated 110",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "dca98656-e1c8-4f1b-bf15-afbac00ffdb0",
-      "id": "dca98656-e1c8-4f1b-bf15-afbac00ffdb0",
-      "name": "DOE Autogenerated 111",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "d6ffab08-6275-419c-b844-4d8746d97e20",
-      "id": "d6ffab08-6275-419c-b844-4d8746d97e20",
-      "name": "DOE Autogenerated 112",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c8cae5a8-0d60-4379-948f-5efe6016ab87",
-      "id": "c8cae5a8-0d60-4379-948f-5efe6016ab87",
-      "name": "DOE Autogenerated 113",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ce6c08dd-fd6f-48b3-b827-096b09d902ff",
-      "id": "ce6c08dd-fd6f-48b3-b827-096b09d902ff",
-      "name": "DOE Autogenerated 114",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5c18544b-a2db-48e8-8dfb-ac61fe5e96db",
-      "id": "5c18544b-a2db-48e8-8dfb-ac61fe5e96db",
-      "name": "DOE Autogenerated 115",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "84342d68-f685-46e8-9f54-ae3f7245a6c2",
-      "id": "84342d68-f685-46e8-9f54-ae3f7245a6c2",
-      "name": "DOE Autogenerated 116",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "41340756-4ae5-4f43-8655-6fd6b641b598",
-      "id": "41340756-4ae5-4f43-8655-6fd6b641b598",
-      "name": "DOE Autogenerated 117",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e4196d41-7be5-4e53-83f4-70a01415ecfa",
-      "id": "e4196d41-7be5-4e53-83f4-70a01415ecfa",
-      "name": "DOE Autogenerated 118",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "9202a27c-922b-4282-9bcc-2387b1bf7c9e",
-      "id": "9202a27c-922b-4282-9bcc-2387b1bf7c9e",
-      "name": "DOE Autogenerated 119",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c599416b-f140-4bff-8e65-103980a4cfdc",
-      "id": "c599416b-f140-4bff-8e65-103980a4cfdc",
-      "name": "DOE Autogenerated 120",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "9e52b90f-acb3-43ce-8ba2-293029aa054f",
-      "id": "9e52b90f-acb3-43ce-8ba2-293029aa054f",
-      "name": "DOE Autogenerated 121",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e09fca61-d797-46c4-a022-c436b857cab1",
-      "id": "e09fca61-d797-46c4-a022-c436b857cab1",
-      "name": "DOE Autogenerated 122",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e4eef787-bcf3-4f57-8534-1d8273a36c81",
-      "id": "e4eef787-bcf3-4f57-8534-1d8273a36c81",
-      "name": "DOE Autogenerated 123",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ec15a13e-58f5-4497-89c1-d189c8a7c8bb",
-      "id": "ec15a13e-58f5-4497-89c1-d189c8a7c8bb",
-      "name": "DOE Autogenerated 124",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "bcb68a9a-d77f-4946-a0d6-7225641f9790",
-      "id": "bcb68a9a-d77f-4946-a0d6-7225641f9790",
-      "name": "DOE Autogenerated 125",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "fa1fc46f-0616-4ac8-bd10-543186a62d0a",
-      "id": "fa1fc46f-0616-4ac8-bd10-543186a62d0a",
-      "name": "DOE Autogenerated 126",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ad2462d0-f603-4839-b1ab-75cf4a12d2c8",
-      "id": "ad2462d0-f603-4839-b1ab-75cf4a12d2c8",
-      "name": "DOE Autogenerated 127",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "41a458a7-d2c4-4c40-897e-f6aae472a0d5",
-      "id": "41a458a7-d2c4-4c40-897e-f6aae472a0d5",
-      "name": "DOE Autogenerated 128",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "7709d6e6-7392-4512-bd24-171c4b1b47de",
-      "id": "7709d6e6-7392-4512-bd24-171c4b1b47de",
-      "name": "DOE Autogenerated 129",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "dc3c9293-9f8e-4ee2-b978-61315ca03c2f",
-      "id": "dc3c9293-9f8e-4ee2-b978-61315ca03c2f",
-      "name": "DOE Autogenerated 130",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "3d64b82d-0685-414d-afc7-14e6240a3b80",
-      "id": "3d64b82d-0685-414d-afc7-14e6240a3b80",
-      "name": "DOE Autogenerated 131",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "2e2675c6-22bc-478a-9f46-d55aaa92bd69",
-      "id": "2e2675c6-22bc-478a-9f46-d55aaa92bd69",
-      "name": "DOE Autogenerated 132",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "79a44759-9d37-4019-ada3-81561b672d99",
-      "id": "79a44759-9d37-4019-ada3-81561b672d99",
-      "name": "DOE Autogenerated 133",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "1cf9b4a9-a838-412d-9079-55e28cf854d5",
-      "id": "1cf9b4a9-a838-412d-9079-55e28cf854d5",
-      "name": "DOE Autogenerated 134",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "fe282df6-8384-42a9-8cec-cf2eb980495b",
-      "id": "fe282df6-8384-42a9-8cec-cf2eb980495b",
-      "name": "DOE Autogenerated 135",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "8568b2de-409f-4b20-8a36-34f6deec635c",
-      "id": "8568b2de-409f-4b20-8a36-34f6deec635c",
-      "name": "DOE Autogenerated 136",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "57a331bd-9c02-4f78-ba50-a9719fe4dd8c",
-      "id": "57a331bd-9c02-4f78-ba50-a9719fe4dd8c",
-      "name": "DOE Autogenerated 137",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "917e5707-2704-4586-b4cb-cb5db163bdba",
-      "id": "917e5707-2704-4586-b4cb-cb5db163bdba",
-      "name": "DOE Autogenerated 138",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5f87e406-d6de-4db7-a3f9-e5e76ef49b36",
-      "id": "5f87e406-d6de-4db7-a3f9-e5e76ef49b36",
-      "name": "DOE Autogenerated 139",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "fd5fec83-bc62-4e94-a3d0-cc6e943a6102",
-      "id": "fd5fec83-bc62-4e94-a3d0-cc6e943a6102",
-      "name": "DOE Autogenerated 140",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "77a1459f-009d-4829-8bff-ce07e2c4c183",
-      "id": "77a1459f-009d-4829-8bff-ce07e2c4c183",
-      "name": "DOE Autogenerated 141",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "844f1a56-9cb3-4eae-a20f-5cfb637316ff",
-      "id": "844f1a56-9cb3-4eae-a20f-5cfb637316ff",
-      "name": "DOE Autogenerated 142",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "1d4d547b-fc1c-4340-af14-e18ee0c8e822",
-      "id": "1d4d547b-fc1c-4340-af14-e18ee0c8e822",
-      "name": "DOE Autogenerated 143",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e3d6cd67-a2a4-418b-ba4f-65df9f2df878",
-      "id": "e3d6cd67-a2a4-418b-ba4f-65df9f2df878",
-      "name": "DOE Autogenerated 144",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5a7ed76f-dd31-4479-ab40-78dcc4278625",
-      "id": "5a7ed76f-dd31-4479-ab40-78dcc4278625",
-      "name": "DOE Autogenerated 145",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "cf95925f-3795-4fbe-8e4f-197fb2e88c9d",
-      "id": "cf95925f-3795-4fbe-8e4f-197fb2e88c9d",
-      "name": "DOE Autogenerated 146",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "79605905-37d6-4d47-aa3c-c00218dd449d",
-      "id": "79605905-37d6-4d47-aa3c-c00218dd449d",
-      "name": "DOE Autogenerated 147",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "48e2d034-894f-4225-a3c0-48a7ad7d0e37",
-      "id": "48e2d034-894f-4225-a3c0-48a7ad7d0e37",
-      "name": "DOE Autogenerated 148",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "6c26ea4d-47a6-417c-a3c8-705ae5f50058",
-      "id": "6c26ea4d-47a6-417c-a3c8-705ae5f50058",
-      "name": "DOE Autogenerated 149",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "cf21c81d-9b4d-46b4-80ac-f999e9a85846",
-      "id": "cf21c81d-9b4d-46b4-80ac-f999e9a85846",
-      "name": "DOE Autogenerated 150",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "b5f93f1b-3bb0-41c3-b40b-c35d477d1dbf",
-      "id": "b5f93f1b-3bb0-41c3-b40b-c35d477d1dbf",
-      "name": "DOE Autogenerated 151",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "58bacef0-340c-4055-ad23-61d25280d5b5",
-      "id": "58bacef0-340c-4055-ad23-61d25280d5b5",
-      "name": "DOE Autogenerated 152",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "5b9015d0-c474-4c72-a219-1057979b05aa",
-      "id": "5b9015d0-c474-4c72-a219-1057979b05aa",
-      "name": "DOE Autogenerated 153",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c5dd9108-208d-4675-b57d-348e80c48b20",
-      "id": "c5dd9108-208d-4675-b57d-348e80c48b20",
-      "name": "DOE Autogenerated 154",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "3206bde2-1c7a-4648-9946-d1aba76c9763",
-      "id": "3206bde2-1c7a-4648-9946-d1aba76c9763",
-      "name": "DOE Autogenerated 155",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "33e22a4a-a7d3-4d2c-9758-97cbc594c3dd",
-      "id": "33e22a4a-a7d3-4d2c-9758-97cbc594c3dd",
-      "name": "DOE Autogenerated 156",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c5868104-8f38-4d11-b0cd-902349ea5342",
-      "id": "c5868104-8f38-4d11-b0cd-902349ea5342",
-      "name": "DOE Autogenerated 157",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "51fcd603-6537-4dc4-80ea-a952da83d9e2",
-      "id": "51fcd603-6537-4dc4-80ea-a952da83d9e2",
-      "name": "DOE Autogenerated 158",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "bd56de38-4197-4357-9f80-24ddaf3c4531",
-      "id": "bd56de38-4197-4357-9f80-24ddaf3c4531",
-      "name": "DOE Autogenerated 159",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "90ed7d51-bb69-4998-8360-9cadc5da41af",
-      "id": "90ed7d51-bb69-4998-8360-9cadc5da41af",
-      "name": "DOE Autogenerated 160",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "1bfc4410-64e8-463a-bdf6-78809c442ce4",
-      "id": "1bfc4410-64e8-463a-bdf6-78809c442ce4",
-      "name": "DOE Autogenerated 161",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "06ce4aa6-b77a-4dc7-a7f2-313a71cffe90",
-      "id": "06ce4aa6-b77a-4dc7-a7f2-313a71cffe90",
-      "name": "DOE Autogenerated 162",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c7ecac4b-37bc-4be2-a1f1-4df728fd64fc",
-      "id": "c7ecac4b-37bc-4be2-a1f1-4df728fd64fc",
-      "name": "DOE Autogenerated 163",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "cadc9b8d-32c6-481f-b4f0-5cfdf65657ed",
-      "id": "cadc9b8d-32c6-481f-b4f0-5cfdf65657ed",
-      "name": "DOE Autogenerated 164",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "c9d4bc0d-3f8a-4c54-9e78-09c5f428a950",
-      "id": "c9d4bc0d-3f8a-4c54-9e78-09c5f428a950",
-      "name": "DOE Autogenerated 165",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "65d3a1d5-bbab-4cf9-8023-2fc034d12643",
-      "id": "65d3a1d5-bbab-4cf9-8023-2fc034d12643",
-      "name": "DOE Autogenerated 166",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "a2e1b9d8-046b-4e46-b6c2-093f34a0cd4c",
-      "id": "a2e1b9d8-046b-4e46-b6c2-093f34a0cd4c",
-      "name": "DOE Autogenerated 167",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "8cbf839e-6109-4539-9d2c-6a9332631e73",
-      "id": "8cbf839e-6109-4539-9d2c-6a9332631e73",
-      "name": "DOE Autogenerated 168",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "1c7a1b10-9cee-4f13-aa35-0448fcf1aeae",
-      "id": "1c7a1b10-9cee-4f13-aa35-0448fcf1aeae",
-      "name": "DOE Autogenerated 169",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ebe3795d-c437-40aa-a570-773757d50436",
-      "id": "ebe3795d-c437-40aa-a570-773757d50436",
-      "name": "DOE Autogenerated 170",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "7c694bf3-547f-4db2-a78f-18d2d69574bd",
-      "id": "7c694bf3-547f-4db2-a78f-18d2d69574bd",
-      "name": "DOE Autogenerated 171",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "ca22efb7-b483-43b1-9413-195110d1ecc8",
-      "id": "ca22efb7-b483-43b1-9413-195110d1ecc8",
-      "name": "DOE Autogenerated 172",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f8d759ba-8a76-4ea2-a36c-6b0acba47800",
-      "id": "f8d759ba-8a76-4ea2-a36c-6b0acba47800",
-      "name": "DOE Autogenerated 173",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "d1b1c3ac-a91f-4577-8e3d-a66364216469",
-      "id": "d1b1c3ac-a91f-4577-8e3d-a66364216469",
-      "name": "DOE Autogenerated 174",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "6c671bb2-045e-44a7-9b48-17006694def7",
-      "id": "6c671bb2-045e-44a7-9b48-17006694def7",
-      "name": "DOE Autogenerated 175",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "acaefb6a-2311-404c-8602-d275c0005ec5",
-      "id": "acaefb6a-2311-404c-8602-d275c0005ec5",
-      "name": "DOE Autogenerated 176",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4d2fb5d1-523f-47f3-a68d-32daa6836f3b",
-      "id": "4d2fb5d1-523f-47f3-a68d-32daa6836f3b",
-      "name": "DOE Autogenerated 177",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "0e23eb34-0d20-455c-8e49-36196d9c3c43",
-      "id": "0e23eb34-0d20-455c-8e49-36196d9c3c43",
-      "name": "DOE Autogenerated 178",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "9f628359-d844-426f-a36c-128008ff6160",
-      "id": "9f628359-d844-426f-a36c-128008ff6160",
-      "name": "DOE Autogenerated 179",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "08c6f296-1703-4cd6-870d-6259d1df5873",
-      "id": "08c6f296-1703-4cd6-870d-6259d1df5873",
-      "name": "DOE Autogenerated 180",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "b715b28c-aa64-4bd5-84d5-212a3ace5218",
-      "id": "b715b28c-aa64-4bd5-84d5-212a3ace5218",
-      "name": "DOE Autogenerated 181",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "72805b36-8c22-461f-914d-1a05af1f28a2",
-      "id": "72805b36-8c22-461f-914d-1a05af1f28a2",
-      "name": "DOE Autogenerated 182",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "f0c86b4f-d9f5-4454-938d-963ef37e9407",
-      "id": "f0c86b4f-d9f5-4454-938d-963ef37e9407",
-      "name": "DOE Autogenerated 183",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "02d275a3-3197-4b51-bfa8-6ba8375945cd",
-      "id": "02d275a3-3197-4b51-bfa8-6ba8375945cd",
-      "name": "DOE Autogenerated 184",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "34504bbf-e6aa-48ed-8b73-f95655bce710",
-      "id": "34504bbf-e6aa-48ed-8b73-f95655bce710",
-      "name": "DOE Autogenerated 185",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "4fec41d0-6bb4-40e2-95e0-8fe0e0f406c0",
-      "id": "4fec41d0-6bb4-40e2-95e0-8fe0e0f406c0",
-      "name": "DOE Autogenerated 186",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "7ee2cfbb-f794-4d84-ac81-714df636cff9",
-      "id": "7ee2cfbb-f794-4d84-ac81-714df636cff9",
-      "name": "DOE Autogenerated 187",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "99c5a822-b0a2-416a-99b5-e07ce1478758",
-      "id": "99c5a822-b0a2-416a-99b5-e07ce1478758",
-      "name": "DOE Autogenerated 188",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "e8c48d7d-e220-4f8c-97ca-0e85eb17f545",
-      "id": "e8c48d7d-e220-4f8c-97ca-0e85eb17f545",
-      "name": "DOE Autogenerated 189",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "b6aa4d5b-3482-48a7-b483-9761a5f5a8ab",
-      "id": "b6aa4d5b-3482-48a7-b483-9761a5f5a8ab",
-      "name": "DOE Autogenerated 190",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "956cc182-0ebf-4cc9-99b1-798be560b5b6",
-      "id": "956cc182-0ebf-4cc9-99b1-798be560b5b6",
-      "name": "DOE Autogenerated 191",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    },
-    {
-      "_id": "decfbdbc-0973-4c4e-b689-902613112c46",
-      "id": "decfbdbc-0973-4c4e-b689-902613112c46",
-      "name": "DOE Autogenerated 192",
-      "analysis_id": "ebd970b4-f352-47c1-a813-1ecd28fbeca2",
-      "status": "queued",
-      "status_message": ""
-    }
-  ]
+  "analysisID": null,
+  "datapoints": []
 }
