@@ -10,7 +10,7 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
   
   # Human readable description
   def description
-    return 'This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.'
+    return 'This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.  It also allows the scaling of building geometry.'
   end
 
   # Human readable description of modeling approach
