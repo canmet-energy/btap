@@ -1,0 +1,105 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_report_variables</name>
+  <uid>b423ae4d-4899-49b4-b447-535a94f2640c</uid>
+  <version_id>5edace42-fca3-412a-91e7-14aa22811c9c</version_id>
+  <version_modified>20180614T144816Z</version_modified>
+  <xml_checksum>17C66553</xml_checksum>
+  <class_name>BTAPReportVariables</class_name>
+  <display_name>BTAPReportVariables</display_name>
+  <description>Adds E+ output variables.   Does not create a report.</description>
+  <modeler_description>Get output variables from a E+ run and enter them in the variables as an array like '["variable_name_1","variable_name_2"]' and set the reporting frequency accordingly.</modeler_description>
+  <arguments>
+    <argument>
+      <name>variable_names</name>
+      <display_name>variable_names</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>[
+        "Heating Coil Air Heating Rate",
+        "Boiler Heating Rate","Cooling Coil Total Cooling Rate",
+        "Water Heater Heating Rate",
+        "Facility Total Electric Demand Power",
+        "Zone Air System Sensible Heating Rate",
+        "Zone Air System Sensible Cooling Rate",
+        "Zone Total Internal Total Heating Rate",
+        "Zone Total Internal Latent Gain rate",
+        "Total Internal Radiant Heating Rate",
+        "Total Internal Convective Heating Rate",
+        "Zone Air Heat Balance Outdoor Air Transfer Rate"
+      ]</default_value>
+    </argument>
+    <argument>
+      <name>reporting_frequency</name>
+      <display_name>Reporting Frequency.</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>timestep</default_value>
+      <choices>
+        <choice>
+          <value>detailed</value>
+          <display_name>detailed</display_name>
+        </choice>
+        <choice>
+          <value>timestep</value>
+          <display_name>timestep</display_name>
+        </choice>
+        <choice>
+          <value>hourly</value>
+          <display_name>hourly</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>example_model.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A0199A45</checksum>
+    </file>
+    <file>
+      <filename>zone_report_variables_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>97060590</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3D94B7AC</checksum>
+    </file>
+    <file>
+      <filename>report.html.in</filename>
+      <filetype>in</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3501204C</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.4.1</identifier>
+        <min_compatible>2.4.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>77AEAFF0</checksum>
+    </file>
+  </files>
+</measure>

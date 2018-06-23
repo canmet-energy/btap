@@ -6,7 +6,7 @@
   "user_id": "",
   "worker_node_number": 5,
   "aws_tags": [],
-  "openstudio_server_version": "2.4.1-nrcan",
+  "openstudio_server_version": "2.4.3-nrcan",
   "cluster_status": "terminated",
   "server": {
     "dns": null
