@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building_scale</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>dfca3fd9-127f-4229-a3bf-76737a2ec06d</version_id>
-  <version_modified>20180625T203750Z</version_modified>
+  <version_id>a7afddde-de2e-47db-8dd1-35675a5eec0a</version_id>
+  <version_modified>20180625T211812Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuildingScale</class_name>
   <display_name>BTAPCreateNECBPrototypeBuildingScale</display_name>
@@ -419,7 +419,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>61809518</checksum>
+      <checksum>CC158258</checksum>
     </file>
   </files>
 </measure>

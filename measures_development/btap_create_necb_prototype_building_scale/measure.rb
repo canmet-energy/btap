@@ -115,9 +115,16 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
 =end
 
     #Determine x and y scaling from area
-    x_scale_factor = Math.sqrt(area_scale_factor)
-    y_scale_factor = x_scale_factor
-    z_scale_factor = 1.0
+    if area_scale_factor != 1.0
+      x_scale_factor = Math.sqrt(area_scale_factor)
+      y_scale_factor = Math.sqrt(area_scale_factor)
+      z_scale_factor = 1.0
+    else
+      x_scale_factor = 1.0
+      y_scale_factor = 1.0
+      z_scale_factor = 1.0
+    end
+
 
     # Turn debugging output on/off
     @debug = false    
