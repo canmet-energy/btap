@@ -66,6 +66,13 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     args << epw_file
 
     #argument for Geometry
+    area_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("x_scale_factor", true)
+    area_scale_factor.setDisplayName("area_scale_factor")
+    area_scale_factor.setDefaultValue(1.0)
+    args << area_scale_factor
+
+=begin
+    #argument for Geometry
     x_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("x_scale_factor", true)
     x_scale_factor.setDisplayName("x_scale_factor")
     x_scale_factor.setDefaultValue(1.0)
@@ -82,7 +89,7 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     z_scale_factor.setDisplayName("z_scale_factor")
     z_scale_factor.setDefaultValue(1.0)
     args << z_scale_factor
-
+=end
     return args
   end
 
@@ -100,9 +107,17 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     template = runner.getStringArgumentValue('template',user_arguments)
     climate_zone = 'NECB HDD Method'
     epw_file = runner.getStringArgumentValue('epw_file',user_arguments)
+    area_scale_factor = runner.getDoubleArgumentValue('area_scale_factor',user_arguments)
+=begin
     x_scale_factor = runner.getDoubleArgumentValue('x_scale_factor',user_arguments)
     y_scale_factor = runner.getDoubleArgumentValue('y_scale_factor',user_arguments)
     z_scale_factor = runner.getDoubleArgumentValue('z_scale_factor',user_arguments)
+=end
+
+    #Determine x and y scaling from area
+    x_scale_factor = Math.sqrt(area_scale_factor)
+    y_scale_factor = x_scale_factor
+    z_scale_factor = 1.0
 
     # Turn debugging output on/off
     @debug = false    

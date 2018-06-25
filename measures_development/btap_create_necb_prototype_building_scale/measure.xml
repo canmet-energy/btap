@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building_scale</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>c1a0352a-8793-4d61-9101-1cb6f3e7ffbf</version_id>
-  <version_modified>20180623T220548Z</version_modified>
+  <version_id>20c71a8e-fa42-4bf3-a987-7f9a259af771</version_id>
+  <version_modified>20180625T195702Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuildingScale</class_name>
   <display_name>BTAPCreateNECBPrototypeBuildingScale</display_name>
@@ -378,23 +378,7 @@
     </argument>
     <argument>
       <name>x_scale_factor</name>
-      <display_name>x_scale_factor</display_name>
-      <type>Double</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
-    </argument>
-    <argument>
-      <name>y_scale_factor</name>
-      <display_name>y_scale_factor</display_name>
-      <type>Double</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
-    </argument>
-    <argument>
-      <name>z_scale_factor</name>
-      <display_name>z_scale_factor</display_name>
+      <display_name>area_scale_factor</display_name>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -424,7 +408,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>386C3560</checksum>
+      <checksum>16CD92C3</checksum>
     </file>
     <file>
       <version>
@@ -435,7 +419,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2E63F276</checksum>
+      <checksum>F92460E6</checksum>
     </file>
   </files>
 </measure>
