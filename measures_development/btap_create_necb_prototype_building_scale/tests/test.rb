@@ -69,7 +69,7 @@ class BTAPCreateNECBPrototypeBuildingScale_Test < Minitest::Test
     #set argument 4
     area_scale_factor = arguments[3].clone
     assert(area_scale_factor.setValue(1.0))
-    argument_map['area_scale_factor'] = x_scale_factor
+    argument_map['area_scale_factor'] = area_scale_factor
 
 =begin
     #set argument 3
