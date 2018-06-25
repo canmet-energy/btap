@@ -66,7 +66,7 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     args << epw_file
 
     #argument for Geometry
-    area_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("x_scale_factor", true)
+    area_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("area_scale_factor", true)
     area_scale_factor.setDisplayName("area_scale_factor")
     area_scale_factor.setDefaultValue(1.0)
     args << area_scale_factor
