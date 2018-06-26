@@ -23,7 +23,7 @@ class BTAPCreateNECBPrototypeBuildingScale_Test < Minitest::Test
     # test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
-    assert_equal(4, arguments.size)
+    assert_equal(8, arguments.size)
     #check argument 0
     assert_equal('building_type', arguments[0].name)
     assert_equal('SmallOffice', arguments[0].defaultValueAsString)
@@ -34,19 +34,21 @@ class BTAPCreateNECBPrototypeBuildingScale_Test < Minitest::Test
     assert_equal('epw_file', arguments[2].name)
     assert_equal('CAN_AB_Banff.CS.711220_CWEC2016.epw', arguments[2].defaultValueAsString)
     #check argument 3
-    assert_equal('area_scale_factor', arguments[3].name)
-    assert_equal(1.0, arguments[3].defaultValueAsDouble)
-=begin
-    #check argument 3
-    assert_equal('x_scale_factor', arguments[3].name)
+    assert_equal('volume_scale_factor', arguments[3].name)
     assert_equal(1.0, arguments[3].defaultValueAsDouble)
     #check argument 4
-    assert_equal('y_scale_factor', arguments[4].name)
+    assert_equal('area_scale_factor', arguments[4].name)
     assert_equal(1.0, arguments[4].defaultValueAsDouble)
     #check argument 5
-    assert_equal('z_scale_factor', arguments[5].name)
+    assert_equal('x_scale_factor', arguments[5].name)
     assert_equal(1.0, arguments[5].defaultValueAsDouble)
-=end
+    #check argument 6
+    assert_equal('y_scale_factor', arguments[6].name)
+    assert_equal(1.0, arguments[6].defaultValueAsDouble)
+    #check argument 7
+    assert_equal('z_scale_factor', arguments[7].name)
+    assert_equal(1.0, arguments[7].defaultValueAsDouble)
+
 
     # set argument values to values and run the measure
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
@@ -66,27 +68,30 @@ class BTAPCreateNECBPrototypeBuildingScale_Test < Minitest::Test
     assert(epw_file.setValue('CAN_AB_Banff.CS.711220_CWEC2016.epw'))
     argument_map['epw_file'] = epw_file
 
+    #set argument 3
+    volume_scale_factor = arguments[3].clone
+    assert(volume_scale_factor.setValue(1.0))
+    argument_map['volume_scale_factor'] = volume_scale_factor
+
     #set argument 4
-    area_scale_factor = arguments[3].clone
+    area_scale_factor = arguments[4].clone
     assert(area_scale_factor.setValue(1.0))
     argument_map['area_scale_factor'] = area_scale_factor
 
-=begin
-    #set argument 3
-    x_scale_factor = arguments[3].clone
+    #set argument 5
+    x_scale_factor = arguments[5].clone
     assert(x_scale_factor.setValue(1.0))
     argument_map['x_scale_factor'] = x_scale_factor
 
-    #set argument 4
-    y_scale_factor = arguments[3].clone
+    #set argument 6
+    y_scale_factor = arguments[6].clone
     assert(y_scale_factor.setValue(1.0))
     argument_map['y_scale_factor'] = y_scale_factor
 
-    #set argument 5
-    z_scale_factor = arguments[3].clone
+    #set argument 7
+    z_scale_factor = arguments[7].clone
     assert(z_scale_factor.setValue(1.0))
     argument_map['z_scale_factor'] = z_scale_factor
-=end
 
     #run the measure
     measure.run(model, runner, argument_map)
