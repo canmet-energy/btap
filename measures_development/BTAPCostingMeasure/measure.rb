@@ -1,6 +1,7 @@
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 require_relative 'resources/BTAPMeasureHelper'
+require_relative 'resources/btap_costing.rb'
 # start the measure
 class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
 
@@ -17,7 +18,7 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
 
   # human readable description
   def description
-    return "This template measure is used to ensure consistency in detailed BTAP measures."
+    return "This measure is use to determine high level costs for the model. This will evaluate the cost of cricitical componenents in an OpenStudio Model based on the NECB for Canadian Cities."
   end
 
   # human readable description of modeling approach
@@ -38,49 +39,7 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
     # create all the variables, validate the ranges and types you need,  and make them available in the 'run' method as a hash after
     # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)'
-    @measure_interface_detailed = [
-        {
-            "name" => "a_string_argument",
-            "type" => "String",
-            "display_name" => "A String Argument (string)",
-            "default_value" => "The Default Value",
-            "is_required" => true
-        },
-        {
-            "name" => "a_double_argument",
-            "type" => "Double",
-            "display_name" => "A Double numeric Argument (double)",
-            "default_value" => 0,
-            "max_double_value" => 100.0,
-            "min_double_value" => 0.0,
-            "is_required" => true
-        },
-        {
-            "name" => "a_string_double_argument",
-            "type" => "StringDouble",
-            "display_name" => "A String Double numeric Argument (double)",
-            "default_value" => 23.0,
-            "max_double_value" => 100.0,
-            "min_double_value" => 0.0,
-            "valid_strings" => ["Baseline", "NA"],
-            "is_required" => true
-        },
-        {
-            "name" => "a_choice_argument",
-            "type" => "Choice",
-            "display_name" => "A Choice String Argument ",
-            "default_value" => "choice_1",
-            "choices" => ["choice_1", "choice_2"],
-            "is_required" => true
-        },
-        {
-            "name" => "a_bool_argument",
-            "type" => "Bool",
-            "display_name" => "A Boolean Argument ",
-            "default_value" => false,
-            "is_required" => true
-        }
-    ]
+    @measure_interface_detailed = []
   end
 
   # define what happens when the measure is run
@@ -92,13 +51,10 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
     #puts JSON.pretty_generate(arguments)
     return false if false == arguments
-    #You can now access the input argument by the name.
-    # arguments['a_string_argument']
-    # arguments['a_double_argument']
-    # etc......
-    # So write your measure code here!
 
-    #Do something.
+    costing = BTAPCosting.new()
+    cost_result = costing.cost_audit_envelope(model)
+
     return true
   end
 end
