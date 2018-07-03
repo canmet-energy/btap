@@ -147,7 +147,12 @@ class BTAPCosting
           path = "https://dataapi-sb.gordian.com/v1/costdata/#{material['type'].downcase.strip}/catalogs/#{material['catalog_id'].strip}/costlines/#{material['id'].strip}"
           begin
             api_return = JSON.parse(RestClient.get(path, auth).body)
-            @costing_database['rsmean_api_data'] << api_return
+            filtered_return = { 'id' => material['id'],
+                                'catalog' => { "id"=> material['catalog_id'] },
+                                'description' => api_return['description'],
+                                'baseCosts' => api_return['baseCosts']
+            }
+            @costing_database['rsmean_api_data'] << filtered_return
 
           rescue Exception => e
             if e.to_s.strip == "401 Unauthorized"
