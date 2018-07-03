@@ -138,11 +138,10 @@ class BTAPCosting
     puts "you entered.."
     puts rs_auth_bearer
     m = rs_auth_bearer.match(/.*Bearer (?<bearer>[^']+).*$/)
-
-    #store auth_key in class variable
-    @auth_hash = m[:bearer].to_s.strip
+    
     #Store to disk to subsequent runs if required.
-    File.write(@rs_means_auth_hash_path, @auth_hash)
+    File.write(@rs_means_auth_hash_path, m[:bearer].to_s.strip)
+    @auth_hash = File.read(@rs_means_auth_hash_path).strip
   end
 
   def load_data_from_excel
