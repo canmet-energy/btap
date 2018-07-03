@@ -215,7 +215,6 @@ class BTAPCosting
     closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
     closest_city = closest_loc['city']
     closest_prov = closest_loc['province-state']
-    generate_construction_cost_database_for_city(closest_city,closest_prov)
 
     costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
     costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
@@ -251,6 +250,7 @@ class BTAPCosting
     closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
     closest_city = closest_loc['city']
     closest_prov = closest_loc['province-state']
+    generate_construction_cost_database_for_city(closest_city,closest_prov)
 
     costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
     costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
