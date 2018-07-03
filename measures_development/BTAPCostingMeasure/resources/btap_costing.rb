@@ -1,4 +1,5 @@
 require 'json'
+require 'zlib'
 
 class BTAPCosting
 
@@ -15,7 +16,7 @@ class BTAPCosting
     @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
-    self.create_database()
+    #self.create_database()
     @costing_database = JSON.parse(Zlib::Inflate.inflate(File.read(@costing_database_filepath_zip)))
   end
 
