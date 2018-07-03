@@ -11,14 +11,16 @@ class BTAPCosting
     @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/national_average_cost_information.xlsm"
     @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.zip"
     @costing_database_filepath_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
+    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.zip"
+    @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
-    self.recreate_database()
+    self.create_database()
     @costing_database = JSON.parse(Zlib::Inflate.inflate(File.read(@costing_database_filepath_zip)))
   end
 
 
-  def recreate_database()
+  def create_database()
     #Keeping track of start time.
     start = Time.now
     #set rs-means auth hash to nil.
@@ -65,6 +67,55 @@ class BTAPCosting
       f.write(JSON.pretty_generate(@costing_database))
     end
   end
+
+  def create_dummy_database()
+    #Keeping track of start time.
+    start = Time.now
+    #set rs-means auth hash to nil.
+    File.delete(@costing_database_filepath_dummy_zip) if File.exist?(@costing_database_filepath_dummy_zip)
+    File.delete(@costing_database_filepath_dummy_json) if File.exist?(@costing_database_filepath_dummy_json)
+    File.delete(@error_log) if File.exist?(@error_log)
+    @auth_hash = nil
+    #Create a hash to store items in excel database that could not be found in RSMeans api.
+    @not_found_in_rsmeans_api = Array.new
+    #Create costing database hash.
+    @costing_database = Hash.new()
+    #read secret rsmeans hash if already run.
+    if File.exist?(@rs_means_auth_hash_path)
+      @auth_hash = File.read(@rs_means_auth_hash_path).strip
+    else
+      #Try to authenticate with rs-means.
+      self.authenticate_rs_means_v1()
+    end
+
+    #Load all data from excel
+    self.load_data_from_excel()
+    #Get materials costing from rs-means and adjust using costing scaling factors for material and labour.
+    self.generate_materials_cost_database(true)
+
+
+    #Some user information.
+    puts "Cost Database regenerated in #{Time.now - start} seconds"
+    puts "#{@costing_database['rsmean_api_data'].size} Unique RSMeans items."
+    puts "#{@costing_database['constructions_costs'].size} Costed Constructions."
+    puts "#{@costing_database['raw']['rsmeans_locations'].size} Canadian Locations Available."
+
+    #If there are errors, write to @error_log
+    unless @costing_database['rs_mean_errors'].empty?
+      File.open(@error_log, "w") do |f|
+        f.write(JSON.pretty_generate(@costing_database['rs_mean_errors']))
+      end
+      puts "#{@costing_database['rs_mean_errors'].size} Errors in Parsing Costing! See #{@error_log} for listing of errors."
+    end
+    #Write database to file.
+    File.open(@costing_database_filepath_dummy_zip, "w") do |f|
+      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database)))
+    end
+    File.open(@costing_database_filepath_dummy_json, "w") do |f|
+      f.write(JSON.pretty_generate(@costing_database))
+    end
+  end
+
 
   def authenticate_rs_means_v1()
     puts '
@@ -122,7 +173,7 @@ class BTAPCosting
 
   end
 
-  def generate_materials_cost_database
+  def generate_materials_cost_database(dummy = false)
     require 'rest-client'
     [@costing_database['raw']['materials_glazing'], @costing_database['raw']['materials_opaque'], @costing_database['raw']['materials_lighting']].each do |mat_lib|
       [mat_lib].each do |materials|
@@ -145,12 +196,29 @@ class BTAPCosting
 
           auth = {:Authorization => "bearer #{@auth_hash}"}
           path = "https://dataapi-sb.gordian.com/v1/costdata/#{material['type'].downcase.strip}/catalogs/#{material['catalog_id'].strip}/costlines/#{material['id'].strip}"
+
+
           begin
             api_return = JSON.parse(RestClient.get(path, auth).body)
+            basecosts = nil
+            if dummy == true
+               basecosts =  {
+                       "installCost" => 1.0,
+                       "installOpCost" => 1.0,
+                       "materialCost" => 1.0,
+                       "materialOpCost" => 1.0,
+                       "laborCost" => 1.0,
+                       "laborOpCost" => 1.0,
+                       "totalCost" => 1.0,
+                       "totalOpCost" => 1.0
+               }
+            else
+              basecosts = api_return['baseCosts']
+            end
             filtered_return = { 'id' => material['id'],
                                 'catalog' => { "id"=> material['catalog_id'] },
                                 'description' => api_return['description'],
-                                'baseCosts' => api_return['baseCosts']
+                                'baseCosts' => basecosts
             }
             @costing_database['rsmean_api_data'] << filtered_return
 
@@ -170,7 +238,6 @@ class BTAPCosting
       end
 
     end
-
   end
 
 
