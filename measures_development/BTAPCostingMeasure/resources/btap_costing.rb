@@ -3,20 +3,23 @@ require 'zlib'
 
 class BTAPCosting
 
-  PATH_TO_COSTING_DATA = "./"
+  PATH_TO_COSTING_DATA = './'
+  PATH_TO_GLOBAL_RESOURCES = '../../../resources/'
   attr_accessor :costing_database
 
   def initialize()
     #paths to files all set here.
     @rs_means_auth_hash_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/rs_means_auth"
-    @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/national_average_cost_information.xlsm"
+    @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_GLOBAL_RESOURCES}/national_average_cost_information.xlsm"
     @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.zip"
     @costing_database_filepath_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
     @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.zip"
     @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
-    #self.create_database()
+  end
+
+  def load_database()
     @costing_database = JSON.parse(Zlib::Inflate.inflate(File.read(@costing_database_filepath_zip)))
   end
 
@@ -62,7 +65,7 @@ class BTAPCosting
     end
     #Write database to file.
     File.open(@costing_database_filepath_zip, "w") do |f|
-      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database)))
+      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database),Zlib::BEST_COMPRESSION))
     end
     File.open(@costing_database_filepath_json, "w") do |f|
       f.write(JSON.pretty_generate(@costing_database))
@@ -110,7 +113,7 @@ class BTAPCosting
     end
     #Write database to file.
     File.open(@costing_database_filepath_dummy_zip, "w") do |f|
-      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database)))
+      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database),Zlib::BEST_COMPRESSION ))
     end
     File.open(@costing_database_filepath_dummy_json, "w") do |f|
       f.write(JSON.pretty_generate(@costing_database))
@@ -138,7 +141,7 @@ class BTAPCosting
     puts "you entered.."
     puts rs_auth_bearer
     m = rs_auth_bearer.match(/.*Bearer (?<bearer>[^']+).*$/)
-    
+
     #Store to disk to subsequent runs if required.
     File.write(@rs_means_auth_hash_path, m[:bearer].to_s.strip)
     @auth_hash = File.read(@rs_means_auth_hash_path).strip
@@ -173,6 +176,11 @@ class BTAPCosting
 
   end
 
+
+  # This method iterates through all the items in the materials spreadsheet and determines the RSMeans standard city
+  # costs and stores it. There is a LOT of information that could be stored from RSMeans. I am trying to be very
+  # data-efficient as every bytes counts downloading and uploading from CANMET Ottawa. For this reason I am only grabbing
+  # the material id, catalog id and basecosts data hash. Even that may be too much.
   def generate_materials_cost_database(dummy = false)
     require 'rest-client'
     [@costing_database['raw']['materials_glazing'], @costing_database['raw']['materials_opaque'], @costing_database['raw']['materials_lighting']].each do |mat_lib|
@@ -203,17 +211,16 @@ class BTAPCosting
             basecosts = nil
             if dummy == true
                basecosts =  {
-                       "installCost" => 1.0,
-                       "installOpCost" => 1.0,
-                       "materialCost" => 1.0,
                        "materialOpCost" => 1.0,
-                       "laborCost" => 1.0,
                        "laborOpCost" => 1.0,
-                       "totalCost" => 1.0,
-                       "totalOpCost" => 1.0
+                       "equipmentOpCost" => 1.0
                }
             else
-              basecosts = api_return['baseCosts']
+              basecosts = {
+                  "materialOpCost" => api_return['baseCosts']["materialOpCost" ],
+                  "laborOpCost" => api_return['baseCosts']["laborOpCost"],
+                  "equipmentOpCost" => api_return['baseCosts']["equipmentOpCost" ],
+              }
             end
             filtered_return = { 'id' => material['id'],
                                 'catalog' => { "id"=> material['catalog_id'] },
