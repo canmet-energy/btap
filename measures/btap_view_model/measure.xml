@@ -2,14 +2,33 @@
   <schema_version>3.0</schema_version>
   <name>btap_view_model</name>
   <uid>a7a14e83-c319-4d66-b143-97630df94dbe</uid>
-  <version_id>5a912a92-b6b3-4f23-8528-3b980dd43de7</version_id>
-  <version_modified>20180614T144817Z</version_modified>
+  <version_id>e40cd8a0-8bcc-455c-acc5-5449c50ad3af</version_id>
+  <version_modified>20180705T173436Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPViewModel</class_name>
   <display_name>BTAPViewModel</display_name>
   <description>Visualize an OpenStudio model in a web based viewer</description>
   <modeler_description>Converts the OpenStudio model to vA3C JSON format and renders using Three.js</modeler_description>
-  <arguments/>
+  <arguments>
+    <argument>
+      <name>output_diet</name>
+      <display_name>Reduce outputs.</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+  </arguments>
   <outputs/>
   <provenances/>
   <tags>
@@ -74,7 +93,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>29F27AC8</checksum>
+      <checksum>30B85031</checksum>
     </file>
   </files>
 </measure>
