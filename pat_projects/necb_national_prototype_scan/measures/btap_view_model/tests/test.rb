@@ -50,14 +50,20 @@ class ViewModel_Test < MiniTest::Unit::TestCase
     model = model.get
     
     # create an instance of the measure
-    measure = ViewModel.new
+    measure = BTAPViewModel.new
     
     # create an instance of a runner
     runner = OpenStudio::Ruleset::OSRunner.new
     
     # get arguments and test that they are what we are expecting
     arguments = measure.arguments(model)
-    assert_equal(0, arguments.size)
+    assert_equal(1, arguments.size)
+
+    # set argument values to good values
+    argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     current_dir = Dir.pwd
     run_dir = File.dirname(__FILE__) + '/output'
@@ -65,8 +71,7 @@ class ViewModel_Test < MiniTest::Unit::TestCase
     FileUtils.mkdir_p(run_dir)
     Dir.chdir(run_dir)
     
-    # set argument values to good values and run the measure
-    argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+    # run the measure
     measure.run(model, runner, argument_map)
     result = runner.result
     show_output(result)
