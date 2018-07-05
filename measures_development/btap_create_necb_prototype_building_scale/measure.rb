@@ -15,7 +15,7 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
 
   # Human readable description of modeling approach
   def modeler_description
-    return 'This will replaced the model object with a brand new model. It effectively ignores the seed model.'
+    return 'This will replaced the model object with a brand new model. It effectively ignores the seed model.  Area scaling takes precedence over volume scaling which takes precedence over scaling in individual directions.'
   end
 
   # Define the arguments that the user will input.
@@ -65,31 +65,35 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     epw_file.setDefaultValue('CAN_AB_Banff.CS.711220_CWEC2016.epw')
     args << epw_file
 
-    #argument for Geometry
-    area_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("area_scale_factor", true)
-    area_scale_factor.setDisplayName("area_scale_factor")
+    #argument for geometry volume scaling
+    volume_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("volume_scale_factor", false)
+    volume_scale_factor.setDisplayName("Volume scaling factor (an entry other than one takes precedence over scaling in individual directions)")
+    volume_scale_factor.setDefaultValue(1.0)
+    args << volume_scale_factor
+
+    #argument for geometry area scaling
+    area_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("area_scale_factor", false)
+    area_scale_factor.setDisplayName("Area scaling factor (an entry other than one takes precedence over other scaling factors)")
     area_scale_factor.setDefaultValue(1.0)
     args << area_scale_factor
 
-=begin
-    #argument for Geometry
-    x_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("x_scale_factor", true)
-    x_scale_factor.setDisplayName("x_scale_factor")
+    #argument for geometry scaling in x-direction
+    x_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("x_scale_factor", false)
+    x_scale_factor.setDisplayName("X scaling factor")
     x_scale_factor.setDefaultValue(1.0)
     args << x_scale_factor
 
-    #argument for Geometry
-    y_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("y_scale_factor", true)
-    y_scale_factor.setDisplayName("y_scale_factor")
+    #argument for geometry scaling in y-direction
+    y_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("y_scale_factor", false)
+    y_scale_factor.setDisplayName("Y Scaling factor")
     y_scale_factor.setDefaultValue(1.0)
     args << y_scale_factor
 
-    #argument for Geometry
-    z_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("z_scale_factor", true)
-    z_scale_factor.setDisplayName("z_scale_factor")
+    #argument for geometry scaling in z-direction
+    z_scale_factor = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("z_scale_factor", false)
+    z_scale_factor.setDisplayName("Z scaling factor")
     z_scale_factor.setDefaultValue(1.0)
     args << z_scale_factor
-=end
     return args
   end
 
@@ -107,24 +111,24 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
     template = runner.getStringArgumentValue('template',user_arguments)
     climate_zone = 'NECB HDD Method'
     epw_file = runner.getStringArgumentValue('epw_file',user_arguments)
+    volume_scale_factor = runner.getDoubleArgumentValue('volume_scale_factor',user_arguments)
     area_scale_factor = runner.getDoubleArgumentValue('area_scale_factor',user_arguments)
-=begin
     x_scale_factor = runner.getDoubleArgumentValue('x_scale_factor',user_arguments)
     y_scale_factor = runner.getDoubleArgumentValue('y_scale_factor',user_arguments)
     z_scale_factor = runner.getDoubleArgumentValue('z_scale_factor',user_arguments)
-=end
 
-    #Determine x and y scaling from area
+    #Determine x, y and z scaling from volume or area scaling factors
+    #This takes precedence over scaling in individual directions
+
     if area_scale_factor != 1.0
       x_scale_factor = Math.sqrt(area_scale_factor)
       y_scale_factor = Math.sqrt(area_scale_factor)
       z_scale_factor = 1.0
-    else
-      x_scale_factor = 1.0
-      y_scale_factor = 1.0
-      z_scale_factor = 1.0
+    elsif volume_scale_factor != 1.0
+      x_scale_factor = (volume_scale_factor)**(1.0/3.0)
+      y_scale_factor = (volume_scale_factor)**(1.0/3.0)
+      z_scale_factor = (volume_scale_factor)**(1.0/3.0)
     end
-
 
     # Turn debugging output on/off
     @debug = false    
