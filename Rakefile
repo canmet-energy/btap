@@ -16,6 +16,7 @@ namespace :test do
   #array << 'measures/btap_utility_tariffs/tests/test.rb'
   #array << 'measures/btap_view_model/tests/test.rb'
   array << 'measures_development/btap_create_necb_prototype_building_scale/tests/test.rb'
+  array << 'measures/btap_results/tests/test.rb'
 
   desc 'Measures Tests'
   Rake::TestTask.new('measure-tests') do |t|

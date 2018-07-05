@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>ca362d8f-1c12-4d82-a841-cb1db2600ee4</version_id>
-  <version_modified>20180615T184841Z</version_modified>
+  <version_id>40a535b8-063f-40b6-8f78-3fd917b1199a</version_id>
+  <version_modified>20180705T130842Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -102,7 +102,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>71A7A6F5</checksum>
+      <checksum>0A6CFFBD</checksum>
     </file>
     <file>
       <version>
@@ -113,7 +113,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A66F232E</checksum>
+      <checksum>49C1A4BD</checksum>
     </file>
   </files>
 </measure>
