@@ -40,14 +40,17 @@ class BTAPViewModel < OpenStudio::Ruleset::ModelUserScript
   #define the arguments that the user will input
   def arguments(model)
     args = OpenStudio::Ruleset::OSArgumentVector.new
-    
+    output_diet = OpenStudio::Ruleset::OSArgument::makeBoolArgument('output_diet', true)
+    output_diet.setDisplayName('Reduce outputs.')
+    output_diet.setDefaultValue(false)
+    args << output_diet
     return args
   end 
   
   #define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-    
+    output_diet = runner.getBoolArgumentValue('output_diet',user_arguments)
     #use the built-in error checking 
     if not runner.validateUserArguments(arguments(model), user_arguments)
       return false
@@ -88,7 +91,7 @@ class BTAPViewModel < OpenStudio::Ruleset::ModelUserScript
     html_out = renderer.result(binding)
 
     #Compress model and store in base64 format
-    store_data(runner, Base64.strict_encode64( Zlib::Deflate.deflate(html_out.to_s) ), "view_model_html_zip","-")
+    store_data(runner, Base64.strict_encode64( Zlib::Deflate.deflate(html_out.to_s) ), "view_model_html_zip","-") unless output_diet
 
     # write html file
     html_out_path = "./report.html"

@@ -89,6 +89,11 @@ class OpenStudioResults < OpenStudio::Ruleset::ReportingUserScript
   def arguments
     args = OpenStudio::Ruleset::OSArgumentVector.new
 
+    output_diet = OpenStudio::Ruleset::OSArgument::makeBoolArgument('output_diet', true)
+    output_diet.setDisplayName('Reduce outputs.')
+    output_diet.setDefaultValue(false)
+    args << output_diet
+
     # populate arguments
     possible_sections.each do |method_name|
       # get display name
@@ -147,6 +152,7 @@ class OpenStudioResults < OpenStudio::Ruleset::ReportingUserScript
   # define what happens when the measure is run
   def run(runner, user_arguments)
     super(runner, user_arguments)
+    output_diet = runner.getBoolArgumentValue('output_diet',user_arguments)
 
     # get sql, model, and web assets
     setup = OsLib_Reporting.setup(runner)
@@ -269,7 +275,7 @@ class OpenStudioResults < OpenStudio::Ruleset::ReportingUserScript
     end
 
     current_path = "#{File.expand_path(".")}"
-    regex = /(.+\/run)\/\d\d\d/  
+    regex = /(.+\/run)\/\d\d\d/
     unless current_path.match(regex).nil?  #checks if file path contains '/run/###'. This statement is true only if the measure is run using osw workflow.
       eplustbl_path =  "#{current_path.match(regex)[1]}/eplustbl.htm"
       eplustbl_content = ""
@@ -277,10 +283,10 @@ class OpenStudioResults < OpenStudio::Ruleset::ReportingUserScript
       if File.file?(eplustbl_path)
         eplustbl_content = File.read(eplustbl_path)
       end
-      runner.registerValue('eplustbl_htm',Base64.strict_encode64( Zlib::Deflate.deflate(eplustbl_content) ))
+      runner.registerValue('eplustbl_htm',Base64.strict_encode64( Zlib::Deflate.deflate(eplustbl_content) )) unless output_diet
     end
-    runner.registerValue('report_html',Base64.strict_encode64( Zlib::Deflate.deflate(html_out) ))
-    
+    runner.registerValue('report_html',Base64.strict_encode64( Zlib::Deflate.deflate(html_out) )) unless output_diet
+
     # adding additional runner.registerValues needed for project scripts in 2.x PAT
     # note: these are not in begin rescue like individual sections. Won't fail gracefully if any SQL query's can't be found
 

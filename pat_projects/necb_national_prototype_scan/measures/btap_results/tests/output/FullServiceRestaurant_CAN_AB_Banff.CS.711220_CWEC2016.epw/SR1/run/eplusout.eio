@@ -1,0 +1,191 @@
+Program Version,EnergyPlus, Version 8.9.0-497bb3e71c, YMD=2018.06.14 14:54
+! <Version>, Version ID
+ Version, 8.9
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  6, 10
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, Yes, No, No
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 1.000, 1.000, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  19.53,  19.50,  19.54,  19.60,  20.00,  21.64,  22.23,  22.38,  21.45,  20.12,  19.80,  19.63
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,  -7.03,  -8.01,  -6.27,  -3.56,   3.55,   9.04,  12.74,  13.87,  11.95,   7.69,   2.00,  -3.29
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Banff CS AB CAN CWEC2016 WMO#=711220,51.19,-115.55,-7.00,1396.90,85631,1.0178
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,NECB_2011FullServiceRestaurant,0.000,City,4.00000E-002,0.20000,FullInteriorAndExterior,25,6
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,TARP
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Value {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, No,N/A
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.330,460.000,6.500000E-003
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,3,21,3
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,0.0,0.00,0.00,3.05,11.30,11.30,3.92,1,1,1,-1.57E-016,22.61,-9.66E-017,22.61,3.05,6.82,1.88,856.26,TARP,TARP,511.15,0.00,0.00,0.00,6,0,0,No
+ Zone Information, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,0.0,0.00,0.00,0.00,11.30,8.22,1.52,1,1,1,0.00,22.61,0.00,16.44,0.00,3.05,3.05,1133.39,TARP,TARP,371.75,169.19,122.02,47.17,6,3,0,Yes
+ Zone Information, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,0.0,0.00,0.00,0.00,11.30,19.53,1.52,1,1,1,0.00,22.61,16.44,22.61,0.00,3.05,3.05,425.02,TARP,TARP,139.41,106.53,106.53,0.00,6,0,0,Yes
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,511.15,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,10.000,10.000E-002,9.600,1.000,0.000,0.000,0.000,0.000,10.600,No
+ Zone Internal Gains Nominal, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,19.979,5.005E-002,10.700,10.000,0.000,0.000,0.000,0.000,20.700,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+ People Internal Gains Nominal, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN SPACE FUNCTION DINING - FAMILY SPACE PEOPLE,NECB-B-OCCUPANCY,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,37.2,10.000E-002,10.000,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,33
+ People Internal Gains Nominal, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN SPACE FUNCTION FOOD PREPARATION PEOPLE,NECB-B-OCCUPANCY,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,7.0,5.005E-002,19.979,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,6
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains Nominal, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS,NECB-B-LIGHTING,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,3568.752,9.600,96.002,0.000,0.500,0.200,0.300,1.000,General,356.875,3211.877
+ Lights Internal Gains Nominal, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN SPACE FUNCTION FOOD PREPARATION LIGHTS,NECB-B-LIGHTING,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,1491.624,10.700,213.775,0.000,0.500,0.200,0.300,1.000,General,149.162,1342.461
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains Nominal, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP,NECB-B-ELECTRIC-EQUIPMENT,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,371.745,1.000,10.000,0.000,0.500,0.000,0.500,General,37.174,334.570
+ ElectricEquipment Internal Gains Nominal, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP,NECB-B-ELECTRIC-EQUIPMENT,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,1394.041,10.000,199.790,0.000,0.500,0.000,0.500,General,139.404,1254.637
+! <Shadowing/Sun Position Calculations Annual Simulations>, Calculation Method, Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm, External Shading Calculation Method, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,AverageOverDaysInFrequency,7,15000,SutherlandHodgman,SimpleSkyDiffuseModeling,InternalCalculation,No,No,No
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s/m2},Volume Flow Rate/Exterior Surface Area {m3/s/m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, ATTIC INFILTRATION,ALWAYS ON DISCRETE,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,511.15,0.0,0.142,2.785E-004,2.500E-004,0.599,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, DINING INFILTRATION,ALWAYS ON DISCRETE,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,371.75,37.2,4.230E-002,1.138E-004,2.500E-004,0.134,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, KITCHEN INFILTRATION,ALWAYS ON DISCRETE,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,139.41,7.0,2.663E-002,1.910E-004,2.500E-004,0.226,0.000,0.000,0.224,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,Mixing/Well-Stirred
+RoomAir Model,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,Mixing/Well-Stirred
+RoomAir Model,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    6
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.3000    
+ Heating Sizing Factor Information, Zone SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,   1.3000    
+ Heating Sizing Factor Information, Zone SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,   1.3000    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1000    
+ Cooling Sizing Factor Information, Zone SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,   1.1000    
+ Cooling Sizing Factor Information, Zone SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,   1.1000    
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN, Cooling, 9383.49598, 10321.84558, 0.82128, 1.33138, BANFF CS ANN CLG .4% CONDNS DB=>MWB, 7/21 18:50:00, 22.14400, 5.98990E-003, 371.74807, 37.17359, 1.33138, 0.00000
+ Zone Sizing Information, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN, Heating, 10094.43745, 13122.76869, 0.45747, 1.33138, BANFF CS ANN HTG 99.6% CONDNS DB, 12/21 10:00:00, -30.30000, 2.67746E-004, 371.74807, 37.17359, 1.33138, 0.00000
+ Zone Sizing Information, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN, Cooling, 3138.27284, 3452.10013, 0.27467, 0.30214, BANFF CS ANN CLG .4% CONDNS DB=>MWB, 7/21 20:00:00, 20.20000, 5.98990E-003, 139.40524, 6.97754, 0.19121, 0.00000
+ Zone Sizing Information, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN, Heating, 2931.75307, 3811.27899, 0.13249, 0.19121, BANFF CS ANN HTG 99.6% CONDNS DB, 12/21 10:00:00, -30.30000, 2.67746E-004, 139.40524, 6.97754, 0.19121, 0.00000
+! <System Sizing Information>, System Name, Load Type, Peak Load Kind, User Design Capacity, Calc Des Air Flow Rate [m3/s], User Des Air Flow Rate [m3/s], Design Day Name, Date/Time of Peak
+ System Sizing Information, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Cooling, Sensible, 12450.76, 1.33138, 1.33138, BANFF CS ANN CLG .4% CONDNS DB=>MWB, 7/21 05:00:00
+ System Sizing Information, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Heating, Sensible, 99807.63, 1.33138, 1.33138, BANFF CS ANN HTG 99.6% CONDNS DB, 12/21 00:10:00
+ System Sizing Information, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Cooling, Sensible, 2655.81, 0.30214, 0.30214, BANFF CS ANN CLG .4% CONDNS DB=>MWB, 7/21 05:00:00
+ System Sizing Information, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Heating, Sensible, 14334.05, 0.19121, 0.19121, BANFF CS ANN HTG 99.6% CONDNS DB, 12/21 00:10:00
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, AirTerminal:SingleDuct:Uncontrolled, AIR TERMINAL SINGLE DUCT UNCONTROLLED 2, Design Size Maximum Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 2, Design Size Maximum Water Flow Rate [m3/s], 1.95999E-004
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 2, Design Size U-Factor Times Area Value [W/K], 399.79995
+ Component Sizing Information, AirTerminal:SingleDuct:Uncontrolled, AIR TERMINAL SINGLE DUCT UNCONTROLLED 1, Design Size Maximum Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 1, Design Size Maximum Water Flow Rate [m3/s], 5.69245E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 1, Design Size U-Factor Times Area Value [W/K], 116.12584
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Maximum Flow Rates [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Adjusted Heating Design Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Adjusted Cooling Design Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Adjusted Main Design Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, User Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Calculated Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Sum of Air Terminal Maximum Flow Rates [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Adjusted Heating Design Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Adjusted Cooling Design Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Adjusted Main Design Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, User Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Calculated Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN NECB SYSTEM 3 PSZ, Design Supply Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, AirLoopHVAC, SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN NECB SYSTEM 3 PSZ, Design Supply Air Flow Rate [m3/s], 0.30214
+!<Controller:MechanicalVentilation>,Name,Availability Schedule Name,Demand Controlled Ventilation {Yes/No},System Outdoor Air Method,Zone Maximum Outdoor Air Fraction,Number of Zones,Zone Name,DSOA Name,DSZAD Name
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 2,ALWAYS ON DISCRETE,No,ZoneSum,1.00,1,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,SPACE FUNCTION DINING - FAMILY SPACE VENTILATION,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 1,ALWAYS ON DISCRETE,No,ZoneSum,1.00,1,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,SPACE FUNCTION FOOD PREPARATION VENTILATION,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN DESIGN SPEC ZONE AIR DIST
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 2, Maximum Outdoor Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2, Design Size Rated Air Flow Rate [m3/s], 1.33138
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2, Design Size Gross Rated Total Cooling Capacity [W], 22039.04227
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2, Design Size Gross Rated Sensible Heat Ratio, 0.80066
+! <DX Cooling Coil Standard Rating Information>, Component Type, Component Name, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER {Btu/W-h}, IEER {Btu/W-h}
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2, 21005.9, 2.51, 8.56, 9.08, 8.70
+ Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 2, Design Size Nominal Capacity [W], 99807.63315
+ Component Sizing Information, Fan:ConstantVolume, FAN CONSTANT VOLUME 2, Design Size Maximum Flow Rate [m3/s], 1.33138
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 1, Maximum Outdoor Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Design Size Rated Air Flow Rate [m3/s], 0.30214
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Design Size Gross Rated Total Cooling Capacity [W], 5001.42582
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Design Size Gross Rated Sensible Heat Ratio, 0.80066
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, 4767.0, 2.51, 8.56, 9.08, 8.70
+ Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 1, Design Size Nominal Capacity [W], 16734.29239
+ Component Sizing Information, Fan:ConstantVolume, FAN CONSTANT VOLUME 1, Design Size Maximum Flow Rate [m3/s], 0.30214
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Maximum Loop Flow Rate [m3/s], 2.52924E-004
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Plant Loop Volume [m3], 3.03509E-002
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Design Flow Rate [m3/s], 2.52924E-004
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Design Power Consumption [W], 64.61878
+ Component Sizing Information, Boiler:HotWater, PRIMARY BOILER, Design Size Nominal Capacity [W], 16999.59882
+ Component Sizing Information, Boiler:HotWater, PRIMARY BOILER, Design Size Design Water Flow Rate [m3/s], 2.52924E-004
+ Component Sizing Information, Boiler:HotWater, SECONDARY BOILER, Design Size Nominal Capacity [W], 16999.59882
+ Component Sizing Information, Boiler:HotWater, SECONDARY BOILER, Design Size Design Water Flow Rate [m3/s], 2.52924E-004
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,BANFF CS ANN CLG .4% CONDNS DB=>MWB,SizingPeriod:DesignDay,07/21,07/21,SummerDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+! <Environment:Design Day Data>, Max Dry-Bulb Temp {C}, Temp Range {dC}, Temp Range Ind Type, Hum Ind Value at Max Temp, Hum Ind Type,Pressure {Pa}, Wind Direction {deg CW from N}, Wind Speed {m/s}, Clearness, Rain, Snow
+! <Environment:Design Day Misc>,DayOfYear,ASHRAE A Coeff,ASHRAE B Coeff,ASHRAE C Coeff,Solar Constant-Annual Variation,Eq of Time {minutes}, Solar Declination Angle {deg}, Solar Model
+Environment:Design Day Data,27.40,14.40,DefaultMultipliers,85631,230,3.1,0.00,No,No
+Environment:Design Day Misc,202,1084.4,0.2082,0.1365,1.0,-6.23,20.6,ASHRAETau
+Environment:WarmupDays,  6
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,None
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,SizingPeriod: BANFF CS ANN CLG .4% CONDNS DB=>MWB,6.2822080947E-002,3.4082308319E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,SizingPeriod: BANFF CS ANN CLG .4% CONDNS DB=>MWB,7.4459077858E-002,0.1303753152,Pass,Pass,2.8332288774E-002,4.8113994467E-002,Pass,Pass
+ Warmup Convergence Information,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,SizingPeriod: BANFF CS ANN CLG .4% CONDNS DB=>MWB,3.4918518110E-002,7.1888095011E-002,Pass,Pass,2.4661951800E-002,4.6767651981E-002,Pass,Pass
+Environment,BANFF CS ANN HTG 99.6% CONDNS DB,SizingPeriod:DesignDay,12/21,12/21,WinterDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+Environment:Design Day Data,-30.30,0.00,DefaultMultipliers,85631,70,1.3,0.00,No,No
+Environment:Design Day Misc,355,1232.8,0.1424,5.7719E-002,1.0,2.45,-23.5,ASHRAEClearSky
+Environment:WarmupDays,  6
+ Warmup Convergence Information,SP-ATTIC SYS-0 FLR-2 SCH-- UNDEFINED - HPLCMT-CORE ZN,SizingPeriod: BANFF CS ANN HTG 99.6% CONDNS DB,1.9702219886E-002,1.1337229456E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,SP-DINING SYS-3 FLR-1 SCH-B HPLCMT-SOUTH ZN,SizingPeriod: BANFF CS ANN HTG 99.6% CONDNS DB,5.5752626272E-002,0.3438478377,Pass,Pass,8.0793076965E-002,0.3609131008,Pass,Pass
+ Warmup Convergence Information,SP-KITCHEN SYS-3 FLR-1 SCH-B HPLCMT-NORTH ZN,SizingPeriod: BANFF CS ANN HTG 99.6% CONDNS DB,5.5565202181E-002,0.2973375485,Pass,Pass,0.1905943869,0.8487967773,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data

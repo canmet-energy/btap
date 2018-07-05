@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>ca362d8f-1c12-4d82-a841-cb1db2600ee4</version_id>
-  <version_modified>20180615T184841Z</version_modified>
+  <version_id>c05a8e7c-df17-420a-a254-20bb7bea220f</version_id>
+  <version_modified>20180705T175200Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -33,6 +33,24 @@
         <choice>
           <value>NECB2015</value>
           <display_name>NECB2015</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>output_diet</name>
+      <display_name>Reduce outputs.</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
@@ -102,7 +120,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>71A7A6F5</checksum>
+      <checksum>C491403A</checksum>
     </file>
     <file>
       <version>
@@ -113,7 +131,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A66F232E</checksum>
+      <checksum>9F8F97A8</checksum>
     </file>
   </files>
 </measure>

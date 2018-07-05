@@ -175,6 +175,10 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
 
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
+
     # create hash of argument values
     args_hash = {}
 
@@ -247,6 +251,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}
@@ -320,6 +327,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}
@@ -392,6 +402,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}
@@ -464,6 +477,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}
@@ -537,6 +553,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}
@@ -609,6 +628,9 @@ class OpenStudioResults_Test < MiniTest::Unit::TestCase
     # get arguments
     arguments = measure.arguments
     argument_map = OpenStudio::Ruleset.convertOSArgumentVectorToMap(arguments)
+    output_diet = arguments[0].clone
+    assert(output_diet.setValue(false))
+    argument_map['output_diet'] = output_diet
 
     # create hash of argument values
     args_hash = {}

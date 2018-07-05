@@ -3,6 +3,11 @@ require 'openstudio-standards'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 
+begin
+  require 'openstudio_measure_tester/test_helper'
+rescue LoadError
+  puts 'OpenStudio Measure Tester Gem not installed -- will not be able to aggregate and dashboard the results of tests'
+end
 
 require_relative '../measure.rb'
 
@@ -12,7 +17,7 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
   # class level variable
 
   @@Building_types = [
-      'FullServiceRestaurant'
+  'FullServiceRestaurant',
   #'HighriseApartment',
   #'LargeHotel',
   #'LargeOffice',
@@ -38,7 +43,7 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
   # has been pulled into nrcan
   @@templates=[
       "NECB2011",
-      # "NECB2015"
+      "NECB2015"
   ]
 
   # Added the template into the path name of the run dir so
@@ -110,7 +115,7 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
     measure = BTAPResults.new
 
     # create an instance of a runner
-    runner = OpenStudio::Ruleset::OSRunner.new
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     @@Building_types.each do |building|
       @@epw_files.each do |weather|
         @@templates.each do |template|
@@ -123,7 +128,12 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
 
           # get arguments
           arguments = measure.arguments()
-          argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+          puts arguments
+          argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+
+          #check number of arguments.
+          assert_equal(3, arguments.size)
+
           hourly_data = arguments[0].clone
           assert(hourly_data.setValue(h_data))
           argument_map['generate_hourly_report'] = hourly_data
@@ -131,6 +141,10 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
           template_type = arguments[1].clone
           assert(template_type.setValue(template))
           argument_map['template_type'] = template_type
+
+          output_diet = arguments[2].clone
+          assert(output_diet.setValue(false))
+          argument_map['output_diet'] = output_diet
 
 
           # mimic the process of running this measure in OS App or PAT
