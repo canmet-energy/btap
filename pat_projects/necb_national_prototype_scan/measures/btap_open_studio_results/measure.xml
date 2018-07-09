@@ -2,14 +2,32 @@
   <schema_version>3.0</schema_version>
   <name>openstudio_results</name>
   <uid>a7437013-6d3a-414a-8a4e-8bcba833188d</uid>
-  <version_id>ee4c7d7c-d8e7-4ecc-a5ca-de54a09cf164</version_id>
-  <version_modified>20180614T144817Z</version_modified>
+  <version_id>4f35ed82-635b-4a16-96df-67a20f629e71</version_id>
+  <version_modified>20180705T151227Z</version_modified>
   <xml_checksum>AE2941B3</xml_checksum>
   <class_name>OpenStudioResults</class_name>
   <display_name>BTAPOpenStudioResults</display_name>
   <description>This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.</description>
   <modeler_description>For the most part consumption data comes from the tabular EnergyPlus results, however there are a few requests added for time series results. Space type and loop details come from the OpenStudio model. The code for this is modular, making it easy to use as a template for your own custom reports. The structure of the report uses bootstrap, and the graphs use dimple js.</modeler_description>
   <arguments>
+    <argument>
+      <name>output_diet</name>
+      <display_name>Reduce outputs.</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
     <argument>
       <name>building_summary_section</name>
       <display_name>Model Summary</display_name>
@@ -555,12 +573,6 @@
       <checksum>D67C186D</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>50A163F9</checksum>
-    </file>
-    <file>
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -591,6 +603,12 @@
       <checksum>7DC1F0A7</checksum>
     </file>
     <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D476B1D0</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -599,7 +617,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0401B5AE</checksum>
+      <checksum>4AAB9AF0</checksum>
     </file>
   </files>
 </measure>
