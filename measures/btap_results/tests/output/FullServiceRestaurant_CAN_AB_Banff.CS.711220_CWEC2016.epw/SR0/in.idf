@@ -6,7 +6,7 @@ Timestep,
   6;                                      !- Number of Timesteps per Hour
 
 LifeCycleCost:Parameters,
-  {01a54698-4914-495a-aafe-3f873ac099a2}, !- Name
+  {be0048ac-340c-4f5c-8293-2c913ea17bb5}, !- Name
   EndOfYear,                              !- Discounting Convention
   ConstantDollar,                         !- Inflation Approach
   0.03,                                   !- Real Discount Rate
@@ -201,7 +201,7 @@ LifeCycleCost:UsePriceEscalation,
   1.0950;                                 !- Year Escalation 30
 
 Building,
-  NECB_2011FullServiceRestaurant,         !- Name
+  -FullServiceRestaurant-NECB HDD Method-CAN_AB_Banff.CS.711220_CWEC2016.epw created: 2018-07-09 18:12:11 +0000, !- Name
   0,                                      !- North Axis {deg}
   City,                                   !- Terrain
   0.04,                                   !- Loads Convergence Tolerance Value
@@ -603,7 +603,7 @@ ZoneControl:Thermostat,
   Dining ZN,                              !- Zone or ZoneList Name
   Dining ZN Thermostat Schedule,          !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Space Function Dining - family space Thermostat 1; !- Control Name 1
+  Space Function Dining area - family dining Thermostat 1; !- Control Name 1
 
 Schedule:Compact,
   Dining ZN Thermostat Schedule,          !- Name
@@ -620,7 +620,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Space Function Dining - family space Thermostat 1, !- Name
+  Space Function Dining area - family dining Thermostat 1, !- Name
   NECB-B-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-B-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -675,7 +675,7 @@ Schedule:Day:Interval,
   22;                                     !- Value Until Time 4
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {44353236-ec35-4658-8925-c748c19905cf}, !- Name
+  Schedule:Week:Daily {0e4b8053-0b55-452f-a618-4a1d750eff4c}, !- Name
   NECB-B-Thermostat Setpoint-Heating Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Heating Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -692,7 +692,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Heating,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {44353236-ec35-4658-8925-c748c19905cf}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {0e4b8053-0b55-452f-a618-4a1d750eff4c}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -745,7 +745,7 @@ Schedule:Day:Interval,
   24;                                     !- Value Until Time 3
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {89047548-367b-4ed5-b342-dee5f5f1c8e9}, !- Name
+  Schedule:Week:Daily {8371daaa-dadd-4b08-977f-06988bab606c}, !- Name
   NECB-B-Thermostat Setpoint-Cooling Sun|Hol Day, !- Sunday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Thermostat Setpoint-Cooling Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -762,7 +762,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Thermostat Setpoint-Cooling,     !- Name
   Temperature,                            !- Schedule Type Limits Name
-  Schedule:Week:Daily {89047548-367b-4ed5-b342-dee5f5f1c8e9}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {8371daaa-dadd-4b08-977f-06988bab606c}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -816,7 +816,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Space Function Dining - family space Ventilation, !- Design Specification Outdoor Air Object Name
+  Space Function Dining area - family dining Ventilation, !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -825,7 +825,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ;                                       !- Latent Heat Recovery Effectiveness {dimensionless}
 
 DesignSpecification:OutdoorAir,
-  Space Function Dining - family space Ventilation, !- Name
+  Space Function Dining area - family dining Ventilation, !- Name
   Sum,                                    !- Outdoor Air Method
   0,                                      !- Outdoor Air Flow per Person {m3/s-person}
   0.0035814,                              !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
@@ -850,7 +850,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Space Function Dining - family space Ventilation, !- Design Specification Outdoor Air Object Name
+  Space Function Dining area - family dining Ventilation, !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1001,7 +1001,7 @@ ZoneControl:Thermostat,
   Kitchen ZN,                             !- Zone or ZoneList Name
   Kitchen ZN Thermostat Schedule,         !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Space Function Food preparation Thermostat 1; !- Control Name 1
+  Space Function Food preparation area Thermostat 1; !- Control Name 1
 
 Schedule:Compact,
   Kitchen ZN Thermostat Schedule,         !- Name
@@ -1018,7 +1018,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Space Function Food preparation Thermostat 1, !- Name
+  Space Function Food preparation area Thermostat 1, !- Name
   NECB-B-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-B-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -1059,7 +1059,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Space Function Food preparation Ventilation, !- Design Specification Outdoor Air Object Name
+  Space Function Food preparation area Ventilation, !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -1068,7 +1068,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ;                                       !- Latent Heat Recovery Effectiveness {dimensionless}
 
 DesignSpecification:OutdoorAir,
-  Space Function Food preparation Ventilation, !- Name
+  Space Function Food preparation area Ventilation, !- Name
   Sum,                                    !- Outdoor Air Method
   0,                                      !- Outdoor Air Flow per Person {m3/s-person}
   0.0013716,                              !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
@@ -1093,7 +1093,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Space Function Food preparation Ventilation, !- Design Specification Outdoor Air Object Name
+  Space Function Food preparation area Ventilation, !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1155,8 +1155,8 @@ SurfaceConvectionAlgorithm:Outside,
   TARP;                                   !- Algorithm
 
 Sizing:Parameters,
-  1.3,                                    !- Heating Sizing Factor
-  1.1;                                    !- Cooling Sizing Factor
+  1.25,                                   !- Heating Sizing Factor
+  1.15;                                   !- Cooling Sizing Factor
 
 GlobalGeometryRules,
   UpperLeftCorner,                        !- Starting Vertex Position
@@ -2148,7 +2148,7 @@ Schedule:Day:Interval,
   0;                                      !- Value Until Time 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {d7e769af-a2e1-47d3-b65e-da98934eac11}, !- Name
+  Schedule:Week:Daily {9a8c1115-458d-494b-8f5e-f034cb9e164c}, !- Name
   Air Velocity Schedule Default,          !- Sunday Schedule:Day Name
   Air Velocity Schedule Default,          !- Monday Schedule:Day Name
   Air Velocity Schedule Default,          !- Tuesday Schedule:Day Name
@@ -2165,14 +2165,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Air Velocity Schedule,                  !- Name
   Velocity,                               !- Schedule Type Limits Name
-  Schedule:Week:Daily {d7e769af-a2e1-47d3-b65e-da98934eac11}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {9a8c1115-458d-494b-8f5e-f034cb9e164c}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {e146b700-b0d1-4015-a395-84f224924d2a}, !- Name
+  Schedule:Week:Daily {548781a1-0595-44d3-a512-5bb4ba9cbadc}, !- Name
   Always On Default,                      !- Sunday Schedule:Day Name
   Always On Default,                      !- Monday Schedule:Day Name
   Always On Default,                      !- Tuesday Schedule:Day Name
@@ -2189,14 +2189,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Always On,                              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {e146b700-b0d1-4015-a395-84f224924d2a}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {548781a1-0595-44d3-a512-5bb4ba9cbadc}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {f0d23fff-7d99-4f3f-863f-6d872145859e}, !- Name
+  Schedule:Week:Daily {337b4d43-592d-4cc9-82bd-c6c3c0c799de}, !- Name
   Clothing Schedule Default Winter Clothes, !- Sunday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Monday Schedule:Day Name
   Clothing Schedule Default Winter Clothes, !- Tuesday Schedule:Day Name
@@ -2213,14 +2213,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   Clothing Schedule,                      !- Name
   Any Number,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {f0d23fff-7d99-4f3f-863f-6d872145859e}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {337b4d43-592d-4cc9-82bd-c6c3c0c799de}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {7b859551-37ea-4f30-9726-eaeda29c08b1}, !- Name
+  Schedule:Week:Daily {84484a98-6ea9-41af-af8e-d0acb3e00e9d}, !- Name
   NECB-Activity Default,                  !- Sunday Schedule:Day Name
   NECB-Activity Default,                  !- Monday Schedule:Day Name
   NECB-Activity Default,                  !- Tuesday Schedule:Day Name
@@ -2237,14 +2237,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-Activity,                          !- Name
   ActivityLevel,                          !- Schedule Type Limits Name
-  Schedule:Week:Daily {7b859551-37ea-4f30-9726-eaeda29c08b1}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {84484a98-6ea9-41af-af8e-d0acb3e00e9d}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {5e5297a7-e1e9-4b2c-9eef-93cba1b921ad}, !- Name
+  Schedule:Week:Daily {cb42f11b-5669-4670-b561-131d32e320bb}, !- Name
   NECB-B-Electric-Equipment Sun|Hol Day,  !- Sunday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Monday Schedule:Day Name
   NECB-B-Electric-Equipment Default|Wkdy Day, !- Tuesday Schedule:Day Name
@@ -2261,14 +2261,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Electric-Equipment,              !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {5e5297a7-e1e9-4b2c-9eef-93cba1b921ad}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {cb42f11b-5669-4670-b561-131d32e320bb}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {8771ee36-ebda-4d78-81dc-01f24fc3a37c}, !- Name
+  Schedule:Week:Daily {9e8d1ddc-b87b-4971-84f0-5a7f9988b0c9}, !- Name
   NECB-B-Lighting Sun|Hol Day,            !- Sunday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Monday Schedule:Day Name
   NECB-B-Lighting Default|Wkdy Day,       !- Tuesday Schedule:Day Name
@@ -2285,14 +2285,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Lighting,                        !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {8771ee36-ebda-4d78-81dc-01f24fc3a37c}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {9e8d1ddc-b87b-4971-84f0-5a7f9988b0c9}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {7a0f0354-19ad-4716-8fec-4294abd8a605}, !- Name
+  Schedule:Week:Daily {a733aed3-0636-4fe4-8a45-b18bd1129c51}, !- Name
   NECB-B-Occupancy Sun|Hol Day,           !- Sunday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Monday Schedule:Day Name
   NECB-B-Occupancy Default|Wkdy Day,      !- Tuesday Schedule:Day Name
@@ -2309,14 +2309,14 @@ Schedule:Week:Daily,
 Schedule:Year,
   NECB-B-Occupancy,                       !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {7a0f0354-19ad-4716-8fec-4294abd8a605}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {a733aed3-0636-4fe4-8a45-b18bd1129c51}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
   31;                                     !- End Day 1
 
 Schedule:Week:Daily,
-  Schedule:Week:Daily {8ce747ca-6ba9-4f20-95c7-a72833432aac}, !- Name
+  Schedule:Week:Daily {cbcbfa94-4584-4abc-ad6e-7ce479e118da}, !- Name
   Work Efficiency Schedule Default,       !- Sunday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Monday Schedule:Day Name
   Work Efficiency Schedule Default,       !- Tuesday Schedule:Day Name
@@ -2333,7 +2333,7 @@ Schedule:Week:Daily,
 Schedule:Year,
   Work Efficiency Schedule,               !- Name
   Fractional,                             !- Schedule Type Limits Name
-  Schedule:Week:Daily {8ce747ca-6ba9-4f20-95c7-a72833432aac}, !- Schedule:Week Name 1
+  Schedule:Week:Daily {cbcbfa94-4584-4abc-ad6e-7ce479e118da}, !- Schedule:Week Name 1
   1,                                      !- Start Month 1
   1,                                      !- Start Day 1
   12,                                     !- End Month 1
@@ -2351,10 +2351,6 @@ Schedule:Constant,
 
 OutdoorAir:Node,
   Model Outdoor Air Node;                 !- Name
-
-OutputControl:ReportingTolerances,
-  1,                                      !- Tolerance for Time Heating Setpoint Not Met {deltaC}
-  1;                                      !- Tolerance for Time Cooling Setpoint Not Met {deltaC}
 
 Site:Location,
   Banff CS_AB_CAN,                        !- Name
@@ -2439,16 +2435,16 @@ SizingPeriod:DesignDay,
   0;                                      !- Sky Clearness
 
 ZoneList,
-  Space Function Dining - family space,   !- Name
+  Space Function Dining area - family dining, !- Name
   Dining ZN;                              !- Zone Name 1
 
 Lights,
-  Space Function Dining - family space Lights, !- Name
-  Space Function Dining - family space,   !- Zone or ZoneList Name
+  Space Function Dining area - family dining Lights, !- Name
+  Space Function Dining area - family dining, !- Zone or ZoneList Name
   NECB-B-Lighting,                        !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
-  9.59992009949298,                       !- Watts per Zone Floor Area {W/m2}
+  9.60348884762206,                       !- Watts per Zone Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   ,                                       !- Return Air Fraction
   0.5,                                    !- Fraction Radiant
@@ -2457,12 +2453,12 @@ Lights,
   General;                                !- End-Use Subcategory
 
 People,
-  Space Function Dining - family space People, !- Name
-  Space Function Dining - family space,   !- Zone or ZoneList Name
+  Space Function Dining area - family dining People, !- Name
+  Space Function Dining area - family dining, !- Zone or ZoneList Name
   NECB-B-Occupancy,                       !- Number of People Schedule Name
   People/Area,                            !- Number of People Calculation Method
   ,                                       !- Number of People
-  0.0999967277712333,                     !- People per Zone Floor Area {person/m2}
+  0.10003634216273,                       !- People per Zone Floor Area {person/m2}
   ,                                       !- Zone Floor Area per Person {m2/person}
   0.3,                                    !- Fraction Radiant
   ,                                       !- Sensible Heat Fraction
@@ -2478,12 +2474,12 @@ People,
   Air Velocity Schedule;                  !- Air Velocity Schedule Name
 
 ElectricEquipment,
-  Space Function Dining - family space Elec Equip, !- Name
-  Space Function Dining - family space,   !- Zone or ZoneList Name
+  Space Function Dining area - family dining Elec Equip, !- Name
+  Space Function Dining area - family dining, !- Zone or ZoneList Name
   NECB-B-Electric-Equipment,              !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Design Level {W}
-  0.999991679497248,                      !- Watts per Zone Floor Area {W/m2}
+  1.0003634216273,                        !- Watts per Zone Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   ,                                       !- Fraction Latent
   0.5,                                    !- Fraction Radiant
@@ -2491,16 +2487,16 @@ ElectricEquipment,
   General;                                !- End-Use Subcategory
 
 ZoneList,
-  Space Function Food preparation,        !- Name
+  Space Function Food preparation area,   !- Name
   Kitchen ZN;                             !- Zone Name 1
 
 Lights,
-  Space Function Food preparation Lights, !- Name
-  Space Function Food preparation,        !- Zone or ZoneList Name
+  Space Function Food preparation area Lights, !- Name
+  Space Function Food preparation area,   !- Zone or ZoneList Name
   NECB-B-Lighting,                        !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
-  10.6999109501691,                       !- Watts per Zone Floor Area {W/m2}
+  13.1047608233176,                       !- Watts per Zone Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   ,                                       !- Return Air Fraction
   0.5,                                    !- Fraction Radiant
@@ -2509,12 +2505,12 @@ Lights,
   General;                                !- End-Use Subcategory
 
 People,
-  Space Function Food preparation People, !- Name
-  Space Function Food preparation,        !- Zone or ZoneList Name
+  Space Function Food preparation area People, !- Name
+  Space Function Food preparation area,   !- Zone or ZoneList Name
   NECB-B-Occupancy,                       !- Number of People Schedule Name
   People/Area,                            !- Number of People Calculation Method
   ,                                       !- Number of People
-  0.0500521834377002,                     !- People per Zone Floor Area {person/m2}
+  0.0500181710813649,                     !- People per Zone Floor Area {person/m2}
   ,                                       !- Zone Floor Area per Person {m2/person}
   0.3,                                    !- Fraction Radiant
   ,                                       !- Sensible Heat Fraction
@@ -2530,12 +2526,12 @@ People,
   Air Velocity Schedule;                  !- Air Velocity Schedule Name
 
 ElectricEquipment,
-  Space Function Food preparation Elec Equip, !- Name
-  Space Function Food preparation,        !- Zone or ZoneList Name
+  Space Function Food preparation area Elec Equip, !- Name
+  Space Function Food preparation area,   !- Zone or ZoneList Name
   NECB-B-Electric-Equipment,              !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Design Level {W}
-  9.99991677344466,                       !- Watts per Zone Floor Area {W/m2}
+  10.003634216273,                        !- Watts per Zone Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   ,                                       !- Fraction Latent
   0.5,                                    !- Fraction Radiant

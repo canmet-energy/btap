@@ -1,6 +1,19 @@
 require 'json'
 require 'zlib'
 
+class Hash
+  def deep_find(key, object=self, found=[])
+    if object.respond_to?(:key?) && object.key?(key)
+      found << object
+    end
+    if object.is_a? Enumerable
+      found << object.collect { |*a| deep_find(key, a.last) }
+    end
+    found.flatten.compact
+  end
+
+end
+
 class BTAPCosting
 
   PATH_TO_COSTING_DATA = './'
@@ -11,16 +24,18 @@ class BTAPCosting
     #paths to files all set here.
     @rs_means_auth_hash_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/rs_means_auth"
     @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_GLOBAL_RESOURCES}/national_average_cost_information.xlsm"
-    @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.zip"
+    @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json.gz"
     @costing_database_filepath_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
-    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.zip"
+    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json.gz"
     @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
   end
 
   def load_database()
-    @costing_database = JSON.parse(Zlib::Inflate.inflate(File.read(@costing_database_filepath_zip)))
+    Zlib::GzipReader.open(@costing_database_filepath_zip) {|gz|
+      @costing_database = JSON.parse(gz.read)
+    }
   end
 
 
@@ -53,7 +68,6 @@ class BTAPCosting
     #Some user information.
     puts "Cost Database regenerated in #{Time.now - start} seconds"
     puts "#{@costing_database['rsmean_api_data'].size} Unique RSMeans items."
-    puts "#{@costing_database['constructions_costs'].size} Costed Constructions."
     puts "#{@costing_database['raw']['rsmeans_locations'].size} Canadian Locations Available."
 
     #If there are errors, write to @error_log
@@ -63,58 +77,39 @@ class BTAPCosting
       end
       puts "#{@costing_database['rs_mean_errors'].size} Errors in Parsing Costing! See #{@error_log} for listing of errors."
     end
-    #Write database to file.
-    File.open(@costing_database_filepath_zip, "w") do |f|
-      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database),Zlib::BEST_COMPRESSION))
+
+    Zlib::GzipWriter.open(@costing_database_filepath_zip) do |fo|
+      fo.write(JSON.pretty_generate(@costing_database))
     end
+
     File.open(@costing_database_filepath_json, "w") do |f|
       f.write(JSON.pretty_generate(@costing_database))
     end
   end
 
   def create_dummy_database()
-    #Keeping track of start time.
-    start = Time.now
-    #set rs-means auth hash to nil.
     File.delete(@costing_database_filepath_dummy_zip) if File.exist?(@costing_database_filepath_dummy_zip)
     File.delete(@costing_database_filepath_dummy_json) if File.exist?(@costing_database_filepath_dummy_json)
-    File.delete(@error_log) if File.exist?(@error_log)
-    @auth_hash = nil
-    #Create a hash to store items in excel database that could not be found in RSMeans api.
-    @not_found_in_rsmeans_api = Array.new
-    #Create costing database hash.
-    @costing_database = Hash.new()
-    #read secret rsmeans hash if already run.
-    if File.exist?(@rs_means_auth_hash_path)
-      @auth_hash = File.read(@rs_means_auth_hash_path).strip
-    else
-      #Try to authenticate with rs-means.
-      self.authenticate_rs_means_v1()
-    end
-
-    #Load all data from excel
-    self.load_data_from_excel()
-    #Get materials costing from rs-means and adjust using costing scaling factors for material and labour.
-    self.generate_materials_cost_database(true)
-
-
-    #Some user information.
-    puts "Cost Database regenerated in #{Time.now - start} seconds"
-    puts "#{@costing_database['rsmean_api_data'].size} Unique RSMeans items."
-    puts "#{@costing_database['constructions_costs'].size} Costed Constructions."
-    puts "#{@costing_database['raw']['rsmeans_locations'].size} Canadian Locations Available."
-
-    #If there are errors, write to @error_log
-    unless @costing_database['rs_mean_errors'].empty?
-      File.open(@error_log, "w") do |f|
-        f.write(JSON.pretty_generate(@costing_database['rs_mean_errors']))
-      end
-      puts "#{@costing_database['rs_mean_errors'].size} Errors in Parsing Costing! See #{@error_log} for listing of errors."
-    end
+    #Replace RSMean data with dummy values.
+    key = "materialOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "laborOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "equipmentOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "material"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "installation"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "total"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
     #Write database to file.
-    File.open(@costing_database_filepath_dummy_zip, "w") do |f|
-      f.write(Zlib::Deflate.deflate(JSON.pretty_generate(@costing_database),Zlib::BEST_COMPRESSION ))
+
+    require 'zlib'
+    Zlib::GzipWriter.open(@costing_database_filepath_dummy_zip) do |fo|
+      fo.write(JSON.pretty_generate(@costing_database))
     end
+
     File.open(@costing_database_filepath_dummy_json, "w") do |f|
       f.write(JSON.pretty_generate(@costing_database))
     end
@@ -156,7 +151,6 @@ class BTAPCosting
 
     #Get Raw Data from files.
     @costing_database['rsmean_api_data']= Array.new
-    @costing_database['constructions_costs']= Array.new
     @costing_database['raw'] = {}
     @costing_database['rs_mean_errors']=[]
     ['rsmeans_locations',
@@ -243,7 +237,6 @@ class BTAPCosting
           raise('rs_means_database empty! ') if @costing_database['rsmean_api_data'].empty?
         end
       end
-
     end
   end
 
@@ -253,12 +246,12 @@ class BTAPCosting
     @costing_database['raw']['rsmeans_locations'].each do |location|
       rs_means_province_state = location["province-state"]
       rs_means_city = location['city']
-
       generate_construction_cost_database_for_city(rs_means_city, rs_means_province_state)
     end
   end
 
   def generate_construction_cost_database_for_city(rs_means_city, rs_means_province_state)
+    @costing_database['constructions_costs']= Array.new
     puts "Costing for: #{rs_means_province_state},#{rs_means_city}"
     @costing_database["raw"]['constructions_opaque'].each do |construction|
       cost_construction(construction, {"province-state" => rs_means_province_state, "city" => rs_means_city}, 'opaque')
@@ -275,67 +268,34 @@ class BTAPCosting
 
 
     # Create a Hash to collect costing data.
-    costing_report = {}
+    @costing_report = {}
+    #Use closest RSMeans city.
+    closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
+    @costing_report["rs_means_city"]= closest_loc['city']
+    @costing_report["rs_means_prov"]= closest_loc['province-state']
     # Create a Hash in the hash for categories of costing.
-    costing_report["Building"] = {}
-    costing_report["Envelope"] = {}
-    costing_report["Lighting"] = {}
-    costing_report["HVAC"] = {}
-    costing_report["Totals"] = {}
+    @costing_report["envelope"] = {}
+    @costing_report["lighting"] = {}
+    @costing_report["hvac"] = {}
+    @costing_report["totals"] = {}
 
     # Check to see if standards building type and the number of stories has been defined.  The former may be omitted in the future.
     if model.getBuilding.standardsBuildingType.empty? or model.getBuilding.standardsNumberOfAboveGroundStories.empty?
       raise("Building information is not complete, please ensure that the standardsBuildingType and standardsNumberOfAboveGroundStories are entered in the model. ")
     end
 
-    # Store number of stories. Required for envelope costing logic.
-    num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
 
-    closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
-    closest_city = closest_loc['city']
-    closest_prov = closest_loc['province-state']
-
-    costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
-    costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
-    costing_report["Building"]["WeatherCity"] = model.getWeatherFile.city
-    costing_report["Building"]["ClosestProv"] = closest_prov
-    costing_report["Building"]["ClosestCity"] = closest_city
-
-    #envelope_cost = cost_audit_envelope(model, costing_report)
-
-    #lighting_cost = cost_audit_lighting(model, costing_report)
-
+    self.cost_audit_envelope(model)
+    return @costing_report
   end
 
   def cost_audit_envelope(model)
 
-    # Create a Hash to collect costing data.
-    costing_report = {}
-    # Create a Hash in the hash for categories of costing.
-    costing_report["Building"] = {}
-    costing_report["Envelope"] = {}
-    costing_report["Lighting"] = {}
-    costing_report["HVAC"] = {}
-    costing_report["Totals"] = {}
-
-    # Check to see if standards building type and the number of stories has been defined.  The former may be omitted in the future.
-    if model.getBuilding.standardsBuildingType.empty? or model.getBuilding.standardsNumberOfAboveGroundStories.empty?
-      raise("Building information is not complete, please ensure that the standardsBuildingType and standardsNumberOfAboveGroundStories are entered in the model. ")
-    end
-
     # Store number of stories. Required for envelope costing logic.
     num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
 
     closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
-    closest_city = closest_loc['city']
-    closest_prov = closest_loc['province-state']
-    generate_construction_cost_database_for_city(closest_city,closest_prov)
-
-    costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
-    costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
-    costing_report["Building"]["WeatherCity"] = model.getWeatherFile.city
-    costing_report["Building"]["ClosestProv"] = closest_prov
-    costing_report["Building"]["ClosestCity"] = closest_city
+    generate_construction_cost_database_for_city(@costing_report["rs_means_city"],@costing_report["rs_means_prov"])
 
     totEnvCost = 0
 
@@ -414,8 +374,8 @@ class BTAPCosting
           else
             cost_range_hash = @costing_database['constructions_costs'].select {|construction|
               construction['construction_type_name'] == construction_set[surface_type] &&
-                  construction['province-state'] == closest_prov &&
-                  construction['city'] == closest_city
+                  construction['province-state'] == @costing_report["rs_means_prov"] &&
+                  construction['city'] == @costing_report["rs_means_city"]
             }
           end
 
@@ -476,25 +436,25 @@ class BTAPCosting
             else
               name = "#{construction_set[surface_type]}_#{rsi}"
             end
-            if costing_report['Envelope'].has_key?(name)
-              costing_report['Envelope'][name]['area'] += surfArea
-              costing_report['Envelope'][name]['cost'] += surfCost
-              costing_report['Envelope'][name]['note'] += " / #{numSurfType}: #{notes}"
+            if @costing_report["envelope"].has_key?(name)
+              @costing_report["envelope"][name]['area'] += surfArea
+              @costing_report["envelope"][name]['cost'] += surfCost
+              @costing_report["envelope"][name]['note'] += " / #{numSurfType}: #{notes}"
             else
-              costing_report['Envelope'][name]={'area' => surfArea,
+              @costing_report["envelope"][name]={'area' => surfArea,
                                                 'cost' => surfCost}
-              costing_report['Envelope'][name]['note'] = "Surf ##{numSurfType}: #{notes}"
+              @costing_report["envelope"][name]['note'] = "Surf ##{numSurfType}: #{notes}"
             end
           end # surfaces of surface type
         end # surface_type
       end # spaces
     end # thermalzone
 
-    costing_report['Envelope']['TotalEnvelopeCost'] = totEnvCost
+    @costing_report["envelope"]['total_envelope_cost'] = totEnvCost
 
-    # Save the costing_report to a file.
+    # Save the @costing_report to a file.
     File.open(@cost_output_file, "w") do |f|
-      f.write(JSON.pretty_generate(costing_report))
+      f.write(JSON.pretty_generate(@costing_report))
     end
 
     puts "\nCost report file cost_output.json successfully generated.\nLocation: #{@cost_output_file}"
@@ -503,7 +463,7 @@ class BTAPCosting
 
   end
 
-  def cost_audit_lighting(model, costing_report)
+  def cost_audit_lighting(model)
 
 
   end

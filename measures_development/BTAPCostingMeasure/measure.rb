@@ -53,7 +53,9 @@ class BTAPModelMeasure < OpenStudio::Measure::ModelMeasure
     return false if false == arguments
 
     costing = BTAPCosting.new()
-    cost_result = costing.cost_audit_envelope(model)
+    costing.load_database()
+    cost_result = costing.cost_audit_all(model)
+    runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
 
     return true
   end

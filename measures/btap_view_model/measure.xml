@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_view_model</name>
   <uid>a7a14e83-c319-4d66-b143-97630df94dbe</uid>
-  <version_id>e40cd8a0-8bcc-455c-acc5-5449c50ad3af</version_id>
-  <version_modified>20180705T173436Z</version_modified>
+  <version_id>6fe14f7d-a9d9-44e9-8f0d-c9be208a3594</version_id>
+  <version_modified>20180709T174347Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPViewModel</class_name>
   <display_name>BTAPViewModel</display_name>
@@ -61,12 +61,6 @@
       <checksum>AC094EF8</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>705A2705</checksum>
-    </file>
-    <file>
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -94,6 +88,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>30B85031</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C19A9FE0</checksum>
     </file>
   </files>
 </measure>

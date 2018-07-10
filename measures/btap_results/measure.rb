@@ -11,6 +11,7 @@ require "#{File.dirname(__FILE__)}/resources/os_lib_reporting"
 require "#{File.dirname(__FILE__)}/resources/os_lib_schedules"
 require "#{File.dirname(__FILE__)}/resources/os_lib_helper_methods"
 
+
 module Enumerable
   def sum
     self.inject(0){|accum, i| accum + i }

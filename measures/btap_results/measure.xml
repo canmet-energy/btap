@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>incompatible library version - /home/osdev/btap/vendor/bundle/ruby/2.2.0/gems/nokogiri-1.8.3/lib/nokogiri/nokogiri.so</error>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>40a535b8-063f-40b6-8f78-3fd917b1199a</version_id>
-  <version_modified>20180705T130842Z</version_modified>
+  <version_id>82cf2fd3-987c-4d47-a5bf-999259fae2c8</version_id>
+  <version_modified>20180709T174347Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -102,7 +103,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0A6CFFBD</checksum>
+      <checksum>C491403A</checksum>
     </file>
     <file>
       <version>
@@ -113,7 +114,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>49C1A4BD</checksum>
+      <checksum>A9476C85</checksum>
     </file>
   </files>
 </measure>
