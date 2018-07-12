@@ -11,29 +11,27 @@ class Hash
     end
     found.flatten.compact
   end
-
 end
 
 class BTAPCosting
-
   PATH_TO_COSTING_DATA = './'
   PATH_TO_GLOBAL_RESOURCES = '../../../resources/'
   attr_accessor :costing_database
-
   def initialize()
     #paths to files all set here.
     @rs_means_auth_hash_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/rs_means_auth"
     @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_GLOBAL_RESOURCES}/national_average_cost_information.xlsm"
     @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json.gz"
-    @costing_database_filepath_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
-    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json.gz"
-    @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_dummy.json"
+    @costing_database_filepath_rsmeans_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_rsmeans.json.gz"
+    @costing_database_filepath_rsmeans_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_rsmeans.json"
+    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json.gz"
+    @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
   end
 
   def load_database()
-    Zlib::GzipReader.open(@costing_database_filepath_zip) {|gz|
+    Zlib::GzipReader.open(@costing_database_filepath_zip ) { |gz|
       @costing_database = JSON.parse(gz.read)
     }
   end
@@ -43,8 +41,8 @@ class BTAPCosting
     #Keeping track of start time.
     start = Time.now
     #set rs-means auth hash to nil.
-    File.delete(@costing_database_filepath_zip) if File.exist?(@costing_database_filepath_zip)
-    File.delete(@costing_database_filepath_json) if File.exist?(@costing_database_filepath_json)
+    File.delete(@costing_database_filepath_rsmeans_zip) if File.exist?(@costing_database_filepath_rsmeans_zip)
+    File.delete(@costing_database_filepath_rsmeans_json) if File.exist?(@costing_database_filepath_rsmeans_json)
     File.delete(@error_log) if File.exist?(@error_log)
     @auth_hash = nil
     #Create a hash to store items in excel database that could not be found in RSMeans api.
@@ -78,11 +76,11 @@ class BTAPCosting
       puts "#{@costing_database['rs_mean_errors'].size} Errors in Parsing Costing! See #{@error_log} for listing of errors."
     end
 
-    Zlib::GzipWriter.open(@costing_database_filepath_zip) do |fo|
+    Zlib::GzipWriter.open(@costing_database_filepath_rsmeans_zip) do |fo|
       fo.write(JSON.pretty_generate(@costing_database))
     end
 
-    File.open(@costing_database_filepath_json, "w") do |f|
+    File.open(@costing_database_filepath_rsmeans_json, "w") do |f|
       f.write(JSON.pretty_generate(@costing_database))
     end
   end
@@ -451,16 +449,8 @@ class BTAPCosting
     end # thermalzone
 
     @costing_report["envelope"]['total_envelope_cost'] = totEnvCost
-
-    # Save the @costing_report to a file.
-    File.open(@cost_output_file, "w") do |f|
-      f.write(JSON.pretty_generate(@costing_report))
-    end
-
     puts "\nCost report file cost_output.json successfully generated.\nLocation: #{@cost_output_file}"
-
     return totEnvCost
-
   end
 
   def cost_audit_lighting(model)

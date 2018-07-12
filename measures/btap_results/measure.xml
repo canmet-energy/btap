@@ -1,10 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>incompatible library version - /home/osdev/btap/vendor/bundle/ruby/2.2.0/gems/nokogiri-1.8.3/lib/nokogiri/nokogiri.so</error>
+  <error>/home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so: undefined symbol: rb_cObject - /home/osdev/btap/vendor/bundle/ruby/2.2.0/extensions/x86_64-linux/2.2.0-static/nokogiri-1.8.2/nokogiri/nokogiri.so</error>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>82cf2fd3-987c-4d47-a5bf-999259fae2c8</version_id>
-  <version_modified>20180709T174347Z</version_modified>
+  <version_id>6801bf00-42d0-4766-9a57-0bd6fd4516df</version_id>
+  <version_modified>20180712T161112Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -114,7 +114,49 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A9476C85</checksum>
+      <checksum>8BB8FED9</checksum>
+    </file>
+    <file>
+      <filename>btap_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E87B7791</checksum>
+    </file>
+    <file>
+      <filename>rs_means_auth</filename>
+      <filetype></filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D607A00D</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E4C4F55E</checksum>
+    </file>
+    <file>
+      <filename>costing_database_rsmeans.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>741D4C5E</checksum>
+    </file>
+    <file>
+      <filename>errors.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9F90B7B6</checksum>
+    </file>
+    <file>
+      <filename>costing_database_rsmeans.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7EF32066</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B4E4DF90</checksum>
     </file>
   </files>
 </measure>
