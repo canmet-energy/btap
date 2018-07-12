@@ -10,6 +10,9 @@ require 'openstudio-standards'
 require "#{File.dirname(__FILE__)}/resources/os_lib_reporting"
 require "#{File.dirname(__FILE__)}/resources/os_lib_schedules"
 require "#{File.dirname(__FILE__)}/resources/os_lib_helper_methods"
+require_relative 'resources/BTAPMeasureHelper'
+require_relative 'resources/btap_costing.rb'
+
 
 module Enumerable
   def sum
@@ -978,8 +981,12 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     prototype_creator = Standard.build("#{template_type}")
 
     # Perform qaqc
-    qaqc = prototype_creator.init_qaqc(model)
-
+    qaqc = prototype_creator.init_qaqc( model )
+    costing = BTAPCosting.new()
+    costing.load_database()
+    cost_result = costing.cost_audit_all(model)
+    runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
+    qaqc["auto_costing"] = cost_result
     # Perform qaqc
     # necb_2011_qaqc(qaqc) if qaqc[:building][:name].include?("NECB 2011") #had to nodify this because this is specifically for "NECB-2011" standard
     # sanity_check(qaqc)

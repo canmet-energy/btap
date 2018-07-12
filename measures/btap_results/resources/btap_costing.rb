@@ -1,68 +1,49 @@
-require "#{File.dirname(__FILE__)}/btap"
 require 'json'
-require 'singleton'
-require 'roo'
-require 'openssl'
-require 'aes'
-require 'rest-client'
+require 'zlib'
 
+class Hash
+  def deep_find(key, object=self, found=[])
+    if object.respond_to?(:key?) && object.key?(key)
+      found << object
+    end
+    if object.is_a? Enumerable
+      found << object.collect { |*a| deep_find(key, a.last) }
+    end
+    found.flatten.compact
+  end
+end
 
 class BTAPCosting
-
-  PATH_TO_COSTING_DATA = "../../../data/costing"
-  include Singleton
+  PATH_TO_COSTING_DATA = './'
+  PATH_TO_GLOBAL_RESOURCES = '../../../resources/'
   attr_accessor :costing_database
   def initialize()
     #paths to files all set here.
     @rs_means_auth_hash_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/rs_means_auth"
-    @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/national_average_cost_information.xlsm"
-    @keyfile = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/keyfile"
-    @encrypted_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_e.json"
-    @plaintext_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing.json"
+    @xlsx_path = "#{File.dirname(__FILE__)}/#{PATH_TO_GLOBAL_RESOURCES}/national_average_cost_information.xlsm"
+    @costing_database_filepath_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json.gz"
+    @costing_database_filepath_rsmeans_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_rsmeans.json.gz"
+    @costing_database_filepath_rsmeans_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database_rsmeans.json"
+    @costing_database_filepath_dummy_zip = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json.gz"
+    @costing_database_filepath_dummy_json = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/costing_database.json"
     @error_log = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/errors.json"
     @cost_output_file = "#{File.dirname(__FILE__)}/#{PATH_TO_COSTING_DATA}/cost_output.json"
   end
 
-  #Initialize the singleton costing object.
-  def load(key = nil, aws = false)
-    @key = key
-    if @key.nil?
-      #load local keyfile for debugging.
-      @key = load_local_keyfile()
-    end
-    if aws
-      # Always use encrypted costing database when running in cloud (Amazon Web Service)
-      @costing_database = decrypt_hash(@key, File.read(@encrypted_file))
-    else
-      if FileUtils.uptodate?(@encrypted_file, [@xlsx_path])
-        puts "National Costing Excel Sheet is older than database, using stored encrypted database."
-        @costing_database = decrypt_hash(@key, File.read(@encrypted_file))
-      else
-        puts "National Costing Excel Sheet is newer than database, recreating database using RSMeans..."
-        self.recreate_database()
-      end
-    end
+  def load_database()
+    Zlib::GzipReader.open(@costing_database_filepath_zip ) { |gz|
+      @costing_database = JSON.parse(gz.read)
+    }
   end
 
-  def load_local_keyfile()
-    puts "loading local key"
-    @key = nil
-    if File.exist?(@keyfile)
-      @key = File.read(@keyfile)
-    end
-    #If file could not be found or the key was black raise exception.
-    puts @key
-    if not File.exist?(@keyfile) or @key.nil? or @key.strip == ""
-      raise("could not find nrcan's secret keyfile hash. Place secret hash key in this file:#{@keyfile}")
-    end
-    puts "this is the key #{@key}"
-    return @key
-  end
 
-  def recreate_database()
+  def create_database()
     #Keeping track of start time.
     start = Time.now
     #set rs-means auth hash to nil.
+    File.delete(@costing_database_filepath_rsmeans_zip) if File.exist?(@costing_database_filepath_rsmeans_zip)
+    File.delete(@costing_database_filepath_rsmeans_json) if File.exist?(@costing_database_filepath_rsmeans_json)
+    File.delete(@error_log) if File.exist?(@error_log)
     @auth_hash = nil
     #Create a hash to store items in excel database that could not be found in RSMeans api.
     @not_found_in_rsmeans_api = Array.new
@@ -80,15 +61,12 @@ class BTAPCosting
     self.load_data_from_excel()
     #Get materials costing from rs-means and adjust using costing scaling factors for material and labour.
     self.generate_materials_cost_database()
-    #Generate construction cost database for all regions.
-    self.generate_construction_cost_database()
+
 
     #Some user information.
-    puts "the decryption key is:#{@key}"
     puts "Cost Database regenerated in #{Time.now - start} seconds"
     puts "#{@costing_database['rsmean_api_data'].size} Unique RSMeans items."
-    puts "#{@costing_database['constructions_costs'].size} Costed Constructions."
-    puts "#{@costing_database['raw']['rsmeans_locations'].size} Canadian Locations."
+    puts "#{@costing_database['raw']['rsmeans_locations'].size} Canadian Locations Available."
 
     #If there are errors, write to @error_log
     unless @costing_database['rs_mean_errors'].empty?
@@ -97,9 +75,44 @@ class BTAPCosting
       end
       puts "#{@costing_database['rs_mean_errors'].size} Errors in Parsing Costing! See #{@error_log} for listing of errors."
     end
-    #Encrypt the database for public.
-    self.encrypt_database(@key)
+
+    Zlib::GzipWriter.open(@costing_database_filepath_rsmeans_zip) do |fo|
+      fo.write(JSON.pretty_generate(@costing_database))
+    end
+
+    File.open(@costing_database_filepath_rsmeans_json, "w") do |f|
+      f.write(JSON.pretty_generate(@costing_database))
+    end
   end
+
+  def create_dummy_database()
+    File.delete(@costing_database_filepath_dummy_zip) if File.exist?(@costing_database_filepath_dummy_zip)
+    File.delete(@costing_database_filepath_dummy_json) if File.exist?(@costing_database_filepath_dummy_json)
+    #Replace RSMean data with dummy values.
+    key = "materialOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "laborOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "equipmentOpCost"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "material"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "installation"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    key = "total"
+    @costing_database.deep_find(key).each {|item| item[key] = 0.0}
+    #Write database to file.
+
+    require 'zlib'
+    Zlib::GzipWriter.open(@costing_database_filepath_dummy_zip) do |fo|
+      fo.write(JSON.pretty_generate(@costing_database))
+    end
+
+    File.open(@costing_database_filepath_dummy_json, "w") do |f|
+      f.write(JSON.pretty_generate(@costing_database))
+    end
+  end
+
 
   def authenticate_rs_means_v1()
     puts '
@@ -113,21 +126,22 @@ class BTAPCosting
        7. Copy the entire string in the curl command field.
        8. Paste it below.
       '
-    rs_auth_bearer = ask "Paste RSMeans API Curl String and hit enter:"
+
+    puts "Paste RSMeans API Curl String and hit enter:"
+    rs_auth_bearer = STDIN.gets.chomp
+    #rs_auth_bearer ="curl -X GET --header 'Accept: application/json' --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Iml1MXFMSTVnbEM2RVBZMi1YbmF0TFBjVVFhRSIsImtpZCI6Iml1MXFMSTVnbEM2RVBZMi1YbmF0TFBjVVFhRSJ9.eyJpc3MiOiJodHRwczovL2xvZ2luLmdvcmRpYW4uY29tIiwiYXVkIjoiaHR0cHM6Ly9sb2dpbi5nb3JkaWFuLmNvbS9yZXNvdXJjZXMiLCJleHAiOjE1MzA2NDA0MzEsIm5iZiI6MTUzMDYzNjgzMSwiY2xpZW50X2lkIjoicnNtLWFwaSIsImNsaWVudF9yb2xlIjoicnNtLWFwaS1jdXN0b21lciIsInNjb3BlIjoicnNtX2FwaTpjb3N0ZGF0YSIsInN1YiI6ImM0ZGE4ZjYwLTIzY2QtNDA4Ni04ODUyLTJlNDk5MjhiMGZlOSIsImF1dGhfdGltZSI6MTUzMDYyNzk1OSwiaWRwIjoiaWRzcnYiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJwaHlscm95LmxvcGV6QGNhbmFkYS5jYSIsImVSb2xlIjoiRmFsc2UiLCJhbXIiOlsicGFzc3dvcmQiXX0.lr0STOgTzCWh1d13IKFpsyU4AQK-xy55pAw6ldvhYHlPVzTjjtFtVryA40GCZpq8I4-YIs5F31SQ-x7byMB551uhRO7deud1G_VZUZWSs6jX-Uy9NX03pmI5b2VQzx_lUhf0JXc4IN_WvNGUgfthuSmSZK4Hdi94qeI4dfjawsV9LUWH2pY7PCqT2U9ry1_ri7zej6aRmUfCITpR-Ye_yMEf0Yj5394rs_QzeRkgcQqNA3-DCmw0fitC7aelswCxSPMVJ7vXoymI25seHJ5Dbph5NB261bCaTgmVnnl1rZNEOinZti_eK2v3kyXIsCbTjPNScxjra-C5arN5ru5yag' 'https://dataapi-sb.gordian.com/v1/costdata/assembly/catalogs'"
+
+    puts "you entered.."
+    puts rs_auth_bearer
     m = rs_auth_bearer.match(/.*Bearer (?<bearer>[^']+).*$/)
-    #if m[:bearer].to_s.size != 934
-    #  puts "this is the bearer #{m[:bearer]}"
-    #  puts "this is the bearer #{m[:bearer].size}"
-    #  abort "Bearer key is not 934 charecters long. Please ensure that you copied the full curl string from the API Explorer."
-    #else
-      #store auth_key in class variable
-      @auth_hash = m[:bearer].to_s
-      #Store to disk to subsequent runs if required.
-      File.write(@rs_means_auth_hash_path, @auth_hash)
-    #end
+
+    #Store to disk to subsequent runs if required.
+    File.write(@rs_means_auth_hash_path, m[:bearer].to_s.strip)
+    @auth_hash = File.read(@rs_means_auth_hash_path).strip
   end
 
   def load_data_from_excel
+
     @costing_database = {} if @costing_database.nil?
     unless File.exist?(@xlsx_path)
       raise("could not find the national_average_cost_information.xlsm in location #{@xlsx_path}. This is a proprietary file manage by Natural resources Canada.")
@@ -135,7 +149,6 @@ class BTAPCosting
 
     #Get Raw Data from files.
     @costing_database['rsmean_api_data']= Array.new
-    @costing_database['constructions_costs']= Array.new
     @costing_database['raw'] = {}
     @costing_database['rs_mean_errors']=[]
     ['rsmeans_locations',
@@ -155,8 +168,13 @@ class BTAPCosting
 
   end
 
-  def generate_materials_cost_database
 
+  # This method iterates through all the items in the materials spreadsheet and determines the RSMeans standard city
+  # costs and stores it. There is a LOT of information that could be stored from RSMeans. I am trying to be very
+  # data-efficient as every bytes counts downloading and uploading from CANMET Ottawa. For this reason I am only grabbing
+  # the material id, catalog id and basecosts data hash. Even that may be too much.
+  def generate_materials_cost_database(dummy = false)
+    require 'rest-client'
     [@costing_database['raw']['materials_glazing'], @costing_database['raw']['materials_opaque'], @costing_database['raw']['materials_lighting']].each do |mat_lib|
       [mat_lib].each do |materials|
 
@@ -178,9 +196,30 @@ class BTAPCosting
 
           auth = {:Authorization => "bearer #{@auth_hash}"}
           path = "https://dataapi-sb.gordian.com/v1/costdata/#{material['type'].downcase.strip}/catalogs/#{material['catalog_id'].strip}/costlines/#{material['id'].strip}"
+
+
           begin
             api_return = JSON.parse(RestClient.get(path, auth).body)
-            @costing_database['rsmean_api_data'] << api_return
+            basecosts = nil
+            if dummy == true
+               basecosts =  {
+                       "materialOpCost" => 1.0,
+                       "laborOpCost" => 1.0,
+                       "equipmentOpCost" => 1.0
+               }
+            else
+              basecosts = {
+                  "materialOpCost" => api_return['baseCosts']["materialOpCost" ],
+                  "laborOpCost" => api_return['baseCosts']["laborOpCost"],
+                  "equipmentOpCost" => api_return['baseCosts']["equipmentOpCost" ],
+              }
+            end
+            filtered_return = { 'id' => material['id'],
+                                'catalog' => { "id"=> material['catalog_id'] },
+                                'description' => api_return['description'],
+                                'baseCosts' => basecosts
+            }
+            @costing_database['rsmean_api_data'] << filtered_return
 
           rescue Exception => e
             if e.to_s.strip == "401 Unauthorized"
@@ -196,90 +235,65 @@ class BTAPCosting
           raise('rs_means_database empty! ') if @costing_database['rsmean_api_data'].empty?
         end
       end
-
     end
-
   end
 
-  def generate_construction_cost_database()
+
+  def generate_construction_cost_database_for_all_cities()
     @costing_database['constructions_costs']= Array.new
-    counter = 0
     @costing_database['raw']['rsmeans_locations'].each do |location|
-      puts "Costing for: #{location["province-state"]},#{location['city']}"
-      @costing_database["raw"]['constructions_opaque'].each do |construction|
-        cost_construction(construction, counter, location, 'opaque')
-      end
-      @costing_database["raw"]['constructions_glazing'].each do |construction|
-        cost_construction(construction, counter, location, 'glazing')
-      end
+      rs_means_province_state = location["province-state"]
+      rs_means_city = location['city']
+      generate_construction_cost_database_for_city(rs_means_city, rs_means_province_state)
     end
   end
+
+  def generate_construction_cost_database_for_city(rs_means_city, rs_means_province_state)
+    @costing_database['constructions_costs']= Array.new
+    puts "Costing for: #{rs_means_province_state},#{rs_means_city}"
+    @costing_database["raw"]['constructions_opaque'].each do |construction|
+      cost_construction(construction, {"province-state" => rs_means_province_state, "city" => rs_means_city}, 'opaque')
+    end
+    @costing_database["raw"]['constructions_glazing'].each do |construction|
+      cost_construction(construction, {"province-state" => rs_means_province_state, "city" => rs_means_city}, 'glazing')
+    end
+    puts "#{@costing_database['constructions_costs'].size} Costed Constructions for #{rs_means_province_state},#{rs_means_city}."
+  end
+
 
   def cost_audit_all(model)
     # JTB: This procedure in progress and not yet fully developed (or called)
 
 
     # Create a Hash to collect costing data.
-    costing_report = {}
+    @costing_report = {}
+    #Use closest RSMeans city.
+    closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
+    @costing_report["rs_means_city"]= closest_loc['city']
+    @costing_report["rs_means_prov"]= closest_loc['province-state']
     # Create a Hash in the hash for categories of costing.
-    costing_report["Building"] = {}
-    costing_report["Envelope"] = {}
-    costing_report["Lighting"] = {}
-    costing_report["HVAC"] = {}
-    costing_report["Totals"] = {}
+    @costing_report["envelope"] = {}
+    @costing_report["lighting"] = {}
+    @costing_report["hvac"] = {}
+    @costing_report["totals"] = {}
 
     # Check to see if standards building type and the number of stories has been defined.  The former may be omitted in the future.
     if model.getBuilding.standardsBuildingType.empty? or model.getBuilding.standardsNumberOfAboveGroundStories.empty?
       raise("Building information is not complete, please ensure that the standardsBuildingType and standardsNumberOfAboveGroundStories are entered in the model. ")
     end
 
-    # Store number of stories. Required for envelope costing logic.
-    num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
 
-    closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
-    closest_city = closest_loc['city']
-    closest_prov = closest_loc['province-state']
-
-    costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
-    costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
-    costing_report["Building"]["WeatherCity"] = model.getWeatherFile.city
-    costing_report["Building"]["ClosestProv"] = closest_prov
-    costing_report["Building"]["ClosestCity"] = closest_city
-
-    #envelope_cost = cost_audit_envelope(model, costing_report)
-
-    #lighting_cost = cost_audit_lighting(model, costing_report)
-
+    self.cost_audit_envelope(model)
+    return @costing_report
   end
 
   def cost_audit_envelope(model)
 
-    # Create a Hash to collect costing data.
-    costing_report = {}
-    # Create a Hash in the hash for categories of costing.
-    costing_report["Building"] = {}
-    costing_report["Envelope"] = {}
-    costing_report["Lighting"] = {}
-    costing_report["HVAC"] = {}
-    costing_report["Totals"] = {}
-
-    # Check to see if standards building type and the number of stories has been defined.  The former may be omitted in the future.
-    if model.getBuilding.standardsBuildingType.empty? or model.getBuilding.standardsNumberOfAboveGroundStories.empty?
-      raise("Building information is not complete, please ensure that the standardsBuildingType and standardsNumberOfAboveGroundStories are entered in the model. ")
-    end
-
     # Store number of stories. Required for envelope costing logic.
     num_of_above_ground_stories = model.getBuilding.standardsNumberOfAboveGroundStories.to_i
 
     closest_loc = get_closest_cost_location(model.getWeatherFile.latitude, model.getWeatherFile.longitude)
-    closest_city = closest_loc['city']
-    closest_prov = closest_loc['province-state']
-
-    costing_report["Building"]["BuildingType"] = model.getBuilding.standardsBuildingType.to_s
-    costing_report["Building"]["WeatherProv"] = model.getWeatherFile.stateProvinceRegion
-    costing_report["Building"]["WeatherCity"] = model.getWeatherFile.city
-    costing_report["Building"]["ClosestProv"] = closest_prov
-    costing_report["Building"]["ClosestCity"] = closest_city
+    generate_construction_cost_database_for_city(@costing_report["rs_means_city"],@costing_report["rs_means_prov"])
 
     totEnvCost = 0
 
@@ -358,15 +372,15 @@ class BTAPCosting
           else
             cost_range_hash = @costing_database['constructions_costs'].select {|construction|
               construction['construction_type_name'] == construction_set[surface_type] &&
-                  construction['province-state'] == closest_prov &&
-                  construction['city'] == closest_city
+                  construction['province-state'] == @costing_report["rs_means_prov"] &&
+                  construction['city'] == @costing_report["rs_means_city"]
             }
           end
 
           # We don't need all the information, just the rsi and cost. However, for windows rsi = 1/u_w_per_m2_k
           surfaceIsGlazing = (surface_type == 'ExteriorFixedWindow' || surface_type == 'ExteriorOperableWindow' ||
-                          surface_type == 'ExteriorSkylight' || surface_type == 'ExteriorTubularDaylightDiffuser' ||
-                          surface_type == 'ExteriorTubularDaylightDome' || surface_type == 'ExteriorGlassDoor')
+              surface_type == 'ExteriorSkylight' || surface_type == 'ExteriorTubularDaylightDiffuser' ||
+              surface_type == 'ExteriorTubularDaylightDome' || surface_type == 'ExteriorGlassDoor')
           if surfaceIsGlazing
             cost_range_array = cost_range_hash.map {|cost|
               [
@@ -420,35 +434,26 @@ class BTAPCosting
             else
               name = "#{construction_set[surface_type]}_#{rsi}"
             end
-            if costing_report['Envelope'].has_key?(name)
-              costing_report['Envelope'][name]['area'] += surfArea
-              costing_report['Envelope'][name]['cost'] += surfCost
-              costing_report['Envelope'][name]['note'] += " / #{numSurfType}: #{notes}"
+            if @costing_report["envelope"].has_key?(name)
+              @costing_report["envelope"][name]['area'] += surfArea
+              @costing_report["envelope"][name]['cost'] += surfCost
+              @costing_report["envelope"][name]['note'] += " / #{numSurfType}: #{notes}"
             else
-              costing_report['Envelope'][name]={'area' => surfArea,
+              @costing_report["envelope"][name]={'area' => surfArea,
                                                 'cost' => surfCost}
-              costing_report['Envelope'][name]['note'] = "Surf ##{numSurfType}: #{notes}"
+              @costing_report["envelope"][name]['note'] = "Surf ##{numSurfType}: #{notes}"
             end
           end # surfaces of surface type
         end # surface_type
       end # spaces
     end # thermalzone
 
-    costing_report['Envelope']['TotalEnvelopeCost'] = totEnvCost
-
-    # Save the costing_report to a file.
-    File.open(@cost_output_file, "w") do |f|
-      f.write(JSON.pretty_generate(costing_report))
-    end
-
+    @costing_report["envelope"]['total_envelope_cost'] = totEnvCost
     puts "\nCost report file cost_output.json successfully generated.\nLocation: #{@cost_output_file}"
-
     return totEnvCost
-
   end
 
-  def cost_audit_lighting(model, costing_report)
-
+  def cost_audit_lighting(model)
 
 
   end
@@ -456,13 +461,14 @@ class BTAPCosting
 
   #This will convert a sheet in a given workbook into an array of hashes with the headers as symbols.
   def convert_workbook_sheet_to_array_of_hashes(xlsx_path, sheet_name)
+    require 'roo'
     #Load Constructions data sheet from workbook and convert to a csv object.
     data = Roo::Spreadsheet.open(xlsx_path).sheet(sheet_name).to_csv
     csv = CSV.new(data, {headers: true})
     return csv.to_a.map {|row| row.to_hash}
   end
 
-  def cost_construction(construction, counter, location, type = 'opaque')
+  def cost_construction(construction, location, type = 'opaque')
 
     material_layers = "material_#{type}_id_layers"
     material_id = "materials_#{type}_id"
@@ -471,7 +477,7 @@ class BTAPCosting
     total_with_op = 0.0
     material_cost_pairs = []
     construction[material_layers].split(',').reject {|c| c.empty?}.each do |material_index|
-      material = materials_database.find { |data| data[material_id].to_s == material_index.to_s }
+      material = materials_database.find {|data| data[material_id].to_s == material_index.to_s}
       if material.nil?
         puts "material error..could not find material #{material_index} in #{materials_database}"
         raise()
@@ -500,7 +506,6 @@ class BTAPCosting
       end
     end
     new_construction = {
-        'index' => counter,
         'province-state' => location['province-state'],
         'city' => location['city'],
         "construction_type_name" => construction["construction_type_name"],
@@ -518,8 +523,8 @@ class BTAPCosting
   end
 
   def get_regional_cost_factors(provinceState, city, material)
-    @costing_database['raw']['rsmeans_local_factors'].select { |code|
-      code['province-state'] == provinceState && code['city'] == city }.each do |code|
+    @costing_database['raw']['rsmeans_local_factors'].select {|code|
+      code['province-state'] == provinceState && code['city'] == city}.each do |code|
       id = material['id'].to_s
       prefixes = code['code_prefixes'].split(',')
       prefixes.each do |prefix|
@@ -533,36 +538,10 @@ class BTAPCosting
     return 100.0, 100.0
   end
 
-  def encrypt_database(key)
-    #Write public cost information to a json file. This will be used by the standards and measures. To create
-    #create the openstudio construction names and costing objects.
-    File.open(@encrypted_file, "w") do |f|
-      f.write(encrypt_hash(key, @costing_database))
-    end
-    File.open(@plaintext_file, "w") do |f|
-      f.write( JSON.pretty_generate(@costing_database))
-    end
-    puts "the decryption key is:#{key}"
-  end
-
-  def encrypt_hash(key, hash)
-    return b64 = AES.encrypt(Zlib::Deflate.deflate(JSON.pretty_generate(hash)), key)
-  end
-
-  def decrypt_hash(key, encrypted_string)
-    json = nil
-    begin
-      json = JSON.parse(Zlib::Inflate.inflate(AES.decrypt(encrypted_string, key)))
-        #puts JSON.pretty_generate(json)
-    rescue OpenSSL::Cipher::CipherError => detail
-      puts "Could not decrypt string, perhaps key is invalid? #{detail}"
-    end
-    return json
-  end
 
   # Interpolate array of hashes that contain 2 values (key=rsi, data=cost)
   def interpolate(x_y_array, x2)
-    array = x_y_array.sort { |a, b| a[0] <=> b[0] }
+    array = x_y_array.sort {|a, b| a[0] <=> b[0]}
 
     # Check if value x2 is within range of array for interpolation
     # Extrapolate when x2 is out-of-range by +/- 10% of end values.
@@ -590,7 +569,7 @@ class BTAPCosting
 
         # Do interpolation
         y2 = y0 # just in-case x0, x1 and x2 are identical!
-        if(x1 - x0) > 0.0
+        if (x1 - x0) > 0.0
           y2 = y0.to_f + ((y1 - y0).to_f * (x2 - x0).to_f / (x1 - x0).to_f)
         end
         return y2
