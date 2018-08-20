@@ -28,3 +28,6 @@ gem 'roo'
 gem 'aes'
 gem 'rest-client','2.0.2'
 gem 'pry'
+gem 'parallel_tests'
+gem 'parallel'
+

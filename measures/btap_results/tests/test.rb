@@ -91,8 +91,14 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
     end
 
 
-    prototype_creator = Standard.build("#{template}_#{building}")
-    model = prototype_creator.model_create_prototype_model('NECB HDD Method', epw_filename, output_folder)
+    prototype_creator = Standard.build(template)
+    model = prototype_creator.model_create_prototype_model(
+        template: template,
+        epw_file: epw_filename,
+        sizing_run_dir: output_folder,
+        debug: @debug,
+        building_type: building)
+
     BTAP::Environment::WeatherFile.new(epw_filename).set_weather_file(model)
 
 

@@ -292,19 +292,21 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
   end
 
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
-    osm_directory = "#{Dir.pwd}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
+    osm_directory = "#{File.dirname(__FILE__)}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"
     FileUtils.mkdir_p (osm_directory) unless Dir.exist?(osm_directory)
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
     #create model
     building_name = "#{template}_#{building_type}"
     puts "Creating #{building_name}"
-    prototype_creator = Standard.build(building_name)
-    model = prototype_creator.model_create_prototype_model(climate_zone,
-                                                           epw_file,
-                                                           osm_directory,
-                                                           @debug,
-                                                           model)
+    prototype_creator = Standard.build(template)
+    model = prototype_creator.model_create_prototype_model(
+        template: template,
+        epw_file: epw_file,
+        sizing_run_dir: osm_directory,
+        debug: @debug,
+        template: template,
+        building_type: building_type)
     #set weather file to epw_file passed to model.
     weather.set_weather_file(model)
     return model

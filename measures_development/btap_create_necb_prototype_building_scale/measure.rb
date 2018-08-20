@@ -174,15 +174,20 @@ class BTAPCreateNECBPrototypeBuildingScale < OpenStudio::Ruleset::ModelUserScrip
       #create model
       building_name = "#{template}_#{building_type}"
       puts "Creating #{building_name}"
-      prototype_creator = Standard.build(building_name)
-      model = prototype_creator.model_create_prototype_model(climate_zone,
-                                                             epw_file,
-                                                             osm_directory,
-                                                             @debug,
-                                                             model,
-                                                             x_scale_factor,
-                                                             y_scale_factor,
-                                                             z_scale_factor)
+      standard = Standard.build(template)
+      new_model = standard.model_create_prototype_model(
+          template: template,
+          epw_file: epw_file,
+          sizing_run_dir: osm_directory,
+          debug: @debug,
+          building_type: building_type,
+          x_scale: x_scale_factor,
+          y_scale: y_scale_factor,
+          z_scale: z_scale_factor)
+      standard.model_replace_model(model, new_model)
+
+
+
       #set weather file to epw_file passed to model.
       weather.set_weather_file(model)
 
