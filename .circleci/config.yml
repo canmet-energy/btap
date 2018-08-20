@@ -28,7 +28,7 @@ jobs:
       - run:
           name: run tests
           command: |
-           ~/.rbenv/shims/bundle exec rake test:measure-tests
+           ~/.rbenv/shims/bundle exec rake test:circleci
 
       # collect reports
       - store_test_results:

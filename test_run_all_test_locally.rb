@@ -43,21 +43,21 @@ end
 
 def write_results(result, test_file)
 
-  test_result = false
   if result[2].success?
     test_result = true
     puts "PASSED: #{test_file}".green
+    return true
   else
-    test_result = false
-    std_out = result[0].split("\n")
-    output = {"test" => test_file, "test_result" => test_result, "output" => {"status" => result[2], "std_out" => std_out, "std_err" => result[1]}}
+    output = {"test" => test_file, "test_result" => test_result, "output" => {"status" => result[2], "std_out" => result[0], "std_err" => result[1]}}
     #puts output
     test_file_output =  File.join(TestOutputFolder, "#{File.basename(test_file)}_test_output.json")
     #puts test_file_output
-    #File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
-    puts "FAILED: #{test_file}".red
+    File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
+    puts "FAILED: #{test_file_output}".red
+    return false
   end
 end
+
 
 class RunAllTests < Minitest::Test
   def test_all()
@@ -81,7 +81,8 @@ class RunAllTests < Minitest::Test
     puts "Running #{@full_file_list.size} tests suites in parallel using #{ProcessorsUsed} of available cpus."
     puts "To increase or decrease the ProcessorsUsed, please edit the test/test_run_all_locally.rb file."
     Parallel.each(@full_file_list, in_threads: (ProcessorsUsed), progress: "Progress :" ) do |test_file|
-      write_results(Open3.capture3('bundle', 'exec', "ruby '#{test_file}'"), test_file)
+      result = write_results(Open3.capture3('bundle', 'exec', "ruby '#{test_file}'"), test_file)
+      did_all_tests_pass = false unless result == true
     end
   end
 end
