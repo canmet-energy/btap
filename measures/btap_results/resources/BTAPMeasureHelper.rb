@@ -250,12 +250,14 @@ module BTAPMeasureTestHelper
     #create model
     building_name = "#{template}_#{building_type}"
 
-    prototype_creator = Standard.build(building_name)
-    model = prototype_creator.model_create_prototype_model(climate_zone,
-                                                           epw_file,
-                                                           osm_directory,
-                                                           @debug,
-                                                           model)
+    prototype_creator = Standard.build(template)
+    model = prototype_creator.model_create_prototype_model(
+        epw_file: epw_file,
+        sizing_run_dir: osm_directory,
+        debug: @debug,
+        template: template,
+        building_type: building_type)
+
     #set weather file to epw_file passed to model.
     weather.set_weather_file(model)
     return model
