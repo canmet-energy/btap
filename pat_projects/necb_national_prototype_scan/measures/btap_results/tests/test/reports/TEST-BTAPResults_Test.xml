@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite time='99.327997' skipped='0' failures='0' errors='0' name="BTAPResults_Test" assertions='5' tests='1'>
-  <testcase time='99.327997' file="OpenStudioResults_Test.rb" name="test_example_model_without_hourly_data" assertions='5'>
-  </testcase>
-</testsuite>

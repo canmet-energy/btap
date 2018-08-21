@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>c05a8e7c-df17-420a-a254-20bb7bea220f</version_id>
-  <version_modified>20180705T175200Z</version_modified>
+  <version_id>bfa7c93e-5393-4a4c-bd59-5b37fb70235b</version_id>
+  <version_modified>20180821T183815Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -75,12 +75,6 @@
       <checksum>3F69E3FB</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <filename>neb_end_use_prices.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -117,12 +111,6 @@
       <checksum>7DC1F0A7</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C491403A</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -131,7 +119,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9F8F97A8</checksum>
+      <checksum>8BB8FED9</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8C6D8744</checksum>
+    </file>
+    <file>
+      <filename>btap_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C7D53577</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>165B9461</checksum>
     </file>
   </files>
 </measure>
