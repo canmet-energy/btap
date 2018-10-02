@@ -755,3 +755,22 @@ Below is an example of the output of a single Full Service Restaurant model in J
   ]
 }
 ```
+### simulations.json
+This file is downloadable from the OpenStudio NRCan server. It is a single file that contains all the the qaqc.json for each simulation. This file is rather large and editors may have a problem opening it. Tableau can has a limit to the file size of json it can process.  You can use MS PowerBI to analyis the data as a whole. You can use Mongodb to load and filter the data as well.
+
+Run the Ideal loads on Amazon using PAT. 
+Download the Simulations.json file from the run. 
+Import the JSON data into MongoDB on Elmo. Where btap is the name of the database and simulations_runs is the name of the collection/table. 
+```
+	mongoimport -h 132.156.197.127:27018 --db btap --collection simulation_runs --file ~/windows-host/IdealAir/simulations.json --jsonArray
+```
+Query the database to get what you need and eliminate what you do not need. 
+```
+	mongo --host 132.156.197.127:27018 btap -eval "printjsononeline( db.simulation_runs.find( {},{ _id :0, information :0, warnings :0, errors :0, unique_errors :0, sanity_check :0, thermal_zones :0, spaces :0} ).toArray()) " > ~/windows-host/test1.json
+```
+For more information on creating MongoDB queries.. look [here](https://www.tutorialspoint.com/mongodb/mongodb_query_document.htm)
+
+Note: You can use you own installation of MongoDB if you wish. Simply change the IP address accordingly. 
+
+
+
