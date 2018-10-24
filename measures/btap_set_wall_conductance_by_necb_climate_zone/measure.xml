@@ -1,0 +1,132 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_set_wall_conductance_by_necb_climate_zone</name>
+  <uid>ef481d8e-a30e-4f0a-9ccf-a2ed35d2170c</uid>
+  <version_id>21e3dbd3-1304-48d1-8e99-2e82d86586d6</version_id>
+  <version_modified>20181017T183733Z</version_modified>
+  <xml_checksum>A51D361F</xml_checksum>
+  <class_name>BTAPSetWallConductanceByNecbClimateZone</class_name>
+  <display_name>BTAPSetWallConductanceByNecbClimateZone </display_name>
+  <description>Modifies wall conductances by climate zone.</description>
+  <modeler_description>Modifies wall conductances by climate zone.</modeler_description>
+  <arguments>
+    <argument>
+      <name>zone4_r_value</name>
+      <display_name>NECB Zone4 Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>20.42</default_value>
+    </argument>
+    <argument>
+      <name>zone5_r_value</name>
+      <display_name>NECB Zone5 Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>22.99</default_value>
+    </argument>
+    <argument>
+      <name>zone6_r_value</name>
+      <display_name>NECB Zone6 Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>27</default_value>
+    </argument>
+    <argument>
+      <name>zone7A_r_value</name>
+      <display_name>NECB Zone7A Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>27</default_value>
+    </argument>
+    <argument>
+      <name>zone7B_r_value</name>
+      <display_name>NECB Zone7B Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>31.03</default_value>
+    </argument>
+    <argument>
+      <name>zone8_r_value</name>
+      <display_name>NECB Zone8 Insulation R-value (ft^2*h*R/Btu).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>36.4</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>10AA8866</checksum>
+    </file>
+    <file>
+      <filename>ReverseTranslatedModel.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0B94403D</checksum>
+    </file>
+    <file>
+      <filename>IncreaseInsulationRValueForExteriorWalls_01_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B554845F</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1FD7D11E</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8230040A</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.11.5</identifier>
+        <min_compatible>1.8.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>CE104ABC</checksum>
+    </file>
+  </files>
+</measure>
