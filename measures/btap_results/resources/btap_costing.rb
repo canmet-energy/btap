@@ -161,7 +161,9 @@ class BTAPCosting
      'Constructions',
      'ConstructionProperties',
      'lighting',
-     'materials_lighting'
+     'materials_lighting',
+     'hvac_vent_ahu',
+     'materials_hvac'
     ].each do |sheet|
       @costing_database['raw'][sheet] = convert_workbook_sheet_to_array_of_hashes(@xlsx_path, sheet)
     end
@@ -175,7 +177,7 @@ class BTAPCosting
   # the material id, catalog id and basecosts data hash. Even that may be too much.
   def generate_materials_cost_database(dummy = false)
     require 'rest-client'
-    [@costing_database['raw']['materials_glazing'], @costing_database['raw']['materials_opaque'], @costing_database['raw']['materials_lighting']].each do |mat_lib|
+    [@costing_database['raw']['materials_glazing'], @costing_database['raw']['materials_opaque'], @costing_database['raw']['materials_lighting'], @costing_database['raw']['materials_hvac']].each do |mat_lib|
       [mat_lib].each do |materials|
 
         lookup_list = materials.map {|material|
