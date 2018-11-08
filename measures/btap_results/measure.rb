@@ -16,6 +16,7 @@ require_relative 'resources/ventilation_costing.rb'
 require_relative 'resources/envelope_costing.rb'
 require_relative 'resources/lighting_costing.rb'
 require_relative 'resources/heating_cooling_costing.rb'
+require_relative 'resources/shw_costing.rb'
 
 
 module Enumerable

@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>Unable to extract OpenStudio::Measure::OSMeasure object from /home/osdev/btap/measures/btap_results/measure.rb. The script should contain a class that derives from OpenStudio::Measure::OSMeasure and should close with a line stating the class name followed by .new.registerWithApplication.</error>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>c65bd7d4-4fb8-47db-8d1a-70d0d6dae698</version_id>
-  <version_modified>20181108T133511Z</version_modified>
+  <version_id>5c56c26b-23f7-443c-93e2-a0202e20f9cb</version_id>
+  <version_modified>20181108T150852Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -153,28 +154,10 @@
       <checksum>E1896AC3</checksum>
     </file>
     <file>
-      <filename>btap_costing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DFACC40A</checksum>
-    </file>
-    <file>
-      <filename>lighting_costing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>06207CD1</checksum>
-    </file>
-    <file>
       <filename>envelope_costing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3BF29246</checksum>
-    </file>
-    <file>
-      <filename>heating_cooling_costing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0FCE07B0</checksum>
     </file>
     <file>
       <filename>test.rb</filename>
@@ -189,6 +172,18 @@
       <checksum>5A8F9CE3</checksum>
     </file>
     <file>
+      <filename>btap_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8394C72E</checksum>
+    </file>
+    <file>
+      <filename>heating_cooling_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>83AAD1CC</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -197,7 +192,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C6AEBD30</checksum>
+      <checksum>E9839DF0</checksum>
+    </file>
+    <file>
+      <filename>shw_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>71BD9DC2</checksum>
+    </file>
+    <file>
+      <filename>lighting_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>06207CD1</checksum>
     </file>
   </files>
 </measure>

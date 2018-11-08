@@ -286,6 +286,9 @@ class BTAPCosting
 
 
     self.cost_audit_envelope(model)
+    self.cost_audit_lighting(model)
+    # self.heating_costing(model, prototype_creator)
+    # self.shw_costing(model, prototype_creator)
     self.ahu_costing(model, prototype_creator)
     return @costing_report
   end
