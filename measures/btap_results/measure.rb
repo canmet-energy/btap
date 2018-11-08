@@ -14,8 +14,8 @@ require_relative 'resources/BTAPMeasureHelper'
 require_relative 'resources/btap_costing.rb'
 require_relative 'resources/ventilation_costing.rb'
 require_relative 'resources/envelope_costing.rb'
-require_relative 'lighting_costing.rb'
-require_relative 'heating_cooling_costing.rb'
+require_relative 'resources/lighting_costing.rb'
+require_relative 'resources/heating_cooling_costing.rb'
 
 
 module Enumerable

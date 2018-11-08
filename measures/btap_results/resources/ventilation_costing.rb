@@ -5,10 +5,7 @@ class BTAPCosting
     model.getAirLoopHVACs.each do |airloop|
       airloop.thermalZones.each do |tz|
         tz_name = tz.nameString
-
         tz.spaces.each do |space|
-          sys_info = prototype_creator.get_sys_selection_and_loads(model, space)
-
           puts "hello"
         end
       end

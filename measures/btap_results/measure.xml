@@ -1,10 +1,9 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>cannot load such file -- /home/osdev/btap/measures/btap_results/lighting_costing.rb</error>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>445dcbf9-20e5-4d1d-bc7f-e53bea8ddbde</version_id>
-  <version_modified>20181108T132103Z</version_modified>
+  <version_id>c65bd7d4-4fb8-47db-8d1a-70d0d6dae698</version_id>
+  <version_modified>20181108T133511Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -124,12 +123,6 @@
       <checksum>17C3D1F2</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>53470D90</checksum>
-    </file>
-    <file>
       <filename>costing_database.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -166,23 +159,6 @@
       <checksum>DFACC40A</checksum>
     </file>
     <file>
-      <filename>ventilation_costing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6C9C1582</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.4.1</identifier>
-        <min_compatible>2.4.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>DD790FDC</checksum>
-    </file>
-    <file>
       <filename>lighting_costing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -199,6 +175,29 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0FCE07B0</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>97F0411E</checksum>
+    </file>
+    <file>
+      <filename>ventilation_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5A8F9CE3</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.4.1</identifier>
+        <min_compatible>2.4.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C6AEBD30</checksum>
     </file>
   </files>
 </measure>
