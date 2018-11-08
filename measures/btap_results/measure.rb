@@ -12,6 +12,10 @@ require "#{File.dirname(__FILE__)}/resources/os_lib_schedules"
 require "#{File.dirname(__FILE__)}/resources/os_lib_helper_methods"
 require_relative 'resources/BTAPMeasureHelper'
 require_relative 'resources/btap_costing.rb'
+require_relative 'resources/ventilation_costing.rb'
+require_relative 'resources/envelope_costing.rb'
+require_relative 'lighting_costing.rb'
+require_relative 'heating_cooling_costing.rb'
 
 
 module Enumerable
@@ -984,7 +988,7 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     qaqc = prototype_creator.init_qaqc( model )
     costing = BTAPCosting.new()
     costing.load_database()
-    cost_result = costing.cost_audit_all(model)
+    cost_result = costing.cost_audit_all(model, prototype_creator)
     runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
     qaqc["auto_costing"] = cost_result
     # Perform qaqc

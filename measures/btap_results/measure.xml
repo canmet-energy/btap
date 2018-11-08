@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>cannot load such file -- /home/osdev/btap/measures/btap_results/lighting_costing.rb</error>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>408b5aa3-7eef-46a9-9f8b-c0baa60a6dc9</version_id>
-  <version_modified>20180713T123915Z</version_modified>
+  <version_id>445dcbf9-20e5-4d1d-bc7f-e53bea8ddbde</version_id>
+  <version_modified>20181108T132103Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -75,12 +76,6 @@
       <checksum>3F69E3FB</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <filename>neb_end_use_prices.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -117,10 +112,64 @@
       <checksum>7DC1F0A7</checksum>
     </file>
     <file>
+      <filename>errors.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9F90B7B6</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
+    </file>
+    <file>
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C491403A</checksum>
+      <checksum>53470D90</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CBA76AAE</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BBAB981A</checksum>
+    </file>
+    <file>
+      <filename>costing_database_rsmeans.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9D355170</checksum>
+    </file>
+    <file>
+      <filename>costing_database_rsmeans.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>97802E56</checksum>
+    </file>
+    <file>
+      <filename>rs_means_auth</filename>
+      <filetype></filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E1896AC3</checksum>
+    </file>
+    <file>
+      <filename>btap_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DFACC40A</checksum>
+    </file>
+    <file>
+      <filename>ventilation_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6C9C1582</checksum>
     </file>
     <file>
       <version>
@@ -131,49 +180,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8BB8FED9</checksum>
+      <checksum>DD790FDC</checksum>
     </file>
     <file>
-      <filename>btap_costing.rb</filename>
+      <filename>lighting_costing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E87B7791</checksum>
+      <checksum>06207CD1</checksum>
     </file>
     <file>
-      <filename>costing_database.json</filename>
-      <filetype>json</filetype>
+      <filename>envelope_costing.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B4E4DF90</checksum>
+      <checksum>3BF29246</checksum>
     </file>
     <file>
-      <filename>costing_database.json.gz</filename>
-      <filetype>gz</filetype>
+      <filename>heating_cooling_costing.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>12608288</checksum>
-    </file>
-    <file>
-      <filename>costing_database_rsmeans.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7EF32066</checksum>
-    </file>
-    <file>
-      <filename>costing_database_rsmeans.json.gz</filename>
-      <filetype>gz</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>47706B12</checksum>
-    </file>
-    <file>
-      <filename>errors.json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9F90B7B6</checksum>
-    </file>
-    <file>
-      <filename>rs_means_auth</filename>
-      <filetype></filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C3B99849</checksum>
+      <checksum>0FCE07B0</checksum>
     </file>
   </files>
 </measure>
