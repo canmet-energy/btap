@@ -161,7 +161,7 @@ class BTAPCosting
     end # thermalzone
 
     @costing_report["envelope"]['total_envelope_cost'] = totEnvCost
-    puts "\nCost report file cost_output.json successfully generated.\nLocation: #{@cost_output_file}"
+
     return totEnvCost
   end
 

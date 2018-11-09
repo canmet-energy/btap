@@ -160,6 +160,7 @@ class BTAPCosting
      'materials_glazing',
      'Constructions',
      'ConstructionProperties',
+     'lighting_sets',
      'lighting',
      'materials_lighting',
      'hvac_vent_ahu',
@@ -264,8 +265,6 @@ class BTAPCosting
 
 
   def cost_audit_all(model, prototype_creator)
-    # JTB: This procedure in progress and not yet fully developed (or called)
-
 
     # Create a Hash to collect costing data.
     @costing_report = {}
@@ -283,7 +282,6 @@ class BTAPCosting
     if model.getBuilding.standardsBuildingType.empty? or model.getBuilding.standardsNumberOfAboveGroundStories.empty?
       raise("Building information is not complete, please ensure that the standardsBuildingType and standardsNumberOfAboveGroundStories are entered in the model. ")
     end
-
 
     self.cost_audit_envelope(model)
     self.cost_audit_lighting(model)
