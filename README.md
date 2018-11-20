@@ -1,7 +1,7 @@
 # Building Technology Assessment Platform (BTAP)
 
 
-## Contents
+## Table of Contents
 --------
 1) [Introduction](#introduction)
 2) [Objective](#objective)
