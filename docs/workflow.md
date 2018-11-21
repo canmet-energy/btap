@@ -150,10 +150,20 @@ Note: While it is tempting to use rebase in this situation, and resolve the conf
 
 
 ### Submitting a Pull request to NRCan
-1. Ensure that your fork branch is synced with NRCan.
+1. Ensure that your fork branch is synced with NRCan master branch.
 2. Ensure all the tests pass locally.
+to be completed. 
+3. Submit Pull request
+4. Add pull request to task issue
+5. Schedule a meeting with NRCan to review code. 
 
-#Clone your repository
+### NRCan Staff
+
+
+#Clone your repository (Script) 
+```
+# After you have forked the btap repository to your account using the webpage modify the BRANCH_NAME and GIT_ACCOUNT to your
+# 
 export BRANCH_NAME=nrcan_123 && \
 export GIT_ACCOUNT=phylroy && \
 git clone https://github.com/$GIT_ACCOUNT/btap.git && \
@@ -164,13 +174,14 @@ git checkout -b nrcan_$BRANCH_NAME && \
 git push origin nrcan_$BRANCH_NAME && \
 bundle install --path vendor/bundle && \
 bundle exec rake test:measure-tests
-
-#Update Your branch
+```
+#Update Your branch(Script)
+```
 export BRANCH_NAME=nrcan_123 && \
 git checkout master && \
 git pull upstream master && \ 
 git push origin master && \
 git checkout nrcan_123 && \
 git merge origin master
- 
+``` 
 
