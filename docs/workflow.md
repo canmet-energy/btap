@@ -39,7 +39,7 @@ You will need to tell your github repository where it came from. This is called 
 git remote add upstream https://github.com/canmet-energy/btap.git
 ```
 
-##4. Create a Feature Branch
+## 4. Create a Feature Branch
 You now need to create a feature branch that you will do your work in. You will want to name the branch using the issue number we created in [Create a Work Issue Ticket](#create_a_work_issue_ticket). For example if your issue number was '123' your branch name should be nrcan_123. To create this branch, you would issue the command while you are in hte btap folder. 
 ```
 git checkout -b nrcan_123
@@ -48,7 +48,7 @@ git push origin nrcan_123
 If you go to your repository page on github
 At this point you will want to go to your btap_task issue and add a comment that you have created a branch to work on 
 
-##5. Installing dependencies
+## 5. Installing dependencies
 Each ruby project manages the use of third party software library dependancies called gems through through a tool called bunlder. This will always execute your measures while in development using these gems. You can control which version or branch of openstudio-standards is used by altering the GEMFILE in the project root folder. Everytime you create a fresh clone, you must perform issue the command to install the gem into your project folder. 
 ```
 bundle install --path vendor/bundle
@@ -58,14 +58,14 @@ If you make changes to the gem file, or swtich branches, it is a good idea to th
 bundle update
 ```
 
-##5. Running All Tests
+## 6. Running All Tests
 It is a very good idea to run the tests locally on your machine before your start working. This is to ensure your starting point is free of errors.  To run the tests you have to run a rake command using bundle. To run the same tests that are part of the automated process that NRCan uses, issue the following command. 
 ```
 bundle exec rake test:measure-tests 
 ```
 This will run with 66% of the available cores that you had made available to your docker container BTAP-DE. 
 
-##6. Adding a New Measure
+## 7. Adding a New Measure
 NRCan has created a template to make starting a measure a bit easier. It takes care of a bit of the boring argument testing and allows you to focus on what you want to do, write a measure.
 Copy the template measure to a new folder in development and follow the instructions on how to modify the measure to your needs.
 ```bash
@@ -75,7 +75,7 @@ cp -R measures_development/btap_template_model_measure measures_development/btap
 
 You can follow the instruction in the template to start your measure development by reading measure.rb and test/test.rb
 
-##7. Running your Measure Test. 
+## 8. Running your Measure Test. 
 To run your test, you will need to use bundler to run the file. To do this type this command in a terminal while in the root BTAP folder.
 ```coffeescript
 bundle exec ruby measures_development/btap_template_<your_measure_name>/test/test.rb
@@ -89,7 +89,7 @@ Also, to add your test to the list of tests run by step six add the path to the 
 circleci_tests.txt
 ```
 
-##5. Pushing your Files to GitHUB
+## 9. Pushing your Files to GitHUB
 As you develop you will modify, add and sometimes delete files. You will want to save your work in chunks often, even if it is not ready. This can save you time if you take snapshots of your code during development. To do this you must determine the STATUS of your local changes,  ADD your changes, and COMMIT your changes locally and then PUSH your changes to the server. I personally do this daily, but it could be more frequent than that. So at the end of everyt day I do a Status, add, commit and push. 
 
 ### Get STATUS
@@ -149,7 +149,7 @@ Note: While it is tempting to use rebase in this situation, and resolve the conf
 
 
 
-### Submitting a Pull request to NRCan
+## 10. Submitting a Pull request to NRCan
 1. Ensure that your fork branch is synced with NRCan master branch.
 2. Ensure all the tests pass locally.
 to be completed. 
