@@ -34,6 +34,6 @@ Also it has been noted that if your model has non-english charecters in any nami
 
 **Q** How to I convert many buildings at once
 
-**A**: You will need to understand ruby and bundler and be comfortable running scripts on the command line. But if you do..you can write a wrapper that iterates through a list of files. Here is an example that would work on Linux systems. You would have to modify this to work with windows. 
+**A**: You will need to understand ruby and bundler and be comfortable running scripts on the command line. But if you do..you can write a wrapper that iterates through a list of files. [Here](https://github.com/canmet-energy/btap/blob/master/measures_development/btap_equest_converter/batch_run.rb) is an example that would work on Linux systems. You would have to modify this to work with windows. 
 
 
