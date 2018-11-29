@@ -22,7 +22,7 @@ require "#{File.dirname(__FILE__)}/btap"
 require 'fileutils'
 require 'csv'
 require 'rubygems'
-require 'zip'
+
 
 module BTAP
   module FileIO

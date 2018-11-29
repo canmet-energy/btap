@@ -2,7 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_equest_converter</name>
   <uid>ca793d90-fbc6-4f3d-9021-24a204e1b380</uid>
-  <version_id>b8c7b404-b6b0-43b2-a690-796d945f76fb</version_id>
+  <version_id>13619e5f-bfc0-4391-be11-85140e9e4a21</version_id>
+  <version_modified>20181129T191157Z</version_modified>
   <xml_checksum>68F3FD42</xml_checksum>
   <class_name>BtapEquestConverter</class_name>
   <display_name>btap equest converter</display_name>
@@ -18,6 +19,7 @@
       <model_dependent>false</model_dependent>
     </argument>
   </arguments>
+  <outputs/>
   <provenances/>
   <tags>
     <tag>Envelope.Form</tag>
@@ -46,130 +48,112 @@
   </attributes>
   <files>
     <file>
-      <filename>4StoreyBuilding.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C606872B</checksum>
-    </file>
-    <file>
-      <filename>5ZoneFloorRotationTest.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DBB97B88</checksum>
-    </file>
-    <file>
-      <filename>PerimeterCoreFloorAzimuthRotationTest.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DBB97B88</checksum>
-    </file>
-    <file>
-      <filename>Rectangle.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E684A66F</checksum>
-    </file>
-    <file>
-      <filename>SingleZonePerFloorRotation.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>15040529</checksum>
-    </file>
-    <file>
-      <filename>Trapezoid.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1F854405</checksum>
-    </file>
-    <file>
-      <filename>Triangle.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D2C897FE</checksum>
-    </file>
-    <file>
-      <filename>H_Shape.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>176092D5</checksum>
-    </file>
-    <file>
-      <filename>L_Shape.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EB98A9B9</checksum>
-    </file>
-    <file>
-      <filename>ReaganBuilding_Calibrated.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>78E0A5CE</checksum>
-    </file>
-    <file>
-      <filename>Rectangle_minus_corner.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3139D59E</checksum>
-    </file>
-    <file>
-      <filename>Rectangular_Atrium.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7FDC75B2</checksum>
-    </file>
-    <file>
-      <filename>U_Shape.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>38EFFD21</checksum>
-    </file>
-    <file>
-      <filename>btap_equest_converter_test.rb</filename>
+      <filename>analysis.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9F3BAA3E</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>55850E0B</checksum>
     </file>
     <file>
-      <filename>basic_2storey_with_basement_wizard_geometry.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>12F5135E</checksum>
+      <filename>compliance.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E9816145</checksum>
     </file>
     <file>
-      <filename>Custom_Concave_Polygon.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>09D0B4C8</checksum>
+      <filename>economics.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>358BEB09</checksum>
     </file>
     <file>
-      <filename>Custom_Convex_Polygon.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DBDE6FCA</checksum>
+      <filename>envelope.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>24A73CD7</checksum>
     </file>
     <file>
-      <filename>Nealon_Calibrated.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>23710AF5</checksum>
+      <filename>environment.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>09B3DAA9</checksum>
     </file>
     <file>
-      <filename>Plus_Shape.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E4298A57</checksum>
+      <filename>equest.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9840C97F</checksum>
     </file>
     <file>
-      <filename>T_Shape.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>46858840</checksum>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F62875E6</checksum>
     </file>
     <file>
-      <filename>Overhang.inp</filename>
-      <filetype>inp</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7EBF0737</checksum>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>27748DAF</checksum>
+    </file>
+    <file>
+      <filename>mpc.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F796690D</checksum>
+    </file>
+    <file>
+      <filename>os_lib_schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4CFAFF91</checksum>
+    </file>
+    <file>
+      <filename>reporting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>965F1439</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B6A1C67B</checksum>
+    </file>
+    <file>
+      <filename>simmanager.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4847FF54</checksum>
+    </file>
+    <file>
+      <filename>spaceloads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>49204CDE</checksum>
+    </file>
+    <file>
+      <filename>spacetypes.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D4E9CBCC</checksum>
+    </file>
+    <file>
+      <filename>utilities.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>27C595DF</checksum>
+    </file>
+    <file>
+      <filename>vintagizer.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9ADFA669</checksum>
+    </file>
+    <file>
+      <filename>visualization.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D890732</checksum>
     </file>
     <file>
       <version>
@@ -180,7 +164,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>ED649CF2</checksum>
+      <checksum>77ACDB86</checksum>
+    </file>
+    <file>
+      <filename>btap.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>92316466</checksum>
+    </file>
+    <file>
+      <filename>fileio.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>18D0A0A0</checksum>
     </file>
   </files>
 </measure>

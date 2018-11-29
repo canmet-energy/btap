@@ -24,7 +24,7 @@ require 'fileutils'
 require "date"
 
 folder = "#{File.dirname(__FILE__)}/resources"
-require_relative "#{folder}/btap.rb"
+require_relative "resources/btap.rb"
 
 
 

@@ -8,4 +8,3 @@ measures/btap_open_studio_results/tests/test.rb
 measures/btap_report_variables/tests/test.rb
 measures/btap_results/tests/test.rb
 measures_development/btap_create_necb_prototype_building_scale/tests/test.rb
-measures_development/btap_equest_converter/test/btap_equest_converter_test.rb
