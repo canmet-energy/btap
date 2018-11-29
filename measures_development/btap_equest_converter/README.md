@@ -1,8 +1,12 @@
+# BTAP eQuest to OpenStudio Geometry converter. 
+
 This measure is a stand-alone implementation using BTAP's equest module. Until BTAP is gemified, this is to be conisdered a hard fork of that work. 
 
-This may or may not work as this is dependant on the complexity of your model. Also it has been noted that if your model has non-english charecters in any naming,  the conversion will fail. 
+This may or may not work as this is dependant on the complexity of your model. This was created using eQuest 3.62 as the basis. So future versions may not work with this script. YMMV greatly. 
 
-Step to convert using OS model editor. (windows)
+Also it has been noted that if your model has non-english charecters in any naming,  the conversion will fail. 
+
+##Step to convert using OS model editor. (windows)
 
 1. Place your eQuest inp file into a folder close to the top of your drive. Ensure your file and folder name have no spaces or special charecters in it. For example a folder like
  ```
@@ -18,3 +22,20 @@ Step to convert using OS model editor. (windows)
 ```
 7. Hit Apply and wait. Large files may take some time. 
 8. When completed is will show a report if it was sucessful. You may now save the osm file anywhere you wish and start tweaking the model as you see fit.
+
+## FAQ
+**Q**: Does this convert HVAC, schedules, spacetypes etc as well?
+
+**A**: No it only converts the following if you are lucky.
+* surfaces
+* sub surfaces
+* spaces
+* thermal zones
+
+**Q** How to I convert many buildings at once
+
+**A**: You will need to understand ruby and bundle and be comfortable running scripts on the command line. But if you do..you can write a wrapper that iterates through a list of files. Here is an example of how you would do it if you placed a script like this in the same folder as the measure.rb.
+you will need to run this with the installed ruby interpreter. 
+**tbc**
+
+
