@@ -6,7 +6,7 @@ This may or may not work as this is dependant on the complexity of your model. T
 
 Also it has been noted that if your model has non-english charecters in any naming,  the conversion will fail. 
 
-##Step to convert using OS model editor. (windows)
+## Steps to convert using OS model editor. (windows)
 
 1. Place your eQuest inp file into a folder close to the top of your drive. Ensure your file and folder name have no spaces or special charecters in it. For example a folder like
  ```
@@ -34,8 +34,6 @@ Also it has been noted that if your model has non-english charecters in any nami
 
 **Q** How to I convert many buildings at once
 
-**A**: You will need to understand ruby and bundle and be comfortable running scripts on the command line. But if you do..you can write a wrapper that iterates through a list of files. Here is an example of how you would do it if you placed a script like this in the same folder as the measure.rb.
-you will need to run this with the installed ruby interpreter. 
-**tbc**
+**A**: You will need to understand ruby and bundler and be comfortable running scripts on the command line. But if you do..you can write a wrapper that iterates through a list of files. Here is an example that would work on Linux systems. You would have to modify this to work with windows. 
 
 
