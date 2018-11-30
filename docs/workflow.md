@@ -128,7 +128,7 @@ git push origin nrcan_123
 ```
 It will ask for your username and password. and it should push your changes to your personal repository.  If you go to your git clone https://github.com/john_doe/btap.git repository you should see your branch commit listed as the most recent commit. **NEVER PUSH TO MASTER BRANCH ANYWHERE**
 
-### <a name="syncing"> 10. Keeping Your Fork in Sync (Merging) 
+## <a name="syncing"> 10. Keeping Your Fork in Sync (Merging) 
 By the way, your forked repository doesnt automatically stay in sync with the original repository; you need to take care of this yourself. After all, in a healthy open source project, multiple contributors are forking the repository, cloning it, creating feature branches, committing changes, and submitting pull requests. I do this daily. 
 
 To keep your fork in sync with the original repository, use these commands:
