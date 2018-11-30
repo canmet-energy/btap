@@ -58,7 +58,7 @@ If you make changes to the gem file, or swtich branches, it is a good idea to th
 bundle update
 ```
 
-## 6. Running All Tests
+## 6. <a name="running_all_tests"></a>Running All Tests
 It is a very good idea to run the tests locally on your machine before your start working. This is to ensure your starting point is free of errors.  To run the tests you have to run a rake command using bundle. To run the same tests that are part of the automated process that NRCan uses, issue the following command. 
 ```
 bundle exec rake test:measure-tests 
@@ -75,7 +75,7 @@ cp -R measures_development/btap_template_model_measure measures_development/btap
 
 You can follow the instruction in the template to start your measure development by reading measure.rb and test/test.rb
 
-## 8. Running your Measure Test. 
+## 8. <a name="running_your_measure_test">Running your Measure Test. 
 To run your test, you will need to use bundler to run the file. To do this type this command in a terminal while in the root BTAP folder.
 ```coffeescript
 bundle exec ruby measures_development/btap_template_<your_measure_name>/test/test.rb
@@ -128,7 +128,7 @@ git push origin nrcan_123
 ```
 It will ask for your username and password. and it should push your changes to your personal repository.  If you go to your git clone https://github.com/john_doe/btap.git repository you should see your branch commit listed as the most recent commit. **NEVER PUSH TO MASTER BRANCH ANYWHERE**
 
-### Keeping Your Fork in Sync (Merging) 
+### <a name="syncing"> 10. Keeping Your Fork in Sync (Merging) 
 By the way, your forked repository doesnt automatically stay in sync with the original repository; you need to take care of this yourself. After all, in a healthy open source project, multiple contributors are forking the repository, cloning it, creating feature branches, committing changes, and submitting pull requests. I do this daily. 
 
 To keep your fork in sync with the original repository, use these commands:
@@ -149,13 +149,22 @@ Note: While it is tempting to use rebase in this situation, and resolve the conf
 
 
 
-## 10. Submitting a Pull request to NRCan
-1. Ensure that your fork branch is synced with NRCan master branch.
-2. Ensure all the tests pass locally.
-to be completed. 
-3. Submit Pull request
-4. Add pull request to task issue
-5. Schedule a meeting with NRCan to review code. 
+## 11. Submitting a Pull request to NRCan
+* Ensure that your fork branch is [synced](#synced) with NRCan master branch. 
+* Your tests have been [added or modified as needed](#running_your_measure_test)
+* Ensure to [run all the tests](#running_all_tests) and that they all pass locally.
+* Go to your repository website
+* Select your branch that you are working on. 
+* Click 'Create Pull Request'
+* Select the pull branches and forks as following
+```
+base fork:canmet-energy/btap - base:master <- head fork:<your_git_account_name>/btap - compare:<nrcan_123>
+```
+This should tell you if you can merge.
+* Assign a reviewer. This should be someone from NRCan, and your local supervisor if you have one. 
+* Send a message to your reviewer(s) via email or some other means with a link to the pull request url 
+* The review may ask for a code review to be scheduled if there are questions to be answered. 
+* Reviewer will commit the code and close the pull request. 
 
 ### NRCan Staff
 
