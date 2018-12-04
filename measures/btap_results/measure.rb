@@ -81,6 +81,7 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     template_type_chs = OpenStudio::StringVector.new
     template_type_chs << 'NECB2011'
     template_type_chs << 'NECB2015'
+    template_type_chs << 'NECB2017'
     template_type = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template_type', template_type_chs, true)
     template_type.setDisplayName('NECB template for QAQC')
     template_type.setDefaultValue('NECB2011')
@@ -987,11 +988,11 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
 
     # Perform qaqc
     qaqc = prototype_creator.init_qaqc( model )
-    costing = BTAPCosting.new()
-    costing.load_database()
-    cost_result = costing.cost_audit_all(model, prototype_creator)
-    runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
-    qaqc["auto_costing"] = cost_result
+    #costing = BTAPCosting.new()
+    #costing.load_database()
+    #cost_result = costing.cost_audit_all(model, prototype_creator)
+    #runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
+    #qaqc["auto_costing"] = cost_result
     # Perform qaqc
     # necb_2011_qaqc(qaqc) if qaqc[:building][:name].include?("NECB 2011") #had to nodify this because this is specifically for "NECB-2011" standard
     # sanity_check(qaqc)
