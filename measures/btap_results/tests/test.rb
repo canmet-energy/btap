@@ -42,6 +42,8 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
   # NECB2015 will work after openstudio-standards/tree/nrcan_48
   # has been pulled into nrcan
   @@templates=[
+      "NECB2011",
+      "NECB2015",
       "NECB2017"
   ]
 
