@@ -1,0 +1,188 @@
+Program Version,EnergyPlus, Version 8.9.0-eba93e8e1b, YMD=2018.11.01 15:59
+! <Version>, Version ID
+ Version, 8.9
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  6, 10
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, Yes, No, No
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 0.200, 0.200, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,   0.43,  -0.56,   1.20,   3.96,  11.16,  16.72,  20.47,  21.61,  19.67,  15.35,   9.58,   4.23
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Windsor Intl AP ON CAN CWEC2016 WMO#=715380,42.28,-82.96,-5.00,189.60,99068,1.1775
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,SmallOffice-CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw created: 2018-11-01 15:58:47 +0000,0.000,City,4.00000E-002,0.20000,FullInteriorAndExterior,25,6
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,TARP
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Value {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, No,N/A
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.330,460.000,6.500000E-003
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,6,64,21
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, ATTIC ZN,0.0,0.00,0.00,0.00,13.85,9.23,3.70,1,1,1,-0.60,28.29,-0.60,19.06,3.05,6.33,1.64,720.19,TARP,TARP,567.98,0.00,0.00,0.00,13,0,0,No
+ Zone Information, CORE_ZN ZN,0.0,0.00,0.00,0.00,13.85,9.23,1.53,1,1,1,5.00,22.69,5.00,13.46,0.00,3.05,3.05,456.46,TARP,TARP,149.66,0.00,0.00,0.00,6,0,0,Yes
+ Zone Information, PERIMETER_ZN_1 ZN,0.0,0.00,0.00,0.00,13.85,2.21,1.53,1,1,1,0.00,27.69,0.00,5.00,0.00,3.05,3.05,346.02,TARP,TARP,113.45,84.45,63.82,16.73,6,7,0,Yes
+ Zone Information, PERIMETER_ZN_2 ZN,0.0,0.00,0.00,0.00,25.64,9.23,1.53,1,1,1,22.69,27.69,0.00,18.46,0.00,3.05,3.05,205.27,TARP,TARP,67.30,56.30,45.15,11.16,6,4,0,Yes
+ Zone Information, PERIMETER_ZN_3 ZN,0.0,0.00,0.00,0.00,13.85,16.25,1.53,1,1,1,0.00,27.69,13.46,18.46,0.00,3.05,3.05,346.02,TARP,TARP,113.45,84.45,67.72,16.73,6,6,0,Yes
+ Zone Information, PERIMETER_ZN_4 ZN,0.0,0.00,0.00,0.00,2.05,9.23,1.53,1,1,1,0.00,5.00,0.00,18.46,0.00,3.05,3.05,205.27,TARP,TARP,67.30,56.30,45.15,11.16,6,4,0,Yes
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, ATTIC ZN,567.98,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, CORE_ZN ZN,149.66,7.5,19.993,5.002E-002,12.004,7.503,0.000,0.000,0.000,0.000,19.507,No
+ Zone Internal Gains Nominal, PERIMETER_ZN_1 ZN,113.45,5.7,19.993,5.002E-002,12.004,7.503,0.000,0.000,0.000,0.000,19.507,No
+ Zone Internal Gains Nominal, PERIMETER_ZN_2 ZN,67.30,3.4,19.993,5.002E-002,12.004,7.503,0.000,0.000,0.000,0.000,19.507,No
+ Zone Internal Gains Nominal, PERIMETER_ZN_3 ZN,113.45,5.7,19.993,5.002E-002,12.004,7.503,0.000,0.000,0.000,0.000,19.507,No
+ Zone Internal Gains Nominal, PERIMETER_ZN_4 ZN,67.30,3.4,19.993,5.002E-002,12.004,7.503,0.000,0.000,0.000,0.000,19.507,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+ People Internal Gains Nominal, CORE_ZN ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 PEOPLE,NECB-A-OCCUPANCY,CORE_ZN ZN,149.66,7.5,7.5,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,7
+ People Internal Gains Nominal, PERIMETER_ZN_1 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 PEOPLE,NECB-A-OCCUPANCY,PERIMETER_ZN_1 ZN,113.45,5.7,5.7,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,5
+ People Internal Gains Nominal, PERIMETER_ZN_2 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 PEOPLE,NECB-A-OCCUPANCY,PERIMETER_ZN_2 ZN,67.30,3.4,3.4,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,3
+ People Internal Gains Nominal, PERIMETER_ZN_3 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 PEOPLE,NECB-A-OCCUPANCY,PERIMETER_ZN_3 ZN,113.45,5.7,5.7,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,5
+ People Internal Gains Nominal, PERIMETER_ZN_4 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 PEOPLE,NECB-A-OCCUPANCY,PERIMETER_ZN_4 ZN,67.30,3.4,3.4,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,3
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains Nominal, CORE_ZN ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 LIGHTS,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,CORE_ZN ZN,149.66,7.5,1796.541,12.004,240.000,0.000,0.500,0.200,0.300,1.000,General,62.789,1616.887
+ Lights Internal Gains Nominal, PERIMETER_ZN_1 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 LIGHTS,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,PERIMETER_ZN_1 ZN,113.45,5.7,1361.895,12.004,240.000,0.000,0.500,0.200,0.300,1.000,General,47.598,1225.705
+ Lights Internal Gains Nominal, PERIMETER_ZN_2 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 LIGHTS,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,PERIMETER_ZN_2 ZN,67.30,3.4,807.893,12.004,240.000,0.000,0.500,0.200,0.300,1.000,General,28.236,727.104
+ Lights Internal Gains Nominal, PERIMETER_ZN_3 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 LIGHTS,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,PERIMETER_ZN_3 ZN,113.45,5.7,1361.895,12.004,240.000,0.000,0.500,0.200,0.300,1.000,General,47.598,1225.705
+ Lights Internal Gains Nominal, PERIMETER_ZN_4 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 LIGHTS,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,PERIMETER_ZN_4 ZN,67.30,3.4,807.893,12.004,240.000,0.000,0.500,0.200,0.300,1.000,General,28.236,727.104
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains Nominal, CORE_ZN ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 ELEC EQUIP,NECB-A-ELECTRIC-EQUIPMENT,CORE_ZN ZN,149.66,7.5,1122.838,7.503,150.000,0.000,0.500,0.000,0.500,General,224.568,1010.555
+ ElectricEquipment Internal Gains Nominal, PERIMETER_ZN_1 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 ELEC EQUIP,NECB-A-ELECTRIC-EQUIPMENT,PERIMETER_ZN_1 ZN,113.45,5.7,851.184,7.503,150.000,0.000,0.500,0.000,0.500,General,170.237,766.066
+ ElectricEquipment Internal Gains Nominal, PERIMETER_ZN_2 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 ELEC EQUIP,NECB-A-ELECTRIC-EQUIPMENT,PERIMETER_ZN_2 ZN,67.30,3.4,504.933,7.503,150.000,0.000,0.500,0.000,0.500,General,100.987,454.440
+ ElectricEquipment Internal Gains Nominal, PERIMETER_ZN_3 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 ELEC EQUIP,NECB-A-ELECTRIC-EQUIPMENT,PERIMETER_ZN_3 ZN,113.45,5.7,851.184,7.503,150.000,0.000,0.500,0.000,0.500,General,170.237,766.066
+ ElectricEquipment Internal Gains Nominal, PERIMETER_ZN_4 ZN SPACE FUNCTION OFFICE ENCLOSED > 25 M2 ELEC EQUIP,NECB-A-ELECTRIC-EQUIPMENT,PERIMETER_ZN_4 ZN,67.30,3.4,504.933,7.503,150.000,0.000,0.500,0.000,0.500,General,100.987,454.440
+! <Shadowing/Sun Position Calculations Annual Simulations>, Calculation Method, Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm, External Shading Calculation Method, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,AverageOverDaysInFrequency,30,15000,SutherlandHodgman,SimpleSkyDiffuseModeling,InternalCalculation,No,No,No
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s/m2},Volume Flow Rate/Exterior Surface Area {m3/s/m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, ATTIC INFILTRATION,ALWAYS ON DISCRETE,ATTIC ZN,567.98,0.0,0.150,2.635E-004,2.283E-004,0.748,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, PERIMETER_ZN_1 INFILTRATION,ALWAYS ON DISCRETE,PERIMETER_ZN_1 ZN,113.45,5.7,2.209E-002,1.947E-004,2.500E-004,0.230,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, PERIMETER_ZN_2 INFILTRATION,ALWAYS ON DISCRETE,PERIMETER_ZN_2 ZN,67.30,3.4,1.408E-002,2.091E-004,2.500E-004,0.247,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, PERIMETER_ZN_3 INFILTRATION,ALWAYS ON DISCRETE,PERIMETER_ZN_3 ZN,113.45,5.7,2.111E-002,1.861E-004,2.500E-004,0.220,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, PERIMETER_ZN_4 INFILTRATION,ALWAYS ON DISCRETE,PERIMETER_ZN_4 ZN,67.30,3.4,1.408E-002,2.091E-004,2.500E-004,0.247,0.000,0.000,0.224,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,ATTIC ZN,Mixing/Well-Stirred
+RoomAir Model,CORE_ZN ZN,Mixing/Well-Stirred
+RoomAir Model,PERIMETER_ZN_1 ZN,Mixing/Well-Stirred
+RoomAir Model,PERIMETER_ZN_2 ZN,Mixing/Well-Stirred
+RoomAir Model,PERIMETER_ZN_3 ZN,Mixing/Well-Stirred
+RoomAir Model,PERIMETER_ZN_4 ZN,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    6
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.2500    
+ Heating Sizing Factor Information, Zone ATTIC ZN,   1.2500    
+ Heating Sizing Factor Information, Zone CORE_ZN ZN,   1.2500    
+ Heating Sizing Factor Information, Zone PERIMETER_ZN_1 ZN,   1.2500    
+ Heating Sizing Factor Information, Zone PERIMETER_ZN_2 ZN,   1.2500    
+ Heating Sizing Factor Information, Zone PERIMETER_ZN_3 ZN,   1.2500    
+ Heating Sizing Factor Information, Zone PERIMETER_ZN_4 ZN,   1.2500    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1500    
+ Cooling Sizing Factor Information, Zone ATTIC ZN,   1.1500    
+ Cooling Sizing Factor Information, Zone CORE_ZN ZN,   1.1500    
+ Cooling Sizing Factor Information, Zone PERIMETER_ZN_1 ZN,   1.1500    
+ Cooling Sizing Factor Information, Zone PERIMETER_ZN_2 ZN,   1.1500    
+ Cooling Sizing Factor Information, Zone PERIMETER_ZN_3 ZN,   1.1500    
+ Cooling Sizing Factor Information, Zone PERIMETER_ZN_4 ZN,   1.1500    
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, CORE_ZN ZN, Cooling, 2977.09950, 3423.66442, 0.24775, 0.28492, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 17:00:00, 30.72600, 1.45394E-002, 149.65740, 7.48559, 6.31015E-002, 0.00000
+ Zone Sizing Information, CORE_ZN ZN, Heating, 3426.26309, 4282.82886, 0.15563, 0.19454, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 149.65740, 7.48559, 6.31015E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_1 ZN, Cooling, 3049.28999, 3506.68349, 0.25376, 0.29182, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 15:00:00, 32.00000, 1.45394E-002, 113.45000, 5.67456, 4.78351E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_1 ZN, Heating, 4611.98815, 5764.98519, 0.21092, 0.26365, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 113.45000, 5.67456, 4.78351E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_2 ZN, Cooling, 3407.74330, 3918.90480, 0.28359, 0.32613, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 09:40:00, 28.02633, 1.45394E-002, 67.30000, 3.36622, 2.83764E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_2 ZN, Heating, 2867.27183, 3584.08979, 0.13119, 0.16398, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 67.30000, 3.36622, 2.83764E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_3 ZN, Cooling, 2928.80111, 3368.12128, 0.24374, 0.28030, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 17:00:00, 30.72600, 1.45394E-002, 113.45000, 5.67456, 4.78351E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_3 ZN, Heating, 4450.30841, 5562.88551, 0.20346, 0.25432, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 113.45000, 5.67456, 4.78351E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_4 ZN, Cooling, 3751.34528, 4314.04707, 0.31219, 0.35902, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 17:20:00, 30.42267, 1.45394E-002, 67.30000, 3.36622, 2.83764E-002, 0.00000
+ Zone Sizing Information, PERIMETER_ZN_4 ZN, Heating, 2880.64512, 3600.80640, 0.13180, 0.16475, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 67.30000, 3.36622, 2.83764E-002, 0.00000
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 1, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 1, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 2, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 2, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 3, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 3, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 4, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 4, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 5, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 5, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 6, User-Specified Maximum Heating Air Flow Rate [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:IdealLoadsAirSystem, ZONE HVAC IDEAL LOADS AIR SYSTEM 6, User-Specified Maximum Cooling Air Flow Rate [m3/s], 0.00000
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,SizingPeriod:DesignDay,07/21,07/21,SummerDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+! <Environment:Design Day Data>, Max Dry-Bulb Temp {C}, Temp Range {dC}, Temp Range Ind Type, Hum Ind Value at Max Temp, Hum Ind Type,Pressure {Pa}, Wind Direction {deg CW from N}, Wind Speed {m/s}, Clearness, Rain, Snow
+! <Environment:Design Day Misc>,DayOfYear,ASHRAE A Coeff,ASHRAE B Coeff,ASHRAE C Coeff,Solar Constant-Annual Variation,Eq of Time {minutes}, Solar Declination Angle {deg}, Solar Model
+Environment:Design Day Data,32.00,9.10,DefaultMultipliers,99068,230,5.4,0.00,No,No
+Environment:Design Day Misc,202,1084.4,0.2082,0.1365,1.0,-6.23,20.6,ASHRAETau
+Environment:WarmupDays,  6
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,None
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,ATTIC ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,6.2857465784E-002,4.2569460050E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,CORE_ZN ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,4.0131493220E-002,0.1619358520,Pass,Pass,0.5056217216,3.1956954052,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_1 ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,3.8968159785E-002,0.1588332618,Pass,Pass,0.2666266223,1.8138480213,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_2 ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,4.5603883819E-002,0.2077836255,Pass,Pass,0.3401877844,2.4049002098,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_3 ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,3.9678442344E-002,0.1676765604,Pass,Pass,0.2613972354,1.7775075891,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_4 ZN,SizingPeriod: WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB,4.5377069173E-002,0.1950673566,Pass,Pass,0.4474288313,4.0291775205,Pass,Pass
+Environment,WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,SizingPeriod:DesignDay,01/21,01/21,WinterDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+Environment:Design Day Data,-15.50,0.00,DefaultMultipliers,99068,240,5.1,0.00,No,No
+Environment:Design Day Misc, 21,1229.0,0.1415,5.7310E-002,1.0,-11.15,-20.1,ASHRAEClearSky
+Environment:WarmupDays,  6
+ Warmup Convergence Information,ATTIC ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,2.1902453179E-002,9.8717196918E-003,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,CORE_ZN ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,5.8215086570E-002,0.3125934676,Pass,Pass,0.2291476016,0.6855651662,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_1 ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,5.6395281188E-002,0.3334347294,Pass,Pass,0.1158345673,0.5898940155,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_2 ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,5.6301945111E-002,0.3333634236,Pass,Pass,0.1595415385,1.0012377804,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_3 ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,5.6473971664E-002,0.3316265175,Pass,Pass,0.3039080806,2.6943525854,Pass,Pass
+ Warmup Convergence Information,PERIMETER_ZN_4 ZN,SizingPeriod: WINDSOR INTL AP ANN HTG 99.6% CONDNS DB,5.6291525516E-002,0.3336121380,Pass,Pass,0.1331643199,0.7413579324,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data
