@@ -49,6 +49,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     template_chs = OpenStudio::StringVector.new
     template_chs << 'NECB2011'
     template_chs << 'NECB2015'
+    template_chs << 'NECB2017'
     template = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template', template_chs, true)
     template.setDisplayName('Template.')
     template.setDefaultValue('NECB2011')
@@ -101,7 +102,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Set OSM folder
     osm_directory = ""
-    if template == 'NECB2011' or template =='NECB2015'
+    if ['NECB2011', 'NECB2015', 'NECB2017'].include?(template)
       osm_directory = "#{build_dir}/#{building_type}-#{template}-#{epw_file}"
     else
       osm_directory = build_dir
@@ -115,14 +116,30 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
-    #Override climate zone from lookup if anything but NECB 2011.
-    unless template == 'NECB2011' or template =='NECB2015'
-      climate_zone = weather.a169_2006_climate_zone()
-    end
+
     #create model
     building_name = "#{template}_#{building_type}"
     puts "Creating #{building_name}"
     standard = Standard.build(template)
+
+    # Side inject json files from
+    path = "#{File.dirname(__FILE__)}/resources/data_sideload/"
+    raise ('Could not find data_sideload folder') unless Dir.exist?(path)
+    files = Dir.glob("#{path}/*.json").select {|e| File.file? e}
+    files.each do |file|
+      data = JSON.parse(File.read(file))
+      if not data["tables"].nil?
+        standard.standards_data["tables"] = [*standard.standards_data["tables"], *data["tables"]].to_h
+      else
+        #standard.standards_data[data.keys.first] = data[data.keys.first]
+      end
+      runner.registerWarning("Replaced default standard data with contents in #{file}")
+      puts "Replaced default standard data with contents in #{file}"
+    end
+    puts JSON.pretty_generate(standard.standards_data)
+
+
+
     new_model = standard.model_create_prototype_model(template: template,
                                                            building_type: building_type,
                                                            epw_file: epw_file,
