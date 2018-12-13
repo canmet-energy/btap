@@ -136,7 +136,6 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
       runner.registerWarning("Replaced default standard data with contents in #{file}")
       puts "Replaced default standard data with contents in #{file}"
     end
-    puts JSON.pretty_generate(standard.standards_data)
 
 
 
