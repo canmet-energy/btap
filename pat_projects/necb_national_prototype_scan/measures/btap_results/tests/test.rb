@@ -43,7 +43,8 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
   # has been pulled into nrcan
   @@templates=[
       "NECB2011",
-      "NECB2015"
+      "NECB2015",
+      "NECB2017"
   ]
 
   # Added the template into the path name of the run dir so
@@ -138,17 +139,13 @@ class BTAPResults_Test < MiniTest::Unit::TestCase
           argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
           #check number of arguments.
-          assert_equal(3, arguments.size)
+          assert_equal(2, arguments.size)
 
           hourly_data = arguments[0].clone
           assert(hourly_data.setValue(h_data))
           argument_map['generate_hourly_report'] = hourly_data
 
-          template_type = arguments[1].clone
-          assert(template_type.setValue(template))
-          argument_map['template_type'] = template_type
-
-          output_diet = arguments[2].clone
+          output_diet = arguments[1].clone
           assert(output_diet.setValue(false))
           argument_map['output_diet'] = output_diet
 

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_reference_building</name>
   <uid>a1260b05-7c15-4aff-94d6-f9340d7dc3ec</uid>
-  <version_id>8ca6d340-0395-4d06-a29e-7d4d76b31e1b</version_id>
-  <version_modified>20180709T174347Z</version_modified>
+  <version_id>d5d36ef8-90a9-4c2b-ab8e-d56c09bc8c37</version_id>
+  <version_modified>20181219T170131Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBReferenceBuilding</class_name>
   <display_name>BTAPCreateNECBReferenceBuilding</display_name>
@@ -323,16 +323,16 @@
       <checksum>53D14E69</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <filename>NECB2011FullServiceRestaurant.osm</filename>
       <filetype>osm</filetype>
       <usage_type>resource</usage_type>
       <checksum>A0499CC7</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
     </file>
     <file>
       <version>
@@ -343,13 +343,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>46DC2B12</checksum>
+      <checksum>DBB67133</checksum>
     </file>
     <file>
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EAB27B8F</checksum>
+      <checksum>8FCB0BA7</checksum>
     </file>
   </files>
 </measure>

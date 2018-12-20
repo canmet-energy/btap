@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>c7acc690-2fec-4e3f-8a7e-b048d469972d</version_id>
-  <version_modified>20180821T183811Z</version_modified>
+  <version_id>a05a2d61-8d71-4a4c-95f8-ba49f6fb41a6</version_id>
+  <version_modified>20181220T162130Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
@@ -99,6 +99,10 @@
         <choice>
           <value>NECB2015</value>
           <display_name>NECB2015</display_name>
+        </choice>
+        <choice>
+          <value>NECB2017</value>
+          <display_name>NECB2017</display_name>
         </choice>
       </choices>
     </argument>
@@ -391,16 +395,16 @@
   </attributes>
   <files>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>570DD7EE</checksum>
-    </file>
-    <file>
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>17C3D1F2</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>919E1A97</checksum>
     </file>
     <file>
       <version>
@@ -411,7 +415,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>98A88B6C</checksum>
+      <checksum>C36E6275</checksum>
     </file>
   </files>
 </measure>

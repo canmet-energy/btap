@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>openstudio_results</name>
   <uid>a7437013-6d3a-414a-8a4e-8bcba833188d</uid>
-  <version_id>4f35ed82-635b-4a16-96df-67a20f629e71</version_id>
-  <version_modified>20180705T151227Z</version_modified>
+  <version_id>18df2d60-b03a-4772-9b1a-8a2c89d79930</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>AE2941B3</xml_checksum>
   <class_name>OpenStudioResults</class_name>
   <display_name>BTAPOpenStudioResults</display_name>
@@ -573,12 +573,6 @@
       <checksum>D67C186D</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <filename>os_lib_helper_methods.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -618,6 +612,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>4AAB9AF0</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
     </file>
   </files>
 </measure>

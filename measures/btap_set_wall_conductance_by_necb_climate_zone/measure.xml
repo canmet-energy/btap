@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_set_wall_conductance_by_necb_climate_zone</name>
   <uid>ef481d8e-a30e-4f0a-9ccf-a2ed35d2170c</uid>
-  <version_id>21e3dbd3-1304-48d1-8e99-2e82d86586d6</version_id>
-  <version_modified>20181017T183733Z</version_modified>
+  <version_id>20cc2f6d-3476-4473-be44-b0bb1b44a6db</version_id>
+  <version_modified>20181219T170133Z</version_modified>
   <xml_checksum>A51D361F</xml_checksum>
   <class_name>BTAPSetWallConductanceByNecbClimateZone</class_name>
   <display_name>BTAPSetWallConductanceByNecbClimateZone </display_name>
@@ -126,7 +126,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CE104ABC</checksum>
+      <checksum>58931840</checksum>
     </file>
   </files>
 </measure>

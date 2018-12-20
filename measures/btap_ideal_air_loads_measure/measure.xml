@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_ideal_air_loads_measure</name>
   <uid>b01d7a54-7061-4c52-9cde-e89aed93f8a2</uid>
-  <version_id>ad79d27d-520c-4026-a174-1cfb56a47e6c</version_id>
-  <version_modified>20180614T144816Z</version_modified>
+  <version_id>a43900cf-43eb-4a69-bb88-36947ebd9d78</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>ED6112BA</xml_checksum>
   <class_name>BTAPIdealAirLoadsMeasure</class_name>
   <display_name>BTAPIdealAirLoadsMeasure</display_name>
@@ -24,22 +24,10 @@
   </attributes>
   <files>
     <file>
-      <filename>btap_ideal_air_loads_measure_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3F6D942C</checksum>
-    </file>
-    <file>
       <filename>example_model.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
       <checksum>53D14E69</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
     </file>
     <file>
       <filename>test.rb</filename>
@@ -57,6 +45,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>02F797BD</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
     </file>
   </files>
 </measure>

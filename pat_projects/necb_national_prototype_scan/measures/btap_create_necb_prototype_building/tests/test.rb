@@ -10,7 +10,18 @@ end
 require_relative '../measure.rb'
 require 'minitest/autorun'
 class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
-  def test_create_building()
+
+  def test_create_necb_vintages
+    @templates = ['NECB2011',
+                  'NECB2015',
+                  'NECB2017']
+    @templates.each do |template|
+      create_building(template)
+    end
+  end
+
+
+  def create_building(template)
     # create an instance of the measure
     measure = BTAPCreateNECBPrototypeBuilding.new
 
@@ -29,7 +40,7 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     assert_equal('SmallOffice', arguments[0].defaultValueAsString)
     #check argument 1
     assert_equal('template', arguments[1].name)
-    assert_equal('NECB2011', arguments[1].defaultValueAsString)
+    assert_equal(template, arguments[1].defaultValueAsString)
     #check argument 2
     assert_equal('epw_file', arguments[2].name)
     assert_equal('CAN_AB_Banff.CS.711220_CWEC2016.epw', arguments[2].defaultValueAsString)
@@ -45,7 +56,7 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
 
     #set argument 1
     template = arguments[1].clone
-    assert(template.setValue('NECB2011'))
+    assert(template.setValue(template))
     argument_map['template'] = template
 
     #set argument 2
