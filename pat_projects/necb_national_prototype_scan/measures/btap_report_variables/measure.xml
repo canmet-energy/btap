@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_report_variables</name>
   <uid>b423ae4d-4899-49b4-b447-535a94f2640c</uid>
-  <version_id>5a3fbb4d-9dc3-4eb6-85d3-432467492a0e</version_id>
-  <version_modified>20180821T183814Z</version_modified>
+  <version_id>a77c73a8-14fb-49b1-95b0-136c9f30e45a</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPReportVariables</class_name>
   <display_name>BTAPReportVariables</display_name>

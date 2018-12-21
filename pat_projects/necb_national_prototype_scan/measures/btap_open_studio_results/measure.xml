@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>openstudio_results</name>
   <uid>a7437013-6d3a-414a-8a4e-8bcba833188d</uid>
-  <version_id>bd6983f5-a6a0-4cad-b830-87993c1fdef1</version_id>
-  <version_modified>20180821T183814Z</version_modified>
+  <version_id>18df2d60-b03a-4772-9b1a-8a2c89d79930</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>AE2941B3</xml_checksum>
   <class_name>OpenStudioResults</class_name>
   <display_name>BTAPOpenStudioResults</display_name>

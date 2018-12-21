@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_construction_measure</name>
   <uid>5765296d-8457-4f6e-a674-d141756acbd9</uid>
-  <version_id>5603849f-42e8-493d-8061-30fa3f86b9a4</version_id>
-  <version_modified>20180614T144816Z</version_modified>
+  <version_id>528c2df4-8f0e-4ca7-b959-6ad17aaec479</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>E2523304</xml_checksum>
   <class_name>BTAPEnvelopeConstructionMeasure</class_name>
   <display_name>BTAPEnvelopeConstructionMeasureDetailed</display_name>
@@ -239,18 +239,6 @@
       <checksum>53D14E69</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>75CC3914</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -260,6 +248,18 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>88459072</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CAE97B4F</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
     </file>
   </files>
 </measure>

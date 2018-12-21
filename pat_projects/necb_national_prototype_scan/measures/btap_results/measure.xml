@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_results</name>
   <uid>bf37e1c6-de70-457b-a3ac-21aa57b7bc58</uid>
-  <version_id>bfa7c93e-5393-4a4c-bd59-5b37fb70235b</version_id>
-  <version_modified>20180821T183815Z</version_modified>
+  <version_id>86fb174b-6040-4a41-8cbe-ab3d1551296a</version_id>
+  <version_modified>20181219T170133Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>BTAPResults</class_name>
   <display_name>BTAP Results</display_name>
@@ -17,24 +17,6 @@
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
-    </argument>
-    <argument>
-      <name>template_type</name>
-      <display_name>NECB template for QAQC</display_name>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>NECB2011</default_value>
-      <choices>
-        <choice>
-          <value>NECB2011</value>
-          <display_name>NECB2011</display_name>
-        </choice>
-        <choice>
-          <value>NECB2015</value>
-          <display_name>NECB2015</display_name>
-        </choice>
-      </choices>
     </argument>
     <argument>
       <name>output_diet</name>
@@ -111,6 +93,54 @@
       <checksum>7DC1F0A7</checksum>
     </file>
     <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
+    </file>
+    <file>
+      <filename>ventilation_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5A8F9CE3</checksum>
+    </file>
+    <file>
+      <filename>heating_cooling_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>83AAD1CC</checksum>
+    </file>
+    <file>
+      <filename>shw_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>71BD9DC2</checksum>
+    </file>
+    <file>
+      <filename>costing_database.json.gz</filename>
+      <filetype>gz</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>165B9461</checksum>
+    </file>
+    <file>
+      <filename>envelope_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>710A2B5B</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>550CFFB6</checksum>
+    </file>
+    <file>
+      <filename>btap_costing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1439AFD7</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.4.1</identifier>
@@ -119,31 +149,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8BB8FED9</checksum>
+      <checksum>772263F5</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
+      <filename>lighting_costing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>17C3D1F2</checksum>
-    </file>
-    <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8C6D8744</checksum>
-    </file>
-    <file>
-      <filename>btap_costing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C7D53577</checksum>
-    </file>
-    <file>
-      <filename>costing_database.json.gz</filename>
-      <filetype>gz</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>165B9461</checksum>
+      <checksum>918FCCDE</checksum>
     </file>
   </files>
 </measure>

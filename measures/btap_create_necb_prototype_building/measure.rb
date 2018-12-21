@@ -19,7 +19,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
   # Define the arguments that the user will input.
   def arguments(model)
-
+    @templates = ['NECB2011','NECB2015','NECB2017']
     args = OpenStudio::Ruleset::OSArgumentVector.new
 
     # Make an argument for the building type
@@ -46,9 +46,9 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     args << building_type
 
     # Make an argument for the template
-    template_chs = OpenStudio::StringVector.new
-    template_chs << 'NECB2011'
-    template_chs << 'NECB2015'
+    template_chs = OpenStudio::StringVector.new(@templates)
+
+
     template = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template', template_chs, true)
     template.setDisplayName('Template.')
     template.setDefaultValue('NECB2011')
@@ -101,7 +101,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Set OSM folder
     osm_directory = ""
-    if template == 'NECB2011' or template =='NECB2015'
+    if @templates.include?(template)
       osm_directory = "#{build_dir}/#{building_type}-#{template}-#{epw_file}"
     else
       osm_directory = build_dir
@@ -116,7 +116,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
     #Override climate zone from lookup if anything but NECB 2011.
-    unless template == 'NECB2011' or template =='NECB2015'
+    unless @templates.include?(template)
       climate_zone = weather.a169_2006_climate_zone()
     end
     #create model

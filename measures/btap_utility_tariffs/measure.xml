@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>34c820cf-b55d-4bdf-b654-48e5bd9beef8</uid>
-  <version_id>fc77fef2-3297-4503-be12-c090e8595a61</version_id>
-  <version_modified>20180614T163059Z</version_modified>
+  <version_id>20dd95fb-d5b0-4916-ace4-5633a6208092</version_id>
+  <version_modified>20181219T170133Z</version_modified>
   <xml_checksum>D1E2AA62</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAPUtilityTariffsModelSetup</display_name>
@@ -28,12 +28,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>C024389B</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
     </file>
     <file>
       <filename>Energy rates_2015.xls</filename>
@@ -63,6 +57,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>5E1F4A42</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
     </file>
   </files>
 </measure>
