@@ -6,6 +6,7 @@ gem 'rake', '~> 12.3.0'
 
 # uncomment if you need to update the bcl measures
 gem "bcl", "~> 0.5"
+gem 'nokogiri', '1.6.8.1'
 # gem "bcl", :path => "../bcl-gem"
 # gem 'bcl', github: 'NREL/bcl-gem', branch: 'develop'
 
