@@ -1,0 +1,963 @@
+{
+  "projectName": "PCF1414",
+  "projectDir": "C:\\Users\\barssoumm\\new_tests\\btap\\pat_projects\\PCF1414",
+  "seed": "dummy.osm",
+  "weatherFile": "dummy.epw",
+  "analysis_type": "Algorithmic",
+  "remoteSettings": {
+    "open": true,
+    "remoteType": "Amazon Cloud",
+    "remoteServerURL": null,
+    "aws": {
+      "connected": false,
+      "cluster_name": "",
+      "server_instance_type": "",
+      "worker_instance_type": "",
+      "user_id": "",
+      "worker_node_number": 0,
+      "aws_tags": [],
+      "openstudio_server_version": ""
+    },
+    "credentials": {
+      "yamlFilename": null,
+      "accessKey": null,
+      "region": "us-east-1"
+    }
+  },
+  "samplingMethod": {
+    "id": "doe",
+    "name": "analysis.type.doe",
+    "link": "https://cran.r-project.org/web/packages/DoE.base/DoE.base.pdf"
+  },
+  "algorithmSettings": [
+    {
+      "name": "experiment_type",
+      "displayName": "Experiment Type",
+      "description": "Options: full_factorial",
+      "defaultValue": "full_factorial",
+      "type": "string",
+      "value": "full_factorial",
+      "$$hashKey": "object:1477"
+    },
+    {
+      "name": "number_of_samples",
+      "displayName": "Number of Samples",
+      "description": "Positive integer (this discretizes a continous variable)",
+      "defaultValue": 2,
+      "type": "number",
+      "value": 2,
+      "$$hashKey": "object:1478"
+    },
+    {
+      "name": "seed",
+      "displayName": "Seed",
+      "description": "Integer seed for random number generator",
+      "defaultValue": null,
+      "type": "number",
+      "value": null,
+      "$$hashKey": "object:1272"
+    },
+    {
+      "name": "failed_f_value",
+      "displayName": "Failed F Value",
+      "description": "Return Value for F(x) if F fails",
+      "defaultValue": 1000000000000000000,
+      "type": "number",
+      "value": 1000000000000000000,
+      "$$hashKey": "object:1479"
+    },
+    {
+      "name": "debug_messages",
+      "displayName": "Debug Messages",
+      "description": "Options: 1 or 0 (True or False)",
+      "defaultValue": 0,
+      "type": "number",
+      "value": 0,
+      "$$hashKey": "object:1480"
+    }
+  ],
+  "rubyMD5": "",
+  "mongoMD5": "",
+  "openstudioServerMD5": "",
+  "openstudioCLIMD5": "",
+  "openstudioMD5": "",
+  "measures": [
+    {
+      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap\\pat_projects\\PCF1414\\measures\\btap_create_necb_prototype_building",
+      "name": "btap_create_necb_prototype_building",
+      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures/btap_create_necb_prototype_building",
+      "uid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
+      "uuid": "{3e9acd53-8602-4749-a655-7cbbe48e8b30}",
+      "version_id": "3eff181f-ed78-40f5-9bbb-3bf13aa63de3",
+      "version_uuid": "{3eff181f-ed78-40f5-9bbb-3bf13aa63de3}",
+      "version_modified": "20181220T162125Z",
+      "xml_checksum": "2C38F48B",
+      "display_name": "BTAPCreateNECBPrototypeBuilding",
+      "class_name": "BTAPCreateNECBPrototypeBuilding",
+      "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+      "modeler_description": "This will replaced the model object with a brand new model. It effectively ignores the seed model.",
+      "tags": "Whole Building.Space Types",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00H1",
+          "variable": false,
+          "option_1": "option_1",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00H3",
+          "variable": false,
+          "option_1": "Option 1 Name",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00H5",
+          "variable": false,
+          "option_1": "Option 1 Description: This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "building_type",
+          "display_name": "Building Type.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "SmallOffice",
+          "choice_values": [
+            "SecondarySchool",
+            "PrimarySchool",
+            "SmallOffice",
+            "MediumOffice",
+            "LargeOffice",
+            "SmallHotel",
+            "LargeHotel",
+            "Warehouse",
+            "RetailStandalone",
+            "RetailStripmall",
+            "QuickServiceRestaurant",
+            "FullServiceRestaurant",
+            "MidriseApartment",
+            "HighriseApartment",
+            "Hospital",
+            "Outpatient"
+          ],
+          "choice_display_names": [
+            "SecondarySchool",
+            "PrimarySchool",
+            "SmallOffice",
+            "MediumOffice",
+            "LargeOffice",
+            "SmallHotel",
+            "LargeHotel",
+            "Warehouse",
+            "RetailStandalone",
+            "RetailStripmall",
+            "QuickServiceRestaurant",
+            "FullServiceRestaurant",
+            "MidriseApartment",
+            "HighriseApartment",
+            "Hospital",
+            "Outpatient"
+          ],
+          "$$hashKey": "uiGrid-00H7",
+          "variable": false,
+          "option_1": "SmallOffice",
+          "display_name_short": "building_type",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "SecondarySchool",
+              "PrimarySchool",
+              "SmallOffice",
+              "MediumOffice",
+              "LargeOffice",
+              "SmallHotel",
+              "LargeHotel",
+              "Warehouse",
+              "RetailStandalone",
+              "RetailStripmall",
+              "QuickServiceRestaurant",
+              "FullServiceRestaurant",
+              "MidriseApartment",
+              "HighriseApartment",
+              "Hospital",
+              "Outpatient"
+            ],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "PrimarySchool",
+                "weight": "",
+                "$$hashKey": "object:1539"
+              },
+              {
+                "value": "SecondarySchool",
+                "weight": "",
+                "$$hashKey": "object:1550"
+              },
+              {
+                "value": "SmallOffice",
+                "weight": "",
+                "$$hashKey": "object:1560"
+              },
+              {
+                "value": "MediumOffice",
+                "weight": "",
+                "$$hashKey": "object:1570"
+              },
+              {
+                "value": "LargeOffice",
+                "weight": "",
+                "$$hashKey": "object:1580"
+              },
+              {
+                "value": "SmallHotel",
+                "weight": "",
+                "$$hashKey": "object:1590"
+              },
+              {
+                "value": "LargeHotel",
+                "weight": "",
+                "$$hashKey": "object:1600"
+              },
+              {
+                "value": "Warehouse",
+                "weight": "",
+                "$$hashKey": "object:1610"
+              },
+              {
+                "value": "RetailStandalone",
+                "weight": "",
+                "$$hashKey": "object:1620"
+              },
+              {
+                "value": "RetailStripmall",
+                "weight": "",
+                "$$hashKey": "object:1630"
+              },
+              {
+                "value": "QuickServiceRestaurant",
+                "weight": "",
+                "$$hashKey": "object:1640"
+              },
+              {
+                "value": "FullServiceRestaurant",
+                "weight": "",
+                "$$hashKey": "object:1650"
+              },
+              {
+                "value": "MidriseApartment",
+                "weight": "",
+                "$$hashKey": "object:1660"
+              },
+              {
+                "value": "HighriseApartment",
+                "weight": "",
+                "$$hashKey": "object:1670"
+              },
+              {
+                "value": "Hospital",
+                "weight": "",
+                "$$hashKey": "object:1680"
+              },
+              {
+                "value": "Outpatient",
+                "weight": "",
+                "$$hashKey": "object:1690"
+              }
+            ],
+            "maximum": "SmallOffice",
+            "minimum": "SmallOffice",
+            "mean": "SmallOffice",
+            "deltaX": "SmallOffice",
+            "stdDev": "SmallOffice",
+            "default_value": "SmallOffice",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "template",
+          "display_name": "Template.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "NECB2011",
+          "choice_values": [
+            "NECB2011",
+            "NECB2015",
+            "NECB2017"
+          ],
+          "choice_display_names": [
+            "NECB2011",
+            "NECB2015",
+            "NECB2017"
+          ],
+          "$$hashKey": "uiGrid-00H9",
+          "variable": false,
+          "option_1": "NECB2011",
+          "display_name_short": "template",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "NECB2011",
+              "NECB2015",
+              "NECB2017"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "NECB2011",
+            "minimum": "NECB2011",
+            "mean": "NECB2011",
+            "deltaX": "NECB2011",
+            "stdDev": "NECB2011",
+            "default_value": "NECB2017",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "epw_file",
+          "display_name": "Climate File",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+          "choice_values": [
+            "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+            "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+            "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+            "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+            "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+            "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+            "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+            "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+            "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+            "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+            "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+            "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+            "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+            "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+            "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+            "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+            "CAN_BC_Summerland.717680_CWEC2016.epw",
+            "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+            "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+            "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+            "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+            "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+            "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+            "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+            "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+            "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+            "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+            "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+            "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+            "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+            "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+            "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+            "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+            "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+            "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+            "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+            "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+            "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+            "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+            "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+            "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+            "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+            "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+            "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+            "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+            "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+            "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+            "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+            "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+            "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+            "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+            "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+            "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+            "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+            "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+            "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+            "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+            "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+            "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+            "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+            "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+            "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+            "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+            "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+            "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+          ],
+          "choice_display_names": [
+            "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+            "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+            "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+            "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+            "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+            "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+            "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+            "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+            "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+            "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+            "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+            "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+            "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+            "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+            "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+            "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+            "CAN_BC_Summerland.717680_CWEC2016.epw",
+            "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+            "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+            "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+            "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+            "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+            "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+            "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+            "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+            "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+            "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+            "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+            "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+            "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+            "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+            "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+            "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+            "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+            "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+            "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+            "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+            "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+            "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+            "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+            "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+            "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+            "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+            "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+            "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+            "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+            "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+            "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+            "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+            "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+            "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+            "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+            "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+            "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+            "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+            "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+            "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+            "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+            "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+            "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+            "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+            "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+            "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+            "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+            "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+          ],
+          "$$hashKey": "uiGrid-00HB",
+          "variable": false,
+          "option_1": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+          "display_name_short": "epw_file",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+              "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+              "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+              "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+              "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+              "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+              "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+              "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+              "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+              "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+              "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+              "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+              "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+              "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+              "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+              "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+              "CAN_BC_Summerland.717680_CWEC2016.epw",
+              "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+              "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+              "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+              "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+              "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+              "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+              "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+              "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+              "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+              "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+              "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+              "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+              "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+              "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+              "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+              "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+              "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+              "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+              "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+              "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+              "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+              "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+              "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+              "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+              "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+              "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+              "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+              "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+              "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+              "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+              "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+              "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+              "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+              "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+              "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+              "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+              "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+              "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+              "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+              "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+              "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+              "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+              "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+              "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+              "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+              "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+              "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+              "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+            ],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1710"
+              },
+              {
+                "value": "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1721"
+              },
+              {
+                "value": "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1731"
+              },
+              {
+                "value": "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1741"
+              },
+              {
+                "value": "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1751"
+              },
+              {
+                "value": "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:1761"
+              }
+            ],
+            "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "mean": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "deltaX": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "stdDev": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": true,
+      "addedToProject": true,
+      "date": "12/20/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 0,
+      "options": [
+        {
+          "id": "option_1",
+          "arguments": [
+            {
+              "name": "building_type",
+              "value": "SmallOffice"
+            },
+            {
+              "name": "template",
+              "value": "NECB2011"
+            },
+            {
+              "name": "epw_file",
+              "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+            }
+          ],
+          "name": "Option 1 Name",
+          "description": "Option 1 Description: This measure creates an NECB prototype building from scratch and uses it as the base for an analysis."
+        }
+      ],
+      "instanceId": 0.14445265122440398,
+      "numberOfOptions": 1,
+      "$$hashKey": "object:925",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap\\pat_projects\\PCF1414\\measures\\Set Space Infiltration by Exterior Surface Area",
+      "name": "set_space_infiltration_by_exterior_surface_area",
+      "directory": "C:/Users/barssoumm/Desktop/Set Space Infiltration by Exterior Surface Area/Set Space Infiltration by Exterior Surface Area",
+      "uid": "9d7b0789-3974-4869-a2a8-055391857e3c",
+      "uuid": "{9d7b0789-3974-4869-a2a8-055391857e3c}",
+      "version_id": "b3c82453-f957-45ae-805b-78210b3cc990",
+      "version_uuid": "{b3c82453-f957-45ae-805b-78210b3cc990}",
+      "version_modified": "20181013T000907Z",
+      "xml_checksum": "E88CCCA7",
+      "display_name": "Set Space Infiltration by Exterior Surface Area",
+      "class_name": "SetSpaceInfiltrationByExteriorSurfaceArea",
+      "description": "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+      "modeler_description": "Remove all infiltration objects used in the model and add in a new object to each space type, and then to spaces without space types. Schedules come from the schedule sets. Warn user if there is no schedule set associated with a space type.\r\r\r\r\r\r\n\r\r\r\r\r\r\nA one time material & installation cost can be added to the building object to reflect improvements made throughout the envelope. \"Years Until Costs Start? is typically \"0?, but you can use a larger number if you want to delay the improvements.  O&M cost and frequency can be whatever is appropriate for the component. This measure hard sizes the costs based on current infiltration levels.  As a result any change to the models made by measures run after this that have an impact on infiltration will not affect the cost. An example of a problematic measure would be deleting a space from the model or making each floor taller; in both cases adjusting the total exterior envelope area.\r\r\r\r\r\r\n  ",
+      "tags": "Envelope.Infiltration",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "infiltration_ip",
+          "display_name": "Space Infiltration Flow per Exterior Envelope Surface Area (cfm/ft^2).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0.05,
+          "display_name_short": "infiltration_ip",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.050787498,
+                "weight": "",
+                "$$hashKey": "object:3479"
+              },
+              {
+                "value": 0.091417497,
+                "weight": "",
+                "$$hashKey": "object:3490"
+              },
+              {
+                "value": 0.142204996,
+                "weight": "",
+                "$$hashKey": "object:3500"
+              },
+              {
+                "value": 0.267480825,
+                "weight": "",
+                "$$hashKey": "object:3510"
+              }
+            ],
+            "maximum": 0.05,
+            "minimum": 0.05,
+            "mean": 0.05,
+            "deltaX": 0.05,
+            "stdDev": 0.05,
+            "default_value": 0.05,
+            "showWarningIcon": false
+          },
+          "$$hashKey": "object:3334"
+        },
+        {
+          "name": "material_cost_ip",
+          "display_name": "Increase in Material and Installation Costs for Building per Exterior Envelope Area ($/ft^2).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "display_name_short": "material_cost_ip",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0
+          },
+          "$$hashKey": "object:3335"
+        },
+        {
+          "name": "om_cost_ip",
+          "display_name": "O & M Costs for Construction per Area Used ($/ft^2).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "display_name_short": "om_cost_ip",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0
+          },
+          "$$hashKey": "object:3336"
+        },
+        {
+          "name": "om_frequency",
+          "display_name": "O & M Frequency (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 1,
+          "display_name_short": "om_frequency",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1,
+            "minimum": 1,
+            "mean": 1,
+            "deltaX": 1,
+            "stdDev": 1,
+            "default_value": 1
+          },
+          "$$hashKey": "object:3337"
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": true,
+      "addedToProject": true,
+      "date": "10/12/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 1,
+      "options": [],
+      "instanceId": 0.7991628191022218,
+      "skip": false,
+      "$$hashKey": "object:3286",
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap\\pat_projects\\PCF1414\\measures\\btap_results",
+      "name": "btap_results",
+      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures/btap_results",
+      "uid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
+      "uuid": "{bf37e1c6-de70-457b-a3ac-21aa57b7bc58}",
+      "version_id": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
+      "version_uuid": "{86fb174b-6040-4a41-8cbe-ab3d1551296a}",
+      "version_modified": "20181219T170133Z",
+      "xml_checksum": "15BF4E57",
+      "display_name": "BTAP Results",
+      "class_name": "BTAPResults",
+      "description": "This measure creates BTAP result values used for NRCan analyses.",
+      "modeler_description": "Grabs data from OS model and sql database and keeps them in the ",
+      "tags": "Reporting.QAQC",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ReportingMeasure"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "generate_hourly_report",
+          "display_name": "Generate Hourly Report.",
+          "description": "",
+          "type": "String",
+          "required": false,
+          "model_dependent": false,
+          "default_value": "false",
+          "display_name_short": "generate_hourly_report",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "false",
+            "minimum": "false",
+            "mean": "false",
+            "deltaX": "false",
+            "stdDev": "false",
+            "default_value": "false"
+          },
+          "$$hashKey": "object:2129"
+        },
+        {
+          "name": "output_diet",
+          "display_name": "Reduce outputs.",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "display_name_short": "output_diet",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false
+          },
+          "$$hashKey": "object:2130"
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": true,
+      "addedToProject": true,
+      "date": "12/19/2018",
+      "author": "",
+      "type": "ReportingMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 2,
+      "options": [],
+      "instanceId": 0.35709378726336705,
+      "skip": false,
+      "$$hashKey": "object:2089"
+    }
+  ],
+  "filesToInclude": [],
+  "serverScripts": {
+    "server_initialization": {
+      "file": null,
+      "arguments": []
+    },
+    "server_finalization": {
+      "file": null,
+      "arguments": []
+    },
+    "worker_initialization": {
+      "file": null,
+      "arguments": []
+    },
+    "worker_finalization": {
+      "file": null,
+      "arguments": []
+    }
+  },
+  "designAlternatives": [],
+  "analysisID": "",
+  "datapoints": []
+}
