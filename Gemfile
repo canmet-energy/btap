@@ -25,7 +25,7 @@ end
 gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
 
 #These gems are present only in nrcan's standards and nrcan's OS server aws image.
-gem 'roo'
+gem 'roo', '2.7.1'
 gem 'aes'
 gem 'rest-client','2.0.2'
 gem 'pry'
