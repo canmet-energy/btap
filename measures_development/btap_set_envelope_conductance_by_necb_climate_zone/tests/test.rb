@@ -116,7 +116,7 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
 
     @good_input_arguments = {
        "necb_template" => "NECB2015",
-	   "surface_type" => "Floors",
+	   "surface_type" => "Roofs",
        "zone4_u_value" => 0.59,
        "zone5_u_value" => 0.265,
        "zone6_u_value" => 0.240,
@@ -129,7 +129,6 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
 
 
  def test_Zone4_conductane
-
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -151,17 +150,12 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     result = runner.result
     show_output(result)
 
-    if assert_equal(0.59, arguments[2].defaultValueAsDouble)
-    runner.registerInfo("Zone 4 ( Victoria), test r-value of 0.59 >>>>>>>>>>  is equal to :'#{arguments[2].defaultValueAsDouble}' .")
-    else
-    runner.registerInfo(" \e[33m Zone 4 ( Victoria), test r-value of 0.29 >>>>>>>>>>  is NOT equal to :'#{arguments[2].defaultValueAsDouble}' \e[0m.")
-    end
+    # test if the measure would grab the correct u value for the correct climate zone.
+    assert_equal(0.59, arguments[2].defaultValueAsDouble)
  end
 
 
-
  def test_Zone5_conductane
-
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -182,15 +176,14 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     runner = run_measure(@good_input_arguments, model)
     result = runner.result
     show_output(result)
-    #assert_equal(zone5_r_value.to_f.round(3),31.03)
 
+    # test if the measure would grab the correct u value for the correct climate zone.
     assert_equal(0.265, arguments[3].defaultValueAsDouble)
   end
 
 
 
   def test_Zone6_conductane
-
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -212,12 +205,12 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     result = runner.result
     show_output(result)
 
+    # test if the measure would grab the correct u value for the correct climate zone.
     assert_equal(0.240, arguments[4].defaultValueAsDouble)
-    runner.registerInfo(" \e[32m Zone 6 (Ottawa), test r-value of 0.240  >>>>>>>>>>  is equal to :'#{arguments[4].defaultValueAsDouble}' \e[0m .")
   end
 
-  def test_Zone7a_conductane
 
+  def test_Zone7a_conductane
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -239,13 +232,11 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     result = runner.result
     show_output(result)
 
+   # test if the measure would grab the correct u value for the correct climate zone
    assert_equal(0.215, arguments[5].defaultValueAsDouble)
-   runner.registerInfo(" \e[32m Zone 7A (Edmonton), test r-value of 0.215  >>>>>>>>>>  is equal to :'#{arguments[5].defaultValueAsDouble}' \e[0m .")
-	
   end
 
   def test_Zone7b_conductane
-
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -266,13 +257,12 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     result = runner.result
     show_output(result)
 
+  # test if the measure would grab the correct u value for the correct climate zone
   assert_equal(0.190, arguments[6].defaultValueAsDouble)
-  runner.registerInfo(" \e[32m Zone 7B (White-horse), test r-value of 0.190  >>>>>>>>>>  is equal to :'#{arguments[6].defaultValueAsDouble}' \e[0m .")
   end
 
 
   def test_Zone8_conductane
-
     measure = BtapSetEnvelopeConductanceByNecbClimateZone.new
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -293,12 +283,10 @@ class BtapSetEnvelopeConductanceByNecbClimateZone_Test  < Minitest::Test
     runner = run_measure(@good_input_arguments, model)
     result = runner.result
     show_output(result)
+
+    # test if the measure would grab the correct u value for the correct climate zone
     assert_equal(0.165, arguments[7].defaultValueAsDouble)
-    runner.registerInfo(" \e[31m Zone 8 (Yellowknife), test r-value of 0.165   >>>>>>>>>>  is equal to :'#{arguments[7].defaultValueAsDouble}' \e[0m .")
-  end
-
-
-
+    end
 
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)
     osm_directory = "#{File.dirname(__FILE__)}/output/#{building_type}-#{template}-#{climate_zone}-#{epw_file}"

@@ -14,11 +14,11 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
   end
 
   def description
-    return "Modifies walls, roofs, floors and windows conductance by climate zone."
+    return "Modifies walls, roofs, and windows conductance by climate zone."
   end
   # human readable description of modeling approach
   def modeler_description
-    return "Modifies walls, roofs, floors and windows conductances by NECB climate zone. OpenStudio 2.6.0 (January 2019)"
+    return "Modifies walls, roofs, and windows conductances by NECB climate zone. OpenStudio 2.6.0 (October 2018)"
   end
 
   #define the arguments that the user will input
@@ -141,11 +141,11 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
     zone7B_u_value = arguments['zone7B_u_value']
     zone8_u_value = arguments['zone8_u_value']
 
-    # call get_necb_hdd18 from Standards, class NECB2011
+    # call get_necb_hdd18 from Standards
     standard = Standard.build(necb_template)
     necb_hdd18 = standard.get_necb_hdd18(model)
     runner.registerInfo("The Weather File NECB hdd is '#{necb_hdd18}'.")
-    
+
 	# Find the climate zone according to the NECB hdds, then find the corresponding r-value of that climate zone.
     if  necb_hdd18 <3000 then
       u_value = zone4_u_value
@@ -173,7 +173,6 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
 	# Check the selected surfact type
 	 if surface_type == "Roofs"
      runner.registerInfo("The selected surface type is '#{surface_type}' So the conductance of roofs only will be changed.to #{u_value} ............. ")
-      #create an array of roofs and find range of starting construction R-value (not just insulation layer)
        surfaces = model.getSurfaces
        surfaces.each do |surface|
          if surface.outsideBoundaryCondition == "Outdoors" and surface.surfaceType == "RoofCeiling"
@@ -188,14 +187,17 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
                                                    false)
 
          surface_conductance2 = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
-		 runner.registerInfo("Initial conductance for #{surface.surfaceType} was : #{surface_conductance} , now it has been changed to #{surface_conductance2} ")
+         u_value_rounded = sprintf "%.3f", u_value
+         surface_conductance2_rounded= sprintf "%.3f" , surface_conductance2
+		     runner.registerInfo("Initial conductance for #{surface.surfaceType} was : #{surface_conductance} , now it has been changed to #{surface_conductance2} ")
+         raise("U values for #{surface.surfaceType} was supposed to change to #{u_value_rounded}, but it is #{surface_conductance2_rounded}") if u_value_rounded != surface_conductance2_rounded
+
        end
        end
      return true
 
    elsif surface_type == "Walls"
      runner.registerInfo("The selected surface type is '#{surface_type}' So the conductance of walls only will be changed.")
-     #create an array of exterior walls and find range of starting construction R-value (not just insulation layer)
      surfaces = model.getSurfaces
      surfaces.each do |surface|
        if surface.outsideBoundaryCondition == "Outdoors" and surface.surfaceType == "Wall"
@@ -210,14 +212,17 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
 
          
          surface_conductance2 = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
+         u_value_rounded = sprintf "%.3f", u_value
+         surface_conductance2_rounded= sprintf "%.3f" , surface_conductance2
          runner.registerInfo("Initial conductance for #{surface.surfaceType} was : #{surface_conductance} , now it has been changed to #{surface_conductance2} ")
+         raise("U values for #{surface.surfaceType} was supposed to change to #{u_value_rounded}, but it is #{surface_conductance2_rounded}") if u_value_rounded != surface_conductance2_rounded
+
        end
        end
      return true
 
    elsif surface_type == "Floors"
      runner.registerInfo("The selected surface type is '#{surface_type}' So the conductance of floors only will be changed.")
-     #create an array of exterior walls and find range of starting construction R-value (not just insulation layer)
      surfaces = model.getSurfaces
      surfaces.each do |surface|
        if surface.outsideBoundaryCondition == "Outdoors" and surface.surfaceType == "Floor"
@@ -231,14 +236,16 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
                                                             false)
 
          surface_conductance2 = BTAP::Geometry::Surfaces.get_surface_construction_conductance(surface)
+         u_value_rounded = sprintf "%.3f", u_value
+         surface_conductance2_rounded= sprintf "%.3f" , surface_conductance2
          runner.registerInfo("Initial conductance for #{surface.surfaceType} was : #{surface_conductance} , now it has been changed to #{surface_conductance2} ")
+         raise("U values for #{surface.surfaceType} was supposed to change to #{u_value_rounded}, but it is #{surface_conductance2_rounded}") if u_value_rounded != surface_conductance2_rounded
+
        end
        end
      return true
 
    elsif surface_type == "Glazing"
-     runner.registerInfo("The selected surface type is '#{surface_type}' So only the conductance of windows will be changed.")
-
      #loop through sub surfaces
      sub_surfaces = model.getSubSurfaces
      sub_surfaces.each do |sub_surface|
@@ -255,7 +262,11 @@ class BtapSetEnvelopeConductanceByNecbClimateZone < OpenStudio::Ruleset::ModelUs
                                                             false)
 
          surface_conductance2 = BTAP::Geometry::Surfaces.get_surface_construction_conductance(sub_surface)
+         u_value_rounded = sprintf "%.3f", u_value
+         surface_conductance2_rounded= sprintf "%.3f" , surface_conductance2
          runner.registerInfo("Initial conductance for #{sub_surface.subSurfaceType} was : #{surface_conductance} , now it has been changed to #{surface_conductance2} ")
+         raise("U values for #{surface.surfaceType} was supposed to change to #{u_value_rounded}, but it is #{surface_conductance2_rounded}") if u_value_rounded != surface_conductance2_rounded
+
        end
        end
 
