@@ -23,22 +23,22 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     #dump to runner.
     if runner.is_a?(OpenStudio::Ruleset::OSRunner)
       case type.downcase
-        when "info"
-          runner.registerInfo(text)
-        when "warning"
-          runner.registerWarning(text)
-        when "error"
-          runner.registerError(text)
-        when "notapplicable"
-          runner.registerAsNotApplicable(text)
-        when "finalcondition"
-          runner.registerFinalCondition(text)
-        when "initialcondition"
-          runner.registerInitialCondition(text)
-        when "debug"
-        when "macro"
-        else
-          raise("Runner Register type #{type.downcase} not info,warning,error,notapplicable,finalcondition,initialcondition,macro.")
+      when "info"
+        runner.registerInfo(text)
+      when "warning"
+        runner.registerWarning(text)
+      when "error"
+        runner.registerError(text)
+      when "notapplicable"
+        runner.registerAsNotApplicable(text)
+      when "finalcondition"
+        runner.registerFinalCondition(text)
+      when "initialcondition"
+        runner.registerInitialCondition(text)
+      when "debug"
+      when "macro"
+      else
+        raise("Runner Register type #{type.downcase} not info,warning,error,notapplicable,finalcondition,initialcondition,macro.")
       end
     end
   end
@@ -70,7 +70,19 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
-    @surface_index =[
+    @necb_climate_zones = [
+        {name: "zone_4", min_hdd: 0.0, max_hdd: 3000.0, epw_file: 'CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw'},
+        {name: "zone_5", min_hdd: 3000.0, max_hdd: 4000.0, epw_file: 'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw'},
+        {name: "zone_6", min_hdd: 4000.0, max_hdd: 5000.0, epw_file: 'CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw'},
+        {name: "zone_7a", min_hdd: 5000.0, max_hdd: 6000.0, epw_file: 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw'},
+        {name: "zone_7b", min_hdd: 6000.0, max_hdd: 7000.0, epw_file: 'CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw'},
+        {name: "zone_8", min_hdd: 7000.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'},
+        {name: "all", min_hdd: 0.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'}
+    ]
+
+    #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
+    # an array to work around is programmatically easier.
+    @surface_index = [
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Wall"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "RoofCeiling"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Floor"},
@@ -115,6 +127,8 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     end
 
     @measure_interface_detailed = []
+
+
     #Conductances
     (@surface_index + @sub_surface_index).each do |surface|
       @measure_interface_detailed << {
@@ -157,6 +171,15 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
           "is_required" => false
       }
     end
+    # Climate Zone Filter
+    @measure_interface_detailed << {
+        "name" => "apply_to_climate_zone",
+        "type" => "Choice",
+        "display_name" => "Apply Only to Climate Zone",
+        "default_value" => "all",
+        "choices" => @necb_climate_zones.map {|cz| cz[:name]},
+        "is_required" => true
+    }
   end
 
   # human readable name
@@ -174,18 +197,41 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     return "Changes exterior wall construction's thermal conductances, Visible Transmittance and SHGC where application for each surface type."
   end
 
-
   # define what happens when the measure is run
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
-
+    standard = Standard.build('NECB2015')
+    necb_hdd18 = standard.get_necb_hdd18(model)
+    runner.registerInfo("The Weather File NECB hdd is '#{necb_hdd18}'.")
     arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)
-    # Make a copy of the model before the measure is applied.
-    report = Standard.new.change_construction_properties_in_model(model, arguments, @use_percentages)
+    raise("User Arguments are not valid\n #{user_arguments}") if arguments == false
+    #apply_to_climate_zone = arguments['apply_to_climate_zone']
+    # Find the climate zone according to the NECB hdds, then find the corresponding u-value of that climate zone.
+    raise() if necb_hdd18.nil?
+    #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
+    # an array to work around is programmatically easier.
+    @necb_climate_zones = [
+        {name: "zone_4", min_hdd: 0.0, max_hdd: 3000.0, epw_file: 'CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw'},
+        {name: "zone_5", min_hdd: 3000.0, max_hdd: 4000.0, epw_file: 'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw'},
+        {name: "zone_6", min_hdd: 4000.0, max_hdd: 5000.0, epw_file: 'CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw'},
+        {name: "zone_7a", min_hdd: 5000.0, max_hdd: 6000.0, epw_file: 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw'},
+        {name: "zone_7b", min_hdd: 6000.0, max_hdd: 7000.0, epw_file: 'CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw'},
+        {name: "zone_8", min_hdd: 7000.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'},
+        {name: "all", min_hdd: 0.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'}
+    ]
+    puts @necb_climate_zones
+    climate_zone = @necb_climate_zones.select {|zone| zone[:min_hdd] >= necb_hdd18 and necb_hdd18 < zone[:max_hdd]}
+    runner.registerInfo("Couldn't find a climate zone.") if climate_zone.nil?
 
+    #Only if the any climate zone is selected.. or the climate zone of the model matches the user selected climate zone will
+    # the measure do anything.
+    if climate_zone == 'all' or climate_zone == arguments['apply_to_climate_zone']
+    # Make a copy of the model before the measure is applied.
+    report = standard.change_construction_properties_in_model(model, arguments, @use_percentages)
     runner_register(runner,
                     'FinalCondition',
                     report)
+    end
     return true
   end
 end

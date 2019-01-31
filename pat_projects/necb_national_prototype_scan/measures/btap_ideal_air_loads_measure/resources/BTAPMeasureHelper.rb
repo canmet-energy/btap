@@ -129,6 +129,7 @@ module BTAPMeasureHelper
     #If any errors return false, else return the hash of argument values for user to use in measure.
     if errors != ""
       runner.registerError(errors)
+      puts errors
       return false
     end
     return values

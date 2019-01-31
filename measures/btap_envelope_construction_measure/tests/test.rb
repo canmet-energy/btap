@@ -32,6 +32,18 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
+    @necb_climate_zones = [
+        {name: "zone_4", min_hdd: 0.0, max_hdd: 3000.0, epw_file: 'CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw'},
+        {name: "zone_5", min_hdd: 3000.0, max_hdd: 4000.0, epw_file: 'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw'},
+        {name: "zone_6", min_hdd: 4000.0, max_hdd: 5000.0, epw_file: 'CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw'},
+        {name: "zone_7a", min_hdd: 5000.0, max_hdd: 6000.0, epw_file: 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw'},
+        {name: "zone_7b", min_hdd: 6000.0, max_hdd: 7000.0, epw_file: 'CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw'},
+        {name: "zone_8", min_hdd: 7000.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'},
+        {name: "all", min_hdd: 0.0, max_hdd: 100000.0, epw_file: 'CAN_NT_Yellowknife.AP.719360_CWEC2016.epw'}
+    ]
+
+    #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
+    # an array to work around is programmatically easier.
     @surface_index =[
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Wall"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "RoofCeiling"},
@@ -77,6 +89,8 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     end
 
     @measure_interface_detailed = []
+
+
     #Conductances
     (@surface_index + @sub_surface_index).each do |surface|
       @measure_interface_detailed << {
@@ -119,6 +133,16 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
           "is_required" => false
       }
     end
+
+    @measure_interface_detailed << {
+        "name" => "apply_to_climate_zone",
+        "type" => "Choice",
+        "display_name" => "Apply Only to Climate Zone",
+        "default_value" => "all",
+        "choices" => @necb_climate_zones.map {|cz| cz[:name]},
+        "is_required" => true
+    }
+
     @good_input_arguments = {
         "outdoors_wall_conductance" => 3.5,
         "outdoors_roofceiling_conductance" => 3.5,
@@ -145,7 +169,8 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "outdoors_skylight_tvis" => 0.999,
         "outdoors_tubulardaylightdiffuser_tvis" => 0.999,
         "outdoors_tubulardaylightdome_tvis" => 0.999,
-        "outdoors_glassdoor_tvis" => 0.999
+        "outdoors_glassdoor_tvis" => 0.999,
+        "apply_to_climate_zone" => 'all'
     }
 
   end
@@ -305,7 +330,6 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         epw_file: epw_file,
         sizing_run_dir: osm_directory,
         debug: @debug,
-        template: template,
         building_type: building_type)
     #set weather file to epw_file passed to model.
     weather.set_weather_file(model)

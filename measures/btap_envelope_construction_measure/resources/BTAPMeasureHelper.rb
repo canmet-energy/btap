@@ -188,6 +188,10 @@ module BTAPMeasureTestHelper
 
   # Test argument ranges.
   def test_argument_ranges
+    model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2015')
+    standard.model_add_design_days_and_weather_file(model, nil, 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw')
+
     [true, false].each do |json_input|
       [true, false].each do |string_double|
         @use_json_package = json_input
@@ -198,7 +202,6 @@ module BTAPMeasureTestHelper
             #Check over max
             if not argument['max_double_value'].nil?
               puts "testing max limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_max_value = argument['max_double_value'].to_f + 1.0
               over_max_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
@@ -213,7 +216,6 @@ module BTAPMeasureTestHelper
             #Check over max
             if not argument['min_double_value'].nil?
               puts "testing min limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_min_value = argument['min_double_value'].to_f - 1.0
               over_min_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
@@ -227,7 +229,6 @@ module BTAPMeasureTestHelper
 
           end
           if (argument['type'] == 'StringDouble') and (not argument["valid_strings"].nil?) and @use_string_double
-            model = OpenStudio::Model::Model.new
             input_arguments = @good_input_arguments.clone
             input_arguments[argument['name']] = SecureRandom.uuid.to_s
             puts "Testing argument #{argument['name']} min limit of #{argument['min_double_value']}"
