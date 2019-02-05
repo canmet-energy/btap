@@ -44,7 +44,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
-    @surface_index =[
+    @surface_index = [
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Wall"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "RoofCeiling"},
         {"boundary_condition" => "Outdoors", "construction_type" => "opaque", "surface_type" => "Floor"},
@@ -106,6 +106,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     end
 
 
+=begin
     # SHGC
     @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each do |surface|
       @measure_interface_detailed << {
@@ -133,6 +134,8 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
           "is_required" => false
       }
     end
+=end
+
 
     @measure_interface_detailed << {
         "name" => "apply_to_climate_zone",
@@ -143,51 +146,117 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "is_required" => true
     }
 
+
     @good_input_arguments = {
-        "outdoors_wall_conductance" => 3.5,
-        "outdoors_roofceiling_conductance" => 3.5,
-        "outdoors_floor_conductance" => 3.5,
-        "ground_wall_conductance" => 3.5,
+        "outdoors_wall_conductance" => 3.1,
+        "outdoors_roofceiling_conductance" => 3.2,
+        "outdoors_floor_conductance" => 3.3,
+        "ground_wall_conductance" => 3.4,
         "ground_roofceiling_conductance" => 3.5,
-        "ground_floor_conductance" => 3.5,
-        "outdoors_fixedwindow_conductance" => 3.5,
-        "outdoors_operablewindow_conductance" => 3.5,
-        "outdoors_skylight_conductance" => 3.5,
-        "outdoors_tubulardaylightdiffuser_conductance" => 3.5,
-        "outdoors_tubulardaylightdome_conductance" => 3.5,
-        "outdoors_door_conductance" => 3.5,
-        "outdoors_glassdoor_conductance" => 3.5,
-        "outdoors_overheaddoor_conductance" => 3.5,
-        "outdoors_fixedwindow_shgc" => 0.4,
-        "outdoors_operablewindow_shgc" => 0.4,
-        "outdoors_skylight_shgc" => 0.4,
-        "outdoors_tubulardaylightdiffuser_shgc" => 0.4,
-        "outdoors_tubulardaylightdome_shgc" => 0.4,
-        "outdoors_glassdoor_shgc" => 0.4,
-        "outdoors_fixedwindow_tvis" => 0.999,
-        "outdoors_operablewindow_tvis" => 0.999,
+        "ground_floor_conductance" => 3.6,
+        "outdoors_fixedwindow_conductance" => 3.7,
+        "outdoors_operablewindow_conductance" => 3.8,
+        "outdoors_skylight_conductance" => 3.9,
+        "outdoors_tubulardaylightdiffuser_conductance" => 4.0,
+        "outdoors_tubulardaylightdome_conductance" => 4.1,
+        "outdoors_door_conductance" => 4.2,
+        "outdoors_glassdoor_conductance" => 4.3,
+        "outdoors_overheaddoor_conductance" => 4.4,
+=begin
+        "outdoors_fixedwindow_shgc" => 0.24,
+        "outdoors_operablewindow_shgc" => 0.25,
+        "outdoors_skylight_shgc" => 0.26,
+        "outdoors_tubulardaylightdiffuser_shgc" => 0.27,
+        "outdoors_tubulardaylightdome_shgc" => 0.28,
+        "outdoors_glassdoor_shgc" => 0.29,
+        "outdoors_fixedwindow_tvis" => 0.990,
+        "outdoors_operablewindow_tvis" => 0.980,
         "outdoors_skylight_tvis" => 0.999,
-        "outdoors_tubulardaylightdiffuser_tvis" => 0.999,
-        "outdoors_tubulardaylightdome_tvis" => 0.999,
-        "outdoors_glassdoor_tvis" => 0.999,
+        "outdoors_tubulardaylightdiffuser_tvis" => 0.970,
+        "outdoors_tubulardaylightdome_tvis" => 0.960,
+        "outdoors_glassdoor_tvis" => 0.959,
+=end
         "apply_to_climate_zone" => 'all'
     }
 
   end
 
+  def get_envelope_average_charecteristics(model)
+    envelope_charecteristics = {}
+    #Check that the conductances have indeed changed to what they should be.
+    @surface_index.each do |surface|
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      boundary_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), surface['boundary_condition'])
+      surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(boundary_surfaces, surface['surface_type'])
+        if surfaces.size > 0
+          envelope_charecteristics[name] = BTAP::Geometry::Surfaces::get_weighted_average_surface_conductance(surfaces).round(4)
+        end
+    end
+
+    #Glazed surfaces
+    @sub_surface_index.select {|item| item['construction_type'] == 'glazing'}.each do |surface|
+      cond_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      boundary_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), surface['boundary_condition'])
+      sub_surfaces_all = BTAP::Geometry::Surfaces::get_subsurfaces_from_surfaces(boundary_surfaces)
+      sub_surfaces = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(sub_surfaces_all, surface['surface_type'])
+      if sub_surfaces.size > 0
+        envelope_charecteristics[cond_name] = BTAP::Geometry::Surfaces::get_weighted_average_surface_conductance(sub_surfaces).round(4)
+      end
+    end
+    return envelope_charecteristics
+  end
+
 
   def test_envelope_changes()
+    input_arguments = @good_input_arguments
+    actual_results = nil
 
-    # Create an instance of the measure
-    measure = get_measure_object()
-
-
-    # Create an instance of a runner
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
     model = create_necb_protype_model(
-        "LargeOffice",
+        "FullServiceRestaurant",
+        'NECB HDD Method',
+        'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
+        "NECB2011"
+    )
+
+    baseline_envelope_charecteristics = get_envelope_average_charecteristics(model)
+
+
+    # Create an instance of the measure and run it...
+    measure = get_measure_object()
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    #if json mode is turned on.
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'NA' || runner.result.value.valueName == 'Success', show_output(runner.result))
+    # Get report of model after the measure.
+    actual_results = get_envelope_average_charecteristics(model)
+    #test that the results are what we inputted into the model.
+    errors = []
+    actual_results.each_key do |key|
+      if input_arguments[key] == @baseline
+        #if set to baseline, then the value should be what was already in the model.
+        errors << "#{key} for #{@baseline}, but changed to #{actual_results[key]}" unless baseline_envelope_charecteristics[key] == actual_results[key]
+      else
+        # Otherwise it should be what was inputted.
+        errors << "#{key} called for #{input_arguments[key]}, but changed to #{actual_results[key]}" unless input_arguments[key] == actual_results[key]
+      end
+    end
+    #Asset there are no errors...otherwise print errors.
+    assert(  errors.size ==  0 , JSON.pretty_generate(errors) )
+  end
+
+  def test_climate_zone_all_applied()
+    #this test will ensure that the climate zone is applied when selected.
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "FullServiceRestaurant",
         'NECB HDD Method',
         'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
         "NECB2011"
@@ -195,112 +264,62 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
     # Test arguments and defaults
     arguments = measure.arguments(model)
-
     # set argument values to values and run the measure
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["apply_to_climate_zone"] = @necb_climate_zones.last[:name]
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure failed to run with apply_to_climate_zone set to climate zone 4. Returned #{runner.result.value.valueName} ")
+  end
 
-
-    #Set up conductance test values to validate against. Make each unique to make each surface type distinct.
-    values = {}
-    conductance = 3.5
-    (@surface_index + @sub_surface_index).each_with_index do |surface, index|
-      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
-      argument = arguments[index].clone
-      assert(argument.setValue(conductance.to_f))
-      argument_map[name] = argument
-      values[name] =conductance
-    end
-
-    conductance_argument_size = (@surface_index + @sub_surface_index).size
-    #SHGC
-    shgc = 0.244
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
-      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_shgc"
-      argument = arguments[conductance_argument_size + index].clone
-      assert(argument.setValue(shgc.to_f))
-      argument_map[name] = argument
-      values[name] =shgc
-    end
-
-    #SHGC
-    shgc_argument_size = @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.size
-    tvis = 0.999
-    @sub_surface_index.select {|surface| surface['construction_type'] == "glazing"}.each_with_index do |surface, index|
-      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_tvis"
-      argument = arguments[conductance_argument_size + shgc_argument_size + index].clone
-      assert(argument.setValue(tvis.to_f))
-      argument_map[name] = argument
-      values[name] =tvis
-    end
-
-    #run the measure
-    measure.run(model, runner, argument_map)
-    result = runner.result
-    assert(result.value.valueName == 'Success')
-    #Check that the conductances have indeed changed to what they should be.
-    outdoor_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(
-        model.getSurfaces(),
-        "Outdoors"
-    )
-    outdoor_subsurfaces = BTAP::Geometry::Surfaces::get_subsurfaces_from_surfaces(outdoor_surfaces)
-    ground_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(
-        model.getSurfaces(),
-        "Ground"
+  def test_climate_zone_applied()
+    #this test will ensure that the climate zone is applied when selected.
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "FullServiceRestaurant",
+        'NECB HDD Method',
+        'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw',
+        "NECB2011"
     )
 
-    ext_windows = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
-        outdoor_subsurfaces,
-        [
-            "FixedWindow",
-            "OperableWindow"]
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["apply_to_climate_zone"] = @necb_climate_zones[2][:name]
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure failed to run with apply_to_climate_zone set to climate zone 4. Returned #{runner.result.value.valueName} ")
+  end
+
+
+  def test_climate_zone_not_applied()
+    #this test will ensure that the climate zone is applied when not selected.
+    # Create an instance of the measure
+    measure = get_measure_object()
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    model = create_necb_protype_model(
+        "FullServiceRestaurant",
+        'NECB HDD Method',
+        'CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw',
+        "NECB2011"
     )
 
-    ext_skylights = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
-        outdoor_subsurfaces,
-        [
-            "Skylight",
-            "TubularDaylightDiffuser",
-            "TubularDaylightDome"]
-    )
-    ext_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
-        outdoor_subsurfaces,
-        ["Door"]
-    )
-
-    ext_glass_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
-        outdoor_subsurfaces,
-        ["GlassDoor"]
-    )
-    ext_overhead_doors = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(
-        outdoor_subsurfaces,
-        ["OverheadDoor"]
-    )
-
-    #opaque surfaces
-    opaque_surfaces = outdoor_surfaces + ext_doors +ext_overhead_doors + ground_surfaces
-    opaque_surfaces.sort.each do |surface|
-      name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.surfaceType.downcase}_conductance"
-      unless values[name] == @baseline
-        assert_equal(
-            values[name].to_f.round(3),
-            BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)
-        )
-      end
-    end
-
-    #glazing subsurfaces
-    glazing_subsurfaces = ext_windows + ext_glass_doors + ext_skylights
-    glazing_subsurfaces.sort.each do |surface|
-      cond_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_conductance"
-      shgc_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_shgc"
-      tvis_name = "#{surface.outsideBoundaryCondition.downcase}_#{surface.subSurfaceType.downcase}_tvis"
-      assert_equal(values[cond_name].to_f.round(3), BTAP::Geometry::Surfaces::get_surface_construction_conductance(surface).round(3)) unless values[cond_name] == @baseline
-      construction = OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get
-      assert_equal(values[shgc_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getSolarHeatGainCoefficient.value.round(3)) unless values[shgc_name] == @baseline
-      construction = OpenStudio::Model::getConstructionByName(surface.model, surface.construction.get.name.to_s).get
-      error_message = "Setting TVis for #{construction.name} to #{values[tvis_name].to_f.round(3)} failed. Actual is #{construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value}"
-      assert_equal(values[tvis_name].to_f.round(3), construction.layers.first.to_SimpleGlazing.get.getVisibleTransmittance.get.value.round(3), error_message) unless values[tvis_name] == @baseline
-    end
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["apply_to_climate_zone"] = @necb_climate_zones[2][:name]
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'NA', "Measure should Not be Applicable since CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw is not in #{@necb_climate_zones[2][:name]} . ")
   end
 
   def copy_model(model)

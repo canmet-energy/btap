@@ -166,7 +166,7 @@ module BTAPMeasureTestHelper
 
         #check number of arguments.
         if @use_json_package
-          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{JSON.pretty_generate(@measure_interface_detailed) } \n and this is the actual \n  #{JSON.pretty_generate(arguments[0])}")
         else
           assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
           (@measure_interface_detailed).each_with_index do |argument_expected, index|
@@ -208,7 +208,6 @@ module BTAPMeasureTestHelper
               input_arguments[argument['name']] = over_max_value
               puts "Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
               input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
-              run_measure(input_arguments, model)
               runner = run_measure(input_arguments, model)
               assert(runner.result.value.valueName != 'Success', "Checks did not stop a lower than limit value of #{over_max_value} for #{argument['name']}")
               puts "Success: Testing argument #{argument['name']} max limit of #{argument['max_double_value']}"
