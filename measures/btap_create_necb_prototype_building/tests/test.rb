@@ -68,5 +68,6 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     measure.run(model, runner, argument_map)
     result = runner.result
     assert(result.value.valueName == 'Success')
+    assert()
   end
 end

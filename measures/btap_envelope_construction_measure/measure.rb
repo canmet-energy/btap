@@ -174,6 +174,32 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
       }
     end
 =end
+
+
+
+
+    @measure_interface_detailed << {
+        "name" => "fdwr_lim",
+        "type" => "StringDouble",
+        "display_name" => "Fenestration Door to Wall Ratio",
+        "default_value" => @baseline,
+        "max_double_value" => 1.0,
+        "min_double_value" => 0.0,
+        "valid_strings" => [@baseline],
+        "is_required" => false
+    }
+
+    @measure_interface_detailed << {
+        "name" => "srr_lim",
+        "type" => "StringDouble",
+        "display_name" => "Skylight to Roof Ratio",
+        "default_value" => @baseline,
+        "max_double_value" => 1.0,
+        "min_double_value" => 0.0,
+        "valid_strings" => [@baseline],
+        "is_required" => false
+    }
+
     # Climate Zone Filter
 
     @measure_interface_detailed << {
@@ -223,6 +249,9 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     if arguments['apply_to_climate_zone'] == 'all' or arguments['apply_to_climate_zone'] == climate_zone[:name]
     # Make a copy of the model before the measure is applied.
       report = standard.change_construction_properties_in_model(model, arguments, @use_percentages)
+      return standard.apply_max_ssr(model: model, srr_lim: arguments['srr_lim'].to_f )
+      return standard.apply_max_fdwr(model: model, fdwr_lim: arguments['fdwr_lim'].to_f)
+
       runner_register(runner,
                       'FinalCondition',
                       report)

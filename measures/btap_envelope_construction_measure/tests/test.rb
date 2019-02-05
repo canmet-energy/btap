@@ -138,6 +138,28 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
 
     @measure_interface_detailed << {
+        "name" => "fdwr_lim",
+        "type" => "StringDouble",
+        "display_name" => "Fenestration Door to Wall Ratio",
+        "default_value" => @baseline,
+        "max_double_value" => 1.0,
+        "min_double_value" => 0.0,
+        "valid_strings" => [@baseline],
+        "is_required" => false
+    }
+
+    @measure_interface_detailed << {
+        "name" => "srr_lim",
+        "type" => "StringDouble",
+        "display_name" => "Skylight to Roof Ratio",
+        "default_value" => @baseline,
+        "max_double_value" => 1.0,
+        "min_double_value" => 0.0,
+        "valid_strings" => [@baseline],
+        "is_required" => false
+    }
+
+    @measure_interface_detailed << {
         "name" => "apply_to_climate_zone",
         "type" => "Choice",
         "display_name" => "Apply Only to Climate Zone",
@@ -176,6 +198,8 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "outdoors_tubulardaylightdome_tvis" => 0.960,
         "outdoors_glassdoor_tvis" => 0.959,
 =end
+        "fdwr_lim" => 0.50,
+        "srr_lim" => 0.03,
         "apply_to_climate_zone" => 'all'
     }
 

@@ -133,7 +133,6 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     log_msgs
     return true
-
   end
 
   #end the run method

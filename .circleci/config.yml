@@ -28,7 +28,7 @@ jobs:
       - run:
           name: run tests
           command: |
-           bundle exec rake test:measure-tests
+           bundle exec rake test:circleci
 
       # collect reports
       - store_test_results:
