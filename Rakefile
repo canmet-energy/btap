@@ -36,8 +36,8 @@ namespace :test do
       test_list = FileList.new
       # Read the parallelized list of tests
       # created by the circleci CLI in config.yml
-      if File.exist?('circleci_test.txt')
-        File.open('circleci_test.txt', 'r') do |f|
+      if File.exist?('circleci_tests.txt')
+        File.open('circleci_tests.txt', 'r') do |f|
           f.each_line do |line|
             # Skip comments the CLI may have included
             next unless line.include?('.rb')
