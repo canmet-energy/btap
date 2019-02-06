@@ -47,6 +47,7 @@ namespace :test do
             pth = File.absolute_path("#{line}")
             unless File.exist?(pth)
               puts "Skipped #{line} because this file doesn't exist"
+              puts "From #{Dir.pwd}"
               next
             end
             # Add this test to the list
