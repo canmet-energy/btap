@@ -144,6 +144,7 @@ end
 module BTAPMeasureTestHelper
   ##### Helper methods Do notouch unless you know the consequences.
 
+
   #Boiler plate to default values and number of arguments against what is in your test's setup method.
   def test_arguments_and_defaults
     [true, false].each do |json_input|
@@ -239,6 +240,7 @@ module BTAPMeasureTestHelper
       end
     end
   end
+
 
   # helper method to create necb archetype as a starting point for testing.
   def create_necb_protype_model(building_type, climate_zone, epw_file, template)

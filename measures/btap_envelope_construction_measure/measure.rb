@@ -248,9 +248,23 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     # the measure do anything.
     if arguments['apply_to_climate_zone'] == 'all' or arguments['apply_to_climate_zone'] == climate_zone[:name]
     # Make a copy of the model before the measure is applied.
+
+      #save original conductances
+      original = get_envelope_average_charecteristics(model)
+      unless arguments['fdwr_lim'] == @baseline
+        #Apply the max fdwr..this will sadly default to the NECB2015 window conductances.
+        standard.apply_max_fdwr(model: model, fdwr_lim: arguments['fdwr_lim'].to_f)
+        # This will re apply the average window conductances to the new windows. ( SHould do this for doors. too...)
+        standard.change_construction_properties_in_model(model, {"outdoors_fixedwindow_conductance" =>original["outdoors_fixedwindow_conductance" ] }, false)
+      end
+      unless arguments['srr_lim'] == @baseline
+        #see above...same idea.
+        standard.apply_max_ssr(model: model, srr_lim: arguments['srr_lim'].to_f)
+        standard.change_construction_properties_in_model(model, {"outdoors_skylight_conductance" =>original["outdoors_skylight_conductance" ] }, false)
+      end
+      #Make the conducance changes contained in the arguments.
       report = standard.change_construction_properties_in_model(model, arguments, @use_percentages)
-      return standard.apply_max_ssr(model: model, srr_lim: arguments['srr_lim'].to_f )
-      return standard.apply_max_fdwr(model: model, fdwr_lim: arguments['fdwr_lim'].to_f)
+
 
       runner_register(runner,
                       'FinalCondition',
@@ -260,6 +274,33 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     end
     return true
   end
+
+
+  def get_envelope_average_charecteristics(model)
+    envelope_charecteristics = {}
+    #Check that the conductances have indeed changed to what they should be.
+    @surface_index.each do |surface|
+      name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      boundary_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), surface['boundary_condition'])
+      surfaces = BTAP::Geometry::Surfaces::filter_by_surface_types(boundary_surfaces, surface['surface_type'])
+      if surfaces.size > 0
+        envelope_charecteristics[name] = BTAP::Geometry::Surfaces::get_weighted_average_surface_conductance(surfaces).round(4)
+      end
+    end
+
+    #Glazed surfaces
+    @sub_surface_index.select {|item| item['construction_type'] == 'glazing'}.each do |surface|
+      cond_name = "#{surface['boundary_condition'].downcase}_#{surface['surface_type'].downcase}_conductance"
+      boundary_surfaces = BTAP::Geometry::Surfaces::filter_by_boundary_condition(model.getSurfaces(), surface['boundary_condition'])
+      sub_surfaces_all = BTAP::Geometry::Surfaces::get_subsurfaces_from_surfaces(boundary_surfaces)
+      sub_surfaces = BTAP::Geometry::Surfaces::filter_subsurfaces_by_types(sub_surfaces_all, surface['surface_type'])
+      if sub_surfaces.size > 0
+        envelope_charecteristics[cond_name] = BTAP::Geometry::Surfaces::get_weighted_average_surface_conductance(sub_surfaces).round(4)
+      end
+    end
+    return envelope_charecteristics
+  end
+
 end
 
 

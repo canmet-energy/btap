@@ -176,7 +176,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
         "ground_wall_conductance" => 3.4,
         "ground_roofceiling_conductance" => 3.5,
         "ground_floor_conductance" => 3.6,
-        "outdoors_fixedwindow_conductance" => 3.7,
+        "outdoors_fixedwindow_conductance" => 1.4,
         "outdoors_operablewindow_conductance" => 3.8,
         "outdoors_skylight_conductance" => 3.9,
         "outdoors_tubulardaylightdiffuser_conductance" => 4.0,
@@ -345,6 +345,66 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     runner = run_measure(input_arguments, model)
     assert(runner.result.value.valueName == 'NA', "Measure should Not be Applicable since CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw is not in #{@necb_climate_zones[2][:name]} . ")
   end
+
+
+  def test_fdwr_applied()
+    standard = Standard.build('NECB2011')
+    # This test will ensrue that the fdwr is set to the model
+    fdwr_lim = 0.20
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "FullServiceRestaurant",
+        'NECB HDD Method',
+        'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw',
+        "NECB2011"
+    )
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["fdwr_lim"] = fdwr_lim
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure did not complete sucessfully. Returned #{runner.result.value.valueName} ")
+    result_fdwr = standard.find_exposed_conditioned_vertical_surfaces(model)['fdwr']
+    assert( result_fdwr.round(2) == fdwr_lim.round(2), "FDWR was NOT set: Expected FDWR == #{fdwr_lim} instead got #{result_fdwr} ")
+
+  end
+
+  def test_srr_applied()
+    standard = Standard.build('NECB2011')
+    # This test will ensrue that the fdwr is set to the model
+    srr_lim = 0.30
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "RetailStripmall",
+        'NECB HDD Method',
+        'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw',
+        "NECB2011"
+    )
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["srr_lim"] = srr_lim
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure did not complete sucessfully. Returned #{runner.result.value.valueName} ")
+    result_srr = standard.find_exposed_conditioned_roof_surfaces(model)['srr']
+    assert( result_srr.round(2) == srr_lim.round(2), "SRR was NOT set: Expected SRR == #{srr_lim} instead got #{result_srr} ")
+  end
+
+
+
+
 
   def copy_model(model)
     copy_model = OpenStudio::Model::Model.new
