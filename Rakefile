@@ -44,7 +44,7 @@ namespace :test do
             # Remove whitespaces
             line = line.strip
             # Ensure the file exists
-            pth = File.absolute_path("test/#{line}")
+            pth = File.absolute_path("#{line}")
             unless File.exist?(pth)
               puts "Skipped #{line} because this file doesn't exist"
               next
