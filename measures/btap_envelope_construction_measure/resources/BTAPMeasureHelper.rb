@@ -22,37 +22,37 @@ module BTAPMeasureHelper
         arg = nil
         statement = nil
         case argument['type']
-          when "String"
-            arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue(argument['default_value'].to_s)
+        when "String"
+          arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
+          arg.setDisplayName(argument['display_name'])
+          arg.setDefaultValue(argument['default_value'].to_s)
 
-          when "Double"
+        when "Double"
+          arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
+          arg.setDisplayName("#{argument['display_name']}")
+          arg.setDefaultValue("#{argument['default_value']}".to_f)
+
+        when "Choice"
+          arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
+          arg.setDisplayName(argument['display_name'])
+          arg.setDefaultValue(argument['default_value'].to_s)
+          puts arg.defaultValueAsString
+
+        when "Bool"
+          arg = OpenStudio::Measure::OSArgument.makeBoolArgument(argument['name'], argument['is_required'])
+          arg.setDisplayName(argument['display_name'])
+          arg.setDefaultValue(argument['default_value'])
+
+
+        when "StringDouble"
+          if @use_string_double == false
             arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName("#{argument['display_name']}")
-            arg.setDefaultValue("#{argument['default_value']}".to_f)
-
-          when "Choice"
-            arg = OpenStudio::Measure::OSArgument.makeChoiceArgument(argument['name'], argument['choices'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
+            arg.setDefaultValue(argument['default_value'].to_f)
+          else
+            arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
             arg.setDefaultValue(argument['default_value'].to_s)
-            puts arg.defaultValueAsString
-
-          when "Bool"
-            arg = OpenStudio::Measure::OSArgument.makeBoolArgument(argument['name'], argument['is_required'])
-            arg.setDisplayName(argument['display_name'])
-            arg.setDefaultValue(argument['default_value'])
-
-
-          when "StringDouble"
-            if @use_string_double == false
-              arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument(argument['name'], argument['is_required'])
-              arg.setDefaultValue(argument['default_value'].to_f)
-            else
-              arg = OpenStudio::Ruleset::OSArgument.makeStringArgument(argument['name'], argument['is_required'])
-              arg.setDefaultValue(argument['default_value'].to_s)
-            end
-            arg.setDisplayName(argument['display_name'])
+          end
+          arg.setDisplayName(argument['display_name'])
         end
         args << arg
       end
@@ -70,23 +70,23 @@ module BTAPMeasureHelper
       @measure_interface_detailed.each do |argument|
 
         case argument['type']
-          when "String", "Choice"
-            values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
-          when "Double"
-            values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
-          when "Bool"
-            values[argument['name']] = runner.getBoolArgumentValue(argument['name'], user_arguments)
-          when "StringDouble"
-            value = nil
-            if @use_string_double == false
-              value = (runner.getDoubleArgumentValue(argument['name'], user_arguments).to_f)
-            else
-              value = runner.getStringArgumentValue(argument['name'], user_arguments)
-              if valid_float?(value)
-                value = value.to_f
-              end
+        when "String", "Choice"
+          values[argument['name']] = runner.getStringArgumentValue(argument['name'], user_arguments)
+        when "Double"
+          values[argument['name']] = runner.getDoubleArgumentValue(argument['name'], user_arguments)
+        when "Bool"
+          values[argument['name']] = runner.getBoolArgumentValue(argument['name'], user_arguments)
+        when "StringDouble"
+          value = nil
+          if @use_string_double == false
+            value = (runner.getDoubleArgumentValue(argument['name'], user_arguments).to_f)
+          else
+            value = runner.getStringArgumentValue(argument['name'], user_arguments)
+            if valid_float?(value)
+              value = value.to_f
             end
-            values[argument['name']] = value
+          end
+          values[argument['name']] = value
         end
       end
     end
@@ -98,15 +98,15 @@ module BTAPMeasureHelper
     return_value = true
     values = get_hash_of_arguments(user_arguments, runner)
     # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
-      runner_register(runner, 'Error', "validateUserArguments failed... Check the argument definition for errors.")
-      return_value = false
-    end
 
     # Validate arguments
     errors = ""
     @measure_interface_detailed.each do |argument|
-      case argument['type']
+      if values[argument['name']] == @baseline
+        #sets baseline argument to nill
+        values[argument['name']] = nil
+      else
+        case argument['type']
         when "Double"
           value = values[argument['name']]
           if (not argument["max_double_value"].nil? and value.to_f > argument["max_double_value"].to_f) or
@@ -124,6 +124,7 @@ module BTAPMeasureHelper
             error = "#{argument['name']} must be between #{argument["min_double_value"]} and #{argument["max_double_value"]}. You entered #{value} for #{argument['name']}. Please enter a stringdouble value in the expected range.\n"
             errors << error
           end
+        end
       end
     end
     #If any errors return false, else return the hash of argument values for user to use in measure.
@@ -174,12 +175,12 @@ module BTAPMeasureTestHelper
             assert_equal(argument_expected['name'], arguments[index].name, "Measure argument name of #{argument_expected['name']} was expected, but got #{arguments[index].name} instead.")
             assert_equal(argument_expected['display_name'], arguments[index].displayName, "Display name for argument #{argument_expected['name']} was expected to be #{argument_expected['display_name']}, but got #{arguments[index].displayName} instead.")
             case argument_type(arguments[index])
-              when "String", "Choice"
-                assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
-              when "Double", "Integer"
-                assert_equal(argument_expected['default_value'].to_f, arguments[index].defaultValueAsDouble.to_f, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
-              when "Bool"
-                assert_equal(argument_expected['default_value'], arguments[index].defaultValueAsBool, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+            when "String", "Choice"
+              assert_equal(argument_expected['default_value'].to_s, arguments[index].defaultValueAsString, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+            when "Double", "Integer"
+              assert_equal(argument_expected['default_value'].to_f, arguments[index].defaultValueAsDouble.to_f, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
+            when "Bool"
+              assert_equal(argument_expected['default_value'], arguments[index].defaultValueAsBool, "The default value for argument #{argument_expected['name']} was #{argument_expected['default_value']}, but actual was #{arguments[index].defaultValueAsString}")
             end
           end
         end
@@ -318,24 +319,24 @@ module BTAPMeasureTestHelper
   #Determines the OS argument type dynamically.
   def argument_type(argument)
     case argument.type.value
-      when 0
-        return "Bool"
-      when 1 #Double
-        return "Double"
-      when 2 #Quantity
-        return "Quantity"
-      when 3 #Integer
-        return "Integer"
-      when 4
-        return "String"
-      when 5 #Choice
-        return "Choice"
-      when 6 #Path
-        return "Path"
-      when 7 #Separator
-        return "Separator"
-      else
-        return "Blah"
+    when 0
+      return "Bool"
+    when 1 #Double
+      return "Double"
+    when 2 #Quantity
+      return "Quantity"
+    when 3 #Integer
+      return "Integer"
+    when 4
+      return "String"
+    when 5 #Choice
+      return "Choice"
+    when 6 #Path
+      return "Path"
+    when 7 #Separator
+      return "Separator"
+    else
+      return "Blah"
     end
   end
 

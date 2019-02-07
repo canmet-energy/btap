@@ -28,7 +28,12 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     #Set to true if debugging measure.
     @debug = true
     #this is the 'do nothing value and most arguments should have. '
-    @baseline = 'baseline'
+    @baseline = nil
+    if @use_string_double
+      @baseline = '-999'
+    else
+      @baseline = -999
+    end
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
@@ -170,7 +175,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
 
 
     @good_input_arguments = {
-        "outdoors_wall_conductance" => 3.1,
+        "outdoors_wall_conductance" => -999,
         "outdoors_roofceiling_conductance" => 3.2,
         "outdoors_floor_conductance" => 3.3,
         "ground_wall_conductance" => 3.4,
@@ -230,13 +235,53 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     return envelope_charecteristics
   end
 
+  def test_baseline_values()
+    input_arguments = {
+        "outdoors_wall_conductance" => @baseline,
+        "outdoors_roofceiling_conductance" => @baseline,
+        "outdoors_floor_conductance" => @baseline,
+        "ground_wall_conductance" => @baseline,
+        "ground_roofceiling_conductance" => @baseline,
+        "ground_floor_conductance" => @baseline,
+        "outdoors_fixedwindow_conductance" => @baseline,
+        "outdoors_operablewindow_conductance" => @baseline,
+        "outdoors_skylight_conductance" => @baseline,
+        "outdoors_tubulardaylightdiffuser_conductance" => @baseline,
+        "outdoors_tubulardaylightdome_conductance" => @baseline,
+        "outdoors_door_conductance" => @baseline,
+        "outdoors_glassdoor_conductance" => @baseline,
+        "outdoors_overheaddoor_conductance" => @baseline,
+=begin
+        "outdoors_fixedwindow_shgc" => 0.24,
+        "outdoors_operablewindow_shgc" => 0.25,
+        "outdoors_skylight_shgc" => 0.26,
+        "outdoors_tubulardaylightdiffuser_shgc" => 0.27,
+        "outdoors_tubulardaylightdome_shgc" => 0.28,
+        "outdoors_glassdoor_shgc" => 0.29,
+        "outdoors_fixedwindow_tvis" => 0.990,
+        "outdoors_operablewindow_tvis" => 0.980,
+        "outdoors_skylight_tvis" => 0.999,
+        "outdoors_tubulardaylightdiffuser_tvis" => 0.970,
+        "outdoors_tubulardaylightdome_tvis" => 0.960,
+        "outdoors_glassdoor_tvis" => 0.959,
+=end
+        "fdwr_lim" => 0.50,
+        "srr_lim" => 0.03,
+        "apply_to_climate_zone" => 'all'
+    }
+    envelope_changes(input_arguments)
+
+  end
+
 
   def test_envelope_changes()
     input_arguments = @good_input_arguments
     actual_results = nil
-
-
     # Use the NECB prototype to create a model to test against. Alterantively we could load an osm file instead.
+    envelope_changes(input_arguments)
+  end
+
+  def envelope_changes(input_arguments)
     model = create_necb_protype_model(
         "FullServiceRestaurant",
         'NECB HDD Method',
@@ -245,8 +290,6 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     )
 
     baseline_envelope_charecteristics = get_envelope_average_charecteristics(model)
-
-
     # Create an instance of the measure and run it...
     measure = get_measure_object()
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -272,7 +315,7 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
       end
     end
     #Asset there are no errors...otherwise print errors.
-    assert(  errors.size ==  0 , JSON.pretty_generate(errors) )
+    assert(errors.size == 0, JSON.pretty_generate(errors))
   end
 
   def test_climate_zone_all_applied()
@@ -372,8 +415,64 @@ class BTAPEnvelopeConstructionMeasure_Test < Minitest::Test
     assert(runner.result.value.valueName == 'Success', "Measure did not complete sucessfully. Returned #{runner.result.value.valueName} ")
     result_fdwr = standard.find_exposed_conditioned_vertical_surfaces(model)['fdwr']
     assert( result_fdwr.round(2) == fdwr_lim.round(2), "FDWR was NOT set: Expected FDWR == #{fdwr_lim} instead got #{result_fdwr} ")
-
   end
+
+  def test_fdwr_not_applied()
+    standard = Standard.build('NECB2011')
+    # This test will ensrue that the fdwr is set to the model
+    fdwr_lim = @baseline
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "FullServiceRestaurant",
+        'NECB HDD Method',
+        'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw',
+        "NECB2011"
+    )
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    before_fdwr = standard.find_exposed_conditioned_vertical_surfaces(model)['fdwr']
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["fdwr_lim"] = fdwr_lim
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure did not complete sucessfully. Returned #{runner.result.value.valueName} ")
+    result_fdwr = standard.find_exposed_conditioned_vertical_surfaces(model)['fdwr']
+    assert( result_fdwr.round(2) == before_fdwr.round(2), "FDWR was NOT set: Expected FDWR == #{before_fdwr} instead got #{result_fdwr} ")
+  end
+
+  def test_srr_not_applied()
+    standard = Standard.build('NECB2011')
+    # This test will ensrue that the fdwr is set to the model
+    srr_lim = @baseline
+    # Create an instance of the measure
+    measure = get_measure_object()
+    model = create_necb_protype_model(
+        "RetailStripmall",
+        'NECB HDD Method',
+        'CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw',
+        "NECB2011"
+    )
+
+    # Test arguments and defaults
+    arguments = measure.arguments(model)
+    before_srr = standard.find_exposed_conditioned_roof_surfaces(model)['srr']
+    # set argument values to values and run the measure
+    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    input_arguments = @good_input_arguments.clone
+    #set to apply to climate zone 4 which is zero in the @necb_climate_zones array.
+    input_arguments["srr_lim"] = srr_lim
+    input_arguments = {'json_input' => JSON.pretty_generate(input_arguments)} if @use_json_package
+    runner = run_measure(input_arguments, model)
+    assert(runner.result.value.valueName == 'Success', "Measure did not complete sucessfully. Returned #{runner.result.value.valueName} ")
+    result_srr = standard.find_exposed_conditioned_roof_surfaces(model)['srr']
+    assert( result_srr.round(2) == before_srr.round(2), "SRR was NOT set: Expected SRR == #{before_srr} instead got #{result_srr} ")
+  end
+
 
   def test_srr_applied()
     standard = Standard.build('NECB2011')

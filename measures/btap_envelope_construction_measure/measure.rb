@@ -66,7 +66,12 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     #Set to true if debugging measure.
     @debug = true
     #this is the 'do nothing value and most arguments should have. '
-    @baseline = 'baseline'
+    @baseline = nil
+    if @use_string_double
+      @baseline = '-999'
+    else
+      @baseline = -999
+    end
 
     #Creating a data-driven measure. This is because there are a large amount of inputs to enter and test.. So creating
     # an array to work around is programmatically easier.
@@ -251,13 +256,13 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
 
       #save original conductances
       original = get_envelope_average_charecteristics(model)
-      unless arguments['fdwr_lim'] == @baseline
+      unless arguments['fdwr_lim'].nil?
         #Apply the max fdwr..this will sadly default to the NECB2015 window conductances.
         standard.apply_max_fdwr(model: model, fdwr_lim: arguments['fdwr_lim'].to_f)
         # This will re apply the average window conductances to the new windows. ( SHould do this for doors. too...)
         standard.change_construction_properties_in_model(model, {"outdoors_fixedwindow_conductance" =>original["outdoors_fixedwindow_conductance" ] }, false)
       end
-      unless arguments['srr_lim'] == @baseline
+      unless arguments['srr_lim'].nil?
         #see above...same idea.
         standard.apply_max_ssr(model: model, srr_lim: arguments['srr_lim'].to_f)
         standard.change_construction_properties_in_model(model, {"outdoors_skylight_conductance" =>original["outdoors_skylight_conductance" ] }, false)
