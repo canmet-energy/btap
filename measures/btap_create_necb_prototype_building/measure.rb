@@ -63,6 +63,11 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     epw_file.setDisplayName('Climate File')
     epw_file.setDefaultValue('CAN_AB_Banff.CS.711220_CWEC2016.epw')
     args << epw_file
+
+    auto_zone = OpenStudio::Ruleset::OSArgument::makeBoolArgument('new_auto_zoner', true)
+    auto_zone.setDisplayName('Use New Autozone method?')
+    auto_zone.setDefaultValue(false)
+    args << auto_zone
     return args
   end
 
@@ -79,6 +84,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     building_type = runner.getStringArgumentValue('building_type', user_arguments)
     template = runner.getStringArgumentValue('template', user_arguments)
     epw_file = runner.getStringArgumentValue('epw_file', user_arguments)
+    new_auto_zoner = runner.getBoolArgumentValue('new_auto_zoner', user_arguments)
 
     # Turn debugging output on/off
     @debug = false
@@ -127,13 +133,13 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
                                                            building_type: building_type,
                                                            epw_file: epw_file,
                                                            sizing_run_dir: osm_directory,
-                                                           debug: @debug )
+                                                           debug: @debug,
+                                                           new_auto_zoner: new_auto_zoner )
     standard.model_replace_model(model, new_model)
 
 
     log_msgs
     return true
-
   end
 
   #end the run method

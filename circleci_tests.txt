@@ -1,10 +1,4 @@
+measures/btap_create_necb_prototype_building/tests/test.rb
 measures/btap_create_necb_reference_building/tests/test.rb
-measures_development/BTAPTemplateModelMeasure/tests/test.rb
 measures/btap_envelope_construction_measure/tests/test.rb
-measures/btap_envelope_fdwr_and_srr/tests/test.rb
-measures/btap_ideal_air_loads_measure/tests/test.rb
-measures/btap_ideal_air_loads_options_eplus/tests/test.rb
-measures/btap_open_studio_results/tests/test.rb
-measures/btap_report_variables/tests/test.rb
 measures/btap_results/tests/test.rb
-measures_development/btap_create_necb_prototype_building_scale/tests/test.rb
