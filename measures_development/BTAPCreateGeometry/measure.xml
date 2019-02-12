@@ -1,11 +1,9 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>invalid null reference Expected argument 1 of type std::vector&lt; openstudio::measure::OSArgument >::value_type const &amp;, but got NilClass nil
-	in SWIG method 'push'</error>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>398cd035-df63-45ef-90a3-4af88bc5039a</version_id>
-  <version_modified>20180516T163939Z</version_modified>
+  <version_id>d174fb93-2578-4eb8-b929-a39aef83952e</version_id>
+  <version_modified>20190114T210916Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
@@ -132,10 +130,16 @@
   </attributes>
   <files>
     <file>
-      <filename>BTAPCreateGeometry_test.rb</filename>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FE6DF5DC</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>70E79E70</checksum>
+      <checksum>DD6C1885</checksum>
     </file>
     <file>
       <version>
@@ -146,43 +150,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C7A23DB6</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
-      <filename>fileio.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>55494222</checksum>
-    </file>
-    <file>
-      <filename>Standards.Construction.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C6C6E51</checksum>
-    </file>
-    <file>
-      <filename>Standards.Model.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>46874C01</checksum>
-    </file>
-    <file>
-      <filename>btap_additions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6DC45CBD</checksum>
-    </file>
-    <file>
-      <filename>building_envelope.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6ED0F4FE</checksum>
+      <checksum>1B622A7A</checksum>
     </file>
   </files>
 </measure>
