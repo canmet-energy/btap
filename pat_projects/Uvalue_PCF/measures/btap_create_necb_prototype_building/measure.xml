@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>3eff181f-ed78-40f5-9bbb-3bf13aa63de3</version_id>
-  <version_modified>20181220T162125Z</version_modified>
+  <version_id>2c997186-1e0c-4f64-80ca-4972aec97836</version_id>
+  <version_modified>20190212T141217Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
@@ -380,6 +380,24 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>new_auto_zoner</name>
+      <display_name>Use New Autozone method?</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
   </arguments>
   <outputs/>
   <provenances/>
@@ -404,7 +422,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>919E1A97</checksum>
+      <checksum>A7332A99</checksum>
     </file>
     <file>
       <version>
@@ -415,7 +433,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C36E6275</checksum>
+      <checksum>C8FFEF2F</checksum>
     </file>
   </files>
 </measure>

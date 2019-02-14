@@ -1,6 +1,7 @@
 {
-  "projectName": "Uvalue_PCF_PAT",
-  "projectDir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT",
+  "projectName": "Uvalue_PCF",
+  "projectDir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF",
+  "analysisName": "Uvalue_PCF",
   "seed": "dummy.osm",
   "weatherFile": "dummy.epw",
   "analysis_type": "Algorithmic",
@@ -83,14 +84,14 @@
   "openstudioMD5": "",
   "measures": [
     {
-      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT\\measures\\btap_create_necb_prototype_building",
+      "measure_dir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_create_necb_prototype_building",
       "name": "btap_create_necb_prototype_building",
-      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures/btap_create_necb_prototype_building",
+      "directory": "C:/Users/vuonge/Documents/Code Document/measure/btap_create_necb_prototype_building",
       "uid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
       "uuid": "{3e9acd53-8602-4749-a655-7cbbe48e8b30}",
-      "version_id": "3eff181f-ed78-40f5-9bbb-3bf13aa63de3",
-      "version_uuid": "{3eff181f-ed78-40f5-9bbb-3bf13aa63de3}",
-      "version_modified": "20181220T162125Z",
+      "version_id": "2c997186-1e0c-4f64-80ca-4972aec97836",
+      "version_uuid": "{2c997186-1e0c-4f64-80ca-4972aec97836}",
+      "version_modified": "20190212T141217Z",
       "xml_checksum": "2C38F48B",
       "display_name": "BTAPCreateNECBPrototypeBuilding",
       "class_name": "BTAPCreateNECBPrototypeBuilding",
@@ -106,62 +107,6 @@
         }
       ],
       "arguments": [
-        {
-          "specialRowId": "optionDelete",
-          "$$hashKey": "uiGrid-00H5",
-          "inputs": {
-            "relationship": null,
-            "choiceDisplayNames": [],
-            "variableSetting": "Argument",
-            "distribution": "Uniform",
-            "discreteVariables": [],
-            "maximum": null,
-            "minimum": null,
-            "mean": null,
-            "deltaX": null,
-            "stdDev": null,
-            "default_value": null,
-            "showWarningIcon": false
-          }
-        },
-        {
-          "specialRowId": "optionName",
-          "type": "String",
-          "$$hashKey": "uiGrid-00H7",
-          "inputs": {
-            "relationship": null,
-            "choiceDisplayNames": [],
-            "variableSetting": "Argument",
-            "distribution": "Uniform",
-            "discreteVariables": [],
-            "maximum": "",
-            "minimum": "",
-            "mean": "",
-            "deltaX": "",
-            "stdDev": "",
-            "default_value": "",
-            "showWarningIcon": false
-          }
-        },
-        {
-          "specialRowId": "optionDescription",
-          "type": "String",
-          "$$hashKey": "uiGrid-00H9",
-          "inputs": {
-            "relationship": null,
-            "choiceDisplayNames": [],
-            "variableSetting": "Argument",
-            "distribution": "Uniform",
-            "discreteVariables": [],
-            "maximum": "",
-            "minimum": "",
-            "mean": "",
-            "deltaX": "",
-            "stdDev": "",
-            "default_value": "",
-            "showWarningIcon": false
-          }
-        },
         {
           "name": "building_type",
           "display_name": "Building Type.",
@@ -206,7 +151,6 @@
             "Hospital",
             "Outpatient"
           ],
-          "$$hashKey": "uiGrid-00HB",
           "display_name_short": "building_type",
           "inputs": {
             "relationship": null,
@@ -234,82 +178,82 @@
               {
                 "value": "SecondarySchool",
                 "weight": "",
-                "$$hashKey": "object:1961"
+                "$$hashKey": "object:2887"
               },
               {
                 "value": "PrimarySchool",
                 "weight": "",
-                "$$hashKey": "object:1972"
+                "$$hashKey": "object:2898"
               },
               {
                 "value": "SmallOffice",
                 "weight": "",
-                "$$hashKey": "object:1982"
+                "$$hashKey": "object:2908"
               },
               {
                 "value": "MediumOffice",
                 "weight": "",
-                "$$hashKey": "object:1992"
+                "$$hashKey": "object:2918"
               },
               {
                 "value": "LargeOffice",
                 "weight": "",
-                "$$hashKey": "object:2002"
+                "$$hashKey": "object:2928"
               },
               {
                 "value": "SmallHotel",
                 "weight": "",
-                "$$hashKey": "object:2012"
+                "$$hashKey": "object:2938"
               },
               {
                 "value": "LargeHotel",
                 "weight": "",
-                "$$hashKey": "object:2022"
+                "$$hashKey": "object:2948"
               },
               {
                 "value": "Warehouse",
                 "weight": "",
-                "$$hashKey": "object:2032"
+                "$$hashKey": "object:2958"
               },
               {
                 "value": "RetailStandalone",
                 "weight": "",
-                "$$hashKey": "object:2042"
+                "$$hashKey": "object:2968"
               },
               {
                 "value": "RetailStripmall",
                 "weight": "",
-                "$$hashKey": "object:2052"
+                "$$hashKey": "object:2978"
               },
               {
                 "value": "QuickServiceRestaurant",
                 "weight": "",
-                "$$hashKey": "object:2062"
+                "$$hashKey": "object:2988"
               },
               {
                 "value": "FullServiceRestaurant",
                 "weight": "",
-                "$$hashKey": "object:2072"
+                "$$hashKey": "object:2998"
               },
               {
                 "value": "MidriseApartment",
                 "weight": "",
-                "$$hashKey": "object:2082"
+                "$$hashKey": "object:3008"
               },
               {
                 "value": "HighriseApartment",
                 "weight": "",
-                "$$hashKey": "object:2092"
+                "$$hashKey": "object:3018"
               },
               {
                 "value": "Hospital",
                 "weight": "",
-                "$$hashKey": "object:2102"
+                "$$hashKey": "object:3028"
               },
               {
                 "value": "Outpatient",
                 "weight": "",
-                "$$hashKey": "object:2112"
+                "$$hashKey": "object:3038"
               }
             ],
             "maximum": "SmallOffice",
@@ -319,7 +263,8 @@
             "stdDev": "SmallOffice",
             "default_value": "SmallOffice",
             "showWarningIcon": false
-          }
+          },
+          "$$hashKey": "object:2723"
         },
         {
           "name": "template",
@@ -339,7 +284,6 @@
             "NECB2015",
             "NECB2017"
           ],
-          "$$hashKey": "uiGrid-00HD",
           "display_name_short": "template",
           "inputs": {
             "relationship": null,
@@ -356,9 +300,9 @@
             "mean": "NECB2011",
             "deltaX": "NECB2011",
             "stdDev": "NECB2011",
-            "default_value": "NECB2017",
-            "showWarningIcon": false
-          }
+            "default_value": "NECB2017"
+          },
+          "$$hashKey": "object:2724"
         },
         {
           "name": "epw_file",
@@ -504,7 +448,6 @@
             "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
             "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
           ],
-          "$$hashKey": "uiGrid-00HF",
           "display_name_short": "epw_file",
           "inputs": {
             "relationship": null,
@@ -578,38 +521,7 @@
             ],
             "variableSetting": "Discrete",
             "distribution": "Uniform",
-            "discreteVariables": [
-              {
-                "value": "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2132"
-              },
-              {
-                "value": "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2143"
-              },
-              {
-                "value": "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2153"
-              },
-              {
-                "value": "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2163"
-              },
-              {
-                "value": "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2173"
-              },
-              {
-                "value": "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
-                "weight": "",
-                "$$hashKey": "object:2183"
-              }
-            ],
+            "discreteVariables": [],
             "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
             "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
             "mean": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
@@ -617,7 +529,32 @@
             "stdDev": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
             "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
             "showWarningIcon": false
-          }
+          },
+          "$$hashKey": "object:2725"
+        },
+        {
+          "name": "new_auto_zoner",
+          "display_name": "Use New Autozone method?",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "display_name_short": "new_auto_zoner",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false
+          },
+          "$$hashKey": "object:2726"
         }
       ],
       "edit": "",
@@ -627,22 +564,21 @@
       "add": "",
       "open": true,
       "addedToProject": true,
-      "date": "12/20/2018",
+      "date": "2/12/2019",
       "author": "",
       "type": "ModelMeasure",
       "seed": "dummy.osm",
       "workflow_index": 0,
       "options": [],
-      "instanceId": 0.6061622148639292,
-      "numberOfOptions": 0,
-      "$$hashKey": "object:1402",
+      "instanceId": 0.7978549799707759,
       "skip": false,
+      "$$hashKey": "object:2680",
       "showWarningText": false
     },
     {
-      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+      "measure_dir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "name": "btap_set_envelope_conductance_by_necb_climate_zone",
-      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures_development/btap_set_envelope_conductance_by_necb_climate_zone",
+      "directory": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "uid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
       "uuid": "{36fd01e8-5fcf-4fec-9117-90bf8d4071fc}",
       "version_id": "8f771480-80c7-4628-8a84-66b01d27262e",
@@ -904,7 +840,7 @@
       "bcl_update": false,
       "location": "my",
       "add": "",
-      "open": false,
+      "open": true,
       "addedToProject": true,
       "date": "1/24/2019",
       "author": "",
@@ -912,14 +848,14 @@
       "seed": "dummy.osm",
       "workflow_index": 1,
       "options": [],
-      "instanceId": 0.9103964784732628,
+      "instanceId": 0.47754789970866485,
       "skip": false,
       "$$hashKey": "object:5242"
     },
     {
-      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+      "measure_dir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "name": "btap_set_envelope_conductance_by_necb_climate_zone_2",
-      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures_development/btap_set_envelope_conductance_by_necb_climate_zone",
+      "directory": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "uid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
       "uuid": "{36fd01e8-5fcf-4fec-9117-90bf8d4071fc}",
       "version_id": "8f771480-80c7-4628-8a84-66b01d27262e",
@@ -1181,7 +1117,7 @@
       "bcl_update": false,
       "location": "my",
       "add": "",
-      "open": false,
+      "open": true,
       "addedToProject": true,
       "date": "1/24/2019",
       "author": "",
@@ -1189,14 +1125,14 @@
       "seed": "dummy.osm",
       "workflow_index": 2,
       "options": [],
-      "instanceId": 0.6766715487099313,
+      "instanceId": 0.5047294131762547,
       "skip": false,
       "$$hashKey": "object:5559"
     },
     {
-      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+      "measure_dir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "name": "btap_set_envelope_conductance_by_necb_climate_zone_2_2",
-      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures_development/btap_set_envelope_conductance_by_necb_climate_zone",
+      "directory": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
       "uid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
       "uuid": "{36fd01e8-5fcf-4fec-9117-90bf8d4071fc}",
       "version_id": "8f771480-80c7-4628-8a84-66b01d27262e",
@@ -1466,14 +1402,14 @@
       "seed": "dummy.osm",
       "workflow_index": 3,
       "options": [],
-      "instanceId": 0.6543015071889597,
+      "instanceId": 0.7901940612378937,
       "skip": false,
       "$$hashKey": "object:5878"
     },
     {
-      "measure_dir": "C:\\Users\\barssoumm\\new_tests\\btap_newest\\btap\\measures\\Uvalue_PCF_PAT\\measures\\btap_results",
+      "measure_dir": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_results",
       "name": "btap_results",
-      "directory": "C:/Users/barssoumm/new_tests/btap_newest/btap/measures/btap_results",
+      "directory": "C:\\b\\btap-nrc_207\\pat_projects\\Uvalue_PCF\\measures\\btap_results",
       "uid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
       "uuid": "{bf37e1c6-de70-457b-a3ac-21aa57b7bc58}",
       "version_id": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
@@ -1556,7 +1492,7 @@
       "seed": "dummy.osm",
       "workflow_index": 4,
       "options": [],
-      "instanceId": 0.9571603511286457,
+      "instanceId": 0.7465698769129652,
       "skip": false,
       "$$hashKey": "object:2944"
     }
