@@ -328,7 +328,7 @@ end
     #BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "#{arguments['building_shape']}-geometryAndSpaceTypes.osm"))
 	
 	# Apply NECB ruleste to model (set constructions, thermal zones etc)
-    model = standard.model_apply_standard(model: model,
+    standard.model_apply_standard(model: model,
 								  epw_file: epw_file)
 
     # reporting final condition of model
