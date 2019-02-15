@@ -257,21 +257,10 @@ end
 	building.setStandardsBuildingType("#{building_type}")
 	building.setStandardsNumberOfStories(above_grade_floors)
 	building.setStandardsNumberOfAboveGroundStories(above_grade_floors)
+		
+	# Set design days
+	OpenStudio::Model::DesignDay.new(model)
 	
-	# Add default meters to the model
-	meter = OpenStudio::Model::OutputMeter.new(model)
-	meter.setFuelType(OpenStudio::FuelType.new("Electricity"))
-	meter.setInstallLocationType(OpenStudio::InstallLocationType.new("Facility"))
-	meter.setReportingFrequency("Hourly")
-	meter.setMeterFileOnly(true)
-	meter.setCumulative(false)
-	meter = OpenStudio::Model::OutputMeter.new(model)
-	meter.setFuelType(OpenStudio::FuelType.new("Gas"))
-	meter.setInstallLocationType(OpenStudio::InstallLocationType.new("Facility"))
-	meter.setReportingFrequency("Hourly")
-	meter.setMeterFileOnly(true)
-	meter.setCumulative(false)
-
 	# Map building type to a building evel space usage in NECB
 	if building_type == 'SmallOffice' || building_type == 'MediumOffice' || building_type == 'LargeOffice'
 		building_type="Office"
@@ -323,7 +312,6 @@ end
 
 
     st_model_vintage_string = "#{template}_space_type"
-
     bt_model_vintage_string = "#{template}_building_type"
     st_target_vintage_string = "#{template}_space_type"
     bt_target_vintage_string = "#{template}_building_type"
@@ -342,8 +330,11 @@ end
 	# Write the basic geometry put to file (for debugging)
     #BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "#{arguments['building_shape']}-geometryAndSpaceTypes.osm"))
 	
+	# Create thermal zones
+	standard.model_create_thermal_zones(model)
+		
 	# Apply NECB ruleste to model (set constructions, thermal zones etc)
-    standard.model_apply_standard(model: model,
+    result = standard.model_apply_standard(model: model,
 								  epw_file: epw_file)
 
     # reporting final condition of model
