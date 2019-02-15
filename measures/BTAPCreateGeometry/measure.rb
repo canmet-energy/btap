@@ -332,9 +332,12 @@ end
 	
 	# Create thermal zones
 	standard.model_create_thermal_zones(model)
+	
+	# Set the start day
+	model.setDayofWeekforStartDay("Sunday")
 		
 	# Apply NECB ruleste to model (set constructions, thermal zones etc)
-    result = standard.model_apply_standard(model: model,
+    standard.model_apply_standard(model: model,
 								  epw_file: epw_file)
 
     # reporting final condition of model
