@@ -253,9 +253,9 @@ end
 	# Need to set building level info
     building = model.getBuilding
     building.setName(building_name)
-	building.setStandardsBuildingType("#{building_type}-#{template}")
+	building.setStandardsBuildingType("#{building_type}")
 	building.setStandardsNumberOfStories(above_grade_floors)
-	building.setStandardsNumberOfStories(above_grade_floors)
+	building.setStandardsNumberOfAboveGroundStories(above_grade_floors)
 
 	# Map building type to a building evel space usage in NECB
 	if building_type == 'SmallOffice' || building_type == 'MediumOffice' || building_type == 'LargeOffice'
