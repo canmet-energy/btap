@@ -253,9 +253,24 @@ end
 	# Need to set building level info
     building = model.getBuilding
     building.setName(building_name)
+    building.setNorthAxis(0)
 	building.setStandardsBuildingType("#{building_type}")
 	building.setStandardsNumberOfStories(above_grade_floors)
 	building.setStandardsNumberOfAboveGroundStories(above_grade_floors)
+	
+	# Add default meters to the model
+	meter = OpenStudio::Model::OutputMeter.new(model)
+	meter.setFuelType(OpenStudio::FuelType.new("Electricity"))
+	meter.setInstallLocationType(OpenStudio::InstallLocationType.new("Facility"))
+	meter.setReportingFrequency("Hourly")
+	meter.setMeterFileOnly(true)
+	meter.setCumulative(false)
+	meter = OpenStudio::Model::OutputMeter.new(model)
+	meter.setFuelType(OpenStudio::FuelType.new("Gas"))
+	meter.setInstallLocationType(OpenStudio::InstallLocationType.new("Facility"))
+	meter.setReportingFrequency("Hourly")
+	meter.setMeterFileOnly(true)
+	meter.setCumulative(false)
 
 	# Map building type to a building evel space usage in NECB
 	if building_type == 'SmallOffice' || building_type == 'MediumOffice' || building_type == 'LargeOffice'
