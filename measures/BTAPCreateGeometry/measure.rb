@@ -175,8 +175,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating Courtyard Shape ***********************************"
     if building_shape == 'Courtyard'
       # Figure out dimensions from inputs
-      b = Math::sqrt(((8.0/9.0)*floor_area)) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt((8.0/9.0)*floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9.0), 4.57].min
       # Generate the geometry
@@ -193,8 +194,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating Rectangular Shape ***********************************"
     elsif building_shape == 'Rectangular'
       # Figure out dimensions from inputs
-      b = Math::sqrt(floor_area) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt(floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9.0), 4.57].min
       # Generate the geometry
@@ -211,8 +213,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating L-Shape ***********************************"
     elsif building_shape == 'L shape'
       # Figure out dimensions from inputs
-      b = Math::sqrt((5.0/9.0)*floor_area) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt((5.0/9.0)*floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9.0), 4.57].min
       # Generate the geometry
@@ -229,8 +232,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating H-Shape Shape ***********************************"
     elsif building_shape == 'H shape'
       # Figure out dimensions from inputs
-      b = Math::sqrt((7.0/9.0)*floor_area) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt((7.0/9.0)*floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9.0), 4.57].min
       # Generate the geometry
@@ -252,8 +256,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating T-Shape Shape ***********************************"
     elsif building_shape == 'T shape'
       # Figure out dimensions from inputs
-      b = Math::sqrt((5.0/9.0)*floor_area) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt((5.0/9.0)*floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9), 4.57].min
       # Generate the geometry
@@ -271,8 +276,9 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     #" ******************* Creating U-Shape Shape ***********************************"
     elsif building_shape == 'U shape'
       # Figure out dimensions from inputs
-      b = Math::sqrt((7.0/9.0)*floor_area) / aspect_ratio
-      a = b * aspect_ratio
+      len = Math::sqrt((7.0/9.0)*floor_area)
+      a = len * aspect_ratio
+      b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth=[([a, b].min/9), 4.57].min
       # Generate the geometry
