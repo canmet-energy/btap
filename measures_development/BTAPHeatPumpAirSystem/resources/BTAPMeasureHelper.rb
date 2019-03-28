@@ -1,5 +1,6 @@
 module BTAPMeasureHelper
 
+  # =============================================================================================================================
   # define the arguments that the user will input
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
@@ -59,6 +60,7 @@ module BTAPMeasureHelper
     return args
   end
 
+  # =============================================================================================================================
   #returns a hash of the user inputs for you to use in your measure.
   def get_hash_of_arguments(user_arguments, runner)
     values = {}
@@ -92,6 +94,7 @@ module BTAPMeasureHelper
     return values
   end
 
+  # =============================================================================================================================
   # boilerplate that validated ranges of inputs.
   def validate_and_get_arguments_in_hash(model, runner, user_arguments)
     return_value = true
@@ -302,6 +305,38 @@ module BTAPMeasureHelper
     return true
   end
 
+  # =============================================================================================================================
+  def get_surfaces_from_thermal_zones(thermal_zone_array)
+    surfaces = Array.new()
+    thermal_zone_array.each do |thermal_zone|
+      thermal_zone.spaces.sort.each do |space|
+        surfaces.concat(space.surfaces())
+      end
+      return surfaces
+    end
+  end
+
+  # =============================================================================================================================
+  # Method to check if all zones have surfaces. This is required to run a simulation.
+  def model_do_all_zones_have_surfaces?(model)
+    error_string = ''
+    error = false
+    # Check to see if all zones have surfaces.
+    model.getThermalZones.each do |zone|
+      if get_surfaces_from_thermal_zones([zone]).empty?
+        error_string << "Error: Thermal zone #{zone.name} does not contain surfaces.\n"
+        error = true
+      end
+      if error == true
+        puts error_string
+        OpenStudio.logFree(OpenStudio::Error, 'openstudio.Siz.Model', error_string)
+        return false
+      else
+        return true
+      end
+    end
+  end
+  
   # =============================================================================================================================
   # A helper method to run a sizing run and pull any values calculated during
   # autosizing back into the model.

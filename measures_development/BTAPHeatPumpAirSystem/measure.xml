@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>set_heat_pump_air_system</name>
   <uid>95d36ab6-98d7-4fcb-b265-c71e7cf2e28e</uid>
-  <version_id>e631c270-b6b9-437b-9b5d-3215f6de9c0d</version_id>
-  <version_modified>20190228T163715Z</version_modified>
+  <version_id>970ec8fe-2075-4a4a-9ae1-dafbf307297d</version_id>
+  <version_modified>20190322T190408Z</version_modified>
   <xml_checksum>470FC630</xml_checksum>
   <class_name>SetHeatPumpAirSystem</class_name>
   <display_name>SetHeatPumpAirSystem</display_name>
@@ -38,7 +38,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>None</default_value>
+      <default_value>Keep Existing</default_value>
       <choices>
         <choice>
           <value>Keep Existing</value>
@@ -51,12 +51,30 @@
       </choices>
     </argument>
     <argument>
+      <name>zone_term_reheat_eqpt</name>
+      <display_name>Zone terminal reheat equipment</display_name>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Electric</default_value>
+      <choices>
+        <choice>
+          <value>Keep Existing</value>
+          <display_name>Keep Existing</display_name>
+        </choice>
+        <choice>
+          <value>Electric</value>
+          <display_name>Electric</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>htg_cop</name>
       <display_name>Heating COP</display_name>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>4</default_value>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>clg_cop</name>
@@ -64,7 +82,7 @@
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>4</default_value>
+      <default_value>0</default_value>
     </argument>
   </arguments>
   <outputs/>
@@ -117,7 +135,7 @@
       <filename>BTAPMeasureHelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>34605984</checksum>
+      <checksum>F821E789</checksum>
     </file>
     <file>
       <filename>curves.json</filename>
@@ -134,13 +152,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7D452903</checksum>
+      <checksum>57D171D7</checksum>
     </file>
     <file>
       <filename>hvac_routines.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4223B1E3</checksum>
+      <checksum>43B6572E</checksum>
+    </file>
+    <file>
+      <filename>.gitkeep</filename>
+      <filetype>gitkeep</filetype>
+      <usage_type>doc</usage_type>
+      <checksum>00000000</checksum>
     </file>
   </files>
 </measure>

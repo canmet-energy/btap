@@ -193,7 +193,7 @@ module HVACRoutines
   end
 
   # =============================================================================================================================
-  def setup_air_sys_variablespeed(model,sys_objs)
+  def setup_air_sys_variablespeed(model,sys_objs,term_reheat_flag)
   # Scan system air loops and replace cooling coils with variable speed coils. Also specify a DX variable speed heating coil with a 
   # supplemental electric heating coil. A variable speed dx heating and cooling coils are used to represent a cold-climate roof-top 
   # unit.  
@@ -250,11 +250,10 @@ module HVACRoutines
       sys_dx_htg_coil.setResistiveDefrostHeaterCapacity(1.0e-6)
       sys_dx_htg_coil.setCrankcaseHeaterCapacity(1.0e-6)
       # System sizing parameters
-      isys.sizingSystem.setTypeofLoadtoSizeOn('Sensible')
+      this_is_mau = false
+      if isys.sizingSystem.typeofLoadtoSizeOn == 'VentilationRequirement' then this_is_mau = true end
       isys.sizingSystem.setCentralCoolingDesignSupplyAirTemperature(13.0)
       isys.sizingSystem.setCentralHeatingDesignSupplyAirTemperature(43.0)
-      isys.sizingSystem.setAllOutdoorAirinCooling(false)
-      isys.sizingSystem.setAllOutdoorAirinHeating(false)
       isys.sizingSystem.setCoolingDesignAirFlowMethod('DesignDay')
       isys.sizingSystem.setHeatingDesignAirFlowMethod('DesignDay')
       isys.sizingSystem.setSizingOption('NonCoincident')
@@ -272,32 +271,17 @@ module HVACRoutines
       sys_dx_htg_coil.addToNode(isys.supplyOutletNode)
       sys_elec_htg_coil.addToNode(isys.supplyOutletNode)
       # add setpoint manager for single zone systems
-      if isys.thermalZones.size == 1
+      if term_reheat_flag == 'Electric'
         sys_supply_fan.addToNode(isys.supplyOutletNode) 
-        spm = OpenStudio::Model::SetpointManagerSingleZoneReheat.new(model)
-        spm.setControlZone(control_zone)
-        spm.setMinimumSupplyAirTemperature(13.0)
-        spm.setMaximumSupplyAirTemperature(43.0)
-      else
-      # setpoint manager and any terminal boxes needed for multizone systems
-        spm = OpenStudio::Model::SetpointManagerWarmest.new(model)
-        spm.setMinimumSetpointTemperature(13.0)
-        spm.setMaximumSetpointTemperature(43.0)
-        # Existing fan is constant volume and we need a variable volume fan for a multizone system
-        if not this_is_vav
-          new_supply_fan = OpenStudio::Model::FanVariableVolume.new(model, always_on)
-          new_supply_fan.setName("#{isys.name} Supply Fan")
-          new_supply_fan.setPressureRise(sys_supply_fan.pressureRise.to_f)
-          new_supply_fan.setMotorEfficiency(sys_supply_fan.motorEfficiency.to_f)
-          new_supply_fan.setFanEfficiency(sys_supply_fan.fanEfficiency.to_f)
-          new_supply_fan.addToNode(isys.supplyOutletNode)
-          sys_supply_fan.remove
-        end	
-        isys.thermalZones.each do |izone|
-          izone.equipment.each do |icomp|
-            if icomp.to_AirTerminalSingleDuctVAVReheat.is_initialized
-              sys_supply_fan.addToNode(isys.supplyOutletNode) 
-              if not icomp.to_AirTerminalSingleDuctVAVReheat.get.reheatCoil.to_CoilHeatingElectric.is_initialized
+          isys.thermalZones.each do |izone|
+            izone.equipment.each do |icomp|
+              if icomp.to_AirTerminalSingleDuctVAVReheat.is_initialized
+                sys_supply_fan.addToNode(isys.supplyOutletNode) 
+                spm = OpenStudio::Model::SetpointManagerWarmest.new(model)
+                spm.setMinimumSetpointTemperature(13.0)
+                spm.setMaximumSetpointTemperature(43.0)
+                spm.addToNode(isys.supplyOutletNode) 
+                if not icomp.to_AirTerminalSingleDuctVAVReheat.get.reheatCoil.to_CoilHeatingElectric.is_initialized
                 term_unit = icomp.to_AirTerminalSingleDuctVAVReheat.get
                 reheat_coil = term_unit.reheatCoil.to_CoilHeatingWater.get
                 new_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
@@ -306,21 +290,13 @@ module HVACRoutines
                   if icoil.name.to_s.strip == reheat_coil.name.to_s.strip
                     icoil.remove
                     break
-                 end
+                  end
                 end
               end
-           elsif icomp.to_AirTerminalSingleDuctUncontrolled.is_initialized
-              icomp.to_AirTerminalSingleDuctUncontrolled.get.remove
-              new_coil = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
-              term_unit = OpenStudio::Model::AirTerminalSingleDuctVAVReheat.new(model, always_on, new_coil)
-              isys.removeBranchForZone(izone)
-              term_unit.setDamperHeatingAction('Normal')
-              isys.addBranchForZone(izone, term_unit.to_StraightComponent)
             end
           end
-        end
-	  end
-      spm.addToNode(isys.supplyOutletNode) 
+	    end
+      end
       # add new setpoint manager to outside air system as nodes might be out of date with e outdoor air setpoint manager
       oa_system = isys.airLoopHVACOutdoorAirSystem.get
       if isys.airLoopHVACOutdoorAirSystem.is_initialized
@@ -405,18 +381,41 @@ module HVACRoutines
   # specify the COP for variable speed heating and cooling dx coils using Mitsubishi VRF data or input values
 
     # Mitsubishi VRF data
-    clg_caps = [21.10,28.10,35.20,42.20,56.30,63.30,70.30,77.40,84.40,91.40,98.50,105.50] # units in 'kw'
-    clg_cop_puhy_lmu = [4.64,4.40,4.36,4.07,3.96,3.85,3.83,3.95,3.87,3.85,3.78,3.78]
-    clg_cop_puhy_kmu = [4.17,4.01,3.87,3.87,3.80,3.75,3.68,3.80,3.77,3.68,3.62,3.55]
-    htg_caps = [23.40,31.70,39.60,46.90,63.00,71.20,79.10,86.50,94.70,102.60,110.80,118.70]  # units in 'kw'
-    htg_cop_puhy_lmu = [4.27,4.14,4.02,3.81,3.71,3.66,3.65,3.75,3.67,3.61,3.53,3.51]
-    htg_cop_puhy_kmu = [4.16,4.24,3.85,3.93,3.73,3.70,3.62,3.74,3.73,3.57,3.49,3.35]
+    clg_caps_puhy_lmu = [21.10,28.10,35.20,42.20,56.30,63.30,70.30,77.40,84.40,91.40,98.50,105.50] # units in 'kw'
+    clg_cop_puhy_lmu =  [ 4.64, 4.40, 4.36, 4.07, 3.96, 3.85, 3.83, 3.95, 3.87, 3.85, 3.78,  3.78]
+    clg_caps_puhy_kmu = [21.10,28.10,35.20,42.20,56.30,63.30,70.30,77.40,84.40,91.40,98.50,105.50] # units in 'kw'
+    clg_cop_puhy_kmu =  [ 4.17, 4.01, 3.87, 3.87, 3.80, 3.75, 3.68, 3.80, 3.77, 3.68, 3.62,  3.55]
 
-    # copy one of the arrays above in these four arrays
-    clg_caps = [21.10,28.10,35.20,42.20,56.30,63.30,70.30,77.40,84.40,91.40,98.50,105.50]
-    clg_cops = [4.64,4.40,4.36,4.07,3.96,3.85,3.83,3.95,3.87,3.85,3.78,3.78]
-    htg_cops = [4.27,4.14,4.02,3.81,3.71,3.66,3.65,3.75,3.67,3.61,3.53,3.51]
-    htg_caps = [23.40,31.70,39.60,46.90,63.00,71.20,79.10,86.50,94.70,102.60,110.80,118.70] 
+    htg_caps_puhy_lmu = [23.40,31.70,39.60,46.90,63.00,71.20,79.10,86.50,94.70,102.60,110.80,118.70]  # units in 'kw'
+    htg_cop_puhy_lmu =  [ 4.27, 4.14, 4.02, 3.81, 3.71, 3.66, 3.65, 3.75, 3.67,  3.61,  3.53,  3.51]
+    htg_caps_puhy_kmu = [23.40,31.70,39.60,46.90,63.00,71.20,79.10,86.50,94.70,102.60,110.80,118.70]  # units in 'kw'
+    htg_cop_puhy_kmu =  [ 4.16, 4.24, 3.85, 3.93, 3.73, 3.70, 3.62, 3.74, 3.73,  3.57,  3.49,  3.35]
+
+    clg_cap_puh_hp =    [21.10,28.10,42.20,56.30]  # units in 'kw'
+    clg_cop_puh_hp =    [ 3.58, 3.22, 3.38, 3.13]
+    htg_cap_puh_hp =    [23.40,31.70,46.90,63.30]  # units in 'kw'
+    htg_cop_puh_hp =    [ 3.73, 3.47, 3.62, 3.37]
+
+    clg_cap_mxz_nahz =  [5.28,6.45,8.32,10.55,12.31,14.07]  # units in 'kw'
+    clg_cop_mxz_nahz =  [3.95,3.96,3.66, 4.11, 3.93, 3.52]
+    htg_cap_mxz_nahz =  [6.45,7.33,8.38,13.19,14.07,15.83]  # units in 'kw'
+    htg_cop_mxz_nahz =  [4.00,4.25,4.00, 3.95, 4.10, 3.75]
+
+    # make up combined capacity and cop array from above data
+    #clg_caps = [5.28,6.45,8.32,10.55,12.31,14.07,21.10,28.10,35.20,42.20,56.30,63.30,70.30,77.40,84.40,91.40,98.50,105.50]  # combine mxz_nahz and puh_lmu
+    #clg_cops = [3.95,3.96,3.66, 4.11, 3.93, 3.52, 4.64, 4.40, 4.36, 4.07, 3.96, 3.85, 3.83, 3.95, 3.87, 3.85, 3.78,  3.78]  # combine mxz_nahz and puh_lmu
+    #htg_caps = [6.45,7.33,8.38,13.19,14.07,15.83,23.40,31.70,39.60,46.90,63.00,71.20,79.10,86.50,94.70,102.60,110.80,118.70]  # combine mxz_nahz and puh_lmu
+    #htg_cops = [4.00,4.25,4.00, 3.95, 4.10, 3.75, 4.27, 4.14, 4.02, 3.81, 3.71, 3.66, 3.65, 3.75, 3.67,  3.61,  3.53,  3.51]  # combine mxz_nahz and puh_lmu
+
+    #clg_caps = [5.28,6.45,8.32,10.55,12.31,14.07,21.10,28.10,42.20,56.30]  # combine mxz_nahz and phu_hp
+    #clg_cops = [3.95,3.96,3.66, 4.11, 3.93, 3.52, 3.58, 3.22, 3.38, 3.13]  # combine mxz_nahz and phu_hp
+    #htg_caps = [6.45,7.33,8.38,13.19,14.07,15.83,23.40,31.70,46.90,63.30]  # combine mxz_nahz and phu_hp
+    #htg_cops = [4.00,4.25,4.00, 3.95, 4.10, 3.75, 3.73, 3.47, 3.62, 3.37]  # combine mxz_nahz and phu_hp
+
+    clg_caps = [5.28,6.45,8.32,10.55,12.31,14.07,21.10,28.10,42.20,56.30]  # combine mxz_nahz and phu_hp
+    clg_cops = [3.95,3.96,3.66, 4.11, 3.93, 3.52, 3.58, 3.22, 3.38, 3.13]  # combine mxz_nahz and phu_hp
+    htg_caps = [6.45,7.33,8.38,13.19,14.07,15.83,23.40,31.70,46.90,63.30]  # combine mxz_nahz and phu_hp
+    htg_cops = [4.00,4.25,4.00, 3.95, 4.10, 3.75, 3.73, 3.47, 3.62, 3.37]  # combine mxz_nahz and phu_hp
 
     # Set COP for any 'CoilCoolingDX:VariableSpeed' and 'CoilHeatingVariableSpeed'
     clgdxcoils = model.getCoilCoolingDXVariableSpeeds
@@ -425,7 +424,7 @@ module HVACRoutines
         cop = input_clg_cop
       else
         cap_int = 0
-        coil_cap = dxcoil.speeds.last.referenceUnitGrossRatedTotalCoolingCapacity/1000.0
+        coil_cap = dxcoil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f/1000.0  # convert to kW
         clg_caps.each do |icap|
           if(coil_cap > icap) 
             cap_int += 1
@@ -446,7 +445,7 @@ module HVACRoutines
         cop = input_htg_cop
       else
         cap_int = 0
-        coil_cap = dxcoil.speeds.last.referenceUnitGrossRatedHeatingCapacity/1000.0
+        coil_cap = dxcoil.ratedHeatingCapacityAtSelectedNominalSpeedLevel.to_f/1000.0  # convert to kW
         htg_caps.each do |icap|
           if(coil_cap > icap)
             cap_int += 1
@@ -469,23 +468,13 @@ module HVACRoutines
   # 'air_sys_cap_siz_fr'.
     clgdxcoils = model.getCoilCoolingDXVariableSpeeds
     clgdxcoils.each do |dxcoil|
-      total_num_speeds = dxcoil.speeds.size
-      speed_num = 1
-      dxcoil.speeds.each do |speed|
-        speed_cap = air_sys_cap_siz_fr*(dxcoil.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f/total_num_speeds)*speed_num
-        speed.setReferenceUnitGrossRatedTotalCoolingCapacity(speed_cap)
-        speed_num += 1
-      end
+      nom_spd_cap = dxcoil.autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel.to_f
+      dxcoil.setGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(air_sys_cap_siz_fr*nom_spd_cap)
     end
     htgdxcoils = model.getCoilHeatingDXVariableSpeeds
     htgdxcoils.each do |dxcoil|
-      total_num_speeds = dxcoil.speeds.size
-      speed_num = 1
-      dxcoil.speeds.each do |speed|
-        speed_cap = air_sys_cap_siz_fr*(dxcoil.autosizedRatedHeatingCapacityAtSelectedNominalSpeedLevel.to_f/total_num_speeds)*speed_num
-        speed.setReferenceUnitGrossRatedHeatingCapacity(speed_cap)
-        speed_num += 1
-      end
+      nom_spd_cap = dxcoil.autosizedRatedHeatingCapacityAtSelectedNominalSpeedLevel.to_f
+      dxcoil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(air_sys_cap_siz_fr*nom_spd_cap)
     end
   end
 

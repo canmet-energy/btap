@@ -46,15 +46,23 @@ class SetHeatPumpAirSystem < OpenStudio::Measure::ModelMeasure
             "name" => "zone_clg_eqpt",
             "type" => "Choice",
             "display_name" => "Zone cooling equipment",
-            "default_value" => 'None',
+            "default_value" => 'Keep Existing',
             "choices" => ['Keep Existing','None'],
+            "is_required" => false
+      },
+      { 
+            "name" => "zone_term_reheat_eqpt",
+            "type" => "Choice",
+            "display_name" => "Zone terminal reheat equipment",
+            "default_value" => 'Electric',
+            "choices" => ['Keep Existing','Electric'],
             "is_required" => false
       },
       { 
             "name" => "htg_cop",
             "type" => "Double",
             "display_name" => "Heating COP",
-            "default_value" => 4.0,
+            "default_value" => 0.0,
             "max_double_value" => 10.0,
             "min_double_value" => 0.0,
             "is_required" => true
@@ -63,7 +71,7 @@ class SetHeatPumpAirSystem < OpenStudio::Measure::ModelMeasure
             "name" => "clg_cop",
             "type" => "Double",
             "display_name" => "Cooling COP",
-            "default_value" => 4.0,
+            "default_value" => 0.0,
             "max_double_value" => 10.0,
             "min_double_value" => 0.0,
             "is_required" => true
@@ -90,6 +98,9 @@ class SetHeatPumpAirSystem < OpenStudio::Measure::ModelMeasure
     # type of zonal cooling equipment
     zone_clg_eqpt = arguments['zone_clg_eqpt']
 
+    # type of zonal terminal reheat equipment
+    zone_term_reheat_eqpt = arguments['zone_term_reheat_eqpt']
+
     # heating COP
     htg_cop = arguments['htg_cop']
 
@@ -104,7 +115,7 @@ class SetHeatPumpAirSystem < OpenStudio::Measure::ModelMeasure
     all_sys_objs = model.getAirLoopHVACs
 
     # scan HVAC systems and replace any existing system heating and cooling coils and fan with DX heating and cooling coils and electric heater
-    setup_air_sys_variablespeed(model,all_sys_objs)
+    setup_air_sys_variablespeed(model,all_sys_objs,zone_term_reheat_eqpt)
 
     # scan thermal zones and remove any zonal heating equipment and replace them with electric baseboards
     if zone_htg_eqpt == 'Electric Baseboard'
@@ -123,7 +134,7 @@ class SetHeatPumpAirSystem < OpenStudio::Measure::ModelMeasure
     remove_empty_plt_loops(model)
 
     # perform sizing run
-    model_run_simulation_and_log_errors(model,"#{Dir.pwd}/Run")
+    model_run_sizing_run(model, sizing_run_dir = "#{Dir.pwd}/SR")
 
     # assign capacities to coils
     set_air_sys_variable_speed_cap(model,air_sys_cap_siz_fr)
