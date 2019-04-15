@@ -1,9 +1,10 @@
 <measure>
   <schema_version>3.0</schema_version>
+  <error>Unable to extract OpenStudio::Measure::OSMeasure object from /home/osdev/btap/measures/btap_create_necb_prototype_building/measure.rb. The script should contain a class that derives from OpenStudio::Measure::OSMeasure and should close with a line stating the class name followed by .new.registerWithApplication.</error>
   <name>btap_create_necb_prototype_building</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>3eff181f-ed78-40f5-9bbb-3bf13aa63de3</version_id>
-  <version_modified>20181220T162125Z</version_modified>
+  <version_id>7eddca6e-6310-46be-ba38-30dbe48e2739</version_id>
+  <version_modified>20190415T190510Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
@@ -404,7 +405,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>919E1A97</checksum>
+      <checksum>F1921960</checksum>
     </file>
     <file>
       <version>
@@ -415,7 +416,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C36E6275</checksum>
+      <checksum>4B3FD557</checksum>
     </file>
   </files>
 </measure>

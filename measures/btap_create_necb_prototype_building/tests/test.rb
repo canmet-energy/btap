@@ -45,7 +45,7 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     # test arguments and defaults
     arguments = measure.arguments(model)
     #check number of arguments.
-    assert_equal(4, arguments.size)
+    assert_equal(6, arguments.size)
     #check argument 0
     assert_equal('building_type', arguments[0].name)
     assert_equal('SmallOffice', arguments[0].defaultValueAsString)
@@ -58,6 +58,12 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     #check argument 3
     assert_equal('new_auto_zoner', arguments[3].name)
     assert_equal(false, arguments[3].defaultValueAsBool)
+    #check argument 4
+    assert_equal('fdwr', arguments[4].name)
+    assert_equal(1.1, arguments[4].defaultValueAsDouble)
+    #check argument 5
+    assert_equal('srr', arguments[5].name)
+    assert_equal(1.1, arguments[5].defaultValueAsDouble)
 
 
     # set argument values to values and run the measure
@@ -77,6 +83,16 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
     epw_file = arguments[2].clone
     assert(epw_file.setValue(epw_file_in))
     argument_map['epw_file'] = epw_file
+
+    #set argument 4
+    fdwr = arguments[4].clone
+    assert(fdwr.setValue(1.1))
+    argument_map['fdwr'] = fdwr
+
+    #set argument 5
+    srr = arguments[5].clone
+    assert(srr.setValue(1.1))
+    argument_map['srr'] = srr
 
     #run the measure
     measure.run(model, runner, argument_map)

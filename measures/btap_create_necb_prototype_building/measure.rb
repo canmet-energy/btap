@@ -68,6 +68,19 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     auto_zone.setDisplayName('Use New Autozone method?')
     auto_zone.setDefaultValue(false)
     args << auto_zone
+
+    #argument for geometry volume scaling
+    fdwr = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("fdwr", false)
+    fdwr.setDisplayName("Fenestration and Door to Wall Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).")
+    fdwr.setDefaultValue(1.1)
+    args << fdwr
+
+    #argument for geometry volume scaling
+    srr = OpenStudio::Ruleset::OSArgument::makeDoubleArgument("srr", false)
+    srr.setDisplayName("Skylight to Roof Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).")
+    srr.setDefaultValue(1.1)
+    args << srr
+
     return args
   end
 
@@ -85,6 +98,8 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     template = runner.getStringArgumentValue('template', user_arguments)
     epw_file = runner.getStringArgumentValue('epw_file', user_arguments)
     new_auto_zoner = runner.getBoolArgumentValue('new_auto_zoner', user_arguments)
+    fdwr = runner.getDoubleArgumentValue('fdwr',user_arguments)
+    srr = runner.getDoubleArgumentValue('srr',user_arguments)
 
     # Turn debugging output on/off
     @debug = false
@@ -134,7 +149,9 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
                                                            epw_file: epw_file,
                                                            sizing_run_dir: osm_directory,
                                                            debug: @debug,
-                                                           new_auto_zoner: new_auto_zoner )
+                                                           fdwr: fdwr,
+                                                           srr: srr,
+                                                           new_auto_zoner: new_auto_zoner)
     standard.model_replace_model(model, new_model)
 
 
