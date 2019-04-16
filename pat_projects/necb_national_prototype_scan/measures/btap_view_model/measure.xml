@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_view_model</name>
   <uid>a7a14e83-c319-4d66-b143-97630df94dbe</uid>
-  <version_id>c34ec4c4-2327-40e2-9351-7dd1ee1283f6</version_id>
-  <version_modified>20180821T183815Z</version_modified>
+  <version_id>b99fab72-8630-4292-82ba-2cf8ef0f9977</version_id>
+  <version_modified>20181219T170133Z</version_modified>
   <xml_checksum>17C66553</xml_checksum>
   <class_name>BTAPViewModel</class_name>
   <display_name>BTAPViewModel</display_name>

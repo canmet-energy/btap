@@ -12,6 +12,11 @@ require "#{File.dirname(__FILE__)}/resources/os_lib_schedules"
 require "#{File.dirname(__FILE__)}/resources/os_lib_helper_methods"
 require_relative 'resources/BTAPMeasureHelper'
 require_relative 'resources/btap_costing.rb'
+require_relative 'resources/ventilation_costing.rb'
+require_relative 'resources/envelope_costing.rb'
+require_relative 'resources/lighting_costing.rb'
+require_relative 'resources/heating_cooling_costing.rb'
+require_relative 'resources/shw_costing.rb'
 
 
 module Enumerable
@@ -72,14 +77,6 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     generate_hourly_report.setDisplayName('Generate Hourly Report.')
     generate_hourly_report.setDefaultValue('false')
     args << generate_hourly_report
-
-    template_type_chs = OpenStudio::StringVector.new
-    template_type_chs << 'NECB2011'
-    template_type_chs << 'NECB2015'
-    template_type = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template_type', template_type_chs, true)
-    template_type.setDisplayName('NECB template for QAQC')
-    template_type.setDefaultValue('NECB2011')
-    args << template_type
 
     output_diet = OpenStudio::Ruleset::OSArgument::makeBoolArgument('output_diet', true)
     output_diet.setDisplayName('Reduce outputs.')
@@ -977,16 +974,24 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
 
     # reporting final condition
     runner.registerInitialCondition('Gathering data from EnergyPlus SQL file and OSM model.')
-    template_type = runner.getStringArgumentValue('template_type',user_arguments)
+
+
+    template_type = nil
+    valid_templates = ['NECB2011', 'NECB2015', 'NECB2017']
+    valid_templates.each do  |model_template|
+      template_type = model_template if model.getBuilding.standardsBuildingType.get.to_s.include?(model_template)
+    end
+    runner.registerError(" Template in the standardsBuildingType #{building_name} is not valid for BTAPReports. It must contain #{valid_templates}") if template_type.nil?
+
     prototype_creator = Standard.build("#{template_type}")
 
     # Perform qaqc
     qaqc = prototype_creator.init_qaqc( model )
-    costing = BTAPCosting.new()
-    costing.load_database()
-    cost_result = costing.cost_audit_all(model)
-    runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
-    qaqc["auto_costing"] = cost_result
+    #costing = BTAPCosting.new()
+    #costing.load_database()
+    #cost_result = costing.cost_audit_all(model, prototype_creator)
+    #runner.registerValue('result_costing',JSON.pretty_generate(cost_result))
+    #qaqc["auto_costing"] = cost_result
     # Perform qaqc
     # necb_2011_qaqc(qaqc) if qaqc[:building][:name].include?("NECB 2011") #had to nodify this because this is specifically for "NECB-2011" standard
     # sanity_check(qaqc)

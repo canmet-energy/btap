@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_ideal_air_loads_measure</name>
   <uid>b01d7a54-7061-4c52-9cde-e89aed93f8a2</uid>
-  <version_id>70bdb6fc-dd6e-456e-bffa-bc74ccab0572</version_id>
-  <version_modified>20180821T183814Z</version_modified>
+  <version_id>a43900cf-43eb-4a69-bb88-36947ebd9d78</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>ED6112BA</xml_checksum>
   <class_name>BTAPIdealAirLoadsMeasure</class_name>
   <display_name>BTAPIdealAirLoadsMeasure</display_name>

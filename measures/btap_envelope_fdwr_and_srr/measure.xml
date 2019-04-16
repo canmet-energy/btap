@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_envelope_fdw_rand_srr</name>
   <uid>8e64e2c6-aeb2-427d-a261-4ccc37a05627</uid>
-  <version_id>41946d25-df20-4e9b-9bcf-071ec5b30d72</version_id>
-  <version_modified>20180614T144816Z</version_modified>
+  <version_id>8d77c52e-ece0-4a7f-8982-76288cc45569</version_id>
+  <version_modified>20181219T170132Z</version_modified>
   <xml_checksum>825E3A16</xml_checksum>
   <class_name>BTAPEnvelopeFDWRandSRR</class_name>
   <display_name>BTAPEnvelopeFDWRAndSRR </display_name>
@@ -117,12 +117,6 @@
       <checksum>0B94403D</checksum>
     </file>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3D94B7AC</checksum>
-    </file>
-    <file>
       <filename>btap_additions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -168,6 +162,18 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>27CACE7E</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>17C3D1F2</checksum>
+    </file>
+    <file>
+      <filename>LICENSE.md</filename>
+      <filetype>md</filetype>
+      <usage_type>license</usage_type>
+      <checksum>9640B6CB</checksum>
     </file>
   </files>
 </measure>

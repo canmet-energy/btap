@@ -19,7 +19,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
   # Define the arguments that the user will input.
   def arguments(model)
-
+    @templates = ['NECB2011','NECB2015','NECB2017']
     args = OpenStudio::Ruleset::OSArgumentVector.new
 
     # Make an argument for the building type
@@ -46,10 +46,8 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     args << building_type
 
     # Make an argument for the template
-    template_chs = OpenStudio::StringVector.new
-    template_chs << 'NECB2011'
-    template_chs << 'NECB2015'
-    template_chs << 'NECB2017'
+    template_chs = OpenStudio::StringVector.new(@templates)
+
     template = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template', template_chs, true)
     template.setDisplayName('Template.')
     template.setDefaultValue('NECB2011')
@@ -64,6 +62,11 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     epw_file.setDisplayName('Climate File')
     epw_file.setDefaultValue('CAN_AB_Banff.CS.711220_CWEC2016.epw')
     args << epw_file
+
+    auto_zone = OpenStudio::Ruleset::OSArgument::makeBoolArgument('new_auto_zoner', true)
+    auto_zone.setDisplayName('Use New Autozone method?')
+    auto_zone.setDefaultValue(false)
+    args << auto_zone
     return args
   end
 
@@ -80,6 +83,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     building_type = runner.getStringArgumentValue('building_type', user_arguments)
     template = runner.getStringArgumentValue('template', user_arguments)
     epw_file = runner.getStringArgumentValue('epw_file', user_arguments)
+    new_auto_zoner = runner.getBoolArgumentValue('new_auto_zoner', user_arguments)
 
     # Turn debugging output on/off
     @debug = false
@@ -102,7 +106,8 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Set OSM folder
     osm_directory = ""
-    if ['NECB2011', 'NECB2015', 'NECB2017'].include?(template)
+
+    if @templates.include?(template)
       osm_directory = "#{build_dir}/#{building_type}-#{template}-#{epw_file}"
     else
       osm_directory = build_dir
@@ -116,6 +121,11 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
+
+    #Override climate zone from lookup if anything but NECB 2011.
+    unless @templates.include?(template)
+      climate_zone = weather.a169_2006_climate_zone()
+    end
 
     #create model
     building_name = "#{template}_#{building_type}"
@@ -143,13 +153,13 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
                                                            building_type: building_type,
                                                            epw_file: epw_file,
                                                            sizing_run_dir: osm_directory,
-                                                           debug: @debug )
+                                                           debug: @debug,
+                                                           new_auto_zoner: new_auto_zoner )
     standard.model_replace_model(model, new_model)
 
 
     log_msgs
     return true
-
   end
 
   #end the run method

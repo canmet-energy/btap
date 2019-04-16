@@ -36,17 +36,18 @@ namespace :test do
       test_list = FileList.new
       # Read the parallelized list of tests
       # created by the circleci CLI in config.yml
-      if File.exist?('node_tests.txt')
-        File.open('node_tests.txt', 'r') do |f|
+      if File.exist?('circleci_tests.txt')
+        File.open('circleci_tests.txt', 'r') do |f|
           f.each_line do |line|
             # Skip comments the CLI may have included
             next unless line.include?('.rb')
             # Remove whitespaces
             line = line.strip
             # Ensure the file exists
-            pth = File.absolute_path("test/#{line}")
+            pth = File.absolute_path("#{line}")
             unless File.exist?(pth)
               puts "Skipped #{line} because this file doesn't exist"
+              puts "From #{Dir.pwd}"
               next
             end
             # Add this test to the list

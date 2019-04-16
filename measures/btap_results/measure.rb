@@ -78,15 +78,6 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     generate_hourly_report.setDefaultValue('false')
     args << generate_hourly_report
 
-    template_type_chs = OpenStudio::StringVector.new
-    template_type_chs << 'NECB2011'
-    template_type_chs << 'NECB2015'
-    template_type_chs << 'NECB2017'
-    template_type = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template_type', template_type_chs, true)
-    template_type.setDisplayName('NECB template for QAQC')
-    template_type.setDefaultValue('NECB2011')
-    args << template_type
-
     output_diet = OpenStudio::Ruleset::OSArgument::makeBoolArgument('output_diet', true)
     output_diet.setDisplayName('Reduce outputs.')
     output_diet.setDefaultValue(false)
@@ -983,7 +974,15 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
 
     # reporting final condition
     runner.registerInitialCondition('Gathering data from EnergyPlus SQL file and OSM model.')
-    template_type = runner.getStringArgumentValue('template_type',user_arguments)
+
+
+    template_type = nil
+    valid_templates = ['NECB2011', 'NECB2015', 'NECB2017']
+    valid_templates.each do  |model_template|
+      template_type = model_template if model.getBuilding.standardsBuildingType.get.to_s.include?(model_template)
+    end
+    runner.registerError(" Template in the standardsBuildingType #{building_name} is not valid for BTAPReports. It must contain #{valid_templates}") if template_type.nil?
+
     prototype_creator = Standard.build("#{template_type}")
 
     # Perform qaqc

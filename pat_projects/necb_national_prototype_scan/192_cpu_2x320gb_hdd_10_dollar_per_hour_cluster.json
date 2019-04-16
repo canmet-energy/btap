@@ -3,10 +3,10 @@
   "connected": false,
   "server_instance_type": "c3.8xlarge",
   "worker_instance_type": "c3.8xlarge",
-  "user_id": "",
-  "worker_node_number": 5,
+  "user_id": "phylroy",
+  "worker_node_number": 10,
   "aws_tags": [],
-  "openstudio_server_version": "2.4.3-nrcan",
+  "openstudio_server_version": "2.6.0-nrcan",
   "cluster_status": "terminated",
   "server": {
     "dns": null

@@ -6,6 +6,7 @@ gem 'rake', '~> 12.3.0'
 
 # uncomment if you need to update the bcl measures
 gem "bcl", "~> 0.5"
+gem 'nokogiri', '1.6.8.1'
 # gem "bcl", :path => "../bcl-gem"
 # gem 'bcl', github: 'NREL/bcl-gem', branch: 'develop'
 
@@ -24,7 +25,7 @@ end
 gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
 
 #These gems are present only in nrcan's standards and nrcan's OS server aws image.
-gem 'roo'
+gem 'roo', '2.7.1'
 gem 'aes'
 gem 'rest-client','2.0.2'
 gem 'pry'

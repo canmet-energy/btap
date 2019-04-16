@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_utility_tariffs_model_setup</name>
   <uid>34c820cf-b55d-4bdf-b654-48e5bd9beef8</uid>
-  <version_id>e537c3f0-c25d-4810-8d83-1ec988f784f4</version_id>
-  <version_modified>20180821T183815Z</version_modified>
+  <version_id>20dd95fb-d5b0-4916-ace4-5633a6208092</version_id>
+  <version_modified>20181219T170133Z</version_modified>
   <xml_checksum>D1E2AA62</xml_checksum>
   <class_name>BTAPUtilityTariffsModelSetup</class_name>
   <display_name>BTAPUtilityTariffsModelSetup</display_name>

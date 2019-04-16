@@ -11,14 +11,14 @@
           "measure_type": "RubyMeasure",
           "measure_definition_class_name": "BTAPCreateNECBPrototypeBuilding",
           "measure_definition_directory": "./measures/btap_create_necb_prototype_building",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_create_necb_prototype_building",
+          "measure_definition_directory_local": "C:/btap/measures/btap_create_necb_prototype_building",
           "measure_definition_display_name": "BTAPCreateNECBPrototypeBuilding",
           "measure_definition_name": "btap_create_necb_prototype_building",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
-          "measure_definition_version_uuid": "906f93cf-f9f6-417f-94c0-a26c508b7f71",
+          "measure_definition_version_uuid": "3eff181f-ed78-40f5-9bbb-3bf13aa63de3",
           "uuid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
-          "version_uuid": "906f93cf-f9f6-417f-94c0-a26c508b7f71",
+          "version_uuid": "3eff181f-ed78-40f5-9bbb-3bf13aa63de3",
           "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
           "taxonomy": "Whole Building.Space Types",
           "arguments": [
@@ -76,67 +76,59 @@
                     "values_and_weights": [
                       {
                         "value": "SecondarySchool",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "PrimarySchool",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "SmallOffice",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "MediumOffice",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "LargeOffice",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "SmallHotel",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "LargeHotel",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "Warehouse",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "RetailStandalone",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "RetailStripmall",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "QuickServiceRestaurant",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "FullServiceRestaurant",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "MidriseApartment",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       },
                       {
                         "value": "HighriseApartment",
-                        "weight": 0.0625
-                      },
-                      {
-                        "value": "Hospital",
-                        "weight": 0.0625
-                      },
-                      {
-                        "value": "Outpatient",
-                        "weight": 0.0625
+                        "weight": 0.07142857142857142
                       }
                     ]
                   },
@@ -257,268 +249,100 @@
                     "name": "discrete",
                     "values_and_weights": [
                       {
-                        "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
                         "value": "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_BC_Summerland.717680_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+                        "weight": 0.041666666666666664
+                      },
+                      {
+                        "value": "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+                        "weight": 0.041666666666666664
+                      },
+                      {
+                        "value": "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
-                        "value": "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
-                        "weight": 0.015151515151515152
-                      },
-                      {
-                        "value": "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "value": "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       },
                       {
                         "value": "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw",
-                        "weight": 0.015151515151515152
+                        "weight": 0.041666666666666664
                       }
                     ]
                   },
@@ -550,64 +374,24 @@
           "workflow_index": 0
         },
         {
-          "name": "btap_ideal_air_loads_measure",
-          "display_name": "BTAPIdealAirLoadsMeasure",
-          "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "BTAPIdealAirLoadsMeasure",
-          "measure_definition_directory": "./measures/btap_ideal_air_loads_measure",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_ideal_air_loads_measure",
-          "measure_definition_display_name": "BTAPIdealAirLoadsMeasure",
-          "measure_definition_name": "btap_ideal_air_loads_measure",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "b01d7a54-7061-4c52-9cde-e89aed93f8a2",
-          "measure_definition_version_uuid": "ad79d27d-520c-4026-a174-1cfb56a47e6c",
-          "uuid": "b01d7a54-7061-4c52-9cde-e89aed93f8a2",
-          "version_uuid": "ad79d27d-520c-4026-a174-1cfb56a47e6c",
-          "description": "This measure will remove all HVAC and apply ideal air loads and remove outdoor air.",
-          "taxonomy": "HVAC.Whole System",
-          "arguments": [],
-          "variables": [],
-          "workflow_index": 1
-        },
-        {
-          "name": "btap_view_model",
-          "display_name": "BTAPViewModel",
-          "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "BTAPViewModel",
-          "measure_definition_directory": "./measures/btap_view_model",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_view_model",
-          "measure_definition_display_name": "BTAPViewModel",
-          "measure_definition_name": "btap_view_model",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "a7a14e83-c319-4d66-b143-97630df94dbe",
-          "measure_definition_version_uuid": "5a912a92-b6b3-4f23-8528-3b980dd43de7",
-          "uuid": "a7a14e83-c319-4d66-b143-97630df94dbe",
-          "version_uuid": "5a912a92-b6b3-4f23-8528-3b980dd43de7",
-          "description": "Visualize an OpenStudio model in a web based viewer",
-          "taxonomy": "Reporting.QAQC",
-          "arguments": [],
-          "variables": [],
-          "workflow_index": 2
-        },
-        {
           "name": "btap_utility_tariffs_model_setup",
           "display_name": "BTAPUtilityTariffsModelSetup",
           "measure_type": "EnergyPlusMeasure",
           "measure_definition_class_name": "BTAPUtilityTariffsModelSetup",
           "measure_definition_directory": "./measures/btap_utility_tariffs",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_utility_tariffs",
+          "measure_definition_directory_local": "C:/btap/measures/btap_utility_tariffs",
           "measure_definition_display_name": "BTAPUtilityTariffsModelSetup",
           "measure_definition_name": "btap_utility_tariffs_model_setup",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "34c820cf-b55d-4bdf-b654-48e5bd9beef8",
-          "measure_definition_version_uuid": "fc77fef2-3297-4503-be12-c090e8595a61",
+          "measure_definition_version_uuid": "20dd95fb-d5b0-4916-ace4-5633a6208092",
           "uuid": "34c820cf-b55d-4bdf-b654-48e5bd9beef8",
-          "version_uuid": "fc77fef2-3297-4503-be12-c090e8595a61",
+          "version_uuid": "20dd95fb-d5b0-4916-ace4-5633a6208092",
           "description": "BTAPUtilityTariffs",
           "taxonomy": "Economics.Life Cycle Cost Analysis",
           "arguments": [],
           "variables": [],
-          "workflow_index": 3
+          "workflow_index": 1
         },
         {
           "name": "btap_results",
@@ -615,14 +399,14 @@
           "measure_type": "ReportingMeasure",
           "measure_definition_class_name": "BTAPResults",
           "measure_definition_directory": "./measures/btap_results",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_results",
+          "measure_definition_directory_local": "C:/btap/measures/btap_results",
           "measure_definition_display_name": "BTAP Results",
           "measure_definition_name": "btap_results",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
-          "measure_definition_version_uuid": "ca362d8f-1c12-4d82-a841-cb1db2600ee4",
+          "measure_definition_version_uuid": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
           "uuid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
-          "version_uuid": "ca362d8f-1c12-4d82-a841-cb1db2600ee4",
+          "version_uuid": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
           "description": "This measure creates BTAP result values used for NRCan analyses.",
           "taxonomy": "Reporting.QAQC",
           "arguments": [
@@ -635,16 +419,16 @@
               "value": "false"
             },
             {
-              "display_name": "NECB template for QAQC",
-              "display_name_short": "template_type",
-              "name": "template_type",
-              "value_type": "string",
-              "default_value": "NECB2011",
-              "value": "NECB2011"
+              "display_name": "Reduce outputs.",
+              "display_name_short": "output_diet",
+              "name": "output_diet",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
             }
           ],
           "variables": [],
-          "workflow_index": 4
+          "workflow_index": 2
         },
         {
           "name": "openstudio_results",
@@ -652,17 +436,25 @@
           "measure_type": "ReportingMeasure",
           "measure_definition_class_name": "OpenStudioResults",
           "measure_definition_directory": "./measures/btap_open_studio_results",
-          "measure_definition_directory_local": "C:\\btap\\pat_projects\\necb_national_prototype_scan\\measures\\btap_open_studio_results",
+          "measure_definition_directory_local": "C:/btap/measures/btap_open_studio_results",
           "measure_definition_display_name": "BTAPOpenStudioResults",
           "measure_definition_name": "openstudio_results",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "a7437013-6d3a-414a-8a4e-8bcba833188d",
-          "measure_definition_version_uuid": "ee4c7d7c-d8e7-4ecc-a5ca-de54a09cf164",
+          "measure_definition_version_uuid": "18df2d60-b03a-4772-9b1a-8a2c89d79930",
           "uuid": "a7437013-6d3a-414a-8a4e-8bcba833188d",
-          "version_uuid": "ee4c7d7c-d8e7-4ecc-a5ca-de54a09cf164",
+          "version_uuid": "18df2d60-b03a-4772-9b1a-8a2c89d79930",
           "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
           "taxonomy": "Whole Building.Space Types",
           "arguments": [
+            {
+              "display_name": "Reduce outputs.",
+              "display_name_short": "output_diet",
+              "name": "output_diet",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
             {
               "display_name": "Model Summary",
               "display_name_short": "building_summary_section",
@@ -833,7 +625,7 @@
             }
           ],
           "variables": [],
-          "workflow_index": 5
+          "workflow_index": 3
         }
       ],
       "algorithm": {
