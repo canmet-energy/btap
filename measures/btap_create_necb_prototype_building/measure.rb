@@ -149,8 +149,8 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
                                                            epw_file: epw_file,
                                                            sizing_run_dir: osm_directory,
                                                            debug: @debug,
-                                                           fdwr: fdwr,
-                                                           srr: srr,
+                                                           fdwr_set: fdwr,
+                                                           srr_set: srr,
                                                            new_auto_zoner: new_auto_zoner)
     standard.model_replace_model(model, new_model)
 
