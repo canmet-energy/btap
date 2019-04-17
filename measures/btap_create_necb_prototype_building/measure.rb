@@ -48,7 +48,6 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
     # Make an argument for the template
     template_chs = OpenStudio::StringVector.new(@templates)
 
-
     template = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('template', template_chs, true)
     template.setDisplayName('Template.')
     template.setDefaultValue('NECB2011')
@@ -122,6 +121,7 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Set OSM folder
     osm_directory = ""
+
     if @templates.include?(template)
       osm_directory = "#{build_dir}/#{building_type}-#{template}-#{epw_file}"
     else
@@ -136,14 +136,34 @@ class BTAPCreateNECBPrototypeBuilding < OpenStudio::Ruleset::ModelUserScript
 
     #Get Weather climate zone from lookup
     weather = BTAP::Environment::WeatherFile.new(epw_file)
+
     #Override climate zone from lookup if anything but NECB 2011.
     unless @templates.include?(template)
       climate_zone = weather.a169_2006_climate_zone()
     end
+
     #create model
     building_name = "#{template}_#{building_type}"
     puts "Creating #{building_name}"
     standard = Standard.build(template)
+
+    # Side inject json files from
+    path = "#{File.dirname(__FILE__)}/resources/data_sideload/"
+    raise ('Could not find data_sideload folder') unless Dir.exist?(path)
+    files = Dir.glob("#{path}/*.json").select {|e| File.file? e}
+    files.each do |file|
+      data = JSON.parse(File.read(file))
+      if not data["tables"].nil?
+        standard.standards_data["tables"] = [*standard.standards_data["tables"], *data["tables"]].to_h
+      else
+        #standard.standards_data[data.keys.first] = data[data.keys.first]
+      end
+      runner.registerWarning("Replaced default standard data with contents in #{file}")
+      puts "Replaced default standard data with contents in #{file}"
+    end
+
+
+
     new_model = standard.model_create_prototype_model(template: template,
                                                            building_type: building_type,
                                                            epw_file: epw_file,

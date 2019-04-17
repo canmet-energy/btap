@@ -76,7 +76,9 @@ class BTAPCreateNECBPrototypeBuilding_Test < Minitest::Test
 
     #set argument 1
     template = arguments[1].clone
+
     assert(template.setValue(necb_template))
+
     argument_map['template'] = template
 
     #set argument 2
