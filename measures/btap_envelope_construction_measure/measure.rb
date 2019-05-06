@@ -246,8 +246,11 @@ class BTAPEnvelopeConstructionMeasure < OpenStudio::Measure::ModelMeasure
     #apply_to_climate_zone = arguments['apply_to_climate_zone']
     # Find the climate zone according to the NECB hdds, then find the corresponding u-value of that climate zone.
 
-    climate_zone = @necb_climate_zones.detect {|zone| zone[:min_hdd] >= necb_hdd18 and necb_hdd18 < zone[:max_hdd]}
-    runner.registerError("Couldn't find a climate zone.") if climate_zone.nil?
+    climate_zone = @necb_climate_zones.detect {|zone| zone[:min_hdd] <= necb_hdd18 and necb_hdd18 < zone[:max_hdd]}
+    if climate_zone.nil?
+      runner.registerError("Couldn't find a climate zone. For #{necb_hdd18}") if climate_zone.nil?
+      raise("Couldn't find a climate zone. for #{necb_hdd18}")
+    end
 
     #Only if the any climate zone is selected.. or the climate zone of the model matches the user selected climate zone will
     # the measure do anything.

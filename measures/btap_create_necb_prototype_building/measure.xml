@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_necb_prototype_building</name>
   <uid>3e9acd53-8602-4749-a655-7cbbe48e8b30</uid>
-  <version_id>3eff181f-ed78-40f5-9bbb-3bf13aa63de3</version_id>
-  <version_modified>20181220T162125Z</version_modified>
+  <version_id>9270051e-27fd-48f8-8a6d-1269613af368</version_id>
+  <version_modified>20190418T150108Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BTAPCreateNECBPrototypeBuilding</class_name>
   <display_name>BTAPCreateNECBPrototypeBuilding</display_name>
@@ -247,6 +247,14 @@
           <display_name>CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw</display_name>
         </choice>
         <choice>
+          <value>CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC.epw</value>
+          <display_name>CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC2016.epw</display_name>
+        </choice>
+        <choice>
+          <value>CAN_NS_Truro.713980_CWEC.epw</value>
+          <display_name>CAN_NS_Truro.713980_CWEC.epw</display_name>
+        </choice>
+        <choice>
           <value>CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw</value>
           <display_name>CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw</display_name>
         </choice>
@@ -380,6 +388,40 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>new_auto_zoner</name>
+      <display_name>Use New Autozone method?</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>fdwr</name>
+      <display_name>Fenestration and Door to Wall Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1.1</default_value>
+    </argument>
+    <argument>
+      <name>srr</name>
+      <display_name>Skylight to Roof Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1.1</default_value>
+    </argument>
   </arguments>
   <outputs/>
   <provenances/>
@@ -404,7 +446,7 @@
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>919E1A97</checksum>
+      <checksum>A53A1C93</checksum>
     </file>
     <file>
       <version>
@@ -415,7 +457,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C36E6275</checksum>
+      <checksum>8DFFEFA0</checksum>
     </file>
   </files>
 </measure>

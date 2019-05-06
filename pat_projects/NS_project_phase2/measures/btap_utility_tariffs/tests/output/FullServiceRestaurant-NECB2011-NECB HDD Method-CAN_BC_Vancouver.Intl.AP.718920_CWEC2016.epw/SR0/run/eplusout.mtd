@@ -1,0 +1,302 @@
+
+ Meters for 9,DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:DINING ZN [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:DINING ZN [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+
+ Meters for 82,KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:KITCHEN ZN [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:KITCHEN ZN [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+
+ Meters for 107,DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:DINING ZN [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:DINING ZN [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+
+ Meters for 144,KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:KITCHEN ZN [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:KITCHEN ZN [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+
+ Meters for 157,ATTIC ZN:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ATTIC ZN [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:ATTIC ZN [J]
+
+ Meters for 218,ATTIC ZN:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ATTIC ZN [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:ATTIC ZN [J]
+
+ Meters for 245,DINING ZN:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:DINING ZN [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:DINING ZN [J]
+
+ Meters for 270,DINING ZN:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:DINING ZN [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:DINING ZN [J]
+
+ Meters for 285,KITCHEN ZN:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:KITCHEN ZN [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:KITCHEN ZN [J]
+
+ Meters for 310,KITCHEN ZN:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:KITCHEN ZN [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:KITCHEN ZN [J]
+
+ Meters for 325,Whole Building:Facility Total Purchased Electric Energy [J]
+  OnMeter=ElectricityPurchased:Facility [J]
+  OnMeter=ElectricityPurchased:Plant [J]
+  OnMeter=Cogeneration:ElectricityPurchased [J]
+
+ Meters for 362,Whole Building:Facility Total Surplus Electric Energy [J]
+  OnMeter=ElectricitySurplusSold:Facility [J]
+  OnMeter=ElectricitySurplusSold:Plant [J]
+  OnMeter=Cogeneration:ElectricitySurplusSold [J]
+
+ Meters for 399,Whole Building:Facility Net Purchased Electric Energy [J]
+  OnMeter=ElectricityNet:Facility [J]
+  OnMeter=ElectricityNet:Plant [J]
+  OnMeter=Cogeneration:ElectricityNet [J]
+
+ Meters for 436,ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Heating Energy [J]
+  OnMeter=DistrictHeating:Facility [J]
+  OnMeter=DistrictHeating:HVAC [J]
+  OnMeter=Heating:DistrictHeating [J]
+
+ Meters for 473,ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Cooling Energy [J]
+  OnMeter=DistrictCooling:Facility [J]
+  OnMeter=DistrictCooling:HVAC [J]
+  OnMeter=Cooling:DistrictCooling [J]
+
+ Meters for 510,ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Heating Energy [J]
+  OnMeter=DistrictHeating:Facility [J]
+  OnMeter=DistrictHeating:HVAC [J]
+  OnMeter=Heating:DistrictHeating [J]
+
+ Meters for 511,ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Cooling Energy [J]
+  OnMeter=DistrictCooling:Facility [J]
+  OnMeter=DistrictCooling:HVAC [J]
+  OnMeter=Cooling:DistrictCooling [J]
+
+ Meters for 512,ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Heating Energy [J]
+  OnMeter=DistrictHeating:Facility [J]
+  OnMeter=DistrictHeating:HVAC [J]
+  OnMeter=Heating:DistrictHeating [J]
+
+ Meters for 513,ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Cooling Energy [J]
+  OnMeter=DistrictCooling:Facility [J]
+  OnMeter=DistrictCooling:HVAC [J]
+  OnMeter=Cooling:DistrictCooling [J]
+
+ Meters for 514,Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 539,Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 540,Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ For Meter=Electricity:Facility [J], ResourceType=Electricity, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=Electricity:Building [J], ResourceType=Electricity, Group=Building, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=Electricity:Zone:DINING ZN [J], ResourceType=Electricity, Group=Zone, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+
+ For Meter=InteriorLights:Electricity:Zone:DINING ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+
+ For Meter=General:InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE LIGHTS:Lights Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+
+ For Meter=Electricity:Zone:KITCHEN ZN [J], ResourceType=Electricity, Group=Zone, contents are:
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=InteriorLights:Electricity:Zone:KITCHEN ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION LIGHTS:Lights Electric Energy
+
+ For Meter=InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:DINING ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=General:InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  DINING ZN SPACE FUNCTION DINING - FAMILY SPACE ELEC EQUIP:Electric Equipment Electric Energy
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:KITCHEN ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  KITCHEN ZN SPACE FUNCTION FOOD PREPARATION ELEC EQUIP:Electric Equipment Electric Energy
+
+ For Meter=EnergyTransfer:Facility [J], ResourceType=EnergyTransfer, contents are:
+  ATTIC ZN:Zone Air System Sensible Heating Energy
+  ATTIC ZN:Zone Air System Sensible Cooling Energy
+  DINING ZN:Zone Air System Sensible Heating Energy
+  DINING ZN:Zone Air System Sensible Cooling Energy
+  KITCHEN ZN:Zone Air System Sensible Heating Energy
+  KITCHEN ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Building [J], ResourceType=EnergyTransfer, Group=Building, contents are:
+  ATTIC ZN:Zone Air System Sensible Heating Energy
+  ATTIC ZN:Zone Air System Sensible Cooling Energy
+  DINING ZN:Zone Air System Sensible Heating Energy
+  DINING ZN:Zone Air System Sensible Cooling Energy
+  KITCHEN ZN:Zone Air System Sensible Heating Energy
+  KITCHEN ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:ATTIC ZN [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  ATTIC ZN:Zone Air System Sensible Heating Energy
+  ATTIC ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  ATTIC ZN:Zone Air System Sensible Heating Energy
+  DINING ZN:Zone Air System Sensible Heating Energy
+  KITCHEN ZN:Zone Air System Sensible Heating Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:ATTIC ZN [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ATTIC ZN:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  ATTIC ZN:Zone Air System Sensible Cooling Energy
+  DINING ZN:Zone Air System Sensible Cooling Energy
+  KITCHEN ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:ATTIC ZN [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ATTIC ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:DINING ZN [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  DINING ZN:Zone Air System Sensible Heating Energy
+  DINING ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:DINING ZN [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  DINING ZN:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:DINING ZN [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  DINING ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:KITCHEN ZN [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  KITCHEN ZN:Zone Air System Sensible Heating Energy
+  KITCHEN ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:KITCHEN ZN [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  KITCHEN ZN:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:KITCHEN ZN [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  KITCHEN ZN:Zone Air System Sensible Cooling Energy
+
+ For Meter=ElectricityPurchased:Facility [J], ResourceType=ElectricityPurchased, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=ElectricityPurchased:Plant [J], ResourceType=ElectricityPurchased, Group=Plant, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=ElectricitySurplusSold:Facility [J], ResourceType=ElectricitySurplusSold, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=ElectricitySurplusSold:Plant [J], ResourceType=ElectricitySurplusSold, Group=Plant, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=ElectricityNet:Facility [J], ResourceType=ElectricityNet, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=ElectricityNet:Plant [J], ResourceType=ElectricityNet, Group=Plant, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=DistrictHeating:Facility [J], ResourceType=DistrictHeating, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Heating Energy
+
+ For Meter=DistrictHeating:HVAC [J], ResourceType=DistrictHeating, Group=HVAC, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Heating Energy
+
+ For Meter=Heating:DistrictHeating [J], ResourceType=DistrictHeating, EndUse=Heating, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Heating Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Heating Energy
+
+ For Meter=DistrictCooling:Facility [J], ResourceType=DistrictCooling, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Cooling Energy
+
+ For Meter=DistrictCooling:HVAC [J], ResourceType=DistrictCooling, Group=HVAC, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Cooling Energy
+
+ For Meter=Cooling:DistrictCooling [J], ResourceType=DistrictCooling, EndUse=Cooling, contents are:
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 1:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 2:Zone Ideal Loads Supply Air Total Cooling Energy
+  ZONE HVAC IDEAL LOADS AIR SYSTEM 3:Zone Ideal Loads Supply Air Total Cooling Energy
+
+ For Meter=Carbon Equivalent:Facility [kg], ResourceType=Carbon Equivalent, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
+
+ For Meter=CarbonEquivalentEmissions:Carbon Equivalent [kg], ResourceType=Carbon Equivalent, EndUse=CarbonEquivalentEmissions, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
