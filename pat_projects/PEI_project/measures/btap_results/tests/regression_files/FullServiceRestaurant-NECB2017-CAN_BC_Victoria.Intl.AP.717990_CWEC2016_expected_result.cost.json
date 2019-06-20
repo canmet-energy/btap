@@ -1,0 +1,104 @@
+{
+  "rs_means_city": "VICTORIA",
+  "rs_means_prov": "BRITISH COLUMBIA",
+  "envelope": {
+    "BTAP-ExteriorRoof-IEAD-2_5.181347150259064": {
+      "area": 569.505710935342,
+      "cost": 91877.20131511142,
+      "note": "Surf #1: OK / 2: OK / 3: OK / 4: OK"
+    },
+    "BTAP-ExteriorWall-SteelFramed-1_3.174603174603174": {
+      "area": 101.51424724799989,
+      "cost": 4482.240736941092,
+      "note": "Surf #1: RSI out of the range (3.17). Range for BTAP-ExteriorWall-SteelFramed-1 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries.  / 2: RSI out of the range (3.17). Range for BTAP-ExteriorWall-SteelFramed-1 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries.  / 3: RSI out of the range (3.17). Range for BTAP-ExteriorWall-SteelFramed-1 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries. "
+    },
+    "BTAP-ExteriorWindow-FixedWindow-6_0.47619047619047616": {
+      "area": 110.28704729600003,
+      "cost": 33233.216102836246,
+      "note": "Surf #1: OK / 2: OK / 3: OK / 1: OK / 2: OK / 3: OK"
+    },
+    "BTAP-GroundContactFloor-Unheated-1_1.321003963011886": {
+      "area": 511.15331569,
+      "cost": 40897.86275334019,
+      "note": "Surf #1: OK / 1: OK"
+    },
+    "BTAP-ExteriorWall-Mass-2_3.174603174603174": {
+      "area": 63.91632369600006,
+      "cost": 3645.866334739164,
+      "note": "Surf #1: RSI out of the range (3.17). Range for BTAP-ExteriorWall-Mass-2 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries.  / 2: RSI out of the range (3.17). Range for BTAP-ExteriorWall-Mass-2 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries.  / 3: RSI out of the range (3.17). Range for BTAP-ExteriorWall-Mass-2 is 3.18-5.46.Using extrapolation up to +/-30% of library boundaries. "
+    },
+    "total_envelope_cost": 174136.38724296817
+  },
+  "lighting": {
+    "Sp-attic Sys-0 Flr-2 Sch-- undefined - HPlcmt-core ZN": {
+      "sName": "- undefined -",
+      "height(avg ft)": 5.3,
+      "area(ft2)": 5502.0,
+      "cost": 0,
+      "note": "Space count: 1"
+    },
+    "Sp-Dining Sys-3 Flr-1 Sch-B HPlcmt-south ZN": {
+      "sName": "Dining area - family dining",
+      "height(avg ft)": 10.0,
+      "area(ft2)": 4001.5,
+      "cost": 22349.316133729502,
+      "note": "Space count: 1"
+    },
+    "Sp-Kitchen Sys-3 Flr-1 Sch-B HPlcmt-north ZN": {
+      "sName": "Food preparation area",
+      "height(avg ft)": 10.0,
+      "area(ft2)": 1500.5,
+      "cost": 8380.976559845774,
+      "note": "Space count: 1"
+    },
+    "total_lighting_cost": 30730.29
+  },
+  "heating & cooling": {
+    "boilers": {
+      "nom_flr2flr_hght_ft": 15.3,
+      "boiler_lonhorizontal_distgest_distance_to_ext_ft": 52.5,
+      "boiler_utility_distance_ft": 52.5,
+      "boilers": 6765.95,
+      "boiler_flues": 1164.99,
+      "boiler_utilties": 1414.93,
+      "boiler_pumps": 9679.63,
+      "boiler_piping": 1684.02,
+      "boilers_total": 20709.52
+    },
+    "chillers": {
+      "nom_flr2flr_hght_ft": 15.3,
+      "chiller_longest_distance_to_ext_ft": 52.5,
+      "chiller_utility_distance_ft": 52.5,
+      "chillers": 0.0,
+      "chiller_flues": 0.0,
+      "chiller_utilties": 0.0,
+      "chiller_pumps": 0.0,
+      "chiller_piping": 0.0,
+      "chillers_total": 0.0
+    },
+    "coolingTower": {
+    },
+    "coolingtowers": {
+      "nom_flr2flr_hght_ft": 15.3,
+      "coolingtower_longest_distance_to_ext_ft": 52.5,
+      "coolingtower_utility_distance_ft": 52.5,
+      "coolingtowers": 0.0,
+      "coolingtower_utilties": 0.0,
+      "coolingtower_pumps": 0.0,
+      "coolingtower_piping": 0.0,
+      "coolingtower_total": 0.0
+    }
+  },
+  "shw": {
+  },
+  "ventilation": {
+  },
+  "totals": {
+    "envelope": 174136.39,
+    "lighting": 30730.29,
+    "heating & cooling": 20709.52,
+    "shw": 0.0,
+    "ventilation": 88886.61,
+    "grand total": 314462.82
+  }
+}
