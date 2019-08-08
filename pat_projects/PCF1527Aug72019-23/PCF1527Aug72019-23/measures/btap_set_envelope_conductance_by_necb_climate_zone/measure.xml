@@ -1,0 +1,162 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_set_envelope_conductance_by_necb_climate_zone</name>
+  <uid>36fd01e8-5fcf-4fec-9117-90bf8d4071fc</uid>
+  <version_id>640ec217-f62b-42fb-ab95-8ed4a5972bba</version_id>
+  <version_modified>20190214T214035Z</version_modified>
+  <xml_checksum>A51D361F</xml_checksum>
+  <class_name>BtapSetEnvelopeConductanceByNecbClimateZone</class_name>
+  <display_name>BTAPSetEnvelopeConductanceByNecbClimateZone</display_name>
+  <description>Modifies walls, roofs, and windows conductance by climate zone.</description>
+  <modeler_description>Modifies walls, roofs, and windows conductances by NECB climate zone. OpenStudio 2.6.0 (October 2018)</modeler_description>
+  <arguments>
+    <argument>
+      <name>necb_template</name>
+      <display_name>Template</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>NECB2015</default_value>
+      <choices>
+        <choice>
+          <value>NECB2011</value>
+          <display_name>NECB2011</display_name>
+        </choice>
+        <choice>
+          <value>NECB2015</value>
+          <display_name>NECB2015</display_name>
+        </choice>
+        <choice>
+          <value>NECB2017</value>
+          <display_name>NECB2017</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>surface_type</name>
+      <display_name>Surface Type</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Glazing</default_value>
+      <choices>
+        <choice>
+          <value>Walls</value>
+          <display_name>Walls</display_name>
+        </choice>
+        <choice>
+          <value>Roofs</value>
+          <display_name>Roofs</display_name>
+        </choice>
+        <choice>
+          <value>Floors</value>
+          <display_name>Floors</display_name>
+        </choice>
+        <choice>
+          <value>Glazing</value>
+          <display_name>Glazing</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>zone4_u_value</name>
+      <display_name>NECB Zone4 Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.59</default_value>
+    </argument>
+    <argument>
+      <name>zone5_u_value</name>
+      <display_name>NECB Zone5 Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.265</default_value>
+    </argument>
+    <argument>
+      <name>zone6_u_value</name>
+      <display_name>NECB Zone6 Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.24</default_value>
+    </argument>
+    <argument>
+      <name>zone7A_u_value</name>
+      <display_name>NECB Zone7A Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.215</default_value>
+    </argument>
+    <argument>
+      <name>zone7B_u_value</name>
+      <display_name>NECB Zone7B Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.19</default_value>
+    </argument>
+    <argument>
+      <name>zone8_u_value</name>
+      <display_name>NECB Zone8 Insulation U-value (W/m^2 K).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.165</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1FD7D11E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.11.5</identifier>
+        <min_compatible>1.8.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>FDB75035</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>06B5C274</checksum>
+    </file>
+  </files>
+</measure>
