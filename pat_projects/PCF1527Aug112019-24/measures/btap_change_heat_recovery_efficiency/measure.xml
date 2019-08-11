@@ -1,0 +1,130 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_change_energy_recovery_efficiency</name>
+  <uid>9b530f72-e5ab-467b-acd6-b5c3458d7b55</uid>
+  <version_id>caaaeca1-9d9a-4f7f-9a2f-8e25c38489c9</version_id>
+  <version_modified>20190811T154743Z</version_modified>
+  <xml_checksum>BF75C791</xml_checksum>
+  <class_name>BTAPChangeEnergyRecoveryEfficiency</class_name>
+  <display_name>BTAPChangeEnergyRecoveryEfficiency</display_name>
+  <description>Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. </description>
+  <modeler_description>The measure loops through all air loops in the baseline model and identify the air loops that contain OS:AirLoopHVAC:OutdoorAirSystem objects. Users can choose one or all air loops from the drop down list to apply this measure. If an OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure modifies the effectiveness, heat exchanger type, and electric power setting in the model based on user inputs. If no OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure will attach a OS:HeatExchanger:AirToAir:SensibleAndLatent object to the air loop. The economizer lockout is always set to be Yes. The initial and final values of effectiveness, the heat exchanger type, and nominal electric power are reported during simulation</modeler_description>
+  <arguments>
+    <argument>
+      <name>sensible_eff_at_100_heating</name>
+      <display_name>Sensible Effectiveness at 100% Heating Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.76</default_value>
+    </argument>
+    <argument>
+      <name>latent_eff_at_100_heating</name>
+      <display_name>Latent Effectiveness at 100% Heating Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.68</default_value>
+    </argument>
+    <argument>
+      <name>sensible_eff_at_75_heating</name>
+      <display_name>Sensible Effectiveness at 75% Heating Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.81</default_value>
+    </argument>
+    <argument>
+      <name>latent_eff_at_75_heating</name>
+      <display_name>Latent Effectiveness at 75% Heating Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.73</default_value>
+    </argument>
+    <argument>
+      <name>sensible_eff_at_100_cooling</name>
+      <display_name>Sensible Effectiveness at 100% Cooling Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.76</default_value>
+    </argument>
+    <argument>
+      <name>latent_eff_at_100_cooling</name>
+      <display_name>Latent Effectiveness at 100% Cooling Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.68</default_value>
+    </argument>
+    <argument>
+      <name>sensible_eff_at_75_cooling</name>
+      <display_name>Sensible Effectiveness at 75% Cooling Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.81</default_value>
+    </argument>
+    <argument>
+      <name>latent_eff_at_75_cooling</name>
+      <display_name>Latent Effectiveness at 75% Cooling Air Flow</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.73</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>HVAC.Energy Recovery</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7A98FCAE</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.0</identifier>
+        <min_compatible>1.8.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>84C8F5D4</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>49CBDE22</checksum>
+    </file>
+  </files>
+</measure>

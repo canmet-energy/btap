@@ -1,0 +1,3641 @@
+{
+  "projectName": "PCF1527Aug112019-24",
+  "projectDir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24",
+  "analysisName": "PCF1527Aug112019-24",
+  "seed": "dummy.osm",
+  "weatherFile": "dummy.epw",
+  "analysis_type": "Algorithmic",
+  "remoteSettings": {
+    "open": true,
+    "remoteType": "Amazon Cloud",
+    "remoteServerURL": null,
+    "aws": {
+      "connected": false,
+      "cluster_name": "",
+      "server_instance_type": "",
+      "worker_instance_type": "",
+      "user_id": "",
+      "worker_node_number": 0,
+      "aws_tags": [],
+      "openstudio_server_version": ""
+    },
+    "credentials": {
+      "yamlFilename": null,
+      "accessKey": null,
+      "region": "us-east-1"
+    }
+  },
+  "samplingMethod": {
+    "id": "doe",
+    "name": "analysis.type.doe",
+    "link": "https://cran.r-project.org/web/packages/DoE.base/DoE.base.pdf"
+  },
+  "algorithmSettings": [
+    {
+      "name": "experiment_type",
+      "displayName": "Experiment Type",
+      "description": "Options: full_factorial",
+      "defaultValue": "full_factorial",
+      "type": "string",
+      "value": "full_factorial",
+      "$$hashKey": "object:9825"
+    },
+    {
+      "name": "number_of_samples",
+      "displayName": "Number of Samples",
+      "description": "Positive integer (this discretizes a continous variable)",
+      "defaultValue": 2,
+      "type": "number",
+      "value": 2,
+      "$$hashKey": "object:9826"
+    },
+    {
+      "name": "seed",
+      "displayName": "Seed",
+      "description": "Integer seed for random number generator",
+      "defaultValue": null,
+      "type": "number",
+      "value": null,
+      "$$hashKey": "object:7540"
+    },
+    {
+      "name": "failed_f_value",
+      "displayName": "Failed F Value",
+      "description": "Return Value for F(x) if F fails",
+      "defaultValue": 1000000000000000000,
+      "type": "number",
+      "value": 1000000000000000000,
+      "$$hashKey": "object:9827"
+    },
+    {
+      "name": "debug_messages",
+      "displayName": "Debug Messages",
+      "description": "Options: 1 or 0 (True or False)",
+      "defaultValue": 0,
+      "type": "number",
+      "value": 0,
+      "$$hashKey": "object:9828"
+    }
+  ],
+  "rubyMD5": "",
+  "mongoMD5": "",
+  "openstudioServerMD5": "",
+  "openstudioCLIMD5": "",
+  "openstudioMD5": "",
+  "measures": [
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_create_necb_prototype_building",
+      "name": "btap_create_necb_prototype_building",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_create_necb_prototype_building",
+      "uid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
+      "uuid": "{3e9acd53-8602-4749-a655-7cbbe48e8b30}",
+      "version_id": "922a9030-878b-47ff-8776-18fbe47bdb12",
+      "version_uuid": "{922a9030-878b-47ff-8776-18fbe47bdb12}",
+      "version_modified": "20190603T174932Z",
+      "xml_checksum": "2C38F48B",
+      "display_name": "BTAPCreateNECBPrototypeBuilding",
+      "class_name": "BTAPCreateNECBPrototypeBuilding",
+      "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+      "modeler_description": "This will replaced the model object with a brand new model. It effectively ignores the seed model.",
+      "tags": "Whole Building.Space Types",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00QO",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00QQ",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00QS",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "building_type",
+          "display_name": "Building Type.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "SmallOffice",
+          "choice_values": [
+            "SecondarySchool",
+            "PrimarySchool",
+            "SmallOffice",
+            "MediumOffice",
+            "LargeOffice",
+            "SmallHotel",
+            "LargeHotel",
+            "Warehouse",
+            "RetailStandalone",
+            "RetailStripmall",
+            "QuickServiceRestaurant",
+            "FullServiceRestaurant",
+            "MidriseApartment",
+            "HighriseApartment",
+            "Hospital",
+            "Outpatient"
+          ],
+          "choice_display_names": [
+            "SecondarySchool",
+            "PrimarySchool",
+            "SmallOffice",
+            "MediumOffice",
+            "LargeOffice",
+            "SmallHotel",
+            "LargeHotel",
+            "Warehouse",
+            "RetailStandalone",
+            "RetailStripmall",
+            "QuickServiceRestaurant",
+            "FullServiceRestaurant",
+            "MidriseApartment",
+            "HighriseApartment",
+            "Hospital",
+            "Outpatient"
+          ],
+          "$$hashKey": "uiGrid-00QU",
+          "display_name_short": "building_type",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "SecondarySchool",
+              "PrimarySchool",
+              "SmallOffice",
+              "MediumOffice",
+              "LargeOffice",
+              "SmallHotel",
+              "LargeHotel",
+              "Warehouse",
+              "RetailStandalone",
+              "RetailStripmall",
+              "QuickServiceRestaurant",
+              "FullServiceRestaurant",
+              "MidriseApartment",
+              "HighriseApartment",
+              "Hospital",
+              "Outpatient"
+            ],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "SecondarySchool",
+                "weight": "",
+                "$$hashKey": "object:9893"
+              },
+              {
+                "value": "MediumOffice",
+                "weight": "",
+                "$$hashKey": "object:9904"
+              },
+              {
+                "value": "LargeOffice",
+                "weight": "",
+                "$$hashKey": "object:9914"
+              },
+              {
+                "value": "Warehouse",
+                "weight": "",
+                "$$hashKey": "object:9924"
+              },
+              {
+                "value": "RetailStripmall",
+                "weight": "",
+                "$$hashKey": "object:9934"
+              },
+              {
+                "value": "HighriseApartment",
+                "weight": "",
+                "$$hashKey": "object:9944"
+              }
+            ],
+            "maximum": "SmallOffice",
+            "minimum": "SmallOffice",
+            "mean": "SmallOffice",
+            "deltaX": "SmallOffice",
+            "stdDev": "SmallOffice",
+            "default_value": "SmallOffice",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "template",
+          "display_name": "Template.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "NECB2011",
+          "choice_values": [
+            "NECB2011",
+            "NECB2015",
+            "NECB2017"
+          ],
+          "choice_display_names": [
+            "NECB2011",
+            "NECB2015",
+            "NECB2017"
+          ],
+          "$$hashKey": "uiGrid-00QW",
+          "display_name_short": "template",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "NECB2011",
+              "NECB2015",
+              "NECB2017"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "NECB2011",
+            "minimum": "NECB2011",
+            "mean": "NECB2011",
+            "deltaX": "NECB2011",
+            "stdDev": "NECB2011",
+            "default_value": "NECB2017",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "epw_file",
+          "display_name": "Climate File",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+          "choice_values": [
+            "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+            "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+            "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+            "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+            "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+            "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+            "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+            "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+            "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+            "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+            "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+            "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+            "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+            "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+            "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+            "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+            "CAN_BC_Summerland.717680_CWEC2016.epw",
+            "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+            "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+            "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+            "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+            "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+            "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+            "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+            "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+            "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+            "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+            "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+            "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+            "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+            "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+            "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+            "CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC2016.epw",
+            "CAN_NS_Truro.713980_CWEC.epw",
+            "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+            "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+            "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+            "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+            "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+            "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+            "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+            "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+            "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+            "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+            "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+            "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+            "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+            "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+            "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+            "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+            "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+            "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+            "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+            "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+            "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+            "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+            "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+            "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+            "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+            "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+            "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+            "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+            "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+            "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+            "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+            "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+            "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+          ],
+          "choice_display_names": [
+            "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+            "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+            "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+            "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+            "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+            "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+            "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+            "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+            "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+            "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+            "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+            "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+            "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+            "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+            "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+            "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+            "CAN_BC_Summerland.717680_CWEC2016.epw",
+            "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+            "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+            "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+            "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+            "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+            "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+            "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+            "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+            "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+            "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+            "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+            "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+            "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+            "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+            "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+            "CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC2016.epw",
+            "CAN_NS_Truro.713980_CWEC.epw",
+            "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+            "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+            "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+            "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+            "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+            "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+            "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+            "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+            "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+            "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+            "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+            "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+            "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+            "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+            "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+            "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+            "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+            "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+            "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+            "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+            "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+            "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+            "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+            "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+            "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+            "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+            "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+            "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+            "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+            "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+            "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+            "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+            "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+          ],
+          "$$hashKey": "uiGrid-00QY",
+          "display_name_short": "epw_file",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+              "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+              "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+              "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+              "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+              "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+              "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+              "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+              "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+              "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+              "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+              "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+              "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+              "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+              "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+              "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+              "CAN_BC_Summerland.717680_CWEC2016.epw",
+              "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+              "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+              "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+              "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+              "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+              "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+              "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+              "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+              "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+              "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+              "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+              "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+              "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+              "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+              "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+              "CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC2016.epw",
+              "CAN_NS_Truro.713980_CWEC.epw",
+              "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+              "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+              "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+              "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+              "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+              "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+              "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+              "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+              "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+              "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+              "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+              "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+              "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+              "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+              "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+              "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+              "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+              "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+              "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+              "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+              "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+              "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+              "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+              "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+              "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+              "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+              "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+              "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+              "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+              "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+              "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+              "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+              "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+            ],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:9964"
+              },
+              {
+                "value": "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:9975"
+              },
+              {
+                "value": "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:9985"
+              },
+              {
+                "value": "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:9995"
+              },
+              {
+                "value": "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:10005"
+              },
+              {
+                "value": "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                "weight": "",
+                "$$hashKey": "object:10015"
+              }
+            ],
+            "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "mean": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "deltaX": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "stdDev": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "new_auto_zoner",
+          "display_name": "Use New Autozone method?",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "$$hashKey": "uiGrid-00R0",
+          "display_name_short": "new_auto_zoner",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": true,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "fdwr",
+          "display_name": "Fenestration and Door to Wall Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 1.1,
+          "$$hashKey": "uiGrid-00R2",
+          "display_name_short": "fdwr",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1.1,
+            "minimum": 1.1,
+            "mean": 1.1,
+            "deltaX": 1.1,
+            "stdDev": 1.1,
+            "default_value": 1.1,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "srr",
+          "display_name": "Skylight to Roof Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 1.1,
+          "$$hashKey": "uiGrid-00R4",
+          "display_name_short": "srr",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1.1,
+            "minimum": 1.1,
+            "mean": 1.1,
+            "deltaX": 1.1,
+            "stdDev": 1.1,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/3/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 0,
+      "options": [],
+      "instanceId": 0.25795411787795386,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2008",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAP set boiler",
+      "name": "btap_set_boiler",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAP set boiler",
+      "uid": "2f81b690-4343-49fe-9c2a-803e531ac6c8",
+      "uuid": "{2f81b690-4343-49fe-9c2a-803e531ac6c8}",
+      "version_id": "b442de41-82f8-49dd-9615-0303ce5aa491",
+      "version_uuid": "{b442de41-82f8-49dd-9615-0303ce5aa491}",
+      "version_modified": "20190811T164051Z",
+      "xml_checksum": "E88CCCA7",
+      "display_name": "BTAPSetBoiler",
+      "class_name": "BTAPSetBoiler",
+      "description": "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+      "modeler_description": "Remove all infiltration objects used in the model and add in a new object to each space type, and then to spaces without space types. Schedules come from the schedule sets. Warn user if there is no schedule set associated with a space type.\r\r\r\r\r\r\n\r\r\r\r\r\r\nA one time material & installation cost can be added to the building object to reflect improvements made throughout the envelope. \"Years Until Costs Start? is typically \"0?, but you can use a larger number if you want to delay the improvements.  O&M cost and frequency can be whatever is appropriate for the component. This measure hard sizes the costs based on current infiltration levels.  As a result any change to the models made by measures run after this that have an impact on infiltration will not affect the cost. An example of a problematic measure would be deleting a space from the model or making each floor taller; in both cases adjusting the total exterior envelope area.\r\r\r\r\r\r\n  ",
+      "tags": "Envelope.Infiltration",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00R6",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00R8",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00RA",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "boiler_eff",
+          "display_name": "Space Infiltration Flow per Exterior Envelope Surface Area (cfm/ft^2).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0.95,
+          "$$hashKey": "uiGrid-00RC",
+          "display_name_short": "boiler_eff",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.95,
+                "weight": null,
+                "$$hashKey": "object:10035"
+              },
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10046"
+              }
+            ],
+            "maximum": 0.95,
+            "minimum": 0.95,
+            "mean": 0.95,
+            "deltaX": 0.95,
+            "stdDev": 0.95,
+            "default_value": 0.95,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 1,
+      "options": [],
+      "instanceId": 0.6518616934673724,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2009",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAPSetInfiltration",
+      "name": "btap_set_infiltration",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAPSetInfiltration",
+      "uid": "9d7b0789-3974-4869-a2a8-055391857e3c",
+      "uuid": "{9d7b0789-3974-4869-a2a8-055391857e3c}",
+      "version_id": "69a5a5c0-332f-4af5-8cef-0136dfeafffc",
+      "version_uuid": "{69a5a5c0-332f-4af5-8cef-0136dfeafffc}",
+      "version_modified": "20190811T164051Z",
+      "xml_checksum": "E88CCCA7",
+      "display_name": "BTAPSetInfiltration",
+      "class_name": "BTAPSetInfiltration",
+      "description": "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+      "modeler_description": "Remove all infiltration objects used in the model and add in a new object to each space type, and then to spaces without space types. Schedules come from the schedule sets. Warn user if there is no schedule set associated with a space type.\r\r\r\r\r\r\n\r\r\r\r\r\r\nA one time material & installation cost can be added to the building object to reflect improvements made throughout the envelope. \"Years Until Costs Start? is typically \"0?, but you can use a larger number if you want to delay the improvements.  O&M cost and frequency can be whatever is appropriate for the component. This measure hard sizes the costs based on current infiltration levels.  As a result any change to the models made by measures run after this that have an impact on infiltration will not affect the cost. An example of a problematic measure would be deleting a space from the model or making each floor taller; in both cases adjusting the total exterior envelope area.\r\r\r\r\r\r\n  ",
+      "tags": "Envelope.Infiltration",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00RE",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00RG",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00RI",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "infiltration_si",
+          "display_name": "Space Infiltration Flow per Exterior Envelope Surface Area m3/s/m2 at 75 Pa",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0.0027,
+          "$$hashKey": "uiGrid-00RK",
+          "display_name_short": "infiltration_si",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.0002,
+                "weight": "",
+                "$$hashKey": "object:10066"
+              },
+              {
+                "value": 0.0006,
+                "weight": "",
+                "$$hashKey": "object:10077"
+              }
+            ],
+            "maximum": 0.0027,
+            "minimum": 0.0027,
+            "mean": 0.0027,
+            "deltaX": 0.0027,
+            "stdDev": 0.0027,
+            "default_value": 0.0027,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 2,
+      "options": [],
+      "instanceId": 0.9287143433760803,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2010",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_change_cav_to_vav",
+      "name": "btap_change_cav_to_vav",
+      "directory": "C:/Users/vuonge/Documents/Code Document/measure/btap_change_cav_to_vav",
+      "uid": "f544d84f-d7c6-426b-b3a4-aecfc6d2523b",
+      "uuid": "{f544d84f-d7c6-426b-b3a4-aecfc6d2523b}",
+      "version_id": "c9fca62f-a6d7-4427-bdec-cda54313d9ca",
+      "version_uuid": "{c9fca62f-a6d7-4427-bdec-cda54313d9ca}",
+      "version_modified": "20190811T181542Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPChangeCAVToVAV",
+      "class_name": "BTAPChangeCAVToVAV",
+      "description": "This measure examines all air loops and swaps CAV with VAV systems",
+      "modeler_description": "This template measure is used to ensure consistency in BTAP measures.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "AirLoopSelected",
+          "display_name": "Which air loops? ",
+          "description": "",
+          "type": "String",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "All Air Loops",
+          "display_name_short": "AirLoopSelected",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "All Air Loops",
+            "minimum": "All Air Loops",
+            "mean": "All Air Loops",
+            "deltaX": "All Air Loops",
+            "stdDev": "All Air Loops",
+            "default_value": "All Air Loops"
+          },
+          "$$hashKey": "object:4620"
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 3,
+      "options": [],
+      "instanceId": 0.1062832957111568,
+      "skip": false,
+      "$$hashKey": "object:4577"
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAPNewSpacetypeLPDList",
+      "name": "btap_new_spacetype_lpd_list",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\BTAPNewSpacetypeLPDList",
+      "uid": "fe83dee3-2233-4744-abb1-3cbb1777fbae",
+      "uuid": "{fe83dee3-2233-4744-abb1-3cbb1777fbae}",
+      "version_id": "7afbf2db-26f5-4916-ad9a-90e35231fbf7",
+      "version_uuid": "{7afbf2db-26f5-4916-ad9a-90e35231fbf7}",
+      "version_modified": "20190811T164051Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPNewSpacetypeLPDList",
+      "class_name": "BTAPNewSpacetypeLPDList",
+      "description": "This  measure changes space type LPD based on associated json file in the resource folder.",
+      "modeler_description": "Reads the spacetypes in the model and replaces the model LPD with the LPD specified in the json file.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00RM",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00RO",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00RQ",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "skip",
+          "display_name": "skip?",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 1,
+          "$$hashKey": "uiGrid-00RS",
+          "display_name_short": "skip",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1,
+            "minimum": 1,
+            "mean": 1,
+            "deltaX": 1,
+            "stdDev": 1,
+            "default_value": 1,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 4,
+      "options": [],
+      "instanceId": 0.7457724155413075,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2011",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_add_doas_sys",
+      "name": "btap_add_doas_sys",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_add_doas_sys",
+      "uid": "14f47c70-84f9-4435-9155-5bd3f2d87c4c",
+      "uuid": "{14f47c70-84f9-4435-9155-5bd3f2d87c4c}",
+      "version_id": "5f3acad7-8d00-42dc-ba88-e1639526d8cf",
+      "version_uuid": "{5f3acad7-8d00-42dc-ba88-e1639526d8cf}",
+      "version_modified": "20190811T164052Z",
+      "xml_checksum": "4435983D",
+      "display_name": "BTAPAddDOASSys",
+      "class_name": "BTAPAddDOASSys",
+      "description": "Measure replaces existing HVAC system (if any) with an Air Source Heat Pump (ASHP) with DOAS HVAC system (one DOAS per floor).  The ASHP with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types.  In select cases, the user is given the option to preserve existing HVAC schedules.  In other cases, new schedules are generated that align with AEDG recommendations.  The resulting HVAC system reflects the HVAC recommendations of the 50% Small and Medium Office AEDG.",
+      "modeler_description": "Airloops are dedicated to ventilation (DOAS) and have constant speed fan operation, gas furnace heating, and single speed DX cooling.  Conditioning is provided at the zone level with air sourced heat pumps with cycling fans.",
+      "tags": "HVAC.Whole System",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00S0",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00S2",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00S4",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "zonesselected",
+          "display_name": "Choose which zones to add DOAS to",
+          "description": "",
+          "type": "String",
+          "required": false,
+          "model_dependent": false,
+          "default_value": "All Zones",
+          "$$hashKey": "uiGrid-00S6",
+          "display_name_short": "zonesselected",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "All Zones",
+                "weight": "",
+                "$$hashKey": "object:10097"
+              },
+              {
+                "value": "999",
+                "weight": "",
+                "$$hashKey": "object:10108"
+              }
+            ],
+            "maximum": "All Zones",
+            "minimum": "All Zones",
+            "mean": "All Zones",
+            "deltaX": "All Zones",
+            "stdDev": "All Zones",
+            "default_value": "All Zones",
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 5,
+      "options": [],
+      "instanceId": 0.6897455411735691,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2013",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_add_ashpwh",
+      "name": "btap_add_ashpwh",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_add_ashpwh",
+      "uid": "87631e5c-6a3f-4f4b-88af-c8b6fe497809",
+      "uuid": "{87631e5c-6a3f-4f4b-88af-c8b6fe497809}",
+      "version_id": "979f6744-8d94-40d1-9b13-a6c0fd783d5c",
+      "version_uuid": "{979f6744-8d94-40d1-9b13-a6c0fd783d5c}",
+      "version_modified": "20190811T164052Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPAddASHPWH",
+      "class_name": "BTAPAddASHPWH",
+      "description": "Replaces existing water heater with a ASHPWH ",
+      "modeler_description": "This template measure is used to ensure consistency in BTAP measures.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00S8",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SA",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SC",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "frac_oa",
+          "display_name": "frac_oa",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 1,
+          "$$hashKey": "uiGrid-00SE",
+          "display_name_short": "frac_oa",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 1,
+                "weight": "",
+                "$$hashKey": "object:10128"
+              },
+              {
+                "value": 0.8,
+                "weight": "",
+                "$$hashKey": "object:10139"
+              },
+              {
+                "value": 0.6,
+                "weight": "",
+                "$$hashKey": "object:10149"
+              },
+              {
+                "value": 999,
+                "weight": "",
+                "$$hashKey": "object:10159"
+              }
+            ],
+            "maximum": 1,
+            "minimum": 1,
+            "mean": 1,
+            "deltaX": 1,
+            "stdDev": 1,
+            "default_value": 1,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 6,
+      "options": [],
+      "instanceId": 0.8320561641726278,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2014",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_alter_shgc",
+      "name": "btap_alter_shgc",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_alter_shgc",
+      "uid": "9d86e04c-8e2c-4a42-a0dc-037a20881320",
+      "uuid": "{9d86e04c-8e2c-4a42-a0dc-037a20881320}",
+      "version_id": "535927ec-249c-4348-b5bf-7211e026557a",
+      "version_uuid": "{535927ec-249c-4348-b5bf-7211e026557a}",
+      "version_modified": "20190811T164052Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPAlterSHGC",
+      "class_name": "BTAPAlterSHGC",
+      "description": "Changes SHGC of simple glazing systems",
+      "modeler_description": "Get simple glazing systems and change the SHGC ",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00SG",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SI",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SK",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "new_shgc",
+          "display_name": "new_shgc",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.3,
+          "$$hashKey": "uiGrid-00SM",
+          "display_name_short": "new_shgc",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.2,
+                "weight": "",
+                "$$hashKey": "object:10179"
+              },
+              {
+                "value": 0.4,
+                "weight": "",
+                "$$hashKey": "object:10190"
+              },
+              {
+                "value": 0.6,
+                "weight": "",
+                "$$hashKey": "object:10200"
+              },
+              {
+                "value": 0.8,
+                "weight": "",
+                "$$hashKey": "object:10210"
+              }
+            ],
+            "maximum": 0.3,
+            "minimum": 0.3,
+            "mean": 0.3,
+            "deltaX": 0.3,
+            "stdDev": 0.3,
+            "default_value": 0.3,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 7,
+      "options": [],
+      "instanceId": 0.40299722619909617,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2015",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_doas_vrf",
+      "name": "btapdoasvrf",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_doas_vrf",
+      "uid": "b48dc234-3f04-4153-b380-28de7b0c7a8f",
+      "uuid": "{b48dc234-3f04-4153-b380-28de7b0c7a8f}",
+      "version_id": "b28a53c6-8d5f-4a74-9fab-7f10ba09e8b6",
+      "version_uuid": "{b28a53c6-8d5f-4a74-9fab-7f10ba09e8b6}",
+      "version_modified": "20190811T164053Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPDOASVRF",
+      "class_name": "BTAPDOASVRF",
+      "description": "Changes air loop to doas, adds vrf for those zones",
+      "modeler_description": "This template measure is used to ensure consistency in BTAP measures.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00SO",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SQ",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SS",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "loops_to_change",
+          "display_name": "loops_to_change",
+          "description": "",
+          "type": "String",
+          "required": false,
+          "model_dependent": false,
+          "default_value": "All",
+          "$$hashKey": "uiGrid-00SU",
+          "display_name_short": "loops_to_change",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": "All",
+                "weight": "",
+                "$$hashKey": "object:10230"
+              },
+              {
+                "value": "999",
+                "weight": "",
+                "$$hashKey": "object:10241"
+              }
+            ],
+            "maximum": "All",
+            "minimum": "All",
+            "mean": "All",
+            "deltaX": "All",
+            "stdDev": "All",
+            "default_value": "All",
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 8,
+      "options": [],
+      "instanceId": 0.06528431164811654,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2016",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_change_heat_recovery_efficiency",
+      "name": "btap_change_energy_recovery_efficiency",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_change_heat_recovery_efficiency",
+      "uid": "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+      "uuid": "{9b530f72-e5ab-467b-acd6-b5c3458d7b55}",
+      "version_id": "caaaeca1-9d9a-4f7f-9a2f-8e25c38489c9",
+      "version_uuid": "{caaaeca1-9d9a-4f7f-9a2f-8e25c38489c9}",
+      "version_modified": "20190811T154743Z",
+      "xml_checksum": "BF75C791",
+      "display_name": "BTAPChangeEnergyRecoveryEfficiency",
+      "class_name": "BTAPChangeEnergyRecoveryEfficiency",
+      "description": "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+      "modeler_description": "The measure loops through all air loops in the baseline model and identify the air loops that contain OS:AirLoopHVAC:OutdoorAirSystem objects. Users can choose one or all air loops from the drop down list to apply this measure. If an OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure modifies the effectiveness, heat exchanger type, and electric power setting in the model based on user inputs. If no OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure will attach a OS:HeatExchanger:AirToAir:SensibleAndLatent object to the air loop. The economizer lockout is always set to be Yes. The initial and final values of effectiveness, the heat exchanger type, and nominal electric power are reported during simulation",
+      "tags": "HVAC.Energy Recovery",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00SW",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00SY",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00T0",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "sensible_eff_at_100_heating",
+          "display_name": "Sensible Effectiveness at 100% Heating Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.76,
+          "$$hashKey": "uiGrid-00T2",
+          "display_name_short": "sensible_eff_at_100_heating",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10261"
+              },
+              {
+                "value": 0.76,
+                "weight": "",
+                "$$hashKey": "object:10272"
+              }
+            ],
+            "maximum": 0.76,
+            "minimum": 0.76,
+            "mean": 0.76,
+            "deltaX": 0.76,
+            "stdDev": 0.76,
+            "default_value": 0.76,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "latent_eff_at_100_heating",
+          "display_name": "Latent Effectiveness at 100% Heating Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.68,
+          "$$hashKey": "uiGrid-00T4",
+          "display_name_short": "latent_eff_at_100_heating",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10322"
+              },
+              {
+                "value": 0.68,
+                "weight": "",
+                "$$hashKey": "object:10333"
+              }
+            ],
+            "maximum": 0.68,
+            "minimum": 0.68,
+            "mean": 0.68,
+            "deltaX": 0.68,
+            "stdDev": 0.68,
+            "default_value": 0.68,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "sensible_eff_at_75_heating",
+          "display_name": "Sensible Effectiveness at 75% Heating Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.81,
+          "$$hashKey": "uiGrid-00T6",
+          "display_name_short": "sensible_eff_at_75_heating",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10347"
+              },
+              {
+                "value": 0.81,
+                "weight": "",
+                "$$hashKey": "object:10358"
+              }
+            ],
+            "maximum": 0.81,
+            "minimum": 0.81,
+            "mean": 0.81,
+            "deltaX": 0.81,
+            "stdDev": 0.81,
+            "default_value": 0.81,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "latent_eff_at_75_heating",
+          "display_name": "Latent Effectiveness at 75% Heating Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.73,
+          "$$hashKey": "uiGrid-00T8",
+          "display_name_short": "latent_eff_at_75_heating",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10372"
+              },
+              {
+                "value": 0.73,
+                "weight": "",
+                "$$hashKey": "object:10383"
+              }
+            ],
+            "maximum": 0.73,
+            "minimum": 0.73,
+            "mean": 0.73,
+            "deltaX": 0.73,
+            "stdDev": 0.73,
+            "default_value": 0.73,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "sensible_eff_at_100_cooling",
+          "display_name": "Sensible Effectiveness at 100% Cooling Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.76,
+          "$$hashKey": "uiGrid-00TA",
+          "display_name_short": "sensible_eff_at_100_cooling",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10397"
+              },
+              {
+                "value": 0.76,
+                "weight": "",
+                "$$hashKey": "object:10408"
+              }
+            ],
+            "maximum": 0.76,
+            "minimum": 0.76,
+            "mean": 0.76,
+            "deltaX": 0.76,
+            "stdDev": 0.76,
+            "default_value": 0.76,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "latent_eff_at_100_cooling",
+          "display_name": "Latent Effectiveness at 100% Cooling Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.68,
+          "$$hashKey": "uiGrid-00TC",
+          "display_name_short": "latent_eff_at_100_cooling",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10422"
+              },
+              {
+                "value": 0.68,
+                "weight": "",
+                "$$hashKey": "object:10458"
+              }
+            ],
+            "maximum": 0.68,
+            "minimum": 0.68,
+            "mean": 0.68,
+            "deltaX": 0.68,
+            "stdDev": 0.68,
+            "default_value": 0.68,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "sensible_eff_at_75_cooling",
+          "display_name": "Sensible Effectiveness at 75% Cooling Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.81,
+          "$$hashKey": "uiGrid-00TE",
+          "display_name_short": "sensible_eff_at_75_cooling",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10437"
+              },
+              {
+                "value": 0.81,
+                "weight": "",
+                "$$hashKey": "object:10448"
+              }
+            ],
+            "maximum": 0.81,
+            "minimum": 0.81,
+            "mean": 0.81,
+            "deltaX": 0.81,
+            "stdDev": 0.81,
+            "default_value": 0.81,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "latent_eff_at_75_cooling",
+          "display_name": "Latent Effectiveness at 75% Cooling Air Flow",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.73,
+          "$$hashKey": "uiGrid-00TG",
+          "display_name_short": "latent_eff_at_75_cooling",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.9,
+                "weight": "",
+                "$$hashKey": "object:10478"
+              },
+              {
+                "value": 0.73,
+                "weight": "",
+                "$$hashKey": "object:10489"
+              }
+            ],
+            "maximum": 0.73,
+            "minimum": 0.73,
+            "mean": 0.73,
+            "deltaX": 0.73,
+            "stdDev": 0.73,
+            "default_value": 0.73,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 9,
+      "options": [],
+      "instanceId": 0.4907073888569027,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2017",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_set_fan_eff",
+      "name": "btap_set_fan_eff",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_set_fan_eff",
+      "uid": "13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978",
+      "uuid": "{13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978}",
+      "version_id": "d6a78a8d-63bc-48a4-87ad-18bb6fd7a19e",
+      "version_uuid": "{d6a78a8d-63bc-48a4-87ad-18bb6fd7a19e}",
+      "version_modified": "20190811T164053Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPSetFanEff",
+      "class_name": "BTAPSetFanEff",
+      "description": "Sets all fan efficiency to specified value. Does not curently work with Fan:SystemModel",
+      "modeler_description": "This template measure is used to ensure consistency in BTAP measures.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00TI",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00TK",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00TM",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "eff_for_this_cz",
+          "display_name": "eff_for_this_cz",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.72,
+          "$$hashKey": "uiGrid-00TO",
+          "display_name_short": "eff_for_this_cz",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.72,
+                "weight": "",
+                "$$hashKey": "object:10509"
+              },
+              {
+                "value": 0.62,
+                "weight": "",
+                "$$hashKey": "object:10520"
+              },
+              {
+                "value": 999,
+                "weight": "",
+                "$$hashKey": "object:10571"
+              }
+            ],
+            "maximum": 0.72,
+            "minimum": 0.72,
+            "mean": 0.72,
+            "deltaX": 0.72,
+            "stdDev": 0.72,
+            "default_value": 0.72,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 10,
+      "options": [],
+      "instanceId": 0.25894954106582224,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2018",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_set_pump_eff",
+      "name": "btap_set_pump_eff",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_set_pump_eff",
+      "uid": "def3fff0-b8f5-48e7-af8d-df4eeb18b0e3",
+      "uuid": "{def3fff0-b8f5-48e7-af8d-df4eeb18b0e3}",
+      "version_id": "b9871e45-c37d-45a7-95bc-80024b7a03fd",
+      "version_uuid": "{b9871e45-c37d-45a7-95bc-80024b7a03fd}",
+      "version_modified": "20190811T164054Z",
+      "xml_checksum": "2609226D",
+      "display_name": "BTAPSetpumpEff",
+      "class_name": "BTAPSetPumpEff",
+      "description": "Sets all pump efficiency to specified value ",
+      "modeler_description": "This template measure is used to ensure consistency in BTAP measures.",
+      "tags": "Envelope.Opaque",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Apply Measure Now"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "OpenStudio Application"
+        },
+        {
+          "name": "Intended Software Tool",
+          "display_name": "Intended Software Tool",
+          "value": "Parametric Analysis Tool"
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00TQ",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00TS",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00TU",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "eff_for_this_cz",
+          "display_name": "eff_for_this_cz",
+          "description": "",
+          "type": "Double",
+          "required": false,
+          "model_dependent": false,
+          "default_value": 0.91,
+          "$$hashKey": "uiGrid-00TW",
+          "display_name_short": "eff_for_this_cz",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.91,
+                "weight": "",
+                "$$hashKey": "object:10540"
+              },
+              {
+                "value": 0.8,
+                "weight": "",
+                "$$hashKey": "object:10551"
+              },
+              {
+                "value": 999,
+                "weight": "",
+                "$$hashKey": "object:10561"
+              }
+            ],
+            "maximum": 0.91,
+            "minimum": 0.91,
+            "mean": 0.91,
+            "deltaX": 0.91,
+            "stdDev": 0.91,
+            "default_value": 0.91,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "8/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 11,
+      "options": [],
+      "instanceId": 0.26855748957035086,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2019",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\reduce_lighting_by_percentage",
+      "name": "reduce_lighting_loads_by_percentage",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\reduce_lighting_by_percentage",
+      "uid": "791f3404-a28b-4a80-ba3f-e15b339e39ea",
+      "uuid": "{791f3404-a28b-4a80-ba3f-e15b339e39ea}",
+      "version_id": "cb04096c-31d0-457e-ad9b-f82af8144533",
+      "version_uuid": "{cb04096c-31d0-457e-ad9b-f82af8144533}",
+      "version_modified": "20180626T202329Z",
+      "xml_checksum": "293730A7",
+      "display_name": "Reduce Lighting Loads by Percentage",
+      "class_name": "ReduceLightingLoadsByPercentage",
+      "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
+      "modeler_description": "This measure supports models which have a mixture of lighting assigned to spaces and space types.  The lighting may be specified as individual luminaires, lighting equipment level, lighting power per area, or lighting power per person.\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\nLoop through all lights and luminaires in the specified space type or the entire building. Clone the definition if it is shared by other lights, rename and adjust the power based on the specified percentage. Link the new definition to the existing lights or luminaire instance.  Adjust the power for lighting equipment assigned to a particular space but only if that space is part of the selected space type by  looping through the objects first in space types and then in spaces, but again only for spaces that are in the specified space type (unless the entire building has been chosen).  Material and installation cost increases will be applied to all costs related to both the definition and instance of the lighting object.  If this measure includes baseline costs, then the material and installation costs of the lighting objects in the baseline model will be summed together and added as a capital cost on the building object.",
+      "tags": "Electric Lighting.Lighting Equipment",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00TY",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00U0",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00U2",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "space_type",
+          "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "*Entire Building*",
+          "choice_values": [
+            "{2ddcd1b5-a439-4b2a-a4db-57f098875981}",
+            "{437675c8-33a9-48fd-ad6c-a95e35efd97e}",
+            "{a56b3bb8-9e60-4db4-9507-227ad7b63252}",
+            "{efd80541-2fb1-4057-82a0-d497b2e416c4}",
+            "{0d292db3-9fa1-4a16-994a-7b581ff2c395}",
+            "{ef611f95-658d-4609-9b31-7cfea756bfd5}"
+          ],
+          "choice_display_names": [
+            "Entry way",
+            "Open area",
+            "Plenum",
+            "Small office",
+            "Utility",
+            "*Entire Building*"
+          ],
+          "$$hashKey": "uiGrid-00U4",
+          "display_name_short": "space_type",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "Entry way",
+              "Open area",
+              "Plenum",
+              "Small office",
+              "Utility",
+              "*Entire Building*"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "*Entire Building*",
+            "minimum": "*Entire Building*",
+            "mean": "*Entire Building*",
+            "deltaX": "*Entire Building*",
+            "stdDev": "*Entire Building*",
+            "default_value": "*Entire Building*",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "lighting_power_reduction_percent",
+          "display_name": "Lighting Power Reduction (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 30,
+          "$$hashKey": "uiGrid-00U6",
+          "display_name_short": "lighting_power_reduction_percent",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 85,
+                "weight": "",
+                "$$hashKey": "object:10591"
+              },
+              {
+                "value": 65,
+                "weight": "",
+                "$$hashKey": "object:10602"
+              }
+            ],
+            "maximum": 30,
+            "minimum": 30,
+            "mean": 30,
+            "deltaX": 30,
+            "stdDev": 30,
+            "default_value": 30,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "material_and_installation_cost",
+          "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00U8",
+          "display_name_short": "material_and_installation_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "demolition_cost",
+          "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00UA",
+          "display_name_short": "demolition_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "years_until_costs_start",
+          "display_name": "Years Until Costs Start (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00UC",
+          "display_name_short": "years_until_costs_start",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "demo_cost_initial_const",
+          "display_name": "Demolition Costs Occur During Initial Construction?",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "$$hashKey": "uiGrid-00UE",
+          "display_name_short": "demo_cost_initial_const",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "expected_life",
+          "display_name": "Expected Life (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 15,
+          "$$hashKey": "uiGrid-00UG",
+          "display_name_short": "expected_life",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 15,
+            "minimum": 15,
+            "mean": 15,
+            "deltaX": 15,
+            "stdDev": 15,
+            "default_value": 15,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "om_cost",
+          "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00UI",
+          "display_name_short": "om_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "om_frequency",
+          "display_name": "O & M Frequency (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 1,
+          "$$hashKey": "uiGrid-00UK",
+          "display_name_short": "om_frequency",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1,
+            "minimum": 1,
+            "mean": 1,
+            "deltaX": 1,
+            "stdDev": 1,
+            "default_value": 1,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/26/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 12,
+      "options": [],
+      "instanceId": 0.2452642051144316,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2020",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\Reduce_load_by_percentage",
+      "name": "reduce_electric_equipment_loads_by_percentage",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\Reduce_load_by_percentage",
+      "uid": "0902e302-70db-4339-99b0-17f08bc93629",
+      "uuid": "{0902e302-70db-4339-99b0-17f08bc93629}",
+      "version_id": "250dee10-48ca-4552-9916-0a15d9c2075b",
+      "version_uuid": "{250dee10-48ca-4552-9916-0a15d9c2075b}",
+      "version_modified": "20180626T202329Z",
+      "xml_checksum": "F9A5B8F0",
+      "display_name": "Reduce Electric Equipment Loads by Percentage",
+      "class_name": "ReduceElectricEquipmentLoadsByPercentage",
+      "description": "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
+      "modeler_description": "Loop through all electric equipment objects in the specified space type or the entire building. Clone the definition if it has not already been cloned, rename and adjust the power based on the specified percentage. Link the new definition to the existing electric equipment instance. Loop through objects first in space types and then in spaces, but only for spaces that are in the specified space type, unless entire building has been chosen.",
+      "tags": "Equipment.Electric Equipment",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-00UM",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-00UO",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-00UQ",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "space_type",
+          "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "*Entire Building*",
+          "choice_values": [
+            "{2ddcd1b5-a439-4b2a-a4db-57f098875981}",
+            "{437675c8-33a9-48fd-ad6c-a95e35efd97e}",
+            "{a56b3bb8-9e60-4db4-9507-227ad7b63252}",
+            "{efd80541-2fb1-4057-82a0-d497b2e416c4}",
+            "{0d292db3-9fa1-4a16-994a-7b581ff2c395}",
+            "{ef611f95-658d-4609-9b31-7cfea756bfd5}"
+          ],
+          "choice_display_names": [
+            "Entry way",
+            "Open area",
+            "Plenum",
+            "Small office",
+            "Utility",
+            "*Entire Building*"
+          ],
+          "$$hashKey": "uiGrid-00US",
+          "display_name_short": "space_type",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "Entry way",
+              "Open area",
+              "Plenum",
+              "Small office",
+              "Utility",
+              "*Entire Building*"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "*Entire Building*",
+            "minimum": "*Entire Building*",
+            "mean": "*Entire Building*",
+            "deltaX": "*Entire Building*",
+            "stdDev": "*Entire Building*",
+            "default_value": "*Entire Building*",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "elecequip_power_reduction_percent",
+          "display_name": "Electric Equipment Power Reduction (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 30,
+          "$$hashKey": "uiGrid-00UU",
+          "display_name_short": "elecequip_power_reduction_percent",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 50,
+                "weight": "",
+                "$$hashKey": "object:10622"
+              },
+              {
+                "value": 30,
+                "weight": "",
+                "$$hashKey": "object:10633"
+              }
+            ],
+            "maximum": 30,
+            "minimum": 30,
+            "mean": 30,
+            "deltaX": 30,
+            "stdDev": 30,
+            "default_value": 30,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "material_and_installation_cost",
+          "display_name": "Increase in Material and Installation Cost for Electric Equipment per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00UW",
+          "display_name_short": "material_and_installation_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "demolition_cost",
+          "display_name": "Increase in Demolition Costs for Electric Equipment per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00UY",
+          "display_name_short": "demolition_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "years_until_costs_start",
+          "display_name": "Years Until Costs Start (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00V0",
+          "display_name_short": "years_until_costs_start",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "demo_cost_initial_const",
+          "display_name": "Demolition Costs Occur During Initial Construction?",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "$$hashKey": "uiGrid-00V2",
+          "display_name_short": "demo_cost_initial_const",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "expected_life",
+          "display_name": "Expected Life (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 15,
+          "$$hashKey": "uiGrid-00V4",
+          "display_name_short": "expected_life",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 15,
+            "minimum": 15,
+            "mean": 15,
+            "deltaX": 15,
+            "stdDev": 15,
+            "default_value": 15,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "om_cost",
+          "display_name": "Increase O & M Costs for Electric Equipment per Floor Area (%).",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 0,
+          "$$hashKey": "uiGrid-00V6",
+          "display_name_short": "om_cost",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 0,
+            "minimum": 0,
+            "mean": 0,
+            "deltaX": 0,
+            "stdDev": 0,
+            "default_value": 0,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "om_frequency",
+          "display_name": "O & M Frequency (whole years).",
+          "description": "",
+          "type": "Integer",
+          "required": true,
+          "model_dependent": false,
+          "default_value": 1,
+          "$$hashKey": "uiGrid-00V8",
+          "display_name_short": "om_frequency",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": 1,
+            "minimum": 1,
+            "mean": 1,
+            "deltaX": 1,
+            "stdDev": 1,
+            "default_value": 1,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "6/26/2018",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 13,
+      "options": [],
+      "instanceId": 0.4502306645827956,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:2021",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\Add Overhangs by Projection Factor",
+      "name": "add_overhangs_by_projection_factor",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\Add Overhangs by Projection Factor",
+      "uid": "1e29e117-3916-4368-b24d-75da54045956",
+      "uuid": "{1e29e117-3916-4368-b24d-75da54045956}",
+      "version_id": "069f7fee-7ddf-43c3-b8e8-9cf4709b1344",
+      "version_uuid": "{069f7fee-7ddf-43c3-b8e8-9cf4709b1344}",
+      "version_modified": "20190711T174915Z",
+      "xml_checksum": "6DE831F7",
+      "display_name": "Add Overhangs by Projection Factor",
+      "class_name": "AddOverhangsByProjectionFactor",
+      "description": "Add overhangs by projection factor to specified windows. The projection factor is the overhang depth divided by the window height. This can be applied to windows by the closest cardinal direction. If baseline model contains overhangs made by this measure, they will be replaced. Optionally the measure can delete any pre-existing space shading surfaces.",
+      "modeler_description": "If requested then delete existing space shading surfaces. Then loop through exterior windows. If the requested cardinal direction is the closest to the window, then add the overhang. Name the shading surface the same as the window but append with '-Overhang'.  If a space shading surface of that name already exists, then delete it before making the new one. This measure has no life cycle cost arguments. You can see the economic impact of the measure by costing the construction used for the overhangs.",
+      "tags": "Envelope.Fenestration",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ModelMeasure"
+        },
+        {
+          "name": "Measure Function",
+          "display_name": "Measure Function",
+          "value": "Measure"
+        },
+        {
+          "name": "Requires EnergyPlus Results",
+          "display_name": "Requires EnergyPlus Results",
+          "value": false
+        },
+        {
+          "name": "Uses SketchUp API",
+          "display_name": "Uses SketchUp API",
+          "value": false
+        }
+      ],
+      "arguments": [
+        {
+          "specialRowId": "optionDelete",
+          "$$hashKey": "uiGrid-02C2",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": null,
+            "minimum": null,
+            "mean": null,
+            "deltaX": null,
+            "stdDev": null,
+            "default_value": null,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionName",
+          "type": "String",
+          "$$hashKey": "uiGrid-02C4",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "specialRowId": "optionDescription",
+          "type": "String",
+          "$$hashKey": "uiGrid-02C6",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "",
+            "minimum": "",
+            "mean": "",
+            "deltaX": "",
+            "stdDev": "",
+            "default_value": "",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "projection_factor",
+          "display_name": "Projection Factor",
+          "description": "",
+          "type": "Double",
+          "required": true,
+          "model_dependent": false,
+          "units": "overhang depth / window height",
+          "default_value": 0.5,
+          "$$hashKey": "uiGrid-02C8",
+          "display_name_short": "projection_factor",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Discrete",
+            "distribution": "Uniform",
+            "discreteVariables": [
+              {
+                "value": 0.6,
+                "weight": "",
+                "$$hashKey": "object:10653"
+              },
+              {
+                "value": 0.4,
+                "weight": "",
+                "$$hashKey": "object:10664"
+              },
+              {
+                "value": 0.2,
+                "weight": "",
+                "$$hashKey": "object:10674"
+              },
+              {
+                "value": 0,
+                "weight": "",
+                "$$hashKey": "object:10684"
+              }
+            ],
+            "maximum": 0.5,
+            "minimum": 0.5,
+            "mean": 0.5,
+            "deltaX": 0.5,
+            "stdDev": 0.5,
+            "default_value": 0.5,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "facade",
+          "display_name": "Cardinal Direction",
+          "description": "",
+          "type": "Choice",
+          "required": true,
+          "model_dependent": false,
+          "default_value": "South",
+          "choice_values": [
+            "North",
+            "East",
+            "South",
+            "West"
+          ],
+          "choice_display_names": [
+            "North",
+            "East",
+            "South",
+            "West"
+          ],
+          "$$hashKey": "uiGrid-02CA",
+          "display_name_short": "facade",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [
+              "North",
+              "East",
+              "South",
+              "West"
+            ],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "South",
+            "minimum": "South",
+            "mean": "South",
+            "deltaX": "South",
+            "stdDev": "South",
+            "default_value": "South",
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "remove_ext_space_shading",
+          "display_name": "Remove Existing Space Shading Surfaces From the Model",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "$$hashKey": "uiGrid-02CC",
+          "display_name_short": "remove_ext_space_shading",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false,
+            "showWarningIcon": false
+          }
+        },
+        {
+          "name": "construction",
+          "display_name": "Remove Existing Space Shading Surfaces From the Model",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "$$hashKey": "uiGrid-02CE",
+          "display_name_short": "construction",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false,
+            "showWarningIcon": false
+          }
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "7/11/2019",
+      "author": "",
+      "type": "ModelMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 14,
+      "options": [],
+      "instanceId": 0.31878493425882537,
+      "numberOfOptions": 0,
+      "$$hashKey": "object:6949",
+      "skip": false,
+      "showWarningText": false
+    },
+    {
+      "measure_dir": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_results",
+      "name": "btap_results",
+      "directory": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug112019-24\\measures\\btap_results",
+      "uid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
+      "uuid": "{bf37e1c6-de70-457b-a3ac-21aa57b7bc58}",
+      "version_id": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
+      "version_uuid": "{86fb174b-6040-4a41-8cbe-ab3d1551296a}",
+      "version_modified": "20181219T170133Z",
+      "xml_checksum": "15BF4E57",
+      "display_name": "BTAP Results",
+      "class_name": "BTAPResults",
+      "description": "This measure creates BTAP result values used for NRCan analyses.",
+      "modeler_description": "Grabs data from OS model and sql database and keeps them in the ",
+      "tags": "Reporting.QAQC",
+      "outputs": [],
+      "attributes": [
+        {
+          "name": "Measure Type",
+          "display_name": "Measure Type",
+          "value": "ReportingMeasure"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "generate_hourly_report",
+          "display_name": "Generate Hourly Report.",
+          "description": "",
+          "type": "String",
+          "required": false,
+          "model_dependent": false,
+          "default_value": "false",
+          "display_name_short": "generate_hourly_report",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": "false",
+            "minimum": "false",
+            "mean": "false",
+            "deltaX": "false",
+            "stdDev": "false",
+            "default_value": "false"
+          },
+          "$$hashKey": "object:11446"
+        },
+        {
+          "name": "output_diet",
+          "display_name": "Reduce outputs.",
+          "description": "",
+          "type": "Boolean",
+          "required": true,
+          "model_dependent": false,
+          "default_value": false,
+          "display_name_short": "output_diet",
+          "inputs": {
+            "relationship": null,
+            "choiceDisplayNames": [],
+            "variableSetting": "Argument",
+            "distribution": "Uniform",
+            "discreteVariables": [],
+            "maximum": false,
+            "minimum": false,
+            "mean": false,
+            "deltaX": false,
+            "stdDev": false,
+            "default_value": false
+          },
+          "$$hashKey": "object:11447"
+        }
+      ],
+      "edit": "",
+      "status": "",
+      "bcl_update": false,
+      "location": "my",
+      "add": "",
+      "open": false,
+      "addedToProject": true,
+      "date": "12/19/2018",
+      "author": "",
+      "type": "ReportingMeasure",
+      "seed": "dummy.osm",
+      "workflow_index": 15,
+      "options": [],
+      "instanceId": 0.5062852615988245,
+      "skip": false,
+      "$$hashKey": "object:11406"
+    }
+  ],
+  "filesToInclude": [],
+  "serverScripts": {
+    "server_initialization": {
+      "file": null,
+      "arguments": []
+    },
+    "server_finalization": {
+      "file": null,
+      "arguments": []
+    },
+    "worker_initialization": {
+      "file": null,
+      "arguments": []
+    },
+    "worker_finalization": {
+      "file": null,
+      "arguments": []
+    }
+  },
+  "designAlternatives": [],
+  "analysisID": "",
+  "datapoints": []
+}
