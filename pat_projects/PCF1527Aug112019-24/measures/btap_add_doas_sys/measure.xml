@@ -1,0 +1,88 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_add_doas_sys</name>
+  <uid>14f47c70-84f9-4435-9155-5bd3f2d87c4c</uid>
+  <version_id>5f3acad7-8d00-42dc-ba88-e1639526d8cf</version_id>
+  <version_modified>20190811T164052Z</version_modified>
+  <xml_checksum>4435983D</xml_checksum>
+  <class_name>BTAPAddDOASSys</class_name>
+  <display_name>BTAPAddDOASSys</display_name>
+  <description>Measure replaces existing HVAC system (if any) with an Air Source Heat Pump (ASHP) with DOAS HVAC system (one DOAS per floor).  The ASHP with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types.  In select cases, the user is given the option to preserve existing HVAC schedules.  In other cases, new schedules are generated that align with AEDG recommendations.  The resulting HVAC system reflects the HVAC recommendations of the 50% Small and Medium Office AEDG.</description>
+  <modeler_description>Airloops are dedicated to ventilation (DOAS) and have constant speed fan operation, gas furnace heating, and single speed DX cooling.  Conditioning is provided at the zone level with air sourced heat pumps with cycling fans.</modeler_description>
+  <arguments>
+    <argument>
+      <name>zonesselected</name>
+      <display_name>Choose which zones to add DOAS to</display_name>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>All Zones</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>HVAC.Whole System</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>LICENSE.md</filename>
+      <filetype>md</filetype>
+      <usage_type>license</usage_type>
+      <checksum>9640B6CB</checksum>
+    </file>
+    <file>
+      <filename>README.md.erb</filename>
+      <filetype>erb</filetype>
+      <usage_type>readmeerb</usage_type>
+      <checksum>703C9964</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C77C89B0</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2A9F92EF</checksum>
+    </file>
+    <file>
+      <filename>README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>readme</usage_type>
+      <checksum>68C7FCE0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.0.0</identifier>
+        <min_compatible>2.0.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>A2B4A21B</checksum>
+    </file>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D90CC410</checksum>
+    </file>
+  </files>
+</measure>
