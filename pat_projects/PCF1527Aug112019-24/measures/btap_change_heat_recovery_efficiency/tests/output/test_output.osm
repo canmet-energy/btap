@@ -6431,14 +6431,14 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
   Sys_3_PSZ Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN ERV, !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
-  0.5,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.2,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.3,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.4,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
   0.5,                                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.6,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.7,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.8,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.9,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
   {6a161ce2-e598-4777-8025-0594222b017c}, !- Supply Air Inlet Node
   {bbf56f73-ee43-4e79-8d14-d851c839bd4d}, !- Supply Air Outlet Node
   {45b57e2a-706d-4ed4-ab49-582419cf1b8f}, !- Exhaust Air Inlet Node
@@ -6847,14 +6847,14 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
   Sys_4_PSZ_Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN ERV, !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
-  0.5,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.2,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.3,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.4,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
   0.5,                                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.6,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.7,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.8,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.9,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
   {b8154de7-b83a-427c-b8ef-5dba335406ea}, !- Supply Air Inlet Node
   {ab0d484e-bd5c-4d92-a6d1-f467e259d3bb}, !- Supply Air Outlet Node
   {1e8b14e8-f86a-4c19-a067-1e19da736e54}, !- Exhaust Air Inlet Node
@@ -7263,14 +7263,14 @@ OS:HeatExchanger:AirToAir:SensibleAndLatent,
   Sys_4_PSZ_Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN ERV, !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
   autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
-  0.5,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.2,                                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.3,                                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.4,                                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
   0.5,                                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-  0.5,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.6,                                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.7,                                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.8,                                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.9,                                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
   {053a2a5f-999c-4b0a-836b-8937b2dea399}, !- Supply Air Inlet Node
   {8d772f12-6eae-41f4-833f-2694d29571af}, !- Supply Air Outlet Node
   {353fd9b3-75ff-4e40-bdf1-e4eb9826d775}, !- Exhaust Air Inlet Node

@@ -3889,7 +3889,7 @@ OS:Fan:ConstantVolume,
   {6154f7c2-861a-4bba-be82-1f2c91924ac1}, !- Handle
   Fan Constant Volume 1,                  !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
-  0.39975,                                !- Fan Efficiency
+  0.8,                                    !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -4411,7 +4411,7 @@ OS:Fan:ConstantVolume,
   {7c714f1f-3c6c-4fa3-ba73-e9b47a233b62}, !- Handle
   Fan Constant Volume 2,                  !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
-  0.39975,                                !- Fan Efficiency
+  0.8,                                    !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -4948,7 +4948,7 @@ OS:Fan:ConstantVolume,
   {bb89a006-f9cd-4f19-80c1-b5529292b282}, !- Handle
   Fan Constant Volume 3,                  !- Name
   {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
-  0.39975,                                !- Fan Efficiency
+  0.8,                                    !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_set_fan_eff</name>
   <uid>13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978</uid>
-  <version_id>d6a78a8d-63bc-48a4-87ad-18bb6fd7a19e</version_id>
-  <version_modified>20190811T164053Z</version_modified>
+  <version_id>519db8d4-7132-49bf-b8cc-cc0b1ab71771</version_id>
+  <version_modified>20190812T210400Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPSetFanEff</class_name>
   <display_name>BTAPSetFanEff</display_name>
@@ -74,7 +74,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>3E8C5779</checksum>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>

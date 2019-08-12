@@ -807,10 +807,10 @@ OS:ScheduleTypeLimits,
 
 OS:Lights:Definition,
   {84163269-22ba-4b2d-a43b-bb3c91ef4db9}, !- Handle
-  Space Function Office enclosed <= 25 m2 Lights Definition, !- Name
+  Space Function Office enclosed <= 25 m2 Lights Definition-new, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
-  9.99992034706292,                       !- Watts per Space Floor Area {W/m2}
+  8,                                      !- Watts per Space Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   0.5,                                    !- Fraction Radiant
   0.2;                                    !- Fraction Visible
@@ -1667,10 +1667,10 @@ OS:People,
 
 OS:Lights:Definition,
   {596acff6-e9c8-4c68-a0b0-7650cf7283e9}, !- Handle
-  Space Function Warehouse storage area medium to bulky palletized items Lights Definition, !- Name
+  Space Function Warehouse storage area medium to bulky palletized items Lights Definition-new, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
-  3.79997253050062,                       !- Watts per Space Floor Area {W/m2}
+  3.6,                                    !- Watts per Space Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   0.5,                                    !- Fraction Radiant
   0.2;                                    !- Fraction Visible
@@ -1915,10 +1915,10 @@ OS:People,
 
 OS:Lights:Definition,
   {3b9a6ea5-5d54-463d-b8f3-9c721636178f}, !- Handle
-  Space Function Warehouse storage area small hand-carried items(4) Lights Definition, !- Name
+  Space Function Warehouse storage area small hand-carried items(4) Lights Definition-new, !- Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
-  7.39994084154835,                       !- Watts per Space Floor Area {W/m2}
+  7.4,                                    !- Watts per Space Floor Area {W/m2}
   ,                                       !- Watts per Person {W/person}
   0.5,                                    !- Fraction Radiant
   0.2;                                    !- Fraction Visible

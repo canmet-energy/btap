@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_alter_shgc</name>
   <uid>9d86e04c-8e2c-4a42-a0dc-037a20881320</uid>
-  <version_id>535927ec-249c-4348-b5bf-7211e026557a</version_id>
-  <version_modified>20190811T164052Z</version_modified>
+  <version_id>be850615-667b-492b-a3ea-0a9ab7028ffd</version_id>
+  <version_modified>20190812T210358Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPAlterSHGC</class_name>
   <display_name>BTAPAlterSHGC</display_name>
@@ -74,7 +74,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>0E00FB0D</checksum>
+      <checksum>199CC87A</checksum>
     </file>
   </files>
 </measure>

@@ -2,23 +2,14 @@
   <schema_version>3.0</schema_version>
   <name>btap_change_cav_to_vav</name>
   <uid>f544d84f-d7c6-426b-b3a4-aecfc6d2523b</uid>
-  <version_id>c9fca62f-a6d7-4427-bdec-cda54313d9ca</version_id>
-  <version_modified>20190811T181542Z</version_modified>
+  <version_id>b31d048d-21a1-436f-bc46-2ddfb3d00395</version_id>
+  <version_modified>20190812T210359Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPChangeCAVToVAV</class_name>
   <display_name>BTAPChangeCAVToVAV</display_name>
   <description>This measure examines all air loops and swaps CAV with VAV systems</description>
   <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
-  <arguments>
-    <argument>
-      <name>AirLoopSelected</name>
-      <display_name>Which air loops? </display_name>
-      <type>String</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>All Air Loops</default_value>
-    </argument>
-  </arguments>
+  <arguments/>
   <outputs/>
   <provenances/>
   <tags>
@@ -63,7 +54,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>7413A5AF</checksum>
+      <checksum>6E458793</checksum>
     </file>
     <file>
       <version>
@@ -74,7 +65,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C4BFE92E</checksum>
+      <checksum>0D81DBEF</checksum>
     </file>
   </files>
 </measure>

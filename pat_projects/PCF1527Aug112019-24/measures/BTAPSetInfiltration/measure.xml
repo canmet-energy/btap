@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_set_infiltration</name>
   <uid>9d7b0789-3974-4869-a2a8-055391857e3c</uid>
-  <version_id>69a5a5c0-332f-4af5-8cef-0136dfeafffc</version_id>
-  <version_modified>20190811T164051Z</version_modified>
+  <version_id>b5adc141-dd48-4d29-9323-53e02329c733</version_id>
+  <version_modified>20190812T210357Z</version_modified>
   <xml_checksum>E88CCCA7</xml_checksum>
   <class_name>BTAPSetInfiltration</class_name>
   <display_name>BTAPSetInfiltration</display_name>
@@ -98,7 +98,7 @@ A one time material &amp; installation cost can be added to the building object 
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>C5249382</checksum>
+      <checksum>6E458793</checksum>
     </file>
   </files>
 </measure>

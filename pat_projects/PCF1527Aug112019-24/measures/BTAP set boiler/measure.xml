@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_set_boiler</name>
   <uid>2f81b690-4343-49fe-9c2a-803e531ac6c8</uid>
-  <version_id>b442de41-82f8-49dd-9615-0303ce5aa491</version_id>
-  <version_modified>20190811T164051Z</version_modified>
+  <version_id>8951c49f-0950-4b48-b28b-0010486acece</version_id>
+  <version_modified>20190812T210357Z</version_modified>
   <xml_checksum>E88CCCA7</xml_checksum>
   <class_name>BTAPSetBoiler</class_name>
   <display_name>BTAPSetBoiler</display_name>
@@ -86,7 +86,7 @@ A one time material &amp; installation cost can be added to the building object 
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>4FAD0F3F</checksum>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>

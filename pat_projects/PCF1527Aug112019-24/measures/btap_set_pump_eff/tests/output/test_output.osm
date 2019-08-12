@@ -3458,7 +3458,7 @@ OS:Pump:VariableSpeed,
   ,                                       !- Rated Flow Rate {m3/s}
   ,                                       !- Rated Pump Head {Pa}
   ,                                       !- Rated Power Consumption {W}
-  0.865,                                  !- Motor Efficiency
+  0.8,                                    !- Motor Efficiency
   ,                                       !- Fraction of Motor Inefficiencies to Fluid Stream
   ,                                       !- Coefficient 1 of the Part Load Performance Curve
   ,                                       !- Coefficient 2 of the Part Load Performance Curve
@@ -5529,7 +5529,7 @@ OS:Pump:ConstantSpeed,
   autosize,                               !- Rated Flow Rate {m3/s}
   1205.26398305794,                       !- Rated Pump Head {Pa}
   autosize,                               !- Rated Power Consumption {W}
-  0.7,                                    !- Motor Efficiency
+  0.8,                                    !- Motor Efficiency
   0,                                      !- Fraction of Motor Inefficiencies to Fluid Stream
   Intermittent,                           !- Pump Control Type
   ,                                       !- Pump Flow Rate Schedule

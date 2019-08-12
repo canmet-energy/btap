@@ -1,7 +1,7 @@
 
 OS:Version,
-  {1747cbed-5d1f-4cba-b6d5-04cc5d497ba4}, !- Handle
-  2.8.0;                                  !- Version Identifier
+  {ab3a17ac-5934-4561-b939-ed963a7e196a}, !- Handle
+  2.6.0;                                  !- Version Identifier
 
 OS:Timestep,
   {b0fa043b-3e91-4705-b798-a26bbea47620}, !- Handle
@@ -1302,7 +1302,6 @@ OS:Building,
   ,                                       !- Default Schedule Set Name
   1,                                      !- Standards Number of Stories
   1,                                      !- Standards Number of Above Ground Stories
-  ,                                       !- Standards Template
   NECB2017_RetailStripmall;               !- Standards Building Type
 
 OS:Facility,
@@ -1316,6 +1315,20 @@ OS:BuildingStory,
   ,                                       !- Default Construction Set Name
   ,                                       !- Default Schedule Set Name
   ;                                       !- Group Rendering Name
+
+OS:WeatherFile,
+  {b7729f74-be76-425a-9ab4-b58b30c19859}, !- Handle
+  Montreal-Trudeau Intl AP,               !- City
+  QC,                                     !- State Province Region
+  CAN,                                    !- Country
+  CWEC2016,                               !- Data Source
+  716270,                                 !- WMO Number
+  45.471,                                 !- Latitude {deg}
+  -73.741,                                !- Longitude {deg}
+  -5,                                     !- Time Zone {hr}
+  36,                                     !- Elevation {m}
+  file:///usr/local/lib/ruby/gems/2.2.0/bundler/gems/openstudio-standards-f0e9e7df79cf/data/weather/CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw, !- Url
+  92B6EB99;                               !- Checksum
 
 OS:Site,
   {1273f654-2b91-4418-8666-ec1096af8b72}, !- Handle
@@ -1355,7 +1368,6 @@ OS:SpaceType,
   {6b52616e-c453-438f-b288-ff32d0b93c80}, !- Default Schedule Set Name
   {4f68c43e-c064-4535-867e-9fe02615fdc9}, !- Group Rendering Name
   {dc355adf-938c-4484-9744-0a6cedf8d02d}, !- Design Specification Outdoor Air Object Name
-  ,                                       !- Standards Template
   Space Function,                         !- Standards Building Type
   Sales area;                             !- Standards Space Type
 
@@ -2740,8 +2752,7 @@ OS:DefaultConstructionSet,
   {75600aa4-9282-448d-978e-19fb80c6bc71}, !- Interior Partition Construction Name
   ,                                       !- Space Shading Construction Name
   ,                                       !- Building Shading Construction Name
-  ,                                       !- Site Shading Construction Name
-  ;                                       !- Adiabatic Surface Construction Name
+  ;                                       !- Site Shading Construction Name
 
 OS:DefaultSurfaceConstructions,
   {abba6f45-c14a-443d-b580-bebd2449f933}, !- Handle
@@ -2901,6 +2912,24 @@ OS:StandardsInformation:Construction,
   ;                                       !- Other Perturbable Layer Type
 
 OS:StandardsInformation:Construction,
+  {e3a9773f-2f05-45f4-b085-516150f7bb4e}, !- Handle
+  {79860f53-adf8-4f9e-b2cd-80631f7c3a31}, !- Construction Name
+  GroundContactWall,                      !- Intended Surface Type
+  Mass,                                   !- Standards Construction Type
+  1,                                      !- Perturbable Layer
+  Insulation,                             !- Perturbable Layer Type
+  ;                                       !- Other Perturbable Layer Type
+
+OS:StandardsInformation:Construction,
+  {51f699fb-00aa-4dcb-84c2-ff990d50f432}, !- Handle
+  {79860f53-adf8-4f9e-b2cd-80631f7c3a31}, !- Construction Name
+  GroundContactRoof,                      !- Intended Surface Type
+  Mass,                                   !- Standards Construction Type
+  1,                                      !- Perturbable Layer
+  Insulation,                             !- Perturbable Layer Type
+  ;                                       !- Other Perturbable Layer Type
+
+OS:StandardsInformation:Construction,
   {3a286090-dc4d-4cd8-9e36-11c637fe8db7}, !- Handle
   {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
   ExteriorWindow;                         !- Intended Surface Type
@@ -2921,6 +2950,11 @@ OS:StandardsInformation:Construction,
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
 
+OS:StandardsInformation:Construction,
+  {8a31402b-ae53-4e74-8803-8358c89bd489}, !- Handle
+  {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
+  GlassDoor;                              !- Intended Surface Type
+
 OS:Construction,
   {09342023-a91a-490a-add1-bdb66c1515e6}, !- Handle
   BTAP-Ext-OverHeadDoor,                  !- Name
@@ -2936,17 +2970,44 @@ OS:StandardsInformation:Construction,
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
 
+OS:StandardsInformation:Construction,
+  {84dc7954-2674-47d1-92da-db1de732f5d3}, !- Handle
+  {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
+  Skylight;                               !- Intended Surface Type
+
+OS:StandardsInformation:Construction,
+  {237001bc-c0ff-46b1-b586-32eb44915fd9}, !- Handle
+  {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
+  TubularDaylightDome;                    !- Intended Surface Type
+
 OS:Construction,
   {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Handle
   BTAP-Ext-DaylightDiffuser,              !- Name
   ,                                       !- Surface Rendering Name
   {49c15fdd-74fb-400d-80d0-c332fb17fe1a}; !- Layer 1
 
+OS:StandardsInformation:Construction,
+  {44f69a7d-f47d-4c5c-9da5-daeb60bd4ba5}, !- Handle
+  {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
+  TubularDaylightDiffuser;                !- Intended Surface Type
+
+OS:StandardsInformation:Construction,
+  {6e991a4f-3cd5-4ea8-a2b8-f958d35e1865}, !- Handle
+  {bdef4939-2422-4c59-a3cd-75d4e21c219b}, !- Construction Name
+  InteriorWindow,                         !- Intended Surface Type
+  ;                                       !- Standards Construction Type
+
 OS:Construction,
   {75600aa4-9282-448d-978e-19fb80c6bc71}, !- Handle
   BTAP-Int-Door,                          !- Name
   ,                                       !- Surface Rendering Name
   {ee439086-a1ae-426e-988c-00941a4ecc1c}; !- Layer 1
+
+OS:StandardsInformation:Construction,
+  {b5de7b21-5d69-4fdd-a490-e46b4356a452}, !- Handle
+  {75600aa4-9282-448d-978e-19fb80c6bc71}, !- Construction Name
+  InteriorDoor,                           !- Intended Surface Type
+  ;                                       !- Standards Construction Type
 
 OS:Material,
   {ee439086-a1ae-426e-988c-00941a4ecc1c}, !- Handle
@@ -3158,6 +3219,14 @@ OS:StandardsInformation:Material,
   {5635958f-7b25-4288-addc-1e41b6453b9c}, !- Handle
   {d2a84a55-c40e-4160-806d-859fb1378837}; !- Material Name
 
+OS:StandardsInformation:Material,
+  {49218b81-8688-4f40-aa49-2ba015418cdd}, !- Handle
+  {29c938d5-ff48-42b7-9b37-399169cacf40}; !- Material Name
+
+OS:StandardsInformation:Material,
+  {3be0d2ef-f6be-4984-8801-1000142ebe0f}, !- Handle
+  {3406e241-a94a-4aea-ba16-7420d1883084}; !- Material Name
+
 OS:Construction,
   {43f0d94e-7d53-4458-b777-1c7b574253af}, !- Handle
   BTAP-Ext-Wall-Mass:U-0.247,             !- Name
@@ -3176,6 +3245,14 @@ OS:StandardsInformation:Construction,
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
 
+OS:StandardsInformation:Material,
+  {4f50dc53-31dd-4cb6-8f25-a6b5776c0a73}, !- Handle
+  {afb4d2e5-adc4-47c9-8d67-f738690f7fb1}; !- Material Name
+
+OS:StandardsInformation:Material,
+  {37f793a1-7396-4962-9f40-a9bece79d1ec}, !- Handle
+  {a19bca2e-1ec1-4e3e-bfb5-1398b8934a57}; !- Material Name
+
 OS:Material:NoMass,
   {d6d203ec-f574-4c69-95b4-ee7c904234ee}, !- Handle
   Typical Insulation 2,                   !- Name
@@ -3188,6 +3265,10 @@ OS:Material:NoMass,
 OS:StandardsInformation:Material,
   {553c5e12-05e5-4dd5-8226-d2d1153e785b}, !- Handle
   {d6d203ec-f574-4c69-95b4-ee7c904234ee}; !- Material Name
+
+OS:StandardsInformation:Material,
+  {a5bae6ad-b75d-492f-896c-9296025161b7}, !- Handle
+  {d3fa9fec-4611-4bab-a846-2969bdc37b13}; !- Material Name
 
 OS:Construction,
   {040dc786-563e-444f-90b6-4e74ab650a43}, !- Handle
@@ -3204,6 +3285,10 @@ OS:StandardsInformation:Construction,
   1,                                      !- Perturbable Layer
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
+
+OS:StandardsInformation:Material,
+  {97115dab-fc43-40fc-b89e-7617103bd88d}, !- Handle
+  {8ce62517-6b0a-4a3b-8378-e6a99eb37e02}; !- Material Name
 
 OS:Material:NoMass,
   {8fa034f0-3046-4e9f-a80b-7271ff29bbc9}, !- Handle
@@ -3241,6 +3326,10 @@ OS:StandardsInformation:Construction,
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
 
+OS:StandardsInformation:Material,
+  {0b8540a9-4e97-4b65-8a03-a74c6c205af9}, !- Handle
+  {88a48054-b6ec-4689-89cc-65f7b3b5c942}; !- Material Name
+
 OS:Material:NoMass,
   {a87e1b8e-e81b-430e-b1e3-2ed0ac9c59c5}, !- Handle
   Typical Carpet Pad 2,                   !- Name
@@ -3263,6 +3352,10 @@ OS:StandardsInformation:Construction,
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
 
+OS:StandardsInformation:Material,
+  {dbec0c27-9c99-433e-88da-dcf41fe0b692}, !- Handle
+  {88a48054-b6ec-4689-89cc-65f7b3b5c942}; !- Material Name
+
 OS:Material:NoMass,
   {02d34ce5-f26d-4a44-96f4-0f3a6ab59e1d}, !- Handle
   Typical Carpet Pad 3,                   !- Name
@@ -3282,6 +3375,23 @@ OS:Construction,
   ,                                       !- Surface Rendering Name
   {88a48054-b6ec-4689-89cc-65f7b3b5c942}, !- Layer 1
   {02d34ce5-f26d-4a44-96f4-0f3a6ab59e1d}; !- Layer 2
+
+OS:StandardsInformation:Construction,
+  {d80cb2fe-a4a0-424b-9934-aeff8186f372}, !- Handle
+  {9c473651-9c13-493a-b027-1ea1521e8b69}, !- Construction Name
+  GroundContactRoof,                      !- Intended Surface Type
+  Mass,                                   !- Standards Construction Type
+  1,                                      !- Perturbable Layer
+  Insulation,                             !- Perturbable Layer Type
+  ;                                       !- Other Perturbable Layer Type
+
+OS:StandardsInformation:Material,
+  {a948106e-b746-410f-9081-47fd7884015b}, !- Handle
+  {88a48054-b6ec-4689-89cc-65f7b3b5c942}; !- Material Name
+
+OS:StandardsInformation:Material,
+  {5a31d84e-6e39-4e48-8037-2bfa9a140ae0}, !- Handle
+  {02d34ce5-f26d-4a44-96f4-0f3a6ab59e1d}; !- Material Name
 
 OS:DefaultSubSurfaceConstructions,
   {165b6fa9-a994-4a02-9185-ead42b43017f}, !- Handle
@@ -3317,6 +3427,10 @@ OS:StandardsInformation:Construction,
   1,                                      !- Perturbable Layer
   Insulation,                             !- Perturbable Layer Type
   ;                                       !- Other Perturbable Layer Type
+
+OS:StandardsInformation:Material,
+  {f30e7aa8-280c-47f3-8193-7deb081cdabc}, !- Handle
+  {0e0a559f-c25d-48a5-bae0-577e32b111eb}; !- Material Name
 
 OS:Material:NoMass,
   {36edb262-65d4-4e0b-a609-8ead36c98069}, !- Handle
@@ -3990,7 +4104,7 @@ OS:ThermalZone,
   {abfd3da6-5fe6-45df-b447-e4b8235efddf}, !- Zone Air Inlet Port List
   {21011413-2f96-4b25-8cf6-89bb88e94a2f}, !- Zone Air Exhaust Port List
   {7403bf12-f18b-4e82-ba38-29b3d56607bf}, !- Zone Air Node Name
-  {9a16b32e-9a32-4e58-baf7-44d7ecca48c8}, !- Zone Return Air Port List
+  {31e206df-92ac-4077-8991-0f40b92cab64}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -3999,12 +4113,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {344ec605-8a56-4e3b-a7c8-809a0b952dba}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {9a16b32e-9a32-4e58-baf7-44d7ecca48c8}, !- Handle
-  Port List 2,                            !- Name
-  {29a735f7-29ef-4e57-8278-3da1df4ba177}, !- HVAC Component
-  {31e206df-92ac-4077-8991-0f40b92cab64}; !- Port 1
 
 OS:Node,
   {15ac5ed6-2ab8-4358-a2c3-7061ef92eab7}, !- Handle
@@ -4065,17 +4173,12 @@ OS:ZoneHVAC:EquipmentList,
   {8492a7da-5140-44de-90f2-07e98f6333d0}, !- Handle
   Zone HVAC Equipment List 1,             !- Name
   {29a735f7-29ef-4e57-8278-3da1df4ba177}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {c30bee96-3f96-4e94-83ab-ee00be964b83}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {aaa205dd-d312-4de3-a0fa-d1a1785b9e28}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {344ec605-8a56-4e3b-a7c8-809a0b952dba}, !- Handle
@@ -4096,7 +4199,7 @@ OS:ThermalZone,
   {6e9ae9ef-a678-4067-a8eb-3954612783cb}, !- Zone Air Inlet Port List
   {c5b630ae-c98d-48fb-8d8c-d59766944325}, !- Zone Air Exhaust Port List
   {ad4868f0-0c1e-4b89-9587-517430e88b01}, !- Zone Air Node Name
-  {e6dc851e-6a98-45fd-9272-8e86b6e8cebc}, !- Zone Return Air Port List
+  {56dac8a5-010d-4abb-91d1-dfd5365ca122}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4105,12 +4208,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {ec170895-0fea-4b1e-aadb-0279d98b2aa8}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {e6dc851e-6a98-45fd-9272-8e86b6e8cebc}, !- Handle
-  Port List 3,                            !- Name
-  {856ea599-a244-4a0d-81f5-a4261f899a02}, !- HVAC Component
-  {56dac8a5-010d-4abb-91d1-dfd5365ca122}; !- Port 1
 
 OS:Node,
   {a7c8faae-a867-450c-a888-edfda87d5a30}, !- Handle
@@ -4171,17 +4268,12 @@ OS:ZoneHVAC:EquipmentList,
   {f00b5122-0cbb-4339-900a-4b47f711b479}, !- Handle
   Zone HVAC Equipment List 2,             !- Name
   {856ea599-a244-4a0d-81f5-a4261f899a02}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {70962fb4-3515-4490-aa1f-aaf6cbf9fe39}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {0fe4cb29-c48b-4cd7-93c8-bdeee26eb520}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {ec170895-0fea-4b1e-aadb-0279d98b2aa8}, !- Handle
@@ -4202,7 +4294,7 @@ OS:ThermalZone,
   {66fc1dc5-9a42-45a9-9e99-44cceaede864}, !- Zone Air Inlet Port List
   {f8146a88-6a96-4869-a531-b78e7e08f150}, !- Zone Air Exhaust Port List
   {261d36be-8c9a-4c4d-aea1-cd8da58b7318}, !- Zone Air Node Name
-  {757e9ab0-86cc-4e09-a1f3-6e2972ba594e}, !- Zone Return Air Port List
+  {4f68f7c1-d6bb-4afc-a6f9-b7ccfb58c5e1}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4211,12 +4303,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {b5ff6bc1-30dc-4954-a2e4-2a93aabf9fd1}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {757e9ab0-86cc-4e09-a1f3-6e2972ba594e}, !- Handle
-  Port List 4,                            !- Name
-  {25ead1a6-8e18-4f81-9a17-895db3ba4dd3}, !- HVAC Component
-  {4f68f7c1-d6bb-4afc-a6f9-b7ccfb58c5e1}; !- Port 1
 
 OS:Node,
   {a35c1352-91e2-4369-8609-d601a379407e}, !- Handle
@@ -4277,17 +4363,12 @@ OS:ZoneHVAC:EquipmentList,
   {b6365b68-986b-43d6-8673-1491a3845deb}, !- Handle
   Zone HVAC Equipment List 3,             !- Name
   {25ead1a6-8e18-4f81-9a17-895db3ba4dd3}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {558a3357-2a85-4973-8bc4-5b26eb8ab4b9}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {39704ea2-0160-46c8-8e12-82323d78e25e}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {b5ff6bc1-30dc-4954-a2e4-2a93aabf9fd1}, !- Handle
@@ -4308,7 +4389,7 @@ OS:ThermalZone,
   {16dae666-2ea1-408e-b61a-e95448ac4834}, !- Zone Air Inlet Port List
   {e60b4e86-20a7-4096-95ad-522bd48d3b2a}, !- Zone Air Exhaust Port List
   {85d30d45-4127-4d60-abdf-fa0f1cf36f67}, !- Zone Air Node Name
-  {769a1c2f-6619-447c-acc8-b9c4d7055383}, !- Zone Return Air Port List
+  {87ee0016-dc68-4b28-b009-c88a2576ae3a}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4317,12 +4398,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {4bae6b23-65e2-45e0-8708-764aa9afb438}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {769a1c2f-6619-447c-acc8-b9c4d7055383}, !- Handle
-  Port List 5,                            !- Name
-  {18a5b9c9-e1d8-4181-8d80-6416387aa3df}, !- HVAC Component
-  {87ee0016-dc68-4b28-b009-c88a2576ae3a}; !- Port 1
 
 OS:Node,
   {27eef023-3a56-499b-ba9f-5a5daa6abba0}, !- Handle
@@ -4383,17 +4458,12 @@ OS:ZoneHVAC:EquipmentList,
   {7dd6b543-4671-4f30-8733-ea6cf98ec6c6}, !- Handle
   Zone HVAC Equipment List 4,             !- Name
   {18a5b9c9-e1d8-4181-8d80-6416387aa3df}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {45b5542a-4751-4170-981f-f04455b123d4}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {2f7eb3a8-7ff6-4588-a52d-31ff8d2ec2cf}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {4bae6b23-65e2-45e0-8708-764aa9afb438}, !- Handle
@@ -4414,7 +4484,7 @@ OS:ThermalZone,
   {7cfc8763-fe0d-4a56-a415-12961e865f82}, !- Zone Air Inlet Port List
   {f3d09de1-f466-437a-b259-e4e8bcca856a}, !- Zone Air Exhaust Port List
   {e7b157b5-2d53-422d-856a-de01992a054d}, !- Zone Air Node Name
-  {e36023f2-e470-4949-a403-13294bdc8c27}, !- Zone Return Air Port List
+  {a16ead16-0142-4402-ac5b-d102cb95e688}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4423,12 +4493,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {8dfee493-7beb-408d-afc4-17236539fe5a}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {e36023f2-e470-4949-a403-13294bdc8c27}, !- Handle
-  Port List 6,                            !- Name
-  {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}, !- HVAC Component
-  {a16ead16-0142-4402-ac5b-d102cb95e688}; !- Port 1
 
 OS:Node,
   {d9883f5e-380c-498e-abab-620da75b2528}, !- Handle
@@ -4489,17 +4553,12 @@ OS:ZoneHVAC:EquipmentList,
   {b56dbad8-86e7-4ea8-8df3-e4b38f9d8805}, !- Handle
   Zone HVAC Equipment List 5,             !- Name
   {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {1c5397dd-f3c2-49ce-b7eb-01c56358bb33}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {a4f8b690-ab51-402b-8863-711ad0b905f2}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {8dfee493-7beb-408d-afc4-17236539fe5a}, !- Handle
@@ -4520,7 +4579,7 @@ OS:ThermalZone,
   {b7ff5043-192e-4bf2-9a67-c032270b87dc}, !- Zone Air Inlet Port List
   {ae16ed18-b3d2-44a5-be0b-30e6a0bd450f}, !- Zone Air Exhaust Port List
   {0bf42409-24e3-4459-bb9b-749dfb707dc8}, !- Zone Air Node Name
-  {11fcd831-1d2f-4926-b429-2aed35f06300}, !- Zone Return Air Port List
+  {31b23950-8c68-42c2-8a2b-a3d6f458fc10}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4529,12 +4588,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {14c2d124-43ba-40db-9246-9432727d7c31}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {11fcd831-1d2f-4926-b429-2aed35f06300}, !- Handle
-  Port List 7,                            !- Name
-  {48b91e93-2852-40e7-aca7-a89906de1bc5}, !- HVAC Component
-  {31b23950-8c68-42c2-8a2b-a3d6f458fc10}; !- Port 1
 
 OS:Node,
   {23881aa5-d6bf-47ef-b1d5-8117fe261298}, !- Handle
@@ -4595,17 +4648,12 @@ OS:ZoneHVAC:EquipmentList,
   {1bf315d3-d8ed-4ad1-88a9-ff488443c4ec}, !- Handle
   Zone HVAC Equipment List 6,             !- Name
   {48b91e93-2852-40e7-aca7-a89906de1bc5}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {21107b4a-451a-4cf2-8131-51473cb87b14}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {58a9a5f9-bbad-4638-bc49-bde300b9b3d5}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {14c2d124-43ba-40db-9246-9432727d7c31}, !- Handle
@@ -4626,7 +4674,7 @@ OS:ThermalZone,
   {ec6ae342-df56-4b5f-8d14-dc4f3f6739d5}, !- Zone Air Inlet Port List
   {a24eb26b-a3f7-48a7-9e26-dae1a3074534}, !- Zone Air Exhaust Port List
   {81abdbe7-f373-4981-97c4-3b3fd781f5f6}, !- Zone Air Node Name
-  {acde5a34-e579-4bed-bec4-ba01ab13ceb3}, !- Zone Return Air Port List
+  {e54ef655-bffd-437e-97d1-af76a776f6ed}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4635,12 +4683,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {ae9151f6-774f-43f9-8b25-da9efb7b8e35}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {acde5a34-e579-4bed-bec4-ba01ab13ceb3}, !- Handle
-  Port List 8,                            !- Name
-  {ecb7297c-1196-4e9f-b095-956c09b782d0}, !- HVAC Component
-  {e54ef655-bffd-437e-97d1-af76a776f6ed}; !- Port 1
 
 OS:Node,
   {a59606b0-b682-4956-838c-88182c6a8488}, !- Handle
@@ -4701,17 +4743,12 @@ OS:ZoneHVAC:EquipmentList,
   {e34a536e-5f2d-4867-a93f-f95feb260138}, !- Handle
   Zone HVAC Equipment List 7,             !- Name
   {ecb7297c-1196-4e9f-b095-956c09b782d0}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {0d3ec1de-5eff-4aa0-9ebc-16f2278651e6}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {9c0ab729-c065-4c80-93cd-4a536d9437cf}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {ae9151f6-774f-43f9-8b25-da9efb7b8e35}, !- Handle
@@ -4732,7 +4769,7 @@ OS:ThermalZone,
   {1dffb558-ce80-4b26-aabf-d198967aa61c}, !- Zone Air Inlet Port List
   {d14e9de0-1777-4265-8fbe-70c64aeb455c}, !- Zone Air Exhaust Port List
   {8de9501d-7989-4d1a-8ac2-ae8058ab1b50}, !- Zone Air Node Name
-  {11fbaef7-97fe-43f6-907d-712e66a3bc4a}, !- Zone Return Air Port List
+  {24584cd1-d167-4e9b-9872-b5a97840e5d0}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4741,12 +4778,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {0a2c68ff-cd2c-41ea-8515-6dda5e3bb23a}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {11fbaef7-97fe-43f6-907d-712e66a3bc4a}, !- Handle
-  Port List 1,                            !- Name
-  {a25f0bf8-6f79-4318-a11c-bff065599e6e}, !- HVAC Component
-  {24584cd1-d167-4e9b-9872-b5a97840e5d0}; !- Port 1
 
 OS:Node,
   {52a12fdb-6395-4605-901e-add4c6416d44}, !- Handle
@@ -4807,17 +4838,12 @@ OS:ZoneHVAC:EquipmentList,
   {b2e772d0-00e2-40c3-83a6-9cf0649f3a1e}, !- Handle
   Zone HVAC Equipment List 8,             !- Name
   {a25f0bf8-6f79-4318-a11c-bff065599e6e}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {3f577eff-d11d-4b5b-af4f-a3dd77b2b722}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {f6dff59f-8647-4c93-982a-a8d40f790e20}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {0a2c68ff-cd2c-41ea-8515-6dda5e3bb23a}, !- Handle
@@ -4838,7 +4864,7 @@ OS:ThermalZone,
   {29129049-f343-4e2d-b9d0-499a7fbad7df}, !- Zone Air Inlet Port List
   {5cb16c68-77b8-4a2c-8789-94dea5f95907}, !- Zone Air Exhaust Port List
   {154dd9d8-fab6-4b72-8c52-6d7c4ededcbb}, !- Zone Air Node Name
-  {92f9fa42-b97b-4ecc-9326-00023ae8c8e1}, !- Zone Return Air Port List
+  {e1970e0c-fce6-4efc-902e-bd370fc7bb10}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4847,12 +4873,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {11a6a8a2-1427-437d-94c3-1448039e21dc}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {92f9fa42-b97b-4ecc-9326-00023ae8c8e1}, !- Handle
-  Port List 9,                            !- Name
-  {7c37a5f8-df9a-42f5-8a96-c98e554fa8e3}, !- HVAC Component
-  {e1970e0c-fce6-4efc-902e-bd370fc7bb10}; !- Port 1
 
 OS:Node,
   {5c9fa6fe-8429-479b-bc3f-9c90e5c1938a}, !- Handle
@@ -4913,17 +4933,12 @@ OS:ZoneHVAC:EquipmentList,
   {caf5ea44-84ab-44cc-b217-7788e9a98db2}, !- Handle
   Zone HVAC Equipment List 9,             !- Name
   {7c37a5f8-df9a-42f5-8a96-c98e554fa8e3}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {f1e2b3e7-04e2-4000-8ca0-20ab553ea0fd}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {55015fe4-c423-4945-bd94-666798b1612a}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {11a6a8a2-1427-437d-94c3-1448039e21dc}, !- Handle
@@ -4944,7 +4959,7 @@ OS:ThermalZone,
   {bfaf13fa-0a80-4b93-9b6c-0fb62203ee8a}, !- Zone Air Inlet Port List
   {20e41a37-e00b-4832-9ffb-c1094a6eccda}, !- Zone Air Exhaust Port List
   {e3ce822a-3013-4124-99e6-25935143b48c}, !- Zone Air Node Name
-  {e686223d-0051-4bcf-bd11-a2198e6a33d0}, !- Zone Return Air Port List
+  {ab8df379-9a53-4cc2-86e2-b87d4cd9e6d2}, !- Zone Return Air Node Name
   ,                                       !- Primary Daylighting Control Name
   ,                                       !- Fraction of Zone Controlled by Primary Daylighting Control
   ,                                       !- Secondary Daylighting Control Name
@@ -4953,12 +4968,6 @@ OS:ThermalZone,
   ,                                       !- Group Rendering Name
   {3c4ed24a-f8d5-4e03-8c90-301006a4987d}, !- Thermostat Name
   No;                                     !- Use Ideal Air Loads
-
-OS:PortList,
-  {e686223d-0051-4bcf-bd11-a2198e6a33d0}, !- Handle
-  Port List 10,                           !- Name
-  {bfe8980e-39c6-41a3-8f32-cc8f1715a6ad}, !- HVAC Component
-  {ab8df379-9a53-4cc2-86e2-b87d4cd9e6d2}; !- Port 1
 
 OS:Node,
   {bcebca70-36f1-4fd0-93b8-f0bb48a39d15}, !- Handle
@@ -5019,17 +5028,12 @@ OS:ZoneHVAC:EquipmentList,
   {4d378c36-1f8d-4287-9b27-64cd93589a2c}, !- Handle
   Zone HVAC Equipment List 10,            !- Name
   {bfe8980e-39c6-41a3-8f32-cc8f1715a6ad}, !- Thermal Zone
-  ,                                       !- Load Distribution Scheme
   {103c5375-2b62-4cbb-8f64-1092da3d2d27}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 1
-  ,                                       !- Zone Equipment Sequential Heating Fraction 1
   {e5b4c68f-24bd-48b9-9e56-93ca8a2e752a}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
-  ,                                       !- Zone Equipment Sequential Cooling Fraction 2
-  ;                                       !- Zone Equipment Sequential Heating Fraction 2
+  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
 
 OS:ThermostatSetpoint:DualSetpoint,
   {3c4ed24a-f8d5-4e03-8c90-301006a4987d}, !- Handle
@@ -5153,7 +5157,7 @@ OS:Sizing:System,
   {172eb422-f272-44a3-81cc-5c70e78d3762}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -5197,7 +5201,7 @@ OS:Fan:ConstantVolume,
   {97ad7d0b-0523-43e7-b314-d156ad36f7fb}, !- Handle
   Fan Constant Volume 1,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -5453,26 +5457,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {29a735f7-29ef-4e57-8278-3da1df4ba177}, !- Control Zone Name
   {b66c9b04-c9a7-42b3-b1da-7497a78f05a0}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {17ce4624-ee27-447a-bfa8-801a59721994}, !- Handle
-  Air Terminal Single Duct Uncontrolled 1 Inlet Node, !- Name
-  {522f5418-c56e-4e23-8011-e5a3514de452}, !- Inlet Port
-  {cc84e29b-541a-4ec4-b6a3-6f634d9750a3}; !- Outlet Port
-
-OS:Connection,
-  {cc84e29b-541a-4ec4-b6a3-6f634d9750a3}, !- Handle
-  {5e9b7689-9a93-4431-a0a8-3c48f3ccac79}, !- Name
-  {17ce4624-ee27-447a-bfa8-801a59721994}, !- Source Object
-  3,                                      !- Outlet Port
-  {c30bee96-3f96-4e94-83ab-ee00be964b83}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {c30bee96-3f96-4e94-83ab-ee00be964b83}, !- Handle
   Air Terminal Single Duct Uncontrolled 1, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {cc84e29b-541a-4ec4-b6a3-6f634d9750a3}, !- Air Inlet Node Name
-  {9dc45825-7f98-4bcd-898d-7cacb499ef12}, !- Air Outlet Node Name
+  {522f5418-c56e-4e23-8011-e5a3514de452}, !- Inlet Air Node Name
+  {9dc45825-7f98-4bcd-898d-7cacb499ef12}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -5492,8 +5482,8 @@ OS:Connection,
 OS:Connection,
   {31e206df-92ac-4077-8991-0f40b92cab64}, !- Handle
   {4f3d17c8-b1ef-4781-832c-291a5fea87f5}, !- Name
-  {9a16b32e-9a32-4e58-baf7-44d7ecca48c8}, !- Source Object
-  3,                                      !- Outlet Port
+  {29a735f7-29ef-4e57-8278-3da1df4ba177}, !- Source Object
+  12,                                     !- Outlet Port
   {2a8d7422-aace-4f15-8f1b-9d9e61540c3c}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -5503,6 +5493,14 @@ OS:Connection,
   {2a8d7422-aace-4f15-8f1b-9d9e61540c3c}, !- Source Object
   3,                                      !- Outlet Port
   {ab87c077-e019-4383-afae-b623544ce019}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {522f5418-c56e-4e23-8011-e5a3514de452}, !- Handle
+  {fa40a9c4-c745-425e-9161-74c09fded8f6}, !- Name
+  {13d70a71-8963-4d23-9518-dd249f4c10d6}, !- Source Object
+  3,                                      !- Outlet Port
+  {c30bee96-3f96-4e94-83ab-ee00be964b83}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -5636,7 +5634,7 @@ OS:Sizing:System,
   {904cd5b2-8917-4bfa-bd19-397652944d54}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -5680,7 +5678,7 @@ OS:Fan:ConstantVolume,
   {4fba2ef0-86a5-445e-ae3a-81e996d21f69}, !- Handle
   Fan Constant Volume 2,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -5936,26 +5934,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {856ea599-a244-4a0d-81f5-a4261f899a02}, !- Control Zone Name
   {48e0dc16-186f-487f-b96f-3d0947b7af2f}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {84c17b96-0237-4c72-bbed-4b45efb9ab81}, !- Handle
-  Air Terminal Single Duct Uncontrolled 2 Inlet Node, !- Name
-  {96297150-b61b-42ea-a604-ed4f71d1f3d2}, !- Inlet Port
-  {9124e22b-32e1-49d9-bb5a-1694f6f7fc93}; !- Outlet Port
-
-OS:Connection,
-  {9124e22b-32e1-49d9-bb5a-1694f6f7fc93}, !- Handle
-  {90698373-6e20-4083-b79e-2291a63e69cd}, !- Name
-  {84c17b96-0237-4c72-bbed-4b45efb9ab81}, !- Source Object
-  3,                                      !- Outlet Port
-  {70962fb4-3515-4490-aa1f-aaf6cbf9fe39}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {70962fb4-3515-4490-aa1f-aaf6cbf9fe39}, !- Handle
   Air Terminal Single Duct Uncontrolled 2, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {9124e22b-32e1-49d9-bb5a-1694f6f7fc93}, !- Air Inlet Node Name
-  {36ad37ea-45ac-4b22-aa68-b9f007c611dc}, !- Air Outlet Node Name
+  {96297150-b61b-42ea-a604-ed4f71d1f3d2}, !- Inlet Air Node Name
+  {36ad37ea-45ac-4b22-aa68-b9f007c611dc}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -5975,8 +5959,8 @@ OS:Connection,
 OS:Connection,
   {56dac8a5-010d-4abb-91d1-dfd5365ca122}, !- Handle
   {af485d58-ae07-4dbd-9976-6ae3be3c5223}, !- Name
-  {e6dc851e-6a98-45fd-9272-8e86b6e8cebc}, !- Source Object
-  3,                                      !- Outlet Port
+  {856ea599-a244-4a0d-81f5-a4261f899a02}, !- Source Object
+  12,                                     !- Outlet Port
   {308420fe-9ac5-48e2-a3c1-cd8ef3a49a26}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -5986,6 +5970,14 @@ OS:Connection,
   {308420fe-9ac5-48e2-a3c1-cd8ef3a49a26}, !- Source Object
   3,                                      !- Outlet Port
   {f3a19fd1-d65d-4a83-be25-265a3334b7de}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {96297150-b61b-42ea-a604-ed4f71d1f3d2}, !- Handle
+  {dc20b844-b0a1-48a4-ad85-c86ab3d8b76e}, !- Name
+  {ff8f3c4d-4644-4aa0-9cd2-07470aa6f775}, !- Source Object
+  3,                                      !- Outlet Port
+  {70962fb4-3515-4490-aa1f-aaf6cbf9fe39}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -6119,7 +6111,7 @@ OS:Sizing:System,
   {c97f108c-7bc2-4e10-bee6-1747d46a0d21}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -6163,7 +6155,7 @@ OS:Fan:ConstantVolume,
   {27d5fdb4-8325-4b3d-a73a-8a7b1e1660c5}, !- Handle
   Fan Constant Volume 3,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -6419,26 +6411,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {25ead1a6-8e18-4f81-9a17-895db3ba4dd3}, !- Control Zone Name
   {9c4104dd-b958-47fd-9963-0868aa22ef8d}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {102a02e2-1c29-47f1-b16e-b8c1a7e0dd5d}, !- Handle
-  Air Terminal Single Duct Uncontrolled 3 Inlet Node, !- Name
-  {202d41f3-6f71-4d16-a6f2-ef21654b90f4}, !- Inlet Port
-  {b84f5dd8-7f0d-449f-a2e6-68366738c48c}; !- Outlet Port
-
-OS:Connection,
-  {b84f5dd8-7f0d-449f-a2e6-68366738c48c}, !- Handle
-  {084ce672-d4d0-48bf-9388-b1bcb81c904a}, !- Name
-  {102a02e2-1c29-47f1-b16e-b8c1a7e0dd5d}, !- Source Object
-  3,                                      !- Outlet Port
-  {558a3357-2a85-4973-8bc4-5b26eb8ab4b9}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {558a3357-2a85-4973-8bc4-5b26eb8ab4b9}, !- Handle
   Air Terminal Single Duct Uncontrolled 3, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {b84f5dd8-7f0d-449f-a2e6-68366738c48c}, !- Air Inlet Node Name
-  {8a1bb4d6-e3bb-47b3-9d07-0e616cca76fc}, !- Air Outlet Node Name
+  {202d41f3-6f71-4d16-a6f2-ef21654b90f4}, !- Inlet Air Node Name
+  {8a1bb4d6-e3bb-47b3-9d07-0e616cca76fc}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -6458,8 +6436,8 @@ OS:Connection,
 OS:Connection,
   {4f68f7c1-d6bb-4afc-a6f9-b7ccfb58c5e1}, !- Handle
   {cc640ba0-8f31-448d-809a-2a514a52bf3e}, !- Name
-  {757e9ab0-86cc-4e09-a1f3-6e2972ba594e}, !- Source Object
-  3,                                      !- Outlet Port
+  {25ead1a6-8e18-4f81-9a17-895db3ba4dd3}, !- Source Object
+  12,                                     !- Outlet Port
   {20570e76-a2e7-4af8-ac14-ebbffd89b1c6}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -6469,6 +6447,14 @@ OS:Connection,
   {20570e76-a2e7-4af8-ac14-ebbffd89b1c6}, !- Source Object
   3,                                      !- Outlet Port
   {a3b15a34-11c7-42b1-8bda-cfec0266dabe}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {202d41f3-6f71-4d16-a6f2-ef21654b90f4}, !- Handle
+  {0f1ccac3-8846-4e31-9b44-281901025954}, !- Name
+  {42c19ee6-ceab-43e3-88db-c7e01a84ffd7}, !- Source Object
+  3,                                      !- Outlet Port
+  {558a3357-2a85-4973-8bc4-5b26eb8ab4b9}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -6602,7 +6588,7 @@ OS:Sizing:System,
   {05f2b02f-a70b-45c5-b781-ad3f8e19674f}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -6646,7 +6632,7 @@ OS:Fan:ConstantVolume,
   {2caa5241-6869-4d57-977b-1205b94dab44}, !- Handle
   Fan Constant Volume 4,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -6902,26 +6888,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {18a5b9c9-e1d8-4181-8d80-6416387aa3df}, !- Control Zone Name
   {1fd494ea-d8b3-43a2-9205-fe143c818109}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {63cf1552-e862-4e28-a4db-28f62edba2d5}, !- Handle
-  Air Terminal Single Duct Uncontrolled 4 Inlet Node, !- Name
-  {73cfde89-4545-4e63-a283-3b64b57f4d40}, !- Inlet Port
-  {60a10e5e-89cb-4b82-a2bf-71bea2f3123d}; !- Outlet Port
-
-OS:Connection,
-  {60a10e5e-89cb-4b82-a2bf-71bea2f3123d}, !- Handle
-  {384795a7-250b-4592-b686-8a7522f1b056}, !- Name
-  {63cf1552-e862-4e28-a4db-28f62edba2d5}, !- Source Object
-  3,                                      !- Outlet Port
-  {45b5542a-4751-4170-981f-f04455b123d4}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {45b5542a-4751-4170-981f-f04455b123d4}, !- Handle
   Air Terminal Single Duct Uncontrolled 4, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {60a10e5e-89cb-4b82-a2bf-71bea2f3123d}, !- Air Inlet Node Name
-  {783aac39-2d2d-4a57-9c8a-59702569bb16}, !- Air Outlet Node Name
+  {73cfde89-4545-4e63-a283-3b64b57f4d40}, !- Inlet Air Node Name
+  {783aac39-2d2d-4a57-9c8a-59702569bb16}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -6941,8 +6913,8 @@ OS:Connection,
 OS:Connection,
   {87ee0016-dc68-4b28-b009-c88a2576ae3a}, !- Handle
   {b9025247-407f-493a-a49a-67435e862d9c}, !- Name
-  {769a1c2f-6619-447c-acc8-b9c4d7055383}, !- Source Object
-  3,                                      !- Outlet Port
+  {18a5b9c9-e1d8-4181-8d80-6416387aa3df}, !- Source Object
+  12,                                     !- Outlet Port
   {1cc4403a-b163-4175-b801-b4e40079ee4c}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -6952,6 +6924,14 @@ OS:Connection,
   {1cc4403a-b163-4175-b801-b4e40079ee4c}, !- Source Object
   3,                                      !- Outlet Port
   {d3b67176-5462-4610-b1f8-8810bcff3f37}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {73cfde89-4545-4e63-a283-3b64b57f4d40}, !- Handle
+  {953a3011-f51b-4ffc-96a1-7f9c73fc42c7}, !- Name
+  {06bbe1b8-b1d3-4b93-bdd2-dd484ae7cc6b}, !- Source Object
+  3,                                      !- Outlet Port
+  {45b5542a-4751-4170-981f-f04455b123d4}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -7085,7 +7065,7 @@ OS:Sizing:System,
   {8d1e2763-13e9-44a5-9ba4-0555dd950936}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -7129,7 +7109,7 @@ OS:Fan:ConstantVolume,
   {a7d2113c-9f73-4be9-a4ab-9c180d474785}, !- Handle
   Fan Constant Volume 5,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -7385,26 +7365,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}, !- Control Zone Name
   {295c543f-b4d2-4eb9-a68f-5c5b4dcaffe6}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {8f5664e2-54ec-4f37-84ea-8d8f133237cc}, !- Handle
-  Air Terminal Single Duct Uncontrolled 5 Inlet Node, !- Name
-  {d9980974-d88c-4663-8648-79deaaea487c}, !- Inlet Port
-  {cef72e25-1ab4-4143-84f5-5b2645896bc5}; !- Outlet Port
-
-OS:Connection,
-  {cef72e25-1ab4-4143-84f5-5b2645896bc5}, !- Handle
-  {da3cabfe-a47c-4786-bc53-09b3e30586be}, !- Name
-  {8f5664e2-54ec-4f37-84ea-8d8f133237cc}, !- Source Object
-  3,                                      !- Outlet Port
-  {1c5397dd-f3c2-49ce-b7eb-01c56358bb33}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {1c5397dd-f3c2-49ce-b7eb-01c56358bb33}, !- Handle
   Air Terminal Single Duct Uncontrolled 5, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {cef72e25-1ab4-4143-84f5-5b2645896bc5}, !- Air Inlet Node Name
-  {6312f012-319f-41fd-91b4-3cb47d583298}, !- Air Outlet Node Name
+  {d9980974-d88c-4663-8648-79deaaea487c}, !- Inlet Air Node Name
+  {6312f012-319f-41fd-91b4-3cb47d583298}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -7424,8 +7390,8 @@ OS:Connection,
 OS:Connection,
   {a16ead16-0142-4402-ac5b-d102cb95e688}, !- Handle
   {df3073ae-a401-47f6-b475-a80ce8d6362e}, !- Name
-  {e36023f2-e470-4949-a403-13294bdc8c27}, !- Source Object
-  3,                                      !- Outlet Port
+  {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}, !- Source Object
+  12,                                     !- Outlet Port
   {bfa7e549-2fec-4f44-afcf-a6f6938e6ff8}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -7435,6 +7401,14 @@ OS:Connection,
   {bfa7e549-2fec-4f44-afcf-a6f6938e6ff8}, !- Source Object
   3,                                      !- Outlet Port
   {d20ca9e8-54c4-41f3-ae25-dd9ec06df4ae}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {d9980974-d88c-4663-8648-79deaaea487c}, !- Handle
+  {c47d43fa-f5ae-4442-bd5c-d13121d40154}, !- Name
+  {40f971df-789e-40aa-b1c1-cbd322e4465b}, !- Source Object
+  3,                                      !- Outlet Port
+  {1c5397dd-f3c2-49ce-b7eb-01c56358bb33}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -7568,7 +7542,7 @@ OS:Sizing:System,
   {d0ee0ad3-89f4-45d0-a761-93962a7a0831}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -7612,7 +7586,7 @@ OS:Fan:ConstantVolume,
   {69562d7e-902b-4bcd-9b28-95341ca59518}, !- Handle
   Fan Constant Volume 6,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -7868,26 +7842,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {48b91e93-2852-40e7-aca7-a89906de1bc5}, !- Control Zone Name
   {2011f3ed-31d6-4b30-ace3-2dba76432493}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {12bb0a08-06ec-488d-88d1-e5cf0a844432}, !- Handle
-  Air Terminal Single Duct Uncontrolled 6 Inlet Node, !- Name
-  {407d6d82-e248-458f-9e07-704e0533b454}, !- Inlet Port
-  {d431d44a-f946-4be1-9e33-d353415269f0}; !- Outlet Port
-
-OS:Connection,
-  {d431d44a-f946-4be1-9e33-d353415269f0}, !- Handle
-  {77664fc3-ba0e-4c10-b47a-bb41fe9b21a2}, !- Name
-  {12bb0a08-06ec-488d-88d1-e5cf0a844432}, !- Source Object
-  3,                                      !- Outlet Port
-  {21107b4a-451a-4cf2-8131-51473cb87b14}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {21107b4a-451a-4cf2-8131-51473cb87b14}, !- Handle
   Air Terminal Single Duct Uncontrolled 6, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {d431d44a-f946-4be1-9e33-d353415269f0}, !- Air Inlet Node Name
-  {6af95896-219c-4a9f-8fa8-204980acb822}, !- Air Outlet Node Name
+  {407d6d82-e248-458f-9e07-704e0533b454}, !- Inlet Air Node Name
+  {6af95896-219c-4a9f-8fa8-204980acb822}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -7907,8 +7867,8 @@ OS:Connection,
 OS:Connection,
   {31b23950-8c68-42c2-8a2b-a3d6f458fc10}, !- Handle
   {e46d56aa-8719-446d-9607-07f57853dfe0}, !- Name
-  {11fcd831-1d2f-4926-b429-2aed35f06300}, !- Source Object
-  3,                                      !- Outlet Port
+  {48b91e93-2852-40e7-aca7-a89906de1bc5}, !- Source Object
+  12,                                     !- Outlet Port
   {8ef3328a-5f26-4c79-bf9d-64384be2306a}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -7918,6 +7878,14 @@ OS:Connection,
   {8ef3328a-5f26-4c79-bf9d-64384be2306a}, !- Source Object
   3,                                      !- Outlet Port
   {233e3128-400a-4a4f-b2a7-fc14680de6ea}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {407d6d82-e248-458f-9e07-704e0533b454}, !- Handle
+  {da2e21f5-4aed-4634-8aba-19370909fc64}, !- Name
+  {5e7ef5a2-6836-49f1-96c5-7956cc033a82}, !- Source Object
+  3,                                      !- Outlet Port
+  {21107b4a-451a-4cf2-8131-51473cb87b14}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -8051,7 +8019,7 @@ OS:Sizing:System,
   {8dcb6d47-2ee5-43f4-a876-9cfe0abbe02b}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -8095,7 +8063,7 @@ OS:Fan:ConstantVolume,
   {efb60ad3-ced4-4969-9cc9-2cb19e472fca}, !- Handle
   Fan Constant Volume 7,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -8351,26 +8319,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {ecb7297c-1196-4e9f-b095-956c09b782d0}, !- Control Zone Name
   {cfb39e38-1e86-44c1-9b1d-a25c34f0cc3e}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {f0184e4c-c26e-47e1-b3ff-5c89130a8c49}, !- Handle
-  Air Terminal Single Duct Uncontrolled 7 Inlet Node, !- Name
-  {bb918e82-3f80-47fb-8be4-753da348ffec}, !- Inlet Port
-  {62b3bfc6-0aed-4036-a55b-5ca4f0113e8d}; !- Outlet Port
-
-OS:Connection,
-  {62b3bfc6-0aed-4036-a55b-5ca4f0113e8d}, !- Handle
-  {3716a708-2776-4202-86cd-e488acac6396}, !- Name
-  {f0184e4c-c26e-47e1-b3ff-5c89130a8c49}, !- Source Object
-  3,                                      !- Outlet Port
-  {0d3ec1de-5eff-4aa0-9ebc-16f2278651e6}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {0d3ec1de-5eff-4aa0-9ebc-16f2278651e6}, !- Handle
   Air Terminal Single Duct Uncontrolled 7, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {62b3bfc6-0aed-4036-a55b-5ca4f0113e8d}, !- Air Inlet Node Name
-  {9cb21ccf-0841-475f-97c5-db4271dc8893}, !- Air Outlet Node Name
+  {bb918e82-3f80-47fb-8be4-753da348ffec}, !- Inlet Air Node Name
+  {9cb21ccf-0841-475f-97c5-db4271dc8893}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -8390,8 +8344,8 @@ OS:Connection,
 OS:Connection,
   {e54ef655-bffd-437e-97d1-af76a776f6ed}, !- Handle
   {5be88b8c-011e-483c-9a70-3062e1d128ea}, !- Name
-  {acde5a34-e579-4bed-bec4-ba01ab13ceb3}, !- Source Object
-  3,                                      !- Outlet Port
+  {ecb7297c-1196-4e9f-b095-956c09b782d0}, !- Source Object
+  12,                                     !- Outlet Port
   {7628b673-3eac-47a1-a4ea-76cbc96a81ca}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -8401,6 +8355,14 @@ OS:Connection,
   {7628b673-3eac-47a1-a4ea-76cbc96a81ca}, !- Source Object
   3,                                      !- Outlet Port
   {1b248246-5c6d-4c1e-b62d-a6d3d5c7f613}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {bb918e82-3f80-47fb-8be4-753da348ffec}, !- Handle
+  {35559fe4-15c2-49af-9d90-84efb6f16f2f}, !- Name
+  {fc5594f9-5df3-402a-8f74-057ab08d4ecd}, !- Source Object
+  3,                                      !- Outlet Port
+  {0d3ec1de-5eff-4aa0-9ebc-16f2278651e6}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -8534,7 +8496,7 @@ OS:Sizing:System,
   {496df9aa-7054-41be-a478-e71dd80fa1bf}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -8578,7 +8540,7 @@ OS:Fan:ConstantVolume,
   {f885d116-7b87-472b-9fc3-5d4de371dba4}, !- Handle
   Fan Constant Volume 8,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -8834,26 +8796,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {a25f0bf8-6f79-4318-a11c-bff065599e6e}, !- Control Zone Name
   {3d0e86b7-13c7-423f-b226-057994097f8a}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {b674dc89-1ab7-4340-8d29-08c1b971e25f}, !- Handle
-  Air Terminal Single Duct Uncontrolled 8 Inlet Node, !- Name
-  {8c4b5084-04c1-4257-8709-14bce426e4d4}, !- Inlet Port
-  {ef30e741-c30c-4c2a-ae05-f5a73c0cf91c}; !- Outlet Port
-
-OS:Connection,
-  {ef30e741-c30c-4c2a-ae05-f5a73c0cf91c}, !- Handle
-  {281bcd4c-ce26-4042-b15d-0216c1dd8e54}, !- Name
-  {b674dc89-1ab7-4340-8d29-08c1b971e25f}, !- Source Object
-  3,                                      !- Outlet Port
-  {3f577eff-d11d-4b5b-af4f-a3dd77b2b722}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {3f577eff-d11d-4b5b-af4f-a3dd77b2b722}, !- Handle
   Air Terminal Single Duct Uncontrolled 8, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {ef30e741-c30c-4c2a-ae05-f5a73c0cf91c}, !- Air Inlet Node Name
-  {13200d54-6fd9-4f74-8357-b813dc8cb44e}, !- Air Outlet Node Name
+  {8c4b5084-04c1-4257-8709-14bce426e4d4}, !- Inlet Air Node Name
+  {13200d54-6fd9-4f74-8357-b813dc8cb44e}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -8873,8 +8821,8 @@ OS:Connection,
 OS:Connection,
   {24584cd1-d167-4e9b-9872-b5a97840e5d0}, !- Handle
   {f1efc07e-4822-43c5-a918-e323185d1d23}, !- Name
-  {11fbaef7-97fe-43f6-907d-712e66a3bc4a}, !- Source Object
-  3,                                      !- Outlet Port
+  {a25f0bf8-6f79-4318-a11c-bff065599e6e}, !- Source Object
+  12,                                     !- Outlet Port
   {6e4ceeac-c98a-4010-ad76-590e3b706026}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -8884,6 +8832,14 @@ OS:Connection,
   {6e4ceeac-c98a-4010-ad76-590e3b706026}, !- Source Object
   3,                                      !- Outlet Port
   {c6f41b86-bd17-4e32-8511-b85560081722}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {8c4b5084-04c1-4257-8709-14bce426e4d4}, !- Handle
+  {df282eae-8a0c-4189-86dd-b46b8612ff29}, !- Name
+  {7184b830-d55c-448b-bde6-ca05bdb11a7b}, !- Source Object
+  3,                                      !- Outlet Port
+  {3f577eff-d11d-4b5b-af4f-a3dd77b2b722}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -9017,7 +8973,7 @@ OS:Sizing:System,
   {7ba097bb-7134-4c2b-acf9-676da8243b23}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -9061,7 +9017,7 @@ OS:Fan:ConstantVolume,
   {690ef37f-5dd4-44ce-85d7-da383666a6ed}, !- Handle
   Fan Constant Volume 9,                  !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -9317,26 +9273,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {7c37a5f8-df9a-42f5-8a96-c98e554fa8e3}, !- Control Zone Name
   {e973d760-b56d-4ae4-a623-42829634c447}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {95a5426c-d1ea-46d5-adc2-7425a3491347}, !- Handle
-  Air Terminal Single Duct Uncontrolled 9 Inlet Node, !- Name
-  {aa1ed300-2874-407a-b6a8-436d040a9998}, !- Inlet Port
-  {b64bce3e-3bb0-403e-ab36-3082e5ae3bfa}; !- Outlet Port
-
-OS:Connection,
-  {b64bce3e-3bb0-403e-ab36-3082e5ae3bfa}, !- Handle
-  {e8d60e02-90da-4a21-95e3-48a073d72185}, !- Name
-  {95a5426c-d1ea-46d5-adc2-7425a3491347}, !- Source Object
-  3,                                      !- Outlet Port
-  {f1e2b3e7-04e2-4000-8ca0-20ab553ea0fd}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {f1e2b3e7-04e2-4000-8ca0-20ab553ea0fd}, !- Handle
   Air Terminal Single Duct Uncontrolled 9, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {b64bce3e-3bb0-403e-ab36-3082e5ae3bfa}, !- Air Inlet Node Name
-  {ef892f18-9d23-469f-a260-5706cf4bd1b2}, !- Air Outlet Node Name
+  {aa1ed300-2874-407a-b6a8-436d040a9998}, !- Inlet Air Node Name
+  {ef892f18-9d23-469f-a260-5706cf4bd1b2}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -9356,8 +9298,8 @@ OS:Connection,
 OS:Connection,
   {e1970e0c-fce6-4efc-902e-bd370fc7bb10}, !- Handle
   {afc67565-f760-4e6c-9c88-e998e8d9af95}, !- Name
-  {92f9fa42-b97b-4ecc-9326-00023ae8c8e1}, !- Source Object
-  3,                                      !- Outlet Port
+  {7c37a5f8-df9a-42f5-8a96-c98e554fa8e3}, !- Source Object
+  12,                                     !- Outlet Port
   {ca16419c-e48e-453f-9e5e-8707da3d28e8}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -9367,6 +9309,14 @@ OS:Connection,
   {ca16419c-e48e-453f-9e5e-8707da3d28e8}, !- Source Object
   3,                                      !- Outlet Port
   {34c7fc84-2b4b-4ad7-8f9d-cdd3ba485dc7}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {aa1ed300-2874-407a-b6a8-436d040a9998}, !- Handle
+  {6efc2985-ef6e-4253-b3dd-db153695633d}, !- Name
+  {aaac9c18-bd52-4486-85f7-4af09025616c}, !- Source Object
+  3,                                      !- Outlet Port
+  {f1e2b3e7-04e2-4000-8ca0-20ab553ea0fd}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -9500,7 +9450,7 @@ OS:Sizing:System,
   {f39090e0-a6fd-41ba-9e6d-83d6b2ead044}, !- AirLoop Name
   Sensible,                               !- Type of Load to Size On
   Autosize,                               !- Design Outdoor Air Flow Rate {m3/s}
-  1,                                      !- Central Heating Maximum System Air Flow Ratio
+  1,                                      !- Minimum System Air Flow Ratio
   7,                                      !- Preheat Design Temperature {C}
   0.008,                                  !- Preheat Design Humidity Ratio {kg-H2O/kg-Air}
   13,                                     !- Precool Design Temperature {C}
@@ -9544,7 +9494,7 @@ OS:Fan:ConstantVolume,
   {fc7634d3-871c-4a0b-a550-dd9a1db34e95}, !- Handle
   Fan Constant Volume 10,                 !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  0.39975,                                !- Fan Total Efficiency
+  0.39975,                                !- Fan Efficiency
   640,                                    !- Pressure Rise {Pa}
   AutoSize,                               !- Maximum Flow Rate {m3/s}
   0.615,                                  !- Motor Efficiency
@@ -9800,26 +9750,12 @@ OS:SetpointManager:SingleZone:Reheat,
   {bfe8980e-39c6-41a3-8f32-cc8f1715a6ad}, !- Control Zone Name
   {6df3b4a3-b2ab-4e0b-9aae-d64d7cd679ed}; !- Setpoint Node or NodeList Name
 
-OS:Node,
-  {3fb3d476-f842-4f8d-a746-c8a35000a2da}, !- Handle
-  Air Terminal Single Duct Uncontrolled 10 Inlet Node, !- Name
-  {91f2f5e0-1f45-4228-a3bb-be04e35c2c5a}, !- Inlet Port
-  {97109a12-f6bc-465a-80c6-70cc78e8a5ff}; !- Outlet Port
-
-OS:Connection,
-  {97109a12-f6bc-465a-80c6-70cc78e8a5ff}, !- Handle
-  {1dc54f11-8728-4d16-a34a-5d09bf868c1c}, !- Name
-  {3fb3d476-f842-4f8d-a746-c8a35000a2da}, !- Source Object
-  3,                                      !- Outlet Port
-  {103c5375-2b62-4cbb-8f64-1092da3d2d27}, !- Target Object
-  3;                                      !- Inlet Port
-
-OS:AirTerminal:SingleDuct:ConstantVolume:NoReheat,
+OS:AirTerminal:SingleDuct:Uncontrolled,
   {103c5375-2b62-4cbb-8f64-1092da3d2d27}, !- Handle
   Air Terminal Single Duct Uncontrolled 10, !- Name
   {05646b09-4609-4899-aeaa-680382288d96}, !- Availability Schedule Name
-  {97109a12-f6bc-465a-80c6-70cc78e8a5ff}, !- Air Inlet Node Name
-  {a4615809-3a97-47e6-a770-589c2e56e346}, !- Air Outlet Node Name
+  {91f2f5e0-1f45-4228-a3bb-be04e35c2c5a}, !- Inlet Air Node Name
+  {a4615809-3a97-47e6-a770-589c2e56e346}, !- Zone Supply Air Node Name
   AutoSize;                               !- Maximum Air Flow Rate {m3/s}
 
 OS:Node,
@@ -9839,8 +9775,8 @@ OS:Connection,
 OS:Connection,
   {ab8df379-9a53-4cc2-86e2-b87d4cd9e6d2}, !- Handle
   {f94a4258-bf3f-4716-9c3e-93e7b34d0af1}, !- Name
-  {e686223d-0051-4bcf-bd11-a2198e6a33d0}, !- Source Object
-  3,                                      !- Outlet Port
+  {bfe8980e-39c6-41a3-8f32-cc8f1715a6ad}, !- Source Object
+  12,                                     !- Outlet Port
   {0df22e9f-7ea8-4692-84be-d80ebcb8b8cb}, !- Target Object
   2;                                      !- Inlet Port
 
@@ -9850,6 +9786,14 @@ OS:Connection,
   {0df22e9f-7ea8-4692-84be-d80ebcb8b8cb}, !- Source Object
   3,                                      !- Outlet Port
   {60e9024e-7044-4e8d-a2e2-9e83dca6b3f2}, !- Target Object
+  3;                                      !- Inlet Port
+
+OS:Connection,
+  {91f2f5e0-1f45-4228-a3bb-be04e35c2c5a}, !- Handle
+  {2665d6e6-6657-40d1-9220-7bdeb065a083}, !- Name
+  {3cb7d5bf-21bb-47f7-acec-25338116f03d}, !- Source Object
+  3,                                      !- Outlet Port
+  {103c5375-2b62-4cbb-8f64-1092da3d2d27}, !- Target Object
   3;                                      !- Inlet Port
 
 OS:Connection,
@@ -16216,192 +16160,4 @@ OS:Curve:Cubic,
   4.2702,                                 !- Coefficient4 x**3
   0.7,                                    !- Minimum Value of x
   1;                                      !- Maximum Value of x
-
-OS:Connection,
-  {522f5418-c56e-4e23-8011-e5a3514de452}, !- Handle
-  {fa40a9c4-c745-425e-9161-74c09fded8f6}, !- Name
-  {13d70a71-8963-4d23-9518-dd249f4c10d6}, !- Source Object
-  3,                                      !- Outlet Port
-  {17ce4624-ee27-447a-bfa8-801a59721994}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {96297150-b61b-42ea-a604-ed4f71d1f3d2}, !- Handle
-  {dc20b844-b0a1-48a4-ad85-c86ab3d8b76e}, !- Name
-  {ff8f3c4d-4644-4aa0-9cd2-07470aa6f775}, !- Source Object
-  3,                                      !- Outlet Port
-  {84c17b96-0237-4c72-bbed-4b45efb9ab81}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {202d41f3-6f71-4d16-a6f2-ef21654b90f4}, !- Handle
-  {0f1ccac3-8846-4e31-9b44-281901025954}, !- Name
-  {42c19ee6-ceab-43e3-88db-c7e01a84ffd7}, !- Source Object
-  3,                                      !- Outlet Port
-  {102a02e2-1c29-47f1-b16e-b8c1a7e0dd5d}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {73cfde89-4545-4e63-a283-3b64b57f4d40}, !- Handle
-  {953a3011-f51b-4ffc-96a1-7f9c73fc42c7}, !- Name
-  {06bbe1b8-b1d3-4b93-bdd2-dd484ae7cc6b}, !- Source Object
-  3,                                      !- Outlet Port
-  {63cf1552-e862-4e28-a4db-28f62edba2d5}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {d9980974-d88c-4663-8648-79deaaea487c}, !- Handle
-  {c47d43fa-f5ae-4442-bd5c-d13121d40154}, !- Name
-  {40f971df-789e-40aa-b1c1-cbd322e4465b}, !- Source Object
-  3,                                      !- Outlet Port
-  {8f5664e2-54ec-4f37-84ea-8d8f133237cc}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {407d6d82-e248-458f-9e07-704e0533b454}, !- Handle
-  {da2e21f5-4aed-4634-8aba-19370909fc64}, !- Name
-  {5e7ef5a2-6836-49f1-96c5-7956cc033a82}, !- Source Object
-  3,                                      !- Outlet Port
-  {12bb0a08-06ec-488d-88d1-e5cf0a844432}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {bb918e82-3f80-47fb-8be4-753da348ffec}, !- Handle
-  {35559fe4-15c2-49af-9d90-84efb6f16f2f}, !- Name
-  {fc5594f9-5df3-402a-8f74-057ab08d4ecd}, !- Source Object
-  3,                                      !- Outlet Port
-  {f0184e4c-c26e-47e1-b3ff-5c89130a8c49}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {8c4b5084-04c1-4257-8709-14bce426e4d4}, !- Handle
-  {df282eae-8a0c-4189-86dd-b46b8612ff29}, !- Name
-  {7184b830-d55c-448b-bde6-ca05bdb11a7b}, !- Source Object
-  3,                                      !- Outlet Port
-  {b674dc89-1ab7-4340-8d29-08c1b971e25f}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {aa1ed300-2874-407a-b6a8-436d040a9998}, !- Handle
-  {6efc2985-ef6e-4253-b3dd-db153695633d}, !- Name
-  {aaac9c18-bd52-4486-85f7-4af09025616c}, !- Source Object
-  3,                                      !- Outlet Port
-  {95a5426c-d1ea-46d5-adc2-7425a3491347}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:Connection,
-  {91f2f5e0-1f45-4228-a3bb-be04e35c2c5a}, !- Handle
-  {2665d6e6-6657-40d1-9220-7bdeb065a083}, !- Name
-  {3cb7d5bf-21bb-47f7-acec-25338116f03d}, !- Source Object
-  3,                                      !- Outlet Port
-  {3fb3d476-f842-4f8d-a746-c8a35000a2da}, !- Target Object
-  2;                                      !- Inlet Port
-
-OS:ShadowCalculation,
-  {30617dc9-bc5c-4161-bdb1-7288819e17de}, !- Handle
-  20,                                     !- Calculation Frequency
-  15000;                                  !- Maximum Figures in Shadow Overlap Calculations
-
-OS:HeatBalanceAlgorithm,
-  {41cb59e6-725b-4496-abdd-bcd96651d547}, !- Handle
-  ConductionTransferFunction,             !- Algorithm
-  200;                                    !- Surface Temperature Upper Limit {C}
-
-OS:RunPeriod,
-  {b21d9a5d-dc35-43ab-95e0-a407fa584500}, !- Handle
-  Run Period 1,                           !- Name
-  1,                                      !- Begin Month
-  1,                                      !- Begin Day of Month
-  12,                                     !- End Month
-  31,                                     !- End Day of Month
-  ,                                       !- Use Weather File Holidays and Special Days
-  ,                                       !- Use Weather File Daylight Saving Period
-  ,                                       !- Apply Weekend Holiday Rule
-  ,                                       !- Use Weather File Rain Indicators
-  ,                                       !- Use Weather File Snow Indicators
-  ;                                       !- Number of Times Runperiod to be Repeated
-
-OS:StandardsInformation:Material,
-  {097274ad-b533-4178-902f-e743c9411a4b}, !- Handle
-  {37c54918-1d9f-40c9-86db-7be57b91b292}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {d2d729fd-4574-4c19-85ed-75e630735414}, !- Handle
-  {cfce97ac-da50-4c5c-9796-87ec8b4c2a0b}; !- Material Name
-
-OS:StandardsInformation:Construction,
-  {8fd1f537-5137-4509-aad9-0e503c9494a6}, !- Handle
-  {316b5fdd-fd8b-48ad-8fa6-058fbf50fcf8}; !- Construction Name
-
-OS:StandardsInformation:Material,
-  {1b3ee729-b3b2-4141-ae1b-507c46c6c14e}, !- Handle
-  {e028a1c4-34a5-4f59-aedd-550c488409a4}; !- Material Name
-
-OS:StandardsInformation:Construction,
-  {028260c6-9c94-4b2f-bae2-76c9bc1d0f97}, !- Handle
-  {6f639f52-02b9-4c6d-be7a-9079364114fe}; !- Construction Name
-
-OS:StandardsInformation:Construction,
-  {176ce22d-9ccd-4c93-8a01-f4faa0df86a7}, !- Handle
-  {6ebb4990-6407-46b0-adc1-e7f17d834903}; !- Construction Name
-
-OS:StandardsInformation:Construction,
-  {d08d3cd9-688e-4a9c-8f54-1411aad8f88b}, !- Handle
-  {79860f53-adf8-4f9e-b2cd-80631f7c3a31}; !- Construction Name
-
-OS:StandardsInformation:Construction,
-  {061060d7-69a5-4c16-a85a-9a266c3dead3}, !- Handle
-  {bdef4939-2422-4c59-a3cd-75d4e21c219b}; !- Construction Name
-
-OS:StandardsInformation:Construction,
-  {203347b7-ae62-44be-b8f4-cddaa5249ea9}, !- Handle
-  {75600aa4-9282-448d-978e-19fb80c6bc71}; !- Construction Name
-
-OS:StandardsInformation:Material,
-  {96c329b2-e03d-4e98-960f-79d5a33ae691}, !- Handle
-  {29c938d5-ff48-42b7-9b37-399169cacf40}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {b690334f-1011-455f-83f9-fea34b7fbc53}, !- Handle
-  {3406e241-a94a-4aea-ba16-7420d1883084}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {657b3bcd-ea51-4c02-9607-94262812bf76}, !- Handle
-  {afb4d2e5-adc4-47c9-8d67-f738690f7fb1}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {0785ebab-7149-4e5d-bc79-ed44a91ca383}, !- Handle
-  {a19bca2e-1ec1-4e3e-bfb5-1398b8934a57}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {367fb396-1c69-4389-823d-7c8839f09d69}, !- Handle
-  {d3fa9fec-4611-4bab-a846-2969bdc37b13}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {3d943025-ff63-4bdb-822d-dee58af269a1}, !- Handle
-  {8ce62517-6b0a-4a3b-8378-e6a99eb37e02}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {0c6ea9a6-0036-4cdd-bc6e-a909e540750b}, !- Handle
-  {88a48054-b6ec-4689-89cc-65f7b3b5c942}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {aa5e9c99-f7eb-4ded-a1dc-db852453dae8}, !- Handle
-  {0e0a559f-c25d-48a5-bae0-577e32b111eb}; !- Material Name
-
-OS:StandardsInformation:Material,
-  {075be334-6843-422e-86da-086fcabadc29}, !- Handle
-  {02d34ce5-f26d-4a44-96f4-0f3a6ab59e1d}; !- Material Name
-
-OS:StandardsInformation:Construction,
-  {7da85c85-34ae-4c29-9eb5-647ab471a91c}, !- Handle
-  {9c473651-9c13-493a-b027-1ea1521e8b69}; !- Construction Name
-
-OS:StandardsInformation:Material,
-  {e73a6f12-1612-4619-a9c8-89b498d54311}, !- Handle
-  {53721bac-58c3-4b2b-8814-740c8176e262}; !- Material Name
-
-OS:StandardsInformation:Construction,
-  {9642f774-2062-4401-874b-591ace67f8bc}, !- Handle
-  {394180e8-9501-4d0f-a54c-ee22aefc40db}; !- Construction Name
 

@@ -3487,7 +3487,7 @@ OS:Boiler:HotWater,
   Primary Boiler 476kBtu/hr 0.83 Thermal Eff, !- Name
   NaturalGas,                             !- Fuel Type
   139391.891760201,                       !- Nominal Capacity {W}
-  0.83,                                   !- Nominal Thermal Efficiency
+  0.8,                                    !- Nominal Thermal Efficiency
   ,                                       !- Efficiency Curve Temperature Evaluation Variable
   {04b1d4e1-274f-49fd-8b59-d36a8c1080ad}, !- Normalized Boiler Efficiency Curve Name
   ,                                       !- Design Water Outlet Temperature {C}
@@ -3508,7 +3508,7 @@ OS:Boiler:HotWater,
   Secondary Boiler 476kBtu/hr 0.83 Thermal Eff, !- Name
   NaturalGas,                             !- Fuel Type
   139391.891760201,                       !- Nominal Capacity {W}
-  0.83,                                   !- Nominal Thermal Efficiency
+  0.8,                                    !- Nominal Thermal Efficiency
   ,                                       !- Efficiency Curve Temperature Evaluation Variable
   {04b1d4e1-274f-49fd-8b59-d36a8c1080ad}, !- Normalized Boiler Efficiency Curve Name
   ,                                       !- Design Water Outlet Temperature {C}

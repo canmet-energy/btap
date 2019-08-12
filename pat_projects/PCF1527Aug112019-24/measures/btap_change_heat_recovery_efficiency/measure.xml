@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_change_energy_recovery_efficiency</name>
   <uid>9b530f72-e5ab-467b-acd6-b5c3458d7b55</uid>
-  <version_id>caaaeca1-9d9a-4f7f-9a2f-8e25c38489c9</version_id>
-  <version_modified>20190811T154743Z</version_modified>
+  <version_id>d60cc0da-8cac-4eff-b43f-c23ffd62fe91</version_id>
+  <version_modified>20190812T210359Z</version_modified>
   <xml_checksum>BF75C791</xml_checksum>
   <class_name>BTAPChangeEnergyRecoveryEfficiency</class_name>
   <display_name>BTAPChangeEnergyRecoveryEfficiency</display_name>
@@ -104,12 +104,6 @@
   </attributes>
   <files>
     <file>
-      <filename>in.osm</filename>
-      <filetype>osm</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7A98FCAE</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>1.0.0</identifier>
@@ -125,6 +119,12 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>49CBDE22</checksum>
+    </file>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>

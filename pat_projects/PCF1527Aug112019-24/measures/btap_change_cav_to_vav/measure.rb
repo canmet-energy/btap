@@ -37,12 +37,12 @@ class BTAPChangeCAVToVAV < OpenStudio::Measure::ModelMeasure
     # Put in this array of hashes all the input variables that you need in your measure. Your choice of types are Sting, Double,
     # StringDouble, and Choice. Optional fields are valid strings, max_double_value, and min_double_value. This will
     # create all the variables, validate the ranges and types you need,  and make them available in the 'run' method as a hash after
-    # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)' 
+    # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)'
     @measure_interface_detailed = [
         {
             "name" => "AirLoopSelected",
             "type" => "String",
-            "display_name" => "Which air loops? ",
+            "display_name" => "Which air loops?",
             "default_value" => "All Air Loops",
             "is_required" => true
         },
@@ -182,7 +182,7 @@ class BTAPChangeCAVToVAV < OpenStudio::Measure::ModelMeasure
                   if zone.airLoopHVAC.get == air_loop
                     current_term = zone.airLoopHVACTerminal.get            
                     #puts "before #{air_loop.zoneSplitter.branchIndexForOutletModelObject(current_term)}"
-                    if not current_term.to_AirTerminalSingleDuctConstantVolumeNoReheat.empty? #if it's an uncontrolled terminal, replace with vav no reheat terminal
+                    if not current_term.to_AirTerminalSingleDuctUncontrolled.empty? #if it's an uncontrolled terminal, replace with vav no reheat terminal
                       #get heaitng/cooling priority, serach for the matching zoneHVACEquipmentList
                       cool_priority = 1
                       heat_priority = 1
@@ -224,7 +224,7 @@ class BTAPChangeCAVToVAV < OpenStudio::Measure::ModelMeasure
                       this_zone_eqp_list.setCoolingPriority(new_vav_term,cool_priority)
                       this_zone_eqp_list.setHeatingPriority(new_vav_term,heat_priority)
                       #puts "after #{air_loop.zoneSplitter.branchIndexForOutletModelObject(new_vav_term)}"
-                    end # end of not current_term.to_AirTerminalSingleDuctConstantVolumeNoReheat.empty?
+                    end # end of if not current_term.to_AirTerminalSingleDuctUncontrolled.empty?
                   end # end if zone.airLoopHVAC.get == air_loop
                 end #end model.getThermalZones.each do |zone|
                 #End of Go through each terminal connected to this air loop and remove it if it's uncontrolled

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_set_pump_eff</name>
   <uid>def3fff0-b8f5-48e7-af8d-df4eeb18b0e3</uid>
-  <version_id>b9871e45-c37d-45a7-95bc-80024b7a03fd</version_id>
-  <version_modified>20190811T164054Z</version_modified>
+  <version_id>7237a16a-48aa-4f99-8bbd-2e4701211307</version_id>
+  <version_modified>20190812T210400Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPSetPumpEff</class_name>
   <display_name>BTAPSetpumpEff</display_name>
@@ -74,7 +74,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>78682C66</checksum>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>

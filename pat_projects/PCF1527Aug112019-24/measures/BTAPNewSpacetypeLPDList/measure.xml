@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_new_spacetype_lpd_list</name>
   <uid>fe83dee3-2233-4744-abb1-3cbb1777fbae</uid>
-  <version_id>7afbf2db-26f5-4916-ad9a-90e35231fbf7</version_id>
-  <version_modified>20190811T164051Z</version_modified>
+  <version_id>49dda4ee-10c7-4997-958d-6b15d1fefe14</version_id>
+  <version_modified>20190812T210357Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPNewSpacetypeLPDList</class_name>
   <display_name>BTAPNewSpacetypeLPDList</display_name>
@@ -80,7 +80,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>8C8E6CE3</checksum>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>

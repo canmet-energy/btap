@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_add_ashpwh</name>
   <uid>87631e5c-6a3f-4f4b-88af-c8b6fe497809</uid>
-  <version_id>979f6744-8d94-40d1-9b13-a6c0fd783d5c</version_id>
-  <version_modified>20190811T164052Z</version_modified>
+  <version_id>9ea6df6d-b505-4028-a162-a4461a867c34</version_id>
+  <version_modified>20190812T210358Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPAddASHPWH</class_name>
   <display_name>BTAPAddASHPWH</display_name>
@@ -48,12 +48,6 @@
   </attributes>
   <files>
     <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A9BF77B3</checksum>
-    </file>
-    <file>
       <filename>test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -74,7 +68,13 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>FDC77391</checksum>
+      <checksum>199CC87A</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A9BF77B3</checksum>
     </file>
   </files>
 </measure>

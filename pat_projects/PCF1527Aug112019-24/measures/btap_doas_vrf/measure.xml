@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btapdoasvrf</name>
   <uid>b48dc234-3f04-4153-b380-28de7b0c7a8f</uid>
-  <version_id>b28a53c6-8d5f-4a74-9fab-7f10ba09e8b6</version_id>
-  <version_modified>20190811T164053Z</version_modified>
+  <version_id>f0cead15-8aac-4bac-9863-92bb17100f7c</version_id>
+  <version_modified>20190812T210359Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPDOASVRF</class_name>
   <display_name>BTAPDOASVRF</display_name>
@@ -74,7 +74,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>07C2DAE0</checksum>
+      <checksum>3D45A995</checksum>
     </file>
   </files>
 </measure>

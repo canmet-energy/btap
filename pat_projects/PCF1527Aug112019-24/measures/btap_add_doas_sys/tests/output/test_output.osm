@@ -3024,12 +3024,14 @@ OS:PortList,
   {b63f4700-7f8f-4767-8a99-9b40daaf1545}, !- Handle
   {ba1919ea-dcf1-4813-8567-6de40502c46f}, !- Name
   {9abc14d7-6129-4577-a311-f718ea3b4afa}, !- HVAC Component
-  {68db6ef4-801b-41ae-b1cc-7512731e0b11}; !- Port 1
+  {68db6ef4-801b-41ae-b1cc-7512731e0b11}, !- Port 1
+  {4ef65636-15be-4e29-8a18-3621e1adfe17}; !- Port 2
 
 OS:PortList,
   {fa7a6e0f-554d-4356-9f99-56307f258ed1}, !- Handle
   {f2715fb2-a67d-4e5a-9201-367256f391eb}, !- Name
-  {9abc14d7-6129-4577-a311-f718ea3b4afa}; !- HVAC Component
+  {9abc14d7-6129-4577-a311-f718ea3b4afa}, !- HVAC Component
+  {8bb2fdc9-715a-4bfd-b517-898fa8185c06}; !- Port 1
 
 OS:Sizing:Zone,
   {32173592-c20f-4e76-9985-031c50de3c78}, !- Handle
@@ -3065,12 +3067,15 @@ OS:ZoneHVAC:EquipmentList,
   {3a227d1a-385b-43ec-ad30-d422a7d3acf9}, !- Handle
   Zone HVAC Equipment List 1,             !- Name
   {9abc14d7-6129-4577-a311-f718ea3b4afa}, !- Thermal Zone
-  {220f6fd9-7f08-4d7e-adb7-62bad86f0d8e}, !- Zone Equipment 1
+  {78349120-d05d-43bd-9f52-20ebe01ef438}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  {a03c954f-a431-47ad-8321-7ddca3953909}, !- Zone Equipment 2
+  {220f6fd9-7f08-4d7e-adb7-62bad86f0d8e}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
+  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
+  {a03c954f-a431-47ad-8321-7ddca3953909}, !- Zone Equipment 3
+  3,                                      !- Zone Equipment Cooling Sequence 3
+  3;                                      !- Zone Equipment Heating or No-Load Sequence 3
 
 OS:ThermostatSetpoint:DualSetpoint,
   {fb766f68-98c5-4813-b58c-856bfa6056b7}, !- Handle
@@ -3119,12 +3124,14 @@ OS:PortList,
   {8f61b0a7-51db-4004-bdd9-d4843e351f48}, !- Handle
   {99f29566-baf0-4db0-b8c6-94a9eec6bbfb}, !- Name
   {e1ae5881-2a2c-42c4-bb72-8aced68cd45b}, !- HVAC Component
-  {130cef4f-ceee-4f08-9c88-4a9b11583179}; !- Port 1
+  {130cef4f-ceee-4f08-9c88-4a9b11583179}, !- Port 1
+  {85339ea6-b691-44dc-9500-69aee1d29bbc}; !- Port 2
 
 OS:PortList,
   {4e346a1b-35eb-48cd-b811-045a3107622d}, !- Handle
   {a96ffeb6-a5f2-46d5-a7be-8986adc4dff7}, !- Name
-  {e1ae5881-2a2c-42c4-bb72-8aced68cd45b}; !- HVAC Component
+  {e1ae5881-2a2c-42c4-bb72-8aced68cd45b}, !- HVAC Component
+  {77588757-5160-4aa0-8637-059669325ff6}; !- Port 1
 
 OS:Sizing:Zone,
   {21917a1f-d386-48f1-8140-5f4f02da6752}, !- Handle
@@ -3160,12 +3167,15 @@ OS:ZoneHVAC:EquipmentList,
   {81b2c4f9-b445-46a6-b88c-955b259fedec}, !- Handle
   Zone HVAC Equipment List 2,             !- Name
   {e1ae5881-2a2c-42c4-bb72-8aced68cd45b}, !- Thermal Zone
-  {5472ec1e-a43e-4c8c-bc63-2049dfacdd97}, !- Zone Equipment 1
+  {ac3f01d3-ddc0-4bab-a7b5-7598f76f31db}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  {f2981fec-bbf2-4759-92e9-33dd005bede0}, !- Zone Equipment 2
+  {5472ec1e-a43e-4c8c-bc63-2049dfacdd97}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
+  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
+  {f2981fec-bbf2-4759-92e9-33dd005bede0}, !- Zone Equipment 3
+  3,                                      !- Zone Equipment Cooling Sequence 3
+  3;                                      !- Zone Equipment Heating or No-Load Sequence 3
 
 OS:ThermostatSetpoint:DualSetpoint,
   {5e7e1faa-126d-4ac6-92dc-43a528b7ed85}, !- Handle
@@ -3214,12 +3224,14 @@ OS:PortList,
   {cd70102a-7ff2-4787-97ea-32c1bb30d6a6}, !- Handle
   {d8044ab6-cd32-4aa6-b36f-8958b79134b1}, !- Name
   {dc420bf8-0701-41c5-9779-2409a77dcaf9}, !- HVAC Component
-  {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}; !- Port 1
+  {876fa8f3-af68-4ddf-b6be-6e95559b9ef1}, !- Port 1
+  {23b0483b-3774-4ad4-9333-af9cd42765aa}; !- Port 2
 
 OS:PortList,
   {1a03df21-9602-46ef-8c61-060bc1238731}, !- Handle
   {d4444ce2-0ea5-486c-8c46-b4b29d933d3d}, !- Name
-  {dc420bf8-0701-41c5-9779-2409a77dcaf9}; !- HVAC Component
+  {dc420bf8-0701-41c5-9779-2409a77dcaf9}, !- HVAC Component
+  {765c63da-3d83-4703-b67a-463001f7eb5b}; !- Port 1
 
 OS:Sizing:Zone,
   {c8575510-c257-4cea-89f2-2d1c91c1ffd8}, !- Handle
@@ -3255,12 +3267,15 @@ OS:ZoneHVAC:EquipmentList,
   {e2760de0-b1e3-4b1e-a6ca-4606ed44c823}, !- Handle
   Zone HVAC Equipment List 3,             !- Name
   {dc420bf8-0701-41c5-9779-2409a77dcaf9}, !- Thermal Zone
-  {190ece4d-4f85-4abe-9fce-2d4b3b534b48}, !- Zone Equipment 1
+  {ad9a07fd-e9ad-4aba-bfd0-c278273e1240}, !- Zone Equipment 1
   1,                                      !- Zone Equipment Cooling Sequence 1
   1,                                      !- Zone Equipment Heating or No-Load Sequence 1
-  {ae16ed18-b3d2-44a5-be0b-30e6a0bd450f}, !- Zone Equipment 2
+  {190ece4d-4f85-4abe-9fce-2d4b3b534b48}, !- Zone Equipment 2
   2,                                      !- Zone Equipment Cooling Sequence 2
-  2;                                      !- Zone Equipment Heating or No-Load Sequence 2
+  2,                                      !- Zone Equipment Heating or No-Load Sequence 2
+  {ae16ed18-b3d2-44a5-be0b-30e6a0bd450f}, !- Zone Equipment 3
+  3,                                      !- Zone Equipment Cooling Sequence 3
+  3;                                      !- Zone Equipment Heating or No-Load Sequence 3
 
 OS:ThermostatSetpoint:DualSetpoint,
   {d41aedc8-c9cf-4704-aa0a-72091a8681bf}, !- Handle
@@ -4006,8 +4021,8 @@ OS:Controller:OutdoorAir,
   ,                                       !- Return Air Node Name
   ,                                       !- Mixed Air Node Name
   ,                                       !- Actuator Node Name
-  autosize,                               !- Minimum Outdoor Air Flow Rate {m3/s}
-  Autosize,                               !- Maximum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Minimum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Maximum Outdoor Air Flow Rate {m3/s}
   NoEconomizer,                           !- Economizer Control Type
   ModulateFlow,                           !- Economizer Control Action Type
   28,                                     !- Economizer Maximum Limit Dry-Bulb Temperature {C}
@@ -4529,8 +4544,8 @@ OS:Controller:OutdoorAir,
   ,                                       !- Return Air Node Name
   ,                                       !- Mixed Air Node Name
   ,                                       !- Actuator Node Name
-  autosize,                               !- Minimum Outdoor Air Flow Rate {m3/s}
-  Autosize,                               !- Maximum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Minimum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Maximum Outdoor Air Flow Rate {m3/s}
   DifferentialEnthalpy,                   !- Economizer Control Type
   ModulateFlow,                           !- Economizer Control Action Type
   ,                                       !- Economizer Maximum Limit Dry-Bulb Temperature {C}
@@ -5066,8 +5081,8 @@ OS:Controller:OutdoorAir,
   ,                                       !- Return Air Node Name
   ,                                       !- Mixed Air Node Name
   ,                                       !- Actuator Node Name
-  autosize,                               !- Minimum Outdoor Air Flow Rate {m3/s}
-  Autosize,                               !- Maximum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Minimum Outdoor Air Flow Rate {m3/s}
+  0,                                      !- Maximum Outdoor Air Flow Rate {m3/s}
   DifferentialEnthalpy,                   !- Economizer Control Type
   ModulateFlow,                           !- Economizer Control Action Type
   ,                                       !- Economizer Maximum Limit Dry-Bulb Temperature {C}
@@ -7881,4 +7896,625 @@ OS:WeatherFile,
   723.3,                                  !- Elevation {m}
   file:CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw, !- Url
   8DFD1F6C;                               !- Checksum
+
+OS:Curve:Exponent,
+  {a05ea172-4bba-448c-97be-a7e1bb0f836a}, !- Handle
+  Fan On Off Power Curve,                 !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {bbd5115f-7976-420b-9dbf-b3270c95ec6f}, !- Handle
+  Fan On Off Efficiency Curve,            !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Curve:Exponent,
+  {a584eb2c-23dc-4b8f-b4f1-23793a7bf830}, !- Handle
+  Fan On Off Power Curve 1,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {b3fe2a44-dbe1-413b-b0b4-6bbd4b97ee97}, !- Handle
+  Fan On Off Efficiency Curve 1,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:ZoneHVAC:EnergyRecoveryVentilator:Controller,
+  {7915b0c1-4aab-4846-87ec-31906e368066}, !- Handle
+  Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN erv contr, !- Name
+  19,                                     !- Temperature High Limit {C}
+  13,                                     !- Temperature Low Limit {C}
+  ,                                       !- Enthalpy High Limit {J/kg}
+  ,                                       !- Dewpoint Temperature Limit {C}
+  {d53a88bf-46b0-425a-b60d-86d7e2dcf6e6}, !- Electronic Enthalpy Limit Curve Name
+  NoExhaustAirTemperatureLimit,           !- Exhaust Air Temperature Limit
+  NoExhaustAirEnthalpyLimit,              !- Exhaust Air Enthalpy Limit
+  {0ff0d2b8-a688-48ab-9b93-52931f11ebc0}, !- Time of Day Economizer Flow Control Schedule Name
+  No,                                     !- High Humidity Control Flag
+  1,                                      !- High Humidity Outdoor Air Flow Ratio
+  Yes;                                    !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+
+OS:HeatExchanger:AirToAir:SensibleAndLatent,
+  {8c64c4b9-94ad-4f1a-884f-5416a1c6cd9d}, !- Handle
+  Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN erv hx, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
+  autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
+  0.76,                                   !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.76,                                   !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  ,                                       !- Supply Air Inlet Node
+  ,                                       !- Supply Air Outlet Node
+  ,                                       !- Exhaust Air Inlet Node
+  ,                                       !- Exhaust Air Outlet Node
+  0,                                      !- Nominal Electric Power {W}
+  No,                                     !- Supply Air Outlet Temperature Control
+  Rotary,                                 !- Heat Exchanger Type
+  ExhaustAirRecirculation,                !- Frost Control Type
+  -23.3,                                  !- Threshold Temperature {C}
+  0.167,                                  !- Initial Defrost Time Fraction {dimensionless}
+  0.012,                                  !- Rate of Defrost Time Fraction Increase {1/K}
+  No;                                     !- Economizer Lockout
+
+OS:Fan:OnOff,
+  {12a566a8-e494-4497-a9be-722a788b05e4}, !- Handle
+  Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN erv sup fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {80b275df-92eb-4e4f-8a7c-c4ad6a18aba7}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {e9368aa5-9ac9-4643-803d-04da790115ca}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {80b275df-92eb-4e4f-8a7c-c4ad6a18aba7}, !- Handle
+  Fan On Off Power Curve 2,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {e9368aa5-9ac9-4643-803d-04da790115ca}, !- Handle
+  Fan On Off Efficiency Curve 2,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Fan:OnOff,
+  {5ffe41fe-6aae-41b3-b47f-2e710e5e7fe4}, !- Handle
+  Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN erv exh fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {22fe0923-4220-454f-8f3a-e4b43e2af3ab}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {ac7e4e6f-f2f2-4c9f-871c-27612a879152}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {22fe0923-4220-454f-8f3a-e4b43e2af3ab}, !- Handle
+  Fan On Off Power Curve 3,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {ac7e4e6f-f2f2-4c9f-871c-27612a879152}, !- Handle
+  Fan On Off Efficiency Curve 3,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Schedule:Constant,
+  {0ff0d2b8-a688-48ab-9b93-52931f11ebc0}, !- Handle
+  Always Off Discrete,                    !- Name
+  {f41334ee-8432-4756-977e-4bb792b900ac}, !- Schedule Type Limits Name
+  0;                                      !- Value
+
+OS:ScheduleTypeLimits,
+  {f41334ee-8432-4756-977e-4bb792b900ac}, !- Handle
+  OnOff 1,                                !- Name
+  0,                                      !- Lower Limit Value
+  1,                                      !- Upper Limit Value
+  Discrete,                               !- Numeric Type
+  Availability;                           !- Unit Type
+
+OS:Curve:Cubic,
+  {d53a88bf-46b0-425a-b60d-86d7e2dcf6e6}, !- Handle
+  Curve Cubic 3,                          !- Name
+  0.01342704,                             !- Coefficient1 Constant
+  -0.00047892,                            !- Coefficient2 x
+  5.3352e-005,                            !- Coefficient3 x**2
+  -1.8103e-006,                           !- Coefficient4 x**3
+  16.6,                                   !- Minimum Value of x
+  29.13;                                  !- Maximum Value of x
+
+OS:ZoneHVAC:EnergyRecoveryVentilator,
+  {78349120-d05d-43bd-9f52-20ebe01ef438}, !- Handle
+  Sp-Zone1 Office Sys-3 Flr-1 Sch-A HPlcmt-south ZN erv doas, !- Name
+  {56d84381-102f-41a0-baa7-36742a40a72d}, !- Availability Schedule Name
+  {8c64c4b9-94ad-4f1a-884f-5416a1c6cd9d}, !- Heat Exchanger Name
+  autosize,                               !- Supply Air Flow Rate {m3/s}
+  autosize,                               !- Exhaust Air Flow Rate {m3/s}
+  {12a566a8-e494-4497-a9be-722a788b05e4}, !- Supply Air Fan Name
+  {5ffe41fe-6aae-41b3-b47f-2e710e5e7fe4}, !- Exhaust Air Fan Name
+  {7915b0c1-4aab-4846-87ec-31906e368066}, !- Controller Name
+  0.00042164,                             !- Ventilation Rate per Unit Floor Area {m3/s-m2}
+  0,                                      !- Ventilation Rate per Occupant {m3/s-person}
+  ,                                       !- Availability Manager List Name
+  {1332283f-ac3d-4860-aafd-a28fa6da4d8c}, !- Air Inlet Node Name
+  {9b9592d7-c7ce-462e-97ed-0b39c3378054}; !- Air Outlet Node Name
+
+OS:Node,
+  {5fee5a80-1f71-49c7-ba2b-284df949211a}, !- Handle
+  Node 75,                                !- Name
+  {8bb2fdc9-715a-4bfd-b517-898fa8185c06}, !- Inlet Port
+  {1332283f-ac3d-4860-aafd-a28fa6da4d8c}; !- Outlet Port
+
+OS:Connection,
+  {8bb2fdc9-715a-4bfd-b517-898fa8185c06}, !- Handle
+  {9cd00021-e12a-4502-b951-65369526417b}, !- Name
+  {fa7a6e0f-554d-4356-9f99-56307f258ed1}, !- Source Object
+  3,                                      !- Outlet Port
+  {5fee5a80-1f71-49c7-ba2b-284df949211a}, !- Target Object
+  2;                                      !- Inlet Port
+
+OS:Connection,
+  {1332283f-ac3d-4860-aafd-a28fa6da4d8c}, !- Handle
+  {1c3f227d-84b6-428f-b01a-e332d462f60d}, !- Name
+  {5fee5a80-1f71-49c7-ba2b-284df949211a}, !- Source Object
+  3,                                      !- Outlet Port
+  {78349120-d05d-43bd-9f52-20ebe01ef438}, !- Target Object
+  12;                                     !- Inlet Port
+
+OS:Node,
+  {ee4124ca-3128-49ac-b214-b06eae3d928d}, !- Handle
+  Node 82,                                !- Name
+  {9b9592d7-c7ce-462e-97ed-0b39c3378054}, !- Inlet Port
+  {4ef65636-15be-4e29-8a18-3621e1adfe17}; !- Outlet Port
+
+OS:Connection,
+  {4ef65636-15be-4e29-8a18-3621e1adfe17}, !- Handle
+  {fb89d5f9-e087-4c1f-9e09-896a3d7317b8}, !- Name
+  {ee4124ca-3128-49ac-b214-b06eae3d928d}, !- Source Object
+  3,                                      !- Outlet Port
+  {b63f4700-7f8f-4767-8a99-9b40daaf1545}, !- Target Object
+  4;                                      !- Inlet Port
+
+OS:Connection,
+  {9b9592d7-c7ce-462e-97ed-0b39c3378054}, !- Handle
+  {53c4ac5b-85f4-405b-9be6-826ec4ddb3da}, !- Name
+  {78349120-d05d-43bd-9f52-20ebe01ef438}, !- Source Object
+  13,                                     !- Outlet Port
+  {ee4124ca-3128-49ac-b214-b06eae3d928d}, !- Target Object
+  2;                                      !- Inlet Port
+
+OS:ZoneHVAC:EnergyRecoveryVentilator:Controller,
+  {ba25e1ab-d9b7-4e22-842a-231d7e8f3bef}, !- Handle
+  Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN erv contr, !- Name
+  19,                                     !- Temperature High Limit {C}
+  13,                                     !- Temperature Low Limit {C}
+  ,                                       !- Enthalpy High Limit {J/kg}
+  ,                                       !- Dewpoint Temperature Limit {C}
+  {9984e766-7df8-4782-85d1-bf99c0483832}, !- Electronic Enthalpy Limit Curve Name
+  NoExhaustAirTemperatureLimit,           !- Exhaust Air Temperature Limit
+  NoExhaustAirEnthalpyLimit,              !- Exhaust Air Enthalpy Limit
+  {0ff0d2b8-a688-48ab-9b93-52931f11ebc0}, !- Time of Day Economizer Flow Control Schedule Name
+  No,                                     !- High Humidity Control Flag
+  1,                                      !- High Humidity Outdoor Air Flow Ratio
+  Yes;                                    !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+
+OS:HeatExchanger:AirToAir:SensibleAndLatent,
+  {192feb86-51a1-4e4c-9057-709bd4265f73}, !- Handle
+  Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN erv hx, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
+  autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
+  0.76,                                   !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.76,                                   !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  ,                                       !- Supply Air Inlet Node
+  ,                                       !- Supply Air Outlet Node
+  ,                                       !- Exhaust Air Inlet Node
+  ,                                       !- Exhaust Air Outlet Node
+  0,                                      !- Nominal Electric Power {W}
+  No,                                     !- Supply Air Outlet Temperature Control
+  Rotary,                                 !- Heat Exchanger Type
+  ExhaustAirRecirculation,                !- Frost Control Type
+  -23.3,                                  !- Threshold Temperature {C}
+  0.167,                                  !- Initial Defrost Time Fraction {dimensionless}
+  0.012,                                  !- Rate of Defrost Time Fraction Increase {1/K}
+  No;                                     !- Economizer Lockout
+
+OS:Fan:OnOff,
+  {e543c9a8-4054-4895-a21c-031fbcd9bde2}, !- Handle
+  Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN erv sup fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {cea7c657-ae53-4177-9906-a13aacf571fe}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {94c36be6-4f82-404a-896c-c989ff2ac72c}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {cea7c657-ae53-4177-9906-a13aacf571fe}, !- Handle
+  Fan On Off Power Curve 4,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {94c36be6-4f82-404a-896c-c989ff2ac72c}, !- Handle
+  Fan On Off Efficiency Curve 4,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Fan:OnOff,
+  {04999f0f-34cc-4f46-838b-5b1e3f5fb35b}, !- Handle
+  Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN erv exh fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {6bd8f706-6d06-4241-a23b-42a61f853fa8}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {048d02db-1506-4207-ae4e-0b631f0269d1}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {6bd8f706-6d06-4241-a23b-42a61f853fa8}, !- Handle
+  Fan On Off Power Curve 5,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {048d02db-1506-4207-ae4e-0b631f0269d1}, !- Handle
+  Fan On Off Efficiency Curve 5,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Curve:Cubic,
+  {9984e766-7df8-4782-85d1-bf99c0483832}, !- Handle
+  Curve Cubic 4,                          !- Name
+  0.01342704,                             !- Coefficient1 Constant
+  -0.00047892,                            !- Coefficient2 x
+  5.3352e-005,                            !- Coefficient3 x**2
+  -1.8103e-006,                           !- Coefficient4 x**3
+  16.6,                                   !- Minimum Value of x
+  29.13;                                  !- Maximum Value of x
+
+OS:ZoneHVAC:EnergyRecoveryVentilator,
+  {ad9a07fd-e9ad-4aba-bfd0-c278273e1240}, !- Handle
+  Sp-Zone2 Fine Storage Sys-4 Flr-1 Sch-A HPlcmt-south ZN erv doas, !- Name
+  {e4dd7ea2-31b1-45b6-b738-6e13d4573575}, !- Availability Schedule Name
+  {192feb86-51a1-4e4c-9057-709bd4265f73}, !- Heat Exchanger Name
+  autosize,                               !- Supply Air Flow Rate {m3/s}
+  autosize,                               !- Exhaust Air Flow Rate {m3/s}
+  {e543c9a8-4054-4895-a21c-031fbcd9bde2}, !- Supply Air Fan Name
+  {04999f0f-34cc-4f46-838b-5b1e3f5fb35b}, !- Exhaust Air Fan Name
+  {ba25e1ab-d9b7-4e22-842a-231d7e8f3bef}, !- Controller Name
+  0.0003048,                              !- Ventilation Rate per Unit Floor Area {m3/s-m2}
+  0,                                      !- Ventilation Rate per Occupant {m3/s-person}
+  ,                                       !- Availability Manager List Name
+  {a7a2681f-f9fa-4d30-b343-8240881b0fad}, !- Air Inlet Node Name
+  {275bb432-ace9-4ef2-a639-39def16c7ada}; !- Air Outlet Node Name
+
+OS:Node,
+  {815df612-461a-4fdc-974b-a468a205ef6c}, !- Handle
+  Node 83,                                !- Name
+  {765c63da-3d83-4703-b67a-463001f7eb5b}, !- Inlet Port
+  {a7a2681f-f9fa-4d30-b343-8240881b0fad}; !- Outlet Port
+
+OS:Connection,
+  {765c63da-3d83-4703-b67a-463001f7eb5b}, !- Handle
+  {a65dccd3-885f-408f-a182-b59a6360f7df}, !- Name
+  {1a03df21-9602-46ef-8c61-060bc1238731}, !- Source Object
+  3,                                      !- Outlet Port
+  {815df612-461a-4fdc-974b-a468a205ef6c}, !- Target Object
+  2;                                      !- Inlet Port
+
+OS:Connection,
+  {a7a2681f-f9fa-4d30-b343-8240881b0fad}, !- Handle
+  {d58a1831-e8e9-4c0a-9fa1-9f3d3516c26e}, !- Name
+  {815df612-461a-4fdc-974b-a468a205ef6c}, !- Source Object
+  3,                                      !- Outlet Port
+  {ad9a07fd-e9ad-4aba-bfd0-c278273e1240}, !- Target Object
+  12;                                     !- Inlet Port
+
+OS:Node,
+  {2adf41ab-4906-4456-87a5-8234f8ef8bb3}, !- Handle
+  Node 84,                                !- Name
+  {275bb432-ace9-4ef2-a639-39def16c7ada}, !- Inlet Port
+  {23b0483b-3774-4ad4-9333-af9cd42765aa}; !- Outlet Port
+
+OS:Connection,
+  {23b0483b-3774-4ad4-9333-af9cd42765aa}, !- Handle
+  {e3881232-d6d2-4fd0-9506-d1132ce8247c}, !- Name
+  {2adf41ab-4906-4456-87a5-8234f8ef8bb3}, !- Source Object
+  3,                                      !- Outlet Port
+  {cd70102a-7ff2-4787-97ea-32c1bb30d6a6}, !- Target Object
+  4;                                      !- Inlet Port
+
+OS:Connection,
+  {275bb432-ace9-4ef2-a639-39def16c7ada}, !- Handle
+  {a6d63818-b84a-4f6c-99ae-ff5dd958c2a6}, !- Name
+  {ad9a07fd-e9ad-4aba-bfd0-c278273e1240}, !- Source Object
+  13,                                     !- Outlet Port
+  {2adf41ab-4906-4456-87a5-8234f8ef8bb3}, !- Target Object
+  2;                                      !- Inlet Port
+
+OS:ZoneHVAC:EnergyRecoveryVentilator:Controller,
+  {a577cd51-c759-4a13-b87e-46c1fa9d88da}, !- Handle
+  Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN erv contr, !- Name
+  19,                                     !- Temperature High Limit {C}
+  13,                                     !- Temperature Low Limit {C}
+  ,                                       !- Enthalpy High Limit {J/kg}
+  ,                                       !- Dewpoint Temperature Limit {C}
+  {5d53f3a6-404a-470a-827e-4ee3d309f024}, !- Electronic Enthalpy Limit Curve Name
+  NoExhaustAirTemperatureLimit,           !- Exhaust Air Temperature Limit
+  NoExhaustAirEnthalpyLimit,              !- Exhaust Air Enthalpy Limit
+  {0ff0d2b8-a688-48ab-9b93-52931f11ebc0}, !- Time of Day Economizer Flow Control Schedule Name
+  No,                                     !- High Humidity Control Flag
+  1,                                      !- High Humidity Outdoor Air Flow Ratio
+  Yes;                                    !- Control High Indoor Humidity Based on Outdoor Humidity Ratio
+
+OS:HeatExchanger:AirToAir:SensibleAndLatent,
+  {205836f3-d27f-4aea-9154-7b1187ba0501}, !- Handle
+  Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN erv hx, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule
+  autosize,                               !- Nominal Supply Air Flow Rate {m3/s}
+  0.76,                                   !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
+  0.76,                                   !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
+  0.81,                                   !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
+  0.75,                                   !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
+  ,                                       !- Supply Air Inlet Node
+  ,                                       !- Supply Air Outlet Node
+  ,                                       !- Exhaust Air Inlet Node
+  ,                                       !- Exhaust Air Outlet Node
+  0,                                      !- Nominal Electric Power {W}
+  No,                                     !- Supply Air Outlet Temperature Control
+  Rotary,                                 !- Heat Exchanger Type
+  ExhaustAirRecirculation,                !- Frost Control Type
+  -23.3,                                  !- Threshold Temperature {C}
+  0.167,                                  !- Initial Defrost Time Fraction {dimensionless}
+  0.012,                                  !- Rate of Defrost Time Fraction Increase {1/K}
+  No;                                     !- Economizer Lockout
+
+OS:Fan:OnOff,
+  {2edb9eb9-1853-4cc1-baaa-3fd97a84a0ec}, !- Handle
+  Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN erv sup fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {88000af4-784d-45cd-8c95-c3bc8d130bc7}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {98dbdcac-e460-4fa4-89cd-9916b582b52b}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {88000af4-784d-45cd-8c95-c3bc8d130bc7}, !- Handle
+  Fan On Off Power Curve 6,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {98dbdcac-e460-4fa4-89cd-9916b582b52b}, !- Handle
+  Fan On Off Efficiency Curve 6,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Fan:OnOff,
+  {3ae42e86-9727-4976-a44a-bc7710d3b9a7}, !- Handle
+  Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN erv exh fan, !- Name
+  {0770139a-2dc0-4a1f-a968-6b1f7583fbb0}, !- Availability Schedule Name
+  0.75,                                   !- Fan Efficiency
+  200,                                    !- Pressure Rise {Pa}
+  autosize,                               !- Maximum Flow Rate {m3/s}
+  0.9,                                    !- Motor Efficiency
+  1,                                      !- Motor In Airstream Fraction
+  ,                                       !- Air Inlet Node Name
+  ,                                       !- Air Outlet Node Name
+  {5f64bcb9-0b8c-445a-a4ec-93b6be4ea1b6}, !- Fan Power Ratio Function of Speed Ratio Curve Name
+  {cdcc2036-2589-4791-809e-007beec3c2e3}, !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+  ;                                       !- End-Use Subcategory
+
+OS:Curve:Exponent,
+  {5f64bcb9-0b8c-445a-a4ec-93b6be4ea1b6}, !- Handle
+  Fan On Off Power Curve 7,               !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 Constant
+  0,                                      !- Coefficient3 Constant
+  0,                                      !- Minimum Value of x
+  1,                                      !- Maximum Value of x
+  ,                                       !- Minimum Curve Output
+  ,                                       !- Maximum Curve Output
+  ,                                       !- Input Unit Type for X
+  ;                                       !- Output Unit Type
+
+OS:Curve:Cubic,
+  {cdcc2036-2589-4791-809e-007beec3c2e3}, !- Handle
+  Fan On Off Efficiency Curve 7,          !- Name
+  1,                                      !- Coefficient1 Constant
+  0,                                      !- Coefficient2 x
+  0,                                      !- Coefficient3 x**2
+  0,                                      !- Coefficient4 x**3
+  0,                                      !- Minimum Value of x
+  1;                                      !- Maximum Value of x
+
+OS:Curve:Cubic,
+  {5d53f3a6-404a-470a-827e-4ee3d309f024}, !- Handle
+  Curve Cubic 5,                          !- Name
+  0.01342704,                             !- Coefficient1 Constant
+  -0.00047892,                            !- Coefficient2 x
+  5.3352e-005,                            !- Coefficient3 x**2
+  -1.8103e-006,                           !- Coefficient4 x**3
+  16.6,                                   !- Minimum Value of x
+  29.13;                                  !- Maximum Value of x
+
+OS:ZoneHVAC:EnergyRecoveryVentilator,
+  {ac3f01d3-ddc0-4bab-a7b5-7598f76f31db}, !- Handle
+  Sp-Zone3 Bulk Storage Sys-4 Flr-1 Sch-A HPlcmt-east ZN erv doas, !- Name
+  {f98ef49b-07c7-4010-8ce9-10b324eeeae4}, !- Availability Schedule Name
+  {205836f3-d27f-4aea-9154-7b1187ba0501}, !- Heat Exchanger Name
+  autosize,                               !- Supply Air Flow Rate {m3/s}
+  autosize,                               !- Exhaust Air Flow Rate {m3/s}
+  {2edb9eb9-1853-4cc1-baaa-3fd97a84a0ec}, !- Supply Air Fan Name
+  {3ae42e86-9727-4976-a44a-bc7710d3b9a7}, !- Exhaust Air Fan Name
+  {a577cd51-c759-4a13-b87e-46c1fa9d88da}, !- Controller Name
+  0.0003048,                              !- Ventilation Rate per Unit Floor Area {m3/s-m2}
+  0,                                      !- Ventilation Rate per Occupant {m3/s-person}
+  ,                                       !- Availability Manager List Name
+  {7cc5a78f-2e9b-4233-a571-a0ffc5c855ac}, !- Air Inlet Node Name
+  {8554bdb4-49dd-4230-8e1b-df8085b6dd81}; !- Air Outlet Node Name
+
+OS:Node,
+  {e03bfd75-71d9-4a05-805e-467a0dfa779e}, !- Handle
+  Node 85,                                !- Name
+  {77588757-5160-4aa0-8637-059669325ff6}, !- Inlet Port
+  {7cc5a78f-2e9b-4233-a571-a0ffc5c855ac}; !- Outlet Port
+
+OS:Connection,
+  {77588757-5160-4aa0-8637-059669325ff6}, !- Handle
+  {91198f79-8e3e-422a-bd8c-3a2c3635d736}, !- Name
+  {4e346a1b-35eb-48cd-b811-045a3107622d}, !- Source Object
+  3,                                      !- Outlet Port
+  {e03bfd75-71d9-4a05-805e-467a0dfa779e}, !- Target Object
+  2;                                      !- Inlet Port
+
+OS:Connection,
+  {7cc5a78f-2e9b-4233-a571-a0ffc5c855ac}, !- Handle
+  {1c0b27ee-e133-4cf2-b565-82e1a9d80683}, !- Name
+  {e03bfd75-71d9-4a05-805e-467a0dfa779e}, !- Source Object
+  3,                                      !- Outlet Port
+  {ac3f01d3-ddc0-4bab-a7b5-7598f76f31db}, !- Target Object
+  12;                                     !- Inlet Port
+
+OS:Node,
+  {f3bf94cc-3339-450f-8736-ec10f02fa65f}, !- Handle
+  Node 86,                                !- Name
+  {8554bdb4-49dd-4230-8e1b-df8085b6dd81}, !- Inlet Port
+  {85339ea6-b691-44dc-9500-69aee1d29bbc}; !- Outlet Port
+
+OS:Connection,
+  {85339ea6-b691-44dc-9500-69aee1d29bbc}, !- Handle
+  {37aa8d2a-2973-4067-bb7a-f63d45601579}, !- Name
+  {f3bf94cc-3339-450f-8736-ec10f02fa65f}, !- Source Object
+  3,                                      !- Outlet Port
+  {8f61b0a7-51db-4004-bdd9-d4843e351f48}, !- Target Object
+  4;                                      !- Inlet Port
+
+OS:Connection,
+  {8554bdb4-49dd-4230-8e1b-df8085b6dd81}, !- Handle
+  {a8b482e1-2fda-4ce3-988e-b3ed462b5b9b}, !- Name
+  {ac3f01d3-ddc0-4bab-a7b5-7598f76f31db}, !- Source Object
+  13,                                     !- Outlet Port
+  {f3bf94cc-3339-450f-8736-ec10f02fa65f}, !- Target Object
+  2;                                      !- Inlet Port
 

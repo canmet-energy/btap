@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_add_doas_sys</name>
   <uid>14f47c70-84f9-4435-9155-5bd3f2d87c4c</uid>
-  <version_id>5f3acad7-8d00-42dc-ba88-e1639526d8cf</version_id>
-  <version_modified>20190811T164052Z</version_modified>
+  <version_id>508b0453-58db-4553-b717-bd818385782d</version_id>
+  <version_modified>20190812T210358Z</version_modified>
   <xml_checksum>4435983D</xml_checksum>
   <class_name>BTAPAddDOASSys</class_name>
   <display_name>BTAPAddDOASSys</display_name>
@@ -82,7 +82,7 @@
       <filename>in.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
-      <checksum>D90CC410</checksum>
+      <checksum>7A98FCAE</checksum>
     </file>
   </files>
 </measure>
