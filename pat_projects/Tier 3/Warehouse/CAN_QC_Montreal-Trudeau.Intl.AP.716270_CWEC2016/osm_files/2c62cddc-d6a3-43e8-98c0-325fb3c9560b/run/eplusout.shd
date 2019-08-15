@@ -1,0 +1,233 @@
+Shadowing Combinations
+..Solar Distribution=FullExterior
+..In the following, only the first 10 reference surfaces will be shown.
+..But all surfaces are used in the calculations.
+==================================
+Surface=OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=5
+..Surface=Mir-FINE STORAGE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=OFFICE FRONT WALL
+..Surface=FINE STORAGE FRONT WALL
+..Surface=FINE STORAGE OFFICE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=OFFICE FRONT WALL
+..Surface=FINE STORAGE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=OFFICE FRONT WALL
+..Surface=FINE STORAGE FRONT WALL
+..Surface=FINE STORAGE OFFICE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-FINE STORAGE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=OFFICE FRONT WALL
+..Surface=FINE STORAGE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=FINE STORAGE FRONT WALL
+..Surface=FINE STORAGE OFFICE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=FINE STORAGE FRONT WALL
+..Surface=FINE STORAGE OFFICE FRONT WALL
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE FRONT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=3
+..Surface=Mir-OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=Mir-FINE STORAGE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=OFFICE FRONT WALL_FIXEDWINDOW
+==================================
+Surface=OFFICE FRONT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE LEFT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=OFFICE LEFT WALL_FIXEDWINDOW
+==================================
+Surface=OFFICE LEFT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE REAR WALL is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE RIGHT WALL is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE ROOF is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE FRONT WALL is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE LEFT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=BULK STORAGE LEFT WALL_FIXEDWINDOW
+==================================
+Surface=BULK STORAGE LEFT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE REAR WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=BULK STORAGE REAR WALL_FIXEDWINDOW
+==================================
+Surface=BULK STORAGE REAR WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE RIGHT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=BULK STORAGE RIGHT WALL_FIXEDWINDOW
+==================================
+Surface=BULK STORAGE RIGHT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BULK STORAGE FRONT WALL REVERSED is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE FRONT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=3
+..Surface=Mir-OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=Mir-FINE STORAGE FRONT WALL_FIXEDWINDOW - OVERHANG
+..Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=FINE STORAGE FRONT WALL_FIXEDWINDOW
+==================================
+Surface=FINE STORAGE FRONT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE LEFT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=FINE STORAGE LEFT WALL_FIXEDWINDOW
+==================================
+Surface=FINE STORAGE LEFT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE OFFICE FRONT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=1
+..Surface=Mir-FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW
+==================================
+Surface=FINE STORAGE OFFICE FRONT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE OFFICE LEFT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=FINE STORAGE OFFICE LEFT WALL_FIXEDWINDOW
+==================================
+Surface=FINE STORAGE OFFICE LEFT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE RIGHT WALL is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=FINE STORAGE RIGHT WALL_FIXEDWINDOW
+==================================
+Surface=FINE STORAGE RIGHT WALL_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE REAR WALL REVERSED is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE RIGHT WALL REVERSED is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICE ROOF REVERSED is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=FINE STORAGE ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0

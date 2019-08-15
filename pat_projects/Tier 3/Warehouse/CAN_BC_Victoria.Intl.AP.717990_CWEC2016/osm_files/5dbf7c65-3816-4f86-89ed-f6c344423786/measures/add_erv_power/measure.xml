@@ -1,0 +1,74 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>add_erv_power</name>
+  <uid>224561f4-8ccc-4f60-8118-34b85359d6f7</uid>
+  <version_id>19f9a81d-7552-43de-a15a-1987d440fbd9</version_id>
+  <version_modified>20190813T205619Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>AddERVPower</class_name>
+  <display_name>AddERVPower</display_name>
+  <description> </description>
+  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <arguments>
+    <argument>
+      <name>a_string_argument</name>
+      <display_name>A String Argument (string)</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>The Default Value</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5CCA669A</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5E7EBF34</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>50E7E383</checksum>
+    </file>
+  </files>
+</measure>

@@ -1,0 +1,377 @@
+{
+   "completed_at" : "20190813T204248Z",
+   "completed_status" : "Success",
+   "created_at" : "20190812T185732Z",
+   "current_step" : 6,
+   "eplusout_err" : "Program Version,EnergyPlus, Version 8.9.0-eba93e8e1b, YMD=2019.08.13 16:41,\n   ************* Beginning Zone Sizing Calculations\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"ECONOMIZER MAX OA FRACTION 100 PCT DEFAULT\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 1\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 10\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 11\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 12\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 13\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 14\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 15\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 16\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 17\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 18\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 19\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 2\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 20\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 21\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 22\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 23\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 24\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 25\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 26\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 27\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 28\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 29\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 30\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 31\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 32\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 33\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 34\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 35\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 36\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 37\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 38\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 39\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 40\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 5\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 6\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 7\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 8\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 9\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"ECONOMIZER MAX OA FRACTION 100 PCT\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 10\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 11\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 12\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 13\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 14\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 15\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 16\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 17\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 18\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 19\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 20\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 21\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 22\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 23\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 24\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 25\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 26\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 27\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 28\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 29\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 3\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 30\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 31\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 32\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 4\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 5\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 6\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 7\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 8\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 9\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** ProcessScheduleInput: Schedule:Constant=\"ALWAYS ON CONTINUOUS\", Blank Schedule Type Limits Name input -- will not be validated.\n   ** Warning ** CheckUsedConstructions: There are 22 nominally unused constructions in input.\n   **   ~~~   ** For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;\n   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.\n   **   ~~~   ** Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   **   ~~~   ** ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C\".\n   **   ~~~   ** Item length=[102] > Maximum Length=[100]. You may need to shorten the names.\n   **   ~~~   ** Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.\n   **   ~~~   ** name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.\n   **   ~~~   ** Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   **   ~~~   ** ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 1\".\n   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.\n   **   ~~~   ** Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.\n   **   ~~~   ** name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 1 SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.\n   **   ~~~   ** Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   **   ~~~   ** ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 2\".\n   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.\n   **   ~~~   ** Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.\n   **   ~~~   ** name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 2 SPACE FUNCTION SALES AREA ELEC EQUIP 50.0 PERCENT REDUCTION\".\n   ** Warning ** GetDXCoils: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\", invalid\n   **   ~~~   ** ...Part Load Fraction Correlation Curve Name = DXCOOL-NECB2011-REF-COOLPLFFPLR has out of range value.\n   **   ~~~   ** ...Curve maximum must be <= 1.0, curve max at PLR = 0.99 is 1.015\n   **   ~~~   ** ...Setting curve maximum to 1.0 and simulation continues.\n   ** Warning ** WaterHeater:HeatPump:PumpedCondenser=\"13GAL NATURALGAS WATER HEATER - 9KBTU/HR 0.82 THERM EFF ASHPWH\": Adding outdoor air node=13GAL NATURALGAS WATER HEATER - 9KBTU/HR 0.82 THERM EFF ASHPWH OUTDOOR AIR\n   ************* Beginning System Sizing Calculations\n   ************* Beginning Plant Sizing Calculations\n   ** Warning ** The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER but not at the AHRI test condition due to curve out of bound.\n   **   ~~~   **  Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.\n   ** Warning ** The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER but not at the AHRI test condition due to curve out of bound.\n   **   ~~~   **  Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.\n   ** Warning ** The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER but not at the AHRI test condition due to curve out of bound.\n   **   ~~~   **  Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.\n   ** Warning ** Output:Meter: invalid Key Name=\"DISTRICTCOOLING:FACILITY\" - not found.\n   ** Warning ** Output:Meter: invalid Key Name=\"DISTRICTHEATING:FACILITY\" - not found.\n   ** Warning ** Output:Meter:MeterFileOnly requested for \"Electricity:Facility\" (TimeStep), already on \"Output:Meter\". Will report to both eplusout.eso and eplusout.mtr\n   ************* Testing Individual Branch Integrity\n   ************* All Branches passed integrity testing\n   ************* Testing Individual Supply Air Path Integrity\n   ************* All Supply Air Paths passed integrity testing\n   ************* Testing Individual Return Air Path Integrity\n   ************* All Return Air Paths passed integrity testing\n   ************* No node connection errors were found.\n   ************* Beginning Simulation\n   ** Warning ** Processing Monthly Tabular Reports: Variable names not valid for this simulation\n   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual variables.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 2.324E-006 m3/s/W.\n   **   ~~~   **  Environment=RUN PERIOD 1, at Simulation time=01/01 14:40 - 14:50\n   **   ~~~   ** Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]\n   **   ~~~   ** Possible causes include inconsistent air flow rates in system components,\n   **   ~~~   ** or variable air volume [VAV] system using incorrect coil type.\n   ** Warning ** Enthalpy out of range (PsyTsatFnHPb)\n   **   ~~~   **  Routine=CalcDoe2DXCoil, Environment=RUN PERIOD 1, at Simulation time=01/01 14:40 - 14:50\n   **   ~~~   **  Enthalpy=-292442.47144 Pressure= 99566.66\n   **   ~~~   **  Initial Resultant Temperature= -59.98\n   ** Warning ** Temperature out of range [-100. to 200.] (PsyPsatFnTemp)\n   **   ~~~   **  Routine=PsyWFnTdbTwbPb, Environment=RUN PERIOD 1, at Simulation time=01/01 14:40 - 14:50\n   **   ~~~   **  Input Temperature=-308.34\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -4.33\n   **   ~~~   **  ... Occurrence info = RUN PERIOD 1, 01/01 14:40 - 14:50\n   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -4.33\n   **   ~~~   **  ... Occurrence info = RUN PERIOD 1, 01/01 14:40 - 14:50\n   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/01 15:00 - 15:10\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on each max iteration exceeded.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -178.13 C.\n   **   ~~~   **  ...Occurrence info = RUN PERIOD 1, 01/01 15:00 - 15:10\n   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil\n   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.913 C.\n   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.\n   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 2.041E-006 m3/s/W.\n   **   ~~~   **  Environment=RUN PERIOD 1, at Simulation time=01/01 15:10 - 15:20\n   **   ~~~   ** Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]\n   **   ~~~   ** Possible causes include inconsistent air flow rates in system components,\n   **   ~~~   ** or variable air volume [VAV] system using incorrect coil type.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -355.52 C.\n   **   ~~~   **  ...Occurrence info = RUN PERIOD 1, 01/01 15:10 - 15:20\n   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil\n   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.971 C.\n   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.\n   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 1.358E-005 m3/s/W.\n   **   ~~~   **  Environment=RUN PERIOD 1, at Simulation time=01/04 10:10 - 10:20\n   **   ~~~   ** Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]\n   **   ~~~   ** Possible causes include inconsistent air flow rates in system components,\n   **   ~~~   ** or variable air volume [VAV] system using incorrect coil type.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -5.10\n   **   ~~~   **  ... Occurrence info = RUN PERIOD 1, 01/04 10:10 - 10:20\n   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.\n   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -47.26 C.\n   **   ~~~   **  ...Occurrence info = RUN PERIOD 1, 01/04 10:10 - 10:20\n   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil\n   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.914 C.\n   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.\n   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.\n   ** Warning ** Calculated Humidity Ratio invalid (PsyWFnTdbH)\n   **   ~~~   **  Routine=CalcDoe2DXCoil, Environment=RUN PERIOD 1, at Simulation time=01/07 09:50 - 10:00\n   **   ~~~   **  Dry-Bulb= -59.98 Enthalpy= -250999.705\n   **   ~~~   ** Calculated Humidity Ratio= -7.9818E-002 ... Humidity Ratio set to .00001\n   ** Warning ** CalcDoe2DXCoil: Coil:WaterHeating:AirToWaterHeatPump:Pumped \"COIL WATER HEATING AIR TO WATER HEAT PUMP 1\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.13 C.\n   **   ~~~   **  ...Occurrence info = RUN PERIOD 1, 01/09 09:40 - 09:50\n   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil\n   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 5.016 C.\n   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.\n   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/15 15:50 - 16:00\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/18 11:20 - 11:30\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/19 14:10 - 14:20\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/21 14:30 - 14:40\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/27 13:30 - 13:40\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/29 16:20 - 16:30\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/01 13:10 - 13:20\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/04 16:00 - 16:10\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/05 16:50 - 17:00\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/08 16:00 - 16:10\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/10 15:20 - 15:30\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/16 14:40 - 14:50\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/17 15:10 - 15:20\n   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge\n   ** Warning ** The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-ELECTRICITY\" has no energy cost. \n   **   ~~~   ** ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.\n   ** Warning ** The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-DISTILLATE OIL\" has no energy cost. \n   **   ~~~   ** ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.\n   ** Warning ** The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-RESIDUAL OIL\" has no energy cost. \n   **   ~~~   ** ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.\n   ** Warning ** The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-NATURAL GAS\" has no energy cost. \n   **   ~~~   ** ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.\n   ** Warning ** The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-COAL\" has no energy cost. \n   **   ~~~   ** ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.\n   ************* Simulation Error Summary *************\n   ************* There are 9 unused schedules in input.\n   ************* There are 9 unused week schedules in input.\n   ************* There are 18 unused day schedules in input.\n   ************* Use Output:Diagnostics,DisplayUnusedSchedules; to see them.\n   *************\n   ************* ===== Recurring Error Summary =====\n   ************* The following recurring error messages occurred.\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...\n   *************  **   ~~~   **   This error occurred 35924 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=2.683558E-005  Min=2.270631E-006\n   *************\n   *************  ** Warning ** Enthalpy out of range (PsyTsatFnHPb)\n   *************  **   ~~~   **   This error occurred 559630 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-42406.154179 J/kg  Min=-378552.851071 J/kg\n   *************\n   *************  ** Warning ** Temperature out of range [-100. to 200.] (PsyPsatFnTemp)\n   *************  **   ~~~   **   This error occurred 16834 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-100.009018 C  Min=-394.524704 C\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Low condenser dry-bulb temperature error continues...\n   *************  **   ~~~   **   This error occurred 940 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-1.387779E-017 [C]  Min=-13.6 [C]\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Low condenser dry-bulb temperature error continues...\n   *************  **   ~~~   **   This error occurred 1070 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-1.387779E-017 [C]  Min=-13.283333 [C]\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 147KBTU/HR 9.08EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:\n   *************  **   ~~~   **   This error occurred 3584 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=1.999675  Min=-356.170489\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...\n   *************  **   ~~~   **   This error occurred 45682 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=2.683997E-005  Min=1.995114E-006\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 462KBTU/HR 8.21EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:\n   *************  **   ~~~   **   This error occurred 4984 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=1.996426  Min=-391.623966\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...\n   *************  **   ~~~   **   This error occurred 32838 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=2.683862E-005  Min=2.737612E-006\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Low condenser dry-bulb temperature error continues...\n   *************  **   ~~~   **   This error occurred 1208 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-1.387779E-017 [C]  Min=-15.4 [C]\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 91KBTU/HR 9.26EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:\n   *************  **   ~~~   **   This error occurred 2678 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=1.999206  Min=-282.965848\n   *************\n   *************  ** Warning ** Calculated Humidity Ratio invalid (PsyWFnTdbH)\n   *************  **   ~~~   **   This error occurred 48482 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=-1.374031E-004 []  Min=-0.130687 []\n   *************\n   *************  ** Warning ** CalcDoe2DXCoil: Coil:WaterHeating:AirToWaterHeatPump:Pumped=\"COIL WATER HEATING AIR TO WATER HEAT PUMP 1\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:\n   *************  **   ~~~   **   This error occurred 1135 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************  **   ~~~   **   Max=1.999655  Min=0.460904\n   *************\n   *************  ** Warning ** SimHVAC: Exceeding Maximum iterations for all HVAC loops, during RUN PERIOD 1 continues\n   *************  **   ~~~   **   This error occurred 58 total times;\n   *************  **   ~~~   **   during Warmup 0 times;\n   *************  **   ~~~   **   during Sizing 0 times.\n   *************\n   *************\n   ************* ===== Final Error Summary =====\n   ************* The following error categories occurred.  Consider correcting or noting.\n   ************* Nominally Unused Constructions\n   ************* ..The nominally unused constructions warning is provided to alert you to potential conditions that can cause\n   ************* ..extra time during simulation. Each construction is calculated by the algorithm indicated in the HeatBalanceAlgorithm\n   ************* ..object. You may remove the constructions indicated (when you use the DisplayExtraWarnings option).\n   *************\n   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.\n   ************* EnergyPlus Sizing Error Summary. During Sizing: 77 Warning; 0 Severe Errors.\n   ************* EnergyPlus Completed Successfully-- 755150 Warning; 0 Severe Errors; Elapsed Time=00hr 00min 50.57sec\n",
+   "hash" : "2D9C4082",
+   "seed_file" : "../8b67f2c0-edac-4a8f-81c2-dd9fa15d216b.osm",
+   "started_at" : "20190813T204153Z",
+   "steps" : [
+      {
+         "arguments" : {
+            "r_value" : 40
+         },
+         "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. Costs for a construction can be adjusted",
+         "measure_dir_name" : "IncreaseInsulationRValueForExteriorWalls",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in air exposed exterior walls to a specified value. Find constructions used for exterior walls, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. Layer to change could be Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance can be directly entered. If the construction doesn't appear to have an insulation layer it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions for surfaces with a \"Ground\" boundary condition will also not be altered. Constructions with an insulation layer that already exceeds the requested R-Value will also not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Exterior Walls to a Specific Value",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "IncreaseInsulationRValueForExteriorWalls",
+            "measure_display_name" : "Increase R-value of Insulation for Exterior Walls to a Specific Value",
+            "measure_name" : "increase_insulation_r_value_for_exterior_walls",
+            "measure_taxonomy" : "Envelope.Opaque",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "3fdf9c39-d305-449b-a4b5-077166af5a67",
+            "measure_version_id" : "7a5e8dbd-58b5-438b-a2a6-154a5c0c3002",
+            "measure_version_modified" : "20190812T184825Z",
+            "measure_xml_checksum" : "0F858D9E",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_final_condition" : "The existing insulation for exterior walls was set to R-40.0. This was accomplished for an initial cost of 0.0 ($/sf) and an increase of 0.0 ($/sf) for construction. This was applied to 10,834 (ft^2) across 1 exterior wall constructions: BTAP-Ext-Wall-Mass:U-0.278-:{ \"cond\"=>0.06} adj ext wall insulation (R-41.5).",
+            "step_info" : [
+               "For construction'BTAP-Ext-Wall-Mass:U-0.278-:{ \"cond\"=>0.06} adj ext wall insulation', material'Typical Insulation 6 R-93.1_R-value 40.0 (ft^2*h*R/Btu)' was altered."
+            ],
+            "step_initial_condition" : "The building had 1 exterior wall constructions: BTAP-Ext-Wall-Mass:U-0.278-:{ \"cond\"=>0.06} (R-94.6).",
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "r_value",
+                  "value" : 40
+               },
+               {
+                  "name" : "allow_reduction",
+                  "value" : true
+               },
+               {
+                  "name" : "material_cost_increase_ip",
+                  "value" : 0
+               },
+               {
+                  "name" : "one_time_retrofit_cost_ip",
+                  "value" : 0
+               },
+               {
+                  "name" : "years_until_retrofit_cost",
+                  "value" : 0
+               }
+            ],
+            "step_warnings" : [
+               "Measure couldn't find the construction named 'BTAP-Ext-Wall-Mass:U-0.278' in the exterior surface hash."
+            ]
+         }
+      },
+      {
+         "arguments" : {
+            "r_value" : 45
+         },
+         "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+         "measure_dir_name" : "IncreaseInsulationRValueForRoofs",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in all roofs in the model to a specified value.  Find constructions used for roofs, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. This could be a Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance will be directly entered.  If the construction doesn't appear to have an insulation layer, it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions used on attic floors will not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Roofs to a Specific Value",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "IncreaseInsulationRValueForRoofs",
+            "measure_display_name" : "Increase R-value of Insulation for Roofs to a Specific Value",
+            "measure_name" : "increase_insulation_r_value_for_roofs",
+            "measure_taxonomy" : "Envelope.Opaque",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "65b798f4-207f-4aed-987a-386c865d0ccd",
+            "measure_version_id" : "04e05f77-d1cb-4f66-be8c-ddaef5017522",
+            "measure_version_modified" : "20190812T184826Z",
+            "measure_xml_checksum" : "0F858D9E",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_final_condition" : "The existing insulation for roofs was changed to R-45.0. This was accomplished for an initial cost of 0.0 ($/sf) and an increase of 0.0 ($/sf) for construction. This was applied to 22,500 (ft^2) across 1 roof constructions: BTAP-Ext-Roof-Metal:U-0.156-:{ \"cond\"=>0.057} adj roof insulation (R-45.0).",
+            "step_info" : [
+               "For construction'BTAP-Ext-Roof-Metal:U-0.156-:{ \"cond\"=>0.057} adj roof insulation', material'Typical Insulation 6 R-99.97_R-value 45.0 (ft^2*h*R/Btu)' was altered."
+            ],
+            "step_initial_condition" : "The building had 1 roof constructions: BTAP-Ext-Roof-Metal:U-0.156-:{ \"cond\"=>0.057} (R-100.0).",
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "r_value",
+                  "value" : 45
+               },
+               {
+                  "name" : "allow_reduction",
+                  "value" : true
+               },
+               {
+                  "name" : "material_cost_increase_ip",
+                  "value" : 0
+               },
+               {
+                  "name" : "one_time_retrofit_cost_ip",
+                  "value" : 0
+               },
+               {
+                  "name" : "years_until_retrofit_cost",
+                  "value" : 0
+               }
+            ],
+            "step_warnings" : [
+               "Measure couldn't find the construction named 'BTAP-Ext-Roof-Metal:U-0.156' in the exterior surface hash."
+            ]
+         }
+      },
+      {
+         "arguments" : {
+            "infiltration_si" : 0.00080000000000000004
+         },
+         "description" : "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+         "measure_dir_name" : "BTAPSetInfiltration",
+         "modeler_description" : "Remove all infiltration objects used in the model and add in a new object to each space type, and then to spaces without space types. Schedules come from the schedule sets. Warn user if there is no schedule set associated with a space type.\r\r\r\r\r\r\n\r\r\r\r\r\r\nA one time material & installation cost can be added to the building object to reflect improvements made throughout the envelope. \"Years Until Costs Start? is typically \"0?, but you can use a larger number if you want to delay the improvements.  O&M cost and frequency can be whatever is appropriate for the component. This measure hard sizes the costs based on current infiltration levels.  As a result any change to the models made by measures run after this that have an impact on infiltration will not affect the cost. An example of a problematic measure would be deleting a space from the model or making each floor taller; in both cases adjusting the total exterior envelope area.\r\r\r\r\r\r\n  ",
+         "name" : "BTAPSetInfiltration",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "BTAPSetInfiltration",
+            "measure_display_name" : "BTAPSetInfiltration",
+            "measure_name" : "btap_set_infiltration",
+            "measure_taxonomy" : "Envelope.Infiltration",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "9d7b0789-3974-4869-a2a8-055391857e3c",
+            "measure_version_id" : "69a5a5c0-332f-4af5-8cef-0136dfeafffc",
+            "measure_version_modified" : "20190811T164051Z",
+            "measure_xml_checksum" : "E88CCCA7",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_info" : [ "BTAPSetInfiltration is not skipped" ],
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "infiltration_si",
+                  "value" : 0.00080000000000000004
+               }
+            ],
+            "step_warnings" : []
+         }
+      },
+      {
+         "arguments" : {
+            "wwr" : 0.26000000000000001
+         },
+         "description" : "This measure aims to resize all of the existing windows in order to produce a specified, user-input, window to wall ratio.\nThe windows will be resized around their centroid.\nIt should be noted that this measure should work in all cases when DOWNSIZING the windows (which is often the need given the 40% WWR imposed as baseline by ASHRAE Appendix G).\nIf you aim to increase the area, please note that this could result in subsurfaces being larger than their parent surface",
+         "measure_dir_name" : "ResizeExistingWindowsToMatchAGivenWWR",
+         "modeler_description" : "The measure works in several steps:\n\n1. Find the current Window to Wall Ratio (WWR).\nThis will compute the WWR by taking into account all of the surfaces that have all of the following characteristics:\n- They are walls\n- They have the outside boundary condition as 'Outdoors' (aims to not take into account the adiabatic surfaces)\n- They are SunExposed (could be removed...)\n\n2. Resize all of the existing windows by re-setting the vertices: scaled centered on centroid.\n\n",
+         "name" : "Resize existing windows to match a given WWR",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "ResizeExistingWindowsToMatchAGivenWWR",
+            "measure_display_name" : "Resize existing windows to match a given WWR",
+            "measure_name" : "resize_existing_windows_to_match_a_given_wwr",
+            "measure_taxonomy" : "Envelope.Fenestration",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "b1c8aae7-db36-4461-88f8-d6ac57ec11d5",
+            "measure_version_id" : "44fbbb22-30e2-42e5-9fb2-63b1c77be26d",
+            "measure_version_modified" : "20190812T153355Z",
+            "measure_xml_checksum" : "A8B8B5E3",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_final_condition" : "Checking final WWR 26.00%. 22 surfaces were resized",
+            "step_info" : [ "Click on 'Advanced' for a CSV of each surface WWR before and after" ],
+            "step_initial_condition" : "The initial WWR was 15.00%.",
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "wwr",
+                  "value" : 0.26000000000000001
+               },
+               {
+                  "name" : "check_wall",
+                  "value" : true
+               },
+               {
+                  "name" : "check_outdoors",
+                  "value" : true
+               },
+               {
+                  "name" : "check_sunexposed",
+                  "value" : true
+               }
+            ],
+            "step_warnings" : []
+         }
+      },
+      {
+         "arguments" : {},
+         "description" : "",
+         "measure_dir_name" : "add_erv_power",
+         "modeler_description" : "This template measure is used to ensure consistency in BTAP measures.",
+         "name" : "AddERVPower",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "AddERVPower",
+            "measure_display_name" : "AddERVPower",
+            "measure_name" : "add_erv_power",
+            "measure_taxonomy" : "Envelope.Opaque",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "224561f4-8ccc-4f60-8118-34b85359d6f7",
+            "measure_version_id" : "b4c7ffa2-06ad-49aa-9ad1-7704ab46316b",
+            "measure_version_modified" : "20190813T202454Z",
+            "measure_xml_checksum" : "2609226D",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_info" : [
+               "true",
+               "1364.2777649875998",
+               "true",
+               "196.03086277640008",
+               "true",
+               "342.0617255528"
+            ],
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "a_string_argument",
+                  "value" : "The Default Value"
+               }
+            ],
+            "step_warnings" : []
+         }
+      },
+      {
+         "arguments" : {
+            "latent_eff_at_100_cooling" : 0.84999999999999998,
+            "latent_eff_at_100_heating" : 0.84999999999999998,
+            "latent_eff_at_75_cooling" : 0.84999999999999998,
+            "latent_eff_at_75_heating" : 0.84999999999999998,
+            "sensible_eff_at_100_cooling" : 0.84999999999999998,
+            "sensible_eff_at_100_heating" : 0.84999999999999998,
+            "sensible_eff_at_75_cooling" : 0.84999999999999998,
+            "sensible_eff_at_75_heating" : 0.84999999999999998
+         },
+         "description" : "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+         "measure_dir_name" : "BTAPChangeEnergyRecoveryEfficiency",
+         "modeler_description" : "The measure loops through all air loops in the baseline model and identify the air loops that contain OS:AirLoopHVAC:OutdoorAirSystem objects. Users can choose one or all air loops from the drop down list to apply this measure. If an OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure modifies the effectiveness, heat exchanger type, and electric power setting in the model based on user inputs. If no OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure will attach a OS:HeatExchanger:AirToAir:SensibleAndLatent object to the air loop. The economizer lockout is always set to be Yes. The initial and final values of effectiveness, the heat exchanger type, and nominal electric power are reported during simulation",
+         "name" : "BTAPChangeEnergyRecoveryEfficiency",
+         "result" : {
+            "completed_at" : "20190813T204154Z",
+            "measure_class_name" : "BTAPChangeEnergyRecoveryEfficiency",
+            "measure_display_name" : "BTAPChangeEnergyRecoveryEfficiency",
+            "measure_name" : "btap_change_energy_recovery_efficiency",
+            "measure_taxonomy" : "HVAC.Energy Recovery",
+            "measure_type" : "ModelMeasure",
+            "measure_uid" : "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+            "measure_version_id" : "dc2b4ab7-dea4-47e3-9e33-5e8ed644e2b5",
+            "measure_version_modified" : "20190813T181430Z",
+            "measure_xml_checksum" : "BF75C791",
+            "started_at" : "20190813T204154Z",
+            "stderr" : "",
+            "stdout" : "",
+            "step_errors" : [],
+            "step_files" : [],
+            "step_info" : [
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped",
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped",
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped",
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped",
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped",
+               "*** Identified the ERV",
+               "sensible_eff_at_100_cooling is not skipped",
+               "sensible_eff_at_75_cooling is not skipped",
+               "latent_eff_at_100_cooling is not skipped",
+               "latent_eff_at_75_cooling is not skipped",
+               "sensible_eff_at_100_heating is not skipped",
+               "sensible_eff_at_75_heating is not skipped",
+               "latent_eff_at_100_heating is not skipped",
+               "latent_eff_at_75_heating is not skipped"
+            ],
+            "step_result" : "Success",
+            "step_values" : [
+               {
+                  "name" : "sensible_eff_at_100_heating",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "latent_eff_at_100_heating",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "sensible_eff_at_75_heating",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "latent_eff_at_75_heating",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "sensible_eff_at_100_cooling",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "latent_eff_at_100_cooling",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "sensible_eff_at_75_cooling",
+                  "value" : 0.84999999999999998
+               },
+               {
+                  "name" : "latent_eff_at_75_cooling",
+                  "value" : 0.84999999999999998
+               }
+            ],
+            "step_warnings" : []
+         }
+      }
+   ],
+   "updated_at" : "20190813T204248Z",
+   "weather_file" : "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw"
+}

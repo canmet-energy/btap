@@ -1,0 +1,3 @@
+[18:13:15.631604 WARN] The requested wall insulation R-value of 50.0 ft^2*h*R/Btu is abnormally high.
+[18:13:15.709604 WARN] Measure couldn't find the construction named 'BTAP-Ext-Wall-Mass:U-0.183' in the exterior surface hash.
+[18:13:16.208804 WARN] Measure couldn't find the construction named 'BTAP-Ext-Roof-Metal:U-0.12099999999999998' in the exterior surface hash.

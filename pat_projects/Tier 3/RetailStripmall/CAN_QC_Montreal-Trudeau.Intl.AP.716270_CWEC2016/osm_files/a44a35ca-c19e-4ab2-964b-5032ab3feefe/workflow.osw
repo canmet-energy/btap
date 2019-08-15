@@ -1,0 +1,67 @@
+{
+   "created_at" : "20190813T183255Z",
+   "seed_file" : "../a44a35ca-c19e-4ab2-964b-5032ab3feefe.osm",
+   "steps" : [
+      {
+         "arguments" : {},
+         "description" : "",
+         "measure_dir_name" : "add_erv_power",
+         "modeler_description" : "This template measure is used to ensure consistency in BTAP measures.",
+         "name" : "AddERVPower"
+      },
+      {
+         "arguments" : {
+            "r_value" : 35
+         },
+         "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. Costs for a construction can be adjusted",
+         "measure_dir_name" : "IncreaseInsulationRValueForExteriorWalls",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in air exposed exterior walls to a specified value. Find constructions used for exterior walls, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. Layer to change could be Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance can be directly entered. If the construction doesn't appear to have an insulation layer it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions for surfaces with a \"Ground\" boundary condition will also not be altered. Constructions with an insulation layer that already exceeds the requested R-Value will also not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Exterior Walls to a Specific Value"
+      },
+      {
+         "arguments" : {
+            "r_value" : 40
+         },
+         "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+         "measure_dir_name" : "IncreaseInsulationRValueForRoofs",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in all roofs in the model to a specified value.  Find constructions used for roofs, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. This could be a Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance will be directly entered.  If the construction doesn't appear to have an insulation layer, it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions used on attic floors will not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Roofs to a Specific Value"
+      },
+      {
+         "arguments" : {
+            "wwr" : 0.20000000000000001
+         },
+         "description" : "This measure aims to resize all of the existing windows in order to produce a specified, user-input, window to wall ratio.\nThe windows will be resized around their centroid.\nIt should be noted that this measure should work in all cases when DOWNSIZING the windows (which is often the need given the 40% WWR imposed as baseline by ASHRAE Appendix G).\nIf you aim to increase the area, please note that this could result in subsurfaces being larger than their parent surface",
+         "measure_dir_name" : "ResizeExistingWindowsToMatchAGivenWWR",
+         "modeler_description" : "The measure works in several steps:\n\n1. Find the current Window to Wall Ratio (WWR).\nThis will compute the WWR by taking into account all of the surfaces that have all of the following characteristics:\n- They are walls\n- They have the outside boundary condition as 'Outdoors' (aims to not take into account the adiabatic surfaces)\n- They are SunExposed (could be removed...)\n\n2. Resize all of the existing windows by re-setting the vertices: scaled centered on centroid.\n\n",
+         "name" : "Resize existing windows to match a given WWR"
+      },
+      {
+         "arguments" : {
+            "infiltration_si" : 0.00080000000000000004
+         },
+         "description" : "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+         "measure_dir_name" : "BTAPSetInfiltration",
+         "modeler_description" : "Remove all infiltration objects used in the model and add in a new object to each space type, and then to spaces without space types. Schedules come from the schedule sets. Warn user if there is no schedule set associated with a space type.\r\r\r\r\r\r\n\r\r\r\r\r\r\nA one time material & installation cost can be added to the building object to reflect improvements made throughout the envelope. \"Years Until Costs Start? is typically \"0?, but you can use a larger number if you want to delay the improvements.  O&M cost and frequency can be whatever is appropriate for the component. This measure hard sizes the costs based on current infiltration levels.  As a result any change to the models made by measures run after this that have an impact on infiltration will not affect the cost. An example of a problematic measure would be deleting a space from the model or making each floor taller; in both cases adjusting the total exterior envelope area.\r\r\r\r\r\r\n  ",
+         "name" : "BTAPSetInfiltration"
+      },
+      {
+         "arguments" : {
+            "latent_eff_at_100_cooling" : 0.80000000000000004,
+            "latent_eff_at_100_heating" : 0.80000000000000004,
+            "latent_eff_at_75_cooling" : 0.80000000000000004,
+            "latent_eff_at_75_heating" : 0.80000000000000004,
+            "sensible_eff_at_100_cooling" : 0.80000000000000004,
+            "sensible_eff_at_100_heating" : 0.80000000000000004,
+            "sensible_eff_at_75_cooling" : 0.80000000000000004,
+            "sensible_eff_at_75_heating" : 0.80000000000000004
+         },
+         "description" : "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+         "measure_dir_name" : "BTAPChangeEnergyRecoveryEfficiency 1 1",
+         "modeler_description" : "The measure loops through all air loops in the baseline model and identify the air loops that contain OS:AirLoopHVAC:OutdoorAirSystem objects. Users can choose one or all air loops from the drop down list to apply this measure. If an OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure modifies the effectiveness, heat exchanger type, and electric power setting in the model based on user inputs. If no OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure will attach a OS:HeatExchanger:AirToAir:SensibleAndLatent object to the air loop. The economizer lockout is always set to be Yes. The initial and final values of effectiveness, the heat exchanger type, and nominal electric power are reported during simulation",
+         "name" : "BTAPChangeEnergyRecoveryEfficiency"
+      }
+   ],
+   "updated_at" : "20190813T204845Z",
+   "weather_file" : "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw"
+}

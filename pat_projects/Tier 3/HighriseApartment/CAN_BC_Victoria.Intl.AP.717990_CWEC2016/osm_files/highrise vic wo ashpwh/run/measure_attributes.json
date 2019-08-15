@@ -1,0 +1,33 @@
+{
+  "BTAPSetInfiltration": {
+    "infiltration_si": 0.0002,
+    "applicable": true
+  },
+  "Increase R-value of Insulation for Exterior Walls to a Specific Value": {
+    "r_value": 50.0,
+    "allow_reduction": true,
+    "material_cost_increase_ip": 0.0,
+    "one_time_retrofit_cost_ip": 0.0,
+    "years_until_retrofit_cost": 0,
+    "applicable": true
+  },
+  "Increase R-value of Insulation for Roofs to a Specific Value": {
+    "r_value": 40.0,
+    "allow_reduction": true,
+    "material_cost_increase_ip": 0.0,
+    "one_time_retrofit_cost_ip": 0.0,
+    "years_until_retrofit_cost": 0,
+    "applicable": true
+  },
+  "BTAPAlterSHGC": {
+    "new_shgc": 0.2,
+    "applicable": true
+  },
+  "Resize existing windows to match a given WWR": {
+    "wwr": 0.1,
+    "check_wall": true,
+    "check_outdoors": true,
+    "check_sunexposed": true,
+    "applicable": true
+  }
+}
