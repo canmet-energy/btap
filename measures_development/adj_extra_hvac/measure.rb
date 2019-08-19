@@ -31,9 +31,9 @@ class Adj_extra_hvac < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    measure_to_adj_for = OpenStudio::Measure::OSArgument::makeStringArgument('measure_to_adj_for', false)
+    measure_to_adj_for = OpenStudio::Ruleset::OSArgument::makeIntegerArgument('measure_to_adj_for', false)
     measure_to_adj_for.setDisplayName('measure_to_adj_for?')
-    measure_to_adj_for.setDefaultValue("AddDOASSysAndVAV")
+    measure_to_adj_for.setDefaultValue(1)
 
     args << measure_to_adj_for
 
@@ -50,10 +50,10 @@ class Adj_extra_hvac < OpenStudio::Measure::ModelMeasure
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
-    measure_to_adj_for = runner.getStringArgumentValue('measure_to_adj_for',user_arguments)
+    measure_to_adj_for = runner.getIntegerArgumentValue('measure_to_adj_for',user_arguments)
  
 
-    if measure_to_adj_for == "AddDOASSysAndVAV"
+    if measure_to_adj_for == 1
           #Get the zones that are connected to an air loop with an outdoor air system
           airloops = model.getAirLoopHVACs
           airloops.each do |airloop|
@@ -71,7 +71,7 @@ class Adj_extra_hvac < OpenStudio::Measure::ModelMeasure
             end
           end #airloops.each do |airloop|
 
-    elsif measure_to_adj_for == "999"
+    elsif measure_to_adj_for == 0
       puts "Adj_extra_hvac is skipped"
 
     else #adj for doas_vrf measure
@@ -105,7 +105,7 @@ class Adj_extra_hvac < OpenStudio::Measure::ModelMeasure
   
 
 
-    end #if measure_to_adj_for == "AddDOASSysAndVAV"
+    end #if measure_to_adj_for == 1
 
     return true
   end

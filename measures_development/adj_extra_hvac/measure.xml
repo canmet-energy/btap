@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>adj_extra_hvac</name>
   <uid>29cae41a-26e6-431b-bc79-04ae35b82302</uid>
-  <version_id>b4c1e4fa-3c6d-4d7b-89b7-3700e952a9d2</version_id>
-  <version_modified>20190819T165242Z</version_modified>
+  <version_id>d5fb845c-1196-4dc0-b561-4aa4936cf33e</version_id>
+  <version_modified>20190819T175207Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>Adj_extra_hvac</class_name>
   <display_name>Adj_extra_hvac</display_name>
@@ -13,10 +13,10 @@
     <argument>
       <name>measure_to_adj_for</name>
       <display_name>measure_to_adj_for?</display_name>
-      <type>String</type>
+      <type>Integer</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>AddDOASSysAndVAV</default_value>
+      <default_value>1</default_value>
     </argument>
   </arguments>
   <outputs/>
@@ -54,6 +54,12 @@
       <checksum>5E7EBF34</checksum>
     </file>
     <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4F284774</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.3.0</identifier>
@@ -62,13 +68,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>03DD4A0D</checksum>
-    </file>
-    <file>
-      <filename>BTAPMeasureHelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4F284774</checksum>
+      <checksum>C737F82A</checksum>
     </file>
   </files>
 </measure>
