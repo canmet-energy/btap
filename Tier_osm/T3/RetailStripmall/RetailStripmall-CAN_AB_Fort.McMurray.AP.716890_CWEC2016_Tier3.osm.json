@@ -81,7 +81,7 @@
   "energyplus_version": "9.1.0",
   "building": {
     "name": "RetailStripmall-CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw created: 2019-08-08 02:59:16 +0000",
-    "conditioned_floor_area_m2": 2090.3184,
+    "conditioned_floor_area_m2": 2090.3183999999997,
     "exterior_area_m2": 3274.466399999999,
     "volume": 10827.849311999998,
     "number_of_stories": 1,
@@ -106,11 +106,11 @@
   },
   "economics": {
     "total_neb_cost": 3949.6728,
-    "total_neb_cost_per_m2": 1.8895077419784467,
+    "total_neb_cost_per_m2": 1.8895077419784472,
     "Electricity_neb_cost": 3106.5627999999997,
-    "Electricity_neb_cost_per_m2": 1.4861672748036852,
+    "Electricity_neb_cost_per_m2": 1.4861672748036856,
     "Natural Gas_neb_cost": 843.1100000000001,
-    "Natural Gas_neb_cost_per_m2": 0.4033404671747616,
+    "Natural Gas_neb_cost_per_m2": 0.40334046717476163,
     "Oil_neb_cost": 0.0,
     "Oil_neb_cost_per_m2": 0.0,
     "electricity_cost": 0.0,
@@ -142,23 +142,23 @@
     "total_end_uses_water_m3": 129.09
   },
   "end_uses_eui": {
-    "heating_gj_per_m2": 0.12877464026532992,
-    "cooling_gj_per_m2": 0.012452648362086847,
-    "interior_lighting_gj_per_m2": 0.024508228028801735,
+    "heating_gj_per_m2": 0.12877464026532995,
+    "cooling_gj_per_m2": 0.01245264836208685,
+    "interior_lighting_gj_per_m2": 0.02450822802880174,
     "exterior_lighting_gj_per_m2": 0,
-    "interior_equipment_gj_per_m2": 0.018083369500072333,
+    "interior_equipment_gj_per_m2": 0.018083369500072336,
     "exterior_equipment_gj_per_m2": 0,
-    "fans_gj_per_m2": 0.016557286200992154,
-    "pumps_gj_per_m2": 0.0010668231213005635,
+    "fans_gj_per_m2": 0.016557286200992158,
+    "pumps_gj_per_m2": 0.0010668231213005637,
     "heat_rejection_gj_per_m2": 0,
     "humidification_gj_per_m2": 0,
     "heat_recovery_gj_per_m2": 0,
-    "water_systems_gj_per_m2": 0.011184898913007701,
-    "water_systems_water_m3_per_m2": 0.061756142030802576,
+    "water_systems_gj_per_m2": 0.011184898913007703,
+    "water_systems_water_m3_per_m2": 0.06175614203080259,
     "refrigeration_gj_per_m2": 0,
     "generators_gj_per_m2": 0,
-    "total_end_uses_gj_per_m2": 0.21262789439159124,
-    "total_end_uses_water_m3_per_m2": 0.061756142030802576
+    "total_end_uses_gj_per_m2": 0.2126278943915913,
+    "total_end_uses_water_m3_per_m2": 0.06175614203080259
   },
   "meter_peaks": {
     "electric_w": 25016.66,
@@ -1218,10 +1218,10 @@
   "code_metrics": {
     "heating_gj": 269.18,
     "cooling_gj": 26.03,
-    "ep_conditioned_floor_area_m2": 2090.3184,
+    "ep_conditioned_floor_area_m2": 2090.3183999999997,
     "os_conditioned_floor_area_m2": 2090.3183999999997,
-    "building_tedi_gj_per_m2": 0.14122728862741676,
-    "building_medi_gj_per_m2": 0.017624109322292716
+    "building_tedi_gj_per_m2": 0.1412272886274168,
+    "building_medi_gj_per_m2": 0.01762410932229272
   },
   "costing_information": {
     "rs_means_city": "FORT MCMURRAY",

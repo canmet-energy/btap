@@ -702,7 +702,7 @@
   "thermal_zones": [
     {
       "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
-      "floor_area": 1567.7387999999999,
+      "floor_area": 1567.7387999999996,
       "multiplier": 1,
       "is_conditioned": "Yes",
       "is_ideal_air_loads": false,
@@ -832,10 +832,10 @@
       "thermal_zones": [
         "ALL_ST=Sales area_FL=Building Story 1_SCH=C"
       ],
-      "total_floor_area_served": 1567.7387999999999,
+      "total_floor_area_served": 1567.7387999999996,
       "total_breathing_zone_outdoor_airflow_vbz": 1.8317,
       "area_outdoor_air_rate_m3_per_s_m2": 0.001168,
-      "outdoor_air_L_per_s": 1831.1189183999998,
+      "outdoor_air_L_per_s": 1831.1189183999995,
       "supply_fan": {
         "type": "VV",
         "name": "Fan Variable Volume 3",
