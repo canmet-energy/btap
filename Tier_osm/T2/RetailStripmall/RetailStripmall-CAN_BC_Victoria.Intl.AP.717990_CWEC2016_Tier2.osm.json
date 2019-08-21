@@ -1,0 +1,1714 @@
+{
+  "sql_data": [
+    {
+      "report_name": "AnnualBuildingUtilityPerformanceSummary",
+      "report_for_string": "Entire Facility",
+      "table_name": "End Uses",
+      "table": [
+        {
+          "name": "Heating",
+          "electricity_GJ": 225.23
+        },
+        {
+          "name": "Cooling",
+          "electricity_GJ": 96.87
+        },
+        {
+          "name": "Interior Lighting",
+          "electricity_GJ": 341.56
+        },
+        {
+          "name": "Interior Equipment",
+          "electricity_GJ": 52.92
+        },
+        {
+          "name": "Fans",
+          "electricity_GJ": 56.36
+        },
+        {
+          "name": "Heat Recovery",
+          "electricity_GJ": 29.27
+        },
+        {
+          "name": "Water Systems",
+          "electricity_GJ": 26.33,
+          "water_m3": 129.09
+        },
+        {
+          "name": "Total End Uses",
+          "electricity_GJ": 828.54,
+          "water_m3": 129.09
+        }
+      ]
+    },
+    {
+      "report_name": "AnnualBuildingUtilityPerformanceSummary",
+      "report_for_string": "Entire Facility",
+      "table_name": "Site and Source Energy",
+      "table": [
+        {
+          "name": "Total Site Energy",
+          "total_energy_GJ": 828.54,
+          "energy_per_total_building_area_MJ/m2": 396.37,
+          "energy_per_conditioned_building_area_MJ/m2": 396.37
+        },
+        {
+          "name": "Net Site Energy",
+          "total_energy_GJ": 828.54,
+          "energy_per_total_building_area_MJ/m2": 396.37,
+          "energy_per_conditioned_building_area_MJ/m2": 396.37
+        },
+        {
+          "name": "Total Source Energy",
+          "total_energy_GJ": 2623.97,
+          "energy_per_total_building_area_MJ/m2": 1255.3,
+          "energy_per_conditioned_building_area_MJ/m2": 1255.3
+        },
+        {
+          "name": "Net Source Energy",
+          "total_energy_GJ": 2623.97,
+          "energy_per_total_building_area_MJ/m2": 1255.3,
+          "energy_per_conditioned_building_area_MJ/m2": 1255.3
+        }
+      ]
+    }
+  ],
+  "os_standards_revision": "2a54ffa",
+  "os_standards_version": "0.2.9",
+  "openstudio_version": "2.8.1.6914d4f590",
+  "energyplus_version": "9.1.0",
+  "building": {
+    "name": "RetailStripmall-CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw created: 2019-07-24 20:30:57 +0000",
+    "conditioned_floor_area_m2": 2090.3183999999997,
+    "exterior_area_m2": 3274.466399999999,
+    "volume": 10827.849311999998,
+    "number_of_stories": 1,
+    "standards_number_of_stories": 1,
+    "standards_number_of_above_ground_stories": 1,
+    "standards_number_of_living_units": null,
+    "nominal_floor_to_ceiling_height": null,
+    "nominal_floor_to_floor_height": null
+  },
+  "geography": {
+    "hdd": 2850.0,
+    "cdd": 27.0,
+    "climate_zone": "4",
+    "city": "Victoria Intl AP",
+    "state_province_region": "BC",
+    "country": "CAN",
+    "latitude": 48.647,
+    "longitude": -123.426
+  },
+  "spacetype_area_breakdown": {
+    "space_function_sales_area": 2090.3183999999997
+  },
+  "economics": {
+    "total_neb_cost": 18244.4508,
+    "total_neb_cost_per_m2": 8.728072622811913,
+    "Electricity_neb_cost": 18244.4508,
+    "Electricity_neb_cost_per_m2": 8.728072622811913,
+    "Natural Gas_neb_cost": 0.0,
+    "Natural Gas_neb_cost_per_m2": 0.0,
+    "Oil_neb_cost": 0.0,
+    "Oil_neb_cost_per_m2": 0.0,
+    "electricity_cost": 0.0,
+    "electricity_cost_per_m2": 0.0,
+    "natural_gas_cost": 0.0,
+    "natural_gas_cost_per_m2": 0.0,
+    "additional_cost": 0.0,
+    "additional_cost_per_m2": 0.0,
+    "total_cost": 0.0,
+    "total_cost_per_m2": 0.0
+  },
+  "end_uses": {
+    "heating_gj": 225.23,
+    "cooling_gj": 96.87,
+    "interior_lighting_gj": 341.56,
+    "exterior_lighting_gj": 0,
+    "interior_equipment_gj": 52.92,
+    "exterior_equipment_gj": 0,
+    "fans_gj": 56.36,
+    "pumps_gj": 0,
+    "heat_rejection_gj": 0,
+    "humidification_gj": 0,
+    "heat_recovery_gj": 29.27,
+    "water_systems_gj": 26.33,
+    "water_systems_water_m3": 129.09,
+    "refrigeration_gj": 0,
+    "generators_gj": 0,
+    "total_end_uses_gj": 828.54,
+    "total_end_uses_water_m3": 129.09
+  },
+  "end_uses_eui": {
+    "heating_gj_per_m2": 0.10774913525135693,
+    "cooling_gj_per_m2": 0.04634222231407427,
+    "interior_lighting_gj_per_m2": 0.16340094408583883,
+    "exterior_lighting_gj_per_m2": 0,
+    "interior_equipment_gj_per_m2": 0.025316717300101273,
+    "exterior_equipment_gj_per_m2": 0,
+    "fans_gj_per_m2": 0.026962399603811558,
+    "pumps_gj_per_m2": 0,
+    "heat_rejection_gj_per_m2": 0,
+    "humidification_gj_per_m2": 0,
+    "heat_recovery_gj_per_m2": 0.01400265146209305,
+    "water_systems_gj_per_m2": 0.012596167167642978,
+    "water_systems_water_m3_per_m2": 0.06175614203080259,
+    "refrigeration_gj_per_m2": 0,
+    "generators_gj_per_m2": 0,
+    "total_end_uses_gj_per_m2": 0.39637023718491887,
+    "total_end_uses_water_m3_per_m2": 0.06175614203080259
+  },
+  "meter_peaks": {
+    "electric_w": 107867.54,
+    "natural_gas_w": "NA"
+  },
+  "unmet_hours": {
+    "cooling": 12.5,
+    "heating": 8.17
+  },
+  "service_water_heating": {
+    "total_nominal_occupancy": 435.62854284761596,
+    "electricity_per_year": 26.33,
+    "electricity_per_day": 0.07203830369357045,
+    "electricity_per_day_per_occupant": 0.00016536635368901814,
+    "natural_gas_per_year": 0.0,
+    "additional_fuel_per_year": 0.0,
+    "water_m3_per_year": 129.09,
+    "water_m3_per_day": 0.353187414500684,
+    "water_m3_per_day_per_occupant": 0.0008107536117628315
+  },
+  "envelope": {
+    "outdoor_walls_area_m2": 828.9035999999987,
+    "outdoor_roofs_area_m2": 2090.3183999999997,
+    "outdoor_floors_area_m2": 0,
+    "ground_walls_area_m2": 0,
+    "ground_roofs_area_m2": 0,
+    "ground_floors_area_m2": 2090.3183999999997,
+    "interior_floors_area_m2": 0,
+    "windows_area_m2": 355.24440000000106,
+    "skylights_area_m2": 0,
+    "doors_area_m2": 0,
+    "overhead_doors_area_m2": 0,
+    "total_exterior_area_m2": 5364.784799999999,
+    "total_ground_area_m2": 2090.3183999999997,
+    "total_outdoor_area_m2": 3274.4663999999993,
+    "outdoor_walls_average_conductance_w_per_m2_k": 0.2906,
+    "outdoor_roofs_average_conductance_w_per_m2_k": 0.1893,
+    "ground_floors_average_conductance_w_per_m2_k": 0.757,
+    "windows_average_conductance_w_per_m2_k": 2.1,
+    "building_outdoor_average_conductance_w_per_m2_k": 0.4222336498184871,
+    "building_ground_average_conductance_w_per_m2_k": 0.757,
+    "building_average_conductance_w_per_m2_k": 0.5526709902846433,
+    "fdwr": 30.0,
+    "srr": 0.0,
+    "constructions": {
+      "exterior_fenestration": [
+        {
+          "name": "BTAP-Ext-DaylightDiffuser:U=0.210 SHGC=0.600",
+          "net_area_m2": 355.24,
+          "thermal_conductance_m2_w_per_k": 2.1,
+          "solar_transmittance": 0.6,
+          "visible_tranmittance": 0.21
+        }
+      ],
+      "exterior_opaque": [
+        {
+          "name": "BTAP-Ext-Roof-Metal:U-0.193-:{ \"cond\"=>0.164} adj roof insulation",
+          "net_area_m2": 2090.32,
+          "thermal_conductance_m2_w_per_k": 0.189,
+          "solar_absorptance": 0.7
+        },
+        {
+          "name": "BTAP-Ext-Wall-Mass:U-0.315-:{ \"cond\"=>0.29} adj ext wall insulation",
+          "net_area_m2": 828.9,
+          "thermal_conductance_m2_w_per_k": 0.291,
+          "solar_absorptance": 0.92
+        }
+      ],
+      "ground": [
+        {
+          "name": "BTAP-Grnd-Floor-Mass:U-0.757",
+          "net_area_m2": 2090.32,
+          "thermal_conductance_m2_w_per_k": 0.757,
+          "solar_absorptance": 0.7
+        }
+      ]
+    },
+    "average_thermal_conductance_m2_w_per_k": [
+      {
+        "name": "LGstore1",
+        "multiplier": 1,
+        "volume": 1804.6415519999998,
+        "exterior_wall_area": 276.3012,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+        "breathing_zone_outdoor_airflow_vbz": 0.4071,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 2.4671500164769e-06,
+            "peak_flow_rate_per_area": 7.081648469851005e-09,
+            "shw_watts_per_person": -1.3174415547372016
+          }
+        ]
+      },
+      {
+        "name": "LGstore2",
+        "multiplier": 1,
+        "volume": 1804.641552,
+        "exterior_wall_area": 157.8864,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 2.4671500164769e-06,
+            "peak_flow_rate_per_area": 7.081648469851004e-09,
+            "shw_watts_per_person": -1.3174415547372014
+          }
+        ]
+      },
+      {
+        "name": "SMstore1",
+        "multiplier": 1,
+        "volume": 902.3207759999999,
+        "exterior_wall_area": 78.94319999999999,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851005e-09,
+            "shw_watts_per_person": -1.3174415547372016
+          }
+        ]
+      },
+      {
+        "name": "SMstore2",
+        "multiplier": 1,
+        "volume": 902.320776,
+        "exterior_wall_area": 78.9432,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851004e-09,
+            "shw_watts_per_person": -1.3174415547372014
+          }
+        ]
+      },
+      {
+        "name": "SMstore3",
+        "multiplier": 1,
+        "volume": 902.320776,
+        "exterior_wall_area": 78.9432,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851004e-09,
+            "shw_watts_per_person": -1.3174415547372014
+          }
+        ]
+      },
+      {
+        "name": "SMstore4",
+        "multiplier": 1,
+        "volume": 902.3207759999996,
+        "exterior_wall_area": 78.94319999999998,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851008e-09,
+            "shw_watts_per_person": -1.317441554737202
+          }
+        ]
+      },
+      {
+        "name": "SMstore5",
+        "multiplier": 1,
+        "volume": 902.3207759999996,
+        "exterior_wall_area": 78.94319999999998,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851008e-09,
+            "shw_watts_per_person": -1.317441554737202
+          }
+        ]
+      },
+      {
+        "name": "SMstore6",
+        "multiplier": 1,
+        "volume": 902.3207760000005,
+        "exterior_wall_area": 78.94320000000005,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851e-09,
+            "shw_watts_per_person": -1.3174415547372007
+          }
+        ]
+      },
+      {
+        "name": "SMstore7",
+        "multiplier": 1,
+        "volume": 902.3207759999988,
+        "exterior_wall_area": 78.94319999999989,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+        "breathing_zone_outdoor_airflow_vbz": 1.8317,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851014e-09,
+            "shw_watts_per_person": -1.3174415547372034
+          }
+        ]
+      },
+      {
+        "name": "SMstore8",
+        "multiplier": 1,
+        "volume": 902.3207760000005,
+        "exterior_wall_area": 197.35800000000003,
+        "space_type_name": "Space Function Sales area",
+        "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+        "breathing_zone_outdoor_airflow_vbz": 0.2035,
+        "infiltration_method": "Flow/ExteriorArea",
+        "infiltration_flow_per_m2": 0.00025,
+        "occupancy_schedule": "NECB-C-Occupancy",
+        "occ_per_m2": 0.033,
+        "lighting_w_per_m2": 11.3,
+        "electric_w_per_m2": 1.751,
+        "shw_m3_per_s": 0.0,
+        "waterUseEquipment": [
+          {
+            "peak_flow_rate": 1.23357500823845e-06,
+            "peak_flow_rate_per_area": 7.081648469851e-09,
+            "shw_watts_per_person": -1.3174415547372007
+          }
+        ]
+      }
+    ]
+  },
+  "spaces": [
+    {
+      "name": "LGstore1",
+      "multiplier": 1,
+      "volume": 1804.6415519999998,
+      "exterior_wall_area": 276.3012,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+      "breathing_zone_outdoor_airflow_vbz": 0.4071,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 2.4671500164769e-06,
+          "peak_flow_rate_per_area": 7.081648469851005e-09,
+          "shw_watts_per_person": -1.3174415547372016
+        }
+      ]
+    },
+    {
+      "name": "LGstore2",
+      "multiplier": 1,
+      "volume": 1804.641552,
+      "exterior_wall_area": 157.8864,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 2.4671500164769e-06,
+          "peak_flow_rate_per_area": 7.081648469851004e-09,
+          "shw_watts_per_person": -1.3174415547372014
+        }
+      ]
+    },
+    {
+      "name": "SMstore1",
+      "multiplier": 1,
+      "volume": 902.3207759999999,
+      "exterior_wall_area": 78.94319999999999,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851005e-09,
+          "shw_watts_per_person": -1.3174415547372016
+        }
+      ]
+    },
+    {
+      "name": "SMstore2",
+      "multiplier": 1,
+      "volume": 902.320776,
+      "exterior_wall_area": 78.9432,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851004e-09,
+          "shw_watts_per_person": -1.3174415547372014
+        }
+      ]
+    },
+    {
+      "name": "SMstore3",
+      "multiplier": 1,
+      "volume": 902.320776,
+      "exterior_wall_area": 78.9432,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851004e-09,
+          "shw_watts_per_person": -1.3174415547372014
+        }
+      ]
+    },
+    {
+      "name": "SMstore4",
+      "multiplier": 1,
+      "volume": 902.3207759999996,
+      "exterior_wall_area": 78.94319999999998,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851008e-09,
+          "shw_watts_per_person": -1.317441554737202
+        }
+      ]
+    },
+    {
+      "name": "SMstore5",
+      "multiplier": 1,
+      "volume": 902.3207759999996,
+      "exterior_wall_area": 78.94319999999998,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851008e-09,
+          "shw_watts_per_person": -1.317441554737202
+        }
+      ]
+    },
+    {
+      "name": "SMstore6",
+      "multiplier": 1,
+      "volume": 902.3207760000005,
+      "exterior_wall_area": 78.94320000000005,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851e-09,
+          "shw_watts_per_person": -1.3174415547372007
+        }
+      ]
+    },
+    {
+      "name": "SMstore7",
+      "multiplier": 1,
+      "volume": 902.3207759999988,
+      "exterior_wall_area": 78.94319999999989,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851014e-09,
+          "shw_watts_per_person": -1.3174415547372034
+        }
+      ]
+    },
+    {
+      "name": "SMstore8",
+      "multiplier": 1,
+      "volume": 902.3207760000005,
+      "exterior_wall_area": 197.35800000000003,
+      "space_type_name": "Space Function Sales area",
+      "thermal_zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+      "breathing_zone_outdoor_airflow_vbz": 0.2035,
+      "infiltration_method": "Flow/ExteriorArea",
+      "infiltration_flow_per_m2": 0.00025,
+      "occupancy_schedule": "NECB-C-Occupancy",
+      "occ_per_m2": 0.033,
+      "lighting_w_per_m2": 11.3,
+      "electric_w_per_m2": 1.751,
+      "shw_m3_per_s": 0.0,
+      "waterUseEquipment": [
+        {
+          "peak_flow_rate": 1.23357500823845e-06,
+          "peak_flow_rate_per_area": 7.081648469851e-09,
+          "shw_watts_per_person": -1.3174415547372007
+        }
+      ]
+    }
+  ],
+  "thermal_zones": [
+    {
+      "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "floor_area": 1567.7387999999999,
+      "multiplier": 1,
+      "is_conditioned": "Yes",
+      "is_ideal_air_loads": false,
+      "heating_sizing_factor": 1.3,
+      "cooling_sizing_factor": 1.1,
+      "zone_heating_design_supply_air_temperature": 43.0,
+      "zone_cooling_design_supply_air_temperature": 13.0,
+      "spaces": [
+        {
+          "name": "LGstore2",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore1",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore2",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore3",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore4",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore5",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore6",
+          "type": "Space Function Sales area"
+        },
+        {
+          "name": "SMstore7",
+          "type": "Space Function Sales area"
+        }
+      ],
+      "equipment": [
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C erv doas",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "Zone HVAC Baseboard Convective Electric 1",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C vav terminal",
+          "type": "StraightComponent"
+        }
+      ]
+    },
+    {
+      "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+      "floor_area": 174.1932000000001,
+      "multiplier": 1,
+      "is_conditioned": "Yes",
+      "is_ideal_air_loads": false,
+      "heating_sizing_factor": 1.3,
+      "cooling_sizing_factor": 1.1,
+      "zone_heating_design_supply_air_temperature": 43.0,
+      "zone_cooling_design_supply_air_temperature": 13.0,
+      "spaces": [
+        {
+          "name": "SMstore8",
+          "type": "Space Function Sales area"
+        }
+      ],
+      "equipment": [
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1 erv doas",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "Zone HVAC Baseboard Convective Electric 2",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1 vav terminal",
+          "type": "StraightComponent"
+        }
+      ]
+    },
+    {
+      "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+      "floor_area": 348.3864,
+      "multiplier": 1,
+      "is_conditioned": "Yes",
+      "is_ideal_air_loads": false,
+      "heating_sizing_factor": 1.3,
+      "cooling_sizing_factor": 1.1,
+      "zone_heating_design_supply_air_temperature": 43.0,
+      "zone_cooling_design_supply_air_temperature": 13.0,
+      "spaces": [
+        {
+          "name": "LGstore1",
+          "type": "Space Function Sales area"
+        }
+      ],
+      "equipment": [
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2 erv doas",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "Zone HVAC Baseboard Convective Electric 3",
+          "type": "ZoneHVACComponent"
+        },
+        {
+          "name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2 vav terminal",
+          "type": "StraightComponent"
+        }
+      ]
+    }
+  ],
+  "air_loops": [
+    {
+      "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+      "thermal_zones": [
+        "ALL_ST=Sales area_FL=Building Story 1_SCH=C"
+      ],
+      "total_floor_area_served": 1567.7387999999999,
+      "total_breathing_zone_outdoor_airflow_vbz": 1.8317,
+      "area_outdoor_air_rate_m3_per_s_m2": 0.001168,
+      "outdoor_air_L_per_s": 1831.1189183999998,
+      "supply_fan": {
+        "type": "VV",
+        "name": "Fan Variable Volume 3",
+        "fan_efficiency": 0.75,
+        "motor_efficiency": 0.9,
+        "pressure_rise": 640.0,
+        "max_air_flow_rate_m3_per_s": 3.52,
+        "rated_electric_power_w": 3000.92
+      },
+      "economizer": {
+        "name": "Controller Outdoor Air 1",
+        "control_type": "DifferentialEnthalpy"
+      },
+      "cooling_coils": {
+        "dx_single_speed": [
+          {
+            "name": "Coil Cooling DX Single Speed 1 366kBtu/hr 8.39EER",
+            "cop": 3.07682961037442,
+            "nominal_total_capacity_w": 58213.99
+          }
+        ],
+        "dx_two_speed": [
+
+        ],
+        "coil_cooling_water": [
+
+        ]
+      },
+      "heating_coils": {
+        "coil_heating_gas": [
+
+        ],
+        "coil_heating_electric": [
+          {
+            "name": "Coil Heating Electric 1",
+            "type": "Electric",
+            "nominal_capacity": 149077.4
+          }
+        ],
+        "coil_heating_water": [
+
+        ]
+      },
+      "heat_exchanger": {
+      }
+    },
+    {
+      "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+      "thermal_zones": [
+        "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1"
+      ],
+      "total_floor_area_served": 174.1932000000001,
+      "total_breathing_zone_outdoor_airflow_vbz": 0.2035,
+      "area_outdoor_air_rate_m3_per_s_m2": 0.001168,
+      "outdoor_air_L_per_s": 203.45765760000012,
+      "supply_fan": {
+        "type": "VV",
+        "name": "Fan Variable Volume 2",
+        "fan_efficiency": 0.75,
+        "motor_efficiency": 0.9,
+        "pressure_rise": 640.0,
+        "max_air_flow_rate_m3_per_s": 1.43,
+        "rated_electric_power_w": 1216.18
+      },
+      "economizer": {
+        "name": "Controller Outdoor Air 2",
+        "control_type": "DifferentialEnthalpy"
+      },
+      "cooling_coils": {
+        "dx_single_speed": [
+          {
+            "name": "Coil Cooling DX Single Speed 2 101kBtu/hr 9.44EER",
+            "cop": 3.26534558494571,
+            "nominal_total_capacity_w": 23592.24
+          }
+        ],
+        "dx_two_speed": [
+
+        ],
+        "coil_cooling_water": [
+
+        ]
+      },
+      "heating_coils": {
+        "coil_heating_gas": [
+
+        ],
+        "coil_heating_electric": [
+          {
+            "name": "Coil Heating Electric 2",
+            "type": "Electric",
+            "nominal_capacity": 43742.4
+          }
+        ],
+        "coil_heating_water": [
+
+        ]
+      },
+      "heat_exchanger": {
+      }
+    },
+    {
+      "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+      "thermal_zones": [
+        "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2"
+      ],
+      "total_floor_area_served": 348.3864,
+      "total_breathing_zone_outdoor_airflow_vbz": 0.4071,
+      "area_outdoor_air_rate_m3_per_s_m2": 0.001168,
+      "outdoor_air_L_per_s": 406.91531519999995,
+      "supply_fan": {
+        "type": "VV",
+        "name": "Fan Variable Volume 1",
+        "fan_efficiency": 0.75,
+        "motor_efficiency": 0.9,
+        "pressure_rise": 640.0,
+        "max_air_flow_rate_m3_per_s": 1.6,
+        "rated_electric_power_w": 1367.56
+      },
+      "economizer": {
+        "name": "Controller Outdoor Air 3",
+        "control_type": "DifferentialEnthalpy"
+      },
+      "cooling_coils": {
+        "dx_single_speed": [
+          {
+            "name": "Coil Cooling DX Single Speed 3 124kBtu/hr 9.44EER",
+            "cop": 3.2821935596689,
+            "nominal_total_capacity_w": 26528.95
+          }
+        ],
+        "dx_two_speed": [
+
+        ],
+        "coil_cooling_water": [
+
+        ]
+      },
+      "heating_coils": {
+        "coil_heating_gas": [
+
+        ],
+        "coil_heating_electric": [
+          {
+            "name": "Coil Heating Electric 3",
+            "type": "Electric",
+            "nominal_capacity": 56125.71
+          }
+        ],
+        "coil_heating_water": [
+
+        ]
+      },
+      "heat_exchanger": {
+      }
+    }
+  ],
+  "plant_loops": [
+    {
+      "name": "Main Service Water Loop",
+      "design_loop_exit_temperature": 60.0,
+      "loop_design_temperature_difference": 5.0,
+      "pumps": [
+        {
+          "name": "Service Water Loop Pump",
+          "type": "Pump:ConstantSpeed",
+          "head_pa": 194.95,
+          "water_flow_m3_per_s": 1.5e-05,
+          "electric_power_w": 0.01,
+          "motor_efficency": 0.7
+        }
+      ],
+      "boilers": [
+
+      ],
+      "chiller_electric_eir": [
+
+      ],
+      "cooling_tower_single_speed": [
+
+      ],
+      "water_heater_mixed": [
+        {
+          "name": "13gal Electricity Water Heater - 9kBtu/hr 1.0 Therm Eff",
+          "type": "WaterHeater:Mixed",
+          "heater_thermal_efficiency": 1.0,
+          "heater_fuel_type": "Electricity"
+        }
+      ]
+    }
+  ],
+  "eplusout_err": {
+    "warnings": [
+      "ProcessScheduleInput: Schedule:Day:Interval=\"ECONOMIZER MAX OA FRACTION 100 PCT DEFAULT\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 1\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 10\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 11\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 12\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 13\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 14\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 15\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 16\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 17\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 18\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 19\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 2\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 20\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 21\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 22\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 23\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 24\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 25\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 26\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 27\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 28\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 29\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 30\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 31\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 32\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 33\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 34\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 35\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 36\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 37\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 38\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 39\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 40\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 5\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 6\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 7\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 8\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Day:Interval=\"SCHEDULE DAY 9\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"ECONOMIZER MAX OA FRACTION 100 PCT\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 10\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 11\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 12\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 13\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 14\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 15\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 16\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 17\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 18\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 19\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 20\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 21\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 22\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 23\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 24\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 25\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 26\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 27\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 28\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 29\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 3\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 30\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 31\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 32\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 4\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 5\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 6\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 7\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 8\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Year=\"SCHEDULE RULESET 9\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "ProcessScheduleInput: Schedule:Constant=\"ALWAYS ON CONTINUOUS\", Blank Schedule Type Limits Name input -- will not be validated.",
+      "CheckUsedConstructions: There are 21 nominally unused constructions in input.  For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;",
+      "GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.  Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".  ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C\".  Item length=[102] > Maximum Length=[100]. You may need to shorten the names.  Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.  name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".",
+      "GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.  Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".  ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 1\".  Item length=[104] > Maximum Length=[100]. You may need to shorten the names.  Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.  name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 1 SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".",
+      "GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.  Object Name=\"SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".  ZoneList/Zone Name=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 2\".  Item length=[104] > Maximum Length=[100]. You may need to shorten the names.  Shortening the Object Name by [5] characters will assure uniqueness for this ZoneList.  name that will be used (may be needed in reporting)=\"ALL_ST=SALES AREA_FL=BUILDING STORY 1_SCH=C 2 SPACE FUNCTION SALES AREA ELEC EQUIP 30.0 PERCENT REDUCTION\".",
+      "GetDXCoils: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\", invalid  ...Part Load Fraction Correlation Curve Name = DXCOOL-NECB2011-REF-COOLPLFFPLR has out of range value.  ...Curve maximum must be <= 1.0, curve max at PLR = 0.99 is 1.015  ...Setting curve maximum to 1.0 and simulation continues.",
+      "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
+      "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
+      "The Standard Ratings is calculated for Coil:Cooling:DX:SingleSpeed = COIL COOLING DX SINGLE SPEED 3 124KBTU/HR 9.44EER but not at the AHRI test condition due to curve out of bound.   Review the Standard Ratings calculations in the Engineering Reference for this coil type. Also, use Output:Diagnostics, DisplayExtraWarnings for further guidance.",
+      "Output:Meter: invalid Key Name=\"GAS:FACILITY\" - not found.",
+      "Output:Meter: invalid Key Name=\"DISTRICTCOOLING:FACILITY\" - not found.",
+      "Output:Meter: invalid Key Name=\"DISTRICTHEATING:FACILITY\" - not found.",
+      "Output:Meter:MeterFileOnly: invalid Key Name=\"GAS:FACILITY\" - not found.",
+      "Output:Meter:MeterFileOnly requested for \"Electricity:Facility\" (TimeStep), already on \"Output:Meter\". Will report to both eplusout.eso and eplusout.mtr",
+      "Processing Monthly Tabular Reports: Variable names not valid for this simulation  ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual variables.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 3.048E-006 m3/s/W.   Environment=RUN PERIOD 1, at Simulation time=01/01 11:00 - 11:10  Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]  Possible causes include inconsistent air flow rates in system components,  or variable air volume [VAV] system using incorrect coil type.",
+      "Enthalpy out of range (PsyTsatFnHPb)   Routine=CalcDoe2DXCoil, Environment=RUN PERIOD 1, at Simulation time=01/01 11:00 - 11:10   Enthalpy=-204299.68710 Pressure= 101986.66   Initial Resultant Temperature= -59.98",
+      "Calculated Humidity Ratio invalid (PsyWFnTdbH)   Routine=CalcDoe2DXCoil, Environment=RUN PERIOD 1, at Simulation time=01/01 11:00 - 11:10   Dry-Bulb= -59.98 Enthalpy= -222163.387  Calculated Humidity Ratio= -6.7750E-002 ... Humidity Ratio set to .00001",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 3.049E-006 m3/s/W.   Environment=RUN PERIOD 1, at Simulation time=01/01 11:00 - 11:10  Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]  Possible causes include inconsistent air flow rates in system components,  or variable air volume [VAV] system using incorrect coil type.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -30.32 C.   ...Occurrence info = RUN PERIOD 1, 01/01 11:05 - 11:10  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.949 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 124KBTU/HR 9.44EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range at 3.049E-006 m3/s/W.   Environment=RUN PERIOD 1, at Simulation time=01/01 11:10 - 11:20  Expected range for VolumeFlowPerRatedTotalCapacity=[2.684E-005--6.713E-005]  Possible causes include inconsistent air flow rates in system components,  or variable air volume [VAV] system using incorrect coil type.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 3 124KBTU/HR 9.44EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -59.99 C.   ...Occurrence info = RUN PERIOD 1, 01/01 11:10 - 11:20  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.765 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -59.99 C.   ...Occurrence info = RUN PERIOD 1, 01/01 11:30 - 11:40  ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil     1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 23.723 C.     2) may have a low air flow rate per watt of cooling capacity. Check inputs.     3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/01 15:20 - 15:30  The solution for one or more of the Air Loop HVAC systems did not appear to converge  ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on each max iteration exceeded.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -0.47   ... Occurrence info = RUN PERIOD 1, 01/01 16:30 - 16:40  ... Operation at low ambient temperatures may require special performance curves.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed \"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -0.50   ... Occurrence info = RUN PERIOD 1, 01/02 09:50 - 09:55  ... Operation at low ambient temperatures may require special performance curves.",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/13 13:20 - 13:25  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/13 13:40 - 13:50  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "Temperature out of range [-100. to 200.] (PsyPsatFnTemp)   Routine=PsyWFnTdbTwbPb, Environment=RUN PERIOD 1, at Simulation time=01/16 09:40 - 09:50   Input Temperature=-226.83",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/16 16:20 - 16:30  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/23 15:00 - 15:10  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 01/31 12:10 - 12:20  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/01 13:00 - 13:10  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/01 13:20 - 13:30  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/01 13:30 - 13:40  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/09 11:30 - 11:40  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/09 14:40 - 14:50  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/10 12:20 - 12:30  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/10 12:50 - 13:00  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "SimHVAC: Maximum iterations (20) exceeded for all HVAC loops, at RUN PERIOD 1, 02/15 13:30 - 13:40  The solution for one or more of the Air Loop HVAC systems did not appear to converge",
+      "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-ELECTRICITY\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
+      "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-DISTILLATE OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
+      "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-RESIDUAL OIL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
+      "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-NATURAL GAS\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
+      "The resource referenced by LifeCycleCost:UsePriceEscalation= \"U.S. AVG  COMMERCIAL-COAL\" has no energy cost.   ... It is likely that the wrong resource is used. The resource should match the meter used in Utility:Tariff.",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...",
+      "Enthalpy out of range (PsyTsatFnHPb)",
+      "Calculated Humidity Ratio invalid (PsyWFnTdbH)",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 124KBTU/HR 9.44EER\" - Air volume flow rate per watt of rated total cooling capacity is out of range error continues...",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 3 124KBTU/HR 9.44EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 1 366KBTU/HR 8.39EER\" - Low condenser dry-bulb temperature error continues...",
+      "CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed=\"COIL COOLING DX SINGLE SPEED 2 101KBTU/HR 9.44EER\" - Low condenser dry-bulb temperature error continues...",
+      "Temperature out of range [-100. to 200.] (PsyPsatFnTemp)",
+      "SimHVAC: Exceeding Maximum iterations for all HVAC loops, during RUN PERIOD 1 continues"
+    ],
+    "fatal": [
+
+    ],
+    "severe": [
+
+    ]
+  },
+  "ruby_warnings": [
+
+  ],
+  "code_metrics": {
+    "heating_gj": 225.23,
+    "cooling_gj": 96.87,
+    "ep_conditioned_floor_area_m2": 2090.3183999999997,
+    "os_conditioned_floor_area_m2": 2090.3183999999997,
+    "building_tedi_gj_per_m2": 0.15409135756543121,
+    "building_medi_gj_per_m2": 0.040965051065904604
+  },
+  "costing_information": {
+    "rs_means_city": "VICTORIA",
+    "rs_means_prov": "BRITISH COLUMBIA",
+    "envelope": {
+      "exterior_wall_cost": 64662.54,
+      "exterior_wall_area_m2": 828.9,
+      "exterior_wall_cost_per_m2": 78.01,
+      "exterior_roof_cost": 192331.94,
+      "exterior_roof_area_m2": 2090.3,
+      "exterior_roof_cost_per_m2": 92.01,
+      "exterior_floor_cost": 0.0,
+      "exterior_floor_area_m2": 0.0,
+      "exterior_floor_cost_per_m2": 0.0,
+      "exterior_fixed_window_cost": 15674.64,
+      "exterior_fixed_window_area_m2": 355.2,
+      "exterior_fixed_window_cost_per_m2": 44.13,
+      "exterior_operable_window_cost": 0.0,
+      "exterior_operable_window_area_m2": 0.0,
+      "exterior_operable_window_cost_per_m2": 0.0,
+      "exterior_skylight_cost": 0.0,
+      "exterior_skylight_area_m2": 0.0,
+      "exterior_skylight_cost_per_m2": 0.0,
+      "exterior_tubular_daylight_diffuser_cost": 0.0,
+      "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+      "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+      "exterior_tubular_daylight_dome_cost": 0.0,
+      "exterior_tubular_daylight_dome_area_m2": 0.0,
+      "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+      "exterior_door_cost": 0.0,
+      "exterior_door_area_m2": 0.0,
+      "exterior_door_cost_per_m2": 0.0,
+      "exterior_glass_door_cost": 0.0,
+      "exterior_glass_door_area_m2": 0.0,
+      "exterior_glass_door_cost_per_m2": 0.0,
+      "exterior_overhead_door_cost": 0.0,
+      "exterior_overhead_door_area_m2": 0.0,
+      "exterior_overhead_door_cost_per_m2": 0.0,
+      "ground_contact_wall_cost": 0.0,
+      "ground_contact_wall_area_m2": 0.0,
+      "ground_contact_wall_cost_per_m2": 0.0,
+      "ground_contact_roof_cost": 0.0,
+      "ground_contact_roof_area_m2": 0.0,
+      "ground_contact_roof_cost_per_m2": 0.0,
+      "ground_contact_floor_cost": 167248.34,
+      "ground_contact_floor_area_m2": 2090.3,
+      "ground_contact_floor_cost_per_m2": 80.01,
+      "construction_costs": [
+        {
+          "name": "BTAP-ExteriorWall-Mass-4",
+          "conductance": 0.291,
+          "area": 828.9,
+          "cost": 64662.54,
+          "cost_per_area": 78.01,
+          "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 3: OK / 1: OK / 2: OK / 3: OK"
+        },
+        {
+          "name": "BTAP-ExteriorRoof-IEAD-4",
+          "conductance": 0.189,
+          "area": 2090.3,
+          "cost": 192331.94,
+          "cost_per_area": 92.01,
+          "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+        },
+        {
+          "name": "BTAP-ExteriorWindow-FixedWindow-2",
+          "conductance": 2.1,
+          "area": 355.2,
+          "cost": 15674.64,
+          "cost_per_area": 44.13,
+          "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 3: OK / 1: OK / 2: OK / 3: OK"
+        },
+        {
+          "name": "BTAP-GroundContactFloor-Unheated-1",
+          "conductance": 0.757,
+          "area": 2090.3,
+          "cost": 167248.34,
+          "cost_per_area": 80.01,
+          "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+        }
+      ],
+      "total_envelope_cost": 439917.45
+    },
+    "lighting": {
+      "fixture_report": [
+        {
+          "fixture_type": "18",
+          "fixture_description": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "floor_area_ft2": 22500.0,
+          "cost": 241109.04,
+          "cost_per_ft2": 10.72,
+          "spaces": [
+            "LGstore2",
+            "SMstore1",
+            "SMstore2",
+            "SMstore3",
+            "SMstore4",
+            "SMstore5",
+            "SMstore6",
+            "SMstore7",
+            "SMstore8",
+            "LGstore1"
+          ],
+          "number_of_spaces": 10
+        }
+      ],
+      "space_report": [
+        {
+          "space": "LGstore2",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 3750.0,
+          "cost": 40184.84,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore1",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore2",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore3",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore4",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore5",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore6",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore7",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "SMstore8",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 1875.0,
+          "cost": 20092.42,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        },
+        {
+          "space": "LGstore1",
+          "zone": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+          "building_type": "Space Function",
+          "space_type": "Sales area",
+          "zone_multiplier": 1,
+          "fixture_type": "18",
+          "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 2 W/ft2 (21.5 W/m2), 48FC, 7 Fixtures per 1000 ft2",
+          "height_avg_ft": 17.0,
+          "floor_area_ft2": 3750.0,
+          "cost": 40184.84,
+          "cost_per_ft2": 10.72,
+          "note": ""
+        }
+      ],
+      "total_lighting_cost": 241109.04
+    },
+    "heating_and_cooling": {
+      "plant_equipment": [
+        {
+          "type": "boilers",
+          "nom_flr2flr_hght_ft": 17.0,
+          "ht_roof_ft": 17.0,
+          "longest_distance_to_ext_ft": 162.5,
+          "wiring_and_gas_connections_distance_ft": 162.5,
+          "equipment_cost": 0.0,
+          "flue_cost": 0.0,
+          "wiring_and_gas_connections_cost": 0.0,
+          "pump_cost": 0.0,
+          "piping_to_pump_cost": 0.0,
+          "header_distribution_cost": 0.0,
+          "total_cost": 0.0
+        },
+        {
+          "type": "chillers",
+          "nom_flr2flr_hght_ft": 17.0,
+          "ht_roof_ft": 17.0,
+          "longest_distance_to_ext_ft": 162.5,
+          "wiring_and_gas_connections_distance_ft": 162.5,
+          "equipment_cost": 0.0,
+          "flue_cost": 0.0,
+          "wiring_and_gas_connections_cost": 0.0,
+          "pump_cost": 0.0,
+          "piping_to_pump_cost": 0.0,
+          "header_distribution_cost": 0.0,
+          "total_cost": 0.0
+        },
+        {
+          "type": "cooling_towers",
+          "nom_flr2flr_hght_ft": 17.0,
+          "ht_roof_ft": 17.0,
+          "longest_distance_to_ext_ft": 162.5,
+          "wiring_and_gas_connections_distance_ft": 162.5,
+          "equipment_cost": 0.0,
+          "wiring_and_gas_connections_cost": 0.0,
+          "pump_cost": 0.0,
+          "piping_cost": 0.0,
+          "total_cost": 0.0
+        }
+      ],
+      "zonal_systems": [
+        {
+          "systype": null,
+          "zone_number": 1,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 46.8,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 0.0,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 0.0,
+          "num_units": null,
+          "cummultive_zonal_cost": 0.0
+        },
+        {
+          "systype": "BB",
+          "zone_number": 1,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 46.8,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 7172.36,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 4693.42,
+          "num_units": 50.0785929144385,
+          "cummultive_zonal_cost": 11865.78
+        },
+        {
+          "systype": null,
+          "zone_number": 2,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 8.2,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 0.0,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 0.0,
+          "num_units": null,
+          "cummultive_zonal_cost": 11865.78
+        },
+        {
+          "systype": "BB",
+          "zone_number": 2,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 8.2,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 1289.0,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 1303.73,
+          "num_units": 9,
+          "cummultive_zonal_cost": 14458.5
+        },
+        {
+          "systype": null,
+          "zone_number": 3,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 12.4,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 0.0,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 0.0,
+          "num_units": null,
+          "cummultive_zonal_cost": 14458.5
+        },
+        {
+          "systype": "BB",
+          "zone_number": 3,
+          "zone_name": "ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+          "zone_multiple": 1,
+          "heat_capacity(kW)": 12.4,
+          "cool_capacity(kW)": 0.0,
+          "heat_cost": 2005.11,
+          "cool_cost": 0.0,
+          "heatcool_cost": 0.0,
+          "piping_cost": 0.0,
+          "wiring_cost": 1825.22,
+          "num_units": 14,
+          "cummultive_zonal_cost": 18288.83
+        }
+      ]
+    },
+    "shw": {
+      "nom_flr2flr_hght_ft": 17.0,
+      "ht_roof": 17.0,
+      "shw_longest_distance_to_ext_ft": 162.5,
+      "shw_utility_distance_ft": 162.5,
+      "shwtanks": 0.0,
+      "shw_flues": 0.0,
+      "shw_utilties": 1659.34,
+      "shw_pumps": 4839.82,
+      "shw_piping": 421.0,
+      "shw_total": 6920.16
+    },
+    "ventilation": {
+      "system_1": [
+
+      ],
+      "system_2": [
+
+      ],
+      "system_3": [
+        {
+          "sys_type": 3,
+          "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C",
+          "airloop_flow_m3_per_s": 3.517,
+          "num_rooftop_units": 1,
+          "base_ahu_cost": 68545.05,
+          "hrv": {
+          },
+          "equipment_info": [
+            {
+              "eq_category": "Coil_Cooling_DX_SingleSpeed",
+              "heating_fuel": "none",
+              "cooling_type": "DX",
+              "capacity_kw": 58.214,
+              "cost": 27071.41
+            },
+            {
+              "eq_category": "Coil_Heating_Electric",
+              "heating_fuel": "elec",
+              "cooling_type": "none",
+              "capacity_kw": 149.077,
+              "cost": 32658.22
+            }
+          ],
+          "reheat_recool": [
+
+          ]
+        },
+        {
+          "sys_type": 3,
+          "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C 1",
+          "airloop_flow_m3_per_s": 1.425,
+          "num_rooftop_units": 1,
+          "base_ahu_cost": 33432.43,
+          "hrv": {
+          },
+          "equipment_info": [
+            {
+              "eq_category": "Coil_Cooling_DX_SingleSpeed",
+              "heating_fuel": "none",
+              "cooling_type": "DX",
+              "capacity_kw": 23.592,
+              "cost": 13344.49
+            },
+            {
+              "eq_category": "Coil_Heating_Electric",
+              "heating_fuel": "elec",
+              "cooling_type": "none",
+              "capacity_kw": 43.742,
+              "cost": 9330.92
+            }
+          ],
+          "reheat_recool": [
+
+          ]
+        },
+        {
+          "sys_type": 3,
+          "name": "Sys_3_PSZ ALL_ST=Sales area_FL=Building Story 1_SCH=C 2",
+          "airloop_flow_m3_per_s": 1.603,
+          "num_rooftop_units": 1,
+          "base_ahu_cost": 33432.43,
+          "hrv": {
+          },
+          "equipment_info": [
+            {
+              "eq_category": "Coil_Cooling_DX_SingleSpeed",
+              "heating_fuel": "none",
+              "cooling_type": "DX",
+              "capacity_kw": 26.529,
+              "cost": 13689.46
+            },
+            {
+              "eq_category": "Coil_Heating_Electric",
+              "heating_fuel": "elec",
+              "cooling_type": "none",
+              "capacity_kw": 56.126,
+              "cost": 13996.38
+            }
+          ],
+          "reheat_recool": [
+
+          ]
+        }
+      ],
+      "system_4": [
+
+      ],
+      "system_5": [
+
+      ],
+      "system_6": [
+
+      ],
+      "system_7": [
+
+      ],
+      "mech_to_roof": {
+        "Gas_Line_m": 0.0,
+        "HW_Line_m": 0.0,
+        "CHW_Line_m": 0.0,
+        "Elec_Line_m": 127.9,
+        "Total_cost": 1388.61
+      },
+      "trunk_duct": [
+        {
+          "DuctSize_in": 30.0,
+          "DuctLength_m": 0.0,
+          "NumberRuns": 2,
+          "DuctCost": 0.0
+        }
+      ],
+      "floor_trunk_ducts": [
+        [
+
+        ]
+      ],
+      "tz_distribution": [
+        [
+
+        ]
+      ],
+      "hrv_return_ducting": [
+
+      ]
+    },
+    "totals": {
+      "envelope": 439917.45,
+      "lighting": 241109.04,
+      "heating_and_cooling": 18288.83,
+      "shw": 6920.16,
+      "ventilation": 246889.4,
+      "grand_total": 953124.88
+    }
+  }
+}
