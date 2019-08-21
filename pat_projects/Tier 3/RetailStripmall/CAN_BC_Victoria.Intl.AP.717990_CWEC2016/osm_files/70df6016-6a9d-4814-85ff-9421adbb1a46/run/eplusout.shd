@@ -1,0 +1,801 @@
+Shadowing Combinations
+..Solar Distribution=FullExterior
+..In the following, only the first 10 reference surfaces will be shown.
+..But all surfaces are used in the calculations.
+==================================
+Surface=LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=18
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=18
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=LGSTORE2_WALL_1
+..Surface=SMSTORE1_WALL_1
+..Surface=SMSTORE2_WALL_1
+..Surface=SMSTORE3_WALL_1
+..Surface=SMSTORE4_WALL_1
+..Surface=SMSTORE5_WALL_1
+..Surface=SMSTORE6_WALL_1
+..Surface=SMSTORE7_WALL_1
+..Surface=SMSTORE8_WALL_1
+..Surface=LGSTORE1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=LGSTORE2_WALL_1_FIXEDWINDOW
+==================================
+Surface=LGSTORE2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=LGSTORE2_WALL_3_FIXEDWINDOW
+==================================
+Surface=LGSTORE2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE1_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE1_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE2_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE2_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE3_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE3_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE3_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE3_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE3_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE3_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE4_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE4_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE4_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE4_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE4_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE4_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE5_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE5_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE5_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE5_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE5_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE5_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE6_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE6_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE6_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE6_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE6_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE6_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE7_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE7_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE7_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE7_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE3_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE4_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE5_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE6_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE2_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE1_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE2_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE3_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE4_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE5_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE6_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE7_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED LGSTORE2_WALL_2 - SMSTORE4_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED LGSTORE2_WALL_4 - SMSTORE5_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED SMSTORE1_WALL_4 - SMSTORE2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED SMSTORE2_WALL_4 - SMSTORE3_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED SMSTORE3_WALL_4 - SMSTORE4_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED SMSTORE5_WALL_4 - SMSTORE6_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MERGED SMSTORE6_WALL_4 - SMSTORE7_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE8_WALL_1_FIXEDWINDOW
+==================================
+Surface=SMSTORE8_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE8_WALL_3_FIXEDWINDOW
+==================================
+Surface=SMSTORE8_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=SMSTORE8_WALL_4_FIXEDWINDOW
+==================================
+Surface=SMSTORE8_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=SMSTORE8_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-LGSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE3_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE4_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE5_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE6_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE7_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-SMSTORE8_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LGSTORE1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=LGSTORE1_WALL_1_FIXEDWINDOW
+==================================
+Surface=LGSTORE1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=LGSTORE1_WALL_2_FIXEDWINDOW
+==================================
+Surface=LGSTORE1_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=1
+....Surface=LGSTORE1_WALL_3_FIXEDWINDOW
+==================================
+Surface=LGSTORE1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LGSTORE1_ROOF is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0

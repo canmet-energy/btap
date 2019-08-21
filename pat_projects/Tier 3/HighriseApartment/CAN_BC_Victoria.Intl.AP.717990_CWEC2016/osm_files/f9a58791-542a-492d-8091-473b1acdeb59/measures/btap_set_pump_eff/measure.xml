@@ -1,0 +1,80 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_set_pump_eff</name>
+  <uid>def3fff0-b8f5-48e7-af8d-df4eeb18b0e3</uid>
+  <version_id>b9871e45-c37d-45a7-95bc-80024b7a03fd</version_id>
+  <version_modified>20190811T164054Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPSetPumpEff</class_name>
+  <display_name>BTAPSetpumpEff</display_name>
+  <description>Sets all pump efficiency to specified value </description>
+  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <arguments>
+    <argument>
+      <name>eff_for_this_cz</name>
+      <display_name>eff_for_this_cz</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.91</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5CCA669A</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>44C05227</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C5481D2C</checksum>
+    </file>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>78682C66</checksum>
+    </file>
+  </files>
+</measure>

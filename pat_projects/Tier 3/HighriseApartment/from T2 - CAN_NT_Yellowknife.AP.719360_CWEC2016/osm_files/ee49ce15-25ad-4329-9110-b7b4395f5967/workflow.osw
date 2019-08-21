@@ -1,0 +1,49 @@
+{
+   "created_at" : "20190813T181317Z",
+   "seed_file" : "../ee49ce15-25ad-4329-9110-b7b4395f5967.osm",
+   "steps" : [
+      {
+         "arguments" : {
+            "latent_eff_at_100_cooling" : 0.90000000000000002,
+            "latent_eff_at_100_heating" : 0.90000000000000002,
+            "latent_eff_at_75_cooling" : 0.90000000000000002,
+            "latent_eff_at_75_heating" : 0.90000000000000002,
+            "sensible_eff_at_100_cooling" : 0.90000000000000002,
+            "sensible_eff_at_100_heating" : 0.90000000000000002,
+            "sensible_eff_at_75_cooling" : 0.90000000000000002,
+            "sensible_eff_at_75_heating" : 0.90000000000000002
+         },
+         "description" : "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+         "measure_dir_name" : "BTAPChangeEnergyRecoveryEfficiency",
+         "modeler_description" : "The measure loops through all air loops in the baseline model and identify the air loops that contain OS:AirLoopHVAC:OutdoorAirSystem objects. Users can choose one or all air loops from the drop down list to apply this measure. If an OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure modifies the effectiveness, heat exchanger type, and electric power setting in the model based on user inputs. If no OS:HeatExchanger:AirToAir:SensibleAndLatent object is found in the selected air loop, the measure will attach a OS:HeatExchanger:AirToAir:SensibleAndLatent object to the air loop. The economizer lockout is always set to be Yes. The initial and final values of effectiveness, the heat exchanger type, and nominal electric power are reported during simulation",
+         "name" : "BTAPChangeEnergyRecoveryEfficiency"
+      },
+      {
+         "arguments" : {
+            "r_value" : 35
+         },
+         "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. Costs for a construction can be adjusted",
+         "measure_dir_name" : "IncreaseInsulationRValueForExteriorWalls",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in air exposed exterior walls to a specified value. Find constructions used for exterior walls, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. Layer to change could be Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance can be directly entered. If the construction doesn't appear to have an insulation layer it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions for surfaces with a \"Ground\" boundary condition will also not be altered. Constructions with an insulation layer that already exceeds the requested R-Value will also not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Exterior Walls to a Specific Value"
+      },
+      {
+         "arguments" : {
+            "r_value" : 50
+         },
+         "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+         "measure_dir_name" : "IncreaseInsulationRValueForRoofs",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in all roofs in the model to a specified value.  Find constructions used for roofs, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. This could be a Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance will be directly entered.  If the construction doesn't appear to have an insulation layer, it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions used on attic floors will not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Roofs to a Specific Value"
+      },
+      {
+         "arguments" : {},
+         "description" : "",
+         "measure_dir_name" : "add_erv_power",
+         "modeler_description" : "This template measure is used to ensure consistency in BTAP measures.",
+         "name" : "AddERVPower"
+      }
+   ],
+   "updated_at" : "20190813T184918Z",
+   "weather_file" : "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw"
+}

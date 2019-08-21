@@ -1,0 +1,74 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>adj_extra_hvac</name>
+  <uid>29cae41a-26e6-431b-bc79-04ae35b82302</uid>
+  <version_id>d5fb845c-1196-4dc0-b561-4aa4936cf33e</version_id>
+  <version_modified>20190819T175207Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>Adj_extra_hvac</class_name>
+  <display_name>Adj_extra_hvac</display_name>
+  <description>This template measure is used to ensure consistency in detailed BTAP measures.</description>
+  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <arguments>
+    <argument>
+      <name>measure_to_adj_for</name>
+      <display_name>measure_to_adj_for?</display_name>
+      <type>Integer</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5E7EBF34</checksum>
+    </file>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4F284774</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C737F82A</checksum>
+    </file>
+  </files>
+</measure>

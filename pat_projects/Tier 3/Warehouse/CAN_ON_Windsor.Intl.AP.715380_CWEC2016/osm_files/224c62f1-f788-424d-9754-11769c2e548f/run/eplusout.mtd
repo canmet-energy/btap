@@ -1,0 +1,1110 @@
+
+ Meters for 9,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+
+ Meters for 82,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+
+ Meters for 107,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorLights:Electricity [J]
+  OnMeter=InteriorLights:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorLights:Electricity [J]
+
+ Meters for 132,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+
+ Meters for 169,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+
+ Meters for 182,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Building [J]
+  OnMeter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=InteriorEquipment:Electricity [J]
+  OnMeter=InteriorEquipment:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=General:InteriorEquipment:Electricity [J]
+
+ Meters for 195,COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=CoolingCoils:EnergyTransfer [J]
+
+ Meters for 232,COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 257,COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=CoolingCoils:EnergyTransfer [J]
+
+ Meters for 258,COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 259,COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=CoolingCoils:EnergyTransfer [J]
+
+ Meters for 260,COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 261,COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=CoolingCoils:EnergyTransfer [J]
+
+ Meters for 262,COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Crankcase Heater Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=WaterSystems:Electricity [J]
+
+ Meters for 287,COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Water Heating Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=WaterSystems:Electricity [J]
+
+ Meters for 288,FAN VARIABLE VOLUME 3:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 313,FAN VARIABLE VOLUME 1:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 314,FAN VARIABLE VOLUME 2:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 315,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 316,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 317,FAN ON OFF 1:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 318,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 319,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 320,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 321,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Fans:Electricity [J]
+  OnMeter=General:Fans:Electricity [J]
+
+ Meters for 322,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Source Side Heat Transfer Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:Plant [J]
+  OnMeter=WaterSystems:PlantLoopHeatingDemand [J]
+  OnMeter=General:WaterSystems:PlantLoopHeatingDemand [J]
+
+ Meters for 371,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:Plant [J]
+  OnMeter=WaterSystems:Gas [J]
+  OnMeter=General:WaterSystems:Gas [J]
+
+ Meters for 420,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Off Cycle Parasitic Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:Plant [J]
+  OnMeter=WaterSystems:Gas [J]
+  OnMeter=General:WaterSystems:Gas [J]
+
+ Meters for 421,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater On Cycle Parasitic Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:Plant [J]
+  OnMeter=WaterSystems:Gas [J]
+  OnMeter=General:WaterSystems:Gas [J]
+
+ Meters for 422,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Water Volume [m3]
+  OnMeter=Water:Facility [m3]
+  OnMeter=Water:Plant [m3]
+  OnMeter=WaterSystems:Water [m3]
+  OnMeter=General:WaterSystems:Water [m3]
+
+ Meters for 471,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Mains Water Volume [m3]
+  OnMeter=MainsWater:Facility [m3]
+  OnMeter=MainsWater:Plant [m3]
+  OnMeter=WaterSystems:MainsWater [m3]
+  OnMeter=General:WaterSystems:MainsWater [m3]
+
+ Meters for 520,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater Off Cycle Ancillary Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=WaterSystems:Electricity [J]
+  OnMeter=Water Heater Parasitic:WaterSystems:Electricity [J]
+
+ Meters for 533,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater On Cycle Ancillary Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=WaterSystems:Electricity [J]
+  OnMeter=Water Heater Parasitic:WaterSystems:Electricity [J]
+
+ Meters for 534,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 583,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 610,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 635,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 650,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Heating:EnergyTransfer [J]
+  OnMeter=Heating:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 675,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Building [J]
+  OnMeter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+  OnMeter=Cooling:EnergyTransfer [J]
+  OnMeter=Cooling:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J]
+
+ Meters for 690,ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Total Volume [m3]
+  OnMeter=Water:Facility [m3]
+  OnMeter=Water:Plant [m3]
+  OnMeter=WaterSystems:Water [m3]
+  OnMeter=General:WaterSystems:Water [m3]
+
+ Meters for 691,ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Mains Water Volume [m3]
+  OnMeter=MainsWater:Facility [m3]
+  OnMeter=MainsWater:Plant [m3]
+  OnMeter=WaterSystems:MainsWater [m3]
+  OnMeter=General:WaterSystems:MainsWater [m3]
+
+ Meters for 692,ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Plant [J]
+  OnMeter=WaterSystems:EnergyTransfer [J]
+  OnMeter=General:WaterSystems:EnergyTransfer [J]
+
+ Meters for 729,ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Total Volume [m3]
+  OnMeter=Water:Facility [m3]
+  OnMeter=Water:Plant [m3]
+  OnMeter=WaterSystems:Water [m3]
+  OnMeter=General:WaterSystems:Water [m3]
+
+ Meters for 730,ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Mains Water Volume [m3]
+  OnMeter=MainsWater:Facility [m3]
+  OnMeter=MainsWater:Plant [m3]
+  OnMeter=WaterSystems:MainsWater [m3]
+  OnMeter=General:WaterSystems:MainsWater [m3]
+
+ Meters for 731,ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Plant [J]
+  OnMeter=WaterSystems:EnergyTransfer [J]
+  OnMeter=General:WaterSystems:EnergyTransfer [J]
+
+ Meters for 732,ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Total Volume [m3]
+  OnMeter=Water:Facility [m3]
+  OnMeter=Water:Plant [m3]
+  OnMeter=WaterSystems:Water [m3]
+  OnMeter=General:WaterSystems:Water [m3]
+
+ Meters for 733,ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Mains Water Volume [m3]
+  OnMeter=MainsWater:Facility [m3]
+  OnMeter=MainsWater:Plant [m3]
+  OnMeter=WaterSystems:MainsWater [m3]
+  OnMeter=General:WaterSystems:MainsWater [m3]
+
+ Meters for 734,ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Plant [J]
+  OnMeter=WaterSystems:EnergyTransfer [J]
+  OnMeter=General:WaterSystems:EnergyTransfer [J]
+
+ Meters for 735,WATER USE CONNECTIONS 1:Water Use Connections Plant Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:Plant [J]
+  OnMeter=WaterSystems:PlantLoopHeatingDemand [J]
+
+ Meters for 736,WATER USE CONNECTIONS 2:Water Use Connections Plant Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:Plant [J]
+  OnMeter=WaterSystems:PlantLoopHeatingDemand [J]
+
+ Meters for 737,WATER USE CONNECTIONS 3:Water Use Connections Plant Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:Plant [J]
+  OnMeter=WaterSystems:PlantLoopHeatingDemand [J]
+
+ Meters for 738,Whole Building:Facility Total Purchased Electric Energy [J]
+  OnMeter=ElectricityPurchased:Facility [J]
+  OnMeter=ElectricityPurchased:Plant [J]
+  OnMeter=Cogeneration:ElectricityPurchased [J]
+
+ Meters for 775,Whole Building:Facility Total Surplus Electric Energy [J]
+  OnMeter=ElectricitySurplusSold:Facility [J]
+  OnMeter=ElectricitySurplusSold:Plant [J]
+  OnMeter=Cogeneration:ElectricitySurplusSold [J]
+
+ Meters for 812,Whole Building:Facility Net Purchased Electric Energy [J]
+  OnMeter=ElectricityNet:Facility [J]
+  OnMeter=ElectricityNet:Plant [J]
+  OnMeter=Cogeneration:ElectricityNet [J]
+
+ Meters for 849,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 862,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 875,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 888,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 889,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 890,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 891,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 892,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 893,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 894,SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 895,SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 896,SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 897,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 898,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 899,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 900,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForHeating:EnergyTransfer [J]
+
+ Meters for 901,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatRecoveryForCooling:EnergyTransfer [J]
+
+ Meters for 902,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=HeatRecovery:Electricity [J]
+
+ Meters for 903,ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=Baseboard:EnergyTransfer [J]
+
+ Meters for 916,ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:HVAC [J]
+  OnMeter=Baseboard:PlantLoopHeatingDemand [J]
+
+ Meters for 941,ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=Baseboard:EnergyTransfer [J]
+
+ Meters for 942,ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:HVAC [J]
+  OnMeter=Baseboard:PlantLoopHeatingDemand [J]
+
+ Meters for 943,ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Total Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=Baseboard:EnergyTransfer [J]
+
+ Meters for 944,ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Hot Water Energy [J]
+  OnMeter=PlantLoopHeatingDemand:Facility [J]
+  OnMeter=PlantLoopHeatingDemand:HVAC [J]
+  OnMeter=Baseboard:PlantLoopHeatingDemand [J]
+
+ Meters for 945,COIL HEATING GAS 1:Heating Coil Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatingCoils:EnergyTransfer [J]
+
+ Meters for 958,COIL HEATING GAS 1:Heating Coil Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 983,COIL HEATING GAS 1:Heating Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Heating:Electricity [J]
+
+ Meters for 996,COIL HEATING GAS 1:Heating Coil Ancillary Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 997,COIL HEATING GAS 3:Heating Coil Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatingCoils:EnergyTransfer [J]
+
+ Meters for 998,COIL HEATING GAS 3:Heating Coil Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 999,COIL HEATING GAS 3:Heating Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Heating:Electricity [J]
+
+ Meters for 1000,COIL HEATING GAS 3:Heating Coil Ancillary Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 1001,COIL HEATING GAS 2:Heating Coil Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:HVAC [J]
+  OnMeter=HeatingCoils:EnergyTransfer [J]
+
+ Meters for 1002,COIL HEATING GAS 2:Heating Coil Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 1003,COIL HEATING GAS 2:Heating Coil Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:HVAC [J]
+  OnMeter=Heating:Electricity [J]
+
+ Meters for 1004,COIL HEATING GAS 2:Heating Coil Ancillary Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:HVAC [J]
+  OnMeter=Heating:Gas [J]
+
+ Meters for 1005,PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Plant [J]
+  OnMeter=Boilers:EnergyTransfer [J]
+
+ Meters for 1018,PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:Plant [J]
+  OnMeter=Heating:Gas [J]
+  OnMeter=General:Heating:Gas [J]
+
+ Meters for 1031,PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Heating:Electricity [J]
+  OnMeter=Boiler Parasitic:Heating:Electricity [J]
+
+ Meters for 1044,SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy [J]
+  OnMeter=EnergyTransfer:Facility [J]
+  OnMeter=EnergyTransfer:Plant [J]
+  OnMeter=Boilers:EnergyTransfer [J]
+
+ Meters for 1045,SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy [J]
+  OnMeter=Gas:Facility [J]
+  OnMeter=Gas:Plant [J]
+  OnMeter=Heating:Gas [J]
+  OnMeter=General:Heating:Gas [J]
+
+ Meters for 1046,SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Heating:Electricity [J]
+  OnMeter=Boiler Parasitic:Heating:Electricity [J]
+
+ Meters for 1047,COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Crankcase Heater Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 1048,COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 1049,COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Cooling:Electricity [J]
+
+ Meters for 1050,PUMP VARIABLE SPEED 1:Pump Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Pumps:Electricity [J]
+
+ Meters for 1063,SERVICE WATER LOOP PUMP:Pump Electric Energy [J]
+  OnMeter=Electricity:Facility [J]
+  OnMeter=Electricity:Plant [J]
+  OnMeter=Pumps:Electricity [J]
+
+ Meters for 1064,Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 1089,Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ Meters for 1090,Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass [kg]
+  OnMeter=Carbon Equivalent:Facility [kg]
+  OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
+
+ For Meter=Electricity:Facility [J], ResourceType=Electricity, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Crankcase Heater Electric Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Water Heating Electric Energy
+  FAN VARIABLE VOLUME 3:Fan Electric Energy
+  FAN VARIABLE VOLUME 1:Fan Electric Energy
+  FAN VARIABLE VOLUME 2:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  FAN ON OFF 1:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater Off Cycle Ancillary Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater On Cycle Ancillary Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  COIL HEATING GAS 1:Heating Coil Electric Energy
+  COIL HEATING GAS 3:Heating Coil Electric Energy
+  COIL HEATING GAS 2:Heating Coil Electric Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+  PUMP VARIABLE SPEED 1:Pump Electric Energy
+  SERVICE WATER LOOP PUMP:Pump Electric Energy
+
+ For Meter=Electricity:Building [J], ResourceType=Electricity, Group=Building, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+
+ For Meter=InteriorLights:Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+
+ For Meter=General:InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+
+ For Meter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorLights:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+
+ For Meter=Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorLights:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION:Lights Electric Energy
+
+ For Meter=InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=General:InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=InteriorEquipment:Electricity:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION:Electric Equipment Electric Energy
+
+ For Meter=EnergyTransfer:Facility [J], ResourceType=EnergyTransfer, contents are:
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Total Cooling Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Heating Energy
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Heating Energy
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Total Heating Energy
+  COIL HEATING GAS 1:Heating Coil Heating Energy
+  COIL HEATING GAS 3:Heating Coil Heating Energy
+  COIL HEATING GAS 2:Heating Coil Heating Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+
+ For Meter=EnergyTransfer:HVAC [J], ResourceType=EnergyTransfer, Group=HVAC, contents are:
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Total Cooling Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Total Heating Energy
+  COIL HEATING GAS 1:Heating Coil Heating Energy
+  COIL HEATING GAS 3:Heating Coil Heating Energy
+  COIL HEATING GAS 2:Heating Coil Heating Energy
+
+ For Meter=CoolingCoils:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=CoolingCoils, contents are:
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Total Cooling Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Total Cooling Energy
+
+ For Meter=Electricity:HVAC [J], ResourceType=Electricity, Group=HVAC, contents are:
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  FAN VARIABLE VOLUME 3:Fan Electric Energy
+  FAN VARIABLE VOLUME 1:Fan Electric Energy
+  FAN VARIABLE VOLUME 2:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  FAN ON OFF 1:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  COIL HEATING GAS 1:Heating Coil Electric Energy
+  COIL HEATING GAS 3:Heating Coil Electric Energy
+  COIL HEATING GAS 2:Heating Coil Electric Energy
+
+ For Meter=Cooling:Electricity [J], ResourceType=Electricity, EndUse=Cooling, contents are:
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Electric Energy
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+
+ For Meter=Electricity:Plant [J], ResourceType=Electricity, Group=Plant, contents are:
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Crankcase Heater Electric Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Water Heating Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater Off Cycle Ancillary Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater On Cycle Ancillary Electric Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+  COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER:Cooling Coil Crankcase Heater Electric Energy
+  PUMP VARIABLE SPEED 1:Pump Electric Energy
+  SERVICE WATER LOOP PUMP:Pump Electric Energy
+
+ For Meter=WaterSystems:Electricity [J], ResourceType=Electricity, EndUse=WaterSystems, contents are:
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Crankcase Heater Electric Energy
+  COIL WATER HEATING AIR TO WATER HEAT PUMP 1:Cooling Coil Water Heating Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater Off Cycle Ancillary Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater On Cycle Ancillary Electric Energy
+
+ For Meter=Fans:Electricity [J], ResourceType=Electricity, EndUse=Fans, contents are:
+  FAN VARIABLE VOLUME 3:Fan Electric Energy
+  FAN VARIABLE VOLUME 1:Fan Electric Energy
+  FAN VARIABLE VOLUME 2:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  FAN ON OFF 1:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+
+ For Meter=General:Fans:Electricity [J], ResourceType=Electricity, EndUse=Fans, contents are:
+  FAN VARIABLE VOLUME 3:Fan Electric Energy
+  FAN VARIABLE VOLUME 1:Fan Electric Energy
+  FAN VARIABLE VOLUME 2:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  FAN ON OFF 1:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN:Fan Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN:Fan Electric Energy
+
+ For Meter=PlantLoopHeatingDemand:Facility [J], ResourceType=PlantLoopHeatingDemand, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Source Side Heat Transfer Energy
+  WATER USE CONNECTIONS 1:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 2:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 3:Water Use Connections Plant Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Hot Water Energy
+
+ For Meter=PlantLoopHeatingDemand:Plant [J], ResourceType=PlantLoopHeatingDemand, Group=Plant, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Source Side Heat Transfer Energy
+  WATER USE CONNECTIONS 1:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 2:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 3:Water Use Connections Plant Hot Water Energy
+
+ For Meter=WaterSystems:PlantLoopHeatingDemand [J], ResourceType=PlantLoopHeatingDemand, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Source Side Heat Transfer Energy
+  WATER USE CONNECTIONS 1:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 2:Water Use Connections Plant Hot Water Energy
+  WATER USE CONNECTIONS 3:Water Use Connections Plant Hot Water Energy
+
+ For Meter=General:WaterSystems:PlantLoopHeatingDemand [J], ResourceType=PlantLoopHeatingDemand, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Source Side Heat Transfer Energy
+
+ For Meter=Gas:Facility [J], ResourceType=Gas, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Off Cycle Parasitic Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater On Cycle Parasitic Gas Energy
+  COIL HEATING GAS 1:Heating Coil Gas Energy
+  COIL HEATING GAS 1:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 3:Heating Coil Gas Energy
+  COIL HEATING GAS 3:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 2:Heating Coil Gas Energy
+  COIL HEATING GAS 2:Heating Coil Ancillary Gas Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+
+ For Meter=Gas:Plant [J], ResourceType=Gas, Group=Plant, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Off Cycle Parasitic Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater On Cycle Parasitic Gas Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+
+ For Meter=WaterSystems:Gas [J], ResourceType=Gas, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Off Cycle Parasitic Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater On Cycle Parasitic Gas Energy
+
+ For Meter=General:WaterSystems:Gas [J], ResourceType=Gas, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Off Cycle Parasitic Gas Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater On Cycle Parasitic Gas Energy
+
+ For Meter=Water:Facility [m3], ResourceType=Water, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Total Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Total Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Total Volume
+
+ For Meter=Water:Plant [m3], ResourceType=Water, Group=Plant, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Total Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Total Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Total Volume
+
+ For Meter=WaterSystems:Water [m3], ResourceType=Water, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Total Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Total Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Total Volume
+
+ For Meter=General:WaterSystems:Water [m3], ResourceType=Water, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Total Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Total Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Total Volume
+
+ For Meter=MainsWater:Facility [m3], ResourceType=MainsWater, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Mains Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Mains Water Volume
+
+ For Meter=MainsWater:Plant [m3], ResourceType=MainsWater, Group=Plant, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Mains Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Mains Water Volume
+
+ For Meter=WaterSystems:MainsWater [m3], ResourceType=MainsWater, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Mains Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Mains Water Volume
+
+ For Meter=General:WaterSystems:MainsWater [m3], ResourceType=MainsWater, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF:Water Heater Mains Water Volume
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Mains Water Volume
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Mains Water Volume
+
+ For Meter=Water Heater Parasitic:WaterSystems:Electricity [J], ResourceType=Electricity, EndUse=WaterSystems, contents are:
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater Off Cycle Ancillary Electric Energy
+  28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH:Water Heater On Cycle Ancillary Electric Energy
+
+ For Meter=EnergyTransfer:Building [J], ResourceType=EnergyTransfer, Group=Building, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Heating, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Cooling, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=Heating:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Heating, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Heating Energy
+
+ For Meter=Cooling:EnergyTransfer:Zone:ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A [J], ResourceType=EnergyTransfer, EndUse=Cooling, Group=Zone, contents are:
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A:Zone Air System Sensible Cooling Energy
+
+ For Meter=EnergyTransfer:Plant [J], ResourceType=EnergyTransfer, Group=Plant, contents are:
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Heating Energy
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Heating Energy
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Heating Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+
+ For Meter=WaterSystems:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=WaterSystems, contents are:
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Heating Energy
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Heating Energy
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Heating Energy
+
+ For Meter=General:WaterSystems:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=WaterSystems, contents are:
+  ZONE1 OFFICE SERVICE WATER USE 0.09GAL/MIN:Water Use Equipment Heating Energy
+  ZONE2 FINE STORAGE SERVICE WATER USE 0.15GAL/MIN:Water Use Equipment Heating Energy
+  ZONE3 BULK STORAGE SERVICE WATER USE 0.18GAL/MIN:Water Use Equipment Heating Energy
+
+ For Meter=ElectricityPurchased:Facility [J], ResourceType=ElectricityPurchased, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=ElectricityPurchased:Plant [J], ResourceType=ElectricityPurchased, Group=Plant, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=Cogeneration:ElectricityPurchased [J], ResourceType=ElectricityPurchased, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Purchased Electric Energy
+
+ For Meter=ElectricitySurplusSold:Facility [J], ResourceType=ElectricitySurplusSold, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=ElectricitySurplusSold:Plant [J], ResourceType=ElectricitySurplusSold, Group=Plant, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=Cogeneration:ElectricitySurplusSold [J], ResourceType=ElectricitySurplusSold, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Total Surplus Electric Energy
+
+ For Meter=ElectricityNet:Facility [J], ResourceType=ElectricityNet, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=ElectricityNet:Plant [J], ResourceType=ElectricityNet, Group=Plant, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=Cogeneration:ElectricityNet [J], ResourceType=ElectricityNet, EndUse=Cogeneration, contents are:
+  Whole Building:Facility Net Purchased Electric Energy
+
+ For Meter=HeatRecoveryForHeating:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=HeatRecoveryForHeating, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Heating Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Heating Energy
+
+ For Meter=HeatRecoveryForCooling:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=HeatRecoveryForCooling, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Total Cooling Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Total Cooling Energy
+
+ For Meter=HeatRecovery:Electricity [J], ResourceType=Electricity, EndUse=HeatRecovery, contents are:
+  ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX:Heat Exchanger Electric Energy
+  SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+  SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV:Heat Exchanger Electric Energy
+
+ For Meter=Baseboard:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Baseboard, contents are:
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Total Heating Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Total Heating Energy
+
+ For Meter=PlantLoopHeatingDemand:HVAC [J], ResourceType=PlantLoopHeatingDemand, Group=HVAC, contents are:
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Hot Water Energy
+
+ For Meter=Baseboard:PlantLoopHeatingDemand [J], ResourceType=PlantLoopHeatingDemand, EndUse=Baseboard, contents are:
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 1:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 3:Baseboard Hot Water Energy
+  ZONE HVAC BASEBOARD CONVECTIVE WATER 2:Baseboard Hot Water Energy
+
+ For Meter=HeatingCoils:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=HeatingCoils, contents are:
+  COIL HEATING GAS 1:Heating Coil Heating Energy
+  COIL HEATING GAS 3:Heating Coil Heating Energy
+  COIL HEATING GAS 2:Heating Coil Heating Energy
+
+ For Meter=Gas:HVAC [J], ResourceType=Gas, Group=HVAC, contents are:
+  COIL HEATING GAS 1:Heating Coil Gas Energy
+  COIL HEATING GAS 1:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 3:Heating Coil Gas Energy
+  COIL HEATING GAS 3:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 2:Heating Coil Gas Energy
+  COIL HEATING GAS 2:Heating Coil Ancillary Gas Energy
+
+ For Meter=Heating:Gas [J], ResourceType=Gas, EndUse=Heating, contents are:
+  COIL HEATING GAS 1:Heating Coil Gas Energy
+  COIL HEATING GAS 1:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 3:Heating Coil Gas Energy
+  COIL HEATING GAS 3:Heating Coil Ancillary Gas Energy
+  COIL HEATING GAS 2:Heating Coil Gas Energy
+  COIL HEATING GAS 2:Heating Coil Ancillary Gas Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+
+ For Meter=Heating:Electricity [J], ResourceType=Electricity, EndUse=Heating, contents are:
+  COIL HEATING GAS 1:Heating Coil Electric Energy
+  COIL HEATING GAS 3:Heating Coil Electric Energy
+  COIL HEATING GAS 2:Heating Coil Electric Energy
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+
+ For Meter=Boilers:EnergyTransfer [J], ResourceType=EnergyTransfer, EndUse=Boilers, contents are:
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Heating Energy
+
+ For Meter=General:Heating:Gas [J], ResourceType=Gas, EndUse=Heating, contents are:
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Gas Energy
+
+ For Meter=Boiler Parasitic:Heating:Electricity [J], ResourceType=Electricity, EndUse=Heating, contents are:
+  PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+  SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF:Boiler Ancillary Electric Energy
+
+ For Meter=Pumps:Electricity [J], ResourceType=Electricity, EndUse=Pumps, contents are:
+  PUMP VARIABLE SPEED 1:Pump Electric Energy
+  SERVICE WATER LOOP PUMP:Pump Electric Energy
+
+ For Meter=Carbon Equivalent:Facility [kg], ResourceType=Carbon Equivalent, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
+
+ For Meter=CarbonEquivalentEmissions:Carbon Equivalent [kg], ResourceType=Carbon Equivalent, EndUse=CarbonEquivalentEmissions, contents are:
+  Site:Environmental Impact Total N2O Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CH4 Emissions Carbon Equivalent Mass
+  Site:Environmental Impact Total CO2 Emissions Carbon Equivalent Mass
