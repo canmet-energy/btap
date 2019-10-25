@@ -327,20 +327,13 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
       building_type="Hotel"
     end
 
-    # Get the space Type data from @standards data
-    spacetype_data = nil
-    @standards_data = standard.load_standards_database_new()
+    # Set the space Type data from @standards data
+    
 
-    spacetype_data = @standards_data['tables']['space_types']['table']
-    spacetype_data.each do |spacedata|
-
-    if spacedata["template"] == template and spacedata["building_type"] == building_type and spacedata["space_type"] == "WholeBuilding"
       space_type = OpenStudio::Model::SpaceType.new(model)
-      #puts ">>>>>>>>>>>#{space_type} >>>>>>>>>>>>>>> building_type #{building_type}.........building_shape #{building_shape}"
-      space_type.setName("#{spacedata['building_type']} #{spacedata['space_type']}")
-      space_type.setStandardsSpaceType(spacedata["space_type"])
-      #space_type.setStandardsSpaceType(spacedata["WholeBuilding"])
-      space_type.setStandardsBuildingType(spacedata["building_type"])
+      space_type.setName("#{building_type} WholeBuilding")
+      space_type.setStandardsSpaceType("WholeBuilding")
+      space_type.setStandardsBuildingType("#{building_type}")
       building.setSpaceType(space_type)
 
       # Add internal loads
@@ -361,8 +354,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
                                                         true,
                                                         true,
                                                         true)
-      end
-    end
 
     # Write the basic geometry put to file (for debugging)
     #BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "#{arguments['building_shape']}-geometryAndSpaceTypes.osm"))
