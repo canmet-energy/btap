@@ -1,0 +1,151 @@
+
+UtilityCost:Tariff,
+  BCHydro,                              !- Name
+  Electricity:Facility,         !- Output Meter Name
+  kWh ,                         !- Conversion Factor Choice
+  ,                                       !- Energy Conversion Factor
+  ,                                       !- Demand Conversion Factor
+  ,                                       !- Time of Use Period Schedule Name
+  ,                                       !- Season Schedule Name
+  ,                                       !- Month Schedule Name
+  QuarterHour,                            !- Demand Window Length
+  ;                      !- Monthly Charge or Variable Name
+
+UtilityCost:Charge:Block,
+  ElectricityBlocksEnergyCharges,           ! Name
+  BCHydro,                  ! Tariff Name
+  TotalEnergy,                            ! Source Variable
+  Annual,                                 ! Season
+  EnergyCharges,                          ! Category Variable Name
+  ,                                       ! Remaining Into Variable
+  ,                                       ! Block Size Multiplier Value or Variable Name
+  14800,            ! Block Size 1 Value or Variable Name
+  0.0989,             ! Block 1 Cost per Unit Value or Variable Name
+  14801,            ! Block Size 2 Value or Variable Name
+  0.069,             ! Block 2 Cost per Unit Value or Variable Name
+  14802,            ! Block Size 3 Value or Variable Name
+  0.069,             ! Block 3 Cost per Unit Value or Variable Name
+  14803,            ! Block Size 4 Value or Variable Name
+  0.069,             ! Block 4 Cost per Unit Value or Variable Name
+  remaining,                              ! Block Size 5 Value or Variable Name
+  0.069;             ! Block 5 Cost per Unit Value or Variable Name
+
+UtilityCost:Charge:Block,
+  ElectricityBlocksDemandCharges,           ! Name
+  BCHydro,                  ! Tariff Name
+  TotalDemand,                                 ! Source Variable
+  Annual,                                      ! Season
+  DemandCharges,                               ! Category Variable Name
+  ,                                            ! Remaining Into Variable
+  ,                                            ! Block Size Multiplier Value or Variable Name
+ 35,          ! Block Size 1 Value or Variable Name
+ 0,           ! Block 1 Cost per Unit Value or Variable Name
+ 115,          ! Block Size 2 Value or Variable Name
+ 5.5,           ! Block 2 Cost per Unit Value or Variable Name
+ 116,          ! Block Size 3 Value or Variable Name
+ 10.55,           ! Block 3 Cost per Unit Value or Variable Name
+ 117,          ! Block Size 4 Value or Variable Name
+ 10.55,           ! Block 4 Cost per Unit Value or Variable Name
+ remaining,                                   ! Block Size 5 Value or Variable Name
+ 10.55;           ! Block 5 Cost per Unit Value or Variable Name
+      
+UtilityCost:Tariff,
+  FortisBC,                              !- Name
+  Gas:Facility,         !- Output Meter Name
+  MJ ,                         !- Conversion Factor Choice
+  ,                                       !- Energy Conversion Factor
+  ,                                       !- Demand Conversion Factor
+  ,                                       !- Time of Use Period Schedule Name
+  ,                                       !- Season Schedule Name
+  ,                                       !- Month Schedule Name
+  QuarterHour,                            !- Demand Window Length
+  ;                      !- Monthly Charge or Variable Name
+
+UtilityCost:Charge:Block,
+  GasBlocksEnergyCharges,           ! Name
+  FortisBC,                  ! Tariff Name
+  TotalEnergy,                            ! Source Variable
+  Annual,                                 ! Season
+  EnergyCharges,                          ! Category Variable Name
+  ,                                       ! Remaining Into Variable
+  ,                                       ! Block Size Multiplier Value or Variable Name
+  1,            ! Block Size 1 Value or Variable Name
+  0.0061,             ! Block 1 Cost per Unit Value or Variable Name
+  2,            ! Block Size 2 Value or Variable Name
+  0.0061,             ! Block 2 Cost per Unit Value or Variable Name
+  3,            ! Block Size 3 Value or Variable Name
+  0.0061,             ! Block 3 Cost per Unit Value or Variable Name
+  4,            ! Block Size 4 Value or Variable Name
+  0.0061,             ! Block 4 Cost per Unit Value or Variable Name
+  remaining,                              ! Block Size 5 Value or Variable Name
+  0.0061;             ! Block 5 Cost per Unit Value or Variable Name
+
+UtilityCost:Charge:Block,
+  GasBlocksDemandCharges,           ! Name
+  FortisBC,                  ! Tariff Name
+  TotalDemand,                                 ! Source Variable
+  Annual,                                      ! Season
+  DemandCharges,                               ! Category Variable Name
+  ,                                            ! Remaining Into Variable
+  ,                                            ! Block Size Multiplier Value or Variable Name
+ 1,          ! Block Size 1 Value or Variable Name
+ 0,           ! Block 1 Cost per Unit Value or Variable Name
+ 2,          ! Block Size 2 Value or Variable Name
+ 0,           ! Block 2 Cost per Unit Value or Variable Name
+ 3,          ! Block Size 3 Value or Variable Name
+ 0,           ! Block 3 Cost per Unit Value or Variable Name
+ 4,          ! Block Size 4 Value or Variable Name
+ 0,           ! Block 4 Cost per Unit Value or Variable Name
+ remaining,                                   ! Block Size 5 Value or Variable Name
+ 0;           ! Block 5 Cost per Unit Value or Variable Name
+      
+UtilityCost:Tariff,
+  NoneOil,                              !- Name
+  FuelOil#2:Facility,         !- Output Meter Name
+  MJ ,                         !- Conversion Factor Choice
+  ,                                       !- Energy Conversion Factor
+  ,                                       !- Demand Conversion Factor
+  ,                                       !- Time of Use Period Schedule Name
+  ,                                       !- Season Schedule Name
+  ,                                       !- Month Schedule Name
+  QuarterHour,                            !- Demand Window Length
+  ;                      !- Monthly Charge or Variable Name
+
+UtilityCost:Charge:Block,
+  FuelOil#2BlocksEnergyCharges,           ! Name
+  NoneOil,                  ! Tariff Name
+  TotalEnergy,                            ! Source Variable
+  Annual,                                 ! Season
+  EnergyCharges,                          ! Category Variable Name
+  ,                                       ! Remaining Into Variable
+  ,                                       ! Block Size Multiplier Value or Variable Name
+  1,            ! Block Size 1 Value or Variable Name
+  0,             ! Block 1 Cost per Unit Value or Variable Name
+  2,            ! Block Size 2 Value or Variable Name
+  0,             ! Block 2 Cost per Unit Value or Variable Name
+  3,            ! Block Size 3 Value or Variable Name
+  0,             ! Block 3 Cost per Unit Value or Variable Name
+  4,            ! Block Size 4 Value or Variable Name
+  0,             ! Block 4 Cost per Unit Value or Variable Name
+  remaining,                              ! Block Size 5 Value or Variable Name
+  0;             ! Block 5 Cost per Unit Value or Variable Name
+
+UtilityCost:Charge:Block,
+  FuelOil#2BlocksDemandCharges,           ! Name
+  NoneOil,                  ! Tariff Name
+  TotalDemand,                                 ! Source Variable
+  Annual,                                      ! Season
+  DemandCharges,                               ! Category Variable Name
+  ,                                            ! Remaining Into Variable
+  ,                                            ! Block Size Multiplier Value or Variable Name
+ 1,          ! Block Size 1 Value or Variable Name
+ 0,           ! Block 1 Cost per Unit Value or Variable Name
+ 2,          ! Block Size 2 Value or Variable Name
+ 0,           ! Block 2 Cost per Unit Value or Variable Name
+ 3,          ! Block Size 3 Value or Variable Name
+ 0,           ! Block 3 Cost per Unit Value or Variable Name
+ 4,          ! Block Size 4 Value or Variable Name
+ 0,           ! Block 4 Cost per Unit Value or Variable Name
+ remaining,                                   ! Block Size 5 Value or Variable Name
+ 0;           ! Block 5 Cost per Unit Value or Variable Name
+      

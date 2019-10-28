@@ -1,0 +1,423 @@
+{
+  "rs_means_city": "WHITEHORSE",
+  "rs_means_prov": "YUKON",
+  "envelope": {
+    "exterior_wall_cost": 9549.76,
+    "exterior_wall_area_m2": 212.84,
+    "exterior_wall_cost_per_m2": 44.87,
+    "exterior_roof_cost": 43082.13,
+    "exterior_roof_area_m2": 569.52,
+    "exterior_roof_cost_per_m2": 75.65,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 4682.72,
+    "exterior_fixed_window_area_m2": 62.88,
+    "exterior_fixed_window_cost_per_m2": 74.47,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 0.0,
+    "exterior_skylight_area_m2": 0.0,
+    "exterior_skylight_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 30639.11,
+    "ground_contact_floor_area_m2": 511.16,
+    "ground_contact_floor_cost_per_m2": 59.94,
+    "construction_costs": [
+      {
+        "name": "BTAP-ExteriorRoof-IEAD-4",
+        "conductance": 0.162,
+        "area": 569.52,
+        "cost": 43082.13,
+        "cost_per_area": 75.65,
+        "note": "Surf #1: OK / 2: OK / 3: OK / 4: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-SteelFramed-1",
+        "conductance": 0.21,
+        "area": 130.61,
+        "cost": 4979.48,
+        "cost_per_area": 38.12,
+        "note": "Surf #1: OK / 2: OK / 3: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-6",
+        "conductance": 2.2,
+        "area": 62.88,
+        "cost": 4682.72,
+        "cost_per_area": 74.47,
+        "note": "Surf #1: OK / 2: OK / 3: OK / 1: OK / 2: OK / 3: OK"
+      },
+      {
+        "name": "BTAP-GroundContactFloor-Unheated-1",
+        "conductance": 0.757,
+        "area": 511.16,
+        "cost": 30639.11,
+        "cost_per_area": 59.94,
+        "note": "Surf #1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-Mass-2",
+        "conductance": 0.21,
+        "area": 82.23,
+        "cost": 4570.28,
+        "cost_per_area": 55.58,
+        "note": "Surf #1: OK / 2: OK / 3: OK"
+      }
+    ],
+    "total_envelope_cost": 87953.71
+  },
+  "lighting": {
+    "fixture_report": [
+      {
+        "fixture_type": "Nil",
+        "fixture_description": "",
+        "floor_area_ft2": 5502.0,
+        "cost": 0.0,
+        "cost_per_ft2": 0.0,
+        "spaces": [
+          "attic"
+        ],
+        "number_of_spaces": 1
+      },
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 5502.0,
+        "cost": 29443.86,
+        "cost_per_ft2": 5.35,
+        "spaces": [
+          "Dining",
+          "Kitchen"
+        ],
+        "number_of_spaces": 2
+      }
+    ],
+    "space_report": [
+      {
+        "space": "attic",
+        "zone": "ALL_ST=- undefined -_FL=Building Story 2_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "- undefined -",
+        "zone_multiplier": 1,
+        "fixture_type": "Nil",
+        "fixture_desciption": "",
+        "height_avg_ft": 5.3,
+        "floor_area_ft2": 5502.0,
+        "cost": 0.0,
+        "cost_per_ft2": 0.0,
+        "note": ""
+      },
+      {
+        "space": "Dining",
+        "zone": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Dining - family space",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 4001.5,
+        "cost": 21413.73,
+        "cost_per_ft2": 5.35,
+        "note": ""
+      },
+      {
+        "space": "Kitchen",
+        "zone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Food preparation",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1500.5,
+        "cost": 8030.13,
+        "cost_per_ft2": 5.35,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 29443.86
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 15.3,
+        "ht_roof_ft": 15.3,
+        "longest_distance_to_ext_ft": 52.5,
+        "wiring_and_gas_connections_distance_ft": 52.5,
+        "equipment_cost": 5767.3,
+        "flue_cost": 1628.79,
+        "wiring_and_gas_connections_cost": 8417.3,
+        "pump_cost": 10898.8,
+        "piping_to_pump_cost": 1622.09,
+        "header_distribution_cost": 1299.99,
+        "total_cost": 29634.26
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 15.3,
+        "ht_roof_ft": 15.3,
+        "longest_distance_to_ext_ft": 52.5,
+        "wiring_and_gas_connections_distance_ft": 52.5,
+        "equipment_cost": 0.0,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_to_pump_cost": 0.0,
+        "header_distribution_cost": 1299.99,
+        "total_cost": 1299.99
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 15.3,
+        "ht_roof_ft": 15.3,
+        "longest_distance_to_ext_ft": 52.5,
+        "wiring_and_gas_connections_distance_ft": 52.5,
+        "equipment_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_cost": 0.0,
+        "total_cost": 0.0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "HW",
+        "zone_number": 2,
+        "zone_name": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 14.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3631.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 2319.69,
+        "wiring_cost": 0.0,
+        "num_units": 5,
+        "cummultive_zonal_cost": 5951.17
+      },
+      {
+        "systype": "HW",
+        "zone_number": 3,
+        "zone_name": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1565.64,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 1460.55,
+        "wiring_cost": 0.0,
+        "num_units": 2.0,
+        "cummultive_zonal_cost": 8977.35
+      }
+    ]
+  },
+  "shw": {
+    "nom_flr2flr_hght_ft": 15.3,
+    "ht_roof": 15.3,
+    "shw_longest_distance_to_ext_ft": 52.5,
+    "shw_utility_distance_ft": 52.5,
+    "shwtanks": 0.0,
+    "shw_flues": 0.0,
+    "shw_utilties": 512.2,
+    "shw_pumps": 4840.54,
+    "shw_piping": 405.52,
+    "shw_total": 5758.26
+  },
+  "ventilation": {
+    "system_1": [
+
+    ],
+    "system_2": [
+
+    ],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+        "airloop_flow_m3_per_s": 1.331,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33460.78,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 22.039,
+            "cost": 13191.66
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 122.46,
+            "cost": 28013.1
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+        "airloop_flow_m3_per_s": 0.397,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28040.48,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 6.567,
+            "cost": 5499.31
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 22.411,
+            "cost": 4668.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_4": [
+
+    ],
+    "system_5": [
+
+    ],
+    "system_6": [
+
+    ],
+    "system_7": [
+
+    ],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 91.5,
+      "Total_cost": 899.65
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 16.0,
+        "DuctLength_m": 1.8,
+        "NumberRuns": 2,
+        "DuctCost": 318.73
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Dining - family space",
+          "SupplyDuctSize_in": 21.9,
+          "SupplyDuctLength_m": 28.0,
+          "ReturnDuctSize_in": 21.9,
+          "ReturnDuctLength_m": 28.0,
+          "TotalDuctCost": 8066.14,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.331,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1495.08
+            },
+            {
+              "ThermalZone": "ALL_ST=Dining - family space_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.331,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1495.08
+            },
+            {
+              "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.397,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 258.58
+            },
+            {
+              "ThermalZone": "ALL_ST=Food preparation_FL=Building Story 1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.397,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 258.58
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": [
+
+        ]
+      }
+    ]
+  },
+  "totals": {
+    "envelope": 87953.71,
+    "lighting": 29443.86,
+    "heating_and_cooling": 39911.6,
+    "shw": 5758.26,
+    "ventilation": 139682.31,
+    "grand_total": 302749.74
+  }
+}

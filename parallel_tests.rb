@@ -2,7 +2,7 @@ require 'fileutils'
 require 'parallel'
 require 'open3'
 
-TestOutputFolder = File.join(File.dirname(__FILE__), 'local_test_output')
+
 ProcessorsUsed = (Parallel.processor_count * 2 / 3).floor
 
 class String
@@ -38,7 +38,7 @@ end
 
 
 def write_results(result, test_file)
-  test_file_output = File.join(TestOutputFolder, "#{File.basename(test_file)}_test_output.json")
+  test_file_output = File.join( "#{test_file}_test_output.json")
   File.delete(test_file_output) if File.exist?(test_file_output)
   test_result = false
   if result[2].success?
@@ -69,8 +69,7 @@ class ParallelTests
     did_all_tests_pass = true
 
     @full_file_list = nil
-    FileUtils.rm_rf(TestOutputFolder)
-    FileUtils.mkpath(TestOutputFolder)
+
 
     # load test files from file.
     @full_file_list = file_list.shuffle
@@ -79,9 +78,11 @@ class ParallelTests
     puts "To increase or decrease the ProcessorsUsed, please edit the test/test_run_all_locally.rb file."
     timings_json = Hash.new()
     Parallel.each(@full_file_list, in_threads: (ProcessorsUsed), progress: "Progress :") do |test_file|
+
       file_name = test_file.gsub(/^.+(openstudio-standards\/test\/)/, '')
       timings_json[file_name.to_s] = {}
       timings_json[file_name.to_s]['start'] = Time.now.to_i
+      FileUtils.rm_rf(File.join( test_file, "_test_output.json"))
       did_all_tests_pass = false unless write_results(Open3.capture3('bundle', 'exec', "ruby '#{test_file}'"), test_file)
       timings_json[file_name.to_s]['end'] = Time.now.to_i
       timings_json[file_name.to_s]['total'] = timings_json[file_name.to_s]['end'] - timings_json[file_name.to_s]['start']

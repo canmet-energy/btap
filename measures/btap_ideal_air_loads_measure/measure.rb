@@ -54,8 +54,6 @@ class BTAPIdealAirLoadsMeasure < OpenStudio::Measure::ModelMeasure
     # array of zones initially using ideal air loads
     startingIdealAir = []
 
-    BTAP::Resources::HVAC.clear_all_hvac_from_model(model)
-
     thermalZones = model.getThermalZones
     thermalZones.each do |zone|
       if zone.useIdealAirLoads

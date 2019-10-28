@@ -1,0 +1,4141 @@
+{
+  "rs_means_city": "PRINCE GEORGE",
+  "rs_means_prov": "BRITISH COLUMBIA",
+  "envelope": {
+    "exterior_wall_cost": 272194.96,
+    "exterior_wall_area_m2": 3867.34,
+    "exterior_wall_cost_per_m2": 70.38,
+    "exterior_roof_cost": 1092561.48,
+    "exterior_roof_area_m2": 11663.96,
+    "exterior_roof_cost_per_m2": 93.67,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 112103.06,
+    "exterior_fixed_window_area_m2": 2100.66,
+    "exterior_fixed_window_cost_per_m2": 53.37,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 14395.61,
+    "exterior_skylight_area_m2": 238.04,
+    "exterior_skylight_cost_per_m2": 60.48,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 929676.49,
+    "ground_contact_floor_area_m2": 11902.0,
+    "ground_contact_floor_cost_per_m2": 78.11,
+    "construction_costs": [
+      {
+        "name": "BTAP-ExteriorWall-Mass-4",
+        "conductance": 0.247,
+        "area": 2675.0,
+        "cost": 204924.93,
+        "cost_per_area": 76.61,
+        "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorRoof-IEAD-4",
+        "conductance": 0.156,
+        "area": 11663.96,
+        "cost": 1092561.48,
+        "cost_per_area": 93.67,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "conductance": 1.9,
+        "area": 1536.07,
+        "cost": 75312.32,
+        "cost_per_area": 49.03,
+        "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-Skylight-2",
+        "conductance": 1.9,
+        "area": 162.52,
+        "cost": 9932.31,
+        "cost_per_area": 61.11,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-GroundContactFloor-Unheated-1",
+        "conductance": 0.757,
+        "area": 11902.0,
+        "cost": 929676.49,
+        "cost_per_area": 78.11,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-Mass-2",
+        "conductance": 0.247,
+        "area": 829.44,
+        "cost": 49217.99,
+        "cost_per_area": 59.34,
+        "note": "Surf #1: OK / 2: OK / 3: OK / 4: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-6",
+        "conductance": 1.9,
+        "area": 423.79,
+        "cost": 32217.0,
+        "cost_per_area": 76.02,
+        "note": "Surf #1: OK / 2: OK / 3: OK / 4: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-Skylight-1",
+        "conductance": 1.9,
+        "area": 75.52,
+        "cost": 4463.3,
+        "cost_per_area": 59.1,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-WoodFramed-5",
+        "conductance": 0.247,
+        "area": 362.9,
+        "cost": 18052.04,
+        "cost_per_area": 49.74,
+        "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-4",
+        "conductance": 1.9,
+        "area": 140.8,
+        "cost": 4573.74,
+        "cost_per_area": 32.48,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      }
+    ],
+    "total_envelope_cost": 2420931.48
+  },
+  "lighting": {
+    "fixture_report": [
+      {
+        "fixture_type": "9",
+        "fixture_description": "H.I.D. High Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 52FC, 1 Fixtures per 1000 ft2",
+        "floor_area_ft2": 10634.7,
+        "cost": 25280.07,
+        "cost_per_ft2": 2.38,
+        "spaces": [
+          "Auditorium_ZN_1_FLR_1"
+        ],
+        "number_of_spaces": 1
+      },
+      {
+        "fixture_type": "17",
+        "fixture_description": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "floor_area_ft2": 34702.9,
+        "cost": 194924.49,
+        "cost_per_ft2": 5.62,
+        "spaces": [
+          "Aux_Gym_ZN_1_FLR_1",
+          "Gym_ZN_1_FLR_1"
+        ],
+        "number_of_spaces": 2
+      },
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 165549.2,
+        "cost": 914594.5,
+        "cost_per_ft2": 5.52,
+        "spaces": [
+          "Bathrooms_ZN_1_FLR_1",
+          "Bathrooms_ZN_1_FLR_2",
+          "Cafeteria_ZN_1_FLR_1",
+          "Corner_Class_1_Pod_1_ZN_1_FLR_1",
+          "Corner_Class_1_Pod_1_ZN_1_FLR_2",
+          "Corner_Class_1_Pod_2_ZN_1_FLR_1",
+          "Corner_Class_1_Pod_2_ZN_1_FLR_2",
+          "Corner_Class_1_Pod_3_ZN_1_FLR_1",
+          "Corner_Class_1_Pod_3_ZN_1_FLR_2",
+          "Corner_Class_2_Pod_1_ZN_1_FLR_1",
+          "Corner_Class_2_Pod_1_ZN_1_FLR_2",
+          "Corner_Class_2_Pod_2_ZN_1_FLR_1",
+          "Corner_Class_2_Pod_2_ZN_1_FLR_2",
+          "Corner_Class_2_Pod_3_ZN_1_FLR_1",
+          "Corner_Class_2_Pod_3_ZN_1_FLR_2",
+          "Corridor_Pod_1_ZN_1_FLR_1",
+          "Corridor_Pod_1_ZN_1_FLR_2",
+          "Corridor_Pod_2_ZN_1_FLR_1",
+          "Corridor_Pod_2_ZN_1_FLR_2",
+          "Corridor_Pod_3_ZN_1_FLR_1",
+          "Corridor_Pod_3_ZN_1_FLR_2",
+          "Kitchen_ZN_1_FLR_1",
+          "LIBRARY_MEDIA_CENTER_ZN_1_FLR_2",
+          "Lobby_ZN_1_FLR_1",
+          "Lobby_ZN_1_FLR_2",
+          "Main_Corridor_ZN_1_FLR_1",
+          "Main_Corridor_ZN_1_FLR_2",
+          "Mech_ZN_1_FLR_1",
+          "Mech_ZN_1_FLR_2",
+          "Mult_Class_1_Pod_1_ZN_1_FLR_1",
+          "Mult_Class_1_Pod_1_ZN_1_FLR_2",
+          "Mult_Class_1_Pod_2_ZN_1_FLR_1",
+          "Mult_Class_1_Pod_2_ZN_1_FLR_2",
+          "Mult_Class_1_Pod_3_ZN_1_FLR_1",
+          "Mult_Class_1_Pod_3_ZN_1_FLR_2",
+          "Mult_Class_2_Pod_1_ZN_1_FLR_1",
+          "Mult_Class_2_Pod_1_ZN_1_FLR_2",
+          "Mult_Class_2_Pod_2_ZN_1_FLR_1",
+          "Mult_Class_2_Pod_2_ZN_1_FLR_2",
+          "Mult_Class_2_Pod_3_ZN_1_FLR_1",
+          "Mult_Class_2_Pod_3_ZN_1_FLR_2",
+          "Offices_ZN_1_FLR_1",
+          "Offices_ZN_1_FLR_2"
+        ],
+        "number_of_spaces": 43
+      }
+    ],
+    "space_report": [
+      {
+        "space": "Auditorium_ZN_1_FLR_1",
+        "zone": "Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Audience seating area permanent - auditorium",
+        "zone_multiplier": 1,
+        "fixture_type": "9",
+        "fixture_desciption": "H.I.D. High Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 52FC, 1 Fixtures per 1000 ft2",
+        "height_avg_ft": 26.2,
+        "floor_area_ft2": 10634.7,
+        "cost": 25280.07,
+        "cost_per_ft2": 2.38,
+        "note": ""
+      },
+      {
+        "space": "Aux_Gym_ZN_1_FLR_1",
+        "zone": "Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Gymnasium/Fitness centre playing area",
+        "zone_multiplier": 1,
+        "fixture_type": "17",
+        "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "height_avg_ft": 26.2,
+        "floor_area_ft2": 13433.4,
+        "cost": 75454.64,
+        "cost_per_ft2": 5.62,
+        "note": ""
+      },
+      {
+        "space": "Bathrooms_ZN_1_FLR_1",
+        "zone": "Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Washroom - other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 2260.4,
+        "cost": 12487.96,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Bathrooms_ZN_1_FLR_2",
+        "zone": "Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Washroom - other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 2260.4,
+        "cost": 12487.96,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Cafeteria_ZN_1_FLR_1",
+        "zone": "Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Conference/Meeting/Multi-purpose room",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 6716.7,
+        "cost": 37107.09,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_1_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_1_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_2_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_2_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_3_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_1_Pod_3_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_1_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_1_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_2_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_2_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_3_ZN_1_FLR_1",
+        "zone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corner_Class_2_Pod_3_ZN_1_FLR_2",
+        "zone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 1065.6,
+        "cost": 5887.18,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_1_ZN_1_FLR_1",
+        "zone": "Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_1_ZN_1_FLR_2",
+        "zone": "Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_2_ZN_1_FLR_1",
+        "zone": "Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_2_ZN_1_FLR_2",
+        "zone": "Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_3_ZN_1_FLR_1",
+        "zone": "Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Corridor_Pod_3_ZN_1_FLR_2",
+        "zone": "Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3444.5,
+        "cost": 19029.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Gym_ZN_1_FLR_1",
+        "zone": "Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN",
+        "building_type": "Space Function",
+        "space_type": "Gymnasium/Fitness centre playing area",
+        "zone_multiplier": 1,
+        "fixture_type": "17",
+        "fixture_desciption": "H.I.D. Low Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 28FC, 4 Fixtures per 1000 ft2",
+        "height_avg_ft": 26.2,
+        "floor_area_ft2": 21269.5,
+        "cost": 119469.85,
+        "cost_per_ft2": 5.62,
+        "note": ""
+      },
+      {
+        "space": "Kitchen_ZN_1_FLR_1",
+        "zone": "Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Food preparation area",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 2325.0,
+        "cost": 12844.76,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "LIBRARY_MEDIA_CENTER_ZN_1_FLR_2",
+        "zone": "Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Library reading area",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 9041.7,
+        "cost": 49951.85,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Lobby_ZN_1_FLR_1",
+        "zone": "Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Lobby - other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 2260.4,
+        "cost": 12487.96,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Lobby_ZN_1_FLR_2",
+        "zone": "Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Lobby - other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 2260.4,
+        "cost": 12487.96,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Main_Corridor_ZN_1_FLR_1",
+        "zone": "Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 12270.9,
+        "cost": 67791.79,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Main_Corridor_ZN_1_FLR_2",
+        "zone": "Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 12270.9,
+        "cost": 67791.79,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mech_ZN_1_FLR_1",
+        "zone": "Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN",
+        "building_type": "Space Function",
+        "space_type": "Electrical/Mechanical room-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3681.3,
+        "cost": 20337.54,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mech_ZN_1_FLR_2",
+        "zone": "Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN",
+        "building_type": "Space Function",
+        "space_type": "Electrical/Mechanical room-sch-D",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 3681.3,
+        "cost": 20337.54,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_1_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_1_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_2_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_2_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_3_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_1_Pod_3_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_1_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_1_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_2_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_2_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_3_ZN_1_FLR_1",
+        "zone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Mult_Class_2_Pod_3_ZN_1_FLR_2",
+        "zone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Classroom/Lecture hall/Training room other",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5134.4,
+        "cost": 28365.51,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Offices_ZN_1_FLR_1",
+        "zone": "Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Office enclosed <= 25 m2",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5726.4,
+        "cost": 31636.17,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "Offices_ZN_1_FLR_2",
+        "zone": "Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Office enclosed <= 25 m2",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 13.1,
+        "floor_area_ft2": 5726.4,
+        "cost": 31636.17,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 1134799.11
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 15.9,
+        "ht_roof_ft": 31.9,
+        "longest_distance_to_ext_ft": 387.6,
+        "wiring_and_gas_connections_distance_ft": 387.6,
+        "equipment_cost": 0.0,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_to_pump_cost": 0.0,
+        "header_distribution_cost": 2445.08,
+        "total_cost": 2445.08
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 15.9,
+        "ht_roof_ft": 31.9,
+        "longest_distance_to_ext_ft": 387.6,
+        "wiring_and_gas_connections_distance_ft": 387.6,
+        "equipment_cost": 0.0,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_to_pump_cost": 0.0,
+        "header_distribution_cost": 2445.08,
+        "total_cost": 2445.08
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 15.9,
+        "ht_roof_ft": 31.9,
+        "longest_distance_to_ext_ft": 387.6,
+        "wiring_and_gas_connections_distance_ft": 387.6,
+        "equipment_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_cost": 0.0,
+        "total_cost": 0.0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "BB",
+        "zone_number": 1,
+        "zone_name": "Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 35.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 6147.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 2354.16,
+        "num_units": 39,
+        "cummultive_zonal_cost": 8501.32
+      },
+      {
+        "systype": "BB",
+        "zone_number": 2,
+        "zone_name": "Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 53.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 9141.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 4708.33,
+        "num_units": 58,
+        "cummultive_zonal_cost": 22351.56
+      },
+      {
+        "systype": "BB",
+        "zone_number": 3,
+        "zone_name": "Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 7.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1260.95,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 557.56,
+        "num_units": 8,
+        "cummultive_zonal_cost": 24170.08
+      },
+      {
+        "systype": "BB",
+        "zone_number": 4,
+        "zone_name": "Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 8.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1429.9,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 557.56,
+        "num_units": 9.071830088569518,
+        "cummultive_zonal_cost": 26157.54
+      },
+      {
+        "systype": "BB",
+        "zone_number": 5,
+        "zone_name": "Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 17.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2994.77,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1548.79,
+        "num_units": 19,
+        "cummultive_zonal_cost": 30701.1
+      },
+      {
+        "systype": "BB",
+        "zone_number": 6,
+        "zone_name": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 32266.33
+      },
+      {
+        "systype": "BB",
+        "zone_number": 7,
+        "zone_name": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 33989.18
+      },
+      {
+        "systype": "BB",
+        "zone_number": 8,
+        "zone_name": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 35554.42
+      },
+      {
+        "systype": "BB",
+        "zone_number": 9,
+        "zone_name": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 37277.27
+      },
+      {
+        "systype": "BB",
+        "zone_number": 10,
+        "zone_name": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 38842.5
+      },
+      {
+        "systype": "BB",
+        "zone_number": 11,
+        "zone_name": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 40565.35
+      },
+      {
+        "systype": "BB",
+        "zone_number": 12,
+        "zone_name": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 42130.58
+      },
+      {
+        "systype": "BB",
+        "zone_number": 13,
+        "zone_name": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 43853.44
+      },
+      {
+        "systype": "BB",
+        "zone_number": 14,
+        "zone_name": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 45418.67
+      },
+      {
+        "systype": "BB",
+        "zone_number": 15,
+        "zone_name": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 47141.52
+      },
+      {
+        "systype": "BB",
+        "zone_number": 16,
+        "zone_name": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 6,
+        "cummultive_zonal_cost": 48706.75
+      },
+      {
+        "systype": "BB",
+        "zone_number": 17,
+        "zone_name": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 619.52,
+        "num_units": 7,
+        "cummultive_zonal_cost": 50429.6
+      },
+      {
+        "systype": "BB",
+        "zone_number": 18,
+        "zone_name": "Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 8.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1427.12,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 9.054231074532085,
+        "cummultive_zonal_cost": 52011.6
+      },
+      {
+        "systype": "BB",
+        "zone_number": 19,
+        "zone_name": "Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 11.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2049.05,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 13,
+        "cummultive_zonal_cost": 54215.53
+      },
+      {
+        "systype": "BB",
+        "zone_number": 20,
+        "zone_name": "Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 8.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1418.57,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 9,
+        "cummultive_zonal_cost": 55788.99
+      },
+      {
+        "systype": "BB",
+        "zone_number": 21,
+        "zone_name": "Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 11.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2049.05,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 13,
+        "cummultive_zonal_cost": 57992.92
+      },
+      {
+        "systype": "BB",
+        "zone_number": 22,
+        "zone_name": "Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 8.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1429.32,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 9.068202707219251,
+        "cummultive_zonal_cost": 59577.12
+      },
+      {
+        "systype": "BB",
+        "zone_number": 23,
+        "zone_name": "Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 11.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2049.05,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 154.88,
+        "num_units": 13,
+        "cummultive_zonal_cost": 61781.05
+      },
+      {
+        "systype": "BB",
+        "zone_number": 24,
+        "zone_name": "Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 43.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 7250.49,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 0.0,
+        "num_units": 46,
+        "cummultive_zonal_cost": 69031.54
+      },
+      {
+        "systype": "BB",
+        "zone_number": 25,
+        "zone_name": "Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 278.78,
+        "num_units": 4,
+        "cummultive_zonal_cost": 69940.8
+      },
+      {
+        "systype": "BB",
+        "zone_number": 26,
+        "zone_name": "Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 26.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 4570.96,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1827.57,
+        "num_units": 29,
+        "cummultive_zonal_cost": 76339.33
+      },
+      {
+        "systype": "BB",
+        "zone_number": 27,
+        "zone_name": "Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 464.64,
+        "num_units": 7,
+        "cummultive_zonal_cost": 77907.3
+      },
+      {
+        "systype": "BB",
+        "zone_number": 28,
+        "zone_name": "Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 7.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1260.95,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 464.64,
+        "num_units": 8,
+        "cummultive_zonal_cost": 79632.9
+      },
+      {
+        "systype": "BB",
+        "zone_number": 29,
+        "zone_name": "Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 23.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3940.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1084.15,
+        "num_units": 25,
+        "cummultive_zonal_cost": 84657.53
+      },
+      {
+        "systype": "BB",
+        "zone_number": 30,
+        "zone_name": "Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 31.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 5359.06,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1084.15,
+        "num_units": 34,
+        "cummultive_zonal_cost": 91100.74
+      },
+      {
+        "systype": "BB",
+        "zone_number": 31,
+        "zone_name": "Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 0.0,
+        "num_units": 7,
+        "cummultive_zonal_cost": 92204.08
+      },
+      {
+        "systype": "BB",
+        "zone_number": 32,
+        "zone_name": "Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 9.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1576.19,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 0.0,
+        "num_units": 10,
+        "cummultive_zonal_cost": 93780.27
+      },
+      {
+        "systype": "BB",
+        "zone_number": 33,
+        "zone_name": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 98259.14
+      },
+      {
+        "systype": "BB",
+        "zone_number": 34,
+        "zone_name": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3322.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 21.081926804812834,
+        "cummultive_zonal_cost": 103223.77
+      },
+      {
+        "systype": "BB",
+        "zone_number": 35,
+        "zone_name": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 107702.64
+      },
+      {
+        "systype": "BB",
+        "zone_number": 36,
+        "zone_name": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3310.01,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 21,
+        "cummultive_zonal_cost": 112654.37
+      },
+      {
+        "systype": "BB",
+        "zone_number": 37,
+        "zone_name": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 117133.23
+      },
+      {
+        "systype": "BB",
+        "zone_number": 38,
+        "zone_name": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3310.01,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 21,
+        "cummultive_zonal_cost": 122084.96
+      },
+      {
+        "systype": "BB",
+        "zone_number": 39,
+        "zone_name": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 126563.82
+      },
+      {
+        "systype": "BB",
+        "zone_number": 40,
+        "zone_name": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3314.53,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 21.02869318181818,
+        "cummultive_zonal_cost": 131520.07
+      },
+      {
+        "systype": "BB",
+        "zone_number": 41,
+        "zone_name": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 135998.94
+      },
+      {
+        "systype": "BB",
+        "zone_number": 42,
+        "zone_name": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3314.38,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 21.027776153074864,
+        "cummultive_zonal_cost": 140955.04
+      },
+      {
+        "systype": "BB",
+        "zone_number": 43,
+        "zone_name": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2837.15,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 18,
+        "cummultive_zonal_cost": 145433.9
+      },
+      {
+        "systype": "BB",
+        "zone_number": 44,
+        "zone_name": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 19.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3467.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1641.72,
+        "num_units": 22,
+        "cummultive_zonal_cost": 150543.25
+      },
+      {
+        "systype": "BB",
+        "zone_number": 45,
+        "zone_name": "Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 16.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2844.71,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1610.74,
+        "num_units": 18.047959141042778,
+        "cummultive_zonal_cost": 154998.7
+      },
+      {
+        "systype": "BB",
+        "zone_number": 46,
+        "zone_name": "Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 20.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 3467.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1610.74,
+        "num_units": 22,
+        "cummultive_zonal_cost": 160077.07
+      }
+    ]
+  },
+  "shw": {
+    "nom_flr2flr_hght_ft": 15.9,
+    "ht_roof": 31.9,
+    "shw_longest_distance_to_ext_ft": 387.6,
+    "shw_utility_distance_ft": 387.6,
+    "shwtanks": 0.0,
+    "shw_flues": 0.0,
+    "shw_utilties": 4355.04,
+    "shw_pumps": 7223.06,
+    "shw_piping": 457.31,
+    "shw_total": 12035.42
+  },
+  "ventilation": {
+    "system_1": [
+
+    ],
+    "system_2": [
+
+    ],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 4.065,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 68940.29,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 4.065,
+          "hrv_return_fan_size_m3ps": 4.065,
+          "hrv_cost": 24803.0
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 73.241,
+            "cost": 34071.89
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 332.028,
+            "cost": 65986.76
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "airloop_flow_m3_per_s": 9.077,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 135227.09,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN ERV",
+          "hrv_size_m3ps": 1.902,
+          "hrv_return_fan_size_m3ps": 1.902,
+          "hrv_cost": 16804.63
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 150.254,
+            "cost": 64590.89
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 337.185,
+            "cost": 70700.1
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.291,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.064,
+          "hrv_return_fan_size_m3ps": 0.064,
+          "hrv_cost": 9755.49
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 4.824,
+            "cost": 5454.56
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 10.568,
+            "cost": 3734.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.495,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.064,
+          "hrv_return_fan_size_m3ps": 0.064,
+          "hrv_cost": 9755.49
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.197,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 15.355,
+            "cost": 4015.83
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN",
+        "airloop_flow_m3_per_s": 1.459,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN ERV",
+          "hrv_size_m3ps": 0.983,
+          "hrv_return_fan_size_m3ps": 0.983,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 24.15,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 91.44,
+            "cost": 18853.36
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.549,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 9.081,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 28.921,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.67,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 11.097,
+            "cost": 10232.82
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 31.781,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.54,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.946,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 28.729,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.665,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 11.001,
+            "cost": 10232.82
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 31.645,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.541,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.958,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 28.745,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.666,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 11.018,
+            "cost": 10232.82
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 31.669,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.452,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 7.488,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 26.66,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.579,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 9.584,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 29.634,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.452,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 7.488,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 26.66,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.579,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 9.592,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 29.646,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.462,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 7.655,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 26.897,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 0.586,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 0.276,
+          "hrv_return_fan_size_m3ps": 0.276,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 9.7,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 29.798,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.488,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.071,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 17.126,
+            "cost": 4610.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.835,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 13.823,
+            "cost": 10671.4
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 25.288,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.477,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 7.891,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 16.87,
+            "cost": 4610.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.825,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 13.654,
+            "cost": 10671.4
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 25.048,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.488,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.076,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 17.134,
+            "cost": 4610.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 0.833,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.098,
+          "hrv_return_fan_size_m3ps": 0.098,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 13.791,
+            "cost": 10671.4
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 25.242,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN",
+        "airloop_flow_m3_per_s": 5.763,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 99213.49,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN ERV",
+          "hrv_size_m3ps": 3.011,
+          "hrv_return_fan_size_m3ps": 3.011,
+          "hrv_cost": 18868.12
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 95.481,
+            "cost": 42237.49
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 316.7,
+            "cost": 65986.76
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+        "airloop_flow_m3_per_s": 0.685,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN ERV",
+          "hrv_size_m3ps": 0.296,
+          "hrv_return_fan_size_m3ps": 0.296,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 11.346,
+            "cost": 10232.82
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 33.333,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN",
+        "airloop_flow_m3_per_s": 2.375,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN ERV",
+          "hrv_size_m3ps": 0.725,
+          "hrv_return_fan_size_m3ps": 0.725,
+          "hrv_cost": 11739.32
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 39.308,
+            "cost": 17905.86
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 97.98,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.864,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.864,
+          "hrv_return_fan_size_m3ps": 0.864,
+          "hrv_cost": 11739.32
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 15.567,
+            "cost": 11646.2
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 70.573,
+            "cost": 14140.02
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.871,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.864,
+          "hrv_return_fan_size_m3ps": 0.864,
+          "hrv_cost": 11739.32
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 15.475,
+            "cost": 11646.2
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 70.736,
+            "cost": 14140.02
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 1.547,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.347,
+          "hrv_return_fan_size_m3ps": 0.347,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 25.602,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 56.541,
+            "cost": 14140.02
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+        "airloop_flow_m3_per_s": 2.519,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 68940.29,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN ERV",
+          "hrv_size_m3ps": 0.347,
+          "hrv_return_fan_size_m3ps": 0.347,
+          "hrv_cost": 10295.56
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 41.706,
+            "cost": 17905.86
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 79.392,
+            "cost": 18853.36
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN",
+        "airloop_flow_m3_per_s": 0.261,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN ERV",
+          "hrv_size_m3ps": 0.104,
+          "hrv_return_fan_size_m3ps": 0.104,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 4.317,
+            "cost": 5454.56
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 12.19,
+            "cost": 3774.08
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN",
+        "airloop_flow_m3_per_s": 0.54,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN ERV",
+          "hrv_size_m3ps": 0.104,
+          "hrv_return_fan_size_m3ps": 0.104,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 8.943,
+            "cost": 6822.96
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 18.755,
+            "cost": 4610.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 1.837,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 31.157,
+            "cost": 16124.72
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 120.418,
+            "cost": 28280.04
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 2.588,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 68940.29,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 42.84,
+            "cost": 20869.06
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 138.045,
+            "cost": 28280.04
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 1.771,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 30.217,
+            "cost": 16124.72
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 118.868,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 2.532,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 68940.29,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 41.91,
+            "cost": 17905.86
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 136.726,
+            "cost": 28280.04
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 1.775,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 30.264,
+            "cost": 16124.72
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 118.947,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 2.537,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 68940.29,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 41.998,
+            "cost": 17905.86
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 136.851,
+            "cost": 28280.04
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.328,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 23.303,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 108.451,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.503,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 26.854,
+            "cost": 14165.69
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 112.562,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.328,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 23.303,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 108.451,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.505,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 26.884,
+            "cost": 14165.69
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 112.611,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.328,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 23.303,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 108.451,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+        "airloop_flow_m3_per_s": 1.554,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN ERV",
+          "hrv_size_m3ps": 1.328,
+          "hrv_return_fan_size_m3ps": 1.328,
+          "hrv_cost": 13912.77
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 27.584,
+            "cost": 14165.69
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 113.764,
+            "cost": 23566.7
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 1.665,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.224,
+          "hrv_return_fan_size_m3ps": 0.224,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 27.555,
+            "cost": 14165.69
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 52.145,
+            "cost": 14140.02
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 2.373,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 33691.34,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.224,
+          "hrv_return_fan_size_m3ps": 0.224,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 39.281,
+            "cost": 17905.86
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 68.784,
+            "cost": 14140.02
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_4": [
+
+    ],
+    "system_5": [
+
+    ],
+    "system_6": [
+
+    ],
+    "system_7": [
+
+    ],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 1668.6,
+      "Total_cost": 17922.11
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 36.0,
+        "DuctLength_m": 4.0,
+        "NumberRuns": 2,
+        "DuctCost": 2233.76
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Gymnasium/Fitness centre playing area",
+          "SupplyDuctSize_in": 104.69,
+          "SupplyDuctLength_m": 167.0,
+          "ReturnDuctSize_in": 104.69,
+          "ReturnDuctLength_m": 167.0,
+          "TotalDuctCost": 93268.96,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "Building Story 2",
+          "Predominant_space_type": "Corridor/Transition area other-sch-D",
+          "SupplyDuctSize_in": 87.56,
+          "SupplyDuctLength_m": 167.0,
+          "ReturnDuctSize_in": 87.56,
+          "ReturnDuctLength_m": 167.0,
+          "TotalDuctCost": 93268.96,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 4.065,
+              "num_diff": 34,
+              "ducting_lbs": 1360,
+              "duct_insulation_ft2": 850,
+              "cost": 5282.1
+            },
+            {
+              "ThermalZone": "Sp-Auditorium_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 4.065,
+              "num_diff": 34,
+              "ducting_lbs": 1360,
+              "duct_insulation_ft2": 850,
+              "cost": 5282.1
+            },
+            {
+              "ThermalZone": "Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 9.077,
+              "num_diff": 76,
+              "ducting_lbs": 3040,
+              "duct_insulation_ft2": 1900,
+              "cost": 11807.06
+            },
+            {
+              "ThermalZone": "Sp-Aux_Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 9.077,
+              "num_diff": 76,
+              "ducting_lbs": 3040,
+              "duct_insulation_ft2": 1900,
+              "cost": 11807.06
+            },
+            {
+              "ThermalZone": "Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.291,
+              "num_diff": 4,
+              "ducting_lbs": 225,
+              "duct_insulation_ft2": 196,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "Sp-Bathrooms_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.291,
+              "num_diff": 4,
+              "ducting_lbs": 225,
+              "duct_insulation_ft2": 196,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.459,
+              "num_diff": 12,
+              "ducting_lbs": 480,
+              "duct_insulation_ft2": 300,
+              "cost": 1864.27
+            },
+            {
+              "ThermalZone": "Sp-Cafeteria_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-east ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.459,
+              "num_diff": 12,
+              "ducting_lbs": 480,
+              "duct_insulation_ft2": 300,
+              "cost": 1864.27
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.549,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.549,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.54,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.54,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.541,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.541,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.452,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.452,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.452,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.452,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.462,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.462,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.488,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.488,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.477,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.477,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.488,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.488,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 5.763,
+              "num_diff": 48,
+              "ducting_lbs": 1920,
+              "duct_insulation_ft2": 1200,
+              "cost": 7457.09
+            },
+            {
+              "ThermalZone": "Sp-Gym_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-core ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 5.763,
+              "num_diff": 48,
+              "ducting_lbs": 1920,
+              "duct_insulation_ft2": 1200,
+              "cost": 7457.09
+            },
+            {
+              "ThermalZone": "Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.685,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Kitchen_ZN_1_FLR_1 Sys-3 Flr-1 Sch-B HPlcmt-east ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.685,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.864,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Lobby_ZN_1_FLR_1 Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.864,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.547,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Main_Corridor_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.547,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.261,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "Sp-Mech_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-core ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.261,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.837,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.837,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.771,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.771,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.775,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.775,
+              "num_diff": 15,
+              "ducting_lbs": 600,
+              "duct_insulation_ft2": 375,
+              "cost": 2330.34
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_1 Sys-3 Flr-1 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.328,
+              "num_diff": 11,
+              "ducting_lbs": 440,
+              "duct_insulation_ft2": 275,
+              "cost": 1708.92
+            },
+            {
+              "ThermalZone": "Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.665,
+              "num_diff": 14,
+              "ducting_lbs": 560,
+              "duct_insulation_ft2": 350,
+              "cost": 2174.98
+            },
+            {
+              "ThermalZone": "Sp-Offices_ZN_1_FLR_1 Sys-3 Flr-1 Sch-A HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.665,
+              "num_diff": 14,
+              "ducting_lbs": 560,
+              "duct_insulation_ft2": 350,
+              "cost": 2174.98
+            }
+          ]
+        },
+        {
+          "Story": "Building Story 2",
+          "thermal_zones": [
+            {
+              "ThermalZone": "Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.495,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Bathrooms_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.495,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 345.81
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.67,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.67,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.665,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.665,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.666,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.666,
+              "num_diff": 6,
+              "ducting_lbs": 495,
+              "duct_insulation_ft2": 380,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.579,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.579,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.579,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.579,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.586,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corner_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.586,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.835,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.835,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.825,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.825,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.833,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Corridor_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.833,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.375,
+              "num_diff": 20,
+              "ducting_lbs": 800,
+              "duct_insulation_ft2": 500,
+              "cost": 3107.12
+            },
+            {
+              "ThermalZone": "Sp-LIBRARY_MEDIA_CENTER_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-east ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.375,
+              "num_diff": 20,
+              "ducting_lbs": 800,
+              "duct_insulation_ft2": 500,
+              "cost": 3107.12
+            },
+            {
+              "ThermalZone": "Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.871,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Lobby_ZN_1_FLR_2 Sys-3 Flr-2 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.871,
+              "num_diff": 8,
+              "ducting_lbs": 795,
+              "duct_insulation_ft2": 528,
+              "cost": 767.88
+            },
+            {
+              "ThermalZone": "Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.519,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Main_Corridor_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-west ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.519,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.54,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Mech_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-core ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.54,
+              "num_diff": 6,
+              "ducting_lbs": 395,
+              "duct_insulation_ft2": 306,
+              "cost": 575.91
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.588,
+              "num_diff": 22,
+              "ducting_lbs": 880,
+              "duct_insulation_ft2": 550,
+              "cost": 3417.83
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.588,
+              "num_diff": 22,
+              "ducting_lbs": 880,
+              "duct_insulation_ft2": 550,
+              "cost": 3417.83
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.532,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.532,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.537,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_1_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.537,
+              "num_diff": 21,
+              "ducting_lbs": 840,
+              "duct_insulation_ft2": 525,
+              "cost": 3262.48
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.503,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_1_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.503,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.505,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_2_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.505,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.554,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Mult_Class_2_Pod_3_ZN_1_FLR_2 Sys-3 Flr-2 Sch-D HPlcmt-north ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 1.554,
+              "num_diff": 13,
+              "ducting_lbs": 520,
+              "duct_insulation_ft2": 325,
+              "cost": 2019.63
+            },
+            {
+              "ThermalZone": "Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.373,
+              "num_diff": 20,
+              "ducting_lbs": 800,
+              "duct_insulation_ft2": 500,
+              "cost": 3107.12
+            },
+            {
+              "ThermalZone": "Sp-Offices_ZN_1_FLR_2 Sys-3 Flr-2 Sch-A HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 2.373,
+              "num_diff": 20,
+              "ducting_lbs": 800,
+              "duct_insulation_ft2": 500,
+              "cost": 3107.12
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": [
+
+        ]
+      },
+      {
+        "floor": "Building Story 2",
+        "air_systems": [
+
+        ]
+      }
+    ]
+  },
+  "totals": {
+    "envelope": 2420931.48,
+    "lighting": 1134799.11,
+    "heating_and_cooling": 164967.23,
+    "shw": 12035.42,
+    "ventilation": 4770966.41,
+    "grand_total": 8503699.64
+  }
+}

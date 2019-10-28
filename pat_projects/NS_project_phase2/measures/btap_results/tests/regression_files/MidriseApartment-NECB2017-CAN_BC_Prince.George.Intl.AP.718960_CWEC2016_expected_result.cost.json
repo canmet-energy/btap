@@ -1,0 +1,1966 @@
+{
+  "rs_means_city": "PRINCE GEORGE",
+  "rs_means_prov": "BRITISH COLUMBIA",
+  "envelope": {
+    "exterior_wall_cost": 50981.65,
+    "exterior_wall_area_m2": 999.2,
+    "exterior_wall_cost_per_m2": 51.02,
+    "exterior_roof_cost": 71936.61,
+    "exterior_roof_area_m2": 767.95,
+    "exterior_roof_cost_per_m2": 93.67,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 17972.92,
+    "exterior_fixed_window_area_m2": 542.84,
+    "exterior_fixed_window_cost_per_m2": 33.11,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 929.4,
+    "exterior_skylight_area_m2": 15.63,
+    "exterior_skylight_cost_per_m2": 59.46,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 61211.89,
+    "ground_contact_floor_area_m2": 783.66,
+    "ground_contact_floor_cost_per_m2": 78.11,
+    "construction_costs": [
+      {
+        "name": "BTAP-ExteriorWall-Mass-2",
+        "conductance": 0.247,
+        "area": 26.48,
+        "cost": 1571.66,
+        "cost_per_area": 59.35,
+        "note": "Surf #1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-4",
+        "conductance": 1.9,
+        "area": 522.24,
+        "cost": 16962.95,
+        "cost_per_area": 32.48,
+        "note": "Surf #1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-GroundContactFloor-Unheated-1",
+        "conductance": 0.757,
+        "area": 783.66,
+        "cost": 61211.89,
+        "cost_per_area": 78.11,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-WoodFramed-5",
+        "conductance": 0.247,
+        "area": 934.8,
+        "cost": 46504.74,
+        "cost_per_area": 49.75,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-Mass-4",
+        "conductance": 0.247,
+        "area": 37.92,
+        "cost": 2905.25,
+        "cost_per_area": 76.62,
+        "note": "Surf #1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "conductance": 1.9,
+        "area": 20.6,
+        "cost": 1009.97,
+        "cost_per_area": 49.03,
+        "note": "Surf #1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorRoof-IEAD-4",
+        "conductance": 0.156,
+        "area": 767.95,
+        "cost": 71936.61,
+        "cost_per_area": 93.67,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-Skylight-2",
+        "conductance": 1.9,
+        "area": 1.55,
+        "cost": 94.92,
+        "cost_per_area": 61.11,
+        "note": "Surf #1: OK"
+      },
+      {
+        "name": "BTAP-Skylight-1",
+        "conductance": 1.9,
+        "area": 14.08,
+        "cost": 834.48,
+        "cost_per_area": 59.27,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      }
+    ],
+    "total_envelope_cost": 203032.49
+  },
+  "lighting": {
+    "fixture_report": [
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 4293.5,
+        "cost": 23720.39,
+        "cost_per_ft2": 5.52,
+        "spaces": [
+          "G Corridor",
+          "M Corridor",
+          "Office",
+          "T Corridor"
+        ],
+        "number_of_spaces": 4
+      },
+      {
+        "fixture_type": "6",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "floor_area_ft2": 29446.9,
+        "cost": 51995.45,
+        "cost_per_ft2": 1.77,
+        "spaces": [
+          "G N1 Apartment",
+          "G N2 Apartment",
+          "G NE Apartment",
+          "G NW Apartment",
+          "G S1 Apartment",
+          "G S2 Apartment",
+          "G SW Apartment",
+          "M N1 Apartment",
+          "M N2 Apartment",
+          "M NE Apartment",
+          "M NW Apartment",
+          "M S1 Apartment",
+          "M S2 Apartment",
+          "M SE Apartment",
+          "M SW Apartment",
+          "T N1 Apartment",
+          "T N2 Apartment",
+          "T NE Apartment",
+          "T NW Apartment",
+          "T S1 Apartment",
+          "T S2 Apartment",
+          "T SE Apartment",
+          "T SW Apartment"
+        ],
+        "number_of_spaces": 23
+      }
+    ],
+    "space_report": [
+      {
+        "space": "G Corridor",
+        "zone": "Sp-G Corridor Sys-1 Flr-1 Sch-G HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 835.9,
+        "cost": 4618.13,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "G N1 Apartment",
+        "zone": "Sp-G N1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G N2 Apartment",
+        "zone": "Sp-G N2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G NE Apartment",
+        "zone": "Sp-G NE Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G NW Apartment",
+        "zone": "Sp-G NW Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G S1 Apartment",
+        "zone": "Sp-G S1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G S2 Apartment",
+        "zone": "Sp-G S2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "G SW Apartment",
+        "zone": "Sp-G SW Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M Corridor",
+        "zone": "Sp-M Corridor Sys-1 Flr-2 Sch-G HPlcmt-east ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 2,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1671.8,
+        "cost": 9236.26,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "M N1 Apartment",
+        "zone": "Sp-M N1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M N2 Apartment",
+        "zone": "Sp-M N2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M NE Apartment",
+        "zone": "Sp-M NE Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M NW Apartment",
+        "zone": "Sp-M NW Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M S1 Apartment",
+        "zone": "Sp-M S1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M S2 Apartment",
+        "zone": "Sp-M S2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M SE Apartment",
+        "zone": "Sp-M SE Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "M SW Apartment",
+        "zone": "Sp-M SW Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 2,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 1899.8,
+        "cost": 3354.55,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "Office",
+        "zone": "Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Conference/Meeting/Multi-purpose room",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 5247.87,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "T Corridor",
+        "zone": "Sp-T Corridor Sys-1 Flr-3 Sch-G HPlcmt-west ZN",
+        "building_type": "Space Function",
+        "space_type": "Corridor/Transition area other-sch-G",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 835.9,
+        "cost": 4618.13,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "T N1 Apartment",
+        "zone": "Sp-T N1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T N2 Apartment",
+        "zone": "Sp-T N2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T NE Apartment",
+        "zone": "Sp-T NE Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T NW Apartment",
+        "zone": "Sp-T NW Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T S1 Apartment",
+        "zone": "Sp-T S1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T S2 Apartment",
+        "zone": "Sp-T S2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T SE Apartment",
+        "zone": "Sp-T SE Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      },
+      {
+        "space": "T SW Apartment",
+        "zone": "Sp-T SW Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "building_type": "Space Function",
+        "space_type": "Dwelling units general",
+        "zone_multiplier": 1,
+        "fixture_type": "6",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting .5 W/ft2 (5.4 W/m2), 29FC, 2 Fixtures per 1000 ft2",
+        "height_avg_ft": 10.0,
+        "floor_area_ft2": 949.9,
+        "cost": 1677.27,
+        "cost_per_ft2": 1.77,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 75715.84
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 40.0,
+        "longest_distance_to_ext_ft": 77.5,
+        "wiring_and_gas_connections_distance_ft": 77.5,
+        "equipment_cost": 18581.1,
+        "flue_cost": 2534.05,
+        "wiring_and_gas_connections_cost": 2311.91,
+        "pump_cost": 23785.12,
+        "piping_cost": 1829.25,
+        "total_cost": 49041.43
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 40.0,
+        "longest_distance_to_ext_ft": 77.5,
+        "wiring_and_gas_connections_distance_ft": 77.5,
+        "equipment_cost": 0.0,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_cost": 0.0,
+        "total_cost": 0.0
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 10.0,
+        "ht_roof_ft": 40.0,
+        "longest_distance_to_ext_ft": 77.5,
+        "wiring_and_gas_connections_distance_ft": 77.5,
+        "equipment_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_cost": 0.0,
+        "total_cost": 0.0
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "PTAC",
+        "zone_number": 1,
+        "zone_name": "Sp-G Corridor Sys-1 Flr-1 Sch-G HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 2.4,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 1666.74
+      },
+      {
+        "systype": "HW",
+        "zone_number": 1,
+        "zone_name": "Sp-G Corridor Sys-1 Flr-1 Sch-G HPlcmt-east ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 858.51,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 2525.24
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 2,
+        "zone_name": "Sp-G N1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 2.1,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 4191.98
+      },
+      {
+        "systype": "HW",
+        "zone_number": 2,
+        "zone_name": "Sp-G N1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 756.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 4948.9
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 3,
+        "zone_name": "Sp-G N2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 1.9,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 6615.63
+      },
+      {
+        "systype": "HW",
+        "zone_number": 3,
+        "zone_name": "Sp-G N2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 756.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 7372.55
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 4,
+        "zone_name": "Sp-G NE Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 4.9,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 10449.24
+      },
+      {
+        "systype": "HW",
+        "zone_number": 4,
+        "zone_name": "Sp-G NE Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 858.51,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 11307.75
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 5,
+        "zone_name": "Sp-G NW Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 4.9,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 14384.44
+      },
+      {
+        "systype": "HW",
+        "zone_number": 5,
+        "zone_name": "Sp-G NW Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 858.51,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 15242.95
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 6,
+        "zone_name": "Sp-G S1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 4.6,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 18319.64
+      },
+      {
+        "systype": "HW",
+        "zone_number": 6,
+        "zone_name": "Sp-G S1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 756.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 19076.56
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 7,
+        "zone_name": "Sp-G S2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 4.7,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 22153.25
+      },
+      {
+        "systype": "HW",
+        "zone_number": 7,
+        "zone_name": "Sp-G S2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 756.92,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 22910.17
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 8,
+        "zone_name": "Sp-G SW Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 5.6,
+        "heat_cost": 0.0,
+        "cool_cost": 3214.67,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 26124.84
+      },
+      {
+        "systype": "HW",
+        "zone_number": 8,
+        "zone_name": "Sp-G SW Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 858.51,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 26983.35
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 9,
+        "zone_name": "Sp-M Corridor Sys-1 Flr-2 Sch-G HPlcmt-east ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.2,
+        "cool_capacity(kW)": 5.4,
+        "heat_cost": 0.0,
+        "cool_cost": 3641.55,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 30624.89
+      },
+      {
+        "systype": "HW",
+        "zone_number": 9,
+        "zone_name": "Sp-M Corridor Sys-1 Flr-2 Sch-G HPlcmt-east ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1717.01,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 32341.91
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 10,
+        "zone_name": "Sp-M N1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 4.6,
+        "heat_cost": 0.0,
+        "cool_cost": 3333.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 35675.38
+      },
+      {
+        "systype": "HW",
+        "zone_number": 10,
+        "zone_name": "Sp-M N1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1615.42,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 37290.8
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 11,
+        "zone_name": "Sp-M N2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 4.3,
+        "heat_cost": 0.0,
+        "cool_cost": 3333.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 40624.28
+      },
+      {
+        "systype": "HW",
+        "zone_number": 11,
+        "zone_name": "Sp-M N2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1615.42,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 42239.7
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 12,
+        "zone_name": "Sp-M NE Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 10.6,
+        "heat_cost": 0.0,
+        "cool_cost": 6429.35,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 48669.05
+      },
+      {
+        "systype": "HW",
+        "zone_number": 12,
+        "zone_name": "Sp-M NE Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2722.88,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 51391.93
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 13,
+        "zone_name": "Sp-M NW Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 11.0,
+        "heat_cost": 0.0,
+        "cool_cost": 6429.35,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 57821.28
+      },
+      {
+        "systype": "HW",
+        "zone_number": 13,
+        "zone_name": "Sp-M NW Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2722.88,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 60544.16
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 14,
+        "zone_name": "Sp-M S1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 10.1,
+        "heat_cost": 0.0,
+        "cool_cost": 6153.39,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 66697.55
+      },
+      {
+        "systype": "HW",
+        "zone_number": 14,
+        "zone_name": "Sp-M S1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1513.83,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 68211.38
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 15,
+        "zone_name": "Sp-M S2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 10.2,
+        "heat_cost": 0.0,
+        "cool_cost": 6153.39,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 74364.76
+      },
+      {
+        "systype": "HW",
+        "zone_number": 15,
+        "zone_name": "Sp-M S2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 5.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1513.83,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1,
+        "cummultive_cost": 75878.59
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 16,
+        "zone_name": "Sp-M SE Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 12.1,
+        "heat_cost": 0.0,
+        "cool_cost": 6429.35,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 82307.94
+      },
+      {
+        "systype": "HW",
+        "zone_number": 16,
+        "zone_name": "Sp-M SE Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2722.88,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 85030.83
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 17,
+        "zone_name": "Sp-M SW Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 12.6,
+        "heat_cost": 0.0,
+        "cool_cost": 6429.35,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 91460.17
+      },
+      {
+        "systype": "HW",
+        "zone_number": 17,
+        "zone_name": "Sp-M SW Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 2,
+        "heat_capacity(kW)": 7.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 2722.88,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 94183.06
+      },
+      {
+        "systype": "HW",
+        "zone_number": 18,
+        "zone_name": "Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 858.51,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 95041.56
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 19,
+        "zone_name": "Sp-T Corridor Sys-1 Flr-3 Sch-G HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.9,
+        "cool_capacity(kW)": 4.5,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 98118.26
+      },
+      {
+        "systype": "HW",
+        "zone_number": 19,
+        "zone_name": "Sp-T Corridor Sys-1 Flr-3 Sch-G HPlcmt-west ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1463.03,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 99581.29
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 20,
+        "zone_name": "Sp-T N1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 3.3,
+        "heat_cost": 0.0,
+        "cool_cost": 1820.77,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 101402.06
+      },
+      {
+        "systype": "HW",
+        "zone_number": 20,
+        "zone_name": "Sp-T N1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1361.44,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 102763.51
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 21,
+        "zone_name": "Sp-T N2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 3.3,
+        "heat_cost": 0.0,
+        "cool_cost": 1820.77,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 104584.28
+      },
+      {
+        "systype": "HW",
+        "zone_number": 21,
+        "zone_name": "Sp-T N2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1361.44,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 105945.72
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 22,
+        "zone_name": "Sp-T NE Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 6.3,
+        "heat_cost": 0.0,
+        "cool_cost": 3214.67,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 109160.39
+      },
+      {
+        "systype": "HW",
+        "zone_number": 22,
+        "zone_name": "Sp-T NE Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1463.03,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 110623.43
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 23,
+        "zone_name": "Sp-T NW Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 6.5,
+        "heat_cost": 0.0,
+        "cool_cost": 3214.67,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 113838.1
+      },
+      {
+        "systype": "HW",
+        "zone_number": 23,
+        "zone_name": "Sp-T NW Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1463.03,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 115301.14
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 24,
+        "zone_name": "Sp-T S1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 7.1,
+        "heat_cost": 0.0,
+        "cool_cost": 3660.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 118961.61
+      },
+      {
+        "systype": "HW",
+        "zone_number": 24,
+        "zone_name": "Sp-T S1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1361.44,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 120323.05
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 25,
+        "zone_name": "Sp-T S2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 7.2,
+        "heat_cost": 0.0,
+        "cool_cost": 3660.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 123983.52
+      },
+      {
+        "systype": "HW",
+        "zone_number": 25,
+        "zone_name": "Sp-T S2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1361.44,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 125344.97
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 26,
+        "zone_name": "Sp-T SE Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 7.8,
+        "heat_cost": 0.0,
+        "cool_cost": 3660.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 129005.44
+      },
+      {
+        "systype": "HW",
+        "zone_number": 26,
+        "zone_name": "Sp-T SE Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1463.03,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 130468.47
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 27,
+        "zone_name": "Sp-T SW Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 7.9,
+        "heat_cost": 0.0,
+        "cool_cost": 3660.47,
+        "heatcool_cost": 0.0,
+        "num_units": 1.0,
+        "cummultive_cost": 134128.95
+      },
+      {
+        "systype": "HW",
+        "zone_number": 27,
+        "zone_name": "Sp-T SW Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1463.03,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "num_units": 2,
+        "cummultive_cost": 135591.98
+      }
+    ]
+  },
+  "shw": {
+    "nom_flr2flr_hght_ft": 10.0,
+    "ht_roof": 40.0,
+    "shw_longest_distance_to_ext_ft": 77.5,
+    "shw_utility_distance_ft": 77.5,
+    "shwtanks": 13436.91,
+    "shw_flues": 1255.26,
+    "shw_utilties": 2258.94,
+    "shw_pumps": 4895.14,
+    "shw_piping": 457.31,
+    "shw_total": 22303.57
+  },
+  "ventilation": {
+    "system_1": [
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit",
+        "airloop_flow_m3_per_s": 1.179,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 9515.96,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_1_Make-up air unit ERV",
+          "hrv_size_m3ps": 1.179,
+          "hrv_return_fan_size_m3ps": 1.179,
+          "hrv_cost": 14806.27
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 19.511,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Water",
+            "heating_fuel": "HW",
+            "cooling_type": "none",
+            "capacity_kw": 96.265,
+            "cost": 24495.73
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_2": [
+
+    ],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+        "airloop_flow_m3_per_s": 0.44,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 29642.75,
+        "hrv": {
+          "hrv_type": "HeatExchanger_AirToAir_SensibleAndLatent",
+          "hrv_name": "Sys_3_PSZ Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN ERV",
+          "hrv_size_m3ps": 0.139,
+          "hrv_return_fan_size_m3ps": 0.139,
+          "hrv_cost": 10044.46
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 7.28,
+            "cost": 6640.83
+          },
+          {
+            "eq_category": "Coil_Heating_Gas",
+            "heating_fuel": "Gas",
+            "cooling_type": "none",
+            "capacity_kw": 18.452,
+            "cost": 1015.42
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_4": [
+
+    ],
+    "system_5": [
+
+    ],
+    "system_6": [
+
+    ],
+    "system_7": [
+
+    ],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 145.6,
+      "CHW_Line_m": 0.0,
+      "Elec_Line_m": 105.6,
+      "Total_cost": 11480.26
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 16.0,
+        "DuctLength_m": 9.1,
+        "NumberRuns": 2,
+        "DuctCost": 1962.43
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "Building Story 1",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 14.02,
+          "SupplyDuctLength_m": 47.3,
+          "ReturnDuctSize_in": 11.05,
+          "ReturnDuctLength_m": 47.3,
+          "TotalDuctCost": 7804.1,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "Building Story 2",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 9.18,
+          "SupplyDuctLength_m": 47.3,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 2745.22,
+          "Multiplier": 2.0
+        },
+        {
+          "Floor": "Building Story 3",
+          "Predominant_space_type": "Dwelling units general",
+          "SupplyDuctSize_in": 9.18,
+          "SupplyDuctLength_m": 47.3,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 2745.22,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "Building Story 1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "Sp-G Corridor Sys-1 Flr-1 Sch-G HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.024,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G N1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G N2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G NE Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G NW Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G S1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G S2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-G SW Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.44,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "Sp-Office Sys-3 Flr-1 Sch-C HPlcmt-south ZN",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.44,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            }
+          ]
+        },
+        {
+          "Story": "Building Story 2",
+          "thermal_zones": [
+            {
+              "ThermalZone": "Sp-M Corridor Sys-1 Flr-2 Sch-G HPlcmt-east ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.024,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M N1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M N2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M NE Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M NW Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M S1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M S2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M SE Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-M SW Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 2.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            }
+          ]
+        },
+        {
+          "Story": "Building Story 3",
+          "thermal_zones": [
+            {
+              "ThermalZone": "Sp-T Corridor Sys-1 Flr-3 Sch-G HPlcmt-west ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.024,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T N1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T N2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T NE Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T NW Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T S1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T S2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T SE Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "Sp-T SW Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "Building Story 1",
+        "air_systems": [
+          {
+            "air_system": "Sys_1_Make-up air unit",
+            "hrv": "Sys_1_Make-up air unit ERV",
+            "floor_mult": 1.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 47.3,
+              "dia_in": 8.0,
+              "cost": 2193.6
+            },
+            "tz_dist": [
+              {
+                "tz": "Sp-G N1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-G N2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-G NE Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              },
+              {
+                "tz": "Sp-G NW Apartment Sys-1 Flr-1 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 8.0,
+                "hrv_ret_size_in": 5.0,
+                "cost": 240.78
+              },
+              {
+                "tz": "Sp-G S1 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-G S2 Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-G SW Apartment Sys-1 Flr-1 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "floor": "Building Story 2",
+        "air_systems": [
+          {
+            "air_system": "Sys_1_Make-up air unit",
+            "hrv": "Sys_1_Make-up air unit ERV",
+            "floor_mult": 2.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 47.3,
+              "dia_in": 8.0,
+              "cost": 2193.6
+            },
+            "tz_dist": [
+              {
+                "tz": "Sp-M N1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-M N2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-M NE Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              },
+              {
+                "tz": "Sp-M NW Apartment Sys-1 Flr-2 Sch-G HPlcmt-north ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 8.0,
+                "hrv_ret_size_in": 5.0,
+                "cost": 240.78
+              },
+              {
+                "tz": "Sp-M S1 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-M S2 Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-M SE Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 8.0,
+                "hrv_ret_size_in": 5.0,
+                "cost": 240.78
+              },
+              {
+                "tz": "Sp-M SW Apartment Sys-1 Flr-2 Sch-G HPlcmt-south ZN",
+                "tz_mult": 2.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "floor": "Building Story 3",
+        "air_systems": [
+          {
+            "air_system": "Sys_1_Make-up air unit",
+            "hrv": "Sys_1_Make-up air unit ERV",
+            "floor_mult": 1.0,
+            "hrv_ret_trunk": {
+              "duct_length_m": 47.3,
+              "dia_in": 8.0,
+              "cost": 2193.6
+            },
+            "tz_dist": [
+              {
+                "tz": "Sp-T N1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-T N2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-T NE Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              },
+              {
+                "tz": "Sp-T NW Apartment Sys-1 Flr-3 Sch-G HPlcmt-north ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 8.0,
+                "hrv_ret_size_in": 5.0,
+                "cost": 240.78
+              },
+              {
+                "tz": "Sp-T S1 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 3.4,
+                "hrv_ret_size_in": 5.0,
+                "cost": 103.19
+              },
+              {
+                "tz": "Sp-T S2 Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 5.7,
+                "hrv_ret_size_in": 5.0,
+                "cost": 171.98
+              },
+              {
+                "tz": "Sp-T SE Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 8.0,
+                "hrv_ret_size_in": 5.0,
+                "cost": 240.78
+              },
+              {
+                "tz": "Sp-T SW Apartment Sys-1 Flr-3 Sch-G HPlcmt-south ZN",
+                "tz_mult": 1.0,
+                "hrv_ret_dist_m": 1.1,
+                "hrv_ret_size_in": 5.0,
+                "cost": 34.4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "air_system": "Sys_1_Make-up air unit",
+        "hrv": "Sys_1_Make-up air unit ERV",
+        "hrv_building_trunk_length_m": 9.1,
+        "hrv_building_trunk_dia_in": 14.0,
+        "cost": 1416.34
+      }
+    ]
+  },
+  "totals": {
+    "envelope": 203032.49,
+    "lighting": 75715.84,
+    "heating_and_cooling": 184633.41,
+    "shw": 22303.57,
+    "ventilation": 190095.95,
+    "grand_total": 675781.27
+  },
+  "zonal systems": {
+  }
+}

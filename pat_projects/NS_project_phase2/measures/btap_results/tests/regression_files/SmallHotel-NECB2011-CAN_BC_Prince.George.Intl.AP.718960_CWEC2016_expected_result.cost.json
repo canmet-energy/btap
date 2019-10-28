@@ -1,0 +1,4835 @@
+{
+  "rs_means_city": "PRINCE GEORGE",
+  "rs_means_prov": "BRITISH COLUMBIA",
+  "envelope": {
+    "exterior_wall_cost": 63074.03,
+    "exterior_wall_area_m2": 1098.02,
+    "exterior_wall_cost_per_m2": 57.44,
+    "exterior_roof_cost": 86290.12,
+    "exterior_roof_area_m2": 953.21,
+    "exterior_roof_cost_per_m2": 90.53,
+    "exterior_floor_cost": 0.0,
+    "exterior_floor_area_m2": 0.0,
+    "exterior_floor_cost_per_m2": 0.0,
+    "exterior_fixed_window_cost": 23696.32,
+    "exterior_fixed_window_area_m2": 596.61,
+    "exterior_fixed_window_cost_per_m2": 39.72,
+    "exterior_operable_window_cost": 0.0,
+    "exterior_operable_window_area_m2": 0.0,
+    "exterior_operable_window_cost_per_m2": 0.0,
+    "exterior_skylight_cost": 2850.66,
+    "exterior_skylight_area_m2": 50.15,
+    "exterior_skylight_cost_per_m2": 56.84,
+    "exterior_tubular_daylight_diffuser_cost": 0.0,
+    "exterior_tubular_daylight_diffuser_area_m2": 0.0,
+    "exterior_tubular_daylight_diffuser_cost_per_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost": 0.0,
+    "exterior_tubular_daylight_dome_area_m2": 0.0,
+    "exterior_tubular_daylight_dome_cost_per_m2": 0.0,
+    "exterior_door_cost": 0.0,
+    "exterior_door_area_m2": 0.0,
+    "exterior_door_cost_per_m2": 0.0,
+    "exterior_glass_door_cost": 0.0,
+    "exterior_glass_door_area_m2": 0.0,
+    "exterior_glass_door_cost_per_m2": 0.0,
+    "exterior_overhead_door_cost": 0.0,
+    "exterior_overhead_door_area_m2": 0.0,
+    "exterior_overhead_door_cost_per_m2": 0.0,
+    "ground_contact_wall_cost": 0.0,
+    "ground_contact_wall_area_m2": 0.0,
+    "ground_contact_wall_cost_per_m2": 0.0,
+    "ground_contact_roof_cost": 0.0,
+    "ground_contact_roof_area_m2": 0.0,
+    "ground_contact_roof_cost_per_m2": 0.0,
+    "ground_contact_floor_cost": 78376.19,
+    "ground_contact_floor_area_m2": 1003.4,
+    "ground_contact_floor_cost_per_m2": 78.11,
+    "construction_costs": [
+      {
+        "name": "BTAP-ExteriorWall-Mass-4",
+        "conductance": 0.247,
+        "area": 82.11,
+        "cost": 6290.81,
+        "cost_per_area": 76.61,
+        "note": "Surf #1: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-1",
+        "conductance": 2.2,
+        "area": 63.31,
+        "cost": 2699.6,
+        "cost_per_area": 42.64,
+        "note": "Surf #1: OK / 1: OK / 2: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-GroundContactFloor-Unheated-1",
+        "conductance": 0.757,
+        "area": 1003.4,
+        "cost": 78376.19,
+        "cost_per_area": 78.11,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-Mass-2",
+        "conductance": 0.247,
+        "area": 846.89,
+        "cost": 50258.63,
+        "cost_per_area": 59.34,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 3: OK / 4: OK / 1: OK / 1: OK / 1: OK / 2: OK / 3: OK / 1: OK / 1: OK / 2: OK / 3: OK / 1: OK / 1: OK / 2: OK / 3: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-2",
+        "conductance": 2.2,
+        "area": 4.68,
+        "cost": 189.77,
+        "cost_per_area": 40.58,
+        "note": "Surf #1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-SteelFramed-1",
+        "conductance": 0.247,
+        "area": 8.61,
+        "cost": 361.13,
+        "cost_per_area": 41.95,
+        "note": "Surf #1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-6",
+        "conductance": 2.2,
+        "area": 164.81,
+        "cost": 10778.5,
+        "cost_per_area": 65.4,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK / 1: OK / 2: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-WoodFramed-5",
+        "conductance": 0.247,
+        "area": 43.05,
+        "cost": 2141.29,
+        "cost_per_area": 49.74,
+        "note": "Surf #1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWall-Metal-1",
+        "conductance": 0.247,
+        "area": 117.36,
+        "cost": 4022.17,
+        "cost_per_area": 34.27,
+        "note": "Surf #1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorRoof-IEAD-4",
+        "conductance": 0.183,
+        "area": 953.21,
+        "cost": 86290.12,
+        "cost_per_area": 90.53,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-Skylight-1",
+        "conductance": 2.2,
+        "area": 1.63,
+        "cost": 87.07,
+        "cost_per_area": 53.42,
+        "note": "Surf #1: OK / 1: OK"
+      },
+      {
+        "name": "BTAP-ExteriorWindow-FixedWindow-4",
+        "conductance": 2.2,
+        "area": 363.81,
+        "cost": 10028.45,
+        "cost_per_area": 27.57,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 3: OK / 4: OK / 1: OK / 1: OK / 1: OK / 2: OK / 3: OK / 1: OK / 1: OK / 2: OK / 3: OK / 1: OK / 1: OK / 2: OK / 3: OK"
+      },
+      {
+        "name": "BTAP-Skylight-2",
+        "conductance": 2.2,
+        "area": 48.52,
+        "cost": 2763.59,
+        "cost_per_area": 56.96,
+        "note": "Surf #1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 1: OK / 2: OK / 1: OK / 1: OK"
+      }
+    ],
+    "total_envelope_cost": 254287.33
+  },
+  "lighting": {
+    "fixture_report": [
+      {
+        "fixture_type": "7",
+        "fixture_description": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "floor_area_ft2": 42850.9,
+        "cost": 236734.33,
+        "cost_per_ft2": 5.52,
+        "spaces": [
+          "MeetingRoomFlr1",
+          "ExerciseCenterFlr1",
+          "FrontLoungeFlr1",
+          "EmployeeLoungeFlr1",
+          "FrontOfficeFlr1",
+          "LaundryRoomFlr1",
+          "RearStorageFlr1",
+          "FrontStorageFlr1",
+          "RearStorageFlr2",
+          "FrontStorageFlr2",
+          "RearStorageFlr3",
+          "FrontStorageFlr3",
+          "RearStorageFlr4",
+          "FrontStorageFlr4",
+          "GuestRoom102",
+          "GuestRoom105",
+          "GuestRoom103",
+          "GuestRoom101",
+          "GuestRoom104",
+          "GuestRoom206_208",
+          "GuestRoom224",
+          "GuestRoom201",
+          "GuestRoom209_212",
+          "GuestRoom215_218",
+          "GuestRoom220_223",
+          "GuestRoom202_205",
+          "GuestRoom214",
+          "GuestRoom219",
+          "GuestRoom213",
+          "GuestRoom324",
+          "GuestRoom306_308",
+          "GuestRoom309_312",
+          "GuestRoom302_305",
+          "GuestRoom319",
+          "GuestRoom313",
+          "GuestRoom315_318",
+          "GuestRoom320_323",
+          "GuestRoom301",
+          "GuestRoom314",
+          "GuestRoom401",
+          "GuestRoom415_418",
+          "GuestRoom402_405",
+          "GuestRoom419",
+          "GuestRoom414",
+          "GuestRoom409_412",
+          "GuestRoom424",
+          "GuestRoom413",
+          "GuestRoom420_423",
+          "GuestRoom406_408",
+          "RestroomFlr1",
+          "CorridorFlr1",
+          "ElevatorCoreFlr1",
+          "ElevatorCoreFlr2",
+          "CorridorFlr2",
+          "ElevatorCoreFlr3",
+          "CorridorFlr3",
+          "ElevatorCoreFlr4",
+          "CorridorFlr4",
+          "RearStairsFlr1",
+          "FrontStairsFlr1",
+          "FrontStairsFlr2",
+          "RearStairsFlr2",
+          "RearStairsFlr3",
+          "FrontStairsFlr3",
+          "FrontStairsFlr4",
+          "RearStairsFlr4"
+        ],
+        "number_of_spaces": 66
+      },
+      {
+        "fixture_type": "9",
+        "fixture_description": "H.I.D. High Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 52FC, 1 Fixtures per 1000 ft2",
+        "floor_area_ft2": 351.0,
+        "cost": 834.43,
+        "cost_per_ft2": 2.38,
+        "spaces": [
+          "MechanicalRoomFlr1"
+        ],
+        "number_of_spaces": 1
+      }
+    ],
+    "space_report": [
+      {
+        "space": "MeetingRoomFlr1",
+        "zone": "ALL_ST=Conf./meet./multi-purpose_FL=BuildingStory1_SCH=C",
+        "building_type": "Space Function",
+        "space_type": "Conf./meet./multi-purpose",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 864.1,
+        "cost": 4773.61,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "ExerciseCenterFlr1",
+        "zone": "ALL_ST=Gym - fitness_FL=BuildingStory1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Gym - fitness",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontLoungeFlr1",
+        "zone": "ALL_ST=Hotel/Motel - lobby_FL=BuildingStory1_SCH=H",
+        "building_type": "Space Function",
+        "space_type": "Hotel/Motel - lobby",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 1755.1,
+        "cost": 9696.39,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "EmployeeLoungeFlr1",
+        "zone": "ALL_ST=Lounge/recreation_FL=BuildingStory1_SCH=B",
+        "building_type": "Space Function",
+        "space_type": "Lounge/recreation",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontOfficeFlr1",
+        "zone": "ALL_ST=Office - enclosed_FL=BuildingStory1_SCH=A",
+        "building_type": "Space Function",
+        "space_type": "Office - enclosed",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "LaundryRoomFlr1",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 1053.0,
+        "cost": 5817.42,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStorageFlr1",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 1",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.69,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStorageFlr1",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 2",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 135.0,
+        "cost": 745.82,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStorageFlr2",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.69,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStorageFlr2",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E 1",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 135.0,
+        "cost": 745.82,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStorageFlr3",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.69,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStorageFlr3",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E 1",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 135.0,
+        "cost": 745.82,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStorageFlr4",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.69,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStorageFlr4",
+        "zone": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E 1",
+        "building_type": "Space Function",
+        "space_type": "Storage area - occsens",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 135.0,
+        "cost": 745.82,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom102",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom105",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 1",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom103",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 2",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom101",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 3",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom104",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 4",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom206_208",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1134.1,
+        "cost": 6265.36,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom224",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 1",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom201",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 2",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom209_212",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 3",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom215_218",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 4",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom220_223",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 5",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom202_205",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 6",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom214",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 7",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom219",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 8",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom213",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 9",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom324",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom306_308",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 1",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1134.1,
+        "cost": 6265.36,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom309_312",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 2",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom302_305",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 3",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom319",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 4",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom313",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 5",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom315_318",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 6",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom320_323",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 7",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom301",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 8",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom314",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 9",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom401",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom415_418",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 1",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom402_405",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 2",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom419",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 3",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom414",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 4",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom409_412",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 5",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.1,
+        "cost": 7757.11,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom424",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 6",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.14,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom413",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 7",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom420_423",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 8",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1404.0,
+        "cost": 7756.56,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "GuestRoom406_408",
+        "zone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 9",
+        "building_type": "Space Function",
+        "space_type": "Hway lodging - rooms",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1134.1,
+        "cost": 6265.36,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RestroomFlr1",
+        "zone": "WET_ST=Washroom-sch-F_FL=BuildingStory1_SCHF",
+        "building_type": "Space Function",
+        "space_type": "Washroom-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 1939.28,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "CorridorFlr1",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 1620.0,
+        "cost": 8950.05,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "ElevatorCoreFlr1",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 162.0,
+        "cost": 894.99,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "ElevatorCoreFlr2",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 162.0,
+        "cost": 894.99,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "CorridorFlr2",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1350.0,
+        "cost": 7458.3,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "ElevatorCoreFlr3",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 162.0,
+        "cost": 894.99,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "CorridorFlr3",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1350.0,
+        "cost": 7458.3,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "ElevatorCoreFlr4",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 162.0,
+        "cost": 894.99,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "CorridorFlr4",
+        "zone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Corr. >= 2.4m wide-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 1350.0,
+        "cost": 7458.3,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "MechanicalRoomFlr1",
+        "zone": "WILD_ST=Electrical/Mechanical-sch-F_FL=BuildingStory1_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Electrical/Mechanical-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "9",
+        "fixture_desciption": "H.I.D. High Bay (16 ft above work plane) 1 W/ft2 (10.8 W/m2), 52FC, 1 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 351.0,
+        "cost": 834.43,
+        "cost_per_ft2": 2.38,
+        "note": ""
+      },
+      {
+        "space": "RearStairsFlr1",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.6,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStairsFlr1",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 11.0,
+        "floor_area_ft2": 216.0,
+        "cost": 1193.32,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStairsFlr2",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.0,
+        "cost": 1193.32,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStairsFlr2",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.6,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStairsFlr3",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.6,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStairsFlr3",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.0,
+        "cost": 1193.32,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "FrontStairsFlr4",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.0,
+        "cost": 1193.32,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      },
+      {
+        "space": "RearStairsFlr4",
+        "zone": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F 1",
+        "building_type": "Space Function",
+        "space_type": "Stairway-sch-F",
+        "zone_multiplier": 1,
+        "fixture_type": "7",
+        "fixture_desciption": "High Bay (10 ft above work plane) Fluorescent Lighting 1.5 W/ft2 (16 W/m2), 103FC, 7 Fixtures per 1000 ft2",
+        "height_avg_ft": 9.0,
+        "floor_area_ft2": 216.1,
+        "cost": 1193.6,
+        "cost_per_ft2": 5.52,
+        "note": ""
+      }
+    ],
+    "total_lighting_cost": 237568.78
+  },
+  "heating_and_cooling": {
+    "plant_equipment": [
+      {
+        "type": "boilers",
+        "nom_flr2flr_hght_ft": 9.5,
+        "ht_roof_ft": 38.0,
+        "longest_distance_to_ext_ft": 131.0,
+        "wiring_and_gas_connections_distance_ft": 131.0,
+        "equipment_cost": 0.0,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 0.0,
+        "pump_cost": 0.0,
+        "piping_to_pump_cost": 0.0,
+        "header_distribution_cost": 7738.22,
+        "total_cost": 7738.22
+      },
+      {
+        "type": "chillers",
+        "nom_flr2flr_hght_ft": 9.5,
+        "ht_roof_ft": 38.0,
+        "longest_distance_to_ext_ft": 131.0,
+        "wiring_and_gas_connections_distance_ft": 131.0,
+        "equipment_cost": 13132.2,
+        "flue_cost": 0.0,
+        "wiring_and_gas_connections_cost": 1472.08,
+        "pump_cost": 9790.29,
+        "piping_to_pump_cost": 1829.25,
+        "header_distribution_cost": 8051.81,
+        "total_cost": 34275.63
+      },
+      {
+        "type": "cooling_towers",
+        "nom_flr2flr_hght_ft": 9.5,
+        "ht_roof_ft": 38.0,
+        "longest_distance_to_ext_ft": 131.0,
+        "wiring_and_gas_connections_distance_ft": 131.0,
+        "equipment_cost": 263.76,
+        "wiring_and_gas_connections_cost": 651.62,
+        "pump_cost": 4895.14,
+        "piping_cost": 7489.06,
+        "total_cost": 13299.58
+      }
+    ],
+    "zonal_systems": [
+      {
+        "systype": "BB",
+        "zone_number": 1,
+        "zone_name": "ALL_ST=Conf./meet./multi-purpose_FL=BuildingStory1_SCH=C",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 425.04,
+        "num_units": 3,
+        "cummultive_zonal_cost": 897.9
+      },
+      {
+        "systype": "BB",
+        "zone_number": 2,
+        "zone_name": "ALL_ST=Gym - fitness_FL=BuildingStory1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1,
+        "cummultive_zonal_cost": 1228.19
+      },
+      {
+        "systype": "BB",
+        "zone_number": 3,
+        "zone_name": "ALL_ST=Hotel/Motel - lobby_FL=BuildingStory1_SCH=H",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 1222.01,
+        "num_units": 3,
+        "cummultive_zonal_cost": 2923.06
+      },
+      {
+        "systype": "BB",
+        "zone_number": 4,
+        "zone_name": "ALL_ST=Lounge/recreation_FL=BuildingStory1_SCH=B",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 170.39,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.081024137282754,
+        "cummultive_zonal_cost": 3266.12
+      },
+      {
+        "systype": "BB",
+        "zone_number": 5,
+        "zone_name": "ALL_ST=Office - enclosed_FL=BuildingStory1_SCH=A",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 690.69,
+        "num_units": 4,
+        "cummultive_zonal_cost": 4587.28
+      },
+      {
+        "systype": "BB",
+        "zone_number": 6,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 518.02,
+        "num_units": 4,
+        "cummultive_zonal_cost": 5735.78
+      },
+      {
+        "systype": "BB",
+        "zone_number": 7,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 464.94,
+        "num_units": 3,
+        "cummultive_zonal_cost": 6673.57
+      },
+      {
+        "systype": "BB",
+        "zone_number": 8,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 66.41,
+        "num_units": 1,
+        "cummultive_zonal_cost": 6897.6
+      },
+      {
+        "systype": "BB",
+        "zone_number": 9,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.4,
+        "num_units": 3,
+        "cummultive_zonal_cost": 7750.86
+      },
+      {
+        "systype": "BB",
+        "zone_number": 10,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 54.34,
+        "num_units": 1,
+        "cummultive_zonal_cost": 7962.82
+      },
+      {
+        "systype": "BB",
+        "zone_number": 11,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.4,
+        "num_units": 3,
+        "cummultive_zonal_cost": 8816.08
+      },
+      {
+        "systype": "BB",
+        "zone_number": 12,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 54.34,
+        "num_units": 1,
+        "cummultive_zonal_cost": 9028.04
+      },
+      {
+        "systype": "BB",
+        "zone_number": 13,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.4,
+        "num_units": 3,
+        "cummultive_zonal_cost": 9881.3
+      },
+      {
+        "systype": "BB",
+        "zone_number": 14,
+        "zone_name": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 166.14,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 54.34,
+        "num_units": 1.054040070396056,
+        "cummultive_zonal_cost": 10101.77
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 15,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.7,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 11441.36
+      },
+      {
+        "systype": "BB",
+        "zone_number": 15,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 2,
+        "cummultive_zonal_cost": 11929.27
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 16,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 1.5,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 13268.85
+      },
+      {
+        "systype": "BB",
+        "zone_number": 16,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 2,
+        "cummultive_zonal_cost": 13756.76
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 17,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.3,
+        "cool_capacity(kW)": 1.1,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 15096.35
+      },
+      {
+        "systype": "BB",
+        "zone_number": 17,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 2,
+        "cummultive_zonal_cost": 15584.26
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 18,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.7,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 16923.84
+      },
+      {
+        "systype": "BB",
+        "zone_number": 18,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 169.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.077645335477941,
+        "cummultive_zonal_cost": 17266.37
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 19,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.2,
+        "cool_capacity(kW)": 1.6,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 18605.96
+      },
+      {
+        "systype": "BB",
+        "zone_number": 19,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 2,
+        "cummultive_zonal_cost": 19093.87
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 20,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.2,
+        "cool_capacity(kW)": 1.8,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 21217.04
+      },
+      {
+        "systype": "BB",
+        "zone_number": 20,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 3,
+        "cummultive_zonal_cost": 22146.33
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 21,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 1.2,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 23454.52
+      },
+      {
+        "systype": "BB",
+        "zone_number": 21,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1,
+        "cummultive_zonal_cost": 23753.42
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 22,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.9,
+        "cool_capacity(kW)": 2.8,
+        "heat_cost": 0.0,
+        "cool_cost": 1820.77,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 26008.91
+      },
+      {
+        "systype": "BB",
+        "zone_number": 22,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 320.28,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 2.0319595744903074,
+        "cummultive_zonal_cost": 26763.9
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 23,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 2.2,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 28995.75
+      },
+      {
+        "systype": "BB",
+        "zone_number": 23,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 3,
+        "cummultive_zonal_cost": 30033.71
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 24,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 4.0,
+        "heat_cost": 0.0,
+        "cool_cost": 2163.83,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 32762.66
+      },
+      {
+        "systype": "BB",
+        "zone_number": 24,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 3,
+        "cummultive_zonal_cost": 33800.62
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 25,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 4.1,
+        "heat_cost": 0.0,
+        "cool_cost": 2163.83,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 36529.56
+      },
+      {
+        "systype": "BB",
+        "zone_number": 25,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 3,
+        "cummultive_zonal_cost": 37567.53
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 26,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 2.6,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 39799.37
+      },
+      {
+        "systype": "BB",
+        "zone_number": 26,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 3,
+        "cummultive_zonal_cost": 40837.34
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 27,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 1.2,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 42145.53
+      },
+      {
+        "systype": "BB",
+        "zone_number": 27,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 162.54,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.031228654014873,
+        "cummultive_zonal_cost": 42449.35
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 28,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.8,
+        "cool_capacity(kW)": 1.1,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 43757.54
+      },
+      {
+        "systype": "BB",
+        "zone_number": 28,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1,
+        "cummultive_zonal_cost": 44056.43
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 29,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 1.0,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 45364.62
+      },
+      {
+        "systype": "BB",
+        "zone_number": 29,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 173.21,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0989325701871657,
+        "cummultive_zonal_cost": 45679.11
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 30,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 1.3,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 46987.3
+      },
+      {
+        "systype": "BB",
+        "zone_number": 30,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 161.76,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0262989717371322,
+        "cummultive_zonal_cost": 47290.35
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 31,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 2.1,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 49413.52
+      },
+      {
+        "systype": "BB",
+        "zone_number": 31,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 3,
+        "cummultive_zonal_cost": 50342.81
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 32,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.2,
+        "cool_capacity(kW)": 2.6,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 52574.65
+      },
+      {
+        "systype": "BB",
+        "zone_number": 32,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 4,
+        "cummultive_zonal_cost": 53770.24
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 33,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.2,
+        "cool_capacity(kW)": 2.8,
+        "heat_cost": 0.0,
+        "cool_cost": 1820.77,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 56156.12
+      },
+      {
+        "systype": "BB",
+        "zone_number": 33,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 4,
+        "cummultive_zonal_cost": 57351.7
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 34,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 1.2,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 58659.89
+      },
+      {
+        "systype": "BB",
+        "zone_number": 34,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1,
+        "cummultive_zonal_cost": 58958.79
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 35,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 1.1,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 60266.98
+      },
+      {
+        "systype": "BB",
+        "zone_number": 35,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 60723.5
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 36,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.1,
+        "cool_capacity(kW)": 4.4,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 64365.3
+      },
+      {
+        "systype": "BB",
+        "zone_number": 36,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 4,
+        "cummultive_zonal_cost": 65560.88
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 37,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.1,
+        "cool_capacity(kW)": 4.4,
+        "heat_cost": 0.0,
+        "cool_cost": 2163.83,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 68289.82
+      },
+      {
+        "systype": "BB",
+        "zone_number": 37,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 4,
+        "cummultive_zonal_cost": 69485.41
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 38,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.1,
+        "cool_capacity(kW)": 2.9,
+        "heat_cost": 0.0,
+        "cool_cost": 1820.77,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 71740.9
+      },
+      {
+        "systype": "BB",
+        "zone_number": 38,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 3,
+        "cummultive_zonal_cost": 72648.48
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 39,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 1.3,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 73956.67
+      },
+      {
+        "systype": "BB",
+        "zone_number": 39,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 74413.18
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 40,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 3.9,
+        "heat_cost": 0.0,
+        "cool_cost": 2163.83,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 77011.74
+      },
+      {
+        "systype": "BB",
+        "zone_number": 40,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 434.72,
+        "num_units": 3,
+        "cummultive_zonal_cost": 77919.31
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 41,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.1,
+        "cool_capacity(kW)": 9.0,
+        "heat_cost": 0.0,
+        "cool_cost": 3801.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 82285.42
+      },
+      {
+        "systype": "BB",
+        "zone_number": 41,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 6,
+        "cummultive_zonal_cost": 83796.25
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 42,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.2,
+        "cool_capacity(kW)": 5.6,
+        "heat_cost": 0.0,
+        "cool_cost": 3214.67,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 87576.03
+      },
+      {
+        "systype": "BB",
+        "zone_number": 42,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 2",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 6,
+        "cummultive_zonal_cost": 89086.85
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 43,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.5,
+        "cool_capacity(kW)": 2.4,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 90894.87
+      },
+      {
+        "systype": "BB",
+        "zone_number": 43,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 3",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 91351.38
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 44,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 2.5,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 93159.4
+      },
+      {
+        "systype": "BB",
+        "zone_number": 44,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 4",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 93615.91
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 45,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.2,
+        "cool_capacity(kW)": 5.4,
+        "heat_cost": 0.0,
+        "cool_cost": 3214.67,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 97395.69
+      },
+      {
+        "systype": "BB",
+        "zone_number": 45,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 5",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 6,
+        "cummultive_zonal_cost": 98906.52
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 46,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.6,
+        "cool_capacity(kW)": 2.4,
+        "heat_cost": 0.0,
+        "cool_cost": 1666.74,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 100714.53
+      },
+      {
+        "systype": "BB",
+        "zone_number": 46,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 6",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 101171.05
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 47,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 1.6,
+        "heat_cost": 0.0,
+        "cool_cost": 1166.91,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 102479.24
+      },
+      {
+        "systype": "BB",
+        "zone_number": 47,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 7",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 141.28,
+        "num_units": 2,
+        "cummultive_zonal_cost": 102935.75
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 48,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.1,
+        "cool_capacity(kW)": 8.9,
+        "heat_cost": 0.0,
+        "cool_cost": 3801.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 107301.86
+      },
+      {
+        "systype": "BB",
+        "zone_number": 48,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 8",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 5.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 945.72,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 565.11,
+        "num_units": 6,
+        "cummultive_zonal_cost": 108812.69
+      },
+      {
+        "systype": "PTAC",
+        "zone_number": 49,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 4.5,
+        "heat_cost": 0.0,
+        "cool_cost": 3076.69,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 1.0,
+        "cummultive_zonal_cost": 112345.81
+      },
+      {
+        "systype": "BB",
+        "zone_number": 49,
+        "zone_name": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 9",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 788.1,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 456.43,
+        "num_units": 5,
+        "cummultive_zonal_cost": 113590.34
+      },
+      {
+        "systype": "BB",
+        "zone_number": 50,
+        "zone_name": "WET_ST=Washroom-sch-F_FL=BuildingStory1_SCHF",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 161.21,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 1.0227877856575869,
+        "cummultive_zonal_cost": 113924.23
+      },
+      {
+        "systype": "BB",
+        "zone_number": 51,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 4.6,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 788.1,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 425.04,
+        "num_units": 5,
+        "cummultive_zonal_cost": 115137.36
+      },
+      {
+        "systype": "BB",
+        "zone_number": 52,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.7,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 79.69,
+        "num_units": 1,
+        "cummultive_zonal_cost": 115374.68
+      },
+      {
+        "systype": "BB",
+        "zone_number": 53,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 65.2,
+        "num_units": 1,
+        "cummultive_zonal_cost": 115597.5
+      },
+      {
+        "systype": "BB",
+        "zone_number": 54,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 486.46,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 239.08,
+        "num_units": 3.0863093248663103,
+        "cummultive_zonal_cost": 116323.05
+      },
+      {
+        "systype": "BB",
+        "zone_number": 55,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.5,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 65.2,
+        "num_units": 1,
+        "cummultive_zonal_cost": 116545.87
+      },
+      {
+        "systype": "BB",
+        "zone_number": 56,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 3.4,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 630.48,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 239.08,
+        "num_units": 4,
+        "cummultive_zonal_cost": 117415.43
+      },
+      {
+        "systype": "BB",
+        "zone_number": 57,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 0.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 157.62,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 65.2,
+        "num_units": 1,
+        "cummultive_zonal_cost": 117638.26
+      },
+      {
+        "systype": "BB",
+        "zone_number": 58,
+        "zone_name": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 6.3,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 1103.34,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 239.08,
+        "num_units": 7,
+        "cummultive_zonal_cost": 118980.67
+      },
+      {
+        "systype": "BB",
+        "zone_number": 59,
+        "zone_name": "WILD_ST=Electrical/Mechanical-sch-F_FL=BuildingStory1_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.0,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 172.67,
+        "num_units": 2,
+        "cummultive_zonal_cost": 119468.59
+      },
+      {
+        "systype": "BB",
+        "zone_number": 60,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 464.91,
+        "num_units": 3,
+        "cummultive_zonal_cost": 120406.35
+      },
+      {
+        "systype": "BB",
+        "zone_number": 61,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.1,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 464.89,
+        "num_units": 3,
+        "cummultive_zonal_cost": 121344.1
+      },
+      {
+        "systype": "BB",
+        "zone_number": 62,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.36,
+        "num_units": 2,
+        "cummultive_zonal_cost": 122039.7
+      },
+      {
+        "systype": "BB",
+        "zone_number": 63,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.8,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.38,
+        "num_units": 2,
+        "cummultive_zonal_cost": 122735.32
+      },
+      {
+        "systype": "BB",
+        "zone_number": 64,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 315.24,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.38,
+        "num_units": 2,
+        "cummultive_zonal_cost": 123430.94
+      },
+      {
+        "systype": "BB",
+        "zone_number": 65,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 1.9,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 323.07,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.36,
+        "num_units": 2.049679875501337,
+        "cummultive_zonal_cost": 124134.37
+      },
+      {
+        "systype": "BB",
+        "zone_number": 66,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.36,
+        "num_units": 3,
+        "cummultive_zonal_cost": 124987.59
+      },
+      {
+        "systype": "BB",
+        "zone_number": 67,
+        "zone_name": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F 1",
+        "zone_multiple": 1,
+        "heat_capacity(kW)": 2.2,
+        "cool_capacity(kW)": 0.0,
+        "heat_cost": 472.86,
+        "cool_cost": 0.0,
+        "heatcool_cost": 0.0,
+        "piping_cost": 0.0,
+        "wiring_cost": 380.38,
+        "num_units": 3,
+        "cummultive_zonal_cost": 125840.83
+      }
+    ]
+  },
+  "shw": {
+    "nom_flr2flr_hght_ft": 9.5,
+    "ht_roof": 38.0,
+    "shw_longest_distance_to_ext_ft": 131.0,
+    "shw_utility_distance_ft": 131.0,
+    "shwtanks": 0.0,
+    "shw_flues": 0.0,
+    "shw_utilties": 1472.08,
+    "shw_pumps": 4895.14,
+    "shw_piping": 457.31,
+    "shw_total": 6824.54
+  },
+  "ventilation": {
+    "system_1": [
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.328,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 1",
+        "airloop_flow_m3_per_s": 0.059,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.975,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 4.808,
+            "cost": 2848.39
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 10",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 11",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 12",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.207,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 13",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 14",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.331,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 15",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.313,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 16",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 17",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.334,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 18",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 19",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 2",
+        "airloop_flow_m3_per_s": 0.059,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.975,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 4.808,
+            "cost": 2848.39
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 20",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.207,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 21",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.289,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 22",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.313,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 23",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.313,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 24",
+        "airloop_flow_m3_per_s": 0.059,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.061,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 4.808,
+            "cost": 2848.39
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 25",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 26",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 27",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.207,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 28",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 29",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.328,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 3",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.207,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 30",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.325,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 31",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 32",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.328,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 33",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 34",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.331,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 4",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 5",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 6",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.328,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 7",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.301,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 8",
+        "airloop_flow_m3_per_s": 0.073,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.313,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 5.953,
+            "cost": 2932.63
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_1_Make-up air unit 9",
+        "airloop_flow_m3_per_s": 0.018,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.302,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.488,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_4_PSZ_ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E",
+        "airloop_flow_m3_per_s": 1.408,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 7145.77,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 23.316,
+            "cost": 13810.74
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 37.897,
+            "cost": 9426.68
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_4_PSZ_WET_ST=Washroom-sch-F_FL=BuildingStory1_SCHF",
+        "airloop_flow_m3_per_s": 0.04,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18846.55,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 0.659,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 1.519,
+            "cost": 2582.85
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 1,
+        "name": "Sys_4_PSZ_WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F",
+        "airloop_flow_m3_per_s": 2.886,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 12814.89,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 47.768,
+            "cost": 24345.56
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 81.858,
+            "cost": 18853.36
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_2": [
+
+    ],
+    "system_3": [
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ ALL_ST=Conf./meet./multi-purpose_FL=BuildingStory1_SCH=C",
+        "airloop_flow_m3_per_s": 0.154,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 2.542,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 10.967,
+            "cost": 3734.17
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ ALL_ST=Hotel/Motel - lobby_FL=BuildingStory1_SCH=H",
+        "airloop_flow_m3_per_s": 0.343,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 5.672,
+            "cost": 5825.64
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 21.775,
+            "cost": 4713.34
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      },
+      {
+        "sys_type": 3,
+        "name": "Sys_3_PSZ ALL_ST=Lounge/recreation_FL=BuildingStory1_SCH=B",
+        "airloop_flow_m3_per_s": 0.116,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 28217.99,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_DX_SingleSpeed",
+            "heating_fuel": "none",
+            "cooling_type": "DX",
+            "capacity_kw": 1.922,
+            "cost": 5077.01
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 4.525,
+            "cost": 2848.39
+          }
+        ],
+        "reheat_recool": [
+
+        ]
+      }
+    ],
+    "system_4": [
+
+    ],
+    "system_5": [
+
+    ],
+    "system_6": [
+      {
+        "sys_type": 6,
+        "name": "Sys_6_VAV with Reheat",
+        "airloop_flow_m3_per_s": 0.585,
+        "num_rooftop_units": 1,
+        "base_ahu_cost": 18964.04,
+        "hrv": {
+        },
+        "equipment_info": [
+          {
+            "eq_category": "Coil_Cooling_Water",
+            "heating_fuel": "none",
+            "cooling_type": "CHW",
+            "capacity_kw": 9.534,
+            "cost": 2647.27
+          },
+          {
+            "eq_category": "Coil_Heating_Electric",
+            "heating_fuel": "elec",
+            "cooling_type": "none",
+            "capacity_kw": 8.474,
+            "cost": 3676.51
+          }
+        ],
+        "reheat_recool": [
+          {
+            "terminal": "AirTerminal_SingleDuct_VAV_Reheat",
+            "zone_mult": 1.0,
+            "box_type": "VAVFanMixingBoxesHtg",
+            "box_name": "Air Terminal Single Duct VAV Reheat 1",
+            "unit_info": {
+              "size_kw": 0.0,
+              "air_flow_m3_per_s": 0.142,
+              "pipe_dist_m": 10.7,
+              "elect_dist_m": 10.7,
+              "num_units": 1
+            },
+            "cost": 3922.97
+          },
+          {
+            "terminal": "AirTerminal_SingleDuct_VAV_Reheat",
+            "zone_mult": 1.0,
+            "box_type": "VAVFanMixingBoxesHtg",
+            "box_name": "Air Terminal Single Duct VAV Reheat 2",
+            "unit_info": {
+              "size_kw": 0.0,
+              "air_flow_m3_per_s": 0.442,
+              "pipe_dist_m": 20.6,
+              "elect_dist_m": 20.6,
+              "num_units": 1
+            },
+            "cost": 5378.06
+          }
+        ]
+      }
+    ],
+    "system_7": [
+
+    ],
+    "mech_to_roof": {
+      "Gas_Line_m": 0.0,
+      "HW_Line_m": 0.0,
+      "CHW_Line_m": 247.6,
+      "Elec_Line_m": 1469.0,
+      "Total_cost": 31237.87
+    },
+    "trunk_duct": [
+      {
+        "DuctSize_in": 30.0,
+        "DuctLength_m": 8.2,
+        "NumberRuns": 2,
+        "DuctCost": 3692.12
+      }
+    ],
+    "floor_trunk_ducts": [
+      [
+        {
+          "Floor": "BuildingStory3",
+          "Predominant_space_type": "Hway lodging - rooms",
+          "SupplyDuctSize_in": 18.99,
+          "SupplyDuctLength_m": 55.8,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 8790.25,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "BuildingStory4",
+          "Predominant_space_type": "Hway lodging - rooms",
+          "SupplyDuctSize_in": 21.99,
+          "SupplyDuctLength_m": 55.8,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 9593.31,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "BuildingStory1",
+          "Predominant_space_type": "Hotel/Motel - lobby",
+          "SupplyDuctSize_in": 27.12,
+          "SupplyDuctLength_m": 55.8,
+          "ReturnDuctSize_in": 18.23,
+          "ReturnDuctLength_m": 55.8,
+          "TotalDuctCost": 22202.78,
+          "Multiplier": 1.0
+        },
+        {
+          "Floor": "BuildingStory2",
+          "Predominant_space_type": "Hway lodging - rooms",
+          "SupplyDuctSize_in": 18.66,
+          "SupplyDuctLength_m": 55.8,
+          "ReturnDuctSize_in": 0,
+          "ReturnDuctLength_m": 0,
+          "TotalDuctCost": 8790.25,
+          "Multiplier": 1.0
+        }
+      ]
+    ],
+    "tz_distribution": [
+      [
+        {
+          "Story": "BuildingStory3",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.059,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 3",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 4",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 5",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 6",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 2",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 7",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory3_SCHF 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.205,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory3_SCH=E 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.05,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.035,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory3_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.194,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.203,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory3_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.172,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            }
+          ]
+        },
+        {
+          "Story": "BuildingStory4",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 3",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 4",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 5",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 6",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 7",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.059,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory4_SCHF 2",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.244,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory4_SCH=E 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.079,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.071,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory4_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.449,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.216,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory4_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.242,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            }
+          ]
+        },
+        {
+          "Story": "BuildingStory1",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 2",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 3",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF 4",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory1_SCHF",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "ALL_ST=Conf./meet./multi-purpose_FL=BuildingStory1_SCH=C",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.154,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Conf./meet./multi-purpose_FL=BuildingStory1_SCH=C",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.154,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Hotel/Motel - lobby_FL=BuildingStory1_SCH=H",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.343,
+              "num_diff": 4,
+              "ducting_lbs": 225,
+              "duct_insulation_ft2": 196,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Hotel/Motel - lobby_FL=BuildingStory1_SCH=H",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.343,
+              "num_diff": 4,
+              "ducting_lbs": 225,
+              "duct_insulation_ft2": 196,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Lounge/recreation_FL=BuildingStory1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.116,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Lounge/recreation_FL=BuildingStory1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.116,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.256,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.265,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory1_SCH=E 2",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.062,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WET_ST=Washroom-sch-F_FL=BuildingStory1_SCHF",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.04,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.222,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory1_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.046,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Electrical/Mechanical-sch-F_FL=BuildingStory1_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.043,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.265,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory1_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.163,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Gym - fitness_FL=BuildingStory1_SCH=B",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.142,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Gym - fitness_FL=BuildingStory1_SCH=B",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.142,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "ALL_ST=Office - enclosed_FL=BuildingStory1_SCH=A",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.442,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            },
+            {
+              "ThermalZone": "ALL_ST=Office - enclosed_FL=BuildingStory1_SCH=A",
+              "ducting_direction": "Return",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.442,
+              "num_diff": 5,
+              "ducting_lbs": 290,
+              "duct_insulation_ft2": 224,
+              "cost": 288.18
+            }
+          ]
+        },
+        {
+          "Story": "BuildingStory2",
+          "thermal_zones": [
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.059,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 3",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 4",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 5",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 6",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.073,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 7",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 8",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 9",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "DU_BT=Space Function_ST=Hway lodging - rooms_FL=BuildingStory2_SCHF 2",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.018,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.2,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            },
+            {
+              "ThermalZone": "ALL_ST=Storage area - occsens_FL=BuildingStory2_SCH=E 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.048,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.033,
+              "num_diff": 2,
+              "ducting_lbs": 55,
+              "duct_insulation_ft2": 40,
+              "cost": 95.89
+            },
+            {
+              "ThermalZone": "WILD_ST=Corr. >= 2.4m wide-sch-F_FL=BuildingStory2_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.164,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.17,
+              "num_diff": 3,
+              "ducting_lbs": 125,
+              "duct_insulation_ft2": 96,
+              "cost": 172.91
+            },
+            {
+              "ThermalZone": "WILD_ST=Stairway-sch-F_FL=BuildingStory2_SCH=F 1",
+              "ducting_direction": "Supply",
+              "tz_mult": 1.0,
+              "airflow_m3ps": 0.199,
+              "num_diff": 4,
+              "ducting_lbs": 190,
+              "duct_insulation_ft2": 144,
+              "cost": 230.54
+            }
+          ]
+        }
+      ]
+    ],
+    "hrv_return_ducting": [
+      {
+        "floor": "BuildingStory3",
+        "air_systems": [
+
+        ]
+      },
+      {
+        "floor": "BuildingStory4",
+        "air_systems": [
+
+        ]
+      },
+      {
+        "floor": "BuildingStory1",
+        "air_systems": [
+
+        ]
+      },
+      {
+        "floor": "BuildingStory2",
+        "air_systems": [
+
+        ]
+      }
+    ]
+  },
+  "totals": {
+    "envelope": 254287.33,
+    "lighting": 237568.78,
+    "heating_and_cooling": 181154.26,
+    "shw": 6824.54,
+    "ventilation": 1376771.32,
+    "grand_total": 2056606.24
+  }
+}
