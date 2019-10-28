@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>btap_create_geometry</name>
   <uid>18bebbaf-e585-4f85-bf1c-d0417ad18df4</uid>
-  <version_id>c2985797-ebb3-406f-bb09-16fa1368322f</version_id>
-  <version_modified>20191002T191442Z</version_modified>
+  <version_id>62707986-e76a-4523-96ea-4cd3401210cc</version_id>
+  <version_modified>20191003T190717Z</version_modified>
   <xml_checksum>2609226D</xml_checksum>
   <class_name>BTAPCreateGeometry</class_name>
   <display_name>BTAPCreateGeometry</display_name>
@@ -518,16 +518,16 @@
       <checksum>67A17DEB</checksum>
     </file>
     <file>
-      <filename>test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>28F83D83</checksum>
-    </file>
-    <file>
       <filename>report_final_area.csv</filename>
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
       <checksum>D8D39932</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>22039A88</checksum>
     </file>
     <file>
       <version>
@@ -538,7 +538,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>303241FC</checksum>
+      <checksum>8B346AEF</checksum>
     </file>
   </files>
 </measure>

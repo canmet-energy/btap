@@ -1,6 +1,6 @@
 
 Version,
-  8.9;                                    !- Version Identifier
+  9.1;                                    !- Version Identifier
 
 Timestep,
   6;                                      !- Number of Timesteps per Hour
@@ -325,7 +325,7 @@ ZoneControl:Thermostat,
   Story 1 East Core Space ZN,             !- Zone or ZoneList Name
   Story 1 East Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 24;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 24; !- Control Name 1
 
 Schedule:Compact,
   Story 1 East Core Space ZN Thermostat Schedule, !- Name
@@ -342,7 +342,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 24,     !- Name
+  Office WholeBuilding 318 Thermostat 24, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -482,8 +482,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 East Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 East Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 East Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 1,                                 !- Zone Air Node Name
-  Story 1 East Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 1;                                 !- Zone Air Node Name
 
 NodeList,
   Story 1 East Core Space ZN Inlet Node List, !- Name
@@ -514,7 +513,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -523,7 +522,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ;                                       !- Latent Heat Recovery Effectiveness {dimensionless}
 
 DesignSpecification:OutdoorAir,
-  Office WholeBuilding Ventilation,       !- Name
+  Office WholeBuilding 318 Ventilation,   !- Name
   Sum,                                    !- Outdoor Air Method
   0,                                      !- Outdoor Air Flow per Person {m3/s-person}
   0.00040132,                             !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
@@ -532,11 +531,13 @@ DesignSpecification:OutdoorAir,
 
 ZoneHVAC:EquipmentList,
   Story 1 East Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 1,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 East Core Space ZN,             !- Zone or ZoneList Name
@@ -548,7 +549,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -622,7 +623,6 @@ FenestrationSurface:Detailed,
   Surface 14,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -714,7 +714,7 @@ ZoneControl:Thermostat,
   Story 1 East Left Perimeter Space ZN,   !- Zone or ZoneList Name
   Story 1 East Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 25;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 25; !- Control Name 1
 
 Schedule:Compact,
   Story 1 East Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -731,7 +731,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 25,     !- Name
+  Office WholeBuilding 318 Thermostat 25, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -740,8 +740,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 East Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 East Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 East Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 4,                                 !- Zone Air Node Name
-  Story 1 East Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 4;                                 !- Zone Air Node Name
 
 NodeList,
   Story 1 East Left Perimeter Space ZN Inlet Node List, !- Name
@@ -772,7 +771,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -782,11 +781,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 East Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 2,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 East Left Perimeter Space ZN,   !- Zone or ZoneList Name
@@ -798,7 +799,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -872,7 +873,6 @@ FenestrationSurface:Detailed,
   Surface 38,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -964,7 +964,7 @@ ZoneControl:Thermostat,
   Story 1 East Right Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 1 East Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 26;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 26; !- Control Name 1
 
 Schedule:Compact,
   Story 1 East Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -981,7 +981,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 26,     !- Name
+  Office WholeBuilding 318 Thermostat 26, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -990,8 +990,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 East Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 East Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 East Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 7,                                 !- Zone Air Node Name
-  Story 1 East Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 7;                                 !- Zone Air Node Name
 
 NodeList,
   Story 1 East Right Perimeter Space ZN Inlet Node List, !- Name
@@ -1022,7 +1021,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -1032,11 +1031,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 East Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 3,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 East Right Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -1048,7 +1049,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1170,7 +1171,6 @@ FenestrationSurface:Detailed,
   Surface 8,                              !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -1214,7 +1214,7 @@ ZoneControl:Thermostat,
   Story 1 North Left Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 1 North Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 27;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 27; !- Control Name 1
 
 Schedule:Compact,
   Story 1 North Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -1231,7 +1231,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 27,     !- Name
+  Office WholeBuilding 318 Thermostat 27, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -1240,8 +1240,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 North Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 North Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 North Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 10,                                !- Zone Air Node Name
-  Story 1 North Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 10;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 North Left Perimeter Space ZN Inlet Node List, !- Name
@@ -1272,7 +1271,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -1282,11 +1281,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 North Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 4,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 North Left Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -1298,7 +1299,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1372,7 +1373,6 @@ FenestrationSurface:Detailed,
   Surface 20,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -1464,7 +1464,7 @@ ZoneControl:Thermostat,
   Story 1 North Lower Perimeter Space ZN, !- Zone or ZoneList Name
   Story 1 North Lower Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 28;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 28; !- Control Name 1
 
 Schedule:Compact,
   Story 1 North Lower Perimeter Space ZN Thermostat Schedule, !- Name
@@ -1481,7 +1481,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 28,     !- Name
+  Office WholeBuilding 318 Thermostat 28, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -1490,8 +1490,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 North Lower Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 North Lower Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 North Lower Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 13,                                !- Zone Air Node Name
-  Story 1 North Lower Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 13;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 North Lower Perimeter Space ZN Inlet Node List, !- Name
@@ -1522,7 +1521,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -1532,11 +1531,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 North Lower Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 5,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 North Lower Perimeter Space ZN, !- Zone or ZoneList Name
@@ -1548,7 +1549,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1622,7 +1623,6 @@ FenestrationSurface:Detailed,
   Surface 32,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -1714,7 +1714,7 @@ ZoneControl:Thermostat,
   Story 1 North Right Perimeter Space ZN, !- Zone or ZoneList Name
   Story 1 North Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 29;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 29; !- Control Name 1
 
 Schedule:Compact,
   Story 1 North Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -1731,7 +1731,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 29,     !- Name
+  Office WholeBuilding 318 Thermostat 29, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -1740,8 +1740,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 North Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 North Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 North Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 16,                                !- Zone Air Node Name
-  Story 1 North Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 16;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 North Right Perimeter Space ZN Inlet Node List, !- Name
@@ -1772,7 +1771,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -1782,11 +1781,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 North Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 6,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 North Right Perimeter Space ZN, !- Zone or ZoneList Name
@@ -1798,7 +1799,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -1934,7 +1935,7 @@ ZoneControl:Thermostat,
   Story 1 South Core Space ZN,            !- Zone or ZoneList Name
   Story 1 South Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 30;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 30; !- Control Name 1
 
 Schedule:Compact,
   Story 1 South Core Space ZN Thermostat Schedule, !- Name
@@ -1951,7 +1952,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 30,     !- Name
+  Office WholeBuilding 318 Thermostat 30, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -1960,8 +1961,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 South Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 South Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 South Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 19,                                !- Zone Air Node Name
-  Story 1 South Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 19;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 South Core Space ZN Inlet Node List, !- Name
@@ -1992,7 +1992,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -2002,11 +2002,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 South Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 7,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 South Core Space ZN,            !- Zone or ZoneList Name
@@ -2018,7 +2020,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -2092,7 +2094,6 @@ FenestrationSurface:Detailed,
   Surface 44,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -2184,7 +2185,7 @@ ZoneControl:Thermostat,
   Story 1 South Lower Perimeter Space ZN, !- Zone or ZoneList Name
   Story 1 South Lower Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 31;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 31; !- Control Name 1
 
 Schedule:Compact,
   Story 1 South Lower Perimeter Space ZN Thermostat Schedule, !- Name
@@ -2201,7 +2202,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 31,     !- Name
+  Office WholeBuilding 318 Thermostat 31, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -2210,8 +2211,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 South Lower Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 South Lower Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 South Lower Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 22,                                !- Zone Air Node Name
-  Story 1 South Lower Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 22;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 South Lower Perimeter Space ZN Inlet Node List, !- Name
@@ -2242,7 +2242,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -2252,11 +2252,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 South Lower Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 8,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 South Lower Perimeter Space ZN, !- Zone or ZoneList Name
@@ -2268,7 +2270,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -2404,7 +2406,7 @@ ZoneControl:Thermostat,
   Story 1 West Core Space ZN,             !- Zone or ZoneList Name
   Story 1 West Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 32;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 32; !- Control Name 1
 
 Schedule:Compact,
   Story 1 West Core Space ZN Thermostat Schedule, !- Name
@@ -2421,7 +2423,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 32,     !- Name
+  Office WholeBuilding 318 Thermostat 32, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -2430,8 +2432,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 West Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 West Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 West Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 25,                                !- Zone Air Node Name
-  Story 1 West Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 25;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 West Core Space ZN Inlet Node List, !- Name
@@ -2462,7 +2463,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -2472,11 +2473,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 West Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 9,     !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 West Core Space ZN,             !- Zone or ZoneList Name
@@ -2488,7 +2491,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -2562,7 +2565,6 @@ FenestrationSurface:Detailed,
   Surface 2,                              !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -2654,7 +2656,7 @@ ZoneControl:Thermostat,
   Story 1 West Left Perimeter Space ZN,   !- Zone or ZoneList Name
   Story 1 West Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 33;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 33; !- Control Name 1
 
 Schedule:Compact,
   Story 1 West Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -2671,7 +2673,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 33,     !- Name
+  Office WholeBuilding 318 Thermostat 33, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -2680,8 +2682,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 West Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 West Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 West Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 28,                                !- Zone Air Node Name
-  Story 1 West Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 28;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 West Left Perimeter Space ZN Inlet Node List, !- Name
@@ -2712,7 +2713,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -2722,11 +2723,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 West Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 10,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 West Left Perimeter Space ZN,   !- Zone or ZoneList Name
@@ -2738,7 +2741,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -2812,7 +2815,6 @@ FenestrationSurface:Detailed,
   Surface 26,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -2904,7 +2906,7 @@ ZoneControl:Thermostat,
   Story 1 West Right Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 1 West Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 34;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 34; !- Control Name 1
 
 Schedule:Compact,
   Story 1 West Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -2921,7 +2923,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 34,     !- Name
+  Office WholeBuilding 318 Thermostat 34, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -2930,8 +2932,7 @@ ZoneHVAC:EquipmentConnections,
   Story 1 West Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 1 West Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 1 West Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 31,                                !- Zone Air Node Name
-  Story 1 West Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 31;                                !- Zone Air Node Name
 
 NodeList,
   Story 1 West Right Perimeter Space ZN Inlet Node List, !- Name
@@ -2962,7 +2963,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -2972,11 +2973,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 1 West Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 11,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 1 West Right Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -2988,7 +2991,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -3126,7 +3129,6 @@ FenestrationSurface:Detailed,
   Surface 132,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -3154,7 +3156,7 @@ ZoneControl:Thermostat,
   Story 2 East Core Space ZN,             !- Zone or ZoneList Name
   Story 2 East Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 35;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 35; !- Control Name 1
 
 Schedule:Compact,
   Story 2 East Core Space ZN Thermostat Schedule, !- Name
@@ -3171,7 +3173,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 35,     !- Name
+  Office WholeBuilding 318 Thermostat 35, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -3180,8 +3182,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 East Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 East Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 East Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 34,                                !- Zone Air Node Name
-  Story 2 East Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 34;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 East Core Space ZN Inlet Node List, !- Name
@@ -3212,7 +3213,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -3222,11 +3223,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 East Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 12,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 East Core Space ZN,             !- Zone or ZoneList Name
@@ -3238,7 +3241,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -3312,7 +3315,6 @@ FenestrationSurface:Detailed,
   Surface 80,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -3392,7 +3394,6 @@ FenestrationSurface:Detailed,
   Surface 84,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -3420,7 +3421,7 @@ ZoneControl:Thermostat,
   Story 2 East Left Perimeter Space ZN,   !- Zone or ZoneList Name
   Story 2 East Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 36;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 36; !- Control Name 1
 
 Schedule:Compact,
   Story 2 East Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -3437,7 +3438,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 36,     !- Name
+  Office WholeBuilding 318 Thermostat 36, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -3446,8 +3447,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 East Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 East Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 East Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 37,                                !- Zone Air Node Name
-  Story 2 East Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 37;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 East Left Perimeter Space ZN Inlet Node List, !- Name
@@ -3478,7 +3478,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -3488,11 +3488,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 East Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 13,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 East Left Perimeter Space ZN,   !- Zone or ZoneList Name
@@ -3504,7 +3506,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -3578,7 +3580,6 @@ FenestrationSurface:Detailed,
   Surface 104,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -3658,7 +3659,6 @@ FenestrationSurface:Detailed,
   Surface 108,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -3686,7 +3686,7 @@ ZoneControl:Thermostat,
   Story 2 East Right Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 2 East Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 37;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 37; !- Control Name 1
 
 Schedule:Compact,
   Story 2 East Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -3703,7 +3703,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 37,     !- Name
+  Office WholeBuilding 318 Thermostat 37, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -3712,8 +3712,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 East Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 East Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 East Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 40,                                !- Zone Air Node Name
-  Story 2 East Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 40;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 East Right Perimeter Space ZN Inlet Node List, !- Name
@@ -3744,7 +3743,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -3754,11 +3753,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 East Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 14,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 East Right Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -3770,7 +3771,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -3844,7 +3845,6 @@ FenestrationSurface:Detailed,
   Surface 74,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -3924,7 +3924,6 @@ FenestrationSurface:Detailed,
   Surface 78,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -3952,7 +3951,7 @@ ZoneControl:Thermostat,
   Story 2 North Left Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 2 North Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 38;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 38; !- Control Name 1
 
 Schedule:Compact,
   Story 2 North Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -3969,7 +3968,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 38,     !- Name
+  Office WholeBuilding 318 Thermostat 38, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -3978,8 +3977,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 North Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 North Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 North Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 43,                                !- Zone Air Node Name
-  Story 2 North Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 43;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 North Left Perimeter Space ZN Inlet Node List, !- Name
@@ -4010,7 +4008,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -4020,11 +4018,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 North Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 15,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 North Left Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -4036,7 +4036,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -4110,7 +4110,6 @@ FenestrationSurface:Detailed,
   Surface 86,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -4190,7 +4189,6 @@ FenestrationSurface:Detailed,
   Surface 90,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -4218,7 +4216,7 @@ ZoneControl:Thermostat,
   Story 2 North Lower Perimeter Space ZN, !- Zone or ZoneList Name
   Story 2 North Lower Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 39;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 39; !- Control Name 1
 
 Schedule:Compact,
   Story 2 North Lower Perimeter Space ZN Thermostat Schedule, !- Name
@@ -4235,7 +4233,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 39,     !- Name
+  Office WholeBuilding 318 Thermostat 39, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -4244,8 +4242,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 North Lower Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 North Lower Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 North Lower Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 46,                                !- Zone Air Node Name
-  Story 2 North Lower Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 46;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 North Lower Perimeter Space ZN Inlet Node List, !- Name
@@ -4276,7 +4273,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -4286,11 +4283,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 North Lower Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 16,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 North Lower Perimeter Space ZN, !- Zone or ZoneList Name
@@ -4302,7 +4301,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -4392,7 +4391,6 @@ FenestrationSurface:Detailed,
   Surface 102,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -4440,7 +4438,6 @@ FenestrationSurface:Detailed,
   Surface 98,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -4484,7 +4481,7 @@ ZoneControl:Thermostat,
   Story 2 North Right Perimeter Space ZN, !- Zone or ZoneList Name
   Story 2 North Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 40;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 40; !- Control Name 1
 
 Schedule:Compact,
   Story 2 North Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -4501,7 +4498,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 40,     !- Name
+  Office WholeBuilding 318 Thermostat 40, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -4510,8 +4507,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 North Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 North Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 North Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 49,                                !- Zone Air Node Name
-  Story 2 North Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 49;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 North Right Perimeter Space ZN Inlet Node List, !- Name
@@ -4542,7 +4538,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -4552,11 +4548,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 North Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 17,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 North Right Perimeter Space ZN, !- Zone or ZoneList Name
@@ -4568,7 +4566,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -4706,7 +4704,6 @@ FenestrationSurface:Detailed,
   Surface 126,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -4734,7 +4731,7 @@ ZoneControl:Thermostat,
   Story 2 South Core Space ZN,            !- Zone or ZoneList Name
   Story 2 South Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 41;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 41; !- Control Name 1
 
 Schedule:Compact,
   Story 2 South Core Space ZN Thermostat Schedule, !- Name
@@ -4751,7 +4748,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 41,     !- Name
+  Office WholeBuilding 318 Thermostat 41, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -4760,8 +4757,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 South Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 South Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 South Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 52,                                !- Zone Air Node Name
-  Story 2 South Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 52;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 South Core Space ZN Inlet Node List, !- Name
@@ -4792,7 +4788,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -4802,11 +4798,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 South Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 18,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 South Core Space ZN,            !- Zone or ZoneList Name
@@ -4818,7 +4816,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -4892,7 +4890,6 @@ FenestrationSurface:Detailed,
   Surface 110,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -4972,7 +4969,6 @@ FenestrationSurface:Detailed,
   Surface 114,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -5000,7 +4996,7 @@ ZoneControl:Thermostat,
   Story 2 South Lower Perimeter Space ZN, !- Zone or ZoneList Name
   Story 2 South Lower Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 42;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 42; !- Control Name 1
 
 Schedule:Compact,
   Story 2 South Lower Perimeter Space ZN Thermostat Schedule, !- Name
@@ -5017,7 +5013,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 42,     !- Name
+  Office WholeBuilding 318 Thermostat 42, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -5026,8 +5022,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 South Lower Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 South Lower Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 South Lower Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 55,                                !- Zone Air Node Name
-  Story 2 South Lower Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 55;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 South Lower Perimeter Space ZN Inlet Node List, !- Name
@@ -5058,7 +5053,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -5068,11 +5063,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 South Lower Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 19,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 South Lower Perimeter Space ZN, !- Zone or ZoneList Name
@@ -5084,7 +5081,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -5222,7 +5219,6 @@ FenestrationSurface:Detailed,
   Surface 120,                            !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -5250,7 +5246,7 @@ ZoneControl:Thermostat,
   Story 2 West Core Space ZN,             !- Zone or ZoneList Name
   Story 2 West Core Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 43;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 43; !- Control Name 1
 
 Schedule:Compact,
   Story 2 West Core Space ZN Thermostat Schedule, !- Name
@@ -5267,7 +5263,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 43,     !- Name
+  Office WholeBuilding 318 Thermostat 43, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -5276,8 +5272,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 West Core Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 West Core Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 West Core Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 58,                                !- Zone Air Node Name
-  Story 2 West Core Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 58;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 West Core Space ZN Inlet Node List, !- Name
@@ -5308,7 +5303,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -5318,11 +5313,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 West Core Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 20,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 West Core Space ZN,             !- Zone or ZoneList Name
@@ -5334,7 +5331,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -5408,7 +5405,6 @@ FenestrationSurface:Detailed,
   Surface 68,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -5488,7 +5484,6 @@ FenestrationSurface:Detailed,
   Surface 72,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -5516,7 +5511,7 @@ ZoneControl:Thermostat,
   Story 2 West Left Perimeter Space ZN,   !- Zone or ZoneList Name
   Story 2 West Left Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 44;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 44; !- Control Name 1
 
 Schedule:Compact,
   Story 2 West Left Perimeter Space ZN Thermostat Schedule, !- Name
@@ -5533,7 +5528,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 44,     !- Name
+  Office WholeBuilding 318 Thermostat 44, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -5542,8 +5537,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 West Left Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 West Left Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 West Left Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 61,                                !- Zone Air Node Name
-  Story 2 West Left Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 61;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 West Left Perimeter Space ZN Inlet Node List, !- Name
@@ -5574,7 +5568,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -5584,11 +5578,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 West Left Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 21,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 West Left Perimeter Space ZN,   !- Zone or ZoneList Name
@@ -5600,7 +5596,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -5674,7 +5670,6 @@ FenestrationSurface:Detailed,
   Surface 92,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   ,                                       !- Multiplier
   ,                                       !- Number of Vertices
@@ -5754,7 +5749,6 @@ FenestrationSurface:Detailed,
   Surface 96,                             !- Building Surface Name
   ,                                       !- Outside Boundary Condition Object
   ,                                       !- View Factor to Ground
-  ,                                       !- Shading Control Name
   ,                                       !- Frame and Divider Name
   1,                                      !- Multiplier
   ,                                       !- Number of Vertices
@@ -5782,7 +5776,7 @@ ZoneControl:Thermostat,
   Story 2 West Right Perimeter Space ZN,  !- Zone or ZoneList Name
   Story 2 West Right Perimeter Space ZN Thermostat Schedule, !- Control Type Schedule Name
   ThermostatSetpoint:DualSetpoint,        !- Control Object Type 1
-  Office WholeBuilding Thermostat 45;     !- Control Name 1
+  Office WholeBuilding 318 Thermostat 45; !- Control Name 1
 
 Schedule:Compact,
   Story 2 West Right Perimeter Space ZN Thermostat Schedule, !- Name
@@ -5799,7 +5793,7 @@ ScheduleTypeLimits,
   DISCRETE;                               !- Numeric Type
 
 ThermostatSetpoint:DualSetpoint,
-  Office WholeBuilding Thermostat 45,     !- Name
+  Office WholeBuilding 318 Thermostat 45, !- Name
   NECB-A-Thermostat Setpoint-Heating,     !- Heating Setpoint Temperature Schedule Name
   NECB-A-Thermostat Setpoint-Cooling;     !- Cooling Setpoint Temperature Schedule Name
 
@@ -5808,8 +5802,7 @@ ZoneHVAC:EquipmentConnections,
   Story 2 West Right Perimeter Space ZN Equipment List, !- Zone Conditioning Equipment List Name
   Story 2 West Right Perimeter Space ZN Inlet Node List, !- Zone Air Inlet Node or NodeList Name
   Story 2 West Right Perimeter Space ZN Exhaust Node List, !- Zone Air Exhaust Node or NodeList Name
-  Node 64,                                !- Zone Air Node Name
-  Story 2 West Right Perimeter Space ZN Return Air Node; !- Zone Return Air Node or NodeList Name
+  Node 64;                                !- Zone Air Node Name
 
 NodeList,
   Story 2 West Right Perimeter Space ZN Inlet Node List, !- Name
@@ -5840,7 +5833,7 @@ ZoneHVAC:IdealLoadsAirSystem,
   ,                                       !- Dehumidification Control Type
   ,                                       !- Cooling Sensible Heat Ratio {dimensionless}
   ,                                       !- Humidification Control Type
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Outdoor Air Inlet Node Name
   ,                                       !- Demand Controlled Ventilation Type
   ,                                       !- Outdoor Air Economizer Type
@@ -5850,11 +5843,13 @@ ZoneHVAC:IdealLoadsAirSystem,
 
 ZoneHVAC:EquipmentList,
   Story 2 West Right Perimeter Space ZN Equipment List, !- Name
-  ,                                       !- Load Distribution Scheme
+  SequentialLoad,                         !- Load Distribution Scheme
   ZoneHVAC:IdealLoadsAirSystem,           !- Zone Equipment Object Type 1
   Zone HVAC Ideal Loads Air System 22,    !- Zone Equipment Name 1
   1,                                      !- Zone Equipment Cooling Sequence 1
-  1;                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Heating or No-Load Sequence 1
+  1,                                      !- Zone Equipment Sequential Cooling Fraction 1
+  1;                                      !- Zone Equipment Sequential Heating Fraction 1
 
 Sizing:Zone,
   Story 2 West Right Perimeter Space ZN,  !- Zone or ZoneList Name
@@ -5866,7 +5861,7 @@ Sizing:Zone,
   11.11,                                  !- Zone Heating Design Supply Air Temperature Difference {deltaC}
   0.0085,                                 !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
   0.008,                                  !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  Office WholeBuilding Ventilation,       !- Design Specification Outdoor Air Object Name
+  Office WholeBuilding 318 Ventilation,   !- Design Specification Outdoor Air Object Name
   ,                                       !- Zone Heating Sizing Factor
   ,                                       !- Zone Cooling Sizing Factor
   DesignDay,                              !- Cooling Design Air Flow Method
@@ -5908,15 +5903,16 @@ RunPeriod,
   Run Period 1,                           !- Name
   1,                                      !- Begin Month
   1,                                      !- Begin Day of Month
+  2006,                                   !- Begin Year
   12,                                     !- End Month
   31,                                     !- End Day of Month
+  2006,                                   !- End Year
   Sunday,                                 !- Day of Week for Start Day
   No,                                     !- Use Weather File Holidays and Special Days
   No,                                     !- Use Weather File Daylight Saving Period
   No,                                     !- Apply Weekend Holiday Rule
   Yes,                                    !- Use Weather File Rain Indicators
-  Yes,                                    !- Use Weather File Snow Indicators
-  1;                                      !- Number of Times Runperiod to be Repeated
+  Yes;                                    !- Use Weather File Snow Indicators
 
 GlobalGeometryRules,
   UpperLeftCorner,                        !- Starting Vertex Position
@@ -7023,7 +7019,7 @@ SizingPeriod:DesignDay,
   0;                                      !- Sky Clearness
 
 ZoneList,
-  Office WholeBuilding,                   !- Name
+  Office WholeBuilding 318,               !- Name
   Story 1 East Core Space ZN,             !- Zone Name 1
   Story 1 East Left Perimeter Space ZN,   !- Zone Name 2
   Story 1 East Right Perimeter Space ZN,  !- Zone Name 3
@@ -7048,8 +7044,8 @@ ZoneList,
   Story 2 West Right Perimeter Space ZN;  !- Zone Name 22
 
 Lights,
-  Office WholeBuilding Lights,            !- Name
-  Office WholeBuilding,                   !- Zone or ZoneList Name
+  Office WholeBuilding 318 Lights,        !- Name
+  Office WholeBuilding 318,               !- Zone or ZoneList Name
   NECB-A-Lighting,                        !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Lighting Level {W}
@@ -7062,8 +7058,8 @@ Lights,
   General;                                !- End-Use Subcategory
 
 People,
-  Office WholeBuilding People,            !- Name
-  Office WholeBuilding,                   !- Zone or ZoneList Name
+  Office WholeBuilding 318 People,        !- Name
+  Office WholeBuilding 318,               !- Zone or ZoneList Name
   NECB-A-Occupancy,                       !- Number of People Schedule Name
   People/Area,                            !- Number of People Calculation Method
   ,                                       !- Number of People
@@ -7083,8 +7079,8 @@ People,
   Air Velocity Schedule;                  !- Air Velocity Schedule Name
 
 ElectricEquipment,
-  Office WholeBuilding Elec Equip,        !- Name
-  Office WholeBuilding,                   !- Zone or ZoneList Name
+  Office WholeBuilding 318 Elec Equip,    !- Name
+  Office WholeBuilding 318,               !- Zone or ZoneList Name
   NECB-A-Electric-Equipment,              !- Schedule Name
   Watts/Area,                             !- Design Level Calculation Method
   ,                                       !- Design Level {W}

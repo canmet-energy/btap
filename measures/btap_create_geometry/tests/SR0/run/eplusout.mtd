@@ -1,5 +1,5 @@
 
- Meters for 9,STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 9,STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J]
@@ -7,7 +7,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 82,STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 82,STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J]
@@ -15,7 +15,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 107,STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 107,STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J]
@@ -23,7 +23,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 132,STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 132,STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J]
@@ -31,7 +31,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 157,STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 157,STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J]
@@ -39,7 +39,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 182,STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 182,STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J]
@@ -47,7 +47,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 207,STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 207,STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J]
@@ -55,7 +55,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 232,STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 232,STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J]
@@ -63,7 +63,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 257,STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 257,STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J]
@@ -71,7 +71,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 282,STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 282,STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J]
@@ -79,7 +79,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 307,STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 307,STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J]
@@ -87,7 +87,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 332,STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 332,STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J]
@@ -95,7 +95,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 357,STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 357,STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J]
@@ -103,7 +103,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 382,STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 382,STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J]
@@ -111,7 +111,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 407,STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 407,STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J]
@@ -119,7 +119,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 432,STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 432,STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J]
@@ -127,7 +127,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 457,STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 457,STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J]
@@ -135,7 +135,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 482,STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 482,STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J]
@@ -143,7 +143,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 507,STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 507,STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J]
@@ -151,7 +151,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 532,STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 532,STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J]
@@ -159,7 +159,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 557,STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 557,STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J]
@@ -167,7 +167,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 582,STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy [J]
+ Meters for 582,STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J]
@@ -175,7 +175,7 @@
   OnMeter=InteriorLights:Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorLights:Electricity [J]
 
- Meters for 607,STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 607,STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J]
@@ -183,7 +183,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 644,STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 644,STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J]
@@ -191,7 +191,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 657,STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 657,STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J]
@@ -199,7 +199,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 670,STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 670,STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J]
@@ -207,7 +207,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 683,STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 683,STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J]
@@ -215,7 +215,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 696,STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 696,STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J]
@@ -223,7 +223,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 709,STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 709,STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J]
@@ -231,7 +231,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 722,STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 722,STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J]
@@ -239,7 +239,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 735,STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 735,STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J]
@@ -247,7 +247,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 748,STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 748,STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J]
@@ -255,7 +255,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 761,STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 761,STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J]
@@ -263,7 +263,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 774,STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 774,STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J]
@@ -271,7 +271,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 787,STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 787,STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J]
@@ -279,7 +279,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 800,STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 800,STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J]
@@ -287,7 +287,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 813,STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 813,STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J]
@@ -295,7 +295,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 826,STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 826,STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J]
@@ -303,7 +303,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 839,STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 839,STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J]
@@ -311,7 +311,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 852,STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 852,STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J]
@@ -319,7 +319,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 865,STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 865,STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J]
@@ -327,7 +327,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 878,STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 878,STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J]
@@ -335,7 +335,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 891,STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 891,STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J]
@@ -343,7 +343,7 @@
   OnMeter=InteriorEquipment:Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J]
   OnMeter=General:InteriorEquipment:Electricity [J]
 
- Meters for 904,STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy [J]
+ Meters for 904,STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy [J]
   OnMeter=Electricity:Facility [J]
   OnMeter=Electricity:Building [J]
   OnMeter=Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J]
@@ -907,412 +907,412 @@
   OnMeter=CarbonEquivalentEmissions:Carbon Equivalent [kg]
 
  For Meter=Electricity:Facility [J], ResourceType=Electricity, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=Electricity:Building [J], ResourceType=Electricity, Group=Building, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=General:InteriorLights:Electricity [J], ResourceType=Electricity, EndUse=InteriorLights, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, Group=Zone, contents are:
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorLights:Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorLights, Group=Zone, contents are:
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING LIGHTS:Lights Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 LIGHTS:Lights Electric Energy
 
  For Meter=InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 EAST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=General:InteriorEquipment:Electricity [J], ResourceType=Electricity, EndUse=InteriorEquipment, contents are:
-  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 WEST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 1 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 1 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 EAST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 EAST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 EAST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 EAST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 NORTH RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 NORTH RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 SOUTH CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 SOUTH LOWER PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 SOUTH LOWER PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 WEST CORE SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST CORE SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 WEST LEFT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST LEFT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=InteriorEquipment:Electricity:Zone:STORY 2 WEST RIGHT PERIMETER SPACE ZN [J], ResourceType=Electricity, EndUse=InteriorEquipment, Group=Zone, contents are:
-  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING ELEC EQUIP:Electric Equipment Electric Energy
+  STORY 2 WEST RIGHT PERIMETER SPACE ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP:Electric Equipment Electric Energy
 
  For Meter=EnergyTransfer:Facility [J], ResourceType=EnergyTransfer, contents are:
   STORY 1 EAST CORE SPACE ZN:Zone Air System Sensible Heating Energy

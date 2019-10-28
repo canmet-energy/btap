@@ -1,5 +1,5 @@
 EnergyPlus Starting
-EnergyPlus, Version 8.9.0-eba93e8e1b, YMD=2019.05.01 16:02
+EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 16:19
 Initializing Response Factors
 Calculating CTFs for "BTAP-EXT-ROOF-METAL:U-0.156", Construction # 18
 Calculating CTFs for "BTAP-EXT-WALL-MASS:U-0.247", Construction # 22
@@ -75,4 +75,7 @@ Warming up {5}
 Warming up {6}
 Starting Simulation at 01/21 for OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB
 Writing tabular output file results using HTML format.
+Computing Life Cycle Costs and Reporting
+Writing final SQL reports
+EnergyPlus Run Time=00hr 00min  5.00sec
 EnergyPlus Completed Successfully.

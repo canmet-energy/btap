@@ -150,8 +150,8 @@ class BTAPCreateGeometry_Test < Minitest::Test
       @templates = ['NECB2017']
       @total_floor_area = [20000.0]
       @above_grade_floors = [2]
-      @building_shapes = ["U shape"]
-     #@building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "T shape", "U shape"]
+      #@building_shapes = ["U shape"]
+      @building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"]
       @building_types = ["SmallOffice"]
       #@building_types= ["RetailStandalone","RetailStripmall","QuickServiceRestaurant","FullServiceRestaurant"]
 

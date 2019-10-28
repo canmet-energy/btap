@@ -236,7 +236,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
       len = Math::sqrt((9.0 / 7.0) * floor_area)
       a = len * aspect_ratio
       b = len / aspect_ratio
-      puts ">>>>>>>>>> b: #{b}, b/3 : #{b / 3}"
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
       perimeter_depth = [([a, b].min / 9.0), 4.57].min
       # Generate the geometry
@@ -284,7 +283,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
       a = len * aspect_ratio
       b = len / aspect_ratio
       # Set perimeter depth to min of 1/3 smallest section width or 4.57 (=BTAP default)
-      puts ">>>>>#{b}>>>#{b / 1.1}"
       perimeter_depth = [([a, b].min / 9), 4.57].min
 
       BTAP::Geometry::Wizards::create_shape_u(model,
@@ -299,10 +297,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
                                               plenum_height = plenum_height,
                                               perimeter_zone_depth = perimeter_depth / 3)
     end
-
-    # Write the basic geometry put to file (for debugging)
-    #BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "#{arguments['building_shape']}-geometry.osm"))
-    #osm_model_path = File.absolute_path("../output/#{arguments['building_shape']}.osm")
 
     #Rotate model.
     t = OpenStudio::Transformation::rotation(OpenStudio::EulerAngles.new(0, 0, arguments['rotation'] * Math::PI / 180.0))
@@ -329,7 +323,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     elsif building_type == "PrimarySchool" || building_type == "SecondarySchool"
       building_type = "School/university"
     elsif building_type == "SmallHotel" || building_type == "LargeHotel"
-      if template = 'NECB2011'
+      if template == 'NECB2011'
         building_type = "Hotel"
       else
         building_type = "Hotel/Motel"
@@ -359,11 +353,10 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     spacetype_data = @standards_data['tables']['space_types']['table']
     spacetype_data.each do |spacedata|
 
-      if spacedata["template"] == template and spacedata["building_type"] == building_type and spacedata["space_type"] == "WholeBuilding"
         space_type = OpenStudio::Model::SpaceType.new(model)
-        space_type.setName("#{spacedata['building_type']} #{spacedata['space_type']}")
-        space_type.setStandardsSpaceType(spacedata["space_type"])
-        space_type.setStandardsBuildingType(spacedata["building_type"])
+        space_type.setName("#{building_type} WholeBuilding")
+        space_type.setStandardsSpaceType("WholeBuilding")
+        space_type.setStandardsBuildingType("#{building_type}")
         building.setSpaceType(space_type)
 
         # Add internal loads
@@ -375,7 +368,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
                                                  true,
                                                  true)
 
-=begin
+
         # Schedules
         standard.space_type_apply_internal_load_schedules(space_type,
                                                           true,
@@ -385,8 +378,10 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
                                                           true,
                                                           true,
                                                           true)
-=end
-      end
+
+
+
+
     end
 
     # Create thermal zones (these will get overwritten in the apply_standard method)
@@ -396,14 +391,22 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     model.setDayofWeekforStartDay("Sunday")
 
     # Apply NECB ruleste to model (set constructions, thermal zones etc)
-    standard.model_apply_standard(model: model, epw_file: epw_file)
+    #standard.model_apply_standard(model: model, epw_file: epw_file)
+
+    standard.model_apply_standard(model:model,
+                         epw_file:epw_file,
+                         debug: false,
+                         sizing_run_dir: Dir.pwd,
+                         x_scale: 1.0,
+                         y_scale: 1.0,
+                         z_scale: 1.0,
+                         fdwr_set: 1.1,
+                         srr_set: 1.1)
     finishing_spaceTypes = model.getSpaceTypes
     num_thermalZones = model.getThermalZones.size
     finishing_constructionSets = model.getDefaultConstructionSets
     runner.registerInfo("The building finished with #{finishing_spaceTypes.size} space type.")
 
-    #save the model
-    #output_file_path = "#{building_shape}_#{building_type}_#{template}.osm")
     # Map building type to a building evel space usage in NECB
     if building_type == "School/university"
       building_type = "School"
@@ -412,6 +415,8 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     elsif building_type == "Dining - cafeteria/fast food"
       building_type = "Dining - cafeteria"
     end
+
+    #save the model
     output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "osm_dir/#{building_shape}_#{building_type}_#{template}.osm")
     name_osm = "#{building_shape}/#{building_type}/#{template}_#{above_grade_floors}_#{total_floor_area.to_i}"
     BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output_osm_files", "#{name_osm}.osm"))
