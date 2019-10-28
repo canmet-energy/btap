@@ -1,292 +1,76 @@
-Program Version,EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 16:19,
+Program Version,EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 18:37,
    ************* Beginning Zone Sizing Calculations
    ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 1", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 10", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 11", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 12", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 13", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 14", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 15", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 16", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 17", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 18", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 19", Blank Schedule Type Limits Name input -- will not be validated.
    ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 2", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 20", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 21", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 22", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 23", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 24", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 25", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 26", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 27", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 28", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 29", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 30", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 31", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 32", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 33", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 34", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 5", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 6", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 7", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 8", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Day:Interval="SCHEDULE DAY 9", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 10", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 11", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 12", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 13", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 14", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 15", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 16", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 17", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 18", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 19", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 20", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 21", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 22", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 23", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 24", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 25", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 26", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 27", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 28", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 29", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 3", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 30", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 31", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 32", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 4", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 5", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 6", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 7", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 8", Blank Schedule Type Limits Name input -- will not be validated.
+   ** Warning ** ProcessScheduleInput: Schedule:Year="SCHEDULE RULESET 9", Blank Schedule Type Limits Name input -- will not be validated.
    ** Warning ** ProcessScheduleInput: Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input -- will not be validated.
    ** Warning ** ProcessScheduleInput: Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input -- will not be validated.
    ** Warning ** GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input.
-   **   ~~~   ** Found first in surface=SURFACE 61
+   **   ~~~   ** Found first in surface=SURFACE 25
    **   ~~~   ** Defaults, constant throughout the year of (18.0) will be used.
    ** Warning ** CheckUsedConstructions: There are 28 nominally unused constructions in input.
    **   ~~~   ** For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[102] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[102] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: People Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 PEOPLE".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 PEOPLE".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[102] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[102] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[103] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: Lights Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 LIGHTS".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[101] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [4] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 LIGHTS".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 EAST LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 EAST LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[105] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 EAST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[106] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 WEST LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 WEST LEFT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[105] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 1 WEST RIGHT PERIMETER SPACE SYS-3 FLR-1 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 EAST LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 EAST LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN".
-   **   ~~~   ** Item length=[105] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 EAST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-EAST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[106] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 NORTH RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-NORTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN".
-   **   ~~~   ** Item length=[107] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 SOUTH LOWER PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-SOUTH ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 WEST LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[104] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 WEST LEFT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   ** Warning ** GetInternalHeatGains: ElectricEquipment Combination of ZoneList and Object Name generate a name too long.
-   **   ~~~   ** Object Name="OFFICE WHOLEBUILDING 318 ELEC EQUIP".
-   **   ~~~   ** ZoneList/Zone Name="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN".
-   **   ~~~   ** Item length=[105] > Maximum Length=[100]. You may need to shorten the names.
-   **   ~~~   ** Shortening the Object Name by [8] characters will assure uniqueness for this ZoneList.
-   **   ~~~   ** name that will be used (may be needed in reporting)="SP-STORY 2 WEST RIGHT PERIMETER SPACE SYS-3 FLR-2 SCH-A HPLCMT-WEST ZN OFFICE WHOLEBUILDING 318 ELEC EQUIP".
    ************* Beginning System Sizing Calculations
    ************* Beginning Plant Sizing Calculations
-   ** Warning ** For object = Coil:Cooling:DX:SingleSpeed, name = "COIL COOLING DX SINGLE SPEED 21"
-   **   ~~~   ** Calculated outlet air relative humidity greater than 1. The combination of
-   **   ~~~   ** rated air volume flow rate, total cooling capacity and sensible heat ratio yields coil exiting
-   **   ~~~   ** air conditions above the saturation curve. Possible fixes are to reduce the rated total cooling
-   **   ~~~   ** capacity, increase the rated air volume flow rate, or reduce the rated sensible heat ratio for this coil.
-   **   ~~~   ** If autosizing, it is recommended that all three of these values be autosized.
-   **   ~~~   ** ...Inputs used for calculating cooling coil bypass factor.
-   **   ~~~   ** ...Inlet Air Temperature     = 26.67 C
-   **   ~~~   ** ...Outlet Air Temperature    = 14.02 C
-   **   ~~~   ** ...Inlet Air Humidity Ratio  = 1.125000E-002 kgWater/kgDryAir
-   **   ~~~   ** ...Outlet Air Humidity Ratio = 9.984284E-003 kgWater/kgDryAir
-   **   ~~~   ** ...Total Cooling Capacity used in calculation = 107914.27 W
-   **   ~~~   ** ...Air Mass Flow Rate used in calculation     = 6.673089 kg/s
-   **   ~~~   ** ...Air Volume Flow Rate used in calculation   = 5.769432 m3/s
-   **   ~~~   **  During Warmup, Environment=OTTAWA=MACDONALD-CARTIER INTL ANN CLG .4% CONDNS DB=>MWB, at Simulation time=07/21 00:00 - 00:10
-   **   ~~~   ** CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.
-   **   ~~~   ** CalcCBF: initial SHR = 0.80038
-   **   ~~~   ** CalcCBF: adjusted SHR = 0.79945
-   ** Warning ** For object = Coil:Cooling:DX:SingleSpeed, name = "COIL COOLING DX SINGLE SPEED 22"
-   **   ~~~   ** Calculated outlet air relative humidity greater than 1. The combination of
-   **   ~~~   ** rated air volume flow rate, total cooling capacity and sensible heat ratio yields coil exiting
-   **   ~~~   ** air conditions above the saturation curve. Possible fixes are to reduce the rated total cooling
-   **   ~~~   ** capacity, increase the rated air volume flow rate, or reduce the rated sensible heat ratio for this coil.
-   **   ~~~   ** If autosizing, it is recommended that all three of these values be autosized.
-   **   ~~~   ** ...Inputs used for calculating cooling coil bypass factor.
-   **   ~~~   ** ...Inlet Air Temperature     = 26.67 C
-   **   ~~~   ** ...Outlet Air Temperature    = 14.02 C
-   **   ~~~   ** ...Inlet Air Humidity Ratio  = 1.125000E-002 kgWater/kgDryAir
-   **   ~~~   ** ...Outlet Air Humidity Ratio = 9.983089E-003 kgWater/kgDryAir
-   **   ~~~   ** ...Total Cooling Capacity used in calculation = 134915.59 W
-   **   ~~~   ** ...Air Mass Flow Rate used in calculation     = 8.339775 kg/s
-   **   ~~~   ** ...Air Volume Flow Rate used in calculation   = 7.210419 m3/s
-   **   ~~~   **  During Warmup, Environment=OTTAWA=MACDONALD-CARTIER INTL ANN CLG .4% CONDNS DB=>MWB, at Simulation time=07/21 00:00 - 00:10
-   **   ~~~   ** CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.
-   **   ~~~   ** CalcCBF: initial SHR = 0.80026
-   **   ~~~   ** CalcCBF: adjusted SHR = 0.79930
    ** Warning ** Output:Meter: invalid Key Name="DISTRICTCOOLING:FACILITY" - not found.
    ** Warning ** Output:Meter: invalid Key Name="DISTRICTHEATING:FACILITY" - not found.
    ** Warning ** Output:Meter:MeterFileOnly requested for "Electricity:Facility" (TimeStep), already on "Output:Meter". Will report to both eplusout.eso and eplusout.mtr
@@ -299,223 +83,172 @@ Program Version,EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 16:19,
    ************* No node connection errors were found.
    ************* Beginning Simulation
    ** Warning ** Output:Table:Monthly requested with SimulationControl Run Simulation for Weather File Run Periods set to No so Output:Table:Monthly will not be generated
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 20" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 7" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 20" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -4.25 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 7" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.11 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 13.622 C.
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.272 C.
    **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
    **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 21" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 10" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 21" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -4.74 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 10" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.78 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 13.528 C.
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 16.949 C.
    **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
    **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 22" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 1" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 22" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -4.62 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 1" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.32 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
    **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 13.663 C.
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.490 C.
+   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
+   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 3" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
+   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 3" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.53 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
+   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.703 C.
    **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
    **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
    ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 4" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
+   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 4" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.25 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 06:01 - 06:03
+   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 16.414 C.
+   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
+   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 6" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
+   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 6" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -5.19 C.
+   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 07:03 - 07:04
+   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 13.264 C.
+   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
+   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 9" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
    **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
    **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 5" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 1" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 1" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -1.40 C.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 9" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -1.94 C.
    **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
    **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.296 C.
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 14.436 C.
    **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
    **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
    ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 2" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
    **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
    **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 2" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -1.98 C.
+   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 2" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -2.84 C.
    **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
    **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.021 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 3" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 3" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -1.40 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.296 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 8" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 8" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.78 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 16.939 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 6" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 7" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 15" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 15" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.83 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.988 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 16" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 16" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.84 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 18.005 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 12" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 12" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -0.34 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.825 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 13" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 13" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -0.51 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.687 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 14" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 14" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = -0.34 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 15.825 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 19" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 19" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 0.97 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 17.133 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 17" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 17" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.95 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 18.115 C.
-   **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
-   **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 18" - Air-cooled condenser inlet dry-bulb temperature below 0 C. Outdoor dry-bulb temperature = -24.20
-   **   ~~~   **  ... Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Operation at low ambient temperatures may require special performance curves.
-   ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed "COIL COOLING DX SINGLE SPEED 18" - Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze. Outlet temperature = 1.94 C.
-   **   ~~~   **  ...Occurrence info = OTTAWA=MACDONALD-CARTIER INTL ANN HTG 99.6% CONDNS DB, 01/21 21:10 - 21:11
-   **   ~~~   ** ... Possible reasons for low outlet air dry-bulb temperatures are: This DX coil
-   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 18.107 C.
+   **   ~~~   **    1) may have a low inlet air dry-bulb temperature. Inlet air temperature = 14.172 C.
    **   ~~~   **    2) may have a low air flow rate per watt of cooling capacity. Check inputs.
    **   ~~~   **    3) is used as part of a HX assisted cooling coil which uses a high sensible effectiveness. Check inputs.
    ************* Simulation Error Summary *************
    ************* There are 8 unused objects in input.
    ************* Use Output:Diagnostics,DisplayUnusedObjects; to see them.
-   ************* There are 6 unused schedules in input.
-   ************* There are 6 unused week schedules in input.
-   ************* There are 9 unused day schedules in input.
+   ************* There are 8 unused schedules in input.
+   ************* There are 8 unused week schedules in input.
+   ************* There are 11 unused day schedules in input.
    ************* Use Output:Diagnostics,DisplayUnusedSchedules; to see them.
    *************
    ************* ===== Recurring Error Summary =====
    ************* The following recurring error messages occurred.
    *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 20" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 7" - Low condenser dry-bulb temperature error continues...
+   *************  **   ~~~   **   This error occurred 3 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
    *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
    *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 20" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 7" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 2 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-4.249129  Min=-4.249129
+   *************  **   ~~~   **   Max=1.112261  Min=1.107442
    *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 21" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 10" - Low condenser dry-bulb temperature error continues...
+   *************  **   ~~~   **   This error occurred 3 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
    *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
    *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 21" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 10" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 2 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-4.744385  Min=-4.744385
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 22" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 22" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-4.616686  Min=-4.616686
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 4" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 5" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
+   *************  **   ~~~   **   Max=0.783036  Min=0.737835
    *************
    *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 1" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  **   ~~~   **   This error occurred 3 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
    *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
    *************
    *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 1" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 2 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.322016  Min=0.865448
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 3" - Low condenser dry-bulb temperature error continues...
+   *************  **   ~~~   **   This error occurred 3 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 3" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 2 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=1.534922  Min=1.120672
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 4" - Low condenser dry-bulb temperature error continues...
+   *************  **   ~~~   **   This error occurred 2 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 4" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 2 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=0.245032  Min=-0.296783
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 6" - Low condenser dry-bulb temperature error continues...
    *************  **   ~~~   **   This error occurred 1 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-1.40187  Min=-1.40187
+   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 6" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=-5.186499  Min=-5.186499
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 9" - Low condenser dry-bulb temperature error continues...
+   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
+   *************
+   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 9" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
+   *************  **   ~~~   **   This error occurred 1 total times;
+   *************  **   ~~~   **   during Warmup 0 times;
+   *************  **   ~~~   **   during Sizing 0 times.
+   *************  **   ~~~   **   Max=-1.944927  Min=-1.944927
    *************
    *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 2" - Low condenser dry-bulb temperature error continues...
    *************  **   ~~~   **   This error occurred 1 total times;
@@ -527,139 +260,7 @@ Program Version,EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 16:19,
    *************  **   ~~~   **   This error occurred 1 total times;
    *************  **   ~~~   **   during Warmup 0 times;
    *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-1.984369  Min=-1.984369
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 3" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 3" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-1.401677  Min=-1.401677
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 8" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 8" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=0.779246  Min=0.779246
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 6" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 7" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 15" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 15" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=1.826077  Min=1.826077
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 16" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 16" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=1.843155  Min=1.843155
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 12" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 12" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-0.340706  Min=-0.340706
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 13" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 13" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-0.508109  Min=-0.508109
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 14" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 14" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-0.340321  Min=-0.340321
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 19" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 19" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=0.969457  Min=0.969457
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 17" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 17" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=1.953492  Min=1.953492
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 18" - Low condenser dry-bulb temperature error continues...
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=-24.2 [C]  Min=-24.2 [C]
-   *************
-   *************  ** Warning ** CalcDoe2DXCoil: Coil:Cooling:DX:SingleSpeed="COIL COOLING DX SINGLE SPEED 18" - Full load outlet temperature indicates a possibility of frost/freeze error continues. Outlet air temperature statistics follow:
-   *************  **   ~~~   **   This error occurred 1 total times;
-   *************  **   ~~~   **   during Warmup 0 times;
-   *************  **   ~~~   **   during Sizing 0 times.
-   *************  **   ~~~   **   Max=1.944758  Min=1.944758
+   *************  **   ~~~   **   Max=-2.841701  Min=-2.841701
    *************
    *************
    ************* ===== Final Error Summary =====
@@ -670,5 +271,5 @@ Program Version,EnergyPlus, Version 9.1.0-fafb9d5652, YMD=2019.10.28 16:19,
    ************* ..object. You may remove the constructions indicated (when you use the DisplayExtraWarnings option).
    *************
    ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
-   ************* EnergyPlus Sizing Error Summary. During Sizing: 46 Warning; 0 Severe Errors.
-   ************* EnergyPlus Completed Successfully-- 86 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  5.00sec
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 66 Warning; 0 Severe Errors.
+   ************* EnergyPlus Completed Successfully-- 100 Warning; 0 Severe Errors; Elapsed Time=00hr 00min  3.01sec

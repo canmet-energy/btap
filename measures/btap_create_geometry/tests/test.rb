@@ -22,16 +22,7 @@ class BTAPCreateGeometry_Test < Minitest::Test
     @use_string_double = true
     @measure_interface_detailed =
         [
-            {
-                "name" => "building_name",
-                "type" => "String",
-                "display_name" => "Building name",
-                "default_value" => "building",
-                "is_required" => true
-
-            },
-
-            {
+             {
                 "name" => "building_shape",
                 "type" => "Choice",
                 "display_name" => "Building shape",
@@ -127,9 +118,8 @@ class BTAPCreateGeometry_Test < Minitest::Test
         ]
 
     @good_input_arguments = {
-        "building_name" => "rectangular",
         "building_shape" => "Rectangular",
-        "template" => "NECB2011",
+        "template" => "NECB2017",
         "building_type" => "SmallOffice",
         "epw_file" => "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
         "total_floor_area" => 50000.0,
@@ -142,7 +132,6 @@ class BTAPCreateGeometry_Test < Minitest::Test
 
   end
 
-
   def test_sample()
     ####### Test Model Creation ######
     File.open('report_final_area.csv', 'a') do |file|
@@ -150,8 +139,8 @@ class BTAPCreateGeometry_Test < Minitest::Test
       @templates = ['NECB2017']
       @total_floor_area = [20000.0]
       @above_grade_floors = [2]
-      #@building_shapes = ["U shape"]
-      @building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"]
+      @building_shapes = ["Rectangular"]
+      #@building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"]
       @building_types = ["SmallOffice"]
       #@building_types= ["RetailStandalone","RetailStripmall","QuickServiceRestaurant","FullServiceRestaurant"]
 
@@ -168,15 +157,14 @@ class BTAPCreateGeometry_Test < Minitest::Test
                 #make an empty model
                 model = OpenStudio::Model::Model.new
                 input_arguments = {
-                    "building_name" => "rectangular",
-                    "building_shape" => "#{building_shape}",
-                    "template" => "#{template}",
-                    "building_type" => "#{building_type}",
+                    "building_shape" => building_shape,
+                    "template" => template,
+                    "building_type" => building_type,
                     "epw_file" => "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
-                    "total_floor_area" => "#{total_floor_a}",
+                    "total_floor_area" => total_floor_a,
                     "aspect_ratio" => 1.0,
                     "rotation" => 0.0,
-                    "above_grade_floors" => "#{above_grade_floor}",
+                    "above_grade_floors" => above_grade_floor,
                     "floor_to_floor_height" => 3.2,
                     "plenum_height" => 1.0
                 }
@@ -191,7 +179,6 @@ class BTAPCreateGeometry_Test < Minitest::Test
                 # Floor area.
                 file.puts "#{building_type} , #{building_shape} , #{template}, #{total_floor_a.to_f.round(3)} , #{model.getBuilding.floorArea.to_f.round(3)}\n \n"
                 assert_in_delta(total_floor_a.to_f.round(2), model.getBuilding.floorArea.to_f.round(2), 0.1)
-                assert_equal(model.getBuilding.name.to_s, input_arguments['building_name'].to_s, 'building name')
                 assert_includes(model.getBuilding.standardsBuildingType.to_s, input_arguments['template'].to_s, 'code version')
                 assert_includes(model.getBuilding.standardsBuildingType.to_s, input_arguments['building_type'].to_s, 'building type')
                 assert(runner.result.value.valueName == 'Success')
