@@ -42,13 +42,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     # you run 'arguments = validate_and_get_arguments_in_hash(model, runner, user_arguments)'
     @measure_interface_detailed = [
         {
-            "name" => "building_name",
-            "type" => "String",
-            "display_name" => "Building name",
-            "default_value" => "building",
-            "is_required" => true
-        },
-        {
             "name" => "building_shape",
             "type" => "Choice",
             "display_name" => "Building shape",
@@ -151,10 +144,8 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     return false if false == arguments
 
     # assign the user inputs to variables
-    building_name = arguments['building_name']
     building_shape = arguments['building_shape']
     building_type = arguments['building_type']
-
     template = arguments['template']
     epw_file = arguments['epw_file']
     total_floor_area = arguments['total_floor_area']
@@ -295,7 +286,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
                                               num_floors = above_grade_floors,
                                               floor_to_floor_height = floor_to_floor_height,
                                               plenum_height = plenum_height,
-                                              perimeter_zone_depth = perimeter_depth / 3)
+                                              perimeter_zone_depth = perimeter_depth / 3.0)
     end
 
     #Rotate model.
@@ -308,6 +299,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
 
     # Need to set building level info
     building = model.getBuilding
+    building_name = ("#{building_shape}_#{building_type}_#{template}")
     building.setName(building_name)
     building.setNorthAxis(0)
     building.setStandardsBuildingType("#{building_type}")
@@ -346,43 +338,33 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
       building_type = "Health-care clinic"
     end
 
-    # Get the space Type data from @standards data
-    spacetype_data = nil
-    @standards_data = standard.load_standards_database_new()
+    # Get the space Type data from standards data
+    space_type = OpenStudio::Model::SpaceType.new(model)
+    space_type.setName("#{building_type} WholeBuilding")
+    space_type.setStandardsSpaceType("WholeBuilding")
+    space_type.setStandardsBuildingType("#{building_type}")
+    building.setSpaceType(space_type)
 
-    spacetype_data = @standards_data['tables']['space_types']['table']
-    spacetype_data.each do |spacedata|
-
-        space_type = OpenStudio::Model::SpaceType.new(model)
-        space_type.setName("#{building_type} WholeBuilding")
-        space_type.setStandardsSpaceType("WholeBuilding")
-        space_type.setStandardsBuildingType("#{building_type}")
-        building.setSpaceType(space_type)
-
-        # Add internal loads
-        standard.space_type_apply_internal_loads(space_type,
-                                                 true,
-                                                 true,
-                                                 true,
-                                                 true,
-                                                 true,
-                                                 true)
+    # Add internal loads
+    standard.space_type_apply_internal_loads(space_type,
+                                             true,
+                                             true,
+                                             true,
+                                             true,
+                                             true,
+                                             true)
 
 
-        # Schedules
-        standard.space_type_apply_internal_load_schedules(space_type,
-                                                          true,
-                                                          true,
-                                                          true,
-                                                          true,
-                                                          true,
-                                                          true,
-                                                          true)
+    # Schedules
+    standard.space_type_apply_internal_load_schedules(space_type,
+                                                      true,
+                                                      true,
+                                                      true,
+                                                      true,
+                                                      true,
+                                                      true,
+                                                      true)
 
-
-
-
-    end
 
     # Create thermal zones (these will get overwritten in the apply_standard method)
     standard.model_create_thermal_zones(model)
@@ -390,18 +372,16 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     # Set the start day
     model.setDayofWeekforStartDay("Sunday")
 
-    # Apply NECB ruleste to model (set constructions, thermal zones etc)
-    #standard.model_apply_standard(model: model, epw_file: epw_file)
-
-    standard.model_apply_standard(model:model,
-                         epw_file:epw_file,
-                         debug: false,
-                         sizing_run_dir: Dir.pwd,
-                         x_scale: 1.0,
-                         y_scale: 1.0,
-                         z_scale: 1.0,
-                         fdwr_set: 1.1,
-                         srr_set: 1.1)
+    # Apply standards ruleste to model
+    standard.model_apply_standard(model: model,
+                                  epw_file: epw_file,
+                                  debug: false,
+                                  sizing_run_dir: Dir.pwd,
+                                  x_scale: 1.0,
+                                  y_scale: 1.0,
+                                  z_scale: 1.0,
+                                  fdwr_set: 1.1,
+                                  srr_set: 1.1)
     finishing_spaceTypes = model.getSpaceTypes
     num_thermalZones = model.getThermalZones.size
     finishing_constructionSets = model.getDefaultConstructionSets
@@ -420,8 +400,6 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
     output_file_path = OpenStudio::Path.new(File.dirname(__FILE__) + "osm_dir/#{building_shape}_#{building_type}_#{template}.osm")
     name_osm = "#{building_shape}/#{building_type}/#{template}_#{above_grade_floors}_#{total_floor_area.to_i}"
     BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output_osm_files", "#{name_osm}.osm"))
-
-    #model.save(output_file_path,true)
 
     return true
   end
