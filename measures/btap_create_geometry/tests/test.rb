@@ -132,7 +132,7 @@ class BTAPCreateGeometry_Test < Minitest::Test
 
   end
 
-  def test_sample()
+  def test()
     ####### Test Model Creation ######
     File.open('report_final_area.csv', 'a') do |file|
       @templates = ['NECB2011','NECB2015','NECB2017']
