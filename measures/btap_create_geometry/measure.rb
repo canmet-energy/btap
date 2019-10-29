@@ -299,7 +299,7 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
 
     # Need to set building level info
     building = model.getBuilding
-    building_name = ("#{building_shape}_#{building_type}_#{template}")
+    building_name = ("#{building_type}_#{building_shape}_#{template}")
     building.setName(building_name)
     building.setNorthAxis(0)
     building.setStandardsBuildingType("#{building_type}")

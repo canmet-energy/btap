@@ -135,14 +135,11 @@ class BTAPCreateGeometry_Test < Minitest::Test
   def test_sample()
     ####### Test Model Creation ######
     File.open('report_final_area.csv', 'a') do |file|
-      #@templates = ['NECB2011','NECB2015','NECB2017']
-      @templates = ['NECB2017']
+      @templates = ['NECB2011','NECB2015','NECB2017']
       @total_floor_area = [20000.0]
-      @above_grade_floors = [2]
-      @building_shapes = ["Rectangular"]
-      #@building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"]
-      @building_types = ["SmallOffice"]
-      #@building_types= ["RetailStandalone","RetailStripmall","QuickServiceRestaurant","FullServiceRestaurant"]
+      @above_grade_floors = [1,3]
+      @building_shapes = ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"]
+      @building_types= ["RetailStandalone","RetailStripmall","QuickServiceRestaurant","MediumOffice"]
 
       @building_types.each do |building_type|
         @building_shapes.each do |building_shape|
