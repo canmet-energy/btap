@@ -46,7 +46,8 @@ class BTAPCreateGeometry < OpenStudio::Measure::ModelMeasure
             "type" => "Choice",
             "display_name" => "Building shape",
             "default_value" => "Rectangular",
-            "choices" => ["Courtyard", "H shape", "L shape", "Rectangular", "T shape", "U shape"],
+            #"choices" => ["Courtyard", "H shape", "L shape", "Rectangular", "T shape", "U shape"],
+            "choices" => ["Courtyard", "H shape", "L shape", "Rectangular", "U shape"],
             "is_required" => true
         },
         {
