@@ -1,2 +1,1 @@
 measures/btap_create_geometry/tests/test.rb
-measures/btap_results/tests/test.rb
