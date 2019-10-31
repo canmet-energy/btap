@@ -50,46 +50,33 @@ class BTAPSetNECBInfiltration_Test < Minitest::Test
   end
 
   def test_sample()
-    # Load the geometry .osm
     osm_file = "#{File.dirname(__FILE__)}/test_models/FullServiceRestaurant-NECB2017-CAN_AB_Banff.CS.711220_CWEC2016.osm"
-    unless File.exist?(osm_file)
-      raise("The initial osm path: #{osm_file} does not exist.")
-    end
     osm_model_path = OpenStudio::Path.new(osm_file.to_s)
     # Upgrade version if required.
     version_translator = OpenStudio::OSVersion::VersionTranslator.new
     model = version_translator.loadModel(osm_model_path).get
 
-    input_arguments = {
-        "infiltration_si" => 1.50
-    }
-
-    #get the initial infiltrationDesignFlowPerExteriorSurfaceArea
-    exteriorSurfaceAreaInfiltarion_before = model.getBuilding.infiltrationDesignFlowPerExteriorSurfaceArea
-
     # Create an instance of the measure
-    runner = run_measure(input_arguments, model)
-    puts show_output(runner.result)
-    # get arguments
     measure = BTAPSetNECBInfiltration.new
-    arguments = measure.arguments(model)
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    input_arguments = @good_input_arguments
+    runner = run_measure(input_arguments, model)
 
-    # get user arguments
-    infiltration_si = arguments [0]
+    puts "Checking runner was successful..."
+    assert(runner.result.value.valueName == 'Success')
 
-    infiltration_si_m3 = Float (infiltration_si.defaultValueAsDouble) * 0.001 # to convert from L/(s*m2) to m3/(s*m2) multiply by 0.001
+    # Calculate 'correct' infiltration value
+    infiltration_si_m3 = Float (input_arguments['infiltration_si']) * 0.001 # to convert from L/(s*m2) to m3/(s*m2) multiply by 0.001
     infiltration_si_5Pa = Float(infiltration_si_m3) * 0.172004845 # to convert from 75 Pa to 5 Pa
 
     #get design flow rate space infiltration objects used in the model
-    space_infiltration_objects = model.getSpaceInfiltrationDesignFlowRates
-    exteriorSurfaceAreaInfiltarion_new = model.getBuilding.infiltrationDesignFlowPerExteriorSurfaceArea
-    
-    # test that the measure has changed the exterior Surface Area Infiltarion to the value specified by the user
-    assert_in_delta exteriorSurfaceAreaInfiltarion_new, infiltration_si_5Pa, 0.01
+    final_exteriorSurfaceAreaInfiltarion = model.getBuilding.infiltrationDesignFlowPerExteriorSurfaceArea
 
     # Double check that the infiltration flow rate was set to the new assigned value in the output osm file
     BTAP::FileIO::save_osm(model, File.join(File.dirname(__FILE__), "output", "saved_file.osm"))
 
-    assert(runner.result.value.valueName == 'Success')
+    # test that the measure has changed the exterior Surface Area Infiltarion to the value specified by the user
+    puts "*** check new infiltartion value OK ***"
+    assert_in_delta(final_exteriorSurfaceAreaInfiltarion, infiltration_si_5Pa, 0.01)
   end
 end
