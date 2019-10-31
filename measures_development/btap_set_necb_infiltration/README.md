@@ -27,30 +27,6 @@ ModelMeasure
 **Required:** true,
 **Model Dependent:** false
 
-### Increase in Material and Installation Costs for Building per Exterior Envelope Area ($/m^2).
-
-**Name:** material_cost_si,
-**Type:** Double,
-**Units:** ,
-**Required:** true,
-**Model Dependent:** false
-
-### O & M Costs for Construction per Area Used ($/m^2).
-
-**Name:** om_cost_si,
-**Type:** Double,
-**Units:** ,
-**Required:** true,
-**Model Dependent:** false
-
-### O & M Frequency (whole years).
-
-**Name:** om_frequency,
-**Type:** Double,
-**Units:** ,
-**Required:** true,
-**Model Dependent:** false
-
 
 
 
