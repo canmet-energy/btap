@@ -18,7 +18,7 @@ class BTAPSetNECBInfiltration < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return "This measure will set a new space infiltration flow rate using the 'Flow per Exterior Surface Area' at at 75 Pa. User will enter si units and the value will be converted to a flow rate at 5Pa as per NECB assumptions and exponent of 0.65."
+   return "This measure will set a new space infiltration flow rate using the 'Flow per Exterior Surface Area' at at 75 Pa. User will enter si units and the value will be converted to a flow rate at 5Pa as per NECB assumptions and exponent of 0.65."
   end
 
   def initialize()
@@ -62,13 +62,6 @@ class BTAPSetNECBInfiltration < OpenStudio::Measure::ModelMeasure
 
     # get space infiltration objects used in the model
     space_infiltration_objects = model.getSpaceInfiltrationDesignFlowRates
-
-    # reporting initial condition of model
-    if !space_infiltration_objects.empty?
-      runner.registerInitialCondition("The initial model contained #{space_infiltration_objects.size} space infiltration objects.")
-    else
-      runner.registerInitialCondition('The initial model did not contain any space infiltration objects.')
-    end
 
     #loop through all infiltration objects and set to the new inflitration flow rate
     space_infiltration_objects.each do |space_infiltration_object|
