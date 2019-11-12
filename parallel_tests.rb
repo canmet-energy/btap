@@ -36,6 +36,12 @@ class String
   end
 end
 
+def print_file(file_name)
+  content = file_name.read
+  file_name.close
+  puts content.pink
+end
+
 
 def write_results(result, test_file)
   test_file_output = File.join( "#{test_file}_test_output.json")
@@ -59,6 +65,7 @@ def write_results(result, test_file)
     #puts test_file_output
     File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
     puts "FAILED: #{test_file_output}".red
+    print_file(test_file_output)
     return false
   end
 end
