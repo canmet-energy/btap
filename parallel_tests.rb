@@ -59,7 +59,7 @@ def write_results(result, test_file)
     File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
     puts "FAILED: #{test_file_output}".red
     puts "---------------"
-    puts output.pink
+    puts output.to_s.pink
     puts "---------------"
     return false
   end
