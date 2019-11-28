@@ -13,7 +13,7 @@ gem 'colored', '~> 1.2'
 
 
 # gem 'openstudio_measure_tester', path: "../OpenStudio-measure-tester-gem"
-gem 'openstudio_measure_tester', :git => 'https://github.com/NREL/OpenStudio-measure-tester-gem'
+gem 'openstudio_measure_tester', :git => 'https://github.com/NREL/OpenStudio-measure-tester-gem', :branch => 'develop'
 
 if RUBY_PLATFORM =~ /win32/
   gem 'win32console', '~> 1.3.2', platform: [:mswin, :mingw]
