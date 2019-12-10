@@ -183,7 +183,7 @@ module BTAPMeasureTestHelper
 
         #check number of arguments.
         if @use_json_package
-          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
+          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{JSON.pretty_generate(@measure_interface_detailed) } and this is the actual #{JSON.pretty_generate(arguments[0])}")
         else
           assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
           (@measure_interface_detailed).each_with_index do |argument_expected, index|
@@ -207,6 +207,10 @@ module BTAPMeasureTestHelper
 
   # Test argument ranges.
   def test_argument_ranges
+    model = OpenStudio::Model::Model.new
+    standard = Standard.build('NECB2015')
+    standard.model_add_design_days_and_weather_file(model, nil, 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw')
+    
     [true, false].each do |json_input|
       [true, false].each do |string_double|
         @use_json_package = json_input
@@ -221,7 +225,6 @@ module BTAPMeasureTestHelper
             # puts " argument[max_integer_value]: #{argument["max_integer_value"]} , min: #{argument["min_integer_value"]}   ====>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
             if not argument['max_integer_value'].nil?
               puts "Testing max limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_max_value = argument['max_integer_value'].to_i + 1
               input_arguments[argument['name']] = over_max_value
@@ -235,7 +238,6 @@ module BTAPMeasureTestHelper
             #Check over max
             if not argument['min_integer_value'].nil?
               puts "Testing min limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_min_value = argument['min_integer_value'].to_i - 1
               input_arguments[argument['name']] = over_min_value
@@ -255,7 +257,6 @@ module BTAPMeasureTestHelper
 
             if not argument['max_double_value'].nil?
               puts "Testing max limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_max_value = argument['max_double_value'].to_f + 1.0
               over_max_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
@@ -270,7 +271,6 @@ module BTAPMeasureTestHelper
             #Check over max
             if not argument['min_double_value'].nil?
               puts "Testing min limit"
-              model = OpenStudio::Model::Model.new
               input_arguments = @good_input_arguments.clone
               over_min_value = argument['min_double_value'].to_f - 1.0
               over_min_value = over_max_value.to_s if argument['type'].downcase == "StringDouble".downcase
@@ -286,7 +286,6 @@ module BTAPMeasureTestHelper
 
 
           if (argument['type'] == 'StringDouble') and (not argument["valid_strings"].nil?) and @use_string_double
-            model = OpenStudio::Model::Model.new
             input_arguments = @good_input_arguments.clone
             input_arguments[argument['name']] = SecureRandom.uuid.to_s
             puts "Testing argument #{argument['name']} min limit of #{argument['min_double_value']}".light_blue
@@ -359,7 +358,7 @@ module BTAPMeasureTestHelper
 
   #Fancy way of getting the measure object automatically.
   def get_measure_object()
-    measure_class_name = self.class.name.to_s.match((/(BTAP.*)(\_Test)/i)).captures[0]
+    measure_class_name = self.class.name.to_s.match(/(BTAP.*)(\_Test)/i).captures[0]
     measure = nil
     eval "measure = #{measure_class_name}.new"
     if measure.nil? 
