@@ -11,28 +11,34 @@ class String
     "\e[#{color_code}m#{self}\e[0m"
   end
 
+  # Use for error messages
   def red
     colorize(31)
   end
 
+  # Use for success messages
   def green
     colorize(32)
   end
 
+  # Use for warning messages
   def yellow
     colorize(33)
   end
 
+  # Use for start of tests/sections
   def blue
     colorize(34)
   end
 
-  def pink
-    colorize(35)
-  end
-
+  # Use for argument value reporting
   def light_blue
     colorize(36)
+  end
+  
+  # Use for larger text dumps (e.g. whole files)
+  def pink
+    colorize(35)
   end
 end
 
