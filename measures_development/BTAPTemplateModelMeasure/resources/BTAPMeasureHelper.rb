@@ -124,7 +124,6 @@ module BTAPMeasureHelper
 
         when "Integer"
           value = values[argument['name']]
-         #  puts " the value of int is #{value}====>>>>>>>>> argument[max_integer_value]: #{argument["max_integer_value"]} , min: #{argument["min_integer_value"]}   ====>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
           if (not argument["max_integer_value"].nil? and value.to_i > argument["max_integer_value"].to_i) or
               (not argument["min_integer_value"].nil? and value.to_i < argument["min_integer_value"].to_i)
             error = "#{argument['name']} must be between #{argument["min_integer_value"]} and #{argument["max_integer_value"]}. You entered #{value.to_i} for this #{argument['name']}.\n Please enter a value withing the expected range.\n"
@@ -183,7 +182,7 @@ module BTAPMeasureTestHelper
 
         #check number of arguments.
         if @use_json_package
-          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{JSON.pretty_generate(@measure_interface_detailed) } and this is the actual #{JSON.pretty_generate(arguments[0])}")
+          assert_equal(@measure_interface_detailed.size, JSON.parse(arguments[0].defaultValueAsString).size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{JSON.pretty_generate(@measure_interface_detailed) } \n and this is the actual \n #{JSON.pretty_generate(arguments[0])}")
         else
           assert_equal(@measure_interface_detailed.size, arguments.size, "The measure should have #{@measure_interface_detailed.size} but actually has #{arguments.size}. Here the the arguement expected #{@measure_interface_detailed} and this is the actual #{arguments}")
           (@measure_interface_detailed).each_with_index do |argument_expected, index|
@@ -222,7 +221,6 @@ module BTAPMeasureTestHelper
             puts "Testing range for #{argument['name']}".blue
             #Check over max
 
-            # puts " argument[max_integer_value]: #{argument["max_integer_value"]} , min: #{argument["min_integer_value"]}   ====>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
             if not argument['max_integer_value'].nil?
               puts "Testing max limit"
               input_arguments = @good_input_arguments.clone
