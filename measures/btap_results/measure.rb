@@ -979,9 +979,9 @@ class BTAPResults < OpenStudio::Ruleset::ReportingUserScript
     template_type = nil
     valid_templates = ['NECB2011', 'NECB2015', 'NECB2017']
     valid_templates.each do  |model_template|
-      template_type = model_template if model.getBuilding.standardsBuildingType.get.to_s.include?(model_template)
+      template_type = model_template if model.getBuilding.standardsTemplate.get.to_s.include?(model_template)
     end
-    runner.registerError(" Template in the standardsBuildingType #{building_name} is not valid for BTAPReports. It must contain #{valid_templates}") if template_type.nil?
+    runner.registerError(" Template in the standardsBuildingType #{template_type} is not valid for BTAPReports. It must contain #{valid_templates}") if template_type.nil?
 
     prototype_creator = Standard.build("#{template_type}")
 

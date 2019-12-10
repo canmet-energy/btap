@@ -69,11 +69,11 @@ class BTAPCreateNECBReferenceBuilding < OpenStudio::Measure::ModelMeasure
     #puts JSON.pretty_generate(arguments)
     return false if false == arguments
 
-    #Set the standard to be used.
+    #Set the standard to be used and apply to model.
+    sr_directory = "#{Dir.pwd}/output/btap_create_necb_reference_building"
     Standard.build(arguments['necb_standard']).model_apply_standard(model: model,
-                                                                          epw_file: arguments['weather_file'],
-                                                                          debug: false,
-                                                                          sizing_run_dir: Dir.pwd)
+                                                                          sizing_run_dir: sr_directory,
+                                                                          epw_file: arguments['weather_file'])
     return true
   end
 

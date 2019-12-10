@@ -3,7 +3,7 @@ require 'parallel'
 require 'open3'
 
 
-ProcessorsUsed = (Parallel.processor_count * 2 / 3).floor
+ProcessorsUsed = (Parallel.processor_count.to_f * 2 / 3).ceil
 
 class String
   # colorization
@@ -36,7 +36,6 @@ class String
   end
 end
 
-
 def write_results(result, test_file)
   test_file_output = File.join( "#{test_file}_test_output.json")
   File.delete(test_file_output) if File.exist?(test_file_output)
@@ -59,6 +58,9 @@ def write_results(result, test_file)
     #puts test_file_output
     File.open(test_file_output, 'w') {|f| f.write(JSON.pretty_generate(output))}
     puts "FAILED: #{test_file_output}".red
+    puts "---------------"
+    puts output.to_s.pink
+    puts "---------------"
     return false
   end
 end
