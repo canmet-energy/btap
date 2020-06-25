@@ -1,0 +1,319 @@
+Automotive facility WholeBuilding	NA	 
+Convention centre WholeBuilding	NA	 
+Courthouse WholeBuilding	NA	 
+Dining - bar lounge/leisure WholeBuilding	NA	 
+Dining - cafeteria/fast food WholeBuilding	NA	 
+Dining - family WholeBuilding	NA	 
+Dormitory WholeBuilding	NA	 
+Exercise centre WholeBuilding	NA	 
+Fire station WholeBuilding	NA	 
+Gymnasium WholeBuilding	NA	 
+Health care clinic WholeBuilding	NA	 
+Hospital WholeBuilding	NA	 
+Hotel/Motel WholeBuilding	NA	 
+Library WholeBuilding	NA	 
+Long-term care - dwelling units WholeBuilding	NA	 
+Long-term care - other WholeBuilding	NA	 
+Manufacturing facility WholeBuilding	NA	 
+Motion picture theatre WholeBuilding	NA	 
+Multi-unit residential building WholeBuilding	NA	 
+Museum WholeBuilding	NA	 
+Office WholeBuilding	NA	 
+Penitentiary WholeBuilding	NA	 
+Performing arts theatre WholeBuilding	NA	 
+Police station WholeBuilding	NA	 
+Post office WholeBuilding	NA	 
+Religious building WholeBuilding	NA	 
+Retail area WholeBuilding	NA	 
+School/university WholeBuilding	NA	 
+Sports arena WholeBuilding	NA	 
+Storage garage WholeBuilding	NA	 
+Town hall WholeBuilding	NA	 
+Transportation facility WholeBuilding	NA	 
+Warehouse WholeBuilding	NA	 
+Workshop WholeBuilding	NA	 
+Space Function Atrium (height < 6m)-sch-A	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-B	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-C	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-D	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-E	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-F	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-G	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-H	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-I	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-J	0.48	5.166679225
+Space Function Atrium (height < 6m)-sch-K	0.48	5.166679225
+Space Function Atrium (6 =< height <= 12m)-sch-A	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-B	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-C	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-D	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-E	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-F	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-G	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-H	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-I	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-J	0.57	6.135431579
+Space Function Atrium (6 =< height <= 12m)-sch-K	0.57	6.135431579
+Space Function Atrium (height > 12m)-sch-A	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-B	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-C	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-D	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-E	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-F	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-G	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-H	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-I	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-J	0.7	7.534740536
+Space Function Atrium (height > 12m)-sch-K	0.7	7.534740536
+Space Function Audience seating area permanent - auditorium	0.61	6.565988181
+Space Function Audience seating area permanent - convention centre	NA	#VALUE!
+Space Function Audience seating area permanent - gymnasium	0.23	2.475700462
+Space Function Audience seating area permanent - motion picture theatre	0.27	2.906257064
+Space Function Audience seating area permanent - penitentiary	0.67	7.211823084
+Space Function Audience seating area permanent - performing arts theatre	1.16	12.48614146
+Space Function Audience seating area permanent - religious building	0.72	7.750018837
+Space Function Audience seating area permanent - sports arena	0.33	3.552091967
+Space Function Audience seating area permanent - other-sch-A	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-B	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-C	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-D	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-E	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-F	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-G	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-H	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-I	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-J	0.23	2.475700462
+Space Function Audience seating area permanent - other-sch-K	0.23	2.475700462
+Space Function Banking activity area and offices	0.61	6.565988181
+Space Function Classroom/Lecture hall/Training room - Penitentary	1.38	14.85420277
+Space Function Classroom/Lecture hall/Training room other	0.78	8.39585374
+Space Function Computer/Server room-sch-A	1	10.76391505
+Space Function Computer/Server room-sch-B	1	10.76391505
+Space Function Computer/Server room-sch-C	1	10.76391505
+Space Function Computer/Server room-sch-D	1	10.76391505
+Space Function Computer/Server room-sch-E	1	10.76391505
+Space Function Computer/Server room-sch-F	1	10.76391505
+Space Function Computer/Server room-sch-G	1	10.76391505
+Space Function Computer/Server room-sch-H	1	10.76391505
+Space Function Computer/Server room-sch-I	1	10.76391505
+Space Function Computer/Server room-sch-J	1	10.76391505
+Space Function Computer/Server room-sch-K	1	10.76391505
+Space Function Conference/Meeting/Multi-purpose room	0.97	10.4409976
+Space Function Confinement cell	0.7	7.534740536
+Space Function Copy/Print room	0.31	3.336813666
+Space Function Corridor/Transition area - hospital-sch-A	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-B	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-C	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-D	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-E	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-F	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-G	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-H	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-I	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-J	0.71	7.642379686
+Space Function Corridor/Transition area - hospital-sch-K	0.71	7.642379686
+Space Function Corridor/Transition area - manufacturing facility-sch-A	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-B	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-C	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-D	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-E	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-F	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-G	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-H	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-I	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-J	NA	#VALUE!
+Space Function Corridor/Transition area - manufacturing facility-sch-K	NA	#VALUE!
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-A	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-B	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-C	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-D	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-E	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-F	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-G	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-H	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-I	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-J	0.71	7.642379686
+Space Function Corridor/Transition area - space designed to ANSI/IES RP-28 (and used primarily by residents)-sch-K	0.71	7.642379686
+Space Function Corridor/Transition area other-sch-A	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-B	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-C	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-D	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-E	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-F	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-G	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-H	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-I	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-J	0.41	4.413205171
+Space Function Corridor/Transition area other-sch-K	0.41	4.413205171
+Space Function Courtroom	1.25	13.45489381
+Space Function Dining area - bar lounge/leisure dining	0.86	9.256966944
+Space Function Dining area - cafeteria/fast food dining	0.4	4.30556602
+Space Function Dining area - family dining	0.6	6.458349031
+Space Function Dining area - penitentiary	0.42	4.520844321
+Space Function Dining area - space designed to ANSI/IES RP-28 (used primarily by residents)	1.38	14.85420277
+Space Function Dining area - other	0.43	4.628483472
+Space Function Dressing/Fitting room - performing arts theatre	0.41	4.413205171
+Space Function Electrical/Mechanical room-sch-A	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-B	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-C	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-D	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-E	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-F	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-G	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-H	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-I	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-J	0.43	4.628483472
+Space Function Electrical/Mechanical room-sch-K	0.43	4.628483472
+Space Function Emergency vehicle garage	0.52	5.597235827
+Space Function Food preparation area	1.29	13.88545042
+Space Function Guest room	0.41	4.413205171
+Space Function Laboratory - classrooms	1.17	12.59378061
+Space Function Laboratory - other	1.7	18.29865559
+Space Function Laundry/Washing area	0.59	6.35070988
+Space Function Loading dock interior	0.88	9.472245245
+Space Function Lobby - elevator	0.71	7.642379686
+Space Function Lobby - hotel	0.51	5.489596676
+Space Function Lobby - motion picture theatre	0.23	2.475700462
+Space Function Lobby - performing arts theatre	1.25	13.45489381
+Space Function Lobby - space designed to ANSI/IES RP-28 (used primarily by residents)	2.49	26.80214848
+Space Function Lobby - other	1.11	11.94794571
+Space Function Locker room-sch-A	0.52	5.597235827
+Space Function Locker room-sch-B	0.52	5.597235827
+Space Function Locker room-sch-C	0.52	5.597235827
+Space Function Locker room-sch-D	0.52	5.597235827
+Space Function Locker room-sch-E	0.52	5.597235827
+Space Function Locker room-sch-F	0.52	5.597235827
+Space Function Locker room-sch-G	0.52	5.597235827
+Space Function Locker room-sch-H	0.52	5.597235827
+Space Function Locker room-sch-I	0.52	5.597235827
+Space Function Locker room-sch-J	0.52	5.597235827
+Space Function Locker room-sch-K	0.52	5.597235827
+Space Function Lounge/Break room - health care facility	0.42	4.520844321
+Space Function Lounge/Break room - other	0.59	6.35070988
+Space Function Office enclosed <= 25 m2	0.74	7.965297138
+Space Function Office enclosed > 25 m2	0.66	7.104183934
+Space Function Office open plan	0.61	6.565988181
+Space Function Pharmacy area	1.9	20.4514386
+Space Function Sales area	1.12	12.05558486
+Space Function Seating area general-sch-A	0.23	2.475700462
+Space Function Seating area general-sch-B	0.23	2.475700462
+Space Function Seating area general-sch-C	0.23	2.475700462
+Space Function Seating area general-sch-D	0.23	2.475700462
+Space Function Seating area general-sch-E	0.23	2.475700462
+Space Function Seating area general-sch-F	0.23	2.475700462
+Space Function Seating area general-sch-G	0.23	2.475700462
+Space Function Seating area general-sch-H	0.23	2.475700462
+Space Function Seating area general-sch-I	0.23	2.475700462
+Space Function Seating area general-sch-J	0.23	2.475700462
+Space Function Seating area general-sch-K	0.23	2.475700462
+Space Function Stairway/Stairwell-sch-A	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-B	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-C	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-D	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-E	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-F	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-G	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-H	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-I	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-J	0.49	5.274318375
+Space Function Stairway/Stairwell-sch-K	0.49	5.274318375
+Space Function Storage garage interior	NA	#VALUE!
+Space Function Storage room < 5 m2-sch-A	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-B	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-C	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-D	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-E	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-F	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-G	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-H	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-I	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-J	0.4	4.30556602
+Space Function Storage room < 5 m2-sch-K	0.4	4.30556602
+Space Function Storage room <= 5 m2 <= 100 m2-sch-A	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-B	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-C	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-D	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-E	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-F	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-G	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-H	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-I	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-J	0.38	4.090287719
+Space Function Storage room <= 5 m2 <= 100 m2-sch-K	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-A	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-B	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-C	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-D	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-E	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-F	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-G	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-H	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-I	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-J	0.38	4.090287719
+Space Function Storage room > 100 m2-sch-K	0.38	4.090287719
+Space Function Vehicle maintenance area	0.6	6.458349031
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-A	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-B	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-C	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-D	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-E	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-F	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-G	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-H	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-I	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-J	1.26	13.56253296
+Space Function Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-K	1.26	13.56253296
+Space Function Washroom - other-sch-A	0.63	6.781266482
+Space Function Washroom - other-sch-B	0.63	6.781266482
+Space Function Washroom - other-sch-C	0.63	6.781266482
+Space Function Washroom - other-sch-D	0.63	6.781266482
+Space Function Washroom - other-sch-E	0.63	6.781266482
+Space Function Washroom - other-sch-F	0.63	6.781266482
+Space Function Washroom - other-sch-G	0.63	6.781266482
+Space Function Washroom - other-sch-H	0.63	6.781266482
+Space Function Washroom - other-sch-I	0.63	6.781266482
+Space Function Washroom - other-sch-J	0.63	6.781266482
+Space Function Washroom other-sch-K	0.63	6.781266482
+Space Function Workshop	1.26	13.56253296
+Space Function Convention centre exhibit space	0.61	6.565988181
+Space Function Dormitory living quarters	0.84	9.041688643
+Space Function Dwelling units general	NA	#VALUE!
+Space Function Dwelling units long-term	NA	#VALUE!
+Space Function Fire station sleeping quarters	0.23	2.475700462
+Space Function Gymnasium/Fitness centre exercise area	0.9	9.687523546
+Space Function Gymnasium/Fitness centre playing area	0.85	9.149327794
+Space Function Health care facility exam/treatment room	1.4	15.06948107
+Space Function Health care facility imaging room	0.85	9.149327794
+Space Function Health care facility medical supply room	0.62	6.673627332
+Space Function Health care facility nursery	1.37	14.74656362
+Space Function Health care facility nurses station	1.11	11.94794571
+Space Function Health care facility operating room	2.26	24.32644802
+Space Function Health care facility patient room	0.68	7.319462235
+Space Function Health care facility physical therapy room	0.91	9.795162697
+Space Function Health care facility recovery room	1.25	13.45489381
+Space Function Library reading area	0.96	10.33335845
+Space Function Library stacks	1.18	12.70141976
+Space Function Manufacturing facility detailed manufacturing area	0.8	8.611132041
+Space Function Manufacturing facility equipment room	0.76	8.180575439
+Space Function Manufacturing facility extra high bay area (> 15 m floor-to-ceiling height)	1.42	15.28475937
+Space Function Manufacturing facility high bay area (7.5 to 15 m floor-to-ceiling height)	1.24	13.34725466
+Space Function Manufacturing facility low bay area (< 7.5 m floor-to-ceiling height)	0.86	9.256966944
+Space Function Museum general exhibition area	0.31	3.336813666
+Space Function Museum restoration room	1.1	11.84030656
+Space Function Post office sorting area	0.76	8.180575439
+Space Function Religious building fellowship hall	0.54	5.812514128
+Space Function Religious building worship/pulpit/choir area	0.85	9.149327794
+Space Function Retail facility dressing/fitting room	0.51	5.489596676
+Space Function Retail facility mall concourse	1.03	11.0868325
+Space Function Space designed to ANSI/IES RP-28 chapel (used primarily by residents)	0.7	7.534740536
+Space Function Space designed to ANSI/IES RP-28 recreation room (used primarily by residents)	1.77	19.05212964
+Space Function Sports arena playing area class I facility(4)	2.94	31.64591025
+Space Function Sports arena playing area class II facility(4)	2.01	21.63546925
+Space Function Sports arena playing area class III facility(4)	1.3	13.99308957
+Space Function Sports arena playing area class IV facility(4)	0.86	9.256966944
+Space Function Transportation facility airport concourse	0.25	2.690978763
+Space Function Transportation facility baggage/carousel area	0.39	4.19792687
+Space Function Transportation facility terminal ticket counter	0.51	5.489596676
+Space Function Warehouse storage area medium to bulky palletized items	0.33	3.552091967
+Space Function Warehouse storage area small hand-carried items(4)	0.69	7.427101385
+Space Function - undefined -	NA	
