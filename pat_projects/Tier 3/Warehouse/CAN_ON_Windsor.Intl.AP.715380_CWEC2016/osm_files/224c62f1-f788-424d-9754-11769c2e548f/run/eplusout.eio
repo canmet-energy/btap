@@ -1,0 +1,247 @@
+Program Version,EnergyPlus, Version 8.9.0-eba93e8e1b, YMD=2019.08.13 17:21
+! <Version>, Version ID
+ Version, 8.9
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  4, 15
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, No, Yes, No
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 1.000, 1.000, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  19.53,  19.50,  19.54,  19.60,  20.00,  21.64,  22.23,  22.38,  21.45,  20.12,  19.80,  19.63
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,   0.43,  -0.56,   1.20,   3.96,  11.16,  16.72,  20.47,  21.61,  19.67,  15.35,   9.58,   4.23
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Windsor Intl AP ON CAN CWEC2016 WMO#=715380,42.28,-82.96,-5.00,189.60,99068,1.1775
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,Warehouse-CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw created: 2019-08-07 22:45:54 +0000,0.000,Suburbs,4.00000E-002,0.40000,FullExterior,25,6
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,TARP
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Value {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, No,N/A
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.220,370.000,6.500000E-003
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,6
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,3,33,10
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,0.0,0.00,0.00,0.00,12.95,4.57,2.13,1,1,1,0.00,25.91,0.00,9.14,0.00,4.27,4.27,1010.76,TARP,TARP,236.88,149.56,109.18,40.38,6,2,2,Yes
+ Zone Information, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,0.0,0.00,0.00,0.00,22.86,65.53,4.27,1,1,1,0.00,45.72,30.48,100.58,0.00,8.53,8.53,35277.63,TARP,TARP,3204.84,1586.63,1158.24,428.39,6,3,0,Yes
+ Zone Information, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,0.0,0.00,0.00,0.00,22.82,14.29,4.51,1,1,1,0.00,45.72,0.00,30.48,0.00,8.53,7.81,2953.02,TARP,TARP,1393.41,760.80,555.39,205.42,11,5,4,Yes
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,236.88,11.8,19.993,5.002E-002,4.800,3.751,0.000,0.000,0.000,0.000,8.551,No
+ Zone Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,3204.84,32.1,99.964,1.000E-002,2.160,0.500,0.000,0.000,0.000,0.000,2.660,No
+ Zone Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,1393.41,27.9,49.982,2.001E-002,4.440,0.500,0.000,0.000,0.000,0.000,4.940,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+ People Internal Gains Nominal, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 PEOPLE,NECB-A-OCCUPANCY,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,236.88,11.8,11.8,5.002E-002,19.993,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,11
+ People Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS PEOPLE,NECB-A-OCCUPANCY,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,3204.84,32.1,32.1,1.000E-002,99.964,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,29
+ People Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) PEOPLE,NECB-A-OCCUPANCY,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,1393.41,27.9,27.9,2.001E-002,49.982,0.300,0.700,AutoCalculate,NECB-ACTIVITY,No,3.8200E-008,0,25
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains Nominal, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 LIGHTS 85.0 PERCENT REDUCTION,NECB-A-OCCUPANCY-NECB-A-LIGHTING-0.3-0.1-0.67-LIGHT RULESET,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,236.88,11.8,1137.022,4.800,95.965,0.000,0.500,0.200,0.300,1.000,General,39.739,1023.320
+ Lights Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS LIGHTS 85.0 PERCENT REDUCTION,NECB-A-LIGHTING,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,3204.84,32.1,6922.459,2.160,215.922,0.000,0.500,0.200,0.300,1.000,General,346.123,6230.213
+ Lights Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) LIGHTS 85.0 PERCENT REDUCTION,NECB-A-LIGHTING,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,1393.41,27.9,6186.739,4.440,221.919,0.000,0.500,0.200,0.300,1.000,General,309.337,5568.065
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains Nominal, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 ELEC EQUIP 50.0 PERCENT REDUCTION,NECB-A-ELECTRIC-EQUIPMENT,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,236.88,11.8,888.622,3.751,75.000,0.000,0.500,0.000,0.500,General,177.724,799.759
+ ElectricEquipment Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS ELEC EQUIP 50.0 PERCENT REDUCTION,NECB-A-ELECTRIC-EQUIPMENT,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,3204.84,32.1,1603.003,0.500,50.000,0.000,0.500,0.000,0.500,General,320.601,1442.703
+ ElectricEquipment Internal Gains Nominal, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) ELEC EQUIP 50.0 PERCENT REDUCTION,NECB-A-ELECTRIC-EQUIPMENT,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,1393.41,27.9,696.958,0.500,25.000,0.000,0.500,0.000,0.500,General,139.392,627.262
+! <Shadowing/Sun Position Calculations Annual Simulations>, Calculation Method, Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm, External Shading Calculation Method, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,AverageOverDaysInFrequency,20,15000,SutherlandHodgman,SimpleSkyDiffuseModeling,InternalCalculation,No,No,No
+! <Water Heater Information>,Type,Name,Volume {m3},Maximum Capacity {W},Standard Rated Recovery Efficiency, Standard Rated Energy Factor
+! <Heat Pump Water Heater Information>,Type,Name,Volume {m3},Maximum Capacity {W},Standard Rated Recovery Efficiency,Standard Rated Energy Factor,"DX Coil Total Cooling Rate {W, HPWH Only}"
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s/m2},Volume Flow Rate/Exterior Surface Area {m3/s/m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, ZONE1 OFFICE INFILTRATION,ALWAYS ON DISCRETE,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,236.88,11.8,2.058E-002,8.688E-005,1.376E-004,7.330E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, ZONE3 BULK STORAGE INFILTRATION,ALWAYS ON DISCRETE,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,3204.84,32.1,0.659,2.057E-004,1.376E-004,6.728E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, ZONE2 FINE STORAGE INFILTRATION,ALWAYS ON DISCRETE,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,1393.41,27.9,0.296,2.127E-004,1.376E-004,0.361,0.000,0.000,0.224,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,Mixing/Well-Stirred
+RoomAir Model,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,Mixing/Well-Stirred
+RoomAir Model,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    4
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.3000    
+ Heating Sizing Factor Information, Zone ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,   1.3000    
+ Heating Sizing Factor Information, Zone ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,   1.3000    
+ Heating Sizing Factor Information, Zone ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,   1.3000    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1000    
+ Cooling Sizing Factor Information, Zone ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,   1.1000    
+ Cooling Sizing Factor Information, Zone ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,   1.1000    
+ Cooling Sizing Factor Information, Zone ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,   1.1000    
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Cooling, 6327.17051, 6959.88756, 0.47870, 0.52657, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 17:15:00, 30.49850, 1.45394E-002, 236.87965, 11.84829, 9.98779E-002, 0.00000
+ Zone Sizing Information, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Heating, 6424.28715, 8351.57329, 0.25014, 0.32518, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 236.87965, 11.84829, 9.98779E-002, 0.00000
+ Zone Sizing Information, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Cooling, 89063.74593, 97970.12052, 6.73778, 7.41156, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 16:45:00, 30.90800, 1.45394E-002, 3204.84228, 32.06007, 0.97684, 0.00000
+ Zone Sizing Information, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Heating, 107488.38825, 139734.90472, 4.11262, 5.34641, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 3204.84228, 32.06007, 0.97684, 0.00000
+ Zone Sizing Information, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Cooling, 39956.23878, 43951.86266, 3.02322, 3.32554, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 16:45:00, 30.90800, 1.45394E-002, 1393.40969, 27.87832, 0.42471, 0.00000
+ Zone Sizing Information, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Heating, 37644.43211, 48937.76175, 1.47443, 1.91676, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00, -15.50000, 9.92508E-004, 1393.40969, 27.87832, 0.42471, 0.00000
+! <System Sizing Information>, System Name, Load Type, Peak Load Kind, User Design Capacity, Calc Des Air Flow Rate [m3/s], User Des Air Flow Rate [m3/s], Design Day Name, Date/Time of Peak
+ System Sizing Information, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Cooling, Sensible, 7620.45, 0.52657, 0.52657, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 05:00:00
+ System Sizing Information, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Heating, Sensible, 12570.43, 0.32518, 0.32518, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00
+ System Sizing Information, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Cooling, Sensible, 104440.46, 7.41156, 7.41156, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 05:00:00
+ System Sizing Information, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Heating, Sensible, 178037.58, 5.34641, 5.34641, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00
+ System Sizing Information, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Cooling, Sensible, 46744.97, 3.32554, 3.32554, WINDSOR INTL AP ANN CLG .4% CONDNS DB=>MWB, 7/21 05:00:00
+ System Sizing Information, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Heating, Sensible, 66777.56, 1.91676, 1.91676, WINDSOR INTL AP ANN HTG 99.6% CONDNS DB, 1/21 08:00:00
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Supply Air Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, Fan:OnOff, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV SUP FAN, Design Size Maximum Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, Fan:OnOff, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV EXH FAN, Design Size Maximum Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV HX, Design Size Nominal Supply Air Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Exhaust Air Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 1, Design Size Maximum Water Flow Rate [m3/s], 1.24738E-004
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 1, Design Size U-Factor Times Area Value [W/K], 254.67826
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 0.52657
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.34279
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 5.00000E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 2.63284E-002
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Supply Air Flow Rate [m3/s], 0.97684
+ Component Sizing Information, Fan:OnOff, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV SUP FAN, Design Size Maximum Flow Rate [m3/s], 0.97684
+ Component Sizing Information, Fan:OnOff, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV EXH FAN, Design Size Maximum Flow Rate [m3/s], 0.97684
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV HX, Design Size Nominal Supply Air Flow Rate [m3/s], 0.97684
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Exhaust Air Flow Rate [m3/s], 0.97684
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 3, Design Size Maximum Water Flow Rate [m3/s], 2.08705E-003
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 3, Design Size U-Factor Times Area Value [W/K], 4262.82299
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 7.41156
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.32950
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 5.00000E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 0.37058
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Supply Air Flow Rate [m3/s], 0.42471
+ Component Sizing Information, Fan:OnOff, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV SUP FAN, Design Size Maximum Flow Rate [m3/s], 0.42471
+ Component Sizing Information, Fan:OnOff, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV EXH FAN, Design Size Maximum Flow Rate [m3/s], 0.42471
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV HX, Design Size Nominal Supply Air Flow Rate [m3/s], 0.42471
+ Component Sizing Information, ZoneHVAC:EnergyRecoveryVentilator, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV DOAS, Design Size Exhaust Air Flow Rate [m3/s], 0.42471
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 2, Design Size Maximum Water Flow Rate [m3/s], 7.30925E-004
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, ZONE HVAC BASEBOARD CONVECTIVE WATER 2, Design Size U-Factor Times Area Value [W/K], 1492.52504
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 3.32554
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.31928
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 5.00000E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat, ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 0.16628
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 2.63284E-002
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 2.63284E-002
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Flow Rates [m3/s], 0.52657
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Adjusted Heating Design Air Flow Rate [m3/s], 0.32518
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Adjusted Cooling Design Air Flow Rate [m3/s], 0.52657
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Adjusted Main Design Air Flow Rate [m3/s], 0.52657
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, User Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Calculated Heating Air Flow Ratio [], 0.61754
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 0.37058
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 0.37058
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Flow Rates [m3/s], 7.41156
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Adjusted Heating Design Air Flow Rate [m3/s], 5.34641
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Adjusted Cooling Design Air Flow Rate [m3/s], 7.41156
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Adjusted Main Design Air Flow Rate [m3/s], 7.41156
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, User Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Calculated Heating Air Flow Ratio [], 0.72136
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 0.16628
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 0.16628
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Sum of Air Terminal Maximum Flow Rates [m3/s], 3.32554
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Adjusted Heating Design Air Flow Rate [m3/s], 1.91676
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Adjusted Cooling Design Air Flow Rate [m3/s], 3.32554
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Adjusted Main Design Air Flow Rate [m3/s], 3.32554
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, User Heating Air Flow Ratio [], 1.00000
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Calculated Heating Air Flow Ratio [], 0.57637
+ Component Sizing Information, AirLoopHVAC, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A, Design Supply Air Flow Rate [m3/s], 0.52657
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A, Design Supply Air Flow Rate [m3/s], 7.41156
+ Component Sizing Information, AirLoopHVAC, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A, Design Supply Air Flow Rate [m3/s], 3.32554
+!<Controller:MechanicalVentilation>,Name,Availability Schedule Name,Demand Controlled Ventilation {Yes/No},System Outdoor Air Method,Zone Maximum Outdoor Air Fraction,Number of Zones,Zone Name,DSOA Name,DSZAD Name
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 1,SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A OCC SCH,No,ZoneSum,1.00,1,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,SPACE FUNCTION OFFICE ENCLOSED <= 25 M2 VENTILATION,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 3,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A OCC SCH,No,ZoneSum,1.00,1,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,SPACE FUNCTION WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS VENTILATION,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 2,SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A OCC SCH,No,ZoneSum,1.00,1,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,SPACE FUNCTION WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4) VENTILATION,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A DESIGN SPEC ZONE AIR DIST
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, SYS_3_PSZ ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A ERV, Design Size Nominal Supply Air Flow Rate [m3/s], 9.98779E-002
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER, Design Size Rated Air Flow Rate [m3/s], 0.52657
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER, Design Size Gross Rated Total Cooling Capacity [W], 10478.21907
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER, Design Size Gross Rated Sensible Heat Ratio, 0.77484
+! <DX Cooling Coil Standard Rating Information>, Component Type, Component Name, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER {Btu/W-h}, IEER {Btu/W-h}
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1 56KBTU/HR 14.0SEER, 10068.5, 3.20, 10.92, 11.52, 10.94
+ Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 1, Design Size Nominal Capacity [W], 17627.30498
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 3, Design Size Maximum Flow Rate [m3/s], 0.52657
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A ERV, Design Size Nominal Supply Air Flow Rate [m3/s], 0.97684
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER, Design Size Rated Air Flow Rate [m3/s], 7.41156
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER, Design Size Gross Rated Total Cooling Capacity [W], 139053.14062
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER, Design Size Gross Rated Sensible Heat Ratio, 0.79838
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 3 724KBTU/HR 8.21EER, 133288.0, 2.74, 9.35, 9.88, 9.46
+ Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 3, Design Size Nominal Capacity [W], 230225.96989
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 1, Design Size Maximum Flow Rate [m3/s], 7.41156
+ Component Sizing Information, HeatExchanger:AirToAir:SensibleAndLatent, SYS_4_PSZ_ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A ERV, Design Size Nominal Supply Air Flow Rate [m3/s], 0.42471
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER, Design Size Rated Air Flow Rate [m3/s], 3.32554
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER, Design Size Gross Rated Total Cooling Capacity [W], 62180.45202
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER, Design Size Gross Rated Sensible Heat Ratio, 0.80049
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 2 334KBTU/HR 8.21EER, 59593.7, 2.55, 8.70, 9.20, 8.86
+ Component Sizing Information, Coil:Heating:Fuel, COIL HEATING GAS 2, Design Size Nominal Capacity [W], 102071.83981
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 2, Design Size Maximum Flow Rate [m3/s], 3.32554
+ Component Sizing Information, Coil:WaterHeating:AirToWaterHeatPump:Pumped, COIL WATER HEATING AIR TO WATER HEAT PUMP 1, Design Size Rated Evaporator Air Flow Rate [m3/s], 0.27448
+ Component Sizing Information, Coil:WaterHeating:AirToWaterHeatPump:Pumped, COIL WATER HEATING AIR TO WATER HEAT PUMP 1, Design Size Rated Condenser Water Flow Rate [m3/s], 2.44603E-004
+ Component Sizing Information, Fan:OnOff, FAN ON OFF 1, Design Size Maximum Flow Rate [m3/s], 0.27448
+Heat Pump Water Heater Information,WaterHeater:HeatPump:PumpedCondenser,28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH,0.1043,4449.6,2.609,2.1768,3491
+ Component Sizing Information, WaterHeater:HeatPump:PumpedCondenser, 28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH, Condenser water flow rate [m3/s], 2.44603E-004
+ Component Sizing Information, WaterHeater:HeatPump:PumpedCondenser, 28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF ASHPWH, Evaporator air flow rate [m3/s], 0.27448
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Maximum Loop Flow Rate [m3/s], 2.94272E-003
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Plant Loop Volume [m3], 0.35313
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Design Flow Rate [m3/s], 2.94272E-003
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Design Power Consumption [W], 885.64017
+ Component Sizing Information, Boiler:HotWater, PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF, Design Size Nominal Capacity [W], 197786.91424
+ Component Sizing Information, Boiler:HotWater, PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF, User-Specified Nominal Capacity [W], 141587.40326
+ Component Sizing Information, Boiler:HotWater, PRIMARY BOILER 483KBTU/HR 0.83 THERMAL EFF, Design Size Design Water Flow Rate [m3/s], 2.94272E-003
+ Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF, Design Size Nominal Capacity [W], 197786.91424
+ Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF, User-Specified Nominal Capacity [W], 141587.40326
+ Component Sizing Information, Boiler:HotWater, SECONDARY BOILER 483KBTU/HR 0.83 THERMAL EFF, Design Size Design Water Flow Rate [m3/s], 2.94272E-003
+ Component Sizing Information, PlantLoop, MAIN SERVICE WATER LOOP, Maximum Loop Flow Rate [m3/s], 2.63466E-005
+ Component Sizing Information, PlantLoop, MAIN SERVICE WATER LOOP, Plant Loop Volume [m3], 3.16159E-003
+ Component Sizing Information, Pump:ConstantSpeed, SERVICE WATER LOOP PUMP, Design Flow Rate [m3/s], 2.63466E-005
+ Component Sizing Information, Pump:ConstantSpeed, SERVICE WATER LOOP PUMP, Design Power Consumption [W], 4.47374E-002
+ Component Sizing Information, WaterHeater:Mixed, 28GAL NATURALGAS WATER HEATER - 19KBTU/HR 0.82 THERM EFF, Use Side Design Flow Rate [m3/s], 2.63466E-005
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,RUN PERIOD 1,WeatherFileRunPeriod,01/01,12/31,Sunday,365,Use RunPeriod Specified Day,No,No,No,Yes,Yes
+Environment:Daylight Saving,No,RunPeriod Object
+Environment:WarmupDays,  6
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,None
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,ALL_ST=OFFICE ENCLOSED <= 25 M2_FL=BUILDING STORY 1_SCH=A,RunPeriod: RUN PERIOD 1,3.9961282012E-002,9.1034238371E-002,Pass,Pass,0.1089546595,0.4213742694,Pass,Pass
+ Warmup Convergence Information,ALL_ST=WAREHOUSE STORAGE AREA MEDIUM TO BULKY PALLETIZED ITEMS_FL=BUILDING STORY 1_SCH=A,RunPeriod: RUN PERIOD 1,4.1691783322E-003,1.5570171722E-002,Pass,Pass,0.1784755611,0.5688911143,Pass,Pass
+ Warmup Convergence Information,ALL_ST=WAREHOUSE STORAGE AREA SMALL HAND-CARRIED ITEMS(4)_FL=BUILDING STORY 1_SCH=A,RunPeriod: RUN PERIOD 1,3.7890984570E-002,0.1179357179,Pass,Pass,0.1283155963,0.3470201539,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data

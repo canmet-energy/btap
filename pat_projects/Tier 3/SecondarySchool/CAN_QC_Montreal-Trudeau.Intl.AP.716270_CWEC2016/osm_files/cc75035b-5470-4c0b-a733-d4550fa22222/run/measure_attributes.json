@@ -1,0 +1,44 @@
+{
+  "Increase R-value of Insulation for Exterior Walls to a Specific Value": {
+    "r_value": 45.0,
+    "allow_reduction": true,
+    "material_cost_increase_ip": 0.0,
+    "one_time_retrofit_cost_ip": 0.0,
+    "years_until_retrofit_cost": 0,
+    "applicable": true
+  },
+  "Increase R-value of Insulation for Roofs to a Specific Value": {
+    "r_value": 50.0,
+    "allow_reduction": true,
+    "material_cost_increase_ip": 0.0,
+    "one_time_retrofit_cost_ip": 0.0,
+    "years_until_retrofit_cost": 0,
+    "applicable": true
+  },
+  "Resize existing windows to match a given WWR": {
+    "wwr": 0.2,
+    "check_wall": true,
+    "check_outdoors": true,
+    "check_sunexposed": true,
+    "applicable": true
+  },
+  "BTAPSetInfiltration": {
+    "infiltration_si": 0.0002,
+    "applicable": true
+  },
+  "AddERVPower": {
+    "a_string_argument": "The Default Value",
+    "applicable": true
+  },
+  "BTAPChangeEnergyRecoveryEfficiency": {
+    "sensible_eff_at_100_heating": 0.9,
+    "latent_eff_at_100_heating": 0.9,
+    "sensible_eff_at_75_heating": 0.9,
+    "latent_eff_at_75_heating": 0.9,
+    "sensible_eff_at_100_cooling": 0.9,
+    "latent_eff_at_100_cooling": 0.9,
+    "sensible_eff_at_75_cooling": 0.9,
+    "latent_eff_at_75_cooling": 0.9,
+    "applicable": true
+  }
+}

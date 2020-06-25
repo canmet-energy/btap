@@ -1,0 +1,3447 @@
+Shadowing Combinations
+..Solar Distribution=FullInteriorAndExterior
+..In the following, only the first 10 reference surfaces will be shown.
+..But all surfaces are used in the calculations.
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=31
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=LOBBY_ZN_1_FLR_1_WALL_1
+..Surface=OFFICES_ZN_1_FLR_1_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=25
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=25
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=37
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=LOBBY_ZN_1_FLR_1_WALL_1
+..Surface=OFFICES_ZN_1_FLR_1_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=31
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=31
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=17
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=LOBBY_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=14
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=14
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=LOBBY_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=LOBBY_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=27
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=7
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=OFFICES_ZN_1_FLR_1_WALL_2
+..Surface=BATHROOMS_ZN_1_FLR_1_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=11
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_2
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=7
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_2
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=30
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=9
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=LOBBY_ZN_1_FLR_1_WALL_1
+..Surface=OFFICES_ZN_1_FLR_1_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=12
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=9
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=LOBBY_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=34
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=LOBBY_ZN_1_FLR_1_WALL_1
+..Surface=OFFICES_ZN_1_FLR_1_WALL_1
+..Surface=BATHROOMS_ZN_1_FLR_1_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=15
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+..Surface=LOBBY_ZN_1_FLR_2_WALL_1
+..Surface=OFFICES_ZN_1_FLR_2_WALL_1
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=BATHROOMS_ZN_1_FLR_1_WALL_3
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=12
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_1
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_2
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4A
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_1
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_2
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4A
+Number of receiving sub surfaces=1
+....Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4A is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=1
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=12
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_1
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_2
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4
+...Surface=AUDITORIUM_ZN_1_FLR_1_WALL_4A
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_1
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_2
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4
+...Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4A
+Number of receiving sub surfaces=1
+....Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_WALL_4A is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUDITORIUM_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=20
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=30
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=20
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_2
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_2
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=20
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=30
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_4
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=20
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=5
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_2_POD_3_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=15
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=19
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_1_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_2
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=5
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_2
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=19
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_2_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MULT_CLASS_2_POD_3_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=10
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=15
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=22
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_1_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_2_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORNER_CLASS_1_POD_3_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=6
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_1
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_3
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_4
+...Surface=CAFETERIA_ZN_1_FLR_1_FLOOR
+...Surface=CAFETERIA_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=CAFETERIA_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=BATHROOMS_ZN_1_FLR_1_WALL_3
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=6
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_1
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_2
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+...Surface=CAFETERIA_ZN_1_FLR_1_WALL_4
+...Surface=CAFETERIA_ZN_1_FLR_1_FLOOR
+...Surface=CAFETERIA_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=CAFETERIA_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CAFETERIA_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=5
+...Surface=KITCHEN_ZN_1_FLR_1_WALL_1
+...Surface=KITCHEN_ZN_1_FLR_1_WALL_3
+...Surface=KITCHEN_ZN_1_FLR_1_WALL_4
+...Surface=KITCHEN_ZN_1_FLR_1_FLOOR
+...Surface=KITCHEN_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=KITCHEN_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=KITCHEN_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=GYM_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=12
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=12
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_4
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=12
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_4
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=AUX_GYM_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=6
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=OFFICES_ZN_1_FLR_2_WALL_2
+Number of back surfaces=12
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_4
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=12
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_1_WALL_4
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_3
+...Surface=AUX_GYM_ZN_1_FLR_2_WALL_4
+Number of receiving sub surfaces=1
+....Surface=AUX_GYM_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=AUX_GYM_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=8
+...Surface=LIBRARY_MEDIA_CENTER_WALL_1
+...Surface=LIBRARY_MEDIA_CENTER_WALL_3
+...Surface=LIBRARY_MEDIA_CENTER_WALL_3_FIXEDWINDOW
+...Surface=LIBRARY_MEDIA_CENTER_WALL_4_A
+...Surface=LIBRARY_MEDIA_CENTER_WALL_4_B
+...Surface=LIBRARY_MEDIA_CENTER_FLOOR_A
+...Surface=LIBRARY_MEDIA_CENTER_FLOOR_B
+...Surface=LIBRARY_MEDIA_CENTER_CEILING
+Number of receiving sub surfaces=1
+....Surface=LIBRARY_MEDIA_CENTER_WALL_2_FIXEDWINDOW
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=1
+..Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+Number of back surfaces=8
+...Surface=LIBRARY_MEDIA_CENTER_WALL_1
+...Surface=LIBRARY_MEDIA_CENTER_WALL_2
+...Surface=LIBRARY_MEDIA_CENTER_WALL_2_FIXEDWINDOW
+...Surface=LIBRARY_MEDIA_CENTER_WALL_4_A
+...Surface=LIBRARY_MEDIA_CENTER_WALL_4_B
+...Surface=LIBRARY_MEDIA_CENTER_FLOOR_A
+...Surface=LIBRARY_MEDIA_CENTER_FLOOR_B
+...Surface=LIBRARY_MEDIA_CENTER_CEILING
+Number of receiving sub surfaces=1
+....Surface=LIBRARY_MEDIA_CENTER_WALL_3_FIXEDWINDOW
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_4_A is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_WALL_4_B is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_FLOOR_A is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_FLOOR_B is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LIBRARY_MEDIA_CENTER_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=6
+...Surface=LOBBY_ZN_1_FLR_1_WALL_2
+...Surface=LOBBY_ZN_1_FLR_1_WALL_3
+...Surface=LOBBY_ZN_1_FLR_1_WALL_4
+...Surface=LOBBY_ZN_1_FLR_1_WALL_5
+...Surface=LOBBY_ZN_1_FLR_1_FLOOR
+...Surface=LOBBY_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=6
+...Surface=LOBBY_ZN_1_FLR_2_WALL_2
+...Surface=LOBBY_ZN_1_FLR_2_WALL_3
+...Surface=LOBBY_ZN_1_FLR_2_WALL_4
+...Surface=LOBBY_ZN_1_FLR_2_WALL_5
+...Surface=LOBBY_ZN_1_FLR_2_FLOOR
+...Surface=LOBBY_ZN_1_FLR_2_CEILING
+Number of receiving sub surfaces=1
+....Surface=LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=LOBBY_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=6
+...Surface=OFFICES_ZN_1_FLR_1_WALL_2
+...Surface=OFFICES_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+...Surface=OFFICES_ZN_1_FLR_1_WALL_3
+...Surface=OFFICES_ZN_1_FLR_1_WALL_4
+...Surface=OFFICES_ZN_1_FLR_1_FLOOR
+...Surface=OFFICES_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=AUX_GYM_ZN_1_FLR_1_WALL_1
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+Number of back surfaces=6
+...Surface=OFFICES_ZN_1_FLR_1_WALL_1
+...Surface=OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW
+...Surface=OFFICES_ZN_1_FLR_1_WALL_3
+...Surface=OFFICES_ZN_1_FLR_1_WALL_4
+...Surface=OFFICES_ZN_1_FLR_1_FLOOR
+...Surface=OFFICES_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=OFFICES_ZN_1_FLR_1_WALL_2_FIXEDWINDOW
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_1 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-LOBBY_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=6
+...Surface=OFFICES_ZN_1_FLR_2_WALL_2
+...Surface=OFFICES_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+...Surface=OFFICES_ZN_1_FLR_2_WALL_3
+...Surface=OFFICES_ZN_1_FLR_2_WALL_4
+...Surface=OFFICES_ZN_1_FLR_2_FLOOR
+...Surface=OFFICES_ZN_1_FLR_2_CEILING
+Number of receiving sub surfaces=1
+....Surface=OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_2 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=2
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=AUX_GYM_ZN_1_FLR_2_WALL_1
+Number of back surfaces=6
+...Surface=OFFICES_ZN_1_FLR_2_WALL_1
+...Surface=OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW
+...Surface=OFFICES_ZN_1_FLR_2_WALL_3
+...Surface=OFFICES_ZN_1_FLR_2_WALL_4
+...Surface=OFFICES_ZN_1_FLR_2_FLOOR
+...Surface=OFFICES_ZN_1_FLR_2_CEILING
+Number of receiving sub surfaces=1
+....Surface=OFFICES_ZN_1_FLR_2_WALL_2_FIXEDWINDOW
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_2_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=OFFICES_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=8
+..Surface=Mir-AUX_GYM_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=AUDITORIUM_ZN_1_FLR_1_WALL_3
+..Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3
+..Surface=CAFETERIA_ZN_1_FLR_1_WALL_3
+..Surface=LIBRARY_MEDIA_CENTER_WALL_3
+Number of back surfaces=8
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_1
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_2
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_4
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_5
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_6
+...Surface=BATHROOMS_ZN_1_FLR_1_FLOOR
+...Surface=BATHROOMS_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=BATHROOMS_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=8
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_1
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_2
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_3
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_3_FIXEDWINDOW
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_5
+...Surface=BATHROOMS_ZN_1_FLR_1_WALL_6
+...Surface=BATHROOMS_ZN_1_FLR_1_FLOOR
+...Surface=BATHROOMS_ZN_1_FLR_1_CEILING
+Number of receiving sub surfaces=1
+....Surface=BATHROOMS_ZN_1_FLR_1_WALL_4_FIXEDWINDOW
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_WALL_6 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_3 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=4
+..Surface=Mir-AUX_GYM_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-OFFICES_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=AUDITORIUM_ZN_1_FLR_2_WALL_3
+..Surface=LIBRARY_MEDIA_CENTER_WALL_3
+Number of back surfaces=8
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_1
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_2
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_4
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_5
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_6
+...Surface=BATHROOMS_ZN_1_FLR_2_FLOOR
+...Surface=BATHROOMS_ZN_1_FLR_2_CEILING
+Number of receiving sub surfaces=1
+....Surface=BATHROOMS_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_3_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_4 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=8
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_1
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_2
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_3
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_3_FIXEDWINDOW
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_5
+...Surface=BATHROOMS_ZN_1_FLR_2_WALL_6
+...Surface=BATHROOMS_ZN_1_FLR_2_FLOOR
+...Surface=BATHROOMS_ZN_1_FLR_2_CEILING
+Number of receiving sub surfaces=1
+....Surface=BATHROOMS_ZN_1_FLR_2_WALL_4_FIXEDWINDOW
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_4_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_WALL_6 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=BATHROOMS_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_10 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=24
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=14
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_1
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_10
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_12
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_2
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_3
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_4
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_5
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_6
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11_FIXEDWINDOW
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_12 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_6 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=24
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_1_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+Number of back surfaces=14
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_1
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_10
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_11_FIXEDWINDOW
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_12
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_2
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_3
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_4
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_5
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_6
+Number of receiving sub surfaces=1
+....Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7_FIXEDWINDOW
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_7_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_8 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_WALL_9 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_5
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_3
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_4
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_5
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_5
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6_FIXEDWINDOW
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_5
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_1_WALL_6_FIXEDWINDOW
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_1_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_10 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=12
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=14
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_1
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_10
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_12
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_2
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_3
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_4
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_5
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_6
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7_FIXEDWINDOW
+Number of receiving sub surfaces=1
+....Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11_FIXEDWINDOW
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_12 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_6 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=12
+..Surface=Mir-MULT_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_1_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_2_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=Mir-CORNER_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1_FIXEDWINDOW - OVERHANG
+..Surface=CORNER_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+..Surface=CORNER_CLASS_2_POD_2_ZN_1_FLR_2_WALL_3
+..Surface=MULT_CLASS_1_POD_3_ZN_1_FLR_2_WALL_1
+..Surface=MULT_CLASS_2_POD_1_ZN_1_FLR_2_WALL_3
+Number of back surfaces=14
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_1
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_10
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_11_FIXEDWINDOW
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_12
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_2
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_3
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_4
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_5
+...Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_6
+Number of receiving sub surfaces=1
+....Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7_FIXEDWINDOW
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_7_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_8 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_WALL_9 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MAIN_CORRIDOR_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_5
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_3
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_4
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_5
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_5
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6_FIXEDWINDOW
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_5 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_6 is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=25
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_3
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_4
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_5
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6
+...Surface=CORRIDOR_POD_1_ZN_1_FLR_2_WALL_6_FIXEDWINDOW
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_1
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_2
+...Surface=CORRIDOR_POD_2_ZN_1_FLR_2_WALL_3
+Number of receiving sub surfaces=1
+....Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_6_FIXEDWINDOW
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_WALL_6_FIXEDWINDOW is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_1_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_2_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=CORRIDOR_POD_3_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_1_CEILING is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_WALL_1 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_WALL_2 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_WALL_3 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_WALL_4 is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_FLOOR is not used as Receiving Surface in calculations.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0
+==================================
+Surface=MECH_ZN_1_FLR_2_CEILING is used as Receiving Surface in calculations and is convex.
+Number of general casting surfaces=0
+Number of back surfaces=0
+Number of receiving sub surfaces=0

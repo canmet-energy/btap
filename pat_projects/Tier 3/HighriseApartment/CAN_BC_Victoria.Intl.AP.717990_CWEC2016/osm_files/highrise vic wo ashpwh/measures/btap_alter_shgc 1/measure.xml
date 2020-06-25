@@ -1,0 +1,80 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_alter_shgc</name>
+  <uid>9d86e04c-8e2c-4a42-a0dc-037a20881320</uid>
+  <version_id>535927ec-249c-4348-b5bf-7211e026557a</version_id>
+  <version_modified>20190811T164052Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPAlterSHGC</class_name>
+  <display_name>BTAPAlterSHGC</display_name>
+  <description>Changes SHGC of simple glazing systems</description>
+  <modeler_description>Get simple glazing systems and change the SHGC </modeler_description>
+  <arguments>
+    <argument>
+      <name>new_shgc</name>
+      <display_name>new_shgc</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.3</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5CCA669A</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>851A98D0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>801BA69A</checksum>
+    </file>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0E00FB0D</checksum>
+    </file>
+  </files>
+</measure>

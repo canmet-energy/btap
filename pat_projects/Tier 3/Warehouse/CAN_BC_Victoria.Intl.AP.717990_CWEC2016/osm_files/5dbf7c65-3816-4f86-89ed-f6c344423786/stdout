@@ -1,0 +1,16 @@
+[17:09:36.073911 WARN] Measure couldn't find the construction named 'BTAP-Ext-Wall-Mass:U-0.315' in the exterior surface hash.
+[17:09:36.318911 WARN] Measure couldn't find the construction named 'BTAP-Ext-Roof-Metal:U-0.193' in the exterior surface hash.
+
+=====================================================
+RESIZING INFORMATION (CSV)
+Surface Name, WWR_before, WWR_after
+Bulk Storage Rear Wall,0.15000000000000063,0.26000000000000184
+Office Left Wall,0.1499999999999988,0.2599999999999985
+Fine Storage Left Wall,0.14999999999999925,0.25999999999999956
+Fine Storage Right Wall,0.15000000000000005,0.2600000000000003
+Bulk Storage Left Wall,0.14999999999999936,0.25999999999999945
+Bulk Storage Right Wall,0.14999999999999936,0.25999999999999945
+Office Front Wall,0.14999999999999927,0.2599999999999993
+Fine Storage Office Left Wall,0.1499999999999999,0.25999999999999956
+Fine Storage Front Wall,0.1499999999999988,0.25999999999999746
+Fine Storage Office Front Wall,0.1500000000000003,0.2600000000000003

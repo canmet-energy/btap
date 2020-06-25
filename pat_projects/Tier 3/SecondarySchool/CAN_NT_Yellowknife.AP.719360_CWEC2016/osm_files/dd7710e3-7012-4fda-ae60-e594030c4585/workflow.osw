@@ -1,0 +1,33 @@
+{
+   "created_at" : "20190813T215104Z",
+   "seed_file" : "../dd7710e3-7012-4fda-ae60-e594030c4585.osm",
+   "steps" : [
+      {
+         "arguments" : {},
+         "description" : "",
+         "measure_dir_name" : "add_erv_power",
+         "modeler_description" : "This template measure is used to ensure consistency in BTAP measures.",
+         "name" : "AddERVPower"
+      },
+      {
+         "arguments" : {
+            "r_value" : 50
+         },
+         "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. Costs for a construction can be adjusted",
+         "measure_dir_name" : "IncreaseInsulationRValueForExteriorWalls",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in air exposed exterior walls to a specified value. Find constructions used for exterior walls, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. Layer to change could be Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance can be directly entered. If the construction doesn't appear to have an insulation layer it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions for surfaces with a \"Ground\" boundary condition will also not be altered. Constructions with an insulation layer that already exceeds the requested R-Value will also not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Exterior Walls to a Specific Value"
+      },
+      {
+         "arguments" : {
+            "r_value" : 60
+         },
+         "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+         "measure_dir_name" : "IncreaseInsulationRValueForRoofs",
+         "modeler_description" : "Set the R-Value (ft^2*h*R/Btu) of the insulation material layer in all roofs in the model to a specified value.  Find constructions used for roofs, make copies of these and assign them to the appropriate construction sets or surfaces. Identify which layer of the construction is the insulation layer. This could be a Material, No Mass Material, or Air Gap Material. If the Insulation layer is \"Material? the thickness will be changed to attain the desired R-Value. If the insulation layer is \"No Mass Material? or \"Air Gap Material? the Thermal Resistance will be directly entered.  If the construction doesn't appear to have an insulation layer, it will not be altered. Surfaces with \"Adiabatic\" boundary conditions are not specifically assumed to be interior or exterior. As a result constructions used on \"Adiabatic\" surfaces will not be altered. Constructions used on attic floors will not be altered.\r\r\r\r\r\r\n\r\r\r\r\r\r\nThe resulting construction will retain the cost data from the source construction, however material and installation cost can be increased which will affect replacement cost if it happens during the analysis period. Additionally a one-time cost can be added to reflect any retrofit costs that occur at some point prior to replacement.\r\r\r\r\r\r\n  ",
+         "name" : "Increase R-value of Insulation for Roofs to a Specific Value"
+      }
+   ],
+   "updated_at" : "20190813T221006Z",
+   "weather_file" : "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw"
+}

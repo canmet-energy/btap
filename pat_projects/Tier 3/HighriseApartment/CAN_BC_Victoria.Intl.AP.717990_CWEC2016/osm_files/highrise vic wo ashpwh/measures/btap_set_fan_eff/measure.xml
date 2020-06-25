@@ -1,0 +1,80 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>btap_set_fan_eff</name>
+  <uid>13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978</uid>
+  <version_id>d6a78a8d-63bc-48a4-87ad-18bb6fd7a19e</version_id>
+  <version_modified>20190811T164053Z</version_modified>
+  <xml_checksum>2609226D</xml_checksum>
+  <class_name>BTAPSetFanEff</class_name>
+  <display_name>BTAPSetFanEff</display_name>
+  <description>Sets all fan efficiency to specified value. Does not curently work with Fan:SystemModel</description>
+  <modeler_description>This template measure is used to ensure consistency in BTAP measures.</modeler_description>
+  <arguments>
+    <argument>
+      <name>eff_for_this_cz</name>
+      <display_name>eff_for_this_cz</display_name>
+      <type>Double</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.72</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>BTAPMeasureHelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5CCA669A</checksum>
+    </file>
+    <file>
+      <filename>test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>18A2C7B0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.3.0</identifier>
+        <min_compatible>2.3.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>C70081D1</checksum>
+    </file>
+    <file>
+      <filename>in.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3E8C5779</checksum>
+    </file>
+  </files>
+</measure>

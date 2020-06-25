@@ -1,0 +1,1378 @@
+{
+  "analysis": {
+    "display_name": "pcf1527Aug42019v2",
+    "name": "pcf1527Aug42019v2",
+    "output_variables": [],
+    "problem": {
+      "workflow": [
+        {
+          "name": "btap_create_necb_prototype_building",
+          "display_name": "BTAPCreateNECBPrototypeBuilding",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPCreateNECBPrototypeBuilding",
+          "measure_definition_directory": "./measures/btap_create_necb_prototype_building",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_create_necb_prototype_building",
+          "measure_definition_display_name": "BTAPCreateNECBPrototypeBuilding",
+          "measure_definition_name": "btap_create_necb_prototype_building",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
+          "measure_definition_version_uuid": "922a9030-878b-47ff-8776-18fbe47bdb12",
+          "uuid": "3e9acd53-8602-4749-a655-7cbbe48e8b30",
+          "version_uuid": "922a9030-878b-47ff-8776-18fbe47bdb12",
+          "description": "This measure creates an NECB prototype building from scratch and uses it as the base for an analysis.",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "Template.",
+              "display_name_short": "template",
+              "name": "template",
+              "value_type": "string",
+              "default_value": "NECB2011",
+              "value": "NECB2017"
+            },
+            {
+              "display_name": "Use New Autozone method?",
+              "display_name_short": "new_auto_zoner",
+              "name": "new_auto_zoner",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": true
+            },
+            {
+              "display_name": "Fenestration and Door to Wall Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).",
+              "display_name_short": "fdwr",
+              "name": "fdwr",
+              "value_type": "double",
+              "default_value": 1.1,
+              "value": 1.1
+            },
+            {
+              "display_name": "Skylight to Roof Ratio (set a value between 0 and 1, or set to 1.1 or ignore to use NECB maximum).",
+              "display_name_short": "srr",
+              "name": "srr",
+              "value_type": "double",
+              "default_value": 1.1,
+              "value": 1.1
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Building Type.",
+                "display_name_short": "building_type",
+                "name": "building_type",
+                "value_type": "string",
+                "default_value": "SmallOffice",
+                "value": "SmallOffice",
+                "choice_display_names": [
+                  "SecondarySchool",
+                  "PrimarySchool",
+                  "SmallOffice",
+                  "MediumOffice",
+                  "LargeOffice",
+                  "SmallHotel",
+                  "LargeHotel",
+                  "Warehouse",
+                  "RetailStandalone",
+                  "RetailStripmall",
+                  "QuickServiceRestaurant",
+                  "FullServiceRestaurant",
+                  "MidriseApartment",
+                  "HighriseApartment",
+                  "Hospital",
+                  "Outpatient"
+                ]
+              },
+              "display_name": "Building Type.",
+              "display_name_short": "building_type",
+              "variable_type": "variable",
+              "minimum": "SmallOffice",
+              "maximum": "SmallOffice",
+              "static_value": "SmallOffice",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "SecondarySchool",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "MediumOffice",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "LargeOffice",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "Warehouse",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "RetailStripmall",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "HighriseApartment",
+                        "weight": 0.16666666666666666
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "SmallOffice"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "SmallOffice"
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Climate File",
+                "display_name_short": "epw_file",
+                "name": "epw_file",
+                "value_type": "string",
+                "default_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                "choice_display_names": [
+                  "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+                  "CAN_AB_Calgary.Intl.AP.718770_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                  "CAN_AB_Edmonton.Stony.Plain.AP.711270_CWEC2016.epw",
+                  "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                  "CAN_AB_Grande.Prairie.AP.719400_CWEC2016.epw",
+                  "CAN_AB_Lethbridge.AP.712430_CWEC2016.epw",
+                  "CAN_AB_Medicine.Hat.AP.710260_CWEC2016.epw",
+                  "CAN_BC_Abbotsford.Intl.AP.711080_CWEC2016.epw",
+                  "CAN_BC_Comox.Valley.AP.718930_CWEC2016.epw",
+                  "CAN_BC_Crankbrook-Canadian.Rockies.Intl.AP.718800_CWEC2016.epw",
+                  "CAN_BC_Fort.St.John-North.Peace.Rgnl.AP.719430_CWEC2016.epw",
+                  "CAN_BC_Hope.Rgnl.Airpark.711870_CWEC2016.epw",
+                  "CAN_BC_Kamloops.AP.718870_CWEC2016.epw",
+                  "CAN_BC_Port.Hardy.AP.711090_CWEC2016.epw",
+                  "CAN_BC_Prince.George.Intl.AP.718960_CWEC2016.epw",
+                  "CAN_BC_Smithers.Rgnl.AP.719500_CWEC2016.epw",
+                  "CAN_BC_Summerland.717680_CWEC2016.epw",
+                  "CAN_BC_Vancouver.Intl.AP.718920_CWEC2016.epw",
+                  "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                  "CAN_MB_Brandon.Muni.AP.711400_CWEC2016.epw",
+                  "CAN_MB_The.Pas.AP.718670_CWEC2016.epw",
+                  "CAN_MB_Winnipeg-Richardson.Intl.AP.718520_CWEC2016.epw",
+                  "CAN_NB_Fredericton.Intl.AP.717000_CWEC2016.epw",
+                  "CAN_NB_Miramichi.AP.717440_CWEC2016.epw",
+                  "CAN_NB_Saint.John.AP.716090_CWEC2016.epw",
+                  "CAN_NL_Gander.Intl.AP-CFB.Gander.718030_CWEC2016.epw",
+                  "CAN_NL_Goose.Bay.AP-CFB.Goose.Bay.718160_CWEC2016.epw",
+                  "CAN_NL_St.Johns.Intl.AP.718010_CWEC2016.epw",
+                  "CAN_NL_Stephenville.Intl.AP.718150_CWEC2016.epw",
+                  "CAN_NS_CFB.Greenwood.713970_CWEC2016.epw",
+                  "CAN_NS_CFB.Shearwater.716010_CWEC2016.epw",
+                  "CAN_NS_Sable.Island.Natl.Park.716000_CWEC2016.epw",
+                  "CAN_NS_Sydney-McCurdy.AP.717070_8205701_CWEC2016.epw",
+                  "CAN_NS_Truro.713980_CWEC.epw",
+                  "CAN_NT_Inuvik-Zubko.AP.719570_CWEC2016.epw",
+                  "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                  "CAN_ON_Armstrong.AP.718410_CWEC2016.epw",
+                  "CAN_ON_CFB.Trenton.716210_CWEC2016.epw",
+                  "CAN_ON_Dryden.Rgnl.AP.715270_CWEC2016.epw",
+                  "CAN_ON_London.Intl.AP.716230_CWEC2016.epw",
+                  "CAN_ON_Moosonee.AP.713980_CWEC2016.epw",
+                  "CAN_ON_Mount.Forest.716310_CWEC2016.epw",
+                  "CAN_ON_North.Bay-Garland.AP.717310_CWEC2016.epw",
+                  "CAN_ON_Ottawa-Macdonald-Cartier.Intl.AP.716280_CWEC2016.epw",
+                  "CAN_ON_Sault.Ste.Marie.AP.712600_CWEC2016.epw",
+                  "CAN_ON_Timmins.Power.AP.717390_CWEC2016.epw",
+                  "CAN_ON_Toronto.Pearson.Intl.AP.716240_CWEC2016.epw",
+                  "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                  "CAN_PE_Charlottetown.AP.717060_CWEC2016.epw",
+                  "CAN_QC_Kuujjuaq.AP.719060_CWEC2016.epw",
+                  "CAN_QC_Kuujuarapik.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Lac.Eon.AP.714210_CWEC2016.epw",
+                  "CAN_QC_Mont-Joli.AP.717180_CWEC2016.epw",
+                  "CAN_QC_Montreal-Mirabel.Intl.AP.719050_CWEC2016.epw",
+                  "CAN_QC_Montreal-St-Hubert.Longueuil.AP.713710_CWEC2016.epw",
+                  "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                  "CAN_QC_Quebec-Lesage.Intl.AP.717140_CWEC2016.epw",
+                  "CAN_QC_Riviere-du-Loup.717150_CWEC2016.epw",
+                  "CAN_QC_Roberval.AP.717280_CWEC2016.epw",
+                  "CAN_QC_Saguenay-Bagotville.AP-CFB.Bagotville.717270_CWEC2016.epw",
+                  "CAN_QC_Schefferville.AP.718280_CWEC2016.epw",
+                  "CAN_QC_Sept-Iles.AP.718110_CWEC2016.epw",
+                  "CAN_QC_Val-d-Or.Rgnl.AP.717250_CWEC2016.epw",
+                  "CAN_SK_Estevan.Rgnl.AP.718620_CWEC2016.epw",
+                  "CAN_SK_North.Battleford.AP.718760_CWEC2016.epw",
+                  "CAN_SK_Saskatoon.Intl.AP.718660_CWEC2016.epw",
+                  "CAN_YT_Whitehorse.Intl.AP.719640_CWEC2016.epw"
+                ]
+              },
+              "display_name": "Climate File",
+              "display_name_short": "epw_file",
+              "variable_type": "variable",
+              "minimum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "maximum": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "static_value": "CAN_AB_Banff.CS.711220_CWEC2016.epw",
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": "CAN_BC_Victoria.Intl.AP.717990_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "CAN_ON_Windsor.Intl.AP.715380_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "CAN_QC_Montreal-Trudeau.Intl.AP.716270_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "CAN_AB_Edmonton.Intl.AP.711230_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "CAN_AB_Fort.McMurray.AP.716890_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      },
+                      {
+                        "value": "CAN_NT_Yellowknife.AP.719360_CWEC2016.epw",
+                        "weight": 0.16666666666666666
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "modes",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  },
+                  {
+                    "name": "stddev",
+                    "value": "CAN_AB_Banff.CS.711220_CWEC2016.epw"
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 0
+        },
+        {
+          "name": "btap_set_infiltration",
+          "display_name": "BTAPSetInfiltration",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPSetInfiltration",
+          "measure_definition_directory": "./measures/BTAPSetInfiltration",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\BTAPSetInfiltration",
+          "measure_definition_display_name": "BTAPSetInfiltration",
+          "measure_definition_name": "btap_set_infiltration",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "9d7b0789-3974-4869-a2a8-055391857e3c",
+          "measure_definition_version_uuid": "31bf3352-9db1-4970-a174-a9c023c36b66",
+          "uuid": "9d7b0789-3974-4869-a2a8-055391857e3c",
+          "version_uuid": "31bf3352-9db1-4970-a174-a9c023c36b66",
+          "description": "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+          "taxonomy": "Envelope.Infiltration",
+          "arguments": [
+            {
+              "display_name": "Space Infiltration Flow per Exterior Envelope Surface Area (cfm/ft^2).",
+              "display_name_short": "infiltration_ip",
+              "name": "infiltration_ip",
+              "value_type": "double",
+              "default_value": 0.05,
+              "value": 0.01875
+            },
+            {
+              "display_name": "Increase in Material and Installation Costs for Building per Exterior Envelope Area ($/ft^2).",
+              "display_name_short": "material_cost_ip",
+              "name": "material_cost_ip",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Costs for Construction per Area Used ($/ft^2).",
+              "display_name_short": "om_cost_ip",
+              "name": "om_cost_ip",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "btap_set_envelope_conductance_by_necb_climate_zone",
+          "display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BtapSetEnvelopeConductanceByNecbClimateZone",
+          "measure_definition_directory": "./measures/btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone",
+          "measure_definition_name": "btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "measure_definition_version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "description": "Modifies walls, roofs, and windows conductance by climate zone.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Template",
+              "display_name_short": "necb_template",
+              "name": "necb_template",
+              "value_type": "string",
+              "default_value": "NECB2015",
+              "value": "NECB2017"
+            },
+            {
+              "display_name": "Surface Type",
+              "display_name_short": "surface_type",
+              "name": "surface_type",
+              "value_type": "string",
+              "default_value": "Glazing",
+              "value": "Walls"
+            },
+            {
+              "display_name": "NECB Zone4 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone4_u_value",
+              "name": "zone4_u_value",
+              "value_type": "double",
+              "default_value": 0.59,
+              "value": 0.22
+            },
+            {
+              "display_name": "NECB Zone5 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone5_u_value",
+              "name": "zone5_u_value",
+              "value_type": "double",
+              "default_value": 0.265,
+              "value": 0.2
+            },
+            {
+              "display_name": "NECB Zone6 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone6_u_value",
+              "name": "zone6_u_value",
+              "value_type": "double",
+              "default_value": 0.24,
+              "value": 0.18
+            },
+            {
+              "display_name": "NECB Zone7A Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7A_u_value",
+              "name": "zone7A_u_value",
+              "value_type": "double",
+              "default_value": 0.215,
+              "value": 0.16
+            },
+            {
+              "display_name": "NECB Zone7B Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7B_u_value",
+              "name": "zone7B_u_value",
+              "value_type": "double",
+              "default_value": 0.19,
+              "value": 0.17
+            },
+            {
+              "display_name": "NECB Zone8 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone8_u_value",
+              "name": "zone8_u_value",
+              "value_type": "double",
+              "default_value": 0.165,
+              "value": 0.14
+            }
+          ],
+          "variables": [],
+          "workflow_index": 2
+        },
+        {
+          "name": "btap_set_envelope_conductance_by_necb_climate_zone_2",
+          "display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone 2",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BtapSetEnvelopeConductanceByNecbClimateZone",
+          "measure_definition_directory": "./measures/btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone 2",
+          "measure_definition_name": "btap_set_envelope_conductance_by_necb_climate_zone_2",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "measure_definition_version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "description": "Modifies walls, roofs, and windows conductance by climate zone.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Template",
+              "display_name_short": "necb_template",
+              "name": "necb_template",
+              "value_type": "string",
+              "default_value": "NECB2015",
+              "value": "NECB2017"
+            },
+            {
+              "display_name": "Surface Type",
+              "display_name_short": "surface_type",
+              "name": "surface_type",
+              "value_type": "string",
+              "default_value": "Glazing",
+              "value": "Roofs"
+            },
+            {
+              "display_name": "NECB Zone4 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone4_u_value",
+              "name": "zone4_u_value",
+              "value_type": "double",
+              "default_value": 0.59,
+              "value": 0.14
+            },
+            {
+              "display_name": "NECB Zone5 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone5_u_value",
+              "name": "zone5_u_value",
+              "value_type": "double",
+              "default_value": 0.265,
+              "value": 0.136
+            },
+            {
+              "display_name": "NECB Zone6 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone6_u_value",
+              "name": "zone6_u_value",
+              "value_type": "double",
+              "default_value": 0.24,
+              "value": 0.112
+            },
+            {
+              "display_name": "NECB Zone7A Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7A_u_value",
+              "name": "zone7A_u_value",
+              "value_type": "double",
+              "default_value": 0.215,
+              "value": 0.11
+            },
+            {
+              "display_name": "NECB Zone7B Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7B_u_value",
+              "name": "zone7B_u_value",
+              "value_type": "double",
+              "default_value": 0.19,
+              "value": 0.11
+            },
+            {
+              "display_name": "NECB Zone8 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone8_u_value",
+              "name": "zone8_u_value",
+              "value_type": "double",
+              "default_value": 0.165,
+              "value": 0.09
+            }
+          ],
+          "variables": [],
+          "workflow_index": 3
+        },
+        {
+          "name": "btap_set_envelope_conductance_by_necb_climate_zone_2_2",
+          "display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone 2 2",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BtapSetEnvelopeConductanceByNecbClimateZone",
+          "measure_definition_directory": "./measures/btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_set_envelope_conductance_by_necb_climate_zone",
+          "measure_definition_display_name": "BTAPSetEnvelopeConductanceByNecbClimateZone 2 2",
+          "measure_definition_name": "btap_set_envelope_conductance_by_necb_climate_zone_2_2",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "measure_definition_version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "uuid": "36fd01e8-5fcf-4fec-9117-90bf8d4071fc",
+          "version_uuid": "640ec217-f62b-42fb-ab95-8ed4a5972bba",
+          "description": "Modifies walls, roofs, and windows conductance by climate zone.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Template",
+              "display_name_short": "necb_template",
+              "name": "necb_template",
+              "value_type": "string",
+              "default_value": "NECB2015",
+              "value": "NECB2017"
+            },
+            {
+              "display_name": "Surface Type",
+              "display_name_short": "surface_type",
+              "name": "surface_type",
+              "value_type": "string",
+              "default_value": "Glazing",
+              "value": "Glazing"
+            },
+            {
+              "display_name": "NECB Zone4 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone4_u_value",
+              "name": "zone4_u_value",
+              "value_type": "double",
+              "default_value": 0.59,
+              "value": 1.6
+            },
+            {
+              "display_name": "NECB Zone5 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone5_u_value",
+              "name": "zone5_u_value",
+              "value_type": "double",
+              "default_value": 0.265,
+              "value": 1.6
+            },
+            {
+              "display_name": "NECB Zone6 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone6_u_value",
+              "name": "zone6_u_value",
+              "value_type": "double",
+              "default_value": 0.24,
+              "value": 1.5
+            },
+            {
+              "display_name": "NECB Zone7A Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7A_u_value",
+              "name": "zone7A_u_value",
+              "value_type": "double",
+              "default_value": 0.215,
+              "value": 1.4
+            },
+            {
+              "display_name": "NECB Zone7B Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone7B_u_value",
+              "name": "zone7B_u_value",
+              "value_type": "double",
+              "default_value": 0.19,
+              "value": 1.3
+            },
+            {
+              "display_name": "NECB Zone8 Insulation U-value (W/m^2 K).",
+              "display_name_short": "zone8_u_value",
+              "name": "zone8_u_value",
+              "value_type": "double",
+              "default_value": 0.165,
+              "value": 1.1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 4
+        },
+        {
+          "name": "reduce_electric_equipment_loads_by_percentage",
+          "display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_directory": "./measures/Reduce_load_by_percentage",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\Reduce_load_by_percentage",
+          "measure_definition_display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_definition_name": "reduce_electric_equipment_loads_by_percentage",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "0902e302-70db-4339-99b0-17f08bc93629",
+          "measure_definition_version_uuid": "250dee10-48ca-4552-9916-0a15d9c2075b",
+          "uuid": "0902e302-70db-4339-99b0-17f08bc93629",
+          "version_uuid": "250dee10-48ca-4552-9916-0a15d9c2075b",
+          "description": "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
+          "taxonomy": "Equipment.Electric Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Electric Equipment Power Reduction (%).",
+              "display_name_short": "elecequip_power_reduction_percent",
+              "name": "elecequip_power_reduction_percent",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 35
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Electric Equipment per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 5
+        },
+        {
+          "name": "add_overhangs_by_projection_factor",
+          "display_name": "Add Overhangs by Projection Factor",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AddOverhangsByProjectionFactor",
+          "measure_definition_directory": "./measures/Add Overhangs by Projection Factor",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\Add Overhangs by Projection Factor",
+          "measure_definition_display_name": "Add Overhangs by Projection Factor",
+          "measure_definition_name": "add_overhangs_by_projection_factor",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "1e29e117-3916-4368-b24d-75da54045956",
+          "measure_definition_version_uuid": "069f7fee-7ddf-43c3-b8e8-9cf4709b1344",
+          "uuid": "1e29e117-3916-4368-b24d-75da54045956",
+          "version_uuid": "069f7fee-7ddf-43c3-b8e8-9cf4709b1344",
+          "description": "Add overhangs by projection factor to specified windows. The projection factor is the overhang depth divided by the window height. This can be applied to windows by the closest cardinal direction. If baseline model contains overhangs made by this measure, they will be replaced. Optionally the measure can delete any pre-existing space shading surfaces.",
+          "taxonomy": "Envelope.Fenestration",
+          "arguments": [
+            {
+              "display_name": "Projection Factor",
+              "display_name_short": "projection_factor",
+              "name": "projection_factor",
+              "value_type": "double",
+              "default_value": 0.5,
+              "value": 0.35
+            },
+            {
+              "display_name": "Cardinal Direction",
+              "display_name_short": "facade",
+              "name": "facade",
+              "value_type": "string",
+              "default_value": "South",
+              "value": "South"
+            },
+            {
+              "display_name": "Remove Existing Space Shading Surfaces From the Model",
+              "display_name_short": "remove_ext_space_shading",
+              "name": "remove_ext_space_shading",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Remove Existing Space Shading Surfaces From the Model",
+              "display_name_short": "construction",
+              "name": "construction",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            }
+          ],
+          "variables": [],
+          "workflow_index": 6
+        },
+        {
+          "name": "btap_setboiler",
+          "display_name": "BTAPSetboiler",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPSetboiler",
+          "measure_definition_directory": "./measures/BTAP set boiler",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\BTAP set boiler",
+          "measure_definition_display_name": "BTAPSetboiler",
+          "measure_definition_name": "btap_setboiler",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "2f81b690-4343-49fe-9c2a-803e531ac6c8",
+          "measure_definition_version_uuid": "d8f058dc-fe0b-41b0-a527-96e1353fd1c6",
+          "uuid": "2f81b690-4343-49fe-9c2a-803e531ac6c8",
+          "version_uuid": "d8f058dc-fe0b-41b0-a527-96e1353fd1c6",
+          "description": "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\n\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\n\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\n  ",
+          "taxonomy": "Envelope.Infiltration",
+          "arguments": [
+            {
+              "display_name": "Space Infiltration Flow per Exterior Envelope Surface Area (cfm/ft^2).",
+              "display_name_short": "infiltration_ip",
+              "name": "infiltration_ip",
+              "value_type": "double",
+              "default_value": 0.05,
+              "value": 0.95
+            },
+            {
+              "display_name": "Increase in Material and Installation Costs for Building per Exterior Envelope Area ($/ft^2).",
+              "display_name_short": "material_cost_ip",
+              "name": "material_cost_ip",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Costs for Construction per Area Used ($/ft^2).",
+              "display_name_short": "om_cost_ip",
+              "name": "om_cost_ip",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 7
+        },
+        {
+          "name": "btap_new_spacetype_lpd_list",
+          "display_name": "BTAPNewSpacetypeLPDList",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPNewSpacetypeLPDList",
+          "measure_definition_directory": "./measures/BTAPNewSpacetypeLPDList",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\BTAPNewSpacetypeLPDList",
+          "measure_definition_display_name": "BTAPNewSpacetypeLPDList",
+          "measure_definition_name": "btap_new_spacetype_lpd_list",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "fe83dee3-2233-4744-abb1-3cbb1777fbae",
+          "measure_definition_version_uuid": "8e3e449c-f6e1-45ab-8f27-623e0ff11091",
+          "uuid": "fe83dee3-2233-4744-abb1-3cbb1777fbae",
+          "version_uuid": "8e3e449c-f6e1-45ab-8f27-623e0ff11091",
+          "description": "This  measure changes space type LPD based on associated json file in the resource folder.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Spacetypes to skip",
+              "display_name_short": "skipspacetype",
+              "name": "skipspacetype",
+              "value_type": "string",
+              "default_value": "None",
+              "value": "None"
+            },
+            {
+              "display_name": "Fractional change",
+              "display_name_short": "fracchange",
+              "name": "fracchange",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 8
+        },
+        {
+          "name": "resize_existing_windows_to_match_a_given_wwr",
+          "display_name": "Resize existing windows to match a given WWR",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ResizeExistingWindowsToMatchAGivenWWR",
+          "measure_definition_directory": "./measures/resize_existing_windows_to_match_a_given_wwr",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\resize_existing_windows_to_match_a_given_wwr",
+          "measure_definition_display_name": "Resize existing windows to match a given WWR",
+          "measure_definition_name": "resize_existing_windows_to_match_a_given_wwr",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "b1c8aae7-db36-4461-88f8-d6ac57ec11d5",
+          "measure_definition_version_uuid": "b7ae033b-97ff-4d23-914e-cd7351649c64",
+          "uuid": "b1c8aae7-db36-4461-88f8-d6ac57ec11d5",
+          "version_uuid": "b7ae033b-97ff-4d23-914e-cd7351649c64",
+          "description": "This measure aims to resize all of the existing windows in order to produce a specified, user-input, window to wall ratio.\nThe windows will be resized around their centroid.\nIt should be noted that this measure should work in all cases when DOWNSIZING the windows (which is often the need given the 40% WWR imposed as baseline by ASHRAE Appendix G).\nIf you aim to increase the area, please note that this could result in subsurfaces being larger than their parent surface",
+          "taxonomy": "Envelope.Fenestration",
+          "arguments": [
+            {
+              "display_name": "Remove skylights?",
+              "display_name_short": "remove_skylight",
+              "name": "remove_skylight",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": true
+            },
+            {
+              "display_name": "Climate zone 4 FDWR",
+              "display_name_short": "cz_4_fdwr",
+              "name": "cz_4_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.25
+            },
+            {
+              "display_name": "Climate zone 5 FDWR",
+              "display_name_short": "cz_5_fdwr",
+              "name": "cz_5_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.25
+            },
+            {
+              "display_name": "Climate zone 6 FDWR",
+              "display_name_short": "cz_6_fdwr",
+              "name": "cz_6_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.22
+            },
+            {
+              "display_name": "Climate zone 7A FDWR",
+              "display_name_short": "cz_7A_fdwr",
+              "name": "cz_7A_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.2
+            },
+            {
+              "display_name": "Climate zone 7B FDWR",
+              "display_name_short": "cz_7B_fdwr",
+              "name": "cz_7B_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.12
+            },
+            {
+              "display_name": "Climate zone 8 FDWR",
+              "display_name_short": "cz_8_fdwr",
+              "name": "cz_8_fdwr",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0.08
+            },
+            {
+              "display_name": "Only affect surfaces that are \"walls\"?",
+              "display_name_short": "check_wall",
+              "name": "check_wall",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Only affect surfaces that have boundary condition = \"Outdoor\"?",
+              "display_name_short": "check_outdoors",
+              "name": "check_outdoors",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Only affect surfaces that are \"SunExposed\"?",
+              "display_name_short": "check_sunexposed",
+              "name": "check_sunexposed",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 9
+        },
+        {
+          "name": "btap_change_cav_to_vav",
+          "display_name": "BTAPChangeCAVToVAV",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPChangeCAVToVAV",
+          "measure_definition_directory": "./measures/btap_change_cav_to_vav",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_change_cav_to_vav",
+          "measure_definition_display_name": "BTAPChangeCAVToVAV",
+          "measure_definition_name": "btap_change_cav_to_vav",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "f544d84f-d7c6-426b-b3a4-aecfc6d2523b",
+          "measure_definition_version_uuid": "185e5109-8efd-4e6a-924d-d07affef9961",
+          "uuid": "f544d84f-d7c6-426b-b3a4-aecfc6d2523b",
+          "version_uuid": "185e5109-8efd-4e6a-924d-d07affef9961",
+          "description": "This measure examines all air loops and swaps CAV with VAV systems",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "Which air loops?",
+              "display_name_short": "AirLoopSelected",
+              "name": "AirLoopSelected",
+              "value_type": "string",
+              "default_value": "All Air Loops",
+              "value": "All Air Loops"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 10
+        },
+        {
+          "name": "btapadddoassys",
+          "display_name": "Btapadddoassys",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "Btapadddoassys",
+          "measure_definition_directory": "./measures/btap_add_doas_sys",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_add_doas_sys",
+          "measure_definition_display_name": "Btapadddoassys",
+          "measure_definition_name": "btapadddoassys",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "14f47c70-84f9-4435-9155-5bd3f2d87c4c",
+          "measure_definition_version_uuid": "e3e471a9-f23f-49e7-b1dd-3f229576309c",
+          "uuid": "14f47c70-84f9-4435-9155-5bd3f2d87c4c",
+          "version_uuid": "e3e471a9-f23f-49e7-b1dd-3f229576309c",
+          "description": "Measure replaces existing HVAC system (if any) with an Air Source Heat Pump (ASHP) with DOAS HVAC system (one DOAS per floor).  The ASHP with DOAS system (centralized DOAS, with zone level conditioning) is applied to all space types.  In select cases, the user is given the option to preserve existing HVAC schedules.  In other cases, new schedules are generated that align with AEDG recommendations.  The resulting HVAC system reflects the HVAC recommendations of the 50% Small and Medium Office AEDG.",
+          "taxonomy": "HVAC.Whole System",
+          "arguments": [
+            {
+              "display_name": "Choose which zones to add DOAS to",
+              "display_name_short": "zonesselected",
+              "name": "zonesselected",
+              "value_type": "string",
+              "default_value": "All Zones",
+              "value": "All Zones"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 11
+        },
+        {
+          "name": "btap_add_ashpwh",
+          "display_name": "BTAPAddASHPWH",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPAddASHPWH",
+          "measure_definition_directory": "./measures/btap_add_ashpwh",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_add_ashpwh",
+          "measure_definition_display_name": "BTAPAddASHPWH",
+          "measure_definition_name": "btap_add_ashpwh",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "87631e5c-6a3f-4f4b-88af-c8b6fe497809",
+          "measure_definition_version_uuid": "e4ac51ed-20be-4f81-a252-359673c9bbfb",
+          "uuid": "87631e5c-6a3f-4f4b-88af-c8b6fe497809",
+          "version_uuid": "e4ac51ed-20be-4f81-a252-359673c9bbfb",
+          "description": "Replaces existing water heater with a ASHPWH ",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "frac_oa",
+              "display_name_short": "frac_oa",
+              "name": "frac_oa",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 12
+        },
+        {
+          "name": "btapdoasvrf",
+          "display_name": "BTAPDOASVRF",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPDOASVRF",
+          "measure_definition_directory": "./measures/btap_doas_vrf",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_doas_vrf",
+          "measure_definition_display_name": "BTAPDOASVRF",
+          "measure_definition_name": "btapdoasvrf",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "b48dc234-3f04-4153-b380-28de7b0c7a8f",
+          "measure_definition_version_uuid": "a82ee30e-462b-4800-befe-df6816051c3e",
+          "uuid": "b48dc234-3f04-4153-b380-28de7b0c7a8f",
+          "version_uuid": "a82ee30e-462b-4800-befe-df6816051c3e",
+          "description": "Changes air loop to doas, adds vrf for those zones",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "loops_to_change",
+              "display_name_short": "loops_to_change",
+              "name": "loops_to_change",
+              "value_type": "string",
+              "default_value": "All",
+              "value": "All"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 13
+        },
+        {
+          "name": "btap_set_fan_eff",
+          "display_name": "BTAPSetFanEff",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPSetFanEff",
+          "measure_definition_directory": "./measures/btap_set_fan_eff",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_set_fan_eff",
+          "measure_definition_display_name": "BTAPSetFanEff",
+          "measure_definition_name": "btap_set_fan_eff",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978",
+          "measure_definition_version_uuid": "87519979-9d5c-4414-b064-bf4c95211646",
+          "uuid": "13bc05eb-5e4f-4dca-b9d0-b5a2d00bf978",
+          "version_uuid": "87519979-9d5c-4414-b064-bf4c95211646",
+          "description": "Sets all fan efficiency to specified value",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "eff_for_this_cz",
+              "display_name_short": "eff_for_this_cz",
+              "name": "eff_for_this_cz",
+              "value_type": "double",
+              "default_value": 0.72,
+              "value": 0.72
+            }
+          ],
+          "variables": [],
+          "workflow_index": 14
+        },
+        {
+          "name": "btap_setpump_eff",
+          "display_name": "BTAPSetpumpEff",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPSetpumpEff",
+          "measure_definition_directory": "./measures/btap_set_pump_eff",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_set_pump_eff",
+          "measure_definition_display_name": "BTAPSetpumpEff",
+          "measure_definition_name": "btap_setpump_eff",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "def3fff0-b8f5-48e7-af8d-df4eeb18b0e3",
+          "measure_definition_version_uuid": "5abbbdf8-b4fa-4fa5-8498-2eaabd3a1109",
+          "uuid": "def3fff0-b8f5-48e7-af8d-df4eeb18b0e3",
+          "version_uuid": "5abbbdf8-b4fa-4fa5-8498-2eaabd3a1109",
+          "description": "Sets all pump efficiency to specified value ",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [
+            {
+              "display_name": "eff_for_this_cz",
+              "display_name_short": "eff_for_this_cz",
+              "name": "eff_for_this_cz",
+              "value_type": "double",
+              "default_value": 0.82,
+              "value": 0.82
+            }
+          ],
+          "variables": [],
+          "workflow_index": 15
+        },
+        {
+          "name": "btap_change_energy_recovery_efficiency",
+          "display_name": "BTAPChangeEnergyRecoveryEfficiency",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "BTAPChangeEnergyRecoveryEfficiency",
+          "measure_definition_directory": "./measures/btap_change_heat_recovery_efficiency",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_change_heat_recovery_efficiency",
+          "measure_definition_display_name": "BTAPChangeEnergyRecoveryEfficiency",
+          "measure_definition_name": "btap_change_energy_recovery_efficiency",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+          "measure_definition_version_uuid": "8ae24220-0ada-4390-851e-bc1a3373a38e",
+          "uuid": "9b530f72-e5ab-467b-acd6-b5c3458d7b55",
+          "version_uuid": "8ae24220-0ada-4390-851e-bc1a3373a38e",
+          "description": "Energy recovery ventilator transfers energy between the exhaust/relief and outdoor air streams and helps reduce building energy use. The measure adds an air-to-air heat exchanger to the air handler unit. Users can define the latent and sensible heat transfer effectiveness. ",
+          "taxonomy": "HVAC.Energy Recovery",
+          "arguments": [
+            {
+              "display_name": "Apply the measure to ",
+              "display_name_short": "air_loop_widget",
+              "name": "air_loop_widget",
+              "value_type": "string",
+              "default_value": "*All air loops*",
+              "value": "*All air loops*"
+            },
+            {
+              "display_name": "Sensible Effectiveness at 100% Heating Air Flow",
+              "display_name_short": "sensible_eff_at_100_heating",
+              "name": "sensible_eff_at_100_heating",
+              "value_type": "double",
+              "default_value": 0.76,
+              "value": 0.76
+            },
+            {
+              "display_name": "Latent Effectiveness at 100% Heating Air Flow",
+              "display_name_short": "latent_eff_at_100_heating",
+              "name": "latent_eff_at_100_heating",
+              "value_type": "double",
+              "default_value": 0.68,
+              "value": 0.75
+            },
+            {
+              "display_name": "Sensible Effectiveness at 75% Heating Air Flow",
+              "display_name_short": "sensible_eff_at_75_heating",
+              "name": "sensible_eff_at_75_heating",
+              "value_type": "double",
+              "default_value": 0.81,
+              "value": 0.81
+            },
+            {
+              "display_name": "Latent Effectiveness at 75% Heating Air Flow",
+              "display_name_short": "latent_eff_at_75_heating",
+              "name": "latent_eff_at_75_heating",
+              "value_type": "double",
+              "default_value": 0.73,
+              "value": 0.73
+            },
+            {
+              "display_name": "Sensible Effectiveness at 100% Cooling Air Flow",
+              "display_name_short": "sensible_eff_at_100_cooling",
+              "name": "sensible_eff_at_100_cooling",
+              "value_type": "double",
+              "default_value": 0.76,
+              "value": 0.76
+            },
+            {
+              "display_name": "Latent Effectiveness at 100% Cooling Air Flow",
+              "display_name_short": "latent_eff_at_100_cooling",
+              "name": "latent_eff_at_100_cooling",
+              "value_type": "double",
+              "default_value": 0.68,
+              "value": 0.75
+            },
+            {
+              "display_name": "Sensible Effectiveness at 75% Cooling Air Flow",
+              "display_name_short": "sensible_eff_at_75_cooling",
+              "name": "sensible_eff_at_75_cooling",
+              "value_type": "double",
+              "default_value": 0.81,
+              "value": 0.81
+            },
+            {
+              "display_name": "Latent Effectiveness at 75% Cooling Air Flow",
+              "display_name_short": "latent_eff_at_75_cooling",
+              "name": "latent_eff_at_75_cooling",
+              "value_type": "double",
+              "default_value": 0.73,
+              "value": 0.73
+            },
+            {
+              "display_name": "Heat Exchanger Type.",
+              "display_name_short": "heat_exchanger_type_widget",
+              "name": "heat_exchanger_type_widget",
+              "value_type": "string",
+              "default_value": "Rotary",
+              "value": "Rotary"
+            },
+            {
+              "display_name": "Nominal electric power [W]",
+              "display_name_short": "nominal_electric_power",
+              "name": "nominal_electric_power",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            }
+          ],
+          "variables": [],
+          "workflow_index": 16
+        },
+        {
+          "name": "reduce_lighting_loads_by_percentage",
+          "display_name": "Reduce Lighting Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
+          "measure_definition_directory": "./measures/reduce_lighting_by_percentage",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\reduce_lighting_by_percentage",
+          "measure_definition_display_name": "Reduce Lighting Loads by Percentage",
+          "measure_definition_name": "reduce_lighting_loads_by_percentage",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "791f3404-a28b-4a80-ba3f-e15b339e39ea",
+          "measure_definition_version_uuid": "cb04096c-31d0-457e-ad9b-f82af8144533",
+          "uuid": "791f3404-a28b-4a80-ba3f-e15b339e39ea",
+          "version_uuid": "cb04096c-31d0-457e-ad9b-f82af8144533",
+          "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
+          "taxonomy": "Electric Lighting.Lighting Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Lighting Power Reduction (%).",
+              "display_name_short": "lighting_power_reduction_percent",
+              "name": "lighting_power_reduction_percent",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 35
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [],
+          "workflow_index": 17
+        },
+        {
+          "name": "btap_results",
+          "display_name": "BTAP Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "BTAPResults",
+          "measure_definition_directory": "./measures/btap_results",
+          "measure_definition_directory_local": "C:\\Users\\vuonge\\Documents\\Code Document\\SC-EE\\PAT\\PCF1527Aug52019-2\\measures\\btap_results",
+          "measure_definition_display_name": "BTAP Results",
+          "measure_definition_name": "btap_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
+          "measure_definition_version_uuid": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
+          "uuid": "bf37e1c6-de70-457b-a3ac-21aa57b7bc58",
+          "version_uuid": "86fb174b-6040-4a41-8cbe-ab3d1551296a",
+          "description": "This measure creates BTAP result values used for NRCan analyses.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Generate Hourly Report.",
+              "display_name_short": "generate_hourly_report",
+              "name": "generate_hourly_report",
+              "value_type": "string",
+              "default_value": "false",
+              "value": "false"
+            },
+            {
+              "display_name": "Reduce outputs.",
+              "display_name_short": "output_diet",
+              "name": "output_diet",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            }
+          ],
+          "variables": [],
+          "workflow_index": 18
+        }
+      ],
+      "algorithm": {
+        "experiment_type": "full_factorial",
+        "number_of_samples": 2,
+        "seed": null,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 0,
+        "objective_functions": []
+      },
+      "analysis_type": "doe"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/dummy.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/dummy.epw"
+    },
+    "file_format_version": 1,
+    "server_scripts": {}
+  }
+}
