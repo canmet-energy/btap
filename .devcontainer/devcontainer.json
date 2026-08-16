@@ -1,0 +1,35 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+	"name": "NECB Gem Family",
+	// Same image the openstudio-standards fork uses, so the gems develop against
+	// exactly the SDK they target: Ubuntu 24.04, Ruby 3.2.2,
+	// OpenStudio 3.11.0, EnergyPlus 25.2.0.
+	"image": "canmet/os_sdk_container:3.11.0",
+	"containerUser": "vscode",
+	"remoteUser": "vscode",
+	"containerEnv": {
+		"VSCODE": "TRUE"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"castwide.solargraph",
+				"KoichiSasada.vscode-rdbg",
+				"karyfoundation.idf",
+				"janisdd.vscode-edit-csv",
+				"qwtel.sqlite-viewer",
+				"moshfeu.compare-folders",
+				"GitHub.copilot-chat"
+			]
+		}
+	},
+	// LANG is LOAD-BEARING, not cosmetic. Without a UTF-8 locale Ruby's default
+	// external encoding is US-ASCII, and File.read of anything the gems emit
+	// (plan_svg.rb writes em dashes and 'm²'; the decisions doc is full of them)
+	// raises "invalid byte sequence in US-ASCII". This bit CI on its first run.
+	"runArgs": [
+		"--env", "LANG=en_US.UTF-8",
+		"--env", "LC_ALL=en_US.UTF-8"
+	],
+	"postCreateCommand": "bash .devcontainer/setup.sh"
+}

@@ -57,6 +57,19 @@ Every gem in this repository obeys the same rules:
 - OpenStudio SDK 3.11.0 (`require 'openstudio'` must succeed; the SDK is
   deliberately not declared as a gem dependency)
 - The `openstudio` CLI, for the tests that run EnergyPlus
+- **A UTF-8 locale.** Without one, Ruby's default external encoding is US-ASCII
+  and `File.read` of anything the gems emit — `plan_svg.rb` writes em dashes and
+  `m²`, the decisions doc is full of them — raises
+  `invalid byte sequence in US-ASCII`.
+
+### Devcontainer
+
+`.devcontainer/` provides all of the above: Ubuntu 24.04, Ruby 3.2.2,
+OpenStudio 3.11.0, EnergyPlus 25.2.0, and `LANG=en_US.UTF-8`, on the
+`canmet/os_sdk_container:3.11.0` image. Open the repo in VS Code and reopen in
+the container. `postCreate` installs NRCan certificates when it detects that
+network, verifies the toolchain, and prints the commands below. It deliberately
+does **not** clone the legacy oracle — that is gigabytes, so it stays opt-in.
 
 ## Testing
 
