@@ -1,0 +1,51 @@
+# MCP server configuration — holds live API keys. NEVER commit.
+# The two scripts that read it (openstudio-geometry/scripts/building_stock.rb,
+# openstudio-necb/scripts/fetch_necb_8_4_text.rb) fall back to environment
+# variables, so an absent .mcp.json is a supported configuration.
+.mcp.json
+
+# Developer installation
+/.bundle/
+/Gemfile.lock
+/vendor
+/.venv
+
+# Build output
+/pkg/
+*.gem
+
+# IDE files
+/.idea
+/netbeans
+/.vscode
+/.VSCodeCounter
+/.serena
+
+# Rubocop / YARD output
+/.rubocop
+/.rubocop-http*
+/.yardoc
+/doc/
+
+# Test + run output
+output/
+coverage/
+/tmp/
+run/
+*.osw
+*.sql
+*.err
+*.eio
+*.rdd
+*.mdd
+*.audit
+eplusout.*
+eplustbl.*
+
+# Generated reports (regenerate rather than commit)
+compliance_report*.html
+audit.json
+audit.txt
+report.json
+
+*.DS_Store
