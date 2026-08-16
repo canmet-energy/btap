@@ -1,0 +1,121 @@
+name: test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Pure-Ruby checks: no OpenStudio SDK, so they run on a bare runner in seconds
+  # and fail fast before anything pays for the container.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+      - name: Rule-key orphan lint
+        run: ruby openstudio-necb/scripts/necb_orphan_keys.rb
+      - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
+        run: cd openstudio-necb && ruby test/test_decisions_registry.rb
+      - name: AuditLog is SDK-free and fast
+        run: cd openstudio-audit && ruby test/test_audit.rb
+
+  # Everything that needs `require "openstudio"`. The image carries the SDK and
+  # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
+  test:
+    runs-on: ubuntu-latest
+    container: nrel/openstudio:3.11.0
+    strategy:
+      fail-fast: false
+      matrix:
+        gem:
+          - openstudio-envelope
+          - openstudio-geometry
+          - openstudio-hvac
+          - openstudio-lighting
+          - openstudio-loads
+          - openstudio-necb
+          - openstudio-shw
+          - openstudio-simulation
+    steps:
+      - uses: actions/checkout@v4
+      - name: ${{ matrix.gem }} suite
+        working-directory: ${{ matrix.gem }}
+        # test_helper.rb is not a test; the parity suites need the pinned oracle
+        # and are covered by the `parity` job below, where they cannot pass
+        # vacuously.
+        run: |
+          status=0
+          for t in test/test_*.rb; do
+            case "$t" in
+              */test_helper.rb|*_parity.rb) continue ;;
+            esac
+            echo "::group::$t"
+            ruby "$t" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+  # Cross-gem rule verification: the reference transforms must actually
+  # overwrite non-compliant proposed values, and the as-applied part-load curves
+  # must match the code coefficients.
+  verify:
+    runs-on: ubuntu-latest
+    container: nrel/openstudio:3.11.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: rake necb:verify
+
+  # The legacy-parity gates, against the PINNED oracle revision.
+  #
+  # LEGACY_PIN_REQUIRED=1 is not optional here: without it a missing oracle
+  # SKIPS, and a skipped parity gate is green-but-vacuous — it would report
+  # success while comparing against nothing.
+  #
+  # Cloning the fork is the expensive part, so the bundle is cached on
+  # legacy_pin/REF + Gemfile.lock. Not run on every push.
+  parity:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    container: nrel/openstudio:3.11.0
+    env:
+      LEGACY_PIN_REQUIRED: '1'
+      BUNDLE_GEMFILE: ${{ github.workspace }}/legacy_pin/Gemfile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache the pinned oracle
+        uses: actions/cache@v4
+        with:
+          path: vendor/bundle
+          key: legacy-pin-${{ hashFiles('legacy_pin/REF', 'legacy_pin/Gemfile.lock') }}
+      - name: Bundle the oracle
+        run: bundle install
+      # Listed explicitly rather than globbed *_parity.rb: three of the eleven
+      # gates (the two test_data_integrity.rb, and lighting's test_costing.rb)
+      # carry pin-dependent tests under names a glob would miss, and they would
+      # then only ever run in their skipping form.
+      - name: Parity gates
+        run: |
+          status=0
+          for t in \
+            openstudio-envelope/test_lookup_parity.rb \
+            openstudio-envelope/test_prescriptive_parity.rb \
+            openstudio-envelope/test_costing_parity.rb \
+            openstudio-envelope/test_data_integrity.rb \
+            openstudio-loads/test_schedules_parity.rb \
+            openstudio-loads/test_apply_parity.rb \
+            openstudio-loads/test_data_integrity.rb \
+            openstudio-shw/test_shw_parity.rb \
+            openstudio-lighting/test_lights_parity.rb \
+            openstudio-lighting/test_daylighting_parity.rb \
+            openstudio-lighting/test_costing.rb \
+          ; do
+            gem_dir="${t%%/*}"; file="${t##*/}"
+            echo "::group::$t"
+            (cd "$gem_dir" && bundle exec ruby "test/$file") || status=1
+            echo "::endgroup::"
+          done
+          exit $status
