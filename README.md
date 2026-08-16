@@ -80,16 +80,30 @@ implementation in the `NatLabRockies/openstudio-standards` fork. See
 [legacy_pin/README.md](legacy_pin/README.md) for the pinning mechanism and the
 bump workflow.
 
+Install the oracle once (it defaults to cloning the fork from GitHub — a
+multi-gigabyte, one-time cost):
+
 ```bash
+BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install
+```
+
+If you already have the fork checked out locally, point at it instead — bundler
+git-clones from the path, which is far faster and works offline. Use the **same**
+`LEGACY_PIN_REMOTE` for install and for every run: it is part of the resolved
+lockfile, so changing it re-resolves and re-clones.
+
+```bash
+cd openstudio-loads
 LEGACY_PIN_REQUIRED=1 \
-LEGACY_PIN_REMOTE=https://github.com/NatLabRockies/openstudio-standards.git \
-BUNDLE_GEMFILE=$PWD/legacy_pin/Gemfile \
+LEGACY_PIN_REMOTE=/path/to/openstudio-standards \
+BUNDLE_GEMFILE=../legacy_pin/Gemfile \
   bundle exec ruby test/test_apply_parity.rb
 ```
 
 `LEGACY_PIN_REQUIRED=1` turns "oracle not bundled" from a skip into a failure —
 CI and verification runs should always set it, because a skipped parity gate is a
-green-but-vacuous gate.
+green-but-vacuous gate. The eleven gates live in openstudio-envelope (4),
+openstudio-loads (3), openstudio-lighting (3) and openstudio-shw (1).
 
 ## History
 

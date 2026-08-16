@@ -36,17 +36,28 @@ ARTICLES = [
   *(1..9).map { |i| "8.4.6.#{i}" }
 ].freeze
 
+# .mcp.json is gitignored (it carries live keys) and is simply absent in a fresh
+# clone or on CI. Read it defensively: an unguarded File.read raised
+# Errno::ENOENT instead of the intended abort message, which read as a crash
+# rather than "you have not configured this yet".
+def mcp_config
+  return @mcp_config if defined?(@mcp_config)
+
+  path = File.join(ROOT, '.mcp.json')
+  @mcp_config = File.exist?(path) ? (JSON.parse(File.read(path)).dig('mcpServers', 'codes') || {}) : {}
+rescue JSON::ParserError => e
+  abort("#{path} is not valid JSON: #{e.message}")
+end
+
 def api_key
   @api_key ||= ENV['CODES_API_KEY'] ||
-               JSON.parse(File.read(File.join(ROOT, '.mcp.json')))
-                   .dig('mcpServers', 'codes', 'headers', 'X-API-Key') ||
+               mcp_config.dig('headers', 'X-API-Key') ||
                abort('no codes API key: set CODES_API_KEY or configure .mcp.json')
 end
 
 def endpoint
-  @endpoint ||= URI(JSON.parse(File.read(File.join(ROOT, '.mcp.json')))
-                        .dig('mcpServers', 'codes', 'url') ||
-                    abort('no codes MCP url in .mcp.json'))
+  @endpoint ||= URI(ENV['CODES_MCP_URL'] || mcp_config['url'] ||
+                    abort('no codes MCP url: set CODES_MCP_URL or configure .mcp.json'))
 end
 
 # One stateless JSON-RPC tools/call. The server replies as a single SSE
