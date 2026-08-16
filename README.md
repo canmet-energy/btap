@@ -80,6 +80,23 @@ implementation in the `NatLabRockies/openstudio-standards` fork. See
 [legacy_pin/README.md](legacy_pin/README.md) for the pinning mechanism and the
 bump workflow.
 
+The tie to that fork is `legacy_pin/REF` — **one commit SHA, not a branch and
+not a git remote**. Nothing in this repository points at the fork's history, so
+"has upstream moved?" cannot be answered by `git log` here. Ask instead:
+
+```bash
+rake legacy:pin                                        # what we are pinned to
+rake legacy:whatsnew                                   # what has landed since, on nrcan
+LEGACY_FORK=/path/to/openstudio-standards rake legacy:whatsnew   # instant, offline
+BRANCH=develop rake legacy:whatsnew                    # a different fork branch
+```
+
+`legacy:whatsnew` lists the commits between the pin and the fork branch and
+groups every changed path by the gem that should care, so you can judge what is
+worth absorbing. Absorbing means **bumping the pin and re-running the gates** —
+never copying code across. With no local checkout it fetches a blobless mirror
+under `tmp/` (first run only).
+
 Install the oracle once (it defaults to cloning the fork from GitHub — a
 multi-gigabyte, one-time cost):
 

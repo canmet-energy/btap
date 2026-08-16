@@ -22,6 +22,25 @@ task :gems do
   end
 end
 
+# --- The legacy oracle ------------------------------------------------------
+# This repository's ONLY tie to openstudio-standards is legacy_pin/REF, one
+# commit SHA — not a branch, and not a git remote. So "has the fork moved?" is
+# not a question git can answer from in here.
+namespace :legacy do
+  desc 'What has changed in the legacy fork since our pinned oracle (BRANCH=nrcan, LEGACY_FORK=/path for speed)'
+  task :whatsnew do
+    abort('legacy:whatsnew failed') unless system(RbConfig.ruby, 'openstudio-necb/scripts/legacy_whatsnew.rb')
+  end
+
+  desc 'Show the pinned oracle revision'
+  task :pin do
+    ref = File.read('legacy_pin/REF').strip
+    puts "legacy_pin/REF = #{ref}"
+    puts 'fork           = https://github.com/NatLabRockies/openstudio-standards'
+    puts 'bump workflow  = legacy_pin/README.md'
+  end
+end
+
 # --- NECB gem-family rule verification -------------------------------------
 # Checks that declared NECB rules actually DO something, rather than trusting
 # the `article_coverage` manifests' prose. See
