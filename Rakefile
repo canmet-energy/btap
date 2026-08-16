@@ -14,7 +14,10 @@ GEM_DIRS = Dir.glob('openstudio-*').select { |d| File.directory?(d) }.sort.freez
 desc 'List the gems in this repository'
 task :gems do
   GEM_DIRS.each do |dir|
-    version = File.read(Dir.glob("#{dir}/lib/*/version.rb").first)[/VERSION\s*=\s*'([^']+)'/, 1]
+    # Most gems keep VERSION in lib/<name>/version.rb; openstudio-audit declares
+    # it inline in its entry file. Search both rather than assuming.
+    source = Dir.glob("#{dir}/lib/**/version.rb").first || Dir.glob("#{dir}/lib/*.rb").first
+    version = source && File.read(source)[/VERSION\s*=\s*'([^']+)'/, 1]
     puts format('  %-24s %s', dir, version || '?')
   end
 end
