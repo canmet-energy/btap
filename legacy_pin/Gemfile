@@ -7,11 +7,20 @@ source 'https://rubygems.org'
 
 ref = File.read(File.expand_path('REF', __dir__)).strip
 
-# Default remote is THIS repository (bundler git-clones from the local path
-# — hardlinked on the same filesystem, fast, offline). Off-monorepo / CI:
-#   LEGACY_PIN_REMOTE=https://github.com/NatLabRockies/openstudio-standards.git
-# (the first install then clones the full history — a one-time cost).
-remote = ENV.fetch('LEGACY_PIN_REMOTE', File.expand_path('..', __dir__))
+# The oracle lives in the openstudio-standards FORK, which is no longer this
+# repository — the gems were extracted out of it. The default is therefore the
+# fork's remote URL; the first install clones its full history, a one-time cost
+# measured in gigabytes.
+#
+# If you have the fork checked out locally, point at it instead — bundler
+# git-clones from the local path, which is far faster and works offline:
+#   LEGACY_PIN_REMOTE=/path/to/openstudio-standards
+#
+# (Before extraction this defaulted to File.expand_path('..', __dir__), i.e.
+# the enclosing openstudio-standards checkout. That default is now always
+# wrong: the parent directory is this gem repo, which is not the oracle.)
+DEFAULT_REMOTE = 'https://github.com/NatLabRockies/openstudio-standards.git'.freeze
+remote = ENV.fetch('LEGACY_PIN_REMOTE', DEFAULT_REMOTE)
 
 gem 'openstudio-standards', git: remote, ref: ref
 

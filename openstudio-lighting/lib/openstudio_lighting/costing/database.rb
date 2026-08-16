@@ -10,8 +10,25 @@ module OpenStudioLighting
     # runtime-injected only and never committed.
     class Database
       DATA_DIR = File.expand_path('../data/costing', __dir__)
+
+      # The priced tables live in openstudio-hvac, the family's single public
+      # vendored copy. Resolve the INSTALLED gem first so this works when the
+      # gems are installed separately (the relative path below only resolves
+      # when they sit side by side in one checkout), and keep the relative path
+      # as the fallback for exactly that side-by-side layout.
+      def self.hvac_costing_dir
+        dir = File.join(Gem::Specification.find_by_name('openstudio-hvac').gem_dir,
+                        'lib', 'openstudio_hvac', 'data', 'costing')
+        Dir.exist?(dir) ? dir : nil
+      rescue Gem::LoadError, StandardError
+        # Gem::MissingSpecError descends from LoadError, NOT StandardError, so a
+        # bare `rescue StandardError` does not catch it — it must be named.
+        nil # gem not installed (side-by-side checkout) — the relative path covers it
+      end
+
       PRICED_FALLBACK_DIRS = [
         ENV['OPENSTUDIO_COSTING_DIR'],
+        hvac_costing_dir,
         File.expand_path('../../../../openstudio-hvac/lib/openstudio_hvac/data/costing', __dir__)
       ].compact.freeze
 
@@ -25,7 +42,20 @@ module OpenStudioLighting
         @costs = index_by_id(load_csv(resolve_priced('costs.csv', costs_csv)))
         index_by_id(load_csv(costs_csv)).each { |id, row| @costs[id] = row } if costs_csv && File.exist?(costs_csv)
         @local_factors = load_csv(resolve_priced('costs_local_factors.csv', local_factors_csv))
-        @locations = load_csv(File.join(PRICED_FALLBACK_DIRS.last, 'locations.csv')) rescue []
+        @locations = locations_table
+      end
+
+      # locations.csv ships alongside the priced tables in openstudio-hvac.
+      # Scan every candidate directory rather than assuming the last one, and
+      # WARN when it cannot be found: the previous `rescue []` silently
+      # disabled regional cost factors, and in this family warnings are never
+      # silent.
+      def locations_table
+        path = PRICED_FALLBACK_DIRS.map { |d| File.join(d, 'locations.csv') }.find { |p| File.exist?(p) }
+        return load_csv(path) if path
+
+        @warnings << 'locations.csv not found in any costing directory — regional cost factors unavailable'
+        []
       end
 
       def cost_record(id)

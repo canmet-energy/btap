@@ -216,7 +216,7 @@ apply_efficiencies / check_part5 / rules`.
 (5ZoneNoHVAC.osm + Toronto CWEC2020 epw/ddy/stat) are shared by the whole
 family — do not duplicate them. E+-dependent tests skip without the
 `openstudio` CLI. Parity tests against legacy openstudio-standards need
-`BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby ...`,
+`BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle exec ruby ...`,
 the PINNED legacy oracle (see legacy_pin/README.md); `LEGACY_PIN_REQUIRED=1`
 turns a missing oracle into a failure.
 

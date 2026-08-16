@@ -15,7 +15,7 @@ explicit and reproducible instead of "whatever the working tree holds".
 ## Running a parity suite against the pin
 
 ```bash
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile \
+BUNDLE_GEMFILE=../legacy_pin/Gemfile \
   bundle exec ruby test/test_shw_parity.rb
 ```
 
@@ -37,9 +37,18 @@ gate is a green-but-vacuous gate).
 
 ## Remotes
 
-Default remote is the local repository (fast, offline). Outside the
-monorepo — e.g. after the gems move to their own repo — set
-`LEGACY_PIN_REMOTE=https://github.com/NatLabRockies/openstudio-standards.git`.
+The gems have now moved to their own repository, so the oracle is no longer a
+parent directory. The default remote is therefore the fork's URL,
+`https://github.com/NatLabRockies/openstudio-standards.git` — the first install
+clones its full history, a one-time cost measured in gigabytes.
+
+If you have the fork checked out locally, point at it instead. Bundler
+git-clones from the local path, which is far faster and works offline:
+
+```bash
+LEGACY_PIN_REMOTE=/path/to/openstudio-standards \
+BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle install
+```
 
 **Never** point the pin at the published `openstudio-standards` RubyGems
 release: that is NREL's release line and does not carry this fork's

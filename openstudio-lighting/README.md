@@ -70,7 +70,7 @@ ruby test/test_apply_lights.rb          # LPD, synthesis hour-math, LED+atrium f
 ruby test/test_exterior_and_reference.rb
 ruby test/test_costing.rb               # incl. legacy $ parity under the PINNED legacy oracle (legacy_pin/Gemfile)
 ruby test/test_e2e_run.rb               # E+ lighting-energy gate + 4-gem composition
-BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby test/test_lights_parity.rb
+BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle exec ruby test/test_lights_parity.rb
 ```
 
 Parity: 5 space types × {NECB_Default, LED} match legacy `set_lights: true`

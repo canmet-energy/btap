@@ -13,9 +13,25 @@ module OpenStudioEnvelope
     class Database
       DATA_DIR = File.expand_path('../data/costing', __dir__)
 
+      # The priced tables live in openstudio-hvac, the family's single public
+      # vendored copy. Resolve the INSTALLED gem first so this works when the
+      # gems are installed separately (the relative path below only resolves
+      # when they sit side by side in one checkout), and keep the relative path
+      # as the fallback for exactly that side-by-side layout.
+      def self.hvac_costing_dir
+        dir = File.join(Gem::Specification.find_by_name('openstudio-hvac').gem_dir,
+                        'lib', 'openstudio_hvac', 'data', 'costing')
+        Dir.exist?(dir) ? dir : nil
+      rescue Gem::LoadError, StandardError
+        # Gem::MissingSpecError descends from LoadError, NOT StandardError, so a
+        # bare `rescue StandardError` does not catch it — it must be named.
+        nil # gem not installed (side-by-side checkout) — the relative path covers it
+      end
+
       # Candidate directories for the priced tables, in order.
       PRICED_FALLBACK_DIRS = [
         ENV['OPENSTUDIO_COSTING_DIR'],
+        hvac_costing_dir,
         File.expand_path('../../../../openstudio-hvac/lib/openstudio_hvac/data/costing', __dir__)
       ].compact.freeze
 

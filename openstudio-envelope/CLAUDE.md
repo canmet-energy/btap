@@ -92,6 +92,6 @@ apply_prescriptive / reference_envelope`;
 `cd openstudio-envelope && ruby test/test_XX.rb`. Fixtures shared from
 `../openstudio-hvac/test/fixtures`. `*_parity.rb` suites compare against
 legacy openstudio-standards and need
-`BUNDLE_GEMFILE=/workspaces/openstudio-standards/legacy_pin/Gemfile bundle exec ruby ...`,
+`BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle exec ruby ...`,
 the PINNED legacy oracle (see legacy_pin/README.md); `LEGACY_PIN_REQUIRED=1`
 turns a missing oracle into a failure.
