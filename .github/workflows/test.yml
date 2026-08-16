@@ -18,8 +18,10 @@ jobs:
           ruby-version: '3.2.2'
       - name: Rule-key orphan lint
         run: ruby openstudio-necb/scripts/necb_orphan_keys.rb
-      - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
-        run: cd openstudio-necb && ruby test/test_decisions_registry.rb
+      # openstudio-audit is the one gem with no SDK dependency at all (json +
+      # minitest). The decisions-registry drift test looks SDK-free but is not:
+      # it `require`s every gem's facade to prove their AuditLog resolves to the
+      # shared class, so it lives in the `verify` job's container.
       - name: AuditLog is SDK-free and fast
         run: cd openstudio-audit && ruby test/test_audit.rb
 
@@ -67,7 +69,10 @@ jobs:
     container: nrel/openstudio:3.11.0
     steps:
       - uses: actions/checkout@v4
-      - run: rake necb:verify
+      - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
+        run: cd openstudio-necb && ruby test/test_decisions_registry.rb
+      - name: rake necb:verify
+        run: rake necb:verify
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
