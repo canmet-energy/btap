@@ -12,6 +12,19 @@ explicit and reproducible instead of "whatever the working tree holds".
   (tbd/osut/topolys resolved reproducibly). `.bundle/config` shares the
   repo's `vendor/bundle`.
 
+**The lock records a REMOTE, and bundler compares it to the one the Gemfile
+computes.** The committed value is the canonical fork URL, so a default
+checkout and CI agree and the CI cache is usable. Point `LEGACY_PIN_REMOTE` at
+a local checkout and the two disagree: bundler re-resolves on
+`bundle install` (fine, and it rewrites your local lock — do not commit that),
+but until you do, `bundle check` reports the source "not yet checked out".
+
+That matters for one test: `test_legacy_archetype_e2e.rb` gates on
+`bundle check`, so with a mismatched remote it SKIPS rather than running. It
+skips loudly and never reports a false pass — but if you expected it to run,
+this is why. Run `bundle install` once with your chosen `LEGACY_PIN_REMOTE` and
+keep using that same value.
+
 ## Running a parity suite against the pin
 
 ```bash

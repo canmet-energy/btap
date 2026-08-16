@@ -76,7 +76,10 @@ def local_fork
 end
 
 # Blobless mirror: commits and trees only, so --name-status works without
-# dragging the fork's multi-gigabyte blob history across the wire.
+# dragging the fork's blob history across the wire. GitHub honours the filter;
+# a plain file:// or dumb server does NOT (git prints "filtering not recognized
+# by server, ignoring" and clones everything, ~4.5 GB for this fork). Prefer a
+# local checkout via LEGACY_FORK when you have one — it needs no copy at all.
 def cached_mirror
   remote = ENV['LEGACY_FORK'] || DEFAULT_REMOTE
   unless Dir.exist?(CACHE)

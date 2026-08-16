@@ -95,7 +95,7 @@ BRANCH=develop rake legacy:whatsnew                    # a different fork branch
 groups every changed path by the gem that should care, so you can judge what is
 worth absorbing. Absorbing means **bumping the pin and re-running the gates** —
 never copying code across. With no local checkout it fetches a blobless mirror
-under `tmp/` (first run only).
+under `tmp/` (first run only; GitHub honours the blob filter, a local `file://` path does not — prefer `LEGACY_FORK`).
 
 Install the oracle once (it defaults to cloning the fork from GitHub — a
 multi-gigabyte, one-time cost):
