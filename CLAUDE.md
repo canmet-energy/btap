@@ -1,0 +1,149 @@
+# CLAUDE.md — the NECB gem family (repository root)
+
+Nine standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems implementing the NECB
+2020/2025 Part 8 performance path. See [README.md](README.md) for the family map
+and the API guide index; **eight of the nine gems carry their own `CLAUDE.md`**
+with architecture, facade and traps — read that one before working inside a gem.
+(`openstudio-audit` has none: it is 180 lines, SDK-free, and its README covers
+it.)
+This file covers what is true across the family, plus how this repository came
+to exist.
+
+## Family contract (every gem obeys it)
+
+- **Pure OpenStudio SDK.** No `openstudio-standards`, no measures, no BTAP.
+- **Never simulates.** Only the umbrella (`openstudio-necb`) runs EnergyPlus.
+- **One AuditLog schema** —
+  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
+  levels `:decision | :info | :warning`. **Warnings are never silent.** The class
+  lives in `openstudio-audit`; every other gem's `audit_log.rb` is a three-line
+  alias. Change the schema THERE, never as a local copy.
+- **Two citation axes.** `article:` cites the code that mandates a value;
+  `ruling:` cites the adjudicated decision saying how we read it. `ruling:` is a
+  TOP-LEVEL kwarg, single-quoted, on ONE line, never nested inside `inputs:`.
+- **Audit text convention:** violations SHOUTED, passes lowercase — the report's
+  checklist classifier is deliberately case-SENSITIVE.
+- **Vintages 2020 + 2025 only.** 2011–2017 backfills are user-deferred.
+- Dependency flow: `audit` ← everything; `geometry` → `loads` → (`lighting`,
+  `shw`); `hvac` and `envelope` stand alone; the umbrella composes them and runs
+  E+ via `simulation`.
+
+## Commands
+
+```bash
+cd openstudio-hvac && ruby test/test_catalog.rb   # a gem suite: plain ruby, no bundler
+rake gems                                          # the nine gems + versions
+rake necb:verify                                   # orphan keys + 8.4.6 curves + hostile-outcome
+rake necb:coverage_doc                             # regenerate coverage documents
+rake legacy:pin                                    # the pinned oracle revision
+rake legacy:whatsnew                               # what the fork has done since the pin
+```
+
+Tests run with **plain `ruby`**, not `bundle exec`. The per-gem Gemfiles exist so
+`bundle exec` and `gem build` work; they are not how the suites run.
+
+## How this repository came to be (2026-08-16)
+
+Extracted from the `NatLabRockies/openstudio-standards` fork with
+`git filter-repo`, keeping the nine gem dirs plus `legacy_pin/`. History
+preserved: 9,403 → 199 commits, `.git` 4.61 GiB → 4.7 MB. The branch was renamed
+`phylroy_dnd` → `main`. **The originals still exist in the fork** — removing them
+is pending (see Open work).
+
+The gems' relative-path requires (`../openstudio-<sibling>`), the shared test
+fixtures in `openstudio-hvac/test/fixtures`, and all the doc cross-links depend
+on this **flat sibling layout**. Do not nest the gems in a subdirectory or rename
+their directories without fixing every one of them.
+
+## Traps — all of these were paid for once
+
+**The locale is load-bearing.** Without a UTF-8 locale Ruby's default external
+encoding is US-ASCII, and `File.read` of anything the gems emit (`plan_svg.rb`
+writes em dashes and `m²`; `necb_decisions.md` is full of them) raises
+`invalid byte sequence in US-ASCII`. It took out three gems on CI's first run.
+The devcontainer and the CI workflow both force `LANG`/`LC_ALL`; do not remove
+them. Read a generated file with an explicit `encoding: 'UTF-8'`.
+
+**`Gem::MissingSpecError` descends from `LoadError`, NOT `StandardError`.** A
+bare `rescue StandardError` around `Gem::Specification.find_by_name` does not
+catch it. Name it (`rescue Gem::LoadError, StandardError`) — see
+`openstudio-envelope/lib/openstudio_envelope/costing/database.rb`.
+
+**The legacy oracle is ONE SHA, not a branch, and not a git remote.**
+`legacy_pin/REF` is the whole tie to openstudio-standards. Nothing here points at
+the fork's history, so `git log` cannot answer "has upstream moved?" — use
+`rake legacy:whatsnew`.
+
+**The lock records a REMOTE and bundler compares it.** `legacy_pin/Gemfile.lock`
+commits the canonical fork URL. Setting `LEGACY_PIN_REMOTE` to a local checkout
+(much faster, offline) makes them disagree until you `bundle install` once; until
+then `bundle check` reports "not yet checked out". `test_legacy_archetype_e2e.rb`
+gates on exactly that and therefore SKIPS. It skips loudly and never reports a
+false pass. Use the same `LEGACY_PIN_REMOTE` for install and for every run.
+
+**A skipped parity gate is a green-but-vacuous gate.** Always run them with
+`LEGACY_PIN_REQUIRED=1`, which turns "oracle not bundled" from a skip into a
+failure. There are **eleven** gates: envelope 4, loads 3, lighting 3, shw 1 —
+and three of them are NOT named `*_parity.rb` (both `test_data_integrity.rb`,
+lighting's `test_costing.rb`), so a glob misses them. CI lists them explicitly.
+
+**`test_decisions_registry.rb` is not SDK-free** despite reading like a pure
+doc/JSON drift check — it `require`s every gem's facade. It needs the container,
+not a bare runner.
+
+**Adding a `## D-XX` heading means adding a `decisions.json` entry**, and the
+doc's id-ordered TOC is generated. The drift test is hard in both directions:
+```bash
+ruby openstudio-necb/scripts/generate_decisions_toc.rb   # after adding a decision
+cd openstudio-necb && ruby test/test_decisions_registry.rb
+```
+A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in some gem's
+`lib/`; entries that are not cited must NOT be `runtime` (use `process`,
+`data`, or `runtime_unwired`).
+
+**`spec.files` excludes `test/` in every gemspec.** So
+`openstudio-hvac/lib/openstudio_hvac/catalog_report.rb`'s `FIXTURE` constant is
+already broken in a *packaged* gem. Pre-existing, not extraction fallout.
+
+**openstudio-envelope and openstudio-lighting read openstudio-hvac's vendored
+priced costing CSVs.** Now declared in both gemspecs and resolved via the
+installed gem first, relative path second. Do not "simplify" that back.
+
+## CI
+
+`.github/workflows/test.yml` — `lint` (bare runner, pure Ruby), `test` (matrix of
+the eight SDK gems in `nrel/openstudio:3.11.0`), `verify` (`rake necb:verify` +
+the decisions registry), `parity` (the eleven gates, `workflow_dispatch`/schedule
+only because it clones the ~4.6 GB fork; cached on `legacy_pin/REF`).
+
+All four have run green. Parity was verified non-vacuous: 42 runs, 562
+assertions, 0 skips — identical to local.
+
+## Open work
+
+- **Retire the originals in the fork.** Remove the nine dirs + `legacy_pin/` from
+  `NatLabRockies/openstudio-standards` and rewrite its `README.md:13-36` to point
+  here. Keep the fork's `origin/nrcan` branch forever — it holds the pinned
+  oracle `f01da13a6`.
+- **The fork is 2 commits ahead of the pin** (`rake legacy:whatsnew`): #2134 adds
+  a NECB footprint aspect-ratio option touching `btap/geometry.rb`, and #2136
+  changes the costing sheets and `necb_2011.rb`. Absorbing means **bumping the
+  pin and re-running the gates**, never copying code across.
+- **The LLM proposed-building workflow** (geometry → loads → constructions →
+  HVAC). The one real physics gap: `openstudio-envelope` cannot build an opaque
+  construction from nothing — zero `DefaultConstructionSet` usage family-wide, and
+  `opaque_at_conductance` requires a base to deep-copy. Wizard geometry has no
+  constructions, so `apply_prescriptive` silently skips everything. The test-only
+  `seed_constructions` helper in `openstudio-geometry/test/test_bar.rb` is the
+  placeholder to replace. Ordering constraint (D-75): thermostats come from
+  `openstudio-loads`' `apply_loads` and gate the whole envelope pass via
+  `Geometry.conditioned?`.
+- **`NatLabRockies/openstudio-mcp`** (Python MCP server, ~150 tools) covers
+  generic OpenStudio authoring but has **zero NECB content**, and its
+  constructions skill is surface-at-a-time primitives that do not close the gap
+  above. Licences do not mix — these gems are LGPL, that project is BSD-3-style —
+  so the decision is to integrate at the **tool boundary, never the source
+  boundary**: a thin `skills/necb/` package shelling out to these gems, not a
+  fork. Do not copy gem source into it.
+- Repository is **private**; the `LICENSE` preamble makes GitHub report
+  `NOASSERTION` even though all nine gemspecs declare `LGPL-3.0-or-later`.
