@@ -266,7 +266,11 @@ class TestFloorPlan < Minitest::Test
       bundle = OpenStudioGeometry.floor_plans(zone_every_space!(wizard_model), path: path, audit: audit)
 
       assert_equal 3, bundle[:storeys].size
-      html = File.read(path)
+      # Explicit UTF-8: the page carries em dashes, 'm²' and ellipses from
+      # plan_svg.rb, so File.read without an encoding picks up
+      # Encoding.default_external and raises 'invalid byte sequence in US-ASCII'
+      # wherever the locale is not UTF-8 (the nrel/openstudio CI container).
+      html = File.read(path, encoding: 'UTF-8')
       assert html.start_with?('<!DOCTYPE html>')
       assert_equal 3, html.scan('<svg').size,
                    'three storey plans and NOTHING else (the zone legend is deliberately not on the page)'

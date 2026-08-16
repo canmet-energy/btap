@@ -6,6 +6,16 @@ on:
   pull_request:
   workflow_dispatch:
 
+# The nrel/openstudio image ships without a UTF-8 locale, so Ruby's default
+# external encoding is US-ASCII and any File.read of the gems' own output
+# (plan_svg.rb emits em dashes, 'm²' and ellipses; the decisions doc is full of
+# them) raises "invalid byte sequence in US-ASCII". This is an environment gap,
+# not a product defect — the gems write correct UTF-8 and every developer
+# machine has a UTF-8 locale. Make CI match rather than diverge from it.
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
 jobs:
   # Pure-Ruby checks: no OpenStudio SDK, so they run on a bare runner in seconds
   # and fail fast before anything pays for the container.

@@ -72,10 +72,17 @@ class TestLegacyArchetypeE2E < Minitest::Test
     puts "OK osm=#{output_osm}"
   RUBY
 
+  # Availability means the oracle is actually BUNDLED, not merely that the pin
+  # exists. legacy_pin/Gemfile is committed, so testing for it is always true
+  # and the guard would not guard — Phase 1 then shells out and dies trying to
+  # resolve the oracle, which is what CI hit on the first run. `bundle check`
+  # verifies the Gemfile's dependencies are satisfied without installing them.
   def self.legacy_available?
     return @legacy_available unless @legacy_available.nil?
 
-    @legacy_available = File.exist?(LEGACY_PIN_GEMFILE) && system('bundle -v > /dev/null 2>&1')
+    @legacy_available =
+      File.exist?(LEGACY_PIN_GEMFILE) &&
+      system("BUNDLE_GEMFILE=#{LEGACY_PIN_GEMFILE.shellescape} bundle check > /dev/null 2>&1")
   end
 
   # The pinned oracle revision keys the cache to the LIBRARY that generates the
