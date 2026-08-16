@@ -176,8 +176,11 @@ E+ tests skip without the CLI; annual tests use week runs (~1 min each).
 Fixtures shared from `../openstudio-hvac/test/fixtures`.
 
 `test_legacy_archetype_e2e.rb` generates/caches the 17-building legacy
-archetype fleet against the in-tree `lib/openstudio-standards` NECB
-implementation; it currently runs under the repo bundle
-(`BUNDLE_GEMFILE=/workspaces/openstudio-standards/Gemfile`), not the pinned
-oracle — moving it onto `legacy_pin` is a gated later phase (see
-`legacy_pin/README.md` for the pinning philosophy).
+archetype fleet against the legacy NECB implementation. It now runs under the
+PINNED oracle (`BUNDLE_GEMFILE=../legacy_pin/Gemfile`), like every sibling
+`*_parity.rb` suite — the gated "move it onto legacy_pin" phase was forced by
+the gem extraction, since the in-tree `lib/openstudio-standards` it used to
+require is no longer in this repository. Its cache key is `legacy_pin/REF`
+rather than the host repo's `HEAD:lib/openstudio-standards` subtree SHA (that
+command returns EMPTY outside the host checkout, which would have degraded the
+key silently). See `legacy_pin/README.md` for the pinning philosophy.

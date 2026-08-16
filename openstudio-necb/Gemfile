@@ -1,3 +1,18 @@
 source 'https://rubygems.org'
 
 gemspec
+
+# The sibling gems are not published to RubyGems — resolve them from this
+# repository's checkout rather than the index.
+gem 'openstudio-audit', path: '../openstudio-audit'
+gem 'openstudio-envelope', path: '../openstudio-envelope'
+gem 'openstudio-geometry', path: '../openstudio-geometry'
+gem 'openstudio-hvac', path: '../openstudio-hvac'
+gem 'openstudio-lighting', path: '../openstudio-lighting'
+gem 'openstudio-loads', path: '../openstudio-loads'
+gem 'openstudio-shw', path: '../openstudio-shw'
+gem 'openstudio-simulation', path: '../openstudio-simulation'
+
+# Test tooling (this gemspec declares no development dependencies).
+gem 'minitest', '~> 5.0'
+gem 'rake', '~> 13.0'

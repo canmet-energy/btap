@@ -15,11 +15,11 @@ require 'shellwords'
 # model_create_prototype_model), fed through the NEW pipeline
 # (OpenStudioNECB.performance_compliance) as the PROPOSED building.
 #
-# Phase 1 (legacy generation) has to run OUT OF PROCESS under the top-level
-# Gemfile (BUNDLE_GEMFILE=<repo root>/Gemfile bundle exec ruby <script>)
-# because legacy openstudio-standards pulls in a completely different gem
-# graph than the SDK-only gems (this file's own process only has `openstudio`
-# on the load path, not `openstudio-standards`). The generated .osm is cached
+# Phase 1 (legacy generation) has to run OUT OF PROCESS under the PINNED
+# oracle (BUNDLE_GEMFILE=<repo root>/legacy_pin/Gemfile bundle exec ruby
+# <script>) because legacy openstudio-standards pulls in a completely different
+# gem graph than the SDK-only gems (this file's own process only has
+# `openstudio` on the load path, not `openstudio-standards`). The generated .osm is cached
 # under Dir.tmpdir keyed by a content hash of the generation recipe, so
 # repeated local runs skip the legacy sizing run (~1 minute).
 #
@@ -31,7 +31,13 @@ class TestLegacyArchetypeE2E < Minitest::Test
   include FixtureHelper
 
   REPO_ROOT = File.expand_path('../..', __dir__)
-  LEGACY_ENTRY = File.join(REPO_ROOT, 'lib', 'openstudio-standards.rb')
+  # The legacy oracle is no longer inside this repository — the gems were
+  # extracted out of openstudio-standards. Phase 1 therefore runs under the
+  # PINNED oracle (legacy_pin/Gemfile), exactly like every sibling *_parity.rb
+  # suite, instead of requiring lib/openstudio-standards.rb from the enclosing
+  # host checkout.
+  LEGACY_PIN_DIR = File.join(REPO_ROOT, 'legacy_pin')
+  LEGACY_PIN_GEMFILE = File.join(LEGACY_PIN_DIR, 'Gemfile')
   CACHE_DIR = File.join(Dir.tmpdir, 'openstudio_necb_legacy_archetype_e2e')
   BUILDING_TYPE = 'SmallOffice'
   TEMPLATE = 'NECB2020'
@@ -42,11 +48,12 @@ class TestLegacyArchetypeE2E < Minitest::Test
   # load path — it requires lib/openstudio-standards.rb directly, exactly the
   # pattern used by the sibling gems' *_parity.rb tests).
   GEN_SCRIPT = <<~'RUBY'
-    output_osm = ARGV[0] or raise 'usage: gen.rb <output_osm> <sizing_run_dir> <repo_root>'
-    sizing_run_dir = ARGV[1] or raise 'usage: gen.rb <output_osm> <sizing_run_dir> <repo_root>'
-    repo_root = ARGV[2] or raise 'usage: gen.rb <output_osm> <sizing_run_dir> <repo_root>'
+    output_osm = ARGV[0] or raise 'usage: gen.rb <output_osm> <sizing_run_dir>'
+    sizing_run_dir = ARGV[1] or raise 'usage: gen.rb <output_osm> <sizing_run_dir>'
 
-    require File.join(repo_root, 'lib', 'openstudio-standards')
+    # Resolved by bundler from legacy_pin/Gemfile — the PINNED oracle revision,
+    # loaded the same way every sibling *_parity.rb suite loads it.
+    require 'openstudio-standards'
 
     std = Standard.build('NECB2020')
     model = std.model_create_prototype_model(
@@ -68,15 +75,21 @@ class TestLegacyArchetypeE2E < Minitest::Test
   def self.legacy_available?
     return @legacy_available unless @legacy_available.nil?
 
-    @legacy_available = File.exist?(LEGACY_ENTRY) && system('bundle -v > /dev/null 2>&1')
+    @legacy_available = File.exist?(LEGACY_PIN_GEMFILE) && system('bundle -v > /dev/null 2>&1')
   end
 
-  # The legacy-subtree SHA keys the cache to the LIBRARY that generates the
+  # The pinned oracle revision keys the cache to the LIBRARY that generates the
   # archetype — without it, a legacy change (e.g. the #2119 SHW/daylighting
   # fixes merged 2026-08-10) silently reuses a stale pre-change OSM, because
   # the script text and its arguments don't change when the library does.
+  #
+  # This was the host repo's `HEAD:lib/openstudio-standards` subtree SHA. That
+  # command returns EMPTY once the gems live in their own repository, which
+  # would have degraded the cache key silently; legacy_pin/REF states the same
+  # identity explicitly and travels with the gems. Bumping the pin invalidates
+  # the cache, which is exactly the intent.
   def self.legacy_sha
-    @legacy_sha ||= `git -C #{REPO_ROOT} rev-parse --short HEAD:lib/openstudio-standards`.strip
+    @legacy_sha ||= File.read(File.join(LEGACY_PIN_DIR, 'REF')).strip
   end
 
   def self.cache_key
@@ -104,10 +117,16 @@ class TestLegacyArchetypeE2E < Minitest::Test
       FileUtils.mkdir_p(sizing_dir)
       log_path = File.join(dir, 'gen.log')
 
-      gemfile = File.join(REPO_ROOT, 'Gemfile')
-      cmd = "BUNDLE_GEMFILE=#{gemfile.shellescape} timeout 1200 bundle exec ruby " \
+      # LEGACY_PIN_REMOTE is passed through when set, so a developer who pointed
+      # the pin at a local openstudio-standards checkout keeps that resolution
+      # here — otherwise this child process would re-resolve against the
+      # Gemfile's default remote and re-clone the fork.
+      remote = ENV['LEGACY_PIN_REMOTE']
+      env = +"BUNDLE_GEMFILE=#{LEGACY_PIN_GEMFILE.shellescape} "
+      env << "LEGACY_PIN_REMOTE=#{remote.shellescape} " if remote
+      cmd = "#{env}timeout 1200 bundle exec ruby " \
             "#{script_path.shellescape} #{osm.shellescape} #{sizing_dir.shellescape} " \
-            "#{REPO_ROOT.shellescape} > #{log_path.shellescape} 2>&1"
+            "> #{log_path.shellescape} 2>&1"
       ok = system(cmd)
       status = $?
       log = File.exist?(log_path) ? File.read(log_path) : '(no log captured)'
