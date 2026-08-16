@@ -68,8 +68,32 @@ Every gem in this repository obeys the same rules:
 OpenStudio 3.11.0, EnergyPlus 25.2.0, and `LANG=en_US.UTF-8`, on the
 `canmet/os_sdk_container:3.11.0` image. Open the repo in VS Code and reopen in
 the container. `postCreate` installs NRCan certificates when it detects that
-network, verifies the toolchain, and prints the commands below. It deliberately
-does **not** clone the legacy oracle — that is gigabytes, so it stays opt-in.
+network, installs **Claude Code**, installs `.mcp.json` from the template,
+verifies the toolchain, and prints the common commands.
+
+```bash
+bash .devcontainer/setup.sh --no-claude   # skip the Claude Code install
+bash .devcontainer/setup.sh --serena      # also add uv + the Serena MCP server
+```
+
+It deliberately does **not** clone the legacy oracle — that is gigabytes, so it
+stays opt-in.
+
+### MCP servers
+
+`.mcp.json.example` is tracked; `.mcp.json` is **not** (the family rule is never
+to stage it). Setup copies the template, which carries **no key** — Claude Code
+expands `${VAR}` in `url` and `headers`, so the secret stays in your
+environment:
+
+```bash
+export NRCAN_MCP_API_KEY=...   # codes, geocoding, weather, building-stock, modelling, simulation
+```
+
+Two Ruby scripts read their own variables instead of that file — give them the
+same value: `CODES_API_KEY` (`openstudio-necb/scripts/fetch_necb_8_4_text.rb`)
+and `BUILDING_STOCK_API_KEY` (`openstudio-geometry/scripts/building_stock.rb`).
+Both abort with a clear message when unset.
 
 ## Testing
 

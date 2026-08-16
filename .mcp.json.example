@@ -1,0 +1,49 @@
+{
+  "_comment": [
+    "Template for .mcp.json — the NRCan MCP servers the gems' scripts and an LLM session use.",
+    ".devcontainer/setup.sh copies this to .mcp.json when that file is absent.",
+    "",
+    "NO KEY LIVES IN THIS FILE. Claude Code expands ${VAR} in url/headers/env/command/args,",
+    "so the secret stays in your environment. .mcp.json itself remains gitignored (the family",
+    "rule is 'NEVER stage .mcp.json') — this template is the tracked artifact instead.",
+    "",
+    "Set the key once, e.g. in ~/.bashrc:",
+    "  export NRCAN_MCP_API_KEY=...",
+    "",
+    "Two Ruby scripts read their own variables rather than this file; give them the same value:",
+    "  CODES_API_KEY            openstudio-necb/scripts/fetch_necb_8_4_text.rb",
+    "  BUILDING_STOCK_API_KEY   openstudio-geometry/scripts/building_stock.rb"
+  ],
+  "mcpServers": {
+    "codes": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/codes/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    },
+    "geocoding": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/geocoding/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    },
+    "weather": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/weather/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    },
+    "building-stock": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/building-stock/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    },
+    "modelling": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/modelling/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    },
+    "simulation": {
+      "type": "http",
+      "url": "${NRCAN_MCP_BASE_URL:-https://3ucoopudrb.execute-api.ca-central-1.amazonaws.com/prod}/simulation/mcp",
+      "headers": { "X-API-Key": "${NRCAN_MCP_API_KEY}" }
+    }
+  }
+}
