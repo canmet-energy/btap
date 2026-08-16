@@ -2,10 +2,8 @@
 
 Nine standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems implementing the NECB
 2020/2025 Part 8 performance path. See [README.md](README.md) for the family map
-and the API guide index; **eight of the nine gems carry their own `CLAUDE.md`**
-with architecture, facade and traps — read that one before working inside a gem.
-(`openstudio-audit` has none: it is 180 lines, SDK-free, and its README covers
-it.)
+and the API guide index; **every gem carries its own `CLAUDE.md`** with
+architecture, facade and traps — read that one before working inside a gem.
 This file covers what is true across the family, plus how this repository came
 to exist.
 
