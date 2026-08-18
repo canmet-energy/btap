@@ -31,8 +31,12 @@ module OpenStudioAudit
       cited = Hash.new(0)
       audit.entries.each { |e| e[:article].to_s.scan(/\d+\.\d+(?:\.\d+)*\./) { |a| cited[a] += 1 } }
       coverage['articles'].each do |art|
-        # strip ' (slice label)' / '(N)' suffixes and the trailing dot before prefix-matching
-        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '').sub(/\.\z/, '')) }.values.sum
+        # Strip ' (slice label)' / '(N)' suffixes, but KEEP the trailing dot: the
+        # scan above only ever yields keys ending in '.', so the dot is what stops
+        # '8.4.4.1.' from prefix-matching '8.4.4.14.' and '8.4.4.17.' and claiming
+        # their citations as its own. (report/checklist.rb#covered? guards the same
+        # collision the same way — do not "simplify" the dot away again.)
+        applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '')) }.values.sum
         inputs = { status: art['status'], decisions_citing: applied }
         inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
         if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
