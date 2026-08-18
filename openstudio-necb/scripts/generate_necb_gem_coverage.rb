@@ -15,10 +15,10 @@ require 'json'
 ROOT = File.expand_path('../..', __dir__)
 # openstudio-necb (the umbrella) declares the pipeline-level articles no domain
 # gem can: the 8.4.1.2 determination itself, calculation methods, the 2025 EUI
-# path. CAVEAT: unlike the domain gems, the umbrella has no runtime
-# emit_article_coverage yet, so its partial/not_implemented entries do NOT warn
-# on every run — they are declaration-only until the emitter consolidation
-# lands.
+# path. It emits them at runtime exactly as the domain gems do — D-09 chose
+# runtime emission over declaration-only; Compliance#emit_article_coverage runs
+# from finalize!, which is the shared epilogue of BOTH the reference and the
+# 8.4.4 EUI path.
 GEMS = %w[openstudio-hvac openstudio-envelope openstudio-loads openstudio-lighting openstudio-shw
           openstudio-necb].freeze
 
@@ -118,10 +118,11 @@ out << 'the 2025-only 8.4.4 EUI subsection is never merged into). Statuses: **im
 out << '**partial** (warns every run) / **not_implemented** (warns every run) /'
 out << '**satisfied_by_clone** / **host_scope** (delegated to the umbrella or a'
 out << 'sibling gem). Each domain gem emits its section of this accounting into'
-out << 'the shared AuditLog on every run, so nothing is silently missed —'
-out << 'EXCEPT openstudio-necb (the umbrella), whose entries are declaration-only'
-out << 'until it gains a runtime emitter: its partial/not_implemented rows do NOT'
-out << 'yet warn on every run.'
+out << 'the shared AuditLog on every run, so nothing is silently missed. That'
+out << 'includes openstudio-necb (the umbrella): its manifest is emitted by'
+out << '`Compliance#emit_article_coverage` from the epilogue both compliance'
+out << 'paths share, so its partial/not_implemented rows warn on every run too'
+out << '(D-09).'
 out << ''
 
 total = rows.size
