@@ -45,27 +45,63 @@ echo "  NECB gem family — devcontainer setup"
 echo "═══════════════════════════════════════════════════════════════════"
 
 # ---------------------------------------------------------------------------
-# NRCan network certificates, FIRST — anything that downloads needs them.
-# Same probe the openstudio-standards fork uses.
+# Corporate certificates, FIRST — anything that downloads needs them.
+#
+# The certs come from the HOST's trust store, staged into .devcontainer/certs/
+# by devcontainer.json's initializeCommand. That ordering is the whole point:
+# the previous routine cloned linux_nrcan_certs FROM GitHub in order to fix
+# GitHub, so on an intercepted network it could never succeed — it printed
+# "certificate repo unreachable — continuing without" and left the container
+# unable to reach anything. Provenance also matters: the host store is what
+# corporate IT installed, so nothing here trusts a CA scraped off the wire.
+#
+# certctl-safe.sh is shared verbatim with canmet-energy/h2k-hpxml; keep the two
+# copies identical rather than patching this one locally.
 # ---------------------------------------------------------------------------
-if [ "$(curl -k -o /dev/null -s -w "%{http_code}" "https://intranet.nrcan.gc.ca/" 2>/dev/null || echo 000)" -ge 200 ] &&
-   [ "$(curl -k -o /dev/null -s -w "%{http_code}" "https://intranet.nrcan.gc.ca/" 2>/dev/null || echo 000)" -lt 400 ]; then
-  echo "🔐 NRCAN network detected — installing certificates..."
+CERTCTL_SRC="$REPO_ROOT/.devcontainer/scripts/certctl-safe.sh"
+STAGED_CERTS="$REPO_ROOT/.devcontainer/certs"
+
+if [ -x "$CERTCTL_SRC" ]; then
+  sudo "$CERTCTL_SRC" install >/dev/null 2>&1 || echo "   ⚠️  certctl install failed"
+fi
+
+staged_count=$(find "$STAGED_CERTS" -maxdepth 1 -name '*.crt' 2>/dev/null | wc -l)
+if [ "$staged_count" -gt 0 ]; then
+  echo "🔐 $staged_count certificate(s) staged from the host — installing..."
+  sudo rm -rf /tmp/certs && sudo mkdir -p /tmp/certs
+  sudo cp "$STAGED_CERTS"/*.crt /tmp/certs/
+  sudo /usr/local/bin/certctl certs-refresh 2>&1 | sed 's/^/   /'
+  sudo rm -rf /tmp/certs
+elif [ "$(curl -k -o /dev/null -s -w "%{http_code}" "https://intranet.nrcan.gc.ca/" 2>/dev/null || echo 000)" -ge 200 ] &&
+     [ "$(curl -k -o /dev/null -s -w "%{http_code}" "https://intranet.nrcan.gc.ca/" 2>/dev/null || echo 000)" -lt 400 ]; then
+  # Fallback only. Works on an unintercepted NRCan network; on an intercepted
+  # one the clone is exactly what fails, hence the pointed message below.
+  echo "🔐 NRCAN network detected, no staged certs — trying linux_nrcan_certs..."
   rm -rf /tmp/linux_nrcan_certs
   if git clone --quiet https://github.com/canmet-energy/linux_nrcan_certs.git /tmp/linux_nrcan_certs 2>/dev/null; then
     (cd /tmp/linux_nrcan_certs && git checkout --quiet ruby_3.2 && ./install_nrcan_certs.sh >/dev/null 2>&1)
     rm -rf /tmp/linux_nrcan_certs
-    for var in SSL_CERT_FILE REQUESTS_CA_BUNDLE NODE_EXTRA_CA_CERTS; do
-      grep -q "export $var=" /home/vscode/.bashrc 2>/dev/null ||
-        echo "export $var=/etc/ssl/certs/ca-certificates.crt" >> /home/vscode/.bashrc
-    done
     sudo update-ca-certificates >/dev/null 2>&1
     echo "   ✅ certificates installed"
   else
-    echo "   ⚠️  certificate repo unreachable — continuing without"
+    echo "   ⚠️  clone failed — the proxy is intercepting TLS, which is the case"
+    echo "      this fallback cannot fix. On the WSL host run:"
+    echo "        cp /usr/local/share/ca-certificates/*.crt $STAGED_CERTS/"
+    echo "      then re-run this script (no rebuild needed)."
   fi
 else
-  echo "🌐 Not on the NRCAN network — skipping certificate install"
+  echo "🌐 No staged certs and not on the NRCAN network — skipping cert install"
+fi
+
+for var in SSL_CERT_FILE REQUESTS_CA_BUNDLE NODE_EXTRA_CA_CERTS CURL_CA_BUNDLE; do
+  grep -q "export $var=" /home/vscode/.bashrc 2>/dev/null ||
+    echo "export $var=/etc/ssl/certs/ca-certificates.crt" >> /home/vscode/.bashrc
+done
+
+# Loud either way: a container that silently cannot verify TLS is the failure
+# mode this whole block exists to make visible.
+if command -v certctl >/dev/null 2>&1; then
+  CERTCTL_TOTAL_TIMEOUT=15 certctl banner 2>/dev/null | sed 's/^/   /' || true
 fi
 
 # ---------------------------------------------------------------------------

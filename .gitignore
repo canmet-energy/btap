@@ -58,3 +58,8 @@ audit.txt
 report.json
 
 *.DS_Store
+
+# Corporate CAs copied off the HOST's trust store by devcontainer.json's
+# initializeCommand. Machine-local and site-specific — staged for the build,
+# never committed.
+/.devcontainer/certs/
