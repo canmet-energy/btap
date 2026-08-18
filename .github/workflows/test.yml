@@ -34,6 +34,24 @@ jobs:
       # shared class, so it lives in the `verify` job's container.
       - name: AuditLog is SDK-free and fast
         run: cd openstudio-audit && ruby test/test_audit.rb
+      # NECB_GEM_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
+      # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
+      # made the committed copies track the manifests, so they drifted: an
+      # article promoted partial -> implemented (8.4.4.12 economizers, D-62) kept
+      # showing as a gap. Regenerate and demand a clean tree — same contract the
+      # decisions registry gets, in the direction a doc can silently rot.
+      #
+      # Both generators are pure Ruby (json + date), so they belong here rather
+      # than in the container. They are deterministic ONLY because BRANCH is a
+      # literal — do not restore `git rev-parse` in generate_necb_8_4_coverage.rb
+      # or this check fails on every branch that is not main.
+      - name: Coverage docs match the manifests
+        run: |
+          ruby openstudio-necb/scripts/generate_necb_gem_coverage.rb
+          ruby openstudio-necb/scripts/generate_necb_8_4_coverage.rb
+          git diff --exit-code -- openstudio-necb/docs/NECB_GEM_COVERAGE.md \
+                                  openstudio-necb/docs/NECB_8_4_COVERAGE.html \
+            || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
   # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.

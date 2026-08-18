@@ -43,9 +43,18 @@ ROOT = File.expand_path('../..', __dir__)
 OUT = File.expand_path('../docs/NECB_8_4_COVERAGE.html', __dir__)
 CACHE = File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
 DISPOSITION = File.expand_path('necb_8_4_disposition.json', __dir__)
-REPO = 'https://github.com/NatLabRockies/openstudio-standards'
-BRANCH = `git -C #{ROOT} rev-parse --abbrev-ref HEAD 2>/dev/null`.strip
-BLOB = "#{REPO}/blob/#{BRANCH.empty? ? 'develop' : BRANCH}"
+# The gems were extracted OUT of the openstudio-standards fork (2026-08-16), so
+# source links must resolve against THIS repository — the fork's copies are
+# slated for removal and every link into them will 404.
+#
+# BRANCH is a literal, NOT `git rev-parse HEAD`: this generator's output is
+# committed and drift-checked in CI, and deriving the branch made the output
+# depend on which branch the regenerating checkout happened to be on (that is
+# how 95 links ended up frozen at the pre-rename `phylroy_dnd`). Override for a
+# preview build with COVERAGE_BRANCH=my-branch; leave it alone when committing.
+REPO = 'https://github.com/canmet-energy/openstudio-necb-gems'
+BRANCH = (ENV['COVERAGE_BRANCH'] || 'main').strip
+BLOB = "#{REPO}/blob/#{BRANCH}"
 
 SUBSECTIONS = {
   '8.4.1' => 'General',
@@ -447,7 +456,7 @@ html = <<~HTML
   (<code>rake necb:coverage_doc</code> to regenerate).
   Requirement text: NECB 2025 Division B via the building-codes MCP, retrieved #{esc(cache.dig('provenance', 'retrieved'))}
   (Crown copyright — reproduction authorized as Government of Canada work); parse safety checks in
-  <code>scripts/fetch_necb_8_4_text.rb</code>. Source links resolve against <code>#{esc(BRANCH.empty? ? 'develop' : BRANCH)}</code>.</footer>
+  <code>scripts/fetch_necb_8_4_text.rb</code>. Source links resolve against <code>#{esc(BRANCH)}</code> of #{esc(REPO)}.</footer>
   </body></html>
 HTML
 
