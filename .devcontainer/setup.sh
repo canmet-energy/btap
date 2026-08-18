@@ -155,6 +155,31 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# GitHub CLI. AFTER the certificates, because it downloads AND because gh has
+# no --insecure escape hatch: unlike git (http.sslVerify) it trusts only the
+# system store, so on an intercepted network without the corporate CAs
+# `gh auth login` dies mid-flow with "x509: certificate signed by unknown
+# authority". Certs first is not a preference here, it is the prerequisite.
+#
+# Ubuntu 24.04 universe carries gh, so no third-party apt repo is needed.
+# Non-fatal: gh is for dispatching the parity workflow and reading PR checks,
+# not for building or testing the gems.
+# ---------------------------------------------------------------------------
+echo ""
+if command -v gh >/dev/null 2>&1; then
+  echo "🐙 GitHub CLI already present ($(gh --version 2>/dev/null | head -1))"
+else
+  echo "🐙 Installing GitHub CLI..."
+  if sudo apt-get update -qq >/dev/null 2>&1 && sudo apt-get install -y -qq gh >/dev/null 2>&1; then
+    echo "   ✅ $(gh --version 2>/dev/null | head -1)"
+    echo "      authenticate with:  gh auth login"
+  else
+    echo "   ⚠️  install failed (offline or blocked) — install manually later:"
+    echo "      sudo apt-get install -y gh"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Claude Code. AFTER the certificates, because it downloads.
 #
 # The native installer bundles its own runtime — Node is NOT required (verified:
