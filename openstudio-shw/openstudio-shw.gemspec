@@ -9,7 +9,15 @@ Gem::Specification.new do |spec|
                      'legacy-parity auto-sized SHW plant, Table 6.2.2.1 water-heater performance ' \
                      '(NECB2020 UEF procedure), and the 8.4.4.20 reference treatment — with an ' \
                      'audit log and article-coverage accounting.'
-  spec.homepage = 'https://github.com/NREL/openstudio-standards'
+  spec.homepage = 'https://github.com/canmet-energy/openstudio-necb-gems'
+  spec.metadata = {
+    # These gems are not published: the repository is private and the costing
+    # data is licence-encumbered. Publishing is a deliberate act — clear this
+    # entry consciously, do not let a stray `gem push` make the decision.
+    'allowed_push_host' => 'none',
+    'source_code_uri' => 'https://github.com/canmet-energy/openstudio-necb-gems',
+    'homepage_uri' => 'https://github.com/canmet-energy/openstudio-necb-gems'
+  }
   spec.license = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2'
 
