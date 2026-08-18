@@ -70,8 +70,38 @@ jobs:
           - openstudio-necb
           - openstudio-shw
           - openstudio-simulation
+    env:
+      # openstudio-envelope's thermal-bridging gate skips when tbd is missing, and
+      # a skipped gate is a green-but-vacuous gate — same reasoning as
+      # LEGACY_PIN_REQUIRED on the parity job. With this set, a tbd that failed to
+      # install fails the run instead of quietly reducing coverage. Harmless on
+      # the other seven legs: only test_thermal_bridging.rb reads it.
+      TBD_REQUIRED: '1'
     steps:
       - uses: actions/checkout@v4
+      # tbd/osut/topolys are openstudio-envelope's third-party runtime deps. They
+      # are declared in the gemspec, but these suites run under plain `ruby` (not
+      # `bundle exec`), so gemspec dependencies are never resolved — they have to
+      # be installed explicitly or NECB 3.1.1.7 goes untested.
+      #
+      # The versions come from legacy_pin/Gemfile.lock, NOT from a constraint
+      # here: the parity job runs our code and the oracle together under that
+      # lock, so this is what makes the two comparable. Floating them is not a
+      # neutral choice — osut 0.9.1 changes generated insulation conductivities,
+      # which would show up as a parity flip caused by a library upgrade rather
+      # than by our code. openstudio-standards does not solve this for us: it
+      # declares `tbd ~> 3`, never mentions osut or topolys, and commits no lock.
+      - name: Install the tbd triplet pinned by legacy_pin
+        if: matrix.gem == 'openstudio-envelope'
+        run: |
+          gem install $(ruby legacy_pin/tbd_triplet.rb) --no-document
+          ruby -e '
+            want = `ruby legacy_pin/tbd_triplet.rb`.strip
+            require "tbd"
+            got = %w[topolys osut tbd].map { |g| "#{g}:#{Gem.loaded_specs[g]&.version}" }.join(" ")
+            abort("::error::tbd triplet is #{got}, expected #{want} (a newer gem is winning over the pin)") if got != want
+            puts "tbd triplet matches the pinned oracle: #{got}"
+          '
       - name: ${{ matrix.gem }} suite
         working-directory: ${{ matrix.gem }}
         # test_helper.rb is not a test; the parity suites need the pinned oracle
