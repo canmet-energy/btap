@@ -67,8 +67,10 @@ its `AuditLog` is the canonical copy the umbrella aliases.
 
 ## Architecture
 
-- `catalog.rb` / `systems.json` — 65 canonical system names, 11 families
-  (NECB sys1–6, ECM hs08–16, CBECS). Names are exact strings, e.g.
+- `catalog.rb` / `systems.json` — 97 canonical system names, 18 families
+  (NECB sys1–6, ECM hs08–16, CBECS). The counts grow; `Catalog.rows.size` and
+  the `family` values in `systems.json` are the authority, not this line.
+  Names are exact strings, e.g.
   `'PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard'` — grep
   `systems.json` before assuming a name.
 - `builder.rb` + `systems/*.rb` — topology builders (one file per family;
