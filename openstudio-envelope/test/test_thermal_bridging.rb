@@ -30,7 +30,17 @@ class TestThermalBridging < Minitest::Test
   end
 
   def test_uprate_derate_meets_effective_targets
-    skip 'tbd gem not available (run under the repo bundle)' unless tbd_available?
+    # A skipped TBD gate is a green-but-vacuous gate: 3.1.1.7 is declared
+    # `implemented`, and THIS is the only test that proves the uprate/derate math
+    # actually lands on the effective-U targets. tbd is a declared runtime
+    # dependency, but the suites run under plain `ruby`, so nothing enforces it —
+    # it went missing from the devcontainer and from CI, and this test skipped in
+    # both while the summary line stayed green. Same contract as the parity
+    # gates: TBD_REQUIRED=1 turns "not installed" from a skip into a failure.
+    unless tbd_available?
+      msg = 'tbd gem not available (gem install tbd)'
+      ENV['TBD_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
+    end
 
     model = load_fixture
     audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD,

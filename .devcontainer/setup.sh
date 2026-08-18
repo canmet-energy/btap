@@ -10,6 +10,13 @@
 
 set -u
 
+# Derived from THIS script's location, not the cwd: postCreateCommand happens to
+# run from the workspace root, but a hand-run `bash .devcontainer/setup.sh` from
+# anywhere must still find legacy_pin/ — and a wrong path here degrades to
+# "triplet not found, skip tbd", which is exactly the silent gap this block
+# exists to close.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # Claude Code installs BY DEFAULT here. (The fork's setup.sh gates it behind
 # --claude but its postCreateCommand passes no flag, so it never actually
 # installed — the flag was effectively dead.) --no-claude opts out.
@@ -59,6 +66,56 @@ if [ "$(curl -k -o /dev/null -s -w "%{http_code}" "https://intranet.nrcan.gc.ca/
   fi
 else
   echo "🌐 Not on the NRCAN network — skipping certificate install"
+fi
+
+# ---------------------------------------------------------------------------
+# The tbd/osut/topolys TRIPLET — openstudio-envelope's third-party runtime deps.
+#
+# It is declared in openstudio-envelope.gemspec, but the suites run under plain
+# `ruby`, not `bundle exec`, so nothing enforces gemspec dependencies. The gem
+# was therefore absent from this container and from CI, and
+# test_uprate_derate_meets_effective_targets — the only test proving the NECB
+# 3.1.1.7 uprate/derate math hits the effective-U targets — skipped in both
+# while the suite summary stayed green. Install it here so the gate is real;
+# CI sets TBD_REQUIRED=1 so a missing tbd fails instead of skipping.
+#
+# AFTER the certificates, because it downloads. Non-fatal: without tbd the gems
+# still work, they just warn that 3.1.1.7 is unaccounted and that one test skips.
+# ---------------------------------------------------------------------------
+echo ""
+TRIPLET="$(ruby "$REPO_ROOT/legacy_pin/tbd_triplet.rb" 2>/dev/null)"
+if [ -z "$TRIPLET" ]; then
+  echo "🌉 ⚠️  could not read the triplet from legacy_pin/Gemfile.lock — skipping tbd"
+elif ruby -e "require 'tbd'" >/dev/null 2>&1 &&
+     [ "$(ruby -e "require 'tbd'; puts %w[topolys osut tbd].map { |g| \"#{g}:#{Gem.loaded_specs[g]&.version}\" }.join(' ')" 2>/dev/null)" = "$TRIPLET" ]; then
+  echo "🌉 tbd triplet already matches the pinned oracle ($TRIPLET)"
+else
+  echo "🌉 Installing the tbd triplet pinned by legacy_pin ($TRIPLET)..."
+  # --user-install FIRST: it needs no privileges (the system gem dir is
+  # root-owned, which is the only reason sudo ever entered this) and keeps the
+  # gems in $HOME where the vscode user owns them. sudo is the fallback for
+  # images that run as root or lack a writable user gem home.
+  #
+  # EXACT versions, in dependency order — see legacy_pin/tbd_triplet.rb. Plain
+  # `ruby` activates the newest installed gem, so a stray newer osut silently
+  # wins over the pin and the parity comparison stops being apples-to-apples.
+  # shellcheck disable=SC2086
+  if gem install $TRIPLET --user-install --no-document >/dev/null 2>&1 ||
+     gem install $TRIPLET --no-document >/dev/null 2>&1 ||
+     sudo gem install $TRIPLET --no-document >/dev/null 2>&1; then
+    echo "   ✅ $(ruby -e "require 'tbd'; puts %w[topolys osut tbd].map { |g| \"#{g} #{Gem.loaded_specs[g]&.version}\" }.join(', ')" 2>/dev/null)"
+  else
+    echo "   ⚠️  install failed (offline or blocked) — install manually later:"
+    echo "      gem install $TRIPLET --user-install"
+    echo "      without it, openstudio-envelope warns that NECB 3.1.1.7 is unaccounted"
+    echo "      and test_thermal_bridging.rb skips its uprate/derate case"
+  fi
+  if ruby -e "require 'tbd'" >/dev/null 2>&1 &&
+     [ "$(ruby -e "require 'tbd'; puts %w[topolys osut tbd].map { |g| \"#{g}:#{Gem.loaded_specs[g]&.version}\" }.join(' ')" 2>/dev/null)" != "$TRIPLET" ]; then
+    echo "   ⚠️  a NEWER tbd/osut/topolys is installed and wins over the pin."
+    echo "      Parity comparisons will measure a library upgrade, not our code."
+    echo "      Remove the newer ones:  gem uninstall tbd osut topolys -v <newer>"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
