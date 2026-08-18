@@ -1,6 +1,12 @@
 // For format details, see https://aka.ms/devcontainer.json
 {
 	"name": "NECB Gem Family",
+	// Corporate CAs come from the HOST's own trust store, not from the network.
+	// This runs on the host before the container exists, so it works even when the
+	// TLS-inspecting proxy has broken github.com — which is precisely when the
+	// certs are needed. The old routine cloned linux_nrcan_certs from GitHub to
+	// fix GitHub, and deadlocked. certs/*.crt is gitignored; nothing is committed.
+	"initializeCommand": "mkdir -p ${localWorkspaceFolder}/.devcontainer/certs && cp /usr/local/share/ca-certificates/*.crt ${localWorkspaceFolder}/.devcontainer/certs/ 2>/dev/null || true",
 	// Same image the openstudio-standards fork uses, so the gems develop against
 	// exactly the SDK they target: Ubuntu 24.04, Ruby 3.2.2,
 	// OpenStudio 3.11.0, EnergyPlus 25.2.0.
