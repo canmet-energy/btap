@@ -191,4 +191,26 @@ namespace :windows do
     end
     puts "  bundled OpenStudio from #{src}#{skip.empty? ? '' : " (dropped: #{skip.join(', ')})"}"
   end
+  desc 'Compile the staged tree into setup.exe via Inno Setup under wine'
+  task :installer do
+    iss = 'packaging/windows/necb-compliance.iss'
+    abort("stage first: rake windows:stage (no #{STAGE})") unless Dir.exist?(STAGE)
+
+    prefix = ENV['WINEPREFIX'] || File.expand_path('~/.wine-innosetup')
+    iscc = File.join(prefix, 'drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe')
+    unless File.exist?(iscc)
+      abort("Inno Setup not found at #{iscc}\n" \
+            'Install it with: bash .devcontainer/setup.sh --wine')
+    end
+
+    # wine maps the filesystem root at Z:, and it needs a display even for a
+    # headless compile — xvfb-run supplies one.
+    win_iss = "Z:#{File.expand_path(iss).tr('/', '\\')}"
+    ok = system({ 'WINEPREFIX' => prefix, 'WINEDEBUG' => '-all' },
+                'xvfb-run', '-a', 'wine', iscc, win_iss)
+    abort('ISCC failed') unless ok
+
+    out = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
+    puts out ? "built #{out} (#{(File.size(out) / 1_048_576.0).round} MB)" : 'ISCC reported success but wrote no .exe'
+  end
 end

@@ -3,6 +3,12 @@
 ; Build:  rake windows:stage OPENSTUDIO_WINDOWS=<unpacked windows sdk>
 ;         iscc packaging\windows\necb-compliance.iss
 ;
+; Installs PER-USER and needs NO administrator rights: no UAC prompt, and it
+; works on a locked-down corporate machine where the user cannot elevate. That
+; is worth more than a machine-wide install for a demo, and it is only possible
+; because the payload is self-contained — nothing goes to system32, nothing
+; registers a service, nothing touches HKLM.
+;
 ; The payload carries its own OpenStudio, so this installer does NOT probe for
 ; one, gate on its version, or touch PATH or the registry. Everything it needs
 ; is under {app}.
@@ -15,7 +21,6 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher=CanmetENERGY, Natural Resources Canada
 DefaultDirName={autopf}\{#AppName}
-DefaultGroupName={#AppName}
 OutputBaseFilename=necb-compliance-setup-{#AppVersion}
 LicenseFile=stage\LICENSE-gems.txt
 Compression=lzma2/max
@@ -23,8 +28,12 @@ SolidCompression=yes
 ; The bundled OpenStudio is 64-bit only.
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-; {autopf} needs elevation.
-PrivilegesRequired=admin
+; No elevation. With `lowest`, {autopf} resolves to {localappdata}\Programs
+; rather than C:\Program Files, so the default install location follows the
+; privilege level automatically and DefaultDirName needs no special-casing.
+; `dialog` still lets someone who DOES have admin choose a machine-wide install.
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
 DisableProgramGroupPage=yes
 WizardStyle=modern
 
@@ -35,12 +44,12 @@ Source: "stage\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs igno
 ; A console pre-seeded with bin\ on PATH, opened in the user's Documents so
 ; relative --out paths land somewhere writable. This is why no global PATH
 ; edit is needed.
-Name: "{group}\NECB Compliance (console)"; Filename: "{cmd}"; \
+Name: "{autoprograms}\NECB Compliance\NECB Compliance (console)"; Filename: "{cmd}"; \
   Parameters: "/K ""set PATH={app}\bin;%PATH% && echo NECB Compliance - type necb-compliance --help"""; \
   WorkingDir: "{userdocs}"
-Name: "{group}\Sample compliance run"; Filename: "{app}\samples\run-demo.cmd"; \
+Name: "{autoprograms}\NECB Compliance\Sample compliance run"; Filename: "{app}\samples\run-demo.cmd"; \
   WorkingDir: "{app}\samples"
-Name: "{group}\Read me"; Filename: "{app}\README-windows.txt"
+Name: "{autoprograms}\NECB Compliance\Read me"; Filename: "{app}\README-windows.txt"
 
 [Run]
 Filename: "{app}\README-windows.txt"; Description: "Open the read me"; \
