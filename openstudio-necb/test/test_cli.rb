@@ -202,4 +202,46 @@ class TestCLI < Minitest::Test
     assert(File.exist?(epw.sub(/\.epw\z/, '.ddy')), 'no .ddy beside the resolved EPW')
     assert(File.exist?(epw.sub(/\.epw\z/, '.stat')), 'no .stat beside the resolved EPW')
   end
+  # The bug this pins: --list-cities reported "No weather files found in this
+  # installation" on a real Windows install while every test here passed,
+  # because in a SOURCE CHECKOUT the openstudio-hvac fixtures path answered and
+  # masked the wrong depth. The packaged tree puts the gems one level deeper
+  # (under gems/), so the relative path needs 4 ups, not 3.
+  #
+  # Layout-specific paths need a test per LAYOUT, not per platform — this builds
+  # the packaged layout in a tmpdir rather than trusting the checkout.
+  def test_weather_is_discoverable_in_the_PACKAGED_layout
+    Dir.mktmpdir do |root|
+      gem_lib = File.join(root, 'gems/openstudio-necb/lib/openstudio_necb')
+      FileUtils.mkdir_p([gem_lib, File.join(root, 'weather')])
+      %w[epw ddy stat].each do |ext|
+        FileUtils.cp(File.join(File.dirname(EPW), "#{File.basename(EPW, '.epw')}.#{ext}"),
+                     File.join(root, 'weather'))
+      end
+
+      found = OpenStudioNECB::CLI::Weather.search
+                                          .map { |d| File.expand_path(d.to_s) }
+      packaged = File.expand_path('../../../../weather', gem_lib)
+      assert_equal(File.join(root, 'weather'), packaged, 'sanity: 4 ups is the packaged root')
+      assert_includes(found, File.expand_path('../../../../weather', __dir__.sub('/test', '/lib/openstudio_necb')),
+                      'the 4-up packaged path must be searched')
+    end
+  end
+
+  # NECB_HOME is what the launcher actually sets, so it must win over any
+  # checkout path that happens to exist on the same machine.
+  def test_necb_home_takes_precedence
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'weather'))
+      FileUtils.cp(EPW, File.join(home, 'weather', 'CAN_XX_Somewhere.123456_CWEC2020.epw'))
+      begin
+        ENV['NECB_HOME'] = home
+        assert_equal(File.join(home, 'weather'), OpenStudioNECB::CLI::Weather.search.first)
+        assert_equal(File.join(home, 'weather', 'CAN_XX_Somewhere.123456_CWEC2020.epw'),
+                     OpenStudioNECB::CLI::Weather.available['somewhere'])
+      ensure
+        ENV.delete('NECB_HOME')
+      end
+    end
+  end
 end

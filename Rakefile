@@ -103,13 +103,25 @@ namespace :necb do
   end
 end
 
+# --- The HVAC catalog ------------------------------------------------------
+namespace :hvac do
+  desc 'Build EVERY catalog system and put each through an EnergyPlus sizing run (JOBS=12)'
+  task :simulate_systems do
+    jobs = ENV.fetch('JOBS', '12')
+    ok = system(RbConfig.ruby, 'openstudio-hvac/scripts/simulate_all_systems.rb', '--jobs', jobs)
+    abort('one or more systems do not produce a simulate-able model') unless ok
+  end
+end
+
 # --- Windows packaging ------------------------------------------------------
 # Stages the payload tree the Inno Setup script packages. Pure file copying, so
 # it runs anywhere — but it CANNOT supply the bundled OpenStudio: the SDK in a
 # Linux dev container is the Linux build, and the installer needs the Windows
 # one. That has to be fetched and unpacked separately (see OPENSTUDIO_WINDOWS).
 namespace :windows do
-  STAGE = ENV.fetch('STAGE_DIR', 'packaging/windows/stage')
+  # Absolute from the start: the copy loop joins this with the repo root, and an
+  # absolute STAGE_DIR joined onto a root yields a mangled in-repo path.
+  STAGE = File.expand_path(ENV.fetch('STAGE_DIR', 'packaging/windows/stage'))
 
   # The priced RS-Means-derived tables are NOT redistributed. Costing still
   # works — the machinery and the unpriced sheets ship — but the user points
@@ -140,7 +152,7 @@ namespace :windows do
         src = File.join(root, dir, rel)
         next unless File.file?(src)
 
-        dest = File.join(root, STAGE, 'gems', dir, rel)
+        dest = File.join(STAGE, 'gems', dir, rel)
         FileUtils.mkdir_p(File.dirname(dest))
         FileUtils.cp(src, dest)
         total += 1
@@ -151,6 +163,11 @@ namespace :windows do
     # Sample + weather, taken from the shared fixtures.
     fixtures = 'openstudio-hvac/test/fixtures'
     FileUtils.mkdir_p(["#{STAGE}/samples", "#{STAGE}/weather", "#{STAGE}/bin"])
+    # The sample set: one building, many HVAC systems (see
+    # openstudio-necb/scripts/generate_samples.rb). Generated rather than
+    # committed — they are derived from the fixture and the catalog.
+    system(RbConfig.ruby, 'openstudio-necb/scripts/generate_samples.rb',
+           File.join(STAGE, 'samples')) || abort('sample generation failed')
     FileUtils.cp("#{fixtures}/5ZoneNoHVAC.osm", "#{STAGE}/samples/")
     Dir.glob("#{fixtures}/weather/CAN_ON_Toronto*.{epw,ddy,stat}").each { |f| FileUtils.cp(f, "#{STAGE}/weather/") }
 

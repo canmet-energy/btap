@@ -400,17 +400,30 @@ module OpenStudioNECB
     # BESIDE the .epw: attach_weather! needs the design days, and Climate.hdd18
     # reads the .stat next to the EPW before falling back to Table C-1.
     module Weather
-      # Beside the staged tree (bin/../weather) in an install, and beside the
-      # shared fixtures in a source checkout.
-      SEARCH = [
-        File.expand_path('../../../weather', __dir__),
-        File.expand_path('../../../openstudio-hvac/test/fixtures/weather', __dir__)
-      ].freeze
+      # Where to look for bundled weather, most authoritative first.
+      #
+      # The relative depths are NOT interchangeable and both are needed —
+      # __dir__ is <root>/openstudio-necb/lib/openstudio_necb, so:
+      #   3 up = <root>            -> the source checkout's sibling gem dirs
+      #   4 up = <install root>    -> the packaged tree, where the gems sit one
+      #                               level deeper under gems/
+      # Shipping only the 3-up form made --list-cities report "none" on a real
+      # Windows install while every Linux test passed, because in a checkout the
+      # openstudio-hvac fixtures path answered instead. Layout-specific paths
+      # need a test per LAYOUT, not per platform.
+      def self.search
+        [ENV.fetch('NECB_HOME', nil)&.then { |h| File.join(h, 'weather') },
+         File.expand_path('../../../../weather', __dir__),
+         File.expand_path('../../../weather', __dir__),
+         File.expand_path('../../../openstudio-hvac/test/fixtures/weather', __dir__)].compact
+      end
 
-      def self.dirs = SEARCH.select { |d| Dir.exist?(d) }
+      def self.dirs = search.select { |d| Dir.exist?(d) }
 
+      # Earlier directories win: NECB_HOME is what the launcher actually set,
+      # so it must not be shadowed by a checkout path that happens to exist.
       def self.available
-        dirs.flat_map { |d| Dir.glob(File.join(d, '*.epw')) }
+        dirs.reverse.flat_map { |d| Dir.glob(File.join(d, '*.epw')) }
             .to_h { |f| [city_of(f), f] }
       end
 
