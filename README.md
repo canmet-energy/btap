@@ -164,9 +164,10 @@ As generated today, the rollup reports:
 
 | | |
 |---|---|
-| implemented | **57** |
-| partial — implemented with a declared gap | **23** |
-| not implemented | **3** |
+| implemented | **59** |
+| partial — implemented with a declared gap | **22** |
+| not implemented | **1** |
+| field / document verification — no model can answer these | **7** |
 | satisfied by construction (the reference is a clone of the proposed) | 5 |
 | host or other-gem scope | 13 |
 | cross-gem delegations | 13 |
@@ -208,9 +209,15 @@ Stated plainly, because a compliance tool that hides these is worse than useless
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
   modelled.** A plant drawing on more than one energy source passes into the
   reference unchanged rather than being apportioned.
-- **Three articles are not implemented at all**: air leakage (3.2.4.1), lighting
-  controls in storage garages (4.2.2.2), and service-water controls, piping
-  insulation, pools and booster heaters (6.2.3–6.2.7).
+- **One article is not implemented**: lighting controls in storage garages
+  (4.2.2.2).
+- **Seven requirements are verified outside the model**, not by it — the
+  whole-building air-leakage test (3.2.4.1, 3.2.4.2), service-water piping
+  insulation and heat trace (6.2.3.1, 6.2.4.3), fixture flow limits (6.2.6),
+  radiant space-temperature control, and the choice of climatic data set. These
+  are code requirements on the *building*; an energy model has nothing to
+  inspect. They are declared on every run so a reviewer sees them accounted for
+  rather than absent.
 - **Vintages 2020 and 2025 only.** 2011–2017 are not supported.
 - **Costing is off unless you supply priced data.** The installer ships no
   priced cost tables; `--costs-csv` takes your own.

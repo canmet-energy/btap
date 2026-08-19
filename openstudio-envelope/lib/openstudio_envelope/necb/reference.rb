@@ -338,6 +338,17 @@ module OpenStudioEnvelope
                                         100 * (proposed_total_l_s / code_total_l_s - 1)),
                      article: '8.4.3.3.(3)-(4)', ruling: 'D-19 D-21')
         end
+        # State the assumption to the AHJ rather than leaving it implicit. 3.2.4.2
+        # is a TEST on the finished building, so this number is an assumption the
+        # model makes on the reader's behalf until someone measures it — say so
+        # where they will see it, not only in the coverage manifest (D-76).
+        audit.info(:reference,
+                   format('airtightness ASSUMED at the untested 3.2.4.2. default of %.2f L/(s.m2) @ 75 Pa ' \
+                          '— PENDING FIELD VERIFICATION by a whole-building ASTM E3158 test; substitute the ' \
+                          'measured rate once tested', AIR_LEAKAGE_I75),
+                   inputs: { assumed_i75_l_per_s_m2: AIR_LEAKAGE_I75, test_standard: 'ASTM E3158',
+                             pressure_pa: 75, verified: false },
+                   article: '3.2.4.2.', ruling: 'D-76')
         audit.decision(:reference, 'air-leakage default applied',
                        inputs: { i75_l_per_s_m2: AIR_LEAKAGE_I75, flow_exponent: AIR_LEAKAGE_N,
                                  envelope_area_m2: envelope_area.round(1), ag_wall_area_m2: wall_area.round(1),

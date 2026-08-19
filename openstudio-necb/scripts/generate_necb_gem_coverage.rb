@@ -71,7 +71,7 @@ GEMS.each do |gem|
       records << { gem: gem, vintage: vintage, article: art['article'].to_s,
                    canonical: canonical(art['article'], vintage),
                    title: art['title'].to_s, status: art['status'].to_s,
-                   how: art['how'], gaps: art['gaps'] }
+                   how: art['how'], gaps: art['gaps'], gap_owner: art['gap_owner'] }
     end
   end
 end
@@ -126,8 +126,17 @@ out << '(D-09).'
 out << ''
 
 total = rows.size
+# gap_owner: "modeller" means NO model change can ever clear the entry — it is
+# verified by field test or from documents (D-09, D-76). Those render as an info
+# scope note, NOT a warning, so they must not sit under a heading that says
+# "warns every run": that heading was false for five of six rows the moment the
+# air-leakage articles were reclassified.
+FIELD_VERIFIED_HEADING = 'Field / document verification (modeller scope, does not warn)'.freeze
+field_verified = rows.select { |r| r[:gap_owner].to_s == 'modeller' }
+                     .sort_by { |r| [r[:gem], article_sort_key(r[:canonical])] }
+
 STATUS_GROUPS.each do |status, heading|
-  group = rows.select { |r| r[:status] == status }
+  group = rows.select { |r| r[:status] == status && r[:gap_owner].to_s != 'modeller' }
            .sort_by { |r| [r[:gem], article_sort_key(r[:canonical])] }
   next if group.empty?
 
@@ -136,6 +145,22 @@ STATUS_GROUPS.each do |status, heading|
   out << '| Gem | Vintage | Article | Title | Notes |'
   out << '|---|---|---|---|---|'
   group.each do |r|
+    out << "| #{r[:gem]} | #{vintage_label(r[:vintages])} | #{article_label(r)} | #{r[:title]} | #{notes(r)} |"
+  end
+  out << ''
+end
+
+unless field_verified.empty?
+  out << "## #{FIELD_VERIFIED_HEADING} (#{field_verified.size})"
+  out << ''
+  out << 'Requirements the code imposes on the BUILDING that no energy model can'
+  out << 'answer — a blower-door test, an installed control device, a pipe'
+  out << 'insulation thickness. They are declared so a reviewer sees them'
+  out << 'accounted for, and are verified from drawings, submittals or on site.'
+  out << ''
+  out << '| Gem | Vintage | Article | Title | Notes |'
+  out << '|---|---|---|---|---|'
+  field_verified.each do |r|
     out << "| #{r[:gem]} | #{vintage_label(r[:vintages])} | #{article_label(r)} | #{r[:title]} | #{notes(r)} |"
   end
   out << ''

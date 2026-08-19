@@ -105,6 +105,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-73** — Perimeter zones merge by orientation via zone membership _(runtime_unwired)_
 - **D-74** — Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope _(process)_
 - **D-75** — Correction to D-74: thermostats gate the envelope pass, not construction seeding _(process)_
+- **D-76** — Field-test articles are declared modeller scope, and the assumed value is stated _(runtime)_
 
 <!-- TOC END -->
 
@@ -4100,3 +4101,48 @@ messages describe a symptom, not necessarily the cause. Cf. [[verify-before-asse
 
 - **Who/when:** Claude, 2026-08-12, prompted by phylroy asking whether
   openstudio-envelope has a construction-adding function.
+
+## D-76
+
+**Decided:** Articles whose compliance is established by a FIELD TEST, not by a
+model, are declared `not_implemented` with `gap_owner: "modeller"` rather than
+left as bare `not_implemented` — and where the model assumes the tested value,
+it says so in the audit, at the point of use.
+
+The two articles this applies to today are **3.2.4.1.** (continuous air barrier
+system) and **3.2.4.2.** (the 1.50 L/(s·m²) @ 75 Pa normalized rate, measured
+per ASTM E3158 on the constructed building, pressurized and depressurized,
+averaged). Neither is answerable from an `.osm`: there is no air-barrier
+continuity to inspect and no measured rate to read. What the model does have is
+the *assumption* — `AIR_LEAKAGE_I75 = 1.50` drives the infiltration
+coefficients through `apply_air_leakage_default`.
+
+**Why not leave them as plain `not_implemented`.** That status renders **✗ fail**
+in the report's coverage appendix and raises a warning on every run. For a gap
+the software could close, that is exactly right. For a field test it is a
+check-engine-light that can never be cleared — the failure mode D-09 was written
+about, where a permanent ▲/✗ trains readers to ignore the ones that matter. The
+status stays honest (the software does not implement it); `gap_owner: "modeller"`
+records WHO can close it, and the entry renders ⓘ *modeller scope*.
+
+**Why not `host_scope`.** Considered and rejected. Every existing `host_scope`
+entry means "a sibling gem or the umbrella owns this", and `Checklist.covered?`
+is computed from the run's own audit — so a `host_scope` article that nothing
+else covers still emits a checklist warning reading *"Delegated but NOT covered
+in this run"*, plus a rollup row saying `(none in family)`. It would have
+demoted ✗ to ▲ while asserting family ownership that does not exist.
+
+**The assumption is now stated where it is used.** `apply_air_leakage_default`
+emits an info entry naming the assumed rate, the test standard, the pressure and
+`verified: false`, cited to 3.2.4.2. Previously the number reached the AHJ only
+as an input on a different decision line, and 3.2.4.2. — the article the code's
+own deviation warning names ("only a 3.2.4.2 airtightness test justifies a
+different value") — had **no manifest entry in any gem**. It does now.
+
+**Scope limit:** this is not a licence to soften real gaps. `gap_owner:
+"modeller"` is for requirements no model change can ever satisfy. A rule the
+software could implement and has not stays a bare `partial`/`not_implemented`
+and keeps warning. Cf. D-09.
+
+- **Who/when:** Claude, 2026-08-19, prompted by phylroy asking what the three
+  not-implemented articles are and whether they can be implemented.
