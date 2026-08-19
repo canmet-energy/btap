@@ -26,6 +26,26 @@ simulate** — the domain gems are SDK-only by contract.
 
 ## Key facts / traps
 
+- **`Remote` is IMPLEMENTED now** (2026-08-19), not a stub. Endpoint/key come
+  from `HBIX_SIM_ENDPOINT` / `HBIX_API_KEY` (or constructor args); the transport
+  is injectable, so `test_remote.rb` exercises the whole backend offline. The
+  key is never logged, echoed, or put in a raised message — errors name the host.
+- **Never shell out with a string; use the argv form.** Both CLI probes used
+  `system('openstudio ... > /dev/null 2>&1')`, which is unresolvable on Windows
+  cmd, so `openstudio_cli?` answered FALSE there with the CLI right in front of
+  it. The `run` call interpolated the run dir UNQUOTED, so any path with a space
+  (the Windows norm) split the `-w` argument and sent the log to a stray file —
+  exit 0, silent misdirection. `system(cli, 'run', '-w', path, out:, err:)` has
+  no shell, so neither can recur. Pinned by a Linux test using a dir with a space.
+- **`OpenStudio.getOpenStudioCLI` gives the absolute path of the binary that
+  loaded the SDK** — immune to PATH, correct on every platform, and the reason
+  `openstudio_cli_path` needs no registry probe. `ENV['OPENSTUDIO_CLI']` wins
+  over it as an escape hatch; a blank value is ignored, not honoured.
+- **`Runner.default_backend`** is process-wide and exists because the umbrella
+  calls `run_energyplus!` at ~8 sites — that is how `--backend remote` reaches
+  them all without threading a parameter through every compliance phase. A
+  per-call `backend:` still wins. Not thread-safe by design; forked children set
+  their own.
 - **`engine_version:` must match the model's version on the remote service** —
   version translation is FORWARD-ONLY; a server defaulting to an older
   OpenStudio cannot open a newer OSM (hard-won).

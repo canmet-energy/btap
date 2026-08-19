@@ -129,6 +129,33 @@ the adjudicated decision(s) governing the code path, so a report reader learns
 
 ## Key facts / traps
 
+- **The CLI is `exe/necb-compliance.rb`; the logic is `lib/openstudio_necb/cli.rb`.**
+  Logic lives in `lib/` so it is testable in-process — `CLI.run(argv, out:, err:)`
+  returns an Integer and never calls exit. The `.rb` extension on the entry point
+  is **mandatory, not stylistic**: the Windows launcher runs it through
+  `openstudio execute_ruby_script`, which loads the file with `require`, and
+  `require` will not load an extensionless path.
+- **The shim must `exit!`, not `exit`.** Under `execute_ruby_script` the file is
+  `require`d, so a `SystemExit` from `exit` unwinds through the CLI's rescue and
+  is reported as a crash-with-backtrace on a perfectly normal exit 6. `exit!`
+  skips at_exit and does not flush, so flush both streams first.
+- **`--quick` must never print COMPLIANT.** `evaluate` returns a boolean
+  regardless of run period and only sets `report['annual'] = false` plus a
+  warning, so the CLI treats that flag as overriding the boolean and exits 6.
+  A week-long run passed off as a determination would be the worst bug this tool
+  could have.
+- **The verdict is decided on `total_site_kwh`, not EUI** (`Compliance.evaluate`).
+  The CLI prints both, but phrases the margin on total site energy — labelling an
+  EUI comparison as the verdict diverges the moment floor areas differ.
+- **`PreflightError < ArgumentError`** distinguishes "repair the MODEL" from
+  "repair the CALL" (bad weather path, unresolvable HDD). Subclassing keeps every
+  existing `rescue ArgumentError` working; it replaced message-matching on the
+  string `'pre-flight'`, which two call sites were doing. Rescue it BEFORE
+  `ArgumentError` or the parent swallows it.
+- Exit codes are the diagnosis: `0` compliant, `1` not compliant (a verdict, not
+  an error), `2` usage, `3` pre-flight refusal, `4` simulation, `5` internal,
+  `6` no determination.
+
 - Sentence (4) unmet cooling is VACUOUS when the proposed has no mechanical
   cooling (passive overheating ≠ capacity shortfall) — audited determination.
 - Capacity iteration (D-43) is per THERMAL BLOCK: failing zones (per-zone

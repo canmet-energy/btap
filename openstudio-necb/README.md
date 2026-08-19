@@ -181,6 +181,61 @@ conformance check passes; otherwise `report['eui_path']` reports
 `computed: false` with the mismatch list — unless `run_normalized: true`
 authorizes the extra normalized run.
 
+## Command line
+
+`exe/necb-compliance.rb` wraps `performance_compliance` for people who would
+rather not write Ruby. One model in; EUIs, a verdict, and the HTML report out.
+
+```bash
+ruby openstudio-necb/exe/necb-compliance.rb model.osm --epw toronto.epw
+ruby openstudio-necb/exe/necb-compliance.rb model.osm --city toronto --quick
+ruby openstudio-necb/exe/necb-compliance.rb --list-cities
+ruby openstudio-necb/exe/necb-compliance.rb --help
+```
+
+Output is deliberately **ASCII-only** (the Windows console is CP437/CP1252), and
+the margin is reported on **total site energy**, because that is what
+`Compliance.evaluate` compares — not EUI, which is shown alongside it.
+
+**Exit codes** carry the diagnosis, so a script can branch on them:
+
+| | |
+|---|---|
+| 0 | compliant |
+| 1 | NOT compliant — a verdict, not an error |
+| 2 | usage or input error |
+| 3 | model rejected by the NECB pre-flight |
+| 4 | simulation failure |
+| 5 | internal error |
+| 6 | no determination (`--quick`, `--simulate sizing\|none`) |
+
+`--quick` shortens the run period to one week so the pipeline can be watched in
+minutes. It is **not** a code determination: `evaluate` still returns a boolean,
+so the CLI overrides it, prints a banner, and exits 6 rather than letting a
+week-long run be mistaken for a year.
+
+**Untagged models.** The pre-flight refuses any model whose space types do not
+resolve against the NECB catalog — before any simulation. BTAP and
+openstudio-standards archetypes already carry the tags; hand-built models
+usually do not. The refusal names each unresolved type with suggestions, and the
+on-ramp takes either a uniform type or a per-space map:
+
+```bash
+--space-type "Space Function/Office enclosed > 25 m2"
+--space-type-map mymap.json     # {"Space 101": ["Space Function", "Office enclosed > 25 m2"]}
+```
+
+**Remote execution.** `--backend remote` offloads the EnergyPlus runs to the
+HBIX simulation service, reading `HBIX_SIM_ENDPOINT` and `HBIX_API_KEY` from the
+environment. It sets `OpenStudioSimulation::Runner.default_backend`, because the
+umbrella calls `run_energyplus!` at ~8 sites and threading a parameter through
+every phase would be worse. Remote is a **scale** play (wide sweeps), not a
+latency win: one determination is 4–7 sequential simulations, each now carrying
+an upload, a queue wait and a download.
+
+**Costing** is off unless `--costs-csv` points at a priced table. The vendored
+sheets are placeholders and the Windows package omits them entirely.
+
 ## Options reference
 
 All `performance_compliance` keywords (YARD in `compliance.rb` is the

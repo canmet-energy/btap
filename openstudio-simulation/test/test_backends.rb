@@ -1,3 +1,4 @@
+require 'tmpdir'
 require_relative 'test_helper'
 
 # Proves the execution abstraction / local-vs-cloud seam WITHOUT EnergyPlus:
@@ -105,20 +106,99 @@ class TestBackends < Minitest::Test
     assert called, 'default backend was not an OpenStudioSimulation::Local instance'
   end
 
+  # --- Windows portability, pinned by Linux tests -------------------------
+  #
+  # There is no Windows CI job, so these are what keep the Windows fixes from
+  # rotting. Each one fails against the pre-fix code on Linux too.
+
+  # `openstudio_cli_path` must prefer an explicit override, then ask the SDK for
+  # the absolute path of the binary that loaded it. The SDK answer is the only
+  # one that works on Windows, where the CLI is not reliably on PATH.
+  def test_cli_path_prefers_the_explicit_override
+    with_env('OPENSTUDIO_CLI', '/somewhere/openstudio.exe') do
+      assert_equal('/somewhere/openstudio.exe', OpenStudioSimulation.openstudio_cli_path)
+    end
+  end
+
+  def test_cli_path_falls_back_to_the_sdk_absolute_path
+    with_env('OPENSTUDIO_CLI', nil) do
+      path = OpenStudioSimulation.openstudio_cli_path
+      skip('SDK too old to answer getOpenStudioCLI') if path == 'openstudio'
+      assert(File.exist?(path), "SDK reported a CLI path that does not exist: #{path}")
+      assert(File.absolute_path?(path), 'must be absolute — PATH is not searched on Windows')
+    end
+  end
+
+  # A blank override must not win over the SDK — an empty env var is how a
+  # launcher script spells "unset", and treating it as a path yields the
+  # baffling "tried ''" message.
+  def test_blank_override_is_ignored
+    with_env('OPENSTUDIO_CLI', '') do
+      refute_equal('', OpenStudioSimulation.openstudio_cli_path)
+    end
+  end
+
+  def test_missing_cli_is_reported_with_the_path_it_tried
+    with_env('OPENSTUDIO_CLI', '/nonexistent/openstudio') do
+      backend = Local.new
+      refute(backend.openstudio_cli?)
+      e = assert_raises(RuntimeError) { backend.execute(Dir.mktmpdir) }
+      assert_match(%r{/nonexistent/openstudio}, e.message, 'must name what it tried')
+      assert_match(/OPENSTUDIO_CLI/, e.message, 'must name the escape hatch')
+    end
+  end
+
+  # THE quoting regression. The old shell string interpolated `dir` unquoted, so
+  # `-w /path/with space/in.osw` split into two arguments and `-w` received a
+  # truncated path — silently, with the cli.log redirect landing in a stray file
+  # named after the first half. Windows paths contain spaces as a matter of
+  # course (C:\Program Files\...), so this is the fix that matters most there.
+  def test_run_directory_containing_a_space_still_simulates
+    skip('openstudio CLI not available') unless Runner.openstudio_cli?
+
+    Dir.mktmpdir do |tmp|
+      dir = File.join(tmp, 'a directory with spaces', 'run')
+      model = load_fixture
+      Runner.attach_weather!(model, epw: EPW, ddy: DDY)
+      run_dir = Runner.run_energyplus!(model, dir, sizing_only: true)
+
+      assert(File.exist?(File.join(run_dir, 'eplusout.sql')), 'no SQL — the path split')
+      assert(Runner.clean_run?(run_dir))
+      assert(File.exist?(File.join(dir, 'cli.log')), 'cli.log landed outside the run dir')
+    end
+  end
+
+  def with_env(key, value)
+    had = ENV.key?(key)
+    previous = ENV[key]
+    value.nil? ? ENV.delete(key) : ENV[key] = value
+    # Both probes memoize, and the memo outlives an env change within a process.
+    Runner.instance_variable_set(:@openstudio_cli, nil)
+    yield
+  ensure
+    had ? ENV[key] = previous : ENV.delete(key)
+    Runner.instance_variable_set(:@openstudio_cli, nil)
+  end
+
   # The abstraction's base class documents the interface by raising.
   def test_backend_base_execute_raises_not_implemented
     err = assert_raises(NotImplementedError) { Backend.new.execute('/nope') }
     assert_match(/execute/, err.message)
   end
 
-  # Remote is a documented stub — it raises with the contract to implement.
-  def test_remote_execute_raises_with_contract
+  # Remote is implemented now (see test_remote.rb for the transport-level
+  # coverage). Here we only pin the two things the SEAM guarantees: it obeys the
+  # same "dir must already be prepared" contract as Local, and it refuses to run
+  # unconfigured rather than emitting a confusing network error.
+  def test_remote_requires_a_prepared_directory
     remote = Remote.new(endpoint: 'https://example.test', api_key: 'k')
-    err = assert_raises(NotImplementedError) { remote.execute('/nope') }
-    assert_match(/documented stub/i, err.message)
-    assert_match(/UPLOAD/,   err.message)
-    assert_match(/DOWNLOAD/, err.message)
-    assert_match(/eplusout\.sql/, err.message)
+    err = assert_raises(RuntimeError) { remote.execute('/nope') }
+    assert_match(/in\.osm is missing/, err.message)
+  end
+
+  def test_remote_without_configuration_refuses_before_touching_the_network
+    err = assert_raises(RuntimeError) { Remote.new(endpoint: nil, api_key: nil).execute('/nope') }
+    assert_match(/not configured/, err.message)
   end
 
   # Sanity: Local and Remote really are Backends (the seam is polymorphic).

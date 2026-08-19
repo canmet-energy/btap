@@ -11,11 +11,32 @@ module OpenStudioSimulation
   module Runner
     module_function
 
-    # @return [Boolean] is the `openstudio` CLI on PATH? (convenience probe;
+    # @return [Boolean] is the `openstudio` CLI runnable? (convenience probe;
     #   the Local backend runs its own check before executing)
+    #
+    # Delegates rather than duplicating: this probe and Local's drifted apart
+    # once already, and both carried the same `> /dev/null` POSIX-ism that made
+    # them answer "no CLI" on Windows.
     def openstudio_cli?
-      @openstudio_cli = system('openstudio openstudio_version > /dev/null 2>&1') if @openstudio_cli.nil?
+      @openstudio_cli = Local.new.openstudio_cli? if @openstudio_cli.nil?
       @openstudio_cli
+    end
+
+    # The process-wide default backend.
+    #
+    # The umbrella calls run_energyplus! at ~8 sites without a `backend:`, so a
+    # process-wide default is what lets `--backend remote` reach all of them
+    # without threading a parameter through performance_compliance and every
+    # phase between. A per-call `backend:` still wins.
+    #
+    # Not thread-safe by design and not meant to be: it is set once at startup
+    # from a CLI flag. Forked children (the sweep script) must set their own.
+    def default_backend
+      @default_backend ||= Local.new
+    end
+
+    def default_backend=(backend)
+      @default_backend = backend
     end
 
     # Attach an EPW + its design days (required before any sizing run).
@@ -60,10 +81,11 @@ module OpenStudioSimulation
     # @param sizing_only [Boolean] design-day sizing run only
     # @param run_period [Hash, nil] { begin_month:, begin_day:, end_month:, end_day: }
     #   override for the weather run (tests use one week; code compliance is annual)
-    # @param backend [Backend] execution backend — Local (CLI) by default; swap
+    # @param backend [Backend, nil] execution backend — nil takes
+    #   `default_backend` (Local unless it has been set); swap
     #   for Remote (or any Backend) to run elsewhere without changing this method
     # @return [String] the run directory (contains eplusout.err / eplusout.sql)
-    def run_energyplus!(model, dir, sizing_only: false, run_period: nil, backend: Local.new)
+    def run_energyplus!(model, dir, sizing_only: false, run_period: nil, backend: nil)
       FileUtils.mkdir_p(dir)
       sim = model.getSimulationControl
       sim.setDoZoneSizingCalculation(true)
@@ -87,7 +109,7 @@ module OpenStudioSimulation
       osw.setSeedFile(File.expand_path("#{dir}/in.osm"))
       osw.saveAs("#{dir}/in.osw")
 
-      backend.execute(dir)
+      (backend || default_backend).execute(dir)
 
       model.setSqlFile(OpenStudio::SqlFile.new(OpenStudio::Path.new("#{dir}/run/eplusout.sql")))
       "#{dir}/run"

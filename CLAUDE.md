@@ -139,6 +139,18 @@ degraded silently into a container that could verify nothing. `gh` has no
 `--insecure` escape hatch (unlike git's `http.sslVerify=false`), so certs are a
 prerequisite for it, not an ordering preference.
 
+## The command-line tool
+
+`openstudio-necb/exe/necb-compliance.rb` (logic in `lib/openstudio_necb/cli.rb`)
+turns the whole pipeline into one command: `.osm` in, EUIs + verdict + HTML
+report out. `packaging/windows/` builds a Windows installer that bundles its own
+OpenStudio, so the recipient installs one thing; `rake windows:stage` assembles
+the payload from each gemspec's own `spec.files`.
+
+The bundled-OpenStudio decision is why the launcher has no CLI detection, no
+version gate and no PATH edit — and it removes version skew, which used to fail
+opaquely ~20 minutes into a run.
+
 ## CI
 
 `.github/workflows/test.yml`, four jobs. Triggers are `push` to main/develop,
