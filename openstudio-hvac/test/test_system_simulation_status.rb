@@ -20,20 +20,12 @@ require 'json'
 class TestSystemSimulationStatus < Minitest::Test
   STATUS = File.expand_path('fixtures/system_simulation_status.json', __dir__)
 
-  # Known broken, with the root cause. Shrinking this list is the point; it must
-  # never grow without a deliberate decision.
-  KNOWN_BAD = {
-    # the VRF outdoor unit is built without its defrost EIR curve
-    'DOAS with VRF' => :vrf_defrost_curve,
-    'VRF' => :vrf_defrost_curve,
-    'hs08_ccashp_vrf' => :vrf_defrost_curve,
-    'hs13_ashp_vrf' => :vrf_defrost_curve,
-    # the DX heating coil is built without a required performance curve
-    'hs09_ccashp_baseboard' => :dx_heating_curve,
-    'hs11_ashp_pthp' => :dx_heating_curve,
-    'hs12_ashp_baseboard' => :dx_heating_curve,
-    'hs16_ashp_cawhp_fancoils' => :dx_heating_curve
-  }.freeze
+  # Known broken, with the root cause. EMPTY, and the goal is to keep it that
+  # way: every one of the 97 catalog systems produces a model EnergyPlus will
+  # start. It held eight entries until the defrost-curve fix — four VRF systems
+  # and four DX heat-pump systems, all setting Defrost Strategy = ReverseCycle
+  # without the Defrost EIR curve that makes required.
+  KNOWN_BAD = {}.freeze
 
   def setup
     @rows = JSON.parse(File.read(STATUS, encoding: 'UTF-8'))

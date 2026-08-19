@@ -29,6 +29,8 @@ module OpenStudioHVAC
         htg_coil.setName('CoilHeatingDXSingleSpeed_ASHP')
         htg_coil.setDefrostStrategy('ReverseCycle')
         htg_coil.setDefrostControl('OnDemand')
+        # REQUIRED once the strategy is ReverseCycle — see Curves.defrost_eir_ft
+        htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(Curves.defrost_eir_ft(model))
         htg_coil.setCrankcaseHeaterCapacity(1.0e-6)
 
         supp_coil = Coils.heating_coil(model, supp_htg_fuel, always_on, hw_loop: hw_loop)
@@ -67,6 +69,7 @@ module OpenStudioHVAC
           pthp_htg.setName('CoilHeatingDXSingleSpeed_PTHP')
           pthp_htg.setDefrostStrategy('ReverseCycle')
           pthp_htg.setDefrostControl('OnDemand')
+          pthp_htg.setDefrostEnergyInputRatioFunctionofTemperatureCurve(Curves.defrost_eir_ft(model))
           pthp_htg.setCrankcaseHeaterCapacity(1.0e-6)
 
           pthp_supp = OpenStudio::Model::CoilHeatingElectric.new(model, always_on)
