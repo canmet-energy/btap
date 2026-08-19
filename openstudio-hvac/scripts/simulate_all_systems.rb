@@ -28,7 +28,7 @@ require 'openstudio'
 
 # Every core but a few: the reserve covers the parent, the OS, and the
 # EnergyPlus child each job spawns, which the job slot does not account for.
-DEFAULT_JOBS = [Etc.nprocessors - 4, 1].max
+DEFAULT_JOBS = [Etc.nprocessors - 4, 2].max
 
 ROOT = File.expand_path('../..', __dir__)
 %w[audit hvac loads simulation].each { |g| require File.expand_path("openstudio-#{g}/lib/openstudio_#{g}", ROOT) }

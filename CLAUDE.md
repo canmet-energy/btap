@@ -160,8 +160,11 @@ every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
   `openstudio-audit` suite, and the coverage-doc gate: it regenerates both
   generated documents and demands a clean tree.
 - **`test`** — matrix of the eight SDK gems in `nrel/openstudio:3.11.0`,
-  `fail-fast: false`, `TBD_REQUIRED=1`. The envelope leg installs the pinned tbd
-  triplet first and asserts the ACTIVATED versions equal the lock.
+  `fail-fast: false`, `TBD_REQUIRED=1`. Each leg runs `rake test:gem[<gem>]`,
+  which forks the gem's files rather than running them one at a time — the
+  matrix parallelizes across gems, this parallelizes within one. The envelope
+  leg installs the pinned tbd triplet first and asserts the ACTIVATED versions
+  equal the lock.
 - **`verify`** — decisions-registry drift + `rake necb:verify`, same container.
 - **`parity`** — the eleven gates with `LEGACY_PIN_REQUIRED=1`, cached on
   `legacy_pin/REF` because it clones the ~4.6 GB fork.
@@ -174,10 +177,12 @@ also names `schedule`, but `on:` declares no `schedule:` trigger, so that half
 never fires. Dispatch it by hand whenever you bump `legacy_pin/REF`; that is the
 only moment the oracle can move under you.
 
-Costs are why parity is not on every push: a run is ~24 runner-minutes (~30 with
-parity) against the org's Team-plan allowance, and `test (openstudio-hvac)` is
-9–11 of them — more than the other seven gem suites combined. The repo is
-private, so those minutes are billed.
+Costs are why parity is not on every push: a run was ~24 runner-minutes (~30
+with parity) against the org's Team-plan allowance, and `test (openstudio-hvac)`
+was 9–11 of them — more than the other seven gem suites combined. The repo is
+private, so those minutes are billed. `rake test:gem` cuts that leg; how much
+depends on the runner's core count, which the job now prints so the next person
+does not have to guess (locally, 45 files drop from ~10 min to ~150 s).
 
 ## Open work
 
