@@ -107,15 +107,65 @@ already broken in a *packaged* gem. Pre-existing, not extraction fallout.
 priced costing CSVs.** Now declared in both gemspecs and resolved via the
 installed gem first, relative path second. Do not "simplify" that back.
 
+**The tbd triplet is pinned by `legacy_pin/Gemfile.lock`, not by any gemspec
+constraint.** The suites run under plain `ruby`, so gemspec dependencies are
+never resolved — tbd was absent from the devcontainer AND from CI, and the one
+test proving the NECB 3.1.1.7 uprate/derate math skipped in both while the
+summary line stayed green. The version is not a detail: tbd 3.5.2 / osut 0.8.2
+and tbd 3.6.0 / osut 0.9.1 land 43% apart on the same wall, and BOTH pass the
+unit test — only a parity comparison ever catches it. `ruby
+legacy_pin/tbd_triplet.rb` prints the three in dependency order (topolys, osut,
+tbd — resolving tbd first pulls the newest osut and defeats the pin) as valid
+`gem install` arguments. `TBD_REQUIRED=1` turns the skip into a failure.
+
+**One MCP key, and `set -a` is load-bearing.** `HBIX_API_KEY` covers all six
+NRCan MCP servers and both Ruby scripts that call them directly;
+`HBIX_MCP_BASE_URL` repoints all six at once. There is deliberately no
+per-server alias for either. The key lives in a gitignored `.env` (template:
+`.env.example`) that `~/.bashrc` auto-loads. A plain `source .env` sets the
+variables without EXPORTING them, so Claude Code — a child process — expands
+`${HBIX_API_KEY}` in `.mcp.json` to nothing and all six servers send an empty
+`X-API-Key`. That surfaces as an opaque 403, never as a missing-key message.
+The two scripts expand `${VAR}` placeholders themselves and treat an
+unresolvable one as absent, so they fail into the message that names what to set.
+
+**The devcontainer takes its CAs from the HOST, not off the network.**
+`initializeCommand` runs on the host before the container exists and copies
+`/usr/local/share/ca-certificates/*.crt` into `.devcontainer/certs/`
+(gitignored, bind-mounted in). The routine it replaced cloned a certificate repo
+*from GitHub* in order to make GitHub verifiable — circular, and on a
+TLS-intercepting network the clone is precisely what fails, after which it
+degraded silently into a container that could verify nothing. `gh` has no
+`--insecure` escape hatch (unlike git's `http.sslVerify=false`), so certs are a
+prerequisite for it, not an ordering preference.
+
 ## CI
 
-`.github/workflows/test.yml` — `lint` (bare runner, pure Ruby), `test` (matrix of
-the eight SDK gems in `nrel/openstudio:3.11.0`), `verify` (`rake necb:verify` +
-the decisions registry), `parity` (the eleven gates, `workflow_dispatch`/schedule
-only because it clones the ~4.6 GB fork; cached on `legacy_pin/REF`).
+`.github/workflows/test.yml`, four jobs. Triggers are `push` to main/develop,
+every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
+
+- **`lint`** — bare runner, Ruby 3.2.2, no SDK. Orphan-key lint, the SDK-free
+  `openstudio-audit` suite, and the coverage-doc gate: it regenerates both
+  generated documents and demands a clean tree.
+- **`test`** — matrix of the eight SDK gems in `nrel/openstudio:3.11.0`,
+  `fail-fast: false`, `TBD_REQUIRED=1`. The envelope leg installs the pinned tbd
+  triplet first and asserts the ACTIVATED versions equal the lock.
+- **`verify`** — decisions-registry drift + `rake necb:verify`, same container.
+- **`parity`** — the eleven gates with `LEGACY_PIN_REQUIRED=1`, cached on
+  `legacy_pin/REF` because it clones the ~4.6 GB fork.
 
 All four have run green. Parity was verified non-vacuous: 42 runs, 562
 assertions, 0 skips — identical to local.
+
+**`parity` is `workflow_dispatch` ONLY — nothing runs it on a timer.** Its `if:`
+also names `schedule`, but `on:` declares no `schedule:` trigger, so that half
+never fires. Dispatch it by hand whenever you bump `legacy_pin/REF`; that is the
+only moment the oracle can move under you.
+
+Costs are why parity is not on every push: a run is ~24 runner-minutes (~30 with
+parity) against the org's Team-plan allowance, and `test (openstudio-hvac)` is
+9–11 of them — more than the other seven gem suites combined. The repo is
+private, so those minutes are billed.
 
 ## Open work
 
