@@ -22,16 +22,20 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # installed — the flag was effectively dead.) --no-claude opts out.
 INSTALL_CLAUDE=true
 INSTALL_SERENA=false
+INSTALL_WINE=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-claude) INSTALL_CLAUDE=false ;;
     --serena)    INSTALL_SERENA=true ;;
+    --wine)      INSTALL_WINE=true ;;
     -h|--help)
       cat <<'USAGE'
-Usage: setup.sh [--no-claude] [--serena]
+Usage: setup.sh [--no-claude] [--serena] [--wine]
   --no-claude  skip the Claude Code install (it is installed by default)
   --serena     also install uv + the Serena MCP server for code navigation
+  --wine       also install wine + Inno Setup, to build the Windows installer
+               (opt-in: it enables the i386 architecture and pulls ~2 GB)
 USAGE
       exit 0 ;;
     *) echo "unknown option: $1 (try --help)"; exit 1 ;;
@@ -257,6 +261,39 @@ if [ -z "${HBIX_API_KEY:-}" ] || [ "${HBIX_API_KEY:-}" = "your_key" ]; then
   echo "      cp .env.example .env && \$EDITOR .env    (then open a new terminal)"
 else
   echo "   ✅ HBIX_API_KEY is set"
+fi
+
+# ---------------------------------------------------------------------------
+# Wine + Inno Setup, for building packaging/windows into a setup.exe.
+#
+# OPT-IN (--wine), and deliberately so: it enables the i386 architecture and
+# pulls ~2 GB, which every other developer would carry for a step only the
+# packager runs.
+#
+# Two facts that cost time to establish, so do not re-derive them:
+#   * Inno Setup 6's ISCC.exe is 32-bit (PE32, Intel 80386) — hence wine32:i386.
+#     Inno Setup 7 ships a native x64 build that needs no multiarch, but it
+#     REFUSES to install under wine 9 ("does not support the version of Windows")
+#     at every Windows version wine can be made to report, win11 included.
+#   * wine needs a display even for a silent install; xvfb-run supplies one.
+# ---------------------------------------------------------------------------
+if [ "$INSTALL_WINE" = true ]; then
+  echo "🍷 installing wine + Inno Setup (Windows installer toolchain)"
+  sudo dpkg --add-architecture i386
+  sudo apt-get update -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wine wine32:i386 xvfb
+  export WINEPREFIX="$HOME/.wine-innosetup"
+  if [ ! -f "$WINEPREFIX/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe" ]; then
+    IS_EXE="$(mktemp -d)/is6.exe"
+    if curl -sSL -o "$IS_EXE" https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe; then
+      WINEDEBUG=-all xvfb-run -a wine "$IS_EXE" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART >/dev/null 2>&1 || true
+    fi
+  fi
+  if [ -f "$WINEPREFIX/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe" ]; then
+    echo "   ✅ ISCC ready — rake windows:installer"
+  else
+    echo "   ⚠️  Inno Setup did not install; build the installer on Windows instead"
+  fi
 fi
 
 if [ "$INSTALL_SERENA" = true ]; then

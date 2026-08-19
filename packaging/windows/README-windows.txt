@@ -10,6 +10,10 @@ the Article 8.4.1.2 determination with a self-contained HTML report.
 Nothing else needs to be installed. OpenStudio 3.11.0 ships inside this
 package, and it carries its own Ruby and its own EnergyPlus.
 
+It installs PER-USER and needs no administrator rights, so there is no UAC
+prompt and it works on a locked-down machine. Everything lives under one
+directory; nothing is written to system folders or the registry.
+
 Quick start
 -----------
   1. Open the "NECB Compliance (console)" shortcut in the Start menu.
