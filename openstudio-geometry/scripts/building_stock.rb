@@ -45,11 +45,34 @@ module BuildingStock
   class Client
     def initialize(endpoint: nil, api_key: nil, timeout: 60)
       config = mcp_config
-      @endpoint = URI(endpoint || ENV['BUILDING_STOCK_MCP_URL'] || config['url'] ||
-                      raise(Error, "no #{SERVER} url: set BUILDING_STOCK_MCP_URL or configure .mcp.json"))
-      @api_key = api_key || ENV['BUILDING_STOCK_API_KEY'] || config.dig('headers', 'X-API-Key') ||
-                 raise(Error, "no #{SERVER} API key: set BUILDING_STOCK_API_KEY or configure .mcp.json")
+      # One knob, matching the key: HBIX_MCP_BASE_URL moves every server at
+      # once, and the per-server path is ours to append. Checked BEFORE
+      # .mcp.json so a staging base wins over an installed template, and it
+      # keeps "no .mcp.json" supported without hardcoding a host here.
+      @endpoint = URI(
+        endpoint ||
+        (ENV['HBIX_MCP_BASE_URL'] && "#{ENV['HBIX_MCP_BASE_URL'].chomp('/')}/#{SERVER}/mcp") ||
+        expand(config['url']) ||
+        raise(Error, "no #{SERVER} url: set HBIX_MCP_BASE_URL (see .env.example) or install .mcp.json")
+      )
+      # ONE key for all six servers, under one name (see .env.example). No
+      # per-server alias: the servers do not take different keys.
+      @api_key = api_key || ENV['HBIX_API_KEY'] ||
+                 expand(config.dig('headers', 'X-API-Key')) ||
+                 raise(Error, "no #{SERVER} API key: set HBIX_API_KEY (see .env.example)")
       @timeout = timeout
+    end
+
+    # .mcp.json holds ${VAR} and ${VAR:-default} placeholders that Claude Code
+    # expands but this script does not, so expand them here from ENV. nil when a
+    # placeholder has neither a value nor a default — the caller then falls
+    # through to its raise instead of sending the literal string and getting a
+    # bare 403.
+    def expand(value)
+      return nil if value.nil?
+
+      out = value.gsub(/\$\{(\w+)(?::-([^}]*))?\}/) { ENV[Regexp.last_match(1)] || Regexp.last_match(2) || "\0" }
+      out unless out.include?("\0")
     end
 
     def mcp_config

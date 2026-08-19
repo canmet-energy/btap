@@ -3909,7 +3909,8 @@ holds networked fetchers on exactly these terms.
 "the raw REST endpoints + auth headers behind [an agent-facing MCP] are not
 ours to hardcode", while `fetch_necb_8_4_text.rb` calls its MCP happily. The
 rule that satisfies both is HARDCODE NOTHING, RESOLVE AT RUNTIME:
-`BUILDING_STOCK_MCP_URL` / `BUILDING_STOCK_API_KEY`, else `.mcp.json` (which is
+`HBIX_API_KEY` and `HBIX_MCP_BASE_URL` — one key and one base URL for all six
+servers, with no per-server override of either — else `.mcp.json` (which is
 gitignored). The key is never printed, never written into the cache, never
 stamped on a model. `--cache` / `--from-cache` keeps builds reproducible and
 lets CI run with no MCP at all.
