@@ -82,7 +82,12 @@ module OpenStudioHVAC
         model.getCoilHeatingGasMultiStages.sort_by(&:nameString).each { |c| apply_gas_multi(c, tables, audit, totals[c.handle.to_s]) }
         model.getFanVariableVolumes.sort_by(&:nameString).each { |f| apply_fan_power_curve(f, vintage, audit) }
         apply_pump_rules(model, requested_vintage, plant_rules['hydronic_pumps'], audit, proposed: proposed)
-        align_heat_pump_heating_capacity(model, audit)
+        # requested_vintage, NOT vintage: the latter has been remapped to the
+        # effective DATA vintage (2020 tables can back a 2025 run), and the
+        # article number must follow the code edition being complied with. Using
+        # the data vintage would cite 8.4.4.13 on a 2025 run whenever the tables
+        # fall back — the very bug this argument exists to fix.
+        align_heat_pump_heating_capacity(model, audit, requested_vintage)
         audit&.info(:efficiency, 'NECB efficiency pass complete',
                     inputs: { vintage: vintage,
                               boilers: model.getBoilerHotWaters.size,
@@ -668,14 +673,17 @@ module OpenStudioHVAC
       # the RATED heating capacity to the rated cooling capacity realizes the
       # sentence (the -8.3 C 50% point comes from the same curve). Post-sizing:
       # both capacities must be readable; paired coils only (same air loop).
-      def align_heat_pump_heating_capacity(model, audit)
+      # @param requested_vintage [String] the CODE edition ('2020'/'2025'), which
+      #   decides whether the heat-pump article is numbered 8.4.4.13 or 8.4.5.13
+      def align_heat_pump_heating_capacity(model, audit, requested_vintage = '2020')
+        hp_article = requested_vintage.to_s == '2025' ? '8.4.5.13.(2)(c)' : '8.4.4.13.(2)(c)'
         model.getAirLoopHVACs.sort_by(&:nameString).each do |loop_|
           comps = Coils.supply_components(loop_)
           staged_heat = comps.find { |c| c.to_CoilHeatingDXMultiSpeed.is_initialized }
           staged_cool = comps.find { |c| c.to_CoilCoolingDXMultiSpeed.is_initialized }
           if staged_heat && staged_cool
             align_staged_heat_pump(staged_heat.to_CoilHeatingDXMultiSpeed.get,
-                                   staged_cool.to_CoilCoolingDXMultiSpeed.get, audit)
+                                   staged_cool.to_CoilCoolingDXMultiSpeed.get, audit, hp_article)
             next
           end
 
@@ -694,7 +702,7 @@ module OpenStudioHVAC
           audit&.decision(:efficiency, 'heat pump heating capacity pinned to cooling capacity',
                           target: heat.nameString, inputs: { cooling_kw: (cool_w / 1000.0).round(1) },
                           value: "rated heating capacity = #{(cool_w / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
-                          article: '8.4.4.13.(2)(c)', ruling: 'D-22')
+                          article: hp_article, ruling: 'D-22')
         end
       end
 
@@ -705,12 +713,12 @@ module OpenStudioHVAC
       # This pins capacities that were autosized — the article demands a specific
       # capacity, so the same D-22 exception that governs the single-speed coil
       # governs here; the COOLING side stays autosized and drives the pair.
-      def align_staged_heat_pump(heat, cool, audit)
+      def align_staged_heat_pump(heat, cool, audit, hp_article = '8.4.4.13.(2)(c)')
         pairs = heat.stages.zip(cool.stages)
         if pairs.any? { |_, c| c.nil? }
           audit&.warn(:efficiency, "#{heat.nameString}: staged heat pump has MORE heating stages than cooling " \
                                    'stages — 8.4.4.13.(2)(c) alignment applied only to the matched stages',
-                      target: heat.nameString, article: '8.4.4.13.(2)(c)', ruling: 'D-22')
+                      target: heat.nameString, article: hp_article, ruling: 'D-22')
         end
         top = nil
         pairs.each do |heat_stage, cool_stage|
@@ -726,14 +734,14 @@ module OpenStudioHVAC
         if top.nil?
           audit&.warn(:efficiency, "#{heat.nameString}: staged cooling capacity unavailable — 8.4.4.13.(2)(c) " \
                                    'heating=cooling alignment skipped (run sizing first)',
-                      target: heat.nameString, article: '8.4.4.13.(2)(c)', ruling: 'D-22')
+                      target: heat.nameString, article: hp_article, ruling: 'D-22')
           return
         end
         audit&.decision(:efficiency, 'staged heat pump heating capacity pinned to cooling capacity, stage for stage',
                         target: heat.nameString,
                         inputs: { stages: heat.stages.size, cooling_kw: (top / 1000.0).round(1) },
                         value: "top-stage heating capacity = #{(top / 1000.0).round(1)} kW (CAP_FT ~1.0 at 8.3 C)",
-                        article: '8.4.4.13.(2)(c)', ruling: 'D-22 D-46')
+                        article: hp_article, ruling: 'D-22 D-46')
       end
 
       # ---------------- table lookup (legacy model_find_object semantics) ----------------

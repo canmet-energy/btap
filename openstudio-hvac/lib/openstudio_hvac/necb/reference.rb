@@ -264,6 +264,7 @@ module OpenStudioHVAC
       return assignment if assignment.action == :copy_proposed
 
       hp_rule = selection['special_rules']['heat_pump']
+      hp_article = heat_pump_article_base(selection)
       if heat_pump_redirects?(group) && hp_rule['applies_to_systems'].include?(assignment.reference_system)
         audit&.decision(:selection, 'proposed heat pump -> reference is an air-source heat pump (Table 8.4.4.13)',
                         target: group[:zones].join(','),
@@ -276,12 +277,13 @@ module OpenStudioHVAC
         audit&.decision(:selection, 'water-loop heat pump — Table 8.4.4.7.-A selection retained (no ASHP redirect)',
                         target: group[:zones].join(','),
                         inputs: { selected_system: assignment.reference_system },
-                        article: '8.4.4.13.(1); Note A-8.4.4.13', ruling: 'D-37')
+                        article: "#{hp_article}.(1); Note A-#{hp_article}", ruling: 'D-37')
       end
 
       assignment.energy_type = nil
       if assignment.reference_system == 'hp'
-        assignment.energy_type = heat_pump_aux_energy_type(group, facts, hp_rules, proposed_annual, audit)
+        assignment.energy_type = heat_pump_aux_energy_type(group, facts, hp_rules, proposed_annual, audit,
+                                                           article_base: hp_article)
       end
       assignment.energy_type ||= reference_energy_type(group, selection, facts, audit)
       definition = definitions.fetch(assignment.reference_system.to_s)
@@ -1317,7 +1319,21 @@ module OpenStudioHVAC
                      inputs: { zones_pinned: hp_pinned, global_cooling_factor: cool_ref },
                      value: 'per-zone cooling sizing factor 1.0 overrides the global factor (measured: sized DX ' \
                             'capacity identical with the global at 1.10 vs 1.00)',
-                     article: '8.4.4.13.(2)(b)', ruling: 'D-52')
+                     article: "#{heat_pump_article_base(ruleset['selection'] || {})}.(2)(b)", ruling: 'D-52')
+    end
+
+    # The heat-pump article is 8.4.4.13 in 2020 and 8.4.5.13 in 2025. BOTH
+    # rulesets already carry the correct spelling in
+    # selection.special_rules.heat_pump.article, so derive it rather than
+    # hardcoding — a 2025 run was citing the 2020 article number to the AHJ.
+    #
+    # Same trade-off as audit_terminal_secondary_split: the coverage generator
+    # only scans for a QUOTED literal after `article:`, so a computed article is
+    # not picked up as a "Cited at" link. The article is declared in the
+    # article_coverage manifests either way, and citing the wrong number is worse
+    # than citing fewer times.
+    def self.heat_pump_article_base(selection)
+      selection.dig('special_rules', 'heat_pump', 'article').to_s[/\d+\.\d+\.\d+\.\d+/] || '8.4.4.13'
     end
 
     # ==================== 8.4.4.13.(2)(g): the HP auxiliary-fuel election (D-52) ====================
@@ -1349,14 +1365,14 @@ module OpenStudioHVAC
     # @param audit [AuditLog, nil]
     # @return [String, nil] elected reference energy-type variant (e.g. 'gas',
     #   'electric'), or nil when sentence (g) does not elect (proxy applies)
-    def self.heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit)
+    def self.heat_pump_aux_energy_type(group, facts, hp_rules, annual, audit, article_base: '8.4.4.13')
       threshold = (hp_rules || {})['aux_energy_type_threshold_fraction'] || 0.33
       if annual.nil?
         audit&.info(:selection,
                     'no proposed annual data (simulate: :sizing/:none, or the annual run predates this ' \
                     'feature) — the 8.4.4.13.(2)(g) auxiliary-fuel election cannot run; the structural ' \
                     '8.4.4.9.(4) proxy elects the fuel instead',
-                    target: group[:zones].join(','), article: '8.4.4.13.(2)(g)', ruling: 'D-52')
+                    target: group[:zones].join(','), article: "#{article_base}.(2)(g)", ruling: 'D-52')
         return nil
       end
 
@@ -1380,7 +1396,7 @@ module OpenStudioHVAC
                     'the proposed thermal blocks have no terminal or auxiliary heating energy in the annual ' \
                     'run — 8.4.4.13.(2)(g) has nothing to elect; the structural 8.4.4.9.(4) proxy elects the fuel',
                     target: group[:zones].join(','),
-                    inputs: { hp_gj: (hp_j / 1e9).round(2) }, article: '8.4.4.13.(2)(g)', ruling: 'D-52')
+                    inputs: { hp_gj: (hp_j / 1e9).round(2) }, article: "#{article_base}.(2)(g)", ruling: 'D-52')
         return nil
       end
 
@@ -1393,7 +1409,7 @@ module OpenStudioHVAC
                         target: group[:zones].join(','),
                         inputs: { hp_gj: (hp_j / 1e9).round(2), total_gj: (total_j / 1e9).round(2),
                                   share: share.round(3), threshold: threshold, sentence: sentence },
-                        article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+                        article: "#{article_base}.(2)#{sentence}", ruling: 'D-52')
         return nil
       end
 
@@ -1405,7 +1421,7 @@ module OpenStudioHVAC
                     'system variant — the structural 8.4.4.9.(4) proxy elects the fuel instead',
                     target: group[:zones].join(','),
                     inputs: { by_fuel_gj: aux_by_fuel.transform_values { |j| (j / 1e9).round(2) } },
-                    article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+                    article: "#{article_base}.(2)#{sentence}", ruling: 'D-52')
         return nil
       end
       audit&.decision(:selection,
@@ -1418,7 +1434,7 @@ module OpenStudioHVAC
                       inputs: { by_fuel_gj: aux_by_fuel.transform_values { |j| (j / 1e9).round(2) },
                                 hp_gj: (hp_j / 1e9).round(2), share: share.round(3),
                                 sentence: sentence, scope_loops: scope_loops, scope_zone_count: scope_zones.size },
-                      value: variant, article: "8.4.4.13.(2)#{sentence}", ruling: 'D-52')
+                      value: variant, article: "#{article_base}.(2)#{sentence}", ruling: 'D-52')
       variant
     end
 
