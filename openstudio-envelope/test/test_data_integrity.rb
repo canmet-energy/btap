@@ -59,7 +59,7 @@ class TestDataIntegrity < Minitest::Test
       assert_equal vintage, prov['edition']
       assert_match(/MCP/, prov['source'])
       coverage = rules['article_coverage']['articles']
-      assert_equal 16, coverage.size # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
+      assert_equal 17, coverage.size # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
       coverage.each do |art|
         assert_includes valid, art['status'], "#{art['article']}: invalid status"
         assert art['title']

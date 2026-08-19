@@ -152,6 +152,13 @@ module OpenStudioSHW
         audit.decision(:shw, 'service water heating added',
                        inputs: { fuel: fuel, spaces: sizing['spaces_w_dhw'].size },
                        article: '8.4.3.2. (SWH loads)')
+
+        # Section 6.2 prescriptive rules. The booster-heater trigger is keyed on
+        # the same demand this pass just sized, so it is checked here where the
+        # per-space temperatures still exist — auto_size collapses them to one
+        # max_temp_c and the information is gone.
+        Prescriptive.check_booster_heaters(sizing, model, audit)
+        Prescriptive.declare_field_verified(audit)
         loop
       end
 

@@ -218,15 +218,33 @@ class TestReferenceEnvelope < Minitest::Test
     assert_in_delta expected_l_s, installed_l_s, 0.2, 'installed total = code default over the (1)(c) enclosure'
   end
 
-  def test_coverage_emitted_all_16_articles
+  def test_coverage_emitted_all_17_articles
     audit = reference(proposed_model)
     coverage = audit.entries.select { |e| e[:step] == :coverage }
-    assert_equal 16, coverage.size # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage
+    # 14 + 8.4.1.1 (envelope slice) + 8.4.2.9 air leakage + 3.2.4.2 (D-76)
+    assert_equal 17, coverage.size
     ref3 = coverage.find { |e| e[:article] == '8.4.4.3.' }
     assert_equal 'implemented', ref3[:inputs][:status]
     assert_operator ref3[:inputs][:decisions_citing], :>, 0
-    # honest gaps still warn
-    assert(coverage.any? { |e| e[:level] == :warning && e[:article] == '3.2.4.1.' })
+    # Honest gaps still warn — but a FIELD-TEST article is not a modelling gap.
+    # 3.2.4.1/3.2.4.2 are established by a whole-building ASTM E3158 test, so
+    # they carry gap_owner: modeller and render as an info scope note (D-76). A
+    # permanent warning nobody can clear is the failure mode D-09 describes.
+    %w[3.2.4.1. 3.2.4.2.].each do |article|
+      entry = coverage.find { |e| e[:article] == article }
+      refute_nil entry, "#{article} must still be declared"
+      assert_equal :info, entry[:level], "#{article} is field-verified, not a modelling warning"
+      assert_equal 'modeller', entry[:inputs][:gap_owner]
+      assert_equal 'not_implemented', entry[:inputs][:status], 'the status stays honest'
+    end
+    # The softening must not spread. gap_owner is ONLY for requirements no model
+    # change can ever satisfy; a rule this gem could implement and has not must
+    # stay a bare partial/not_implemented and keep warning (D-76 scope limit).
+    # Envelope declares no such rule today — its only gaps are the two field
+    # tests above — so the guard is that nothing ELSE has been given the flag.
+    softened = coverage.select { |e| e[:inputs][:gap_owner] }.map { |e| e[:article] }.sort
+    assert_equal(['3.2.4.1.', '3.2.4.2.'], softened,
+                 'only the ASTM E3158 field-test articles may carry gap_owner')
     assert JSON.parse(audit.to_json).size > 20
   end
 
