@@ -1,8 +1,11 @@
 # CLAUDE.md — the NECB gem family (repository root)
 
 Nine standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems implementing the NECB
-2020/2025 Part 8 performance path. See [README.md](README.md) for the family map
-and the API guide index; **every gem carries its own `CLAUDE.md`** with
+2020/2025 Part 8 performance path. [README.md](README.md) is written for the
+BUILDING ENGINEER — install, run, read the verdict, and what is not implemented;
+the contributor material (family contract, devcontainer, MCP, test suites,
+parity gates) lives in [docs/DEVELOPERS.md](docs/DEVELOPERS.md). Do not put
+developer setup back in the README; **every gem carries its own `CLAUDE.md`** with
 architecture, facade and traps — read that one before working inside a gem.
 This file covers what is true across the family, plus how this repository came
 to exist.
