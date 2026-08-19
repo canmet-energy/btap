@@ -80,3 +80,4 @@ report.json
 # OpenStudio) — all of it derived, none of it source.
 /packaging/windows/stage/
 /packaging/windows/Output/
+/packaging/windows/samples/
