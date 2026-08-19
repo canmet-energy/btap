@@ -1,6 +1,16 @@
 require 'json'
 
 module OpenStudioNECB
+  # Raised when the INPUT MODEL is rejected before any simulation runs: space
+  # types that do not resolve against the NECB catalog, an undeterminable
+  # above-ground storey count, no thermostats, no geometry. Distinct from every
+  # other ArgumentError the pipeline raises (bad weather paths, unresolvable
+  # HDD) because the fix is different — the caller must repair the MODEL, not
+  # the call. Subclasses ArgumentError so existing `rescue ArgumentError`
+  # handlers keep working unchanged; before this existed, callers had to match
+  # on the message text (necb_archetype_sweep.rb did exactly that).
+  class PreflightError < ArgumentError; end
+
   # The NECB Part 8 performance path (Division B, 8.4.1.2, identical intent in
   # 2020 and 2025):
   #   (2) annual energy consumption of the PROPOSED building shall not exceed the
@@ -483,7 +493,7 @@ module OpenStudioNECB
       counts = { spaces: proposed.getSpaces.size, thermal_zones: proposed.getThermalZones.size,
                  surfaces: proposed.getSurfaces.size }
       empty = counts.select { |_, v| v.zero? }.keys
-      raise(ArgumentError, "input model is not simulate-able: it has no #{empty.join(', ')}") unless empty.empty?
+      raise(PreflightError, "input model is not simulate-able: it has no #{empty.join(', ')}") unless empty.empty?
 
       # COMPLIANCE inputs the model must carry: the above-ground storey count
       # drives the Table 8.4.4.7.-A System 3-vs-6 splits, and the downstream
@@ -495,7 +505,7 @@ module OpenStudioNECB
       derivable = proposed.getBuildingStorys.any? { |st| st.spaces.any? { |s| s.zOrigin.to_f >= -0.01 } }
       overridden = building&.transform_keys(&:to_sym)&.key?(:storeys)
       unless !require_storeys || declared.is_initialized || derivable || overridden
-        raise(ArgumentError, 'input model cannot determine its ABOVE-GROUND STOREY COUNT — no ' \
+        raise(PreflightError, 'input model cannot determine its ABOVE-GROUND STOREY COUNT — no ' \
                              'Building.standardsNumberOfAboveGroundStories, no BuildingStory objects with ' \
                              'above-grade spaces, and no building: {storeys:} override. Table 8.4.4.7.-A ' \
                              'reference-system selection depends on it (System 3 vs 6), and the fallback would ' \
@@ -509,7 +519,7 @@ module OpenStudioNECB
 
       with_stat = proposed.getThermalZones.count { |z| !z.thermostatSetpointDualSetpoint.empty? }
       if with_stat.zero?
-        raise(ArgumentError, 'input model is not simulate-able as a building: NO thermal zone carries a ' \
+        raise(PreflightError, 'input model is not simulate-able as a building: NO thermal zone carries a ' \
                              'thermostat — every zone would free-float and the 8.4.1.2 determination would be ' \
                              'meaningless (attach thermostats, or use the necb_loads on-ramp)')
       end
@@ -1223,7 +1233,7 @@ module OpenStudioNECB
                end
         "'#{name}' [#{bt.inspect}, #{st.inspect}] (#{spaces.size} space(s))#{hint}"
       end
-      raise(ArgumentError,
+      raise(PreflightError,
             "pre-flight FAILED: #{problems.size} space type(s) do not resolve against the NECB #{data_vintage} " \
             "space-type catalog, so the reference building cannot be generated correctly (unmatched types " \
             "silently keep the proposed's lighting/loads, waiving the allowances):\n  #{lines.join("\n  ")}")

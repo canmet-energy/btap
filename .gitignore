@@ -74,3 +74,8 @@ report.json
 # initializeCommand. Machine-local and site-specific — staged for the build,
 # never committed.
 /.devcontainer/certs/
+
+# Windows packaging build output. `rake windows:stage` assembles a COPY of the
+# nine gems' lib/ trees (plus, when OPENSTUDIO_WINDOWS is set, a ~1.1 GB
+# OpenStudio) — all of it derived, none of it source.
+/packaging/windows/stage/

@@ -143,12 +143,13 @@ def sweep_one(type)
                      rep['compliant'].inspect, rep['tier'].inspect, rep['percent_of_target'].to_f)
   end
   { type: type, verdict: 'PASS', detail: detail }
+# PreflightError subclasses ArgumentError, so it must be rescued FIRST — a
+# leading `rescue ArgumentError` would swallow it. This used to match on the
+# message text ('pre-flight'), which broke the moment the wording moved.
+rescue OpenStudioNECB::PreflightError => e
+  { type: type, verdict: 'PREFLIGHT-REFUSAL', detail: e.message.lines.first(4).join(' ').strip[0, 300] }
 rescue ArgumentError => e
-  if e.message.include?('pre-flight')
-    { type: type, verdict: 'PREFLIGHT-REFUSAL', detail: e.message.lines.first(4).join(' ').strip[0, 300] }
-  else
-    { type: type, verdict: 'ERROR', detail: "#{e.class}: #{e.message[0, 200]}" }
-  end
+  { type: type, verdict: 'ERROR', detail: "#{e.class}: #{e.message[0, 200]}" }
 rescue StandardError => e
   { type: type, verdict: 'ERROR', detail: "#{e.class}: #{e.message[0, 200]}" }
 end

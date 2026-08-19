@@ -102,3 +102,93 @@ namespace :necb do
     abort('necb:verify: see failures above') unless results.values.all?
   end
 end
+
+# --- Windows packaging ------------------------------------------------------
+# Stages the payload tree the Inno Setup script packages. Pure file copying, so
+# it runs anywhere — but it CANNOT supply the bundled OpenStudio: the SDK in a
+# Linux dev container is the Linux build, and the installer needs the Windows
+# one. That has to be fetched and unpacked separately (see OPENSTUDIO_WINDOWS).
+namespace :windows do
+  STAGE = ENV.fetch('STAGE_DIR', 'packaging/windows/stage')
+
+  # The priced RS-Means-derived tables are NOT redistributed. Costing still
+  # works — the machinery and the unpriced sheets ship — but the user points
+  # --costs-csv at their own licensed table, which is the injection route the
+  # costing README already mandates.
+  PRICED_CSVS = %w[costs.csv costs_local_factors.csv].freeze
+
+  desc 'Stage the Windows payload tree (STAGE_DIR=, OPENSTUDIO_WINDOWS=<unpacked win SDK>)'
+  task :stage do
+    require 'fileutils'
+    FileUtils.rm_rf(STAGE)
+    FileUtils.mkdir_p("#{STAGE}/gems")
+
+    # Mirror each gemspec's own spec.files rather than a glob written here, so
+    # the staged tree cannot drift from what the gem declares it contains.
+    total = 0
+    root = Dir.pwd
+    GEM_DIRS.each do |dir|
+      # spec.files is `Dir['lib/**/*', ...]` evaluated at load time, and those
+      # globs are relative to the CWD — NOT to the gemspec. Loading from the
+      # repo root silently yields a near-empty file list, so chdir first.
+      spec = Dir.chdir(dir) { Gem::Specification.load(File.basename(Dir.glob('*.gemspec').first.to_s)) }
+      abort("cannot load gemspec in #{dir}") unless spec
+
+      spec.files.each do |rel|
+        next if PRICED_CSVS.include?(File.basename(rel)) && rel.include?('costing')
+
+        src = File.join(root, dir, rel)
+        next unless File.file?(src)
+
+        dest = File.join(root, STAGE, 'gems', dir, rel)
+        FileUtils.mkdir_p(File.dirname(dest))
+        FileUtils.cp(src, dest)
+        total += 1
+      end
+    end
+    FileUtils.chmod(0o755, "#{STAGE}/gems/openstudio-necb/exe/necb-compliance.rb")
+
+    # Sample + weather, taken from the shared fixtures.
+    fixtures = 'openstudio-hvac/test/fixtures'
+    FileUtils.mkdir_p(["#{STAGE}/samples", "#{STAGE}/weather", "#{STAGE}/bin"])
+    FileUtils.cp("#{fixtures}/5ZoneNoHVAC.osm", "#{STAGE}/samples/")
+    Dir.glob("#{fixtures}/weather/CAN_ON_Toronto*.{epw,ddy,stat}").each { |f| FileUtils.cp(f, "#{STAGE}/weather/") }
+
+    %w[necb-compliance.cmd].each { |f| FileUtils.cp("packaging/windows/#{f}", "#{STAGE}/bin/") }
+    FileUtils.cp('packaging/windows/run-demo.cmd', "#{STAGE}/samples/")
+    FileUtils.cp('packaging/windows/README-windows.txt', STAGE)
+    FileUtils.cp('LICENSE', "#{STAGE}/LICENSE-gems.txt")
+
+    stage_openstudio
+
+    puts "staged #{total} gem files -> #{STAGE}"
+    puts "  size: #{`du -sh #{STAGE} 2>/dev/null`.split.first || '?'}"
+    puts '  NOTE: no OpenStudio staged — set OPENSTUDIO_WINDOWS to an unpacked' unless ENV['OPENSTUDIO_WINDOWS']
+    puts '        Windows OpenStudio 3.11.0 tree to make this installable.' unless ENV['OPENSTUDIO_WINDOWS']
+  end
+
+  # The bundled SDK must be the WINDOWS build. Copying the container's tree
+  # would produce an installer full of ELF binaries, so refuse rather than
+  # silently stage the wrong platform.
+  def stage_openstudio
+    src = ENV.fetch('OPENSTUDIO_WINDOWS', nil)
+    return if src.nil? || src.empty?
+
+    abort("OPENSTUDIO_WINDOWS=#{src} does not exist") unless File.directory?(src)
+    unless File.exist?(File.join(src, 'bin', 'openstudio.exe'))
+      abort("#{src} has no bin/openstudio.exe — that is not a Windows OpenStudio tree")
+    end
+
+    FileUtils.mkdir_p("#{STAGE}/openstudio")
+    # Python/, include/, Radiance/ and Examples/ are unused by these gems (Ruby
+    # only, no Radiance) and account for ~227 MB. Dropping them is optional —
+    # set OPENSTUDIO_FULL=1 to stage the whole tree if anything misbehaves.
+    skip = ENV['OPENSTUDIO_FULL'] ? [] : %w[Python include Radiance Examples]
+    Dir.children(src).each do |entry|
+      next if skip.include?(entry)
+
+      FileUtils.cp_r(File.join(src, entry), "#{STAGE}/openstudio/")
+    end
+    puts "  bundled OpenStudio from #{src}#{skip.empty? ? '' : " (dropped: #{skip.join(', ')})"}"
+  end
+end
