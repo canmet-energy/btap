@@ -13,6 +13,18 @@ module OpenStudioHVAC
         end
       end
 
+      # Is this loop heated by PURCHASED energy rather than a boiler?
+      #
+      # Both SDK spellings: DistrictHeating was deprecated for DistrictHeatingWater
+      # at 3.7.0 and older models still carry the former.
+      def self.district_heated?(loop)
+        loop.supplyComponents.any? do |c|
+          c.to_DistrictHeating.is_initialized ||
+            (c.respond_to?(:to_DistrictHeatingWater) && c.to_DistrictHeatingWater.is_initialized)
+        end
+      end
+      private_class_method :district_heated?
+
       # Build a hot-water loop: primary + secondary boiler, variable-speed pump,
       # 82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
       #
@@ -26,7 +38,23 @@ module OpenStudioHVAC
       def self.hot_water(model, fuel: 'NaturalGas', backup_fuel: nil, reuse: true, source: 'boiler')
         if reuse
           existing = find_hot_water(model)
-          existing ||= model.getPlantLoops.find { |pl| pl.nameString == 'Hot Water Loop' }
+          # The name fallback catches a loop that has no boiler YET. It must not
+          # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
+          # every loop this builder makes is named 'Hot Water Loop', district
+          # ones included, so a bare name match happily hands a district loop to
+          # a caller that asked for boilers.
+          #
+          # That is exactly how 8.4.4.6.(1)(a) ended up half-applied. The
+          # reference builder tears down and rebuilds ONE GROUP AT A TIME, and
+          # Teardown only drops a plant loop whose demand side is empty — so with
+          # several single-zone groups the district loop still carries the other
+          # groups' coils, survives, and was then re-adopted here by name. The
+          # reference kept purchased heating while its energy type said gas.
+          # Refusing the adoption lets the district loop drain group by group and
+          # be removed by the teardown's own fixpoint.
+          existing ||= model.getPlantLoops.find do |pl|
+            pl.nameString == 'Hot Water Loop' && district_heated?(pl) == (source == 'district')
+          end
           return existing unless existing.nil?
         end
 

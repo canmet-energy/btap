@@ -147,4 +147,35 @@ class TestReferenceRules < Minitest::Test
       refute_empty(vacuous, 'sentence (4) should be declared vacuous for a heating-only proposed')
     end
   end
+  # The layout that hid the bug. `Baseboard district hot water` makes FIVE
+  # single-zone groups, and the reference builder tears down and rebuilds one
+  # group at a time; Teardown only drops a plant loop whose demand side is empty,
+  # so the district loop always still carried the other groups' coils and
+  # survived. It was then re-adopted by a bare NAME match on 'Hot Water Loop' —
+  # the name every loop this builder makes carries, district ones included — so
+  # the reference kept purchased heating while its energy type said gas.
+  #
+  # The single-group sample (13) never showed this. Both layouts are asserted
+  # here so the fix cannot regress on the shape that is easy to miss.
+  def test_purchased_heating_is_replaced_whatever_the_group_layout
+    %w[Baseboard\ district\ hot\ water
+       DOAS\ with\ fan\ coil\ air-cooled\ chiller\ with\ district\ hot\ water].each do |escaped|
+      system = escaped.tr('\\', '')
+      model = load_fixture
+      OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: OpenStudioHVAC::AuditLog.new)
+      OpenStudioHVAC.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
+
+      district = ->(m) { m.modelObjects.count { |o| o.iddObjectType.valueName.match?(/DistrictHeating/) } }
+      assert_equal(1, district.call(model), "#{system}: the proposed should carry district heating")
+
+      reference = OpenStudioHVAC::NECB.reference_hvac(
+        model, vintage: '2020', building: { storeys: 1 }, audit: OpenStudioHVAC::AuditLog.new
+      ).model
+
+      assert_equal(0, district.call(reference),
+                   "#{system}: 8.4.4.6.(1)(a) — the reference must NOT keep purchased heating")
+      assert_equal(['NaturalGas'], reference.getBoilerHotWaters.map(&:fuelType).uniq,
+                   "#{system}: the reference must be heated by a gas-fired boiler")
+    end
+  end
 end
