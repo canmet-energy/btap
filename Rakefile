@@ -8,8 +8,25 @@
 # directories as direct children.
 
 require 'rbconfig'
+require 'etc'
 
 GEM_DIRS = Dir.glob('openstudio-*').select { |d| File.directory?(d) }.sort.freeze
+
+# Default parallelism: every core but a few.
+#
+# The reserve is for the parent process, the OS, and — the reason it is not
+# zero — the EnergyPlus child processes the heavier suites spawn, which are not
+# counted by the job slots holding them. Measured on this workload a test
+# process is ~124 MB resident, so memory is not the binding constraint; the real
+# ceiling is the file count, beyond which extra slots idle and wall time is just
+# the slowest single file.
+#
+# JOBS= overrides it.
+def default_jobs
+  reserve = 4
+  [Etc.nprocessors - reserve, 1].max
+end
+
 
 desc 'List the gems in this repository'
 task :gems do
@@ -103,11 +120,62 @@ namespace :necb do
   end
 end
 
+# --- Tests -----------------------------------------------------------------
+# The suites are plain `ruby test/test_x.rb` files with no shared state, so they
+# parallelize across FILES for free. CI's matrix already parallelizes across
+# gems; within a gem it runs them one at a time, which is why openstudio-hvac
+# (46 files) is the slowest leg by a wide margin.
+#
+# Parity suites are excluded: they need the pinned oracle and are covered by the
+# `parity` job, where they cannot pass vacuously.
+namespace :test do
+  desc 'Run one gem\'s suite in parallel (rake test:gem[openstudio-hvac] [JOBS=n])'
+  task :gem, [:name] do |_t, args|
+    name = args[:name] or abort('usage: rake test:gem[openstudio-hvac]')
+    dir = File.expand_path(name)
+    abort("no such gem: #{name}") unless Dir.exist?(dir)
+
+    files = Dir.glob('test/test_*.rb', base: dir)
+                .reject { |f| f.end_with?('test_helper.rb') || f.end_with?('_parity.rb') }
+                .sort
+    jobs = ENV.fetch('JOBS', default_jobs.to_s).to_i
+    failed = []
+    started = Time.now
+
+    files.each_slice(jobs) do |batch|
+      pids = batch.to_h do |f|
+        [Process.spawn(RbConfig.ruby, f, chdir: dir,
+                       out: File::NULL, err: [:child, :out]), f]
+      end
+      pids.each do |pid, f|
+        _, status = Process.waitpid2(pid)
+        failed << f unless status.success?
+      end
+    end
+
+    elapsed = (Time.now - started).round(1)
+    if failed.empty?
+      puts "#{name}: #{files.size} files OK in #{elapsed}s (#{jobs}-way)"
+    else
+      # Re-run the failures serially so their output is readable rather than
+      # interleaved with eleven other suites.
+      puts "#{name}: #{failed.size} of #{files.size} FAILED in #{elapsed}s — re-running for output"
+      failed.each { |f| system(RbConfig.ruby, f, chdir: dir) }
+      abort("failed: #{failed.join(', ')}")
+    end
+  end
+
+  desc 'Run every gem suite in parallel ([JOBS=n])'
+  task :all do
+    GEM_DIRS.each { |d| Rake::Task['test:gem'].execute(Rake::TaskArguments.new([:name], [d])) }
+  end
+end
+
 # --- The HVAC catalog ------------------------------------------------------
 namespace :hvac do
-  desc 'Build EVERY catalog system and put each through an EnergyPlus sizing run (JOBS=12)'
+  desc 'Build EVERY catalog system and put each through an EnergyPlus sizing run ([JOBS=n])'
   task :simulate_systems do
-    jobs = ENV.fetch('JOBS', '12')
+    jobs = ENV.fetch('JOBS', default_jobs.to_s)
     ok = system(RbConfig.ruby, 'openstudio-hvac/scripts/simulate_all_systems.rb', '--jobs', jobs)
     abort('one or more systems do not produce a simulate-able model') unless ok
   end

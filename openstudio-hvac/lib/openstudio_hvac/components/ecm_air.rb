@@ -38,6 +38,8 @@ module OpenStudioHVAC
         coil.setName('CoilHeatingDXSingleSpeed_ASHP')
         coil.setDefrostStrategy('ReverseCycle')
         coil.setDefrostControl('OnDemand')
+        # REQUIRED once the strategy is ReverseCycle — see Curves.defrost_eir_ft
+        coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(Curves.defrost_eir_ft(model))
         coil.setCrankcaseHeaterCapacity(1.0e-6)
         coil
       when 'ccashp'
@@ -48,6 +50,7 @@ module OpenStudioHVAC
         coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-25.0)
         coil.setDefrostStrategy('ReverseCycle')
         coil.setDefrostControl('OnDemand')
+        coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(Curves.defrost_eir_ft(model))
         coil.setCrankcaseHeaterCapacity(1.0e-6)
         coil
       when 'coil_electric', 'Electric'
@@ -240,6 +243,8 @@ module OpenStudioHVAC
       unit.setMasterThermostatPriorityControlType('ThermostatOffsetPriority')
       unit.setDefrostControl('OnDemand')
       unit.setDefrostStrategy('ReverseCycle')
+      # REQUIRED once the strategy is ReverseCycle — see Curves.defrost_eir_ft
+      unit.setDefrostEnergyInputRatioModifierFunctionofTemperatureCurve(Curves.defrost_eir_ft(model))
       unit.autosizeResistiveDefrostHeaterCapacity
       # -0.00019231 piping height correction: legacy verbatim (:284-285), no derivation
       # given in the legacy source (~ -1/5200 per metre of height).

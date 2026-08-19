@@ -9,6 +9,48 @@ module OpenStudioHVAC
       @data ||= JSON.parse(File.read(DATA_PATH))['curves']
     end
 
+    # The defrost Energy Input Ratio modifier, f(T).
+    #
+    # EnergyPlus REQUIRES this field whenever Defrost Strategy is 'ReverseCycle'
+    # — on Coil:Heating:DX:SingleSpeed, Coil:Heating:DX:VariableSpeed and
+    # AirConditioner:VariableRefrigerantFlow alike:
+    #
+    #   ** Severe ** ...required Defrost Energy Input Ratio Function of
+    #                Temperature Curve Name is blank.
+    #                ...field is required because Defrost Strategy is "ReverseCycle".
+    #
+    # and the SDK leaves it unset, because its own default strategy is
+    # 'Resistive', which needs no curve. Setting the strategy without the curve
+    # therefore produces a model that looks fine to every in-process check and
+    # is rejected by EnergyPlus. Eight catalog systems shipped that way.
+    #
+    # The value is 1.0 — deliberately, not as a placeholder. The legacy oracle
+    # supplies a 22-point lookup table for this curve whose output is 1.0 at
+    # EVERY point (15.0-27.2 C indoor, -25 to +6 C outdoor), i.e. defrost EIR is
+    # not modified by temperature. A biquadratic with c1 = 1 and every other
+    # coefficient 0 is that same function, without importing the table.
+    #
+    # @return [OpenStudio::Model::CurveBiquadratic] shared per model
+    def self.defrost_eir_ft(model)
+      name = 'DEFROST-EIR-FT'
+      existing = model.getCurves.find { |c| c.nameString == name }
+      return existing.to_CurveBiquadratic.get unless existing.nil?
+
+      curve = OpenStudio::Model::CurveBiquadratic.new(model)
+      curve.setName(name)
+      curve.setCoefficient1Constant(1.0)
+      [curve.method(:setCoefficient2x), curve.method(:setCoefficient3xPOW2),
+       curve.method(:setCoefficient4y), curve.method(:setCoefficient5yPOW2),
+       curve.method(:setCoefficient6xTIMESY)].each { |m| m.call(0.0) }
+      # The oracle table's own independent-variable span; outside it EnergyPlus
+      # clamps, which for a constant function changes nothing.
+      curve.setMinimumValueofx(15.0)
+      curve.setMaximumValueofx(27.2)
+      curve.setMinimumValueofy(-25.0)
+      curve.setMaximumValueofy(6.0)
+      curve
+    end
+
     # Build (or fetch, if already present in the model) a named curve.
     #
     # @param model [OpenStudio::Model::Model]

@@ -22,7 +22,13 @@
 require 'json'
 require 'fileutils'
 require 'tmpdir'
+require 'etc'
+require 'etc'
 require 'openstudio'
+
+# Every core but a few: the reserve covers the parent, the OS, and the
+# EnergyPlus child each job spawns, which the job slot does not account for.
+DEFAULT_JOBS = [Etc.nprocessors - 4, 1].max
 
 ROOT = File.expand_path('../..', __dir__)
 %w[audit hvac loads simulation].each { |g| require File.expand_path("openstudio-#{g}/lib/openstudio_#{g}", ROOT) }
@@ -31,7 +37,7 @@ FIXTURES = File.join(ROOT, 'openstudio-hvac/test/fixtures')
 EPW = File.join(FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
 DDY = File.join(FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
 
-jobs = (ARGV[ARGV.index('--jobs') + 1].to_i if ARGV.include?('--jobs')) || 8
+jobs = (ARGV[ARGV.index('--jobs') + 1].to_i if ARGV.include?('--jobs')) || DEFAULT_JOBS
 only = (ARGV[ARGV.index('--only') + 1] if ARGV.include?('--only'))
 
 systems = OpenStudioHVAC::Catalog.rows.map { |r| [r['name'], r['family']] }

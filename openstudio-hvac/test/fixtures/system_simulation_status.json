@@ -20,8 +20,7 @@
     "family": "doas"
   },
   {
-    "status": "fail",
-    "error": "AirConditioner:VariableRefrigerantFlow, \"VRF OUTDOOR UNIT\" Defrost Energy Input Ratio Modifier Function of Temperature Curve Name not found:",
+    "status": "ok",
     "name": "DOAS with VRF",
     "family": "composite"
   },
@@ -426,8 +425,7 @@
     "family": "vav_reheat"
   },
   {
-    "status": "fail",
-    "error": "AirConditioner:VariableRefrigerantFlow, \"VRF OUTDOOR UNIT\" Defrost Energy Input Ratio Modifier Function of Temperature Curve Name not found:",
+    "status": "ok",
     "name": "VRF",
     "family": "vrf"
   },
@@ -447,32 +445,27 @@
     "family": "zone_ervs"
   },
   {
-    "status": "fail",
-    "error": "AirConditioner:VariableRefrigerantFlow, \"VRF OUTDOOR UNIT\" Defrost Energy Input Ratio Modifier Function of Temperature Curve Name not found:",
+    "status": "ok",
     "name": "hs08_ccashp_vrf",
     "family": "ecm_doas_vrf"
   },
   {
-    "status": "fail",
-    "error": "GetVarSpeedCoilInput: Coil:Heating:DX:VariableSpeed=\"COILHEATINGDXVARIABLESPEED_CCASHP\", missing",
+    "status": "ok",
     "name": "hs09_ccashp_baseboard",
     "family": "ecm_ashp_baseboard"
   },
   {
-    "status": "fail",
-    "error": "GetDXCoils: Coil:Heating:DX:SingleSpeed=\"COILHEATINGDXSINGLESPEED_PTHP\", missing",
+    "status": "ok",
     "name": "hs11_ashp_pthp",
     "family": "doas_pthp"
   },
   {
-    "status": "fail",
-    "error": "GetDXCoils: Coil:Heating:DX:SingleSpeed=\"COILHEATINGDXSINGLESPEED_ASHP\", missing",
+    "status": "ok",
     "name": "hs12_ashp_baseboard",
     "family": "ecm_ashp_baseboard"
   },
   {
-    "status": "fail",
-    "error": "AirConditioner:VariableRefrigerantFlow, \"VRF OUTDOOR UNIT\" Defrost Energy Input Ratio Modifier Function of Temperature Curve Name not found:",
+    "status": "ok",
     "name": "hs13_ashp_vrf",
     "family": "ecm_doas_vrf"
   },
@@ -487,8 +480,7 @@
     "family": "ecm_hp_fancoils"
   },
   {
-    "status": "fail",
-    "error": "GetDXCoils: Coil:Heating:DX:SingleSpeed=\"COILHEATINGDXSINGLESPEED_ASHP\", missing",
+    "status": "ok",
     "name": "hs16_ashp_cawhp_fancoils",
     "family": "ecm_hp_fancoils"
   }
