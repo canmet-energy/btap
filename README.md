@@ -84,16 +84,42 @@ stays opt-in.
 `.mcp.json.example` is tracked; `.mcp.json` is **not** (the family rule is never
 to stage it). Setup copies the template, which carries **no key** — Claude Code
 expands `${VAR}` in `url` and `headers`, so the secret stays in your
-environment:
+environment.
+
+The key lives in a gitignored `.env`, using the same variable name and the same
+loading mechanism as [canmet-energy/bluesky](https://github.com/canmet-energy/bluesky),
+so one `.env` works in both repositories:
 
 ```bash
-export NRCAN_MCP_API_KEY=...   # codes, geocoding, weather, building-stock, modelling, simulation
+cp .env.example .env
+chmod 600 .env
+$EDITOR .env        # set HBIX_API_KEY
 ```
 
-Two Ruby scripts read their own variables instead of that file — give them the
-same value: `CODES_API_KEY` (`openstudio-necb/scripts/fetch_necb_8_4_text.rb`)
-and `BUILDING_STOCK_API_KEY` (`openstudio-geometry/scripts/building_stock.rb`).
-Both abort with a clear message when unset.
+`.devcontainer/setup.sh` appends an auto-load block to `~/.bashrc`, so a **new
+terminal** has the key exported. To load it into the shell you are already in:
+
+```bash
+set -a && source .env && set +a
+```
+
+The `set -a` is load-bearing. A plain `source .env` sets shell variables without
+**exporting** them, so Claude Code — a child process — expands `${HBIX_API_KEY}`
+to nothing and all six servers send an empty `X-API-Key`. That surfaces as an
+opaque 403, not as a missing-key message.
+
+**One key, one name.** `HBIX_API_KEY` covers all six MCP servers (codes,
+geocoding, weather, building-stock, modelling, simulation) and both Ruby scripts
+that call them directly — those scripts expand the `${VAR}` placeholders in
+`.mcp.json` themselves and abort with a clear message when the key is
+unresolvable. There is deliberately no per-server key alias, because the servers
+do not take different keys.
+
+`HBIX_MCP_BASE_URL` is the only other knob: it repoints all six servers at
+once — for the Ruby scripts and for `.mcp.json` alike — at a staging or local
+stack. There are no per-server overrides for the URL either; the scripts append
+their own `/<server>/mcp` path. That also keeps a missing `.mcp.json` a
+supported configuration without hardcoding a host in the scripts.
 
 ## Testing
 

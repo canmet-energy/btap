@@ -216,19 +216,47 @@ fi
 # MCP servers. .mcp.json stays GITIGNORED (family rule: never stage it), so the
 # tracked artifact is .mcp.json.example and we install it here. Claude Code
 # expands ${VAR} in url/headers, so even the installed file holds no secret —
-# the key comes from NRCAN_MCP_API_KEY in the environment.
+# the key comes from HBIX_API_KEY in the environment.
 # ---------------------------------------------------------------------------
-if [ -f .mcp.json ]; then
+if [ -f "$REPO_ROOT/.mcp.json" ]; then
   echo "🔌 .mcp.json already present — left untouched"
-elif [ -f .mcp.json.example ]; then
-  cp .mcp.json.example .mcp.json
-  echo "🔌 .mcp.json installed from template ($(grep -c '"type": "http"' .mcp.json) NRCan MCP servers)"
-  if [ -z "${NRCAN_MCP_API_KEY:-}" ]; then
-    echo "   ⚠️  NRCAN_MCP_API_KEY is not set — the servers will fail to authenticate."
-    echo "      export NRCAN_MCP_API_KEY=...   (add it to ~/.bashrc to persist)"
-  else
-    echo "   ✅ NRCAN_MCP_API_KEY is set"
-  fi
+elif [ -f "$REPO_ROOT/.mcp.json.example" ]; then
+  cp "$REPO_ROOT/.mcp.json.example" "$REPO_ROOT/.mcp.json"
+  echo "🔌 .mcp.json installed from template ($(grep -c '"type": "http"' "$REPO_ROOT/.mcp.json") NRCan MCP servers)"
+fi
+
+# The key lives in a gitignored .env, same name (HBIX_API_KEY) and same
+# mechanism as canmet-energy/bluesky, so one .env works in both repos.
+#
+# `set -a` is LOAD-BEARING: a plain `source .env` sets shell variables without
+# EXPORTING them, so Claude Code — a child process — would expand
+# ${HBIX_API_KEY} in .mcp.json to nothing and the servers would send an empty
+# X-API-Key header. That fails as an opaque 403, not as a missing-key message.
+if ! grep -q 'Auto-load project .env' "$HOME/.bashrc" 2>/dev/null; then
+  cat >> "$HOME/.bashrc" <<EOF
+
+# Auto-load project .env into the environment
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  . "$REPO_ROOT/.env"
+  set +a
+fi
+EOF
+  echo "🔑 ~/.bashrc now auto-loads $REPO_ROOT/.env"
+fi
+
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$REPO_ROOT/.env"
+  set +a
+fi
+
+if [ -z "${HBIX_API_KEY:-}" ] || [ "${HBIX_API_KEY:-}" = "your_key" ]; then
+  echo "   ⚠️  HBIX_API_KEY is not set — the six MCP servers will fail to authenticate."
+  echo "      cp .env.example .env && \$EDITOR .env    (then open a new terminal)"
+else
+  echo "   ✅ HBIX_API_KEY is set"
 fi
 
 if [ "$INSTALL_SERENA" = true ]; then
@@ -317,16 +345,22 @@ cat <<'STEPS'
 
    MCP servers: .mcp.json was installed from .mcp.json.example above (codes,
    geocoding, weather, building-stock, modelling, simulation). It holds NO key —
-   Claude Code expands ${NRCAN_MCP_API_KEY} from your environment, and .mcp.json
-   itself stays gitignored. Set it once:
+   Claude Code expands ${HBIX_API_KEY} from your environment, and .mcp.json
+   itself stays gitignored. Set the key once, in a gitignored .env:
 
-     export NRCAN_MCP_API_KEY=...          # add to ~/.bashrc to persist
+     cp .env.example .env && $EDITOR .env    # then open a new terminal
 
-   Two Ruby scripts read their OWN variables rather than that file, so give them
-   the same value if you use them:
+   ~/.bashrc auto-loads that file (with `set -a`, so it is EXPORTED). To load it
+   into the shell you are already in:  set -a && source .env && set +a
 
-     CODES_API_KEY / CODES_MCP_URL                    openstudio-necb/scripts/fetch_necb_8_4_text.rb
-     BUILDING_STOCK_API_KEY / BUILDING_STOCK_MCP_URL  openstudio-geometry/scripts/building_stock.rb
+   The two Ruby scripts that hit these servers directly read HBIX_API_KEY too,
+   so the one key covers them:
+
+     openstudio-necb/scripts/fetch_necb_8_4_text.rb
+     openstudio-geometry/scripts/building_stock.rb
+
+   HBIX_MCP_BASE_URL is the only other knob — it repoints all six servers at
+   once, for the scripts and .mcp.json alike. There are no per-server overrides.
 STEPS
 echo ""
 echo "═══════════════════════════════════════════════════════════════════"

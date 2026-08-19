@@ -4,6 +4,17 @@
 # variables, so an absent .mcp.json is a supported configuration.
 .mcp.json
 
+# The API key itself. .env is where HBIX_API_KEY lives (same name and mechanism
+# as canmet-energy/bluesky); .env.example is the tracked template. ~/.bashrc
+# auto-loads .env — see .devcontainer/setup.sh.
+.env
+!.env.example
+
+# Claude Code's per-developer settings. Untracked by intent: it names enabled
+# MCP servers and permission grants, and is exactly the file a stray `git add .`
+# would otherwise sweep in.
+.claude/settings.local.json
+
 # Developer installation. Scoped deliberately: legacy_pin/.bundle/config IS
 # committed (it points the oracle's bundle at the shared vendor/ dir), and git
 # cannot re-include a file whose parent directory is excluded.

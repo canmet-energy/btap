@@ -8,7 +8,7 @@
 #
 #   ruby scripts/fetch_necb_8_4_text.rb
 #
-# Auth: X-API-Key from $CODES_API_KEY, else read at runtime from .mcp.json
+# Auth: X-API-Key from $HBIX_API_KEY, else read at runtime from .mcp.json
 # (which is never committed with a live key). The key is never printed and
 # never written into the cache.
 #
@@ -40,24 +40,50 @@ ARTICLES = [
 # clone or on CI. Read it defensively: an unguarded File.read raised
 # Errno::ENOENT instead of the intended abort message, which read as a crash
 # rather than "you have not configured this yet".
+SERVER = 'codes'
+
 def mcp_config
   return @mcp_config if defined?(@mcp_config)
 
   path = File.join(ROOT, '.mcp.json')
-  @mcp_config = File.exist?(path) ? (JSON.parse(File.read(path)).dig('mcpServers', 'codes') || {}) : {}
+  @mcp_config = File.exist?(path) ? (JSON.parse(File.read(path)).dig('mcpServers', SERVER) || {}) : {}
 rescue JSON::ParserError => e
   abort("#{path} is not valid JSON: #{e.message}")
 end
 
+# ONE key for all six servers, under one name — the same one canmet-energy/bluesky
+# uses, so a .env copied between the repos works in both. There is deliberately no
+# per-server alias: the servers do not take different keys, so a second name would
+# only raise the question of which one to set. The .mcp.json fallback is LAST and
+# skipped when it holds a ${VAR} placeholder that cannot be resolved — see expand.
 def api_key
-  @api_key ||= ENV['CODES_API_KEY'] ||
-               mcp_config.dig('headers', 'X-API-Key') ||
-               abort('no codes API key: set CODES_API_KEY or configure .mcp.json')
+  @api_key ||= ENV['HBIX_API_KEY'] ||
+               expand(mcp_config.dig('headers', 'X-API-Key')) ||
+               abort('no codes API key: set HBIX_API_KEY (see .env.example)')
 end
 
+# .mcp.json holds ${VAR} and ${VAR:-default} placeholders that Claude Code
+# expands but this script does not, so expand them here from ENV. nil when a
+# placeholder has neither a value nor a default — the caller then falls through
+# to its abort instead of sending the literal string and getting a bare 403.
+def expand(value)
+  return nil if value.nil?
+
+  out = value.gsub(/\$\{(\w+)(?::-([^}]*))?\}/) { ENV[Regexp.last_match(1)] || Regexp.last_match(2) || "\0" }
+  out unless out.include?("\0")
+end
+
+# One knob, matching the key: HBIX_MCP_BASE_URL moves every server at once, and
+# the per-server path is ours to append rather than yours to retype. It is
+# checked BEFORE .mcp.json so a staging base wins over an installed template,
+# and it keeps "no .mcp.json" a supported configuration without hardcoding a
+# host here (see the auth paragraph under D-71..D-75).
 def endpoint
-  @endpoint ||= URI(ENV['CODES_MCP_URL'] || mcp_config['url'] ||
-                    abort('no codes MCP url: set CODES_MCP_URL or configure .mcp.json'))
+  @endpoint ||= URI(
+    (ENV['HBIX_MCP_BASE_URL'] && "#{ENV['HBIX_MCP_BASE_URL'].chomp('/')}/#{SERVER}/mcp") ||
+    expand(mcp_config['url']) ||
+    abort("no #{SERVER} MCP url: set HBIX_MCP_BASE_URL (see .env.example) or install .mcp.json")
+  )
 end
 
 # One stateless JSON-RPC tools/call. The server replies as a single SSE

@@ -198,9 +198,11 @@ where a ring came from.
 - Transport: stateless JSON-RPC `tools/call` to the HTTP MCP server; the reply
   is an SSE `data:` frame whose `result.content[0].text` is itself JSON. Same
   shape as `openstudio-necb/scripts/fetch_necb_8_4_text.rb`.
-- Auth: `BUILDING_STOCK_MCP_URL` / `BUILDING_STOCK_API_KEY`, else `.mcp.json`
-  (gitignored). NOTHING hardcoded; the key is never printed, never written to
-  the cache, never stamped on a model.
+- Auth: `HBIX_API_KEY` (one key for all six servers — see `.env.example`),
+  else `.mcp.json` (gitignored, and its `${VAR}` placeholders are expanded at
+  runtime). `HBIX_MCP_BASE_URL` repoints all six; there is no per-server
+  override for either. NOTHING hardcoded; the key is never printed, never
+  written to the cache, never stamped on a model.
 - `--cache` / `--from-cache` split so a build is reproducible and needs no
   network — the NECB text fetcher's rule.
 - `Adapter.stamp` writes the record onto `building.additionalProperties` as
