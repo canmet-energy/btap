@@ -23,8 +23,12 @@ GEM_DIRS = Dir.glob('openstudio-*').select { |d| File.directory?(d) }.sort.freez
 #
 # JOBS= overrides it.
 def default_jobs
-  reserve = 4
-  [Etc.nprocessors - reserve, 1].max
+  # The floor of 2 is load-bearing, not a nicety: a GitHub-hosted runner has
+  # very few cores, and `nprocessors - reserve` would clamp to 1 there and make
+  # the "parallel" runner strictly sequential. Two still overlaps one suite's
+  # EnergyPlus wait with another's startup, which is where the CI gain comes
+  # from — those runs are as much I/O as CPU.
+  [Etc.nprocessors - 4, 2].max
 end
 
 
@@ -142,15 +146,21 @@ namespace :test do
     failed = []
     started = Time.now
 
-    files.each_slice(jobs) do |batch|
-      pids = batch.to_h do |f|
-        [Process.spawn(RbConfig.ruby, f, chdir: dir,
-                       out: File::NULL, err: [:child, :out]), f]
+    # A sliding window, NOT each_slice: a batch barrier makes every slot wait on
+    # the slowest file in its batch, which is invisible with 44 slots and one
+    # batch but is most of the loss with the 2 slots a hosted runner gets.
+    # Start a replacement the moment any job finishes.
+    queue = files.dup
+    running = {}
+    until queue.empty? && running.empty?
+      while running.size < jobs && !queue.empty?
+        f = queue.shift
+        running[Process.spawn(RbConfig.ruby, f, chdir: dir,
+                              out: File::NULL, err: [:child, :out])] = f
       end
-      pids.each do |pid, f|
-        _, status = Process.waitpid2(pid)
-        failed << f unless status.success?
-      end
+      pid, status = Process.waitpid2(-1)
+      f = running.delete(pid)
+      failed << f if f && !status.success?
     end
 
     elapsed = (Time.now - started).round(1)

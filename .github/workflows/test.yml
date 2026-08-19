@@ -102,22 +102,25 @@ jobs:
             abort("::error::tbd triplet is #{got}, expected #{want} (a newer gem is winning over the pin)") if got != want
             puts "tbd triplet matches the pinned oracle: #{got}"
           '
+      # `rake test:gem` forks the suite's files instead of running them one at a
+      # time. The matrix already parallelizes across GEMS; this parallelizes
+      # WITHIN one, which matters because openstudio-hvac (45 files) is by far
+      # the longest leg and sets the wall-clock and the bill for the whole run.
+      #
+      # It excludes test_helper.rb and the *_parity.rb suites for the same
+      # reasons the loop it replaced did: the first is not a test, and the second
+      # needs the pinned oracle and is covered by the `parity` job, where it
+      # cannot pass vacuously.
+      #
+      # JOBS defaults to cores-minus-a-reserve with a floor of 2, so this is a
+      # real (if modest) win on a small hosted runner rather than a silent
+      # fallback to sequential. Output is suppressed while green and any failing
+      # file is re-run serially afterwards, so a failure reads cleanly instead of
+      # interleaved with a dozen other suites.
       - name: ${{ matrix.gem }} suite
-        working-directory: ${{ matrix.gem }}
-        # test_helper.rb is not a test; the parity suites need the pinned oracle
-        # and are covered by the `parity` job below, where they cannot pass
-        # vacuously.
         run: |
-          status=0
-          for t in test/test_*.rb; do
-            case "$t" in
-              */test_helper.rb|*_parity.rb) continue ;;
-            esac
-            echo "::group::$t"
-            ruby "$t" || status=1
-            echo "::endgroup::"
-          done
-          exit $status
+          echo "runner: $(nproc) cores, $(free -m | awk '/Mem:/{print $2}') MB"
+          rake "test:gem[${{ matrix.gem }}]"
 
   # Cross-gem rule verification: the reference transforms must actually
   # overwrite non-compliant proposed values, and the as-applied part-load curves
