@@ -86,6 +86,15 @@ rather than discovered by review. Levels:
 `gap_owner: "modeller"` gaps are wholly the modeller's responsibility, so the
 AHJ report is not permanently stamped with warnings no model change can clear.
 
+**Declaration depth.** An entry's `article` string carries its own depth:
+`"8.4.5.9."` declares the whole article, `"8.4.5.9.(5)"` declares one sentence,
+and the 8.4 coverage HTML groups sentence entries under their article. Declare
+at the depth the evidence supports — the formerly-`partial` articles are
+declared per sentence because their prose already adjudicated each sentence,
+while a uniformly-`implemented` article stays one entry: splitting it would
+restate the same claim N times without sentence-specific evidence, which is the
+fabrication the coverage generator's depth note warns about.
+
 `decisions_citing` counts the run's `article:` tags that PREFIX-match the
 manifest id, after stripping a `' (slice label)'` / `'(N)'` suffix and the
 trailing dot. Citations are harvested with `/\d+\.\d+(?:\.\d+)*\./`, so a Part 3

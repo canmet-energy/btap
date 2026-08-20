@@ -92,6 +92,17 @@ lighting's `test_costing.rb`), so a glob misses them. CI lists them explicitly.
 doc/JSON drift check — it `require`s every gem's facade. It needs the container,
 not a bare runner.
 
+**Coverage is declared at the depth the evidence supports.** An entry's
+`article` string carries its depth (`"8.4.5.9."` = whole article,
+`"8.4.5.9.(5)"` = one sentence). The formerly-partial articles are per-sentence
+(54 hvac entries per vintage, not 22; loads 9, not 7; umbrella 15/12) and tests
+pin per-sentence ids — so **match coverage articles by PREFIX, never exact
+string**. Do NOT split a uniformly-implemented article: that restates one claim
+N times without sentence evidence, the exact fabrication the 8.4 HTML's depth
+note warns about. `gap_owner: "modeller"` is only for requirements no model
+change can ever satisfy (D-76); a rule the software could implement stays a
+warning.
+
 **Adding a `## D-XX` heading means adding a `decisions.json` entry**, and the
 doc's id-ordered TOC is generated. The drift test is hard in both directions:
 ```bash
