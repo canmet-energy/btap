@@ -78,33 +78,50 @@
     "article": "8.4.5.5.(1)",
     "title": "Reference building interior lighting power = Part 4 allowance",
     "status": "implemented",
-    "how": "apply_lights sets the allowance LPD from the space-type records"
+    "how": "apply_lights sets the allowance LPD from the space-type records",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#apply_to_space_type",
+     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#reference_lighting"
+    ]
    },
    {
     "article": "8.4.5.5.(2)",
     "title": "Dwelling units 5 W/m2",
     "status": "implemented",
-    "how": "reference_lighting overrides dwelling space types to 5 W/m2"
+    "how": "reference_lighting overrides dwelling space types to 5 W/m2",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#apply_dwelling_rule"
+    ]
    },
    {
     "article": "8.4.5.5.(3)",
     "title": "Occupancy/personal control factors in the reference",
     "status": "partial",
     "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+",
-    "gaps": "strict reading multiplies installed power by Focc x Fpers"
+    "gaps": "strict reading multiplies installed power by Focc x Fpers",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#wire_lighting_schedule",
+     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#synthesize_sensor_ruleset"
+    ]
    },
    {
     "article": "8.4.5.5.(4)",
     "title": "Radiant/convective/return-air fractions identical to proposed",
     "status": "implemented",
-    "how": "fractions come from the same space-type records for both models"
+    "how": "fractions come from the same space-type records for both models",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#apply_to_space_type"
+    ]
    },
    {
     "article": "8.4.5.5.(5)-(12)",
     "title": "Reference daylighting geometry + photocontrols",
     "status": "partial",
     "how": "reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available); WHERE 4.2.2 requires photocontrols is decided by the 2020/2025 rule 4.2.2.1.(10)-(15) as of D-57 — before that it was the NECB 2011 criteria, which are conjunctive and so placed NO photocontrols on window-only spaces (L-26) [D-51 D-57]",
-    "gaps": "sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction"
+    "gaps": "sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/reference_daylighting.rb#apply"
+    ]
    },
    {
     "article": "8.4.1.1. (lighting)",

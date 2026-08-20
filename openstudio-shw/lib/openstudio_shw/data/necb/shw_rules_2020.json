@@ -198,7 +198,11 @@
     "article": "8.4.4.20.(2)",
     "title": "HP-source SWH -> air-source HP in the reference",
     "status": "implemented",
-    "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction"
+    "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction",
+    "code": [
+     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#wrap_heat_pump",
+     "openstudio-shw/lib/openstudio_shw/necb/efficiency.rb#apply_heat_pump_efficiency"
+    ]
    },
    {
     "article": "8.4.4.20.(3)-(4)",

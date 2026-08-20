@@ -31,25 +31,41 @@
     "title": "Calculation Methods",
     "status": "partial",
     "how": "the energy model accounts for the annual energy use of what the model contains",
-    "gaps": "elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"
+    "gaps": "elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
+    "code": [
+     "openstudio-simulation/lib/openstudio_simulation/runner.rb#energy_results",
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#run_annual"
+    ]
    },
    {
     "article": "8.4.2.2.(2)",
     "title": "Calculation Methods",
     "status": "implemented",
-    "how": "annual 8760-hour runs at an hourly timestep; a shortened run_period computes the arithmetic but is flagged NOT code-compliant and exits as no-determination"
+    "how": "annual 8760-hour runs at an hourly timestep; a shortened run_period computes the arithmetic but is flagged NOT code-compliant and exits as no-determination",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate",
+     "openstudio-necb/lib/openstudio_necb/cli.rb#verdict_exit",
+     "openstudio-simulation/lib/openstudio_simulation/runner.rb#run_energyplus!"
+    ]
    },
    {
     "article": "8.4.2.2.(3)",
     "title": "Calculation Methods",
     "status": "implemented",
-    "how": "operating schedules and climatic data enter at an hourly interval"
+    "how": "operating schedules and climatic data enter at an hourly interval",
+    "code": [
+     "openstudio-loads/lib/openstudio_loads/schedules.rb#add",
+     "openstudio-simulation/lib/openstudio_simulation/runner.rb#attach_weather!"
+    ]
    },
    {
     "article": "8.4.2.2.(4)",
     "title": "Calculation Methods",
     "status": "implemented",
-    "how": "software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing (see 8.4.2.11.)"
+    "how": "software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing (see 8.4.2.11.)",
+    "code": [
+     "openstudio-simulation/lib/openstudio_simulation/backends.rb#execute"
+    ]
    },
    {
     "article": "8.4.2.2.(5)",
@@ -69,7 +85,11 @@
     "article": "8.4.2.3.(1)",
     "title": "Climatic Data",
     "status": "implemented",
-    "how": "weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback"
+    "how": "weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback",
+    "code": [
+     "openstudio-simulation/lib/openstudio_simulation/runner.rb#attach_weather!",
+     "openstudio-envelope/lib/openstudio_envelope/climate.rb#hdd18"
+    ]
    },
    {
     "article": "8.4.2.3.(2)",

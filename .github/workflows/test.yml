@@ -34,6 +34,11 @@ jobs:
       # shared class, so it lives in the `verify` job's container.
       - name: AuditLog is SDK-free and fast
         run: cd openstudio-audit && ruby test/test_audit.rb
+      # The coverage manifests' code refs ("where is this sentence dealt with")
+      # are pure JSON + file reads — lint them here so a rename that strands a
+      # pointer fails before anything pays for the container.
+      - name: Coverage code refs resolve
+        run: cd openstudio-necb && ruby test/test_coverage_code_refs.rb
       # NECB_GEM_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
       # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
       # made the committed copies track the manifests, so they drifted: an

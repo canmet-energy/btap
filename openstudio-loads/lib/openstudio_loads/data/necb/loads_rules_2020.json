@@ -22,14 +22,22 @@
     "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
     "status": "partial",
     "how": "occupancy and receptacle densities, thermostats and the NECB-letter schedule sets applied per space type from the NECB records (2025 values verified identical to 2020)",
-    "gaps": "lighting schedules are provided by openstudio-lighting and SWH schedules by openstudio-shw — apply them after apply_loads"
+    "gaps": "lighting schedules are provided by openstudio-lighting and SWH schedules by openstudio-shw — apply them after apply_loads",
+    "code": [
+     "openstudio-loads/lib/openstudio_loads/necb/apply.rb#apply_loads",
+     "openstudio-loads/lib/openstudio_loads/necb/apply.rb#assign_space_types",
+     "openstudio-loads/lib/openstudio_loads/schedules.rb#add"
+    ]
    },
    {
     "article": "8.4.3.2.(2)",
     "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
     "status": "partial",
     "how": "internal loads and SWH loads representative of the space functions via the space-type records; ventilation OA and space-type infiltration from the same records",
-    "gaps": "illuminance levels are lighting-design data and are not modelled"
+    "gaps": "illuminance levels are lighting-design data and are not modelled",
+    "code": [
+     "openstudio-loads/lib/openstudio_loads/necb/apply.rb#apply_loads"
+    ]
    },
    {
     "article": "8.4.3.2.(3)",
