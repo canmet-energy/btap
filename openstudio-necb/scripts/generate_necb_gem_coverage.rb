@@ -71,7 +71,8 @@ GEMS.each do |gem|
       records << { gem: gem, vintage: vintage, article: art['article'].to_s,
                    canonical: canonical(art['article'], vintage),
                    title: art['title'].to_s, status: art['status'].to_s,
-                   how: art['how'], gaps: art['gaps'], gap_owner: art['gap_owner'] }
+                   how: art['how'], gaps: art['gaps'], gap_owner: art['gap_owner'],
+                   code: art['code'] }
     end
   end
 end
