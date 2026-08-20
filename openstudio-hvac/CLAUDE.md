@@ -47,7 +47,12 @@ its `AuditLog` is the canonical copy the umbrella aliases.
 - **Article-coverage manifests:** each vintage ruleset JSON carries an
   `article_coverage` block (implemented / partial / not_implemented /
   satisfied_by_clone / host_scope); partial + not_implemented warn on every
-  run. `host_scope` = the article is real NECB but owned by the umbrella or a
+  run. The formerly-partial reference articles (.6/.9/.10/.11/.13/.15/.16/.18)
+  are declared PER SENTENCE — 54 entries per vintage, not 22 — and the tests
+  pin per-sentence entries (`8.4.4.16.(1)` etc.), so match coverage articles by
+  PREFIX, never by exact article string. Uniformly-implemented articles stay
+  one entry each: splitting them would restate the same claim without
+  sentence-specific evidence. `host_scope` = the article is real NECB but owned by the umbrella or a
   sibling gem — the `how` string names the delegate (e.g. "Delegated to
   openstudio-shw"). `openstudio-necb/docs/NECB_GEM_COVERAGE.md` is the rollup —
   regenerate with `rake necb:coverage_doc` (it also emits a

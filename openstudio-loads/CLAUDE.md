@@ -13,6 +13,9 @@ deliberately EXCLUDED** (openstudio-shw owns it) — do not add them back here.
   `audit.with_building`. `audit_log.rb` aliases the shared class in
   **openstudio-audit** — schema changes happen there, never as a local copy.
 - Audit text: violations SHOUTED, passes lowercase.
+- **8.4.3.2. is declared per sentence** (9 manifest entries, not 7): (1)/(2)
+  partial with the cross-gem schedule delegations named, (3) the semi-heated
+  set-point as modeller scope. Three tests pin the per-sentence entries.
 - `article_coverage` manifest in `loads_rules_*.json`; partial/not_implemented
   warn every run.
 - Vintages 2020 + 2025 only (2011–2017 user-deferred).

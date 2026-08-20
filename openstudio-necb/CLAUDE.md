@@ -114,8 +114,13 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   Split semantics (D-09, all six gems' emitters): partial/not_implemented
   warn, EXCEPT entries flagged `"gap_owner": "modeller"` (gaps wholly the
   modeller's responsibility) which emit as info scope notes — rendered ⓘ
-  "modeller scope" in the report, off the checklist. 8.4.2.2 warns (real
-  elevator/escalator limitation); 8.4.2.3 is modeller-scope.
+  "modeller scope" in the report, off the checklist. 8.4.2.2, 8.4.2.3 and
+  8.4.4.2 are declared PER SENTENCE (15 entries in the 2025 manifest, 12 in
+  2020, which has no 8.4.4.2): the real pipeline limitation 8.4.2.2.(1)
+  (elevators/escalators) warns on its own, while the modeller decisions —
+  (5)/(6) equipment exclusions and the 8.4.2.3.(2) urban-dataset choice — are
+  individual scope notes. test_compliance pins the per-sentence entries; match
+  coverage articles by PREFIX.
 - `tiers.rb` + `data/eui_targets_2025.json` / `ghg_factors_2025.json` —
   Section 10 tiers (≤100/75/50/<40% → 1–4, identical 2020/2025), 8.4.4 BET
   arithmetic, Part 11 GHG levels A–F (provincial factors: ON elec 57.9 g/kWh,
