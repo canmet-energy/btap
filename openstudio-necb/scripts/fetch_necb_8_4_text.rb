@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Fetches every NECB 2025 Section 8.4 article from the building-codes MCP,
+# Fetches every NECB Section 8.4 article from the building-codes MCP for ONE
+# edition (EDITION=2025 default, EDITION=2020 supported),
 # parses each into a sentence/clause tree with STRICT sanity checks, and caches
 # the result to data/necb/necb_8_4_articles_2025.json for the coverage-document
 # generator (which must run in CI without MCP access).
@@ -25,16 +26,32 @@ require 'date'
 require 'fileutils'
 
 ROOT = File.expand_path('../..', __dir__)
-OUT = File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
+# The two editions do not share Section 8.4's structure: 2020's 8.4.4 is the
+# reference building (20 articles) and 8.4.5 the part-load curves; 2025 inserts
+# the EUI path as 8.4.4 and shifts everything down. One article list per
+# edition, not a renumbering of one list.
+EDITION = ENV.fetch('EDITION', '2025')
+abort("unsupported EDITION #{EDITION} (2020|2025)") unless %w[2020 2025].include?(EDITION)
+OUT = File.expand_path("../data/necb/necb_8_4_articles_#{EDITION}.json", __dir__)
 
-ARTICLES = [
-  *(1..5).map { |i| "8.4.1.#{i}" },
-  *(1..12).map { |i| "8.4.2.#{i}" },
-  *(1..9).map { |i| "8.4.3.#{i}" },
-  *(1..2).map { |i| "8.4.4.#{i}" },
-  *(1..20).map { |i| "8.4.5.#{i}" },
-  *(1..9).map { |i| "8.4.6.#{i}" }
-].freeze
+ARTICLES = if EDITION == '2020'
+             [
+               *(1..4).map { |i| "8.4.1.#{i}" },
+               *(1..10).map { |i| "8.4.2.#{i}" },
+               *(1..9).map { |i| "8.4.3.#{i}" },
+               *(1..20).map { |i| "8.4.4.#{i}" },
+               *(1..9).map { |i| "8.4.5.#{i}" }
+             ].freeze
+           else
+             [
+               *(1..5).map { |i| "8.4.1.#{i}" },
+               *(1..12).map { |i| "8.4.2.#{i}" },
+               *(1..9).map { |i| "8.4.3.#{i}" },
+               *(1..2).map { |i| "8.4.4.#{i}" },
+               *(1..20).map { |i| "8.4.5.#{i}" },
+               *(1..9).map { |i| "8.4.6.#{i}" }
+             ].freeze
+           end
 
 # .mcp.json is gitignored (it carries live keys) and is simply absent in a fresh
 # clone or on CI. Read it defensively: an unguarded File.read raised
@@ -95,7 +112,7 @@ def get_section(number)
   req['Accept'] = 'application/json, text/event-stream'
   req.body = { jsonrpc: '2.0', id: 1, method: 'tools/call',
                params: { name: 'get_section',
-                         arguments: { code: 'necb', edition: '2025', division: 'B',
+                         arguments: { code: 'necb', edition: EDITION, division: 'B',
                                       section_number: number, include_sentences: false } } }.to_json
   res = Net::HTTP.start(endpoint.host, endpoint.port, use_ssl: true, read_timeout: 60) { |h| h.request(req) }
   raise "HTTP #{res.code} for #{number}" unless res.code == '200'
@@ -111,7 +128,7 @@ end
 # ---------------------------------------------------------------- parsing
 
 FURNITURE = [
-  /\ANational Energy Code of Canada for Buildings 2025\z/,
+  /\ANational Energy Code of Canada for Buildings #{EDITION}\z/,
   /\ADivision B(\s+8-\d+)?\z/,
   /\A8-\d+\s+Division B\z/,
   /\A©\s*His Majesty.*\z/,
@@ -207,7 +224,7 @@ return unless __FILE__ == $PROGRAM_NAME # requirable for tests (necb:coverage_do
 
 cache = {
   'provenance' => {
-    'code' => 'necb', 'edition' => '2025', 'division' => 'B',
+    'code' => 'necb', 'edition' => EDITION, 'division' => 'B',
     'retrieved' => Date.today.iso8601,
     'source' => 'building-codes MCP (get_section, JSON-RPC), Crown copyright — reproduction authorized (GoC work)',
     'note' => 'Regenerate with: ruby scripts/fetch_necb_8_4_text.rb. The 2020->2025 renumbering (8.4.4->8.4.5) makes stale text actively misleading; check `retrieved` before trusting.'
