@@ -21,7 +21,7 @@ Every gem in this repository obeys the same rules:
 - **Two citation axes.** `article:` cites the code that mandates a value;
   `ruling:` cites the adjudicated decision that says how we read it. Every id
   must exist in
-  [openstudio-necb/docs/necb_decisions.md](openstudio-necb/docs/necb_decisions.md)
+  [openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
   and its machine-readable mirror; a drift test enforces both directions.
 - **Audit text convention:** violations are SHOUTED, passes are lowercase — the
   report's checklist classifier is deliberately case-sensitive about this.
@@ -118,7 +118,7 @@ rake necb:coverage_doc  # regenerate the coverage documents
 
 The parity suites compare against a **pinned revision** of the NECB/BTAP
 implementation in the `NatLabRockies/openstudio-standards` fork. See
-[legacy_pin/README.md](legacy_pin/README.md) for the pinning mechanism and the
+[legacy_pin/README.md](../legacy_pin/README.md) for the pinning mechanism and the
 bump workflow.
 
 The tie to that fork is `legacy_pin/REF` — **one commit SHA, not a branch and

@@ -12,6 +12,18 @@ pump and instantaneous water heaters), the reference transform, and costing.
   `audit.with_building`. `audit_log.rb` aliases the shared class in
   **openstudio-audit** — schema changes happen there, never as a local copy.
 - Audit text: violations SHOUTED, passes lowercase.
+- **Section 6.2.3-6.2.7 is declared PER ARTICLE**, not as one row. Splitting it
+  showed they have different answers: 6.2.4.1 was already satisfied and merely
+  undeclared (the tank carries a setpoint schedule), 6.2.5.1 is now checked from
+  the sized demand, and 6.2.3.1/6.2.6 are field-verified. `necb/prescriptive.rb`.
+- **6.2.5.1 fires when the hot fraction is SMALL.** "Where LESS THAN 50% of the
+  total design flow ... has a design discharge temperature higher than 60 C" — a
+  mostly-hot system may run one plant; a minority hot load may not drag the whole
+  plant up. `auto_size` has the per-space temperatures and flows and then throws
+  them away collapsing to one `max_temp_c`; the check reads them first.
+- **6.2.6 is NOT checkable** however tempting it looks: the demand data is a
+  per-AREA aggregate with no fixture count anywhere, so a per-showerhead
+  7.6 L/min limit cannot be derived from it.
 - `article_coverage` manifest in `shw_rules_*.json`; partial/not_implemented
   warn every run.
 - Vintages 2020 + 2025 only.

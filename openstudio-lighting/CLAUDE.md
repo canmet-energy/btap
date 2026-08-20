@@ -95,7 +95,25 @@ lighting fixture costing.
   all under the old (pre-#2119, pre-D-57) behaviour.
 - **Subsection 4.2.2 of NECB 2020/2025 ENDS AT ARTICLE 4.2.2.6.** Any citation to
   4.2.2.7.-4.2.2.12. is a NECB 2011 leftover and is wrong; 4.2.2.2. is "Lighting
-  Controls in Storage Garages", not occupancy controls.
+  Controls in Storage Garages", not occupancy controls — and it is IMPLEMENTED
+  now, in `necb/storage_garage.rb`. `apply_lights` used to tag the general
+  occupancy-sensor synthesis `article: '4.2.2.2.'`, which made the garage
+  manifest entry report citations it never earned; a test greps for that string
+  so it cannot come back.
+- **The garage daylight band is NOT the 4.2.2.3 band.** `sidelit_polygons`
+  builds from an APERTURE at depth = window head height with a half-head side
+  extension. 4.2.2.2.(4) measures a constant 6.1 m from the WALL, glazed or not,
+  no extension. And it cannot be clipped with `OpenStudio.within` /
+  `.intersects` / `.subtract`: a full-width band SHARES EDGES with the floor, so
+  `within` and `intersects` both return false (a shared edge is neither
+  containment nor crossing) and `subtract` reports the whole floor consumed.
+  `Perimeter` clips it with a convex Sutherland-Hodgman instead — exact for a
+  rectangle, no edge cases. The clip window is normalised counter-clockwise
+  because a wall's vertex order is whatever the model author chose.
+- **The general occupancy path is INERT for garages.** It is gated on
+  LPD > 8.6 W/m2 and both garage records sit at 1.5-1.9 W/m2, so 4.2.2.2.(2)
+  needs its own trigger — and the Table 4.3.2.10 factors would give 26.8% where
+  the sentence demands 30%.
 - Zone daylight fraction on the `:necb2020` path is the **daylighted share of
   the zone floor area**, not 1.0 — (10)/(13) control the lighting in the
   daylighted areas, not the whole room. The legacy paths still use 1.0.

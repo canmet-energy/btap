@@ -86,9 +86,31 @@ object EXACT vs legacy `model_add_swh`; 9 efficiency cases covering every
 Table 6.2.2.1 bin EXACT vs the legacy NECB2020
 `water_heater_mixed_apply_efficiency`.
 
+## Section 6.2 prescriptive rules
+
+Most of 6.2.3–6.2.7 governs installed hardware — a device that shuts a pool
+heater off, an insulation thickness on a pipe run — that an energy model has no
+object for. `necb/prescriptive.rb` checks the one rule a model *can* answer and
+declares the rest by article, because silence reads as "not applicable" and
+these very much apply.
+
+| Article | |
+|---|---|
+| **6.2.4.1** temperature controls | **Implemented.** The tank is built with an automatic setpoint: a constant schedule installed as both the loop `SetpointManagerScheduled` and the `WaterHeaterMixed` setpoint, 2 °C deadband, `Cycle` control. |
+| **6.2.5.1** remote/booster heaters | **Checked.** The fraction of design flow above 60 °C is computed from the per-space demand *before* `auto_size` collapses it to one `max_temp_c`. Note the sentence fires when that fraction is **small** — a minority high-temperature load may not drag the whole plant up to serve it. |
+| **6.2.7** pools | **Partial.** Pool-heater minimums apply when a `SwimmingPoolIndoor` is present (D-63). 6.2.7.2 covers govern heated **outdoor** pools, and EnergyPlus models indoor pools only. |
+| **6.2.3.1** piping insulation | Field-verified. No pipe objects, no pipe-run lengths — and Table 6.2.3.1 is known-damaged in the codes store. |
+| **6.2.6** fixture flow limits | Field-verified. The demand data is a per-**area** aggregate with no fixture count, so a per-showerhead 7.6 L/min rate cannot be derived from it. |
+
+Field-verified articles carry `gap_owner: "modeller"`, so they render as a scope
+note rather than a failure the software could never clear (D-76).
+
 ## Documented future
 
 Heat-pump and instantaneous water heaters (incl. the 2025 UEF ≥ 2.23 row and
 the 8.4.4.20.(2) HP→ASHP reference rule) · the legacy geometric pump-head
-calculation · SHW distribution costing · piping insulation and controls
-(6.2.3–6.2.7) · 2011–2017 backfill.
+calculation · SHW distribution costing · 2011–2017 backfill.
+
+Section 6.2.3–6.2.7 is no longer a single "documented future" line. It was one
+manifest row covering five articles, which hid that they have different answers;
+it is now declared per article — see [Section 6.2 prescriptive rules](#section-62-prescriptive-rules).
