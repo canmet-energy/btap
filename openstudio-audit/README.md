@@ -73,7 +73,10 @@ OpenStudioAudit::Coverage.emit(coverage, audit)  # coverage = the resolved artic
 ```
 
 Every declared article lands in the audit as a `step: :coverage` entry carrying
-`inputs: { status:, decisions_citing: }` (plus `gap_owner:` when present) and
+`inputs: { status:, decisions_citing: }` (plus `gap_owner:` and `code:` when
+present — `code` is the entry's "where is this dealt with" list of
+`path#method` refs, linted by `openstudio-necb/test/test_coverage_code_refs.rb`
+so a rename cannot leave a stale pointer) and
 the manifest's `article:`, so a missed requirement is visible in every log
 rather than discovered by review. Levels:
 

@@ -39,6 +39,10 @@ module OpenStudioAudit
         applied = cited.select { |a, _| a.start_with?(art['article'].to_s.sub(/\s*\(.*\z/, '')) }.values.sum
         inputs = { status: art['status'], decisions_citing: applied }
         inputs[:gap_owner] = art['gap_owner'] if art['gap_owner']
+      # "Where is this dealt with" — path#method refs, linted by
+      # test_coverage_code_refs.rb so they cannot rot. Carried into the audit so
+      # the AHJ trail answers the question without a trip to the repo.
+      inputs[:code] = art['code'] if art['code']
         if %w[implemented satisfied_by_clone host_scope].include?(art['status'])
           audit.info(:coverage, "#{art['title']} — #{art['status'].tr('_', ' ')}#{art['how'] ? ": #{art['how']}" : ''}",
                      inputs: inputs, article: art['article'])

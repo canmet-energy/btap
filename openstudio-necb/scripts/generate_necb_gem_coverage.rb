@@ -102,6 +102,12 @@ def notes(row)
   parts = []
   parts << row[:how] if row[:how] && !row[:how].empty?
   parts << "Gaps: #{row[:gaps]}" if row[:gaps] && !row[:gaps].empty?
+  # The "where is this dealt with" pointers (linted by test_coverage_code_refs).
+  # Method anchors, not line numbers — lines rot with every edit above them.
+  if row[:code] && !Array(row[:code]).empty?
+    refs = Array(row[:code]).map { |r| "`#{r.split('/').last}`" }.join(', ')
+    parts << "Code: #{refs}"
+  end
   parts.join(' — ').tr('|', '/') # '|' would break the Markdown table
 end
 

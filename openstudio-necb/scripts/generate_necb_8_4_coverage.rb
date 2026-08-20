@@ -292,7 +292,15 @@ def clause_tree(art, record, decls)
   items = record['sentences'].map do |s|
     marks = (sentence_decls[s['num']] || []).map do |d|
       label, css = STATUS_META.fetch(d['status'], [d['status'], 'none'])
-      %(<span class="pill #{css}" title="#{esc(d['gem'])}: #{esc(d['how'].to_s[0, 160])}">#{esc(d['gem'].sub('openstudio-', ''))}: #{esc(label)}</span>)
+      # "Where is this dealt with": the manifest's path#method refs, linted by
+      # test_coverage_code_refs.rb, rendered as file deep links (method in the
+      # link text — GitHub cannot anchor a method, and line numbers rot).
+      code = Array(d['code']).map do |ref|
+        path, sym = ref.split('#', 2)
+        %(<a class="dim" href="#{REPO}/blob/#{BRANCH}/#{esc(path)}" title="#{esc(ref)}">#{esc(File.basename(path))}##{esc(sym)}</a>)
+      end.join(' · ')
+      pill = %(<span class="pill #{css}" title="#{esc(d['gem'])}: #{esc(d['how'].to_s[0, 160])}">#{esc(d['gem'].sub('openstudio-', ''))}: #{esc(label)}</span>)
+      code.empty? ? pill : "#{pill} <span class=\"dim\">[#{code}]</span>"
     end.join(' ')
     clauses = s['clauses'].map do |c|
       subs = c['subclauses'].map { |sc| %(<li class="sub"><span class="cid">(#{esc(sc['id'])})</span> #{esc(sc['text'])}</li>) }.join
