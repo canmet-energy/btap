@@ -38,18 +38,35 @@ class TestCoverageCodeRefs < Minitest::Test
     assert_operator(checked, :>, 60, 'the code refs exist and were actually checked')
   end
 
-  # The refs answer "where is this sentence dealt with", so a sentence that IS
-  # dealt with must say where. not_implemented and modeller-scope entries have
-  # no site by definition; sizing-time partials may legitimately have none.
-  def test_every_implemented_sentence_entry_names_its_code
+  # The refs answer "where is this dealt with", so an entry that claims a rule
+  # IS dealt with must say where — at every depth, not only per sentence:
+  #
+  #   implemented / satisfied_by_clone   always (the claim is a code claim)
+  #   host_scope                         must point at the DELEGATE's code —
+  #                                      "delegated to gem X" without a pointer
+  #                                      was the reader complaint that produced
+  #                                      this field — unless the delegate is the
+  #                                      modeller, who has no code
+  #   partial                            unless the applied half is EnergyPlus
+  #                                      sizing-time behaviour with no gem site
+  #   not_implemented / modeller scope   no site exists by definition
+  def test_every_covering_entry_names_its_code
+    sizing_time = /sizing[- ]time|autosiz|not explicitly enforced|not individually evaluated/i
     manifests.each do |manifest, arts|
       arts.each do |art|
-        next unless art['article'] =~ /\(\d+\)\z/     # per-sentence entries only
-        next unless art['status'] == 'implemented'
+        next if art['gap_owner'] == 'modeller'
+
+        needed = case art['status']
+                 when 'implemented', 'satisfied_by_clone' then true
+                 when 'host_scope' then !"#{art['how']} #{art['gaps']}".match?(/modeller/i)
+                 when 'partial' then !art['gaps'].to_s.match?(sizing_time)
+                 else false
+                 end
+        next unless needed
 
         refute_empty(Array(art['code']),
-                     "#{manifest} #{art['article']}: implemented per-sentence entries must name " \
-                     'the code that implements them')
+                     "#{manifest} #{art['article']} (#{art['status']}): must name the code where " \
+                     'this is dealt with')
       end
     end
   end
