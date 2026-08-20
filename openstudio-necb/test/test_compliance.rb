@@ -103,15 +103,24 @@ class TestCompliance < Minitest::Test
 
     # The umbrella's OWN manifest is emitted at runtime (D-09): real pipeline
     # limitations warn; gap_owner "modeller" entries are info scope notes.
+    # 8.4.2.2 and 8.4.2.3 are declared PER SENTENCE since the coverage-depth
+    # pass, and the split preserves the D-09 distinction exactly: the real
+    # pipeline limitation ((1) end-use accounting: elevators) still WARNS, while
+    # the modeller decisions ((5)/(6) exclusions, (2) urban dataset choice) are
+    # info scope notes.
     umbrella_coverage = result.audit.entries.select { |e| e[:step] == :coverage }
-    calc = umbrella_coverage.find { |e| e[:article] == '8.4.2.2.' }
-    refute_nil calc, 'umbrella 8.4.2.2 Calculation Methods coverage emitted'
-    assert_equal :warning, calc[:level], '8.4.2.2 has a real pipeline limitation (elevators) — warns'
-    climate = umbrella_coverage.find { |e| e[:article] == '8.4.2.3.' }
-    refute_nil climate, 'umbrella 8.4.2.3 Climatic Data coverage emitted'
+    calc = umbrella_coverage.find { |e| e[:article] == '8.4.2.2.(1)' }
+    refute_nil calc, 'umbrella 8.4.2.2.(1) end-use accounting coverage emitted'
+    assert_equal :warning, calc[:level], '(1) has a real pipeline limitation (elevators) — warns'
+    backup = umbrella_coverage.find { |e| e[:article] == '8.4.2.2.(5)' }
+    assert_equal 'modeller', backup[:inputs][:gap_owner], '(5) redundant-equipment exclusion is a modeller call'
+    climate = umbrella_coverage.find { |e| e[:article] == '8.4.2.3.(2)' }
+    refute_nil climate, 'umbrella 8.4.2.3.(2) urban-dataset coverage emitted'
     assert_equal :info, climate[:level], 'modeller-scope gap is a scope note, NOT a warning'
     assert_equal 'modeller', climate[:inputs][:gap_owner]
     assert_includes climate[:action], 'modeller scope'
+    attach = umbrella_coverage.find { |e| e[:article] == '8.4.2.3.(1)' }
+    assert_equal 'implemented', attach[:inputs][:status], '(1) weather attach is implemented'
     determination = umbrella_coverage.find { |e| e[:article] == '8.4.1.2.' }
     assert_equal :info, determination&.dig(:level), 'umbrella 8.4.1.2 implemented — info'
 

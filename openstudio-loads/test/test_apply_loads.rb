@@ -122,11 +122,15 @@ class TestApplyLoads < Minitest::Test
 
     assert(audit.entries.any? { |e| e[:action].include?('plenum space type skipped') })
     coverage = audit.entries.select { |e| e[:step] == :coverage }
-    # 5 original 8.4.3.x + 8.4.2.7 (internal loads slice) + 8.4.3.6 outdoor air
-    assert_equal 7, coverage.size, 'all declared articles accounted'
-    partial = coverage.find { |e| e[:article] == '8.4.3.2.' }
-    assert_equal :warning, partial[:level], 'partial status WARNS (lighting+SHW gaps)'
+    # 8.4.3.2. is declared PER SENTENCE since the coverage-depth pass: (1)/(2)
+    # partial (cross-gem schedule delegations, illuminance), (3) modeller scope.
+    # 4 other 8.4.3.x + 8.4.2.7 (internal loads slice) + 8.4.3.6 outdoor air.
+    assert_equal 9, coverage.size, 'all declared entries accounted'
+    partial = coverage.find { |e| e[:article] == '8.4.3.2.(1)' }
+    assert_equal :warning, partial[:level], 'partial status WARNS (lighting+SHW schedule delegations)'
     assert_match(/openstudio-lighting/, partial[:action])
+    semi = coverage.find { |e| e[:article] == '8.4.3.2.(3)' }
+    assert_equal :info, semi[:level], '(3) semi-heated set-point is a modeller input, not a warning'
     decisions = audit.entries.select { |e| e[:article].to_s.include?('8.4.3.2') && e[:level] == :decision }
     refute_empty decisions
   end

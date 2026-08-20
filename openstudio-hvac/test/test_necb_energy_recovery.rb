@@ -163,11 +163,15 @@ class TestNecbEnergyRecovery < Minitest::Test
   def test_article_coverage_emitted_for_all_20_articles
     result = reference(proposed_office)
     coverage = result.audit.entries.select { |e| e[:step] == :coverage }
-    # 20 Subsection 8.4.4 articles + '8.4.1.1. (HVAC)' + '8.4.2.10.' (the
-    # covered_by manifest entries reconciling cross-gem delegations)
-    assert_equal 22, coverage.size, 'all declared articles accounted for'
+    # 20 Subsection 8.4.4 articles + '8.4.1.1. (HVAC)' + '8.4.2.10.'. The
+    # formerly-partial articles are declared PER SENTENCE now (the article-level
+    # prose already enumerated its sentences; the split turned that into
+    # structure), so the count is entries, not articles: 12 article-level rows
+    # + 40 sentence rows across the 8 split articles + the 2 shared entries.
+    assert_equal 54, coverage.size, 'all declared entries accounted for'
     (1..20).each do |n|
-      assert coverage.any? { |e| e[:article] == "8.4.4.#{n}." }, "article 8.4.4.#{n}. missing from coverage"
+      assert coverage.any? { |e| e[:article].to_s.start_with?("8.4.4.#{n}.") },
+             "article 8.4.4.#{n}. missing from coverage (at any declared depth)"
     end
     # 8.4.4.12 graduated to implemented with D-62 (the 5.2.2.8.(4)-(5) staging
     # floor closed its last gap) — it must now be an INFO coverage line whose
@@ -176,13 +180,16 @@ class TestNecbEnergyRecovery < Minitest::Test
     assert_equal 'implemented', econ[:inputs][:status], '8.4.4.12 implemented since D-62'
     refute_equal :warning, econ[:level], '8.4.4.12 no longer warns'
     assert_includes econ[:action], '5.2.2.8.(4)-(5)'
-    # 8.4.4.16 is re-manifested modeller-scope (D-11): (2) is identical by
-    # construction, (1) binds only when the modeller approximates radiant
-    # convectively — an info scope note, NOT a warning.
-    stc = coverage.find { |e| e[:article] == '8.4.4.16.' }
-    assert_equal :info, stc[:level], '8.4.4.16 is a modeller scope note, not a warning'
-    assert_equal 'modeller', stc[:inputs][:gap_owner]
-    assert_includes stc[:action], 'modeller scope'
+    # 8.4.4.16 is declared per sentence, and the split preserves the D-11
+    # adjudication exactly: (1) binds only when the modeller approximates
+    # radiant convectively — modeller scope, an info note — while (2) is
+    # identical by construction and simply implemented.
+    stc1 = coverage.find { |e| e[:article] == '8.4.4.16.(1)' }
+    assert_equal :info, stc1[:level], '8.4.4.16.(1) is a modeller scope note, not a warning'
+    assert_equal 'modeller', stc1[:inputs][:gap_owner]
+    assert_includes stc1[:action], 'modeller scope'
+    stc2 = coverage.find { |e| e[:article] == '8.4.4.16.(2)' }
+    assert_equal 'implemented', stc2[:inputs][:status], '(2) is identical by construction'
     # implemented articles report how many decisions cited them this run
     selection = coverage.find { |e| e[:article] == '8.4.4.7.' }
     assert_operator selection[:inputs][:decisions_citing], :>, 0
@@ -197,7 +204,8 @@ class TestNecbEnergyRecovery < Minitest::Test
     valid = %w[implemented partial not_implemented satisfied_by_clone host_scope]
     %w[2020 2025].each do |vintage|
       manifest = OpenStudioHVAC::NECB.rules(vintage)['article_coverage']['articles']
-      assert_equal 22, manifest.size # 20 reference articles + 8.4.1.1.(HVAC) + 8.4.2.10.
+      # 12 article-level + 40 per-sentence + the 2 shared entries
+      assert_equal 54, manifest.size
       manifest.each do |art|
         assert_includes valid, art['status'], "#{art['article']} has invalid status"
         assert art['title'], "#{art['article']} missing title"
