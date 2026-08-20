@@ -332,7 +332,11 @@ namespace :windows do
 
     # 2. The commit must exist on the remote, or the tag points at nothing others can fetch.
     sha = `git rev-parse HEAD`.strip
-    abort('HEAD is not on the remote — push first') unless system("git branch -r --contains #{sha} > /dev/null 2>&1")
+    # `git branch -r --contains` exits 0 whether or not it finds anything, so the
+    # OUTPUT is the answer, not the status. Checking the status silently passed
+    # an unpushed commit straight through to the publish step.
+    on_remote = `git branch -r --contains #{sha} 2>/dev/null`.strip
+    abort("HEAD (#{sha[0, 12]}) is not on any remote branch — push first") if on_remote.empty?
 
     # 3. The installer must be NEWER than every source it claims to contain.
     #    This is the guard that catches the common mistake: editing a gem, then
