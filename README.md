@@ -164,13 +164,20 @@ As generated today, the rollup reports:
 
 | | |
 |---|---|
-| implemented | **59** |
-| partial — implemented with a declared gap | **23** |
-| not implemented | **0** |
-| field / document verification — no model can answer these | **7** |
+| implemented | **89** |
+| partial — implemented with a declared gap | **31** |
+| not implemented | **4** |
+| field / document verification — no model can answer these | **10** |
 | satisfied by construction (the reference is a clone of the proposed) | 5 |
-| host or other-gem scope | 13 |
-| cross-gem delegations | 13 |
+| host or other-gem scope | 15 |
+| cross-gem delegations | 15 |
+
+Counts are rows, and coverage is declared **per sentence** where the underlying
+work distinguishes sentences — so one article can contribute several rows. The
+not-implemented rows are individual *sentences* — the multi-energy capacity
+ratios (heating (5), cooling (4)) and two supply-air fan clauses
+(8.4.4.18.(5)-(6)) — not whole articles; every article is at least partially
+implemented.
 
 Every partial and not-implemented entry **warns on every run** and appears in the
 audit, so nothing in this list is hidden from a reviewer. These counts come from
@@ -209,9 +216,10 @@ Stated plainly, because a compliance tool that hides these is worse than useless
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
   modelled.** A plant drawing on more than one energy source passes into the
   reference unchanged rather than being apportioned.
-- **No article is wholly unimplemented.** 23 are partial — implemented with a
-  declared gap; each gap is spelled out in the coverage document and warns on
-  every run.
+- **No article is wholly unimplemented.** Four individual *sentences* are —
+  the multi-energy capacity ratios (8.4.4.9.(5) and 8.4.4.10.(4)) and two
+  supply-air fan clauses (8.4.4.18.(5)-(6)) — and each is named as its own row
+  in the coverage document and warns on every run.
 - **Seven requirements are verified outside the model**, not by it — the
   whole-building air-leakage test (3.2.4.1, 3.2.4.2), service-water piping
   insulation and heat trace (6.2.3.1, 6.2.4.3), fixture flow limits (6.2.6),
