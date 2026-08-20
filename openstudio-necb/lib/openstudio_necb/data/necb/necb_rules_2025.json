@@ -12,19 +12,29 @@
     "article": "8.4.1.2.",
     "title": "Determination of Compliance",
     "status": "implemented",
-    "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb."
+    "how": "The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate",
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate_unmet"
+    ]
    },
    {
     "article": "8.4.1.5.",
     "title": "Treatment of Process Loads",
     "status": "satisfied_by_clone",
-    "how": "(2): on the reference path, process loads in the proposed are automatically in the reference (clone; no transform touches them). On the EUI path the PL term is the caller-supplied process_loads_kwh added to the BET (8.4.4.1.(2)). (1) exclusion-by-default is the modeller's input decision."
+    "how": "(2): on the reference path, process loads in the proposed are automatically in the reference (clone; no transform touches them). On the EUI path the PL term is the caller-supplied process_loads_kwh added to the BET (8.4.4.1.(2)). (1) exclusion-by-default is the modeller's input decision.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#build_reference!"
+    ]
    },
    {
     "article": "8.4.2.1.",
     "title": "General",
     "status": "implemented",
-    "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs (simulate: :annual); any other mode is flagged non-determining. The EUI path still requires the annual run of the proposed."
+    "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs (simulate: :annual); any other mode is flagged non-determining. The EUI path still requires the annual run of the proposed.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#performance_compliance"
+    ]
    },
    {
     "article": "8.4.2.2.(1)",
@@ -102,13 +112,20 @@
     "article": "8.4.3.1.",
     "title": "General (Proposed Building)",
     "status": "implemented",
-    "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb)."
+    "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb).",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#load_and_validate!"
+    ]
    },
    {
     "article": "8.4.4.1.",
     "title": "General (Energy Use Intensity path)",
     "status": "implemented",
-    "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for \"conditioned\"); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage >= 90% and the Table-note HDD < 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise."
+    "how": "BET = sum(A_i x EUI_i) + PL from Table 8.4.4.1 (tiers.rb) with archetype floor areas COMPUTED FROM THE MODEL per (3) (Archetypes.resolve: partofTotalFloorArea non-plenum spaces x multiplier, a documented proxy for \"conditioned\"); (4) unmapped space functions distributed pro-rata (Archetypes.bet_areas — over-assignment impossible by construction); (1) coverage >= 90% and the Table-note HDD < 9000 bound are HARD refusals on the :eui path (a verdict outside applicability is not a determination); unknown archetype names raise.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/tiers.rb#eui_building_energy_target",
+     "openstudio-necb/lib/openstudio_necb/eui_archetypes.rb#resolve"
+    ]
    },
    {
     "article": "8.4.4.2.(1)",

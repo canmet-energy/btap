@@ -12,19 +12,29 @@
     "article": "8.4.1.2.",
     "title": "Determination of Compliance",
     "status": "implemented",
-    "how": "The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb."
+    "how": "The pipeline computes the (2) annual-energy verdict (proposed vs reference building energy target), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration — per-thermal-block: each failing zone’s Sizing:Zone factors are raised, secant-targeted from that zone’s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection — compliance.rb; asserted by test_compliance.rb.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate",
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate_unmet"
+    ]
    },
    {
     "article": "8.4.1.5.",
     "title": "Treatment of Process Loads",
     "status": "satisfied_by_clone",
-    "how": "(2): process loads included in the proposed model are automatically included in the reference — the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision."
+    "how": "(2): process loads included in the proposed model are automatically included in the reference — the reference is a clone and no transform touches process loads. (1) exclusion-by-default is the modeller's input decision.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#build_reference!"
+    ]
    },
    {
     "article": "8.4.2.1.",
     "title": "General",
     "status": "implemented",
-    "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining."
+    "how": "Compliance is assessed through modeling: the umbrella is the only gem permitted to run EnergyPlus, and a determination requires sizing + annual runs of BOTH models (simulate: :annual); any other mode is flagged non-determining.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#performance_compliance"
+    ]
    },
    {
     "article": "8.4.2.2.(1)",
@@ -102,7 +112,10 @@
     "article": "8.4.3.1.",
     "title": "General (Proposed Building)",
     "status": "implemented",
-    "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb)."
+    "how": "The proposed model is simulated as supplied — the pipeline applies no transforms to it (weather attach only); reference transforms operate on a clone. Guaranteed by test_caller_model_never_mutated (test_compliance.rb).",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#load_and_validate!"
+    ]
    }
   ]
  }

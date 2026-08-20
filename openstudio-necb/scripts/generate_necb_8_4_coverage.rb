@@ -271,22 +271,74 @@ def executed_badge(obs)
   %(<span class="pill #{css}" title="#{esc(detail)}">#{label}</span>)
 end
 
+# Resolve a manifest code ref ("path#method") to its CURRENT line number.
+#
+# The manifests deliberately store method anchors, not line numbers — a line
+# number rots with every edit above it. The DOCUMENT shows real line numbers
+# anyway, because it is regenerated (and CI-gated) on every source change, so
+# the resolution below is always fresh. Same contract as the "Cited at" links.
+CODE_LINES = {}
+def code_ref_link(ref)
+  path, sym = ref.to_s.split('#', 2)
+  return esc(ref) if path.nil? || sym.nil?
+
+  CODE_LINES[ref] ||= begin
+    file = File.join(ROOT, path)
+    line = nil
+    if File.file?(file)
+      File.readlines(file, encoding: 'UTF-8', invalid: :replace, undef: :replace).each_with_index do |l, i|
+        if l.match?(/def (self\.)?#{Regexp.escape(sym)}[\s(=]/) || l.match?(/def (self\.)?#{Regexp.escape(sym)}$/)
+          line = i + 1
+          break
+        end
+      end
+    end
+    line
+  end
+  line = CODE_LINES[ref]
+  text = "#{File.basename(path)}##{sym}#{line ? ":#{line}" : ''}"
+  %(<a href="#{BLOB}/#{esc(path)}#{line ? "#L#{line}" : ''}" title="#{esc(ref)}">#{esc(text)}</a>)
+end
+
+def code_cell(entry)
+  refs = Array(entry['code'])
+  return '' if refs.empty?
+
+  %(<div class="coderefs">#{refs.map { |r| code_ref_link(r) }.join(' · ')}</div>)
+end
+
 # Plain per-article declaration table. Each vintage part shows only its own
 # edition's declarations, so no inner vintage split is needed any more.
 def declaration_rows(decls, art_executed)
-  rows = decls.group_by { |d| [d['gem'], d['article'], d['status'], d['how'].to_s, d['gaps'].to_s] }
-              .map do |(gem_name, article, status, how, gaps), _group|
+  # A host_scope row beside the row that actually implements the article is
+  # bookkeeping, not information: it exists so an hvac-only RUN still audits
+  # "this is envelope's job", but a reader looking at 8.4.4.3 does not need
+  # "openstudio-hvac: Delegated" as a peer of the envelope implementation. When
+  # an implementing declaration is present, delegations collapse to a footnote;
+  # they render as rows only in the "(none in family)" case, where the
+  # delegation IS the open item.
+  implementing = decls.reject { |d| d['status'] == 'host_scope' }
+  delegations = decls.select { |d| d['status'] == 'host_scope' }
+  shown = implementing.any? ? implementing : delegations
+
+  rows = shown.group_by { |d| [d['gem'], d['article'], d['status'], d['how'].to_s, d['gaps'].to_s] }
+              .map do |(gem_name, article, status, how, gaps), group|
     label, css = STATUS_META.fetch(status, [status, 'none'])
     <<~ROW
       <tr>
         <td class="ref">#{esc(article)}</td>
         <td>#{esc(gem_name)}</td>
         <td><span class="pill #{css}">#{esc(label)}</span> #{art_executed}</td>
-        <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}</td>
+        <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}#{code_cell(group.first)}</td>
       </tr>
     ROW
   end.join
-  %(<table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody>#{rows}</tbody></table>)
+  table = %(<table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps · code</th></tr></thead><tbody>#{rows}</tbody></table>)
+  if implementing.any? && delegations.any?
+    note = delegations.map { |d| d['gem'] }.uniq.sort.join(', ')
+    table += %(<div class="dim delegnote">Also declared <code>host_scope</code> by #{esc(note)} — runtime bookkeeping so a partial-composition run still names the owner; reconciled against the row#{implementing.size == 1 ? '' : 's'} above.</div>)
+  end
+  table
 end
 
 def citation_cell(cits)
@@ -346,10 +398,7 @@ def clause_tree(art, record, decls)
       # "Where is this dealt with": the manifest's path#method refs, linted by
       # test_coverage_code_refs.rb, rendered as file deep links (method in the
       # link text — GitHub cannot anchor a method, and line numbers rot).
-      code = Array(d['code']).map do |ref|
-        path, sym = ref.split('#', 2)
-        %(<a class="dim" href="#{REPO}/blob/#{BRANCH}/#{esc(path)}" title="#{esc(ref)}">#{esc(File.basename(path))}##{esc(sym)}</a>)
-      end.join(' · ')
+      code = Array(d['code']).map { |ref| code_ref_link(ref) }.join(' · ')
       pill = %(<span class="pill #{css}" title="#{esc(d['gem'])} (#{esc(vintages)}): #{esc(d['how'].to_s[0, 160])}">#{esc(d['gem'].sub('openstudio-', ''))}: #{esc(label)}</span>)
       code.empty? ? pill : "#{pill} <span class=\"dim\">[#{code}]</span>"
     end.join(' ')
@@ -506,6 +555,10 @@ html = <<~HTML
       padding:.6rem; overflow-x:auto; font-size:.8rem; white-space:pre-wrap; }
     footer { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--dim); font-size:.82rem; }
     code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }
+    .coderefs { margin-top:.25rem; font-size:.8rem; }
+    .coderefs a { color:var(--clone); text-decoration:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .coderefs a:hover { text-decoration:underline; }
+    .delegnote { margin:.2rem 0 .4rem; font-size:.78rem; }
     details.vintage-part { margin:1.4rem 0; border:1px solid var(--line); border-radius:8px; padding:.2rem .9rem .6rem; }
     details.vintage-part > summary { cursor:pointer; font-size:1.25rem; padding:.55rem 0; color:var(--fg); }
     details.vintage-part[open] > summary { border-bottom:1px solid var(--line); margin-bottom:.6rem; }

@@ -50,31 +50,49 @@
     "article": "8.4.3.3.",
     "title": "Air Leakage",
     "status": "host_scope",
-    "how": "implemented in the openstudio-envelope gem (8.4.3.3.(3) default air-leakage rule in its reference transform); the loads pass applies only the space-type modelling infiltration, which envelope rules may override"
+    "how": "implemented in the openstudio-envelope gem (8.4.3.3.(3) default air-leakage rule in its reference transform); the loads pass applies only the space-type modelling infiltration, which envelope rules may override",
+    "code": [
+     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_air_leakage_default",
+     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply"
+    ]
    },
    {
     "article": "8.4.3.4.",
     "title": "HVAC System Operation",
     "status": "host_scope",
-    "how": "fan/system operating schedules ship in the schedule sets (NECB-<letter>-Fan); wiring them to systems is the openstudio-hvac / umbrella layer"
+    "how": "fan/system operating schedules ship in the schedule sets (NECB-<letter>-Fan); wiring them to systems is the openstudio-hvac / umbrella layer",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#apply_to_space_type",
+     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#apply_dwelling_rule"
+    ]
    },
    {
     "article": "8.4.3.5.",
     "title": "Assumed chiller performance for Part 8 calculations (Table 8.4.3.5)",
     "status": "host_scope",
-    "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)"
+    "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/systems/plant_loops.rb#hot_water",
+     "openstudio-hvac/lib/openstudio_hvac/systems/plant_loops.rb#chilled_water"
+    ]
    },
    {
     "article": "8.4.2.7. (internal loads)",
     "title": "Internal and Service Water Heating Loads — internal slice",
     "status": "implemented",
-    "how": "Occupant, receptacle and miscellaneous loads applied from the NECB space-type data; (2) sensible/latent split and (3) schedule-driven adjustment are EnergyPlus behaviour of those inputs."
+    "how": "Occupant, receptacle and miscellaneous loads applied from the NECB space-type data; (2) sensible/latent split and (3) schedule-driven adjustment are EnergyPlus behaviour of those inputs.",
+    "code": [
+     "openstudio-loads/lib/openstudio_loads/necb/apply.rb#apply_loads"
+    ]
    },
    {
     "article": "8.4.3.6.",
     "title": "Outdoor Air",
     "status": "implemented",
-    "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone. (1)(a): on the 2025 EUI path the umbrella normalizes OA to the ASHRAE 62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretation 2026-07-22; openstudio-necb Archetypes)."
+    "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone. (1)(a): on the 2025 EUI path the umbrella normalizes OA to the ASHRAE 62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretation 2026-07-22; openstudio-necb Archetypes).",
+    "code": [
+     "openstudio-loads/lib/openstudio_loads/necb/apply.rb#apply_loads"
+    ]
    }
   ]
  }

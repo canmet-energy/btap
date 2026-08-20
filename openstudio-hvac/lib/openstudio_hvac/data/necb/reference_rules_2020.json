@@ -642,31 +642,46 @@
     "article": "8.4.4.1.",
     "title": "General — reference building basis (prescriptive components, all energy uses)",
     "status": "host_scope",
-    "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems."
+    "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems.",
+    "code": [
+     "openstudio-necb/lib/openstudio_necb/compliance.rb#build_reference!"
+    ]
    },
    {
     "article": "8.4.4.2.",
     "title": "Operating Schedules, Internal Loads and Service Water Heating Loads",
     "status": "satisfied_by_clone",
-    "how": "The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required."
+    "how": "The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#clone_model"
+    ]
    },
    {
     "article": "8.4.4.3.",
     "title": "Building Envelope Components (solar absorptance)",
     "status": "host_scope",
-    "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
+    "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
+    "code": [
+     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#reference_envelope"
+    ]
    },
    {
     "article": "8.4.4.4.",
     "title": "Envelope Thermal Characteristics (lightweight construction)",
     "status": "host_scope",
-    "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella."
+    "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
+    "code": [
+     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_lightweight_construction"
+    ]
    },
    {
     "article": "8.4.4.5.",
     "title": "Lighting",
     "status": "host_scope",
-    "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (ON by default, D-51; placement per the 4.2.2.1.(10)-(15) rule, D-57) covers sentences (5)-(12)."
+    "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (ON by default, D-51; placement per the 4.2.2.1.(10)-(15) rule, D-57) covers sentences (5)-(12).",
+    "code": [
+     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#reference_lighting"
+    ]
    },
    {
     "article": "8.4.4.6.(1)",
@@ -714,13 +729,20 @@
     "title": "HVAC System Selection (Tables -A/-B)",
     "status": "implemented",
     "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.4.1.(5) presence override keeps the changeover heating when the proposed block heats).",
-    "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification IS rebuilt since D-55 (the proposed's humidifier is recorded per thermal block before the teardown and re-created on the serving reference loop with the same energy source, autosized, and with a control taken from the proposed); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication)."
+    "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification IS rebuilt since D-55 (the proposed's humidifier is recorded per thermal block before the teardown and re-created on the serving reference loop with the same energy source, autosized, and with a control taken from the proposed); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication).",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#select_reference_systems",
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#assign"
+    ]
    },
    {
     "article": "8.4.4.8.",
     "title": "Equipment Oversizing",
     "status": "implemented",
-    "how": "Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded."
+    "how": "Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#apply_oversizing_caps"
+    ]
    },
    {
     "article": "8.4.4.9.(1)",
@@ -952,7 +974,11 @@
     "article": "8.4.4.12.",
     "title": "Cooling with Outside Air (economizers)",
     "status": "implemented",
-    "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. DX staging clauses 5.2.2.8.(4)-(5) enforced since D-62: economizer systems' staged cooling gets a stage-count FLOOR so the lowest stage is <= 25% of capacity at >= 70 kW and <= 50% at > 25 kW (economizer_dx_staging rules; sentence (6)'s OA-reduction permission is not exercised - stage flows are floored at the minimum-OA fraction per D-46). Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. The 5.2.2.9 capability is INTEGRATED and measured: 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower, partial share above the band; sentence (1) binds because the reference rejects heat evaporatively, (2) declared inapplicable; air-cooled/purchased chilled water warns (no evaporatively-cooled fluid)."
+    "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. DX staging clauses 5.2.2.8.(4)-(5) enforced since D-62: economizer systems' staged cooling gets a stage-count FLOOR so the lowest stage is <= 25% of capacity at >= 70 kW and <= 50% at > 25 kW (economizer_dx_staging rules; sentence (6)'s OA-reduction permission is not exercised - stage flows are floored at the minimum-OA fraction per D-46). Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. The 5.2.2.9 capability is INTEGRATED and measured: 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower, partial share above the band; sentence (1) binds because the reference rejects heat evaporatively, (2) declared inapplicable; air-cooled/purchased chilled water warns (no evaporatively-cooled fluid).",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#apply_economizers",
+     "openstudio-hvac/lib/openstudio_hvac/necb/efficiency.rb#economizer_stage_floor"
+    ]
    },
    {
     "article": "8.4.4.13.(1)",
@@ -982,7 +1008,10 @@
     "title": "Hydronic Pumps",
     "status": "implemented",
     "how": "Table 8.4.4.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.4.1.(2) makes Part 5 a ceiling for the reference).",
-    "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed."
+    "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/efficiency.rb#apply_pump_rules"
+    ]
    },
    {
     "article": "8.4.4.15.(1)",
@@ -1026,21 +1055,31 @@
     "article": "8.4.4.17.",
     "title": "Fans (exhaust fans, fan power vs flow curves)",
     "status": "implemented",
-    "how": "VAV fan power-vs-flow curves from Table -17 applied in the (post-sizing) efficiency pass, row selected by rated power per sentences (3)-(5); the below-D floor is approximated by the E+ minimum-flow-fraction clamp (equals E within table rounding)"
+    "how": "VAV fan power-vs-flow curves from Table -17 applied in the (post-sizing) efficiency pass, row selected by rated power per sentences (3)-(5); the below-D floor is approximated by the E+ minimum-flow-fraction clamp (equals E within table rounding)",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/efficiency.rb#apply_fan_power_curve",
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#apply_fan_rules"
+    ]
    },
    {
     "article": "8.4.4.18.(1)",
     "title": "Supply Air Systems (airflow rates, fan specs)",
     "status": "partial",
     "how": "secondary-system supply airflow is the sum of the block airflows via zone-level sizing",
-    "gaps": "the determination is sizing-time; the sentence’s arithmetic is not re-verified against the sized result"
+    "gaps": "the determination is sizing-time; the sentence’s arithmetic is not re-verified against the sized result",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#apply_zone_fan_rules"
+    ]
    },
    {
     "article": "8.4.4.18.(2)",
     "title": "Supply Air Systems (airflow rates, fan specs)",
     "status": "partial",
     "how": "block supply airflow comes from zone sizing",
-    "gaps": "the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced"
+    "gaps": "the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#apply_zone_fan_rules"
+    ]
    },
    {
     "article": "8.4.4.18.(3)",
@@ -1077,26 +1116,39 @@
     "title": "Energy Recovery Systems",
     "status": "implemented",
     "how": "Table 5.2.10.1.-A/-B airflow-threshold trigger (climate row by HDD x %OA band x continuous/non-continuous from the air loop availability schedule, >=8000 h/yr) evaluated POST-SIZING per reference air loop on sized supply/OA flows; rotary HX @ 50% effectiveness with OA-pretreat control added where required. Below-10%-OA systems are outside the Tables (NR).",
-    "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs."
+    "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/energy_recovery.rb#apply_energy_recovery"
+    ]
    },
    {
     "article": "8.4.4.20.",
     "title": "Service Water Heating Systems",
     "status": "host_scope",
-    "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies."
+    "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies.",
+    "code": [
+     "openstudio-shw/lib/openstudio_shw/necb/reference.rb#reference_shw"
+    ]
    },
    {
     "article": "8.4.1.1. (HVAC)",
     "title": "General — HVAC components accounted",
     "status": "implemented",
-    "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.4.7.-8.4.4.19.) and the capacity-binned efficiency pass — the realization of 8.4.1.1.(1) for the HVAC slice."
+    "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.4.7.-8.4.4.19.) and the capacity-binned efficiency pass — the realization of 8.4.1.1.(1) for the HVAC slice.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#reference_hvac"
+    ]
    },
    {
     "article": "8.4.2.10.",
     "title": "HVAC Systems",
     "status": "implemented",
     "how": "Reference HVAC systems are built explicitly from the Table 8.4.4.7. topologies — components are constructed, not approximated by thermodynamically-similar substitutes.",
-    "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified."
+    "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified.",
+    "code": [
+     "openstudio-hvac/lib/openstudio_hvac/builder.rb#build_system",
+     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#reference_hvac"
+    ]
    }
   ]
  }
