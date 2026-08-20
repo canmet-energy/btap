@@ -229,20 +229,30 @@ def executed_badge(obs)
   %(<span class="pill #{css}" title="#{esc(detail)}">#{label}</span>)
 end
 
+# One collapsible block PER VINTAGE, each showing that edition's own article
+# numbers. The previous single table merged vintages into one row where the
+# text matched and interleaved per-vintage rows where it did not — two
+# numbering schemes woven through one table. A reader reviews one code edition
+# at a time; let them open that one.
 def declaration_rows(decls, art_executed)
-  grouped = decls.group_by { |d| [d['gem'], d['canonical'], d['status'], d['how'].to_s, d['gaps'].to_s] }
-  grouped.map do |(gem_name, canon, status, how, gaps), group|
-    label, css = STATUS_META.fetch(status, [status, 'none'])
-    vintages = group.map { |g| g['vintage'] }.uniq.sort.join(', ')
-    originals = group.map { |g| g['article'] }.uniq.sort.join(' / ')
-    <<~ROW
-      <tr>
-        <td class="ref">#{esc(canon)}#{originals == canon ? '' : %(<div class="orig">declared as #{esc(originals)}</div>)}</td>
-        <td>#{esc(gem_name)}<br><span class="dim">#{esc(vintages)}</span></td>
-        <td><span class="pill #{css}">#{esc(label)}</span> #{art_executed}</td>
-        <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}</td>
-      </tr>
-    ROW
+  decls.group_by { |d| d['vintage'] }.sort.map do |vintage, vdecls|
+    rows = vdecls.group_by { |d| [d['gem'], d['article'], d['status'], d['how'].to_s, d['gaps'].to_s] }
+                 .map do |(gem_name, article, status, how, gaps), _group|
+      label, css = STATUS_META.fetch(status, [status, 'none'])
+      <<~ROW
+        <tr>
+          <td class="ref">#{esc(article)}</td>
+          <td>#{esc(gem_name)}</td>
+          <td><span class="pill #{css}">#{esc(label)}</span> #{art_executed}</td>
+          <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}</td>
+        </tr>
+      ROW
+    end.join
+    <<~BLOCK
+      <details class="vintage" #{vintage == '2025' ? 'open' : ''}><summary>NECB #{esc(vintage)} — #{vdecls.size} declaration#{vdecls.size == 1 ? '' : 's'}</summary>
+      <table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody>#{rows}</tbody></table>
+      </details>
+    BLOCK
   end.join
 end
 
@@ -290,7 +300,15 @@ def clause_tree(art, record, decls)
                  'no coverage declared at any depth'
                end
   items = record['sentences'].map do |s|
-    marks = (sentence_decls[s['num']] || []).map do |d|
+    # Dedupe across vintages: hvac declares the same sentence in 2020 and 2025
+    # numbering, and two identical pills per sentence read as stutter. One pill,
+    # vintages named in the tooltip; a vintage-specific difference in status or
+    # text still gets its own pill because it hashes differently.
+    marks = (sentence_decls[s['num']] || [])
+            .group_by { |d| [d['gem'], d['status'], d['how'].to_s, Array(d['code'])] }
+            .map do |(_gem, _status, _how, _code), same|
+      d = same.first
+      vintages = same.map { |x| x['vintage'] }.uniq.sort.join(', ')
       label, css = STATUS_META.fetch(d['status'], [d['status'], 'none'])
       # "Where is this dealt with": the manifest's path#method refs, linted by
       # test_coverage_code_refs.rb, rendered as file deep links (method in the
@@ -299,7 +317,7 @@ def clause_tree(art, record, decls)
         path, sym = ref.split('#', 2)
         %(<a class="dim" href="#{REPO}/blob/#{BRANCH}/#{esc(path)}" title="#{esc(ref)}">#{esc(File.basename(path))}##{esc(sym)}</a>)
       end.join(' · ')
-      pill = %(<span class="pill #{css}" title="#{esc(d['gem'])}: #{esc(d['how'].to_s[0, 160])}">#{esc(d['gem'].sub('openstudio-', ''))}: #{esc(label)}</span>)
+      pill = %(<span class="pill #{css}" title="#{esc(d['gem'])} (#{esc(vintages)}): #{esc(d['how'].to_s[0, 160])}">#{esc(d['gem'].sub('openstudio-', ''))}: #{esc(label)}</span>)
       code.empty? ? pill : "#{pill} <span class=\"dim\">[#{code}]</span>"
     end.join(' ')
     clauses = s['clauses'].map do |c|
@@ -331,9 +349,7 @@ sections_html = SUBSECTIONS.map do |prefix, sub_title|
 
     body = +''
     if decls.any?
-      body << %(<table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody>)
       body << declaration_rows(decls, exec_badge)
-      body << '</tbody></table>'
     elsif state == :cited
       body << %(<div class="dispo"><span class="pill warn">cited in code, not declared</span> <span class="how">No
         manifest entry exists, but source citations reference this article (see below). This is a manifest
@@ -427,7 +443,11 @@ html = <<~HTML
       padding:.6rem; overflow-x:auto; font-size:.8rem; white-space:pre-wrap; }
     footer { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--dim); font-size:.82rem; }
     code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }
-  </style></head><body>
+    details.vintage { margin: .35em 0; }
+  details.vintage > summary { cursor: pointer; font-weight: 600; color: #444;
+    padding: .15em 0; }
+  details.vintage[open] > summary { color: #000; }
+</style></head><body>
 
   <h1>NECB Section 8.4 — Performance Path coverage</h1>
   <p class="lede">How the <code>openstudio-*</code> gem family covers Section 8.4 of the National Energy Code of

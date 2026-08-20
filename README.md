@@ -160,24 +160,26 @@ Coverage is generated from the code, not hand-maintained:
   Section 8.4 article by article, down to sentence and clause text, showing
   where each is applied in the code.
 
-As generated today, the rollup reports:
+As generated today, the rollup reports (the coverage document itself opens
+with this table, then a collapsible section per vintage in that edition's own
+article numbering):
 
-| | |
-|---|---|
-| implemented | **89** |
-| partial — implemented with a declared gap | **31** |
-| not implemented | **4** |
-| field / document verification — no model can answer these | **10** |
-| satisfied by construction (the reference is a clone of the proposed) | 5 |
-| host or other-gem scope | 15 |
-| cross-gem delegations | 15 |
+| | NECB 2020 | NECB 2025 |
+|---|---|---|
+| Implemented | 63 | 65 |
+| Partial (warns every run) | 27 | 28 |
+| Not implemented (warns every run) | 4 | 4 |
+| Satisfied by construction (clone) | 3 | 3 |
+| Host / other-gem scope | 12 | 12 |
+| Field / document verification (modeller scope, does not warn) | 10 | 10 |
+| **Total entries** | **119** | **122** |
 
-Counts are rows, and coverage is declared **per sentence** where the underlying
-work distinguishes sentences — so one article can contribute several rows. The
-not-implemented rows are individual *sentences* — the multi-energy capacity
-ratios (heating (5), cooling (4)) and two supply-air fan clauses
-(8.4.4.18.(5)-(6)) — not whole articles; every article is at least partially
-implemented.
+Counts are per-vintage rows, and coverage is declared **per sentence** where
+the underlying work distinguishes sentences — so one article can contribute
+several rows. The not-implemented rows are individual *sentences* — the
+multi-energy capacity ratios (heating (5), cooling (4)) and two supply-air fan
+clauses (8.4.4.18.(5)-(6)) — not whole articles; every article is at least
+partially implemented.
 
 Every partial and not-implemented entry **warns on every run** and appears in the
 audit, so nothing in this list is hidden from a reviewer. These counts come from
