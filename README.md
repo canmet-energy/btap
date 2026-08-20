@@ -158,7 +158,9 @@ Coverage is generated from the code, not hand-maintained:
   article each gem declares, with its status and its gaps.
 - **[NECB_8_4_COVERAGE.html](openstudio-necb/docs/NECB_8_4_COVERAGE.html)** —
   Section 8.4 article by article, down to sentence and clause text, showing
-  where each is applied in the code.
+  where each is applied in the code. One collapsible part per edition, each in
+  its own article numbering — 2020's 8.4.4 is the reference building where
+  2025's is the EUI path, so nothing is renumbered across editions.
 
 As generated today, the rollup reports (the coverage document itself opens
 with this table, then a collapsible section per vintage in that edition's own

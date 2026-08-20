@@ -41,7 +41,15 @@ require 'date'
 
 ROOT = File.expand_path('../..', __dir__)
 OUT = File.expand_path('../docs/NECB_8_4_COVERAGE.html', __dir__)
-CACHE = File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
+# One text cache PER EDITION. The two editions do not share Section 8.4's
+# structure — 2020's 8.4.4 is the reference building and 8.4.5 the part-load
+# curves; 2025 inserts the EUI path as 8.4.4 and shifts everything down — so
+# each vintage part of this document walks its own edition's articles under its
+# own numbers. "Text under a wrong number is worse than no tree."
+CACHES = {
+  '2020' => File.expand_path('../data/necb/necb_8_4_articles_2020.json', __dir__),
+  '2025' => File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
+}.freeze
 DISPOSITION = File.expand_path('necb_8_4_disposition.json', __dir__)
 # The gems were extracted OUT of the openstudio-standards fork (2026-08-16), so
 # source links must resolve against THIS repository — the fork's copies are
@@ -57,12 +65,21 @@ BRANCH = (ENV['COVERAGE_BRANCH'] || 'main').strip
 BLOB = "#{REPO}/blob/#{BRANCH}"
 
 SUBSECTIONS = {
-  '8.4.1' => 'General',
-  '8.4.2' => 'Compliance Calculations',
-  '8.4.3' => 'Proposed Building',
-  '8.4.4' => 'Energy Use Intensity (EUI path — new in 2025)',
-  '8.4.5' => 'Reference Building (2020 numbering: 8.4.4.)',
-  '8.4.6' => 'Part-Load Performance Curves'
+  '2020' => {
+    '8.4.1' => 'General',
+    '8.4.2' => 'Compliance Calculations',
+    '8.4.3' => 'Proposed Building',
+    '8.4.4' => 'Building Energy Target of the Reference Building',
+    '8.4.5' => 'Part-Load Performance Curves'
+  },
+  '2025' => {
+    '8.4.1' => 'General',
+    '8.4.2' => 'Compliance Calculations',
+    '8.4.3' => 'Proposed Building',
+    '8.4.4' => 'Energy Use Intensity (EUI path — new in 2025)',
+    '8.4.5' => 'Modeled Reference Building',
+    '8.4.6' => 'Part-Load Performance Curves'
+  }
 }.freeze
 
 STATUS_META = {
@@ -80,19 +97,17 @@ DISPOSITION_META = {
   'gap' => ['GAP', 'bad']
 }.freeze
 
-# --- canonicalization (vintage-DIRECTIONAL, matching generate_necb_gem_coverage.rb)
-#
-# 2020's 8.4.4 (Reference Building) is 2025's 8.4.5; 2025's 8.4.4 is the NEW
-# EUI subsection. Only 2020-vintage refs are translated. A blind bidirectional
-# collapse previously rendered reference-building prose under the EUI heading.
-def canonical(ref, vintage)
-  r = ref.to_s.strip
-  return r unless vintage.to_s == '2020'
+# Canonicalization is RETIRED from this document: each vintage part shows its
+# own edition natively, so nothing is renumbered for display. The only mapping
+# left is disposition keys, which are curated in 2025 numbering and translated
+# DOWN for the 2020 part (8.4.5.x -> 8.4.4.x, 8.4.6.x -> 8.4.5.x; the 2025-only
+# EUI keys 8.4.4.x are dropped — 2020's 8.4.4 is the reference building and
+# must not inherit EUI dispositions).
+def disposition_key_for(vintage, key)
+  return key unless vintage == '2020'
+  return nil if key.start_with?('8.4.4.')
 
-  # ONE-SHOT map (2020 -> 2025): 8.4.4 (Reference Building) -> 8.4.5, and
-  # 8.4.5 (Part-Load Curves in 2020 numbering, e.g. DX = 8.4.5.4) -> 8.4.6.
-  # Sequential subs would cascade 8.4.4 -> 8.4.5 -> 8.4.6.
-  r.sub(/\A8\.4\.([45])\./) { "8.4.#{Regexp.last_match(1).to_i + 1}." }
+  key.sub(/\A8\.4\.([56])\./) { "8.4.#{Regexp.last_match(1).to_i - 1}." }
 end
 
 # '8.4.5.5.(1)' -> ['8.4.5.5', 1]; '8.4.1.2.' -> ['8.4.1.2', nil]
@@ -107,37 +122,13 @@ end
 
 # ---------------------------------------------------------------- inputs
 
-cache = JSON.parse(File.read(CACHE))
-articles = cache['articles'] # {"8.4.1.1" => {...}}
-
-# Change-7 lint: the cache may contain ONLY Section 8.4 text. Prescriptive
-# values from Sections 3-7 must come from the gems' data JSONs, never be
-# rendered from MCP-fetched text.
-outside = articles.keys.reject { |k| k.start_with?('8.4.') }
-abort("LINT: non-8.4 content in text cache: #{outside.join(', ')}") unless outside.empty?
-
-# Manifest declarations, canonicalized. One record per (gem, vintage, entry).
-declarations = Hash.new { |h, k| h[k] = [] }
-Dir.glob(File.join(ROOT, 'openstudio-*/lib/**/data/necb/*_rules_*.json')).sort.each do |path|
-  data = JSON.parse(File.read(path))
-  entries = data.dig('article_coverage', 'articles') or next
-  gem_name = path.sub("#{ROOT}/", '')[%r{\Aopenstudio-[a-z]+}]
-  vintage = File.basename(path)[/(\d{4})\.json\z/, 1]
-  entries.each do |e|
-    next unless e['article'].to_s.start_with?('8.4')
-
-    art, sentence = split_ref(canonical(e['article'], vintage))
-    next unless art
-
-    declarations[art] << e.merge('gem' => gem_name, 'vintage' => vintage,
-                                 'sentence' => sentence, 'canonical' => canonical(e['article'], vintage))
-  end
-end
-
-# Source citations, classified by the audit call they sit on. The umbrella's
-# literal 8.4.4.x citations are the 2025 EUI path and stay; domain gems'
-# literal 8.4.4.x are 2020 reference-building numbering and map to 8.4.5.x;
-# "#{prefix}" expands per-vintage in the code and canonicalizes to 8.4.5.
+# The source scan happens ONCE; classification per vintage. The one ambiguous
+# token family is 8.4.4.x — the umbrella writes it meaning the 2025 EUI path,
+# the domain gems write it meaning the reference building (2020 numbering, and
+# runtime-renumbered to 8.4.5 on 2025 runs). Verified against the tree: no
+# 8.4.5.x or 8.4.6.x literals exist anywhere, so this is the only fork.
+# A citation's evidentiary weight depends on the call it sits on: a warning
+# often announces the rule is NOT applied. Look back a few lines for the call.
 def classify_call(lines, idx)
   idx.downto([idx - 6, 0].max) do |j|
     return :warn  if lines[j].match?(/(?:audit&?\.|\.)\s*warn\s*\(/)
@@ -146,70 +137,121 @@ def classify_call(lines, idx)
   :cited
 end
 
-citations = Hash.new { |h, k| h[k] = [] }
-Dir.glob(File.join(ROOT, 'openstudio-*/lib/**/*.rb')).sort.each do |path|
-  gem_name = path.sub("#{ROOT}/", '')[%r{\Aopenstudio-[a-z]+}]
-  rel = path.sub("#{ROOT}/", '')
-  lines = File.readlines(path, encoding: 'UTF-8', invalid: :replace, undef: :replace)
-  lines.each_with_index do |line, i|
-    raw = line[/article:\s*["']([^"']+)["']/, 1] or next
-    kind = classify_call(lines, i)
-    raw.gsub('#{prefix}', 'PREFIX')
-       .scan(/(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?/)
-       .each do |tok|
-      ref = tok.sub('PREFIX', '8.4.5')
-      ref = ref.sub(/\A8\.4\.4\./, '8.4.5.') unless gem_name == 'openstudio-necb'
-      art, = split_ref(ref)
-      next unless art
-
-      citations[art] << { file: rel, line: i + 1, kind: kind }
+RAW_CITATIONS = [].tap do |acc|
+  Dir.glob(File.join(ROOT, 'openstudio-*/lib/**/*.rb')).sort.each do |path|
+    gem_name = path.sub("#{ROOT}/", '')[%r{\Aopenstudio-[a-z]+}]
+    rel = path.sub("#{ROOT}/", '')
+    lines = File.readlines(path, encoding: 'UTF-8', invalid: :replace, undef: :replace)
+    lines.each_with_index do |line, i|
+      raw = line[/article:\s*["']([^"']+)["']/, 1] or next
+      kind = classify_call(lines, i)
+      tokens = raw.gsub('#{prefix}', 'PREFIX').scan(/(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?/)
+      acc << { gem: gem_name, file: rel, line: i + 1, kind: kind, tokens: tokens } unless tokens.empty?
     end
   end
 end
-citations.each_value { |v| v.uniq! { |c| [c[:file], c[:line], c[:kind]] } }
 
-# Runtime evidence: articles observed in real runs' audit.json, vintage-aware.
-runs = (ENV['NECB_AUDIT_JSONS'] || '').split(':').map(&:strip).reject(&:empty?)
-executed = Hash.new { |h, k| h[k] = [] }
-runs.each do |dir|
-  audit_path = File.join(dir, 'audit.json')
-  next unless File.exist?(audit_path)
+def citations_for(vintage, articles)
+  reference_prefix = vintage == '2020' ? '8.4.4' : '8.4.5'
+  citations = Hash.new { |h, k| h[k] = [] }
+  RAW_CITATIONS.each do |c|
+    # An umbrella line citing ANY 8.4.4.x token is EUI-path code (the umbrella's
+    # 8.4.4 is the 2025-only EUI subsection), so the WHOLE line is 2025-only —
+    # including companion tokens like the 8.4.3.6.(1)(a) it applies rates from.
+    # Without this, multi-article literals leak their non-EUI half into 2020.
+    if vintage == '2020' && c[:gem] == 'openstudio-necb' &&
+       c[:tokens].any? { |t| t.start_with?('8.4.4.') }
+      next
+    end
+    c[:tokens].each do |tok|
+      ref = tok.sub('PREFIX', reference_prefix)
+      if ref.start_with?('8.4.4.')
+        if c[:gem] == 'openstudio-necb'
+          # umbrella 8.4.4.x = the 2025 EUI path; it has no 2020 counterpart
+          next if vintage == '2020'
+        elsif vintage == '2025'
+          ref = ref.sub(/\A8\.4\.4\./, '8.4.5.') # domain gems: reference numbering
+        end
+      end
+      art, = split_ref(ref)
+      next unless art && articles.key?(art)
 
-  vintage = begin
-    JSON.parse(File.read(File.join(dir, 'report.json')))['vintage'].to_s
-  rescue StandardError
-    ''
+      citations[art] << { file: c[:file], line: c[:line], kind: c[:kind] }
+    end
   end
-  levels = Hash.new { |h, k| h[k] = Hash.new(0) }
-  JSON.parse(File.read(audit_path)).each do |entry|
-    ref = entry['article'].to_s
-    next unless ref.start_with?('8.4')
-
-    art, = split_ref(canonical(ref, vintage))
-    levels[art][entry['level'].to_s] += 1 if art
-  end
-  levels.each { |art, counts| executed[art] << { run: File.basename(dir), vintage: vintage, levels: counts } }
+  citations.each_value { |v| v.uniq! { |x| [x[:file], x[:line], x[:kind]] } }
+  citations
 end
 
-dispositions = JSON.parse(File.read(DISPOSITION))['dispositions']
+def declarations_for(vintage)
+  declarations = Hash.new { |h, k| h[k] = [] }
+  Dir.glob(File.join(ROOT, "openstudio-*/lib/**/data/necb/*_rules_#{vintage}.json")).sort.each do |path|
+    data = JSON.parse(File.read(path))
+    entries = data.dig('article_coverage', 'articles') or next
+    gem_name = path.sub("#{ROOT}/", '')[%r{\Aopenstudio-[a-z]+}]
+    entries.each do |e|
+      next unless e['article'].to_s.start_with?('8.4')
 
-# ---------------------------------------------------------------- states
+      art, sentence = split_ref(e['article'])
+      next unless art
 
-states = {}
-conflicts = []
-articles.each_key do |art|
-  primary = if declarations.key?(art) then :declared
-            elsif citations.key?(art) then :cited
-            elsif dispositions.key?(art) then :dispositioned
-            else :unknown
-            end
-  states[art] = primary
-  conflicts << art if dispositions.key?(art) && primary != :dispositioned
+      declarations[art] << e.merge('gem' => gem_name, 'vintage' => vintage, 'sentence' => sentence)
+    end
+  end
+  declarations
 end
 
-counts = states.values.tally
-total = counts.values.sum
-abort("SELF-CHECK FAILED: states sum to #{total}, not #{articles.size}") unless total == articles.size
+# Runtime evidence, native per vintage: a 2020 run's audit cites 8.4.4.x and
+# belongs to the 2020 part; it is not renumbered into the other edition.
+RUNS = (ENV['NECB_AUDIT_JSONS'] || '').split(':').map(&:strip).reject(&:empty?)
+def executed_for(vintage)
+  executed = Hash.new { |h, k| h[k] = [] }
+  RUNS.each do |dir|
+    audit_path = File.join(dir, 'audit.json')
+    next unless File.exist?(audit_path)
+
+    run_vintage = begin
+      JSON.parse(File.read(File.join(dir, 'report.json')))['vintage'].to_s
+    rescue StandardError
+      ''
+    end
+    next unless run_vintage == vintage
+
+    levels = Hash.new { |h, k| h[k] = Hash.new(0) }
+    JSON.parse(File.read(audit_path)).each do |entry|
+      ref = entry['article'].to_s
+      next unless ref.start_with?('8.4')
+
+      art, = split_ref(ref)
+      levels[art][entry['level'].to_s] += 1 if art
+    end
+    levels.each { |art, counts| executed[art] << { run: File.basename(dir), vintage: run_vintage, levels: counts } }
+  end
+  executed
+end
+
+DISPOSITIONS_2025 = JSON.parse(File.read(DISPOSITION))['dispositions']
+def dispositions_for(vintage, articles)
+  DISPOSITIONS_2025.each_with_object({}) do |(key, val), out|
+    mapped = disposition_key_for(vintage, key)
+    out[mapped] = val if mapped && articles.key?(mapped)
+  end
+end
+
+def states_for(articles, declarations, citations, dispositions)
+  states = {}
+  conflicts = []
+  articles.each_key do |art|
+    primary = if declarations.key?(art) then :declared
+              elsif citations.key?(art) then :cited
+              elsif dispositions.key?(art) then :dispositioned
+              else :unknown
+              end
+    states[art] = primary
+    conflicts << art if dispositions.key?(art) && primary != :dispositioned
+  end
+  [states, conflicts]
+end
 
 # ---------------------------------------------------------------- rendering
 
@@ -229,31 +271,22 @@ def executed_badge(obs)
   %(<span class="pill #{css}" title="#{esc(detail)}">#{label}</span>)
 end
 
-# One collapsible block PER VINTAGE, each showing that edition's own article
-# numbers. The previous single table merged vintages into one row where the
-# text matched and interleaved per-vintage rows where it did not — two
-# numbering schemes woven through one table. A reader reviews one code edition
-# at a time; let them open that one.
+# Plain per-article declaration table. Each vintage part shows only its own
+# edition's declarations, so no inner vintage split is needed any more.
 def declaration_rows(decls, art_executed)
-  decls.group_by { |d| d['vintage'] }.sort.map do |vintage, vdecls|
-    rows = vdecls.group_by { |d| [d['gem'], d['article'], d['status'], d['how'].to_s, d['gaps'].to_s] }
-                 .map do |(gem_name, article, status, how, gaps), _group|
-      label, css = STATUS_META.fetch(status, [status, 'none'])
-      <<~ROW
-        <tr>
-          <td class="ref">#{esc(article)}</td>
-          <td>#{esc(gem_name)}</td>
-          <td><span class="pill #{css}">#{esc(label)}</span> #{art_executed}</td>
-          <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}</td>
-        </tr>
-      ROW
-    end.join
-    <<~BLOCK
-      <details class="vintage" #{vintage == '2025' ? 'open' : ''}><summary>NECB #{esc(vintage)} — #{vdecls.size} declaration#{vdecls.size == 1 ? '' : 's'}</summary>
-      <table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody>#{rows}</tbody></table>
-      </details>
-    BLOCK
+  rows = decls.group_by { |d| [d['gem'], d['article'], d['status'], d['how'].to_s, d['gaps'].to_s] }
+              .map do |(gem_name, article, status, how, gaps), _group|
+    label, css = STATUS_META.fetch(status, [status, 'none'])
+    <<~ROW
+      <tr>
+        <td class="ref">#{esc(article)}</td>
+        <td>#{esc(gem_name)}</td>
+        <td><span class="pill #{css}">#{esc(label)}</span> #{art_executed}</td>
+        <td class="how">#{esc(how)}#{gaps.empty? ? '' : %(<div class="gaps"><b>Gaps:</b> #{esc(gaps)}</div>)}</td>
+      </tr>
+    ROW
   end.join
+  %(<table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th><th>How / gaps</th></tr></thead><tbody>#{rows}</tbody></table>)
 end
 
 def citation_cell(cits)
@@ -334,58 +367,88 @@ def clause_tree(art, record, decls)
   HTML
 end
 
-state_meta = { declared: ['Declared', 'ok'], cited: ['Cited in code, not declared', 'warn'],
-               dispositioned: ['Dispositioned', 'host'], unknown: ['Unknown', 'bad'] }
+STATE_META = { declared: ['Declared', 'ok'], cited: ['Cited in code, not declared', 'warn'],
+               dispositioned: ['Dispositioned', 'host'], unknown: ['Unknown', 'bad'] }.freeze
 
-sections_html = SUBSECTIONS.map do |prefix, sub_title|
-  rows = articles.keys.select { |a| a.start_with?("#{prefix}.") }
-                 .sort_by { |a| a.scan(/\d+/).map(&:to_i) }.map do |art|
-    record = articles[art]
-    decls = declarations[art]
-    state = states[art]
-    label, css = state_meta[state]
-    conflict = conflicts.include?(art)
-    exec_badge = executed_badge(executed[art])
+# One vintage part: the full subsection walk for that edition, natively
+# numbered, preceded by its own summary cards. Anchors are vintage-prefixed so
+# 8.4.4.9 (2020, Heating System) and 8.4.4.2 (2025, EUI schedules) cannot
+# collide.
+def vintage_part(vintage)
+  articles = JSON.parse(File.read(CACHES.fetch(vintage)))['articles']
+  outside = articles.keys.reject { |k| k.start_with?('8.4.') }
+  abort("LINT: non-8.4 content in the #{vintage} text cache: #{outside.join(', ')}") unless outside.empty?
 
-    body = +''
-    if decls.any?
-      body << declaration_rows(decls, exec_badge)
-    elsif state == :cited
-      body << %(<div class="dispo"><span class="pill warn">cited in code, not declared</span> <span class="how">No
-        manifest entry exists, but source citations reference this article (see below). This is a manifest
-        gap to close — it is NOT a claim of implementation.</span> #{exec_badge}</div>)
-    elsif state == :unknown
-      body << %(<div class="dispo"><span class="pill bad">unknown</span> <span class="how">No declaration, no
-        citation, no disposition. Nothing is known about how this article is satisfied.</span></div>)
-    end
-    body << disposition_block(art, dispositions[art], conflict) if dispositions.key?(art)
-    body << citation_cell(citations[art])
-    body << clause_tree(art, record, decls)
+  declarations = declarations_for(vintage)
+  citations = citations_for(vintage, articles)
+  executed = executed_for(vintage)
+  dispositions = dispositions_for(vintage, articles)
+  states, conflicts = states_for(articles, declarations, citations, dispositions)
+  counts = states.values.tally
+  total = counts.values.sum
+  abort("SELF-CHECK FAILED (#{vintage}): states sum to #{total}, not #{articles.size}") unless total == articles.size
 
-    <<~ROW
-      <tr class="article" id="a#{art.tr('.', '-')}">
-        <td class="ref">#{esc(art)}.</td>
-        <td><b>#{esc(record['title'].to_s.empty? ? '(untitled)' : record['title'])}</b>
-            <span class="pill #{css}">#{label}</span>#{conflict ? ' <span class="pill bad">⚑</span>' : ''}
-            <span class="dim">pp. #{record['pages']&.join('–')}</span></td>
-      </tr>
-      <tr class="nested"><td colspan="2">#{body}</td></tr>
-    ROW
+  sections_html = SUBSECTIONS.fetch(vintage).map do |prefix, sub_title|
+    rows = articles.keys.select { |a| a.start_with?("#{prefix}.") }
+                   .sort_by { |a| a.scan(/\d+/).map(&:to_i) }.map do |art|
+      record = articles[art]
+      decls = declarations[art]
+      state = states[art]
+      label, css = STATE_META[state]
+      conflict = conflicts.include?(art)
+      exec_badge = executed_badge(executed[art])
+
+      body = +''
+      if decls.any?
+        body << declaration_rows(decls, exec_badge)
+      elsif state == :cited
+        body << %(<div class="dispo"><span class="pill warn">cited in code, not declared</span> <span class="how">No
+          manifest entry exists, but source citations reference this article (see below). This is a manifest
+          gap to close — it is NOT a claim of implementation.</span> #{exec_badge}</div>)
+      elsif state == :unknown
+        body << %(<div class="dispo"><span class="pill bad">unknown</span> <span class="how">No declaration, no
+          citation, no disposition. Nothing is known about how this article is satisfied.</span></div>)
+      end
+      body << disposition_block(art, dispositions[art], conflict) if dispositions.key?(art)
+      body << citation_cell(citations[art])
+      body << clause_tree(art, record, decls)
+
+      <<~ROW
+        <tr class="article" id="v#{vintage}-a#{art.tr('.', '-')}">
+          <td class="ref">#{esc(art)}.</td>
+          <td><b>#{esc(record['title'].to_s.empty? ? '(untitled)' : record['title'])}</b>
+              <span class="pill #{css}">#{label}</span>#{conflict ? ' <span class="pill bad">⚑</span>' : ''}
+              <span class="dim">pp. #{record['pages']&.join('–')}</span></td>
+        </tr>
+        <tr class="nested"><td colspan="2">#{body}</td></tr>
+      ROW
+    end.join
+    <<~SECTION
+      <section><h2>#{esc(prefix)}. #{esc(sub_title)}</h2>
+      <table class="outer"><tbody>#{rows}</tbody></table></section>
+    SECTION
   end.join
-  <<~SECTION
-    <section><h2>#{esc(prefix)}. #{esc(sub_title)}</h2>
-    <table class="outer"><tbody>#{rows}</tbody></table></section>
-  SECTION
-end.join
 
-cards = state_meta.map do |state, (label, css)|
-  %(<div class="card #{css}"><b>#{counts[state] || 0}</b><span>#{label}</span></div>)
-end.join + %(<div class="card bad"><b>#{conflicts.size}</b><span>⚑ Conflicts</span></div>)
+  cards = STATE_META.map do |state, (label, css)|
+    %(<div class="card #{css}"><b>#{counts[state] || 0}</b><span>#{label}</span></div>)
+  end.join + %(<div class="card bad"><b>#{conflicts.size}</b><span>⚑ Conflicts</span></div>)
 
-run_note = if runs.empty?
+  { articles: articles, counts: counts, conflicts: conflicts,
+    html: <<~PART }
+      <details class="vintage-part" open id="v#{vintage}">
+      <summary><b>NECB #{vintage}</b> — #{articles.size} articles <span class="dim">(click to collapse)</span></summary>
+      <div class="cards">#{cards}</div>
+      <div class="scroll">#{sections_html}</div>
+      </details>
+    PART
+end
+
+parts = { '2020' => vintage_part('2020'), '2025' => vintage_part('2025') }
+
+run_note = if RUNS.empty?
              'No run evidence supplied (set NECB_AUDIT_JSONS to one or more run directories containing audit.json + report.json) — the "observed in run" tier is absent from this build.'
            else
-             "Run evidence: #{runs.map { |r| File.basename(r) }.join(', ')} — articles cited at runtime in those runs carry an \"observed in run\" badge (the strongest evidence tier here: it proves the citing code executed in at least one real scenario)."
+             "Run evidence: #{RUNS.map { |r| File.basename(r) }.join(', ')} — articles cited at runtime in those runs carry an \"observed in run\" badge (the strongest evidence tier here: it proves the citing code executed in at least one real scenario)."
            end
 
 html = <<~HTML
@@ -443,17 +506,16 @@ html = <<~HTML
       padding:.6rem; overflow-x:auto; font-size:.8rem; white-space:pre-wrap; }
     footer { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--dim); font-size:.82rem; }
     code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }
-    details.vintage { margin: .35em 0; }
-  details.vintage > summary { cursor: pointer; font-weight: 600; color: #444;
-    padding: .15em 0; }
-  details.vintage[open] > summary { color: #000; }
+    details.vintage-part { margin:1.4rem 0; border:1px solid var(--line); border-radius:8px; padding:.2rem .9rem .6rem; }
+    details.vintage-part > summary { cursor:pointer; font-size:1.25rem; padding:.55rem 0; color:var(--fg); }
+    details.vintage-part[open] > summary { border-bottom:1px solid var(--line); margin-bottom:.6rem; }
 </style></head><body>
 
   <h1>NECB Section 8.4 — Performance Path coverage</h1>
   <p class="lede">How the <code>openstudio-*</code> gem family covers Section 8.4 of the National Energy Code of
-  Canada for Buildings (2025 numbering; 2020's reference-building subsection 8.4.4. is canonicalized to 8.4.5.).
-  Every article in the Section renders with its full requirement text, so coverage cannot be overstated by
-  omission. #{esc(run_note)}</p>
+  Canada for Buildings — one collapsible part per edition, each walking its own subsections under its own
+  article numbers. Every article of both editions renders with its full requirement text, so coverage cannot
+  be overstated by omission. #{esc(run_note)}</p>
 
   <div class="caveat"><b>How to read the evidence — weakest to strongest.</b>
   <ul>
@@ -476,13 +538,19 @@ html = <<~HTML
   <code>openstudio-hvac .../efficiencies_*.json</code>. The official code wording is available through the
   building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human reference only.</div>
 
-  <div class="cards">#{cards}</div>
+  <p class="lede"><b>Jump to:</b> <a href="#v2020">NECB 2020</a> (#{parts['2020'][:articles].size} articles,
+  8.4.1–8.4.5) · <a href="#v2025">NECB 2025</a> (#{parts['2025'][:articles].size} articles, 8.4.1–8.4.6).
+  Each edition is a collapsible part in its OWN article numbering — 2020's 8.4.4 is the reference building
+  where 2025's 8.4.4 is the EUI path, so nothing is renumbered across editions here.</p>
 
-  <div class="scroll">#{sections_html}</div>
+  #{parts['2020'][:html]}
+  #{parts['2025'][:html]}
 
   <footer>Generated by <code>openstudio-necb/scripts/generate_necb_8_4_coverage.rb</code> — do not edit by hand
   (<code>rake necb:coverage_doc</code> to regenerate).
-  Requirement text: NECB 2025 Division B via the building-codes MCP, retrieved #{esc(cache.dig('provenance', 'retrieved'))}
+  Requirement text: NECB 2020 and 2025 Division B via the building-codes MCP
+  (2020 retrieved #{esc(JSON.parse(File.read(CACHES['2020'])).dig('provenance', 'retrieved'))},
+  2025 retrieved #{esc(JSON.parse(File.read(CACHES['2025'])).dig('provenance', 'retrieved'))})
   (Crown copyright — reproduction authorized as Government of Canada work); parse safety checks in
   <code>scripts/fetch_necb_8_4_text.rb</code>. Source links resolve against <code>#{esc(BRANCH)}</code> of #{esc(REPO)}.</footer>
   </body></html>
@@ -490,7 +558,10 @@ HTML
 
 File.write(OUT, html)
 puts "wrote #{OUT.sub("#{ROOT}/", '')}"
-puts format('  states: %s  (sum %d/%d)  conflicts: %s',
-            counts.map { |k, v| "#{k}=#{v}" }.join(' '), total, articles.size, conflicts.join(', '))
-parse_fail = articles.reject { |_, r| r['parse_ok'] }.keys
-puts "  clause-tree fallbacks: #{parse_fail.empty? ? 'none' : parse_fail.join(', ')}"
+parts.each do |vintage, part|
+  puts format('  %s: %s  (sum %d/%d)  conflicts: %s',
+              vintage, part[:counts].map { |k, v| "#{k}=#{v}" }.join(' '),
+              part[:counts].values.sum, part[:articles].size, part[:conflicts].join(', '))
+  parse_fail = part[:articles].reject { |_, r| r['parse_ok'] }.keys
+  puts "  #{vintage} clause-tree fallbacks: #{parse_fail.empty? ? 'none' : parse_fail.join(', ')}"
+end
