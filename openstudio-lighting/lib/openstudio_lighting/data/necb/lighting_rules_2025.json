@@ -51,8 +51,9 @@
    {
     "article": "4.2.2.2.",
     "title": "Lighting Controls in Storage Garages",
-    "status": "not_implemented",
-    "gaps": "zoning <=360 m2 (1), 30% occupancy reduction (2), 50% sunset-to-sunrise entrance/exit reduction (3) and the storage-garage-specific daylight response of (4) (>150 W of luminaires within 6.1 m of a >=40%-glazed perimeter wall) are NOT modelled; Table 4.2.1.6. refers 'Storage garage interior' here instead of to 4.2.2.1.(10)/(13), so those spaces are correctly EXCLUDED from the photocontrol rule rather than silently swept into it"
+    "status": "partial",
+    "how": "(1) zone area is CHECKED against the 360 m2 limit and an oversized zone is a shouted finding (re-zoning to satisfy a lighting rule would silently change the thermal results, so it is not done for you); (2) a >=30% unoccupied reduction is applied by schedule modulation — the 4.2.2.1.(16)-(23) convention, and note the general occupancy path CANNOT serve this since it is gated on LPD > 8.6 W/m2 while both garage records sit at 1.5-1.9 W/m2, and the Table 4.3.2.10 factors would give only 26.8%; (4) luminaire power within 6.1 m of a >=40% net-opening perimeter wall is derived as LPD x band area (the 4.2.2.1 convention) and a zone daylighting control is added above 150 W. Table 4.2.1.6. defers 'Storage garage interior' here rather than to 4.2.2.1.(10)/(13), so garages are correctly excluded from the ordinary photocontrol rule",
+    "gaps": "(3) covered vehicle ENTRANCES AND EXITS cannot be identified from geometry or space type — no model attribute distinguishes an entrance bay from a parking bay — so the 50% sunset-to-sunrise reduction is applied only when the modeller names those spaces, and is declared otherwise; its night window is a fixed schedule approximation rather than true astronomical sunset. (5) the daylight-transition-zone and ramp-without-parking exemptions are likewise not detectable, so the determinations are applied to every garage space and an exempt space must be excluded by the reviewer. (2)'s 20-minute detection delay is recorded in the audit but not modelled: an hourly ScheduleRuleset cannot express it"
    },
    {
     "article": "4.2.2.1.(10)-(15); 4.2.2.3.; 4.2.2.4.; 4.2.2.5.",
