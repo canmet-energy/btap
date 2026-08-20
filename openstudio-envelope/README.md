@@ -206,6 +206,22 @@ Parity gates (0 mismatches vs `Standard.build('NECB2020')`): U-value lookups acr
 the full NECB 8.4.1.2 performance-path determination: proposed vs reference,
 sizing/annual simulation, unified costing, one audit.
 
+## Air leakage is verified by test, not by model (3.2.4.1 / 3.2.4.2)
+
+3.2.4.1 requires a continuous air barrier complying with 3.2.4.2 — a
+**whole-building ASTM E3158 test at 1.50 L/(s·m²) @ 75 Pa on the constructed
+building**. No `.osm` can answer it: there is no barrier continuity to inspect
+and no measured rate to read.
+
+What the model has is the *assumption*. `AIR_LEAKAGE_I75 = 1.50` drives the
+infiltration coefficients through `apply_air_leakage_default`, and the audit now
+states the assumed rate, the test standard and `verified: false` at the point of
+use, so a reviewer sees it rather than inferring it. Substitute the measured
+rate once the building is tested.
+
+Both articles carry `gap_owner: "modeller"` and render as a scope note rather
+than a failure the software could never clear (D-76).
+
 ## Documented future (not yet in scope)
 
-2011/2015/2017 rule backfill · air-leakage refinements.
+2011/2015/2017 rule backfill.

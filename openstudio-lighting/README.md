@@ -169,7 +169,30 @@ its implementation defects by #2119, still a deliberate 2011-vs-2020 rule
 divergence per D-57). Family glossary:
 [openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
 
+## Storage-garage lighting controls (4.2.2.2)
+
+Table 4.2.1.6 defers interior storage and parking garages to Article 4.2.2.2
+rather than to 4.2.2.1.(10)/(13), so a garage is deliberately excluded from the
+ordinary photocontrol rule and carries this different one.
+`OpenStudioLighting::NECB::StorageGarage.apply(model, vintage:, entrance_spaces:, audit:)`.
+
+| Sentence | |
+|---|---|
+| **(1)** zones ≤ 360 m² | **Checked.** An oversized zone is a shouted finding, not a silent re-zoning — dividing zones to satisfy a *lighting* rule would change the thermal results underneath you. |
+| **(2)** ≥30% when unoccupied | **Applied** by schedule modulation, the 4.2.2.1.(16)-(23) convention. The gem's general occupancy path cannot serve it: that path is gated on LPD > 8.6 W/m² and both garage records sit at 1.5–1.9 W/m². |
+| **(4)** daylight response | **Applied.** Luminaire power within 6.1 m of a ≥40% net-opening perimeter wall is derived as LPD × band area; above 150 W a zone daylighting control is added. |
+| **(3)** entrances/exits | Applied only when you pass `entrance_spaces:` — no model attribute distinguishes a covered vehicle entrance from a parking bay. Declared otherwise. |
+| **(5)** exemptions | Declared. Daylight transition zones and ramps without parking are not detectable, so an exempt space must be excluded by the reviewer. |
+
+The 6.1 m band is measured from the **wall**, not from an aperture, so it could
+not reuse `DaylightedAreas.sidelit_polygons` (whose depth is the window head
+height, per 4.2.2.3). It is clipped with a convex Sutherland–Hodgman rather than
+the SDK's polygon booleans: a full-width band shares edges with the floor, and
+`within`/`intersects` both return false for a shared edge while `subtract`
+reports the whole floor consumed.
+
 ## Documented future
 
 Exterior-lighting schedules beyond the astronomical clock · 2011–2017 vintage
-backfill.
+backfill · 4.2.2.2.(2)'s 20-minute detection delay, which an hourly
+`ScheduleRuleset` cannot express (EMS or a sub-hourly timestep would).

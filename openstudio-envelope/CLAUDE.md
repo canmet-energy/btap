@@ -15,7 +15,16 @@ numbering), climate/HDD resolution, and envelope + thermal-bridging costing.
 - Audit text: violations SHOUTED, passes lowercase (report checklist parses
   case-sensitively).
 - `article_coverage` manifest in each vintage rules JSON; partial/
-  not_implemented warn every run.
+  not_implemented warn every run — EXCEPT where `gap_owner: "modeller"` marks a
+  requirement no model change can ever satisfy, which renders as a scope note
+  instead (D-09, D-76).
+- **3.2.4.1/3.2.4.2 air leakage is verified by TEST, not by model.** A
+  whole-building ASTM E3158 blower-door test on the constructed building; an
+  .osm has no barrier continuity to inspect. `AIR_LEAKAGE_I75 = 1.50` is the
+  ASSUMPTION, and `apply_air_leakage_default` now states it with the standard
+  and `verified: false` so the AHJ sees it. Do not "fix" these to implemented —
+  and note `host_scope` is the WRONG status for them: it asserts sibling-gem
+  ownership that does not exist, and would still emit a checklist warning.
 - Licensing: real RS-Means prices only via runtime `costs_csv:`; the vendored
   `data/costing/constructions.json` is UNPRICED (price-reference columns
   blanked). Runtime price resolution: explicit args → `OPENSTUDIO_COSTING_DIR`
