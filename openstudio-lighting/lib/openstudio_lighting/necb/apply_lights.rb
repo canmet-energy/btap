@@ -230,7 +230,11 @@ module OpenStudioLighting
                    target: space_type.nameString,
                    inputs: { rel_absence_occ: rel_absence, personal_control: personal, occ_sense: occ_sense,
                              occ_control_factor: (1 - (rel_absence * occ_sense) - personal).round(4) },
-                   article: '4.2.2.2.; 4.3.2.10. (8.4.4.5.(3) via schedule modulation)')
+                   # 4.2.2.1.(16)-(23), NOT 4.2.2.2. — this is the general occupancy-sensor
+                   # rule. 4.2.2.2. is Lighting Controls in STORAGE GARAGES and has its own
+                   # module; misciting it here made the storage-garage manifest entry report
+                   # citations it never earned.
+                   article: '4.2.2.1.(16)-(23); 4.3.2.10. (8.4.4.5.(3) via schedule modulation)')
       end
 
       def synthesize_sensor_ruleset(model, name, occupancy_rows, lighting_rows, rel_absence, personal, occ_sense)

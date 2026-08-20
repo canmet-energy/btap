@@ -165,8 +165,8 @@ As generated today, the rollup reports:
 | | |
 |---|---|
 | implemented | **59** |
-| partial — implemented with a declared gap | **22** |
-| not implemented | **1** |
+| partial — implemented with a declared gap | **23** |
+| not implemented | **0** |
 | field / document verification — no model can answer these | **7** |
 | satisfied by construction (the reference is a clone of the proposed) | 5 |
 | host or other-gem scope | 13 |
@@ -209,8 +209,9 @@ Stated plainly, because a compliance tool that hides these is worse than useless
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
   modelled.** A plant drawing on more than one energy source passes into the
   reference unchanged rather than being apportioned.
-- **One article is not implemented**: lighting controls in storage garages
-  (4.2.2.2).
+- **No article is wholly unimplemented.** 23 are partial — implemented with a
+  declared gap; each gap is spelled out in the coverage document and warns on
+  every run.
 - **Seven requirements are verified outside the model**, not by it — the
   whole-building air-leakage test (3.2.4.1, 3.2.4.2), service-water piping
   insulation and heat trace (6.2.3.1, 6.2.4.3), fixture flow limits (6.2.6),
