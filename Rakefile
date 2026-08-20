@@ -319,9 +319,16 @@ namespace :windows do
   #
   # Credentials come from git's own credential helper, so there is no second
   # secret to manage and nothing to put in the environment.
-  desc 'Publish the built installer as a GitHub release (rake windows:release[v0.1.0])'
+  desc 'Publish the built installer as a GitHub release (rake windows:release[v0.1.0] [DRY_RUN=1])'
   task :release, [:tag] do |_t, args|
     tag = args[:tag] or abort('usage: rake windows:release[v0.1.0]')
+    # DRY_RUN runs every guard and prints exactly what WOULD be published,
+    # without creating a tag, a release or an upload. It exists because the
+    # first exercise of this task published a live 168 MB release by accident:
+    # the guards were being tested one at a time, and the last one legitimately
+    # passed. A release is outward-facing and effectively public within the org
+    # the moment it exists, so it needs a way to be rehearsed.
+    dry_run = !ENV['DRY_RUN'].to_s.empty?
     exe = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
     abort('no installer built — run: rake windows:stage && rake windows:installer') if exe.nil?
 
@@ -365,6 +372,19 @@ namespace :windows do
       installer verified to install, but the packaged tool has not been run on a
       real Windows machine.
     NOTES
+
+    if dry_run
+      puts '--- DRY RUN: nothing will be created or uploaded ---'
+      puts "  tag      #{tag}  ->  #{sha[0, 12]}"
+      puts "  asset    #{exe} (#{size_mb} MB)"
+      puts "  title    NECB Compliance #{tag}"
+      existing = `git ls-remote --tags origin refs/tags/#{tag} 2>/dev/null`.strip
+      puts "  WARNING  tag #{tag} ALREADY EXISTS on the remote" unless existing.empty?
+      puts '  notes:'
+      notes.each_line { |line| puts "    #{line.rstrip}" }
+      puts '--- all guards passed; re-run without DRY_RUN to publish ---'
+      next
+    end
 
     puts "publishing #{tag} -> #{File.basename(exe)} (#{size_mb} MB) from #{sha[0, 12]}"
     ok = system({ 'GH_TOKEN' => token }, 'gh', 'release', 'create', tag, exe,
