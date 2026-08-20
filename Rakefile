@@ -308,4 +308,64 @@ namespace :windows do
     out = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
     puts out ? "built #{out} (#{(File.size(out) / 1_048_576.0).round} MB)" : 'ISCC reported success but wrote no .exe'
   end
+  # --- release ---------------------------------------------------------------
+  # Publish the built installer as a GitHub release asset.
+  #
+  # A local release is a CONVENIENCE, not the ideal. A CI-built release is
+  # reproducible from its tag by construction; this one is only as trustworthy
+  # as the guards below, which exist to prevent the failure that matters —
+  # shipping a binary that corresponds to no commit anyone can check out. Move
+  # this to a tag-triggered workflow once the audience is external.
+  #
+  # Credentials come from git's own credential helper, so there is no second
+  # secret to manage and nothing to put in the environment.
+  desc 'Publish the built installer as a GitHub release (rake windows:release[v0.1.0])'
+  task :release, [:tag] do |_t, args|
+    tag = args[:tag] or abort('usage: rake windows:release[v0.1.0]')
+    exe = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
+    abort('no installer built — run: rake windows:stage && rake windows:installer') if exe.nil?
+
+    # 1. The tree must be clean. A release built from uncommitted work cannot be
+    #    reproduced by anyone, including you, a week later.
+    dirty = `git status --porcelain`.strip
+    abort("working tree is dirty — commit or stash first:\n#{dirty}") unless dirty.empty?
+
+    # 2. The commit must exist on the remote, or the tag points at nothing others can fetch.
+    sha = `git rev-parse HEAD`.strip
+    abort('HEAD is not on the remote — push first') unless system("git branch -r --contains #{sha} > /dev/null 2>&1")
+
+    # 3. The installer must be NEWER than every source it claims to contain.
+    #    This is the guard that catches the common mistake: editing a gem, then
+    #    publishing yesterday's build.
+    newest = Dir.glob('openstudio-*/lib/**/*.{rb,json,csv}').max_by { |f| File.mtime(f) }
+    if newest && File.mtime(newest) > File.mtime(exe)
+      abort("#{File.basename(exe)} is OLDER than #{newest} — rebuild before releasing")
+    end
+
+    token = `printf 'protocol=https\nhost=github.com\n\n' | git credential fill 2>/dev/null`
+            .lines.find { |l| l.start_with?('password=') }&.split('=', 2)&.last&.strip
+    abort('no GitHub token from the git credential helper') if token.nil? || token.empty?
+
+    size_mb = (File.size(exe) / 1_048_576.0).round
+    notes = <<~NOTES
+      Built from `#{sha[0, 12]}` on #{`git log -1 --format=%cs`.strip}.
+
+      **#{File.basename(exe)}** — #{size_mb} MB. Installs per-user, needs no
+      administrator rights, and carries its own OpenStudio 3.11.0 and
+      EnergyPlus 25.2.0, so nothing else has to be installed.
+
+      Run `necb-compliance --help` from the Start-menu console, or double-click
+      `samples\\run-demo.cmd`. See README-windows.txt in the install directory.
+
+      NOT YET VALIDATED ON WINDOWS — the CLI has been exercised on Linux and the
+      installer verified to install, but the packaged tool has not been run on a
+      real Windows machine.
+    NOTES
+
+    puts "publishing #{tag} -> #{File.basename(exe)} (#{size_mb} MB) from #{sha[0, 12]}"
+    ok = system({ 'GH_TOKEN' => token }, 'gh', 'release', 'create', tag, exe,
+                '--title', "NECB Compliance #{tag}", '--notes', notes, '--target', sha)
+    abort('gh release create failed') unless ok
+    puts "published: https://github.com/canmet-energy/openstudio-necb-gems/releases/tag/#{tag}"
+  end
 end
