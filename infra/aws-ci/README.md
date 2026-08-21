@@ -13,7 +13,13 @@ bash infra/aws-ci/setup.sh      # idempotent; ca-central-1
 
 Then set one repository variable (Settings → Secrets and variables → Actions):
 
-    CI_RUNNER = codebuild-necb-ci-${{ github.run_id }}-${{ github.run_attempt }}
+    CI_RUNNER = necb-ci
+
+The PROJECT NAME only. The workflow composes the per-run label
+`codebuild-necb-ci-<runId>-<runAttempt>` itself with `format()` — expressions
+stored inside a variable are never re-expanded by GitHub, so a variable
+holding `${{ github.run_id }}` delivers that literal text and CodeBuild 400s
+every queued job.
 
 The workflow reads `vars.CI_RUNNER` for the container matrix, `verify` and
 `parity`; unset it and everything reverts to `ubuntu-latest`. No workflow edit

@@ -23,10 +23,21 @@ ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 ECR_URI="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 if ! aws ecr describe-images --repository-name "$ECR_REPO" --image-ids imageTag="$IMAGE_TAG" --region "$REGION" >/dev/null 2>&1; then
   echo "   mirroring docker.io/nrel/openstudio:${IMAGE_TAG} -> ${ECR_URI}:${IMAGE_TAG}"
-  aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
-  docker pull "nrel/openstudio:${IMAGE_TAG}"
-  docker tag "nrel/openstudio:${IMAGE_TAG}" "${ECR_URI}:${IMAGE_TAG}"
-  docker push "${ECR_URI}:${IMAGE_TAG}"
+  if command -v docker >/dev/null && docker info >/dev/null 2>&1; then
+    aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
+    docker pull "nrel/openstudio:${IMAGE_TAG}"
+    docker tag "nrel/openstudio:${IMAGE_TAG}" "${ECR_URI}:${IMAGE_TAG}"
+    docker push "${ECR_URI}:${IMAGE_TAG}"
+  else
+    # No docker daemon (e.g. inside the devcontainer): crane copies
+    # registry-to-registry without one.
+    command -v crane >/dev/null || {
+      echo "   no docker and no crane — install crane (go-containerregistry releases) or run where docker exists" >&2
+      exit 1
+    }
+    aws ecr get-login-password --region "$REGION" | crane auth login "${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com" -u AWS --password-stdin
+    crane copy "docker.io/nrel/openstudio:${IMAGE_TAG}" "${ECR_URI}:${IMAGE_TAG}"
+  fi
 else
   echo "   already mirrored"
 fi
@@ -71,7 +82,14 @@ cat <<DONE
 Done. Last step, on the GitHub side (repo Settings -> Secrets and variables ->
 Actions -> Variables):
 
-  CI_RUNNER = codebuild-${PROJECT}-\${{ github.run_id }}-\${{ github.run_attempt }}
+  CI_RUNNER = ${PROJECT}
+
+The PROJECT NAME only — the workflow composes the per-run label
+codebuild-${PROJECT}-<runId>-<runAttempt> itself with format(). Do NOT store
+the label with \${{ ... }} inside the variable: GitHub never re-expands
+expressions stored in a variable, so CodeBuild receives the literal text and
+rejects every queued job with HTTP 400 ("a project label matching pattern
+codebuild-<projectName>-<runId>-<runAttempt> is required"). Paid for once.
 
 The workflow already reads that variable; unset, it falls back to
 ubuntu-latest. Setting it moves the container matrix + verify onto CodeBuild —
