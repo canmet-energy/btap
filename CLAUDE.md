@@ -167,7 +167,10 @@ opaquely ~20 minutes into a run.
 
 ## CI
 
-`.github/workflows/test.yml`, four jobs. Triggers are `push` to main/develop,
+`.github/workflows/test.yml`, four jobs — plus `release.yml`, which on a `v*`
+tag push builds the Windows installer (stage in the SDK container, ISCC under
+wine on the bare runner) and publishes it via `rake windows:release`;
+dispatching it by hand rehearses the whole build but stops at `DRY_RUN`. Triggers are `push` to main/develop,
 every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
 
 - **`lint`** — bare runner, Ruby 3.2.2, no SDK. Orphan-key lint, the SDK-free

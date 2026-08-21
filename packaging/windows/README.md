@@ -1,7 +1,15 @@
 # Building the Windows installer
 
-Two steps, both runnable from the Linux devcontainer. Only the second needs
-wine, and only the *testing* needs an actual Windows machine.
+**CI builds and publishes this automatically**: pushing a `v*` tag runs
+`.github/workflows/release.yml`, which stages in the SDK container, compiles
+under wine on a bare runner, and attaches the exe to a GitHub release via
+`rake windows:release` — same task, same guards as below, plus a tag ↔
+`.iss AppVersion` match. Dispatching the workflow by hand
+(`gh workflow run release.yml`) is the rehearsal: the identical build, but the
+publish step stops at `DRY_RUN`.
+
+The manual path — two steps, both runnable from the Linux devcontainer. Only
+the second needs wine, and only the *testing* needs an actual Windows machine.
 
 ```bash
 # 1. assemble the payload (~790 MB with OpenStudio, ~8 MB without)
