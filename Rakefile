@@ -311,11 +311,11 @@ namespace :windows do
   # --- release ---------------------------------------------------------------
   # Publish the built installer as a GitHub release asset.
   #
-  # A local release is a CONVENIENCE, not the ideal. A CI-built release is
-  # reproducible from its tag by construction; this one is only as trustworthy
-  # as the guards below, which exist to prevent the failure that matters —
-  # shipping a binary that corresponds to no commit anyone can check out. Move
-  # this to a tag-triggered workflow once the audience is external.
+  # This task is BOTH paths: pushing a v* tag runs it in CI
+  # (.github/workflows/release.yml, which also has a workflow_dispatch
+  # rehearsal that stops at DRY_RUN), and it still runs locally as a
+  # convenience. The guards below exist to prevent the failure that matters —
+  # shipping a binary that corresponds to no commit anyone can check out.
   #
   # Credentials come from git's own credential helper, so there is no second
   # secret to manage and nothing to put in the environment.
@@ -329,6 +329,15 @@ namespace :windows do
     # passed. A release is outward-facing and effectively public within the org
     # the moment it exists, so it needs a way to be rehearsed.
     dry_run = !ENV['DRY_RUN'].to_s.empty?
+
+    # The .iss AppVersion is stamped into the exe name and the install tree.
+    # Publishing v0.2.0 with a 0.1.0-named installer is a mislabel no later
+    # guard catches, so refuse the mismatch here (suffixes like -rc1 are fine).
+    iss_version = File.read('packaging/windows/necb-compliance.iss')[/#define AppVersion\s+"([^"]+)"/, 1]
+    unless tag == "v#{iss_version}" || tag.start_with?("v#{iss_version}-")
+      abort("tag #{tag} does not match AppVersion #{iss_version} in necb-compliance.iss — bump the .iss first")
+    end
+
     exe = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
     abort('no installer built — run: rake windows:stage && rake windows:installer') if exe.nil?
 
@@ -342,8 +351,13 @@ namespace :windows do
     # `git branch -r --contains` exits 0 whether or not it finds anything, so the
     # OUTPUT is the answer, not the status. Checking the status silently passed
     # an unpushed commit straight through to the publish step.
-    on_remote = `git branch -r --contains #{sha} 2>/dev/null`.strip
-    abort("HEAD (#{sha[0, 12]}) is not on any remote branch — push first") if on_remote.empty?
+    # In a CI run the commit is on the remote by construction (it arrived by
+    # push), and the shallow single-ref checkout means `branch -r --contains`
+    # sees nothing either way — the guard could only ever false-abort there.
+    unless ENV['GITHUB_ACTIONS']
+      on_remote = `git branch -r --contains #{sha} 2>/dev/null`.strip
+      abort("HEAD (#{sha[0, 12]}) is not on any remote branch — push first") if on_remote.empty?
+    end
 
     # 3. The installer must be NEWER than every source it claims to contain.
     #    This is the guard that catches the common mistake: editing a gem, then
@@ -353,9 +367,12 @@ namespace :windows do
       abort("#{File.basename(exe)} is OLDER than #{newest} — rebuild before releasing")
     end
 
-    token = `printf 'protocol=https\nhost=github.com\n\n' | git credential fill 2>/dev/null`
-            .lines.find { |l| l.start_with?('password=') }&.split('=', 2)&.last&.strip
-    abort('no GitHub token from the git credential helper') if token.nil? || token.empty?
+    token = ENV['GH_TOKEN']
+    if token.nil? || token.empty?
+      token = `printf 'protocol=https\nhost=github.com\n\n' | git credential fill 2>/dev/null`
+              .lines.find { |l| l.start_with?('password=') }&.split('=', 2)&.last&.strip
+    end
+    abort('no GitHub token — set GH_TOKEN or configure the git credential helper') if token.nil? || token.empty?
 
     size_mb = (File.size(exe) / 1_048_576.0).round
     notes = <<~NOTES

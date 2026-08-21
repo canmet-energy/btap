@@ -1,0 +1,83 @@
+name: release
+
+# Pushing a v* tag builds the Windows installer and publishes it as a GitHub
+# release. workflow_dispatch is the REHEARSAL: the same build end to end, but
+# the publish step runs under DRY_RUN with the tag derived from the .iss
+# AppVersion — a full exercise that creates nothing outward-facing.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
+jobs:
+  # Staging needs the OpenStudio SDK (generate_samples.rb requires
+  # 'openstudio'), so it runs in the same container as the test matrix. The
+  # ISCC compile needs apt + the i386 architecture, which the container job
+  # cannot have — hence two jobs, handing over a TARRED tree because
+  # upload-artifact drops the exec bit on exe/necb-compliance.rb.
+  stage:
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
+    container: nrel/openstudio:3.11.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch the Windows OpenStudio 3.11.0
+        # The same tarball packaging/windows/README.md documents: NREL ships
+        # it alongside the .exe installer and it unpacks cleanly on Linux.
+        run: |
+          curl -sSLO https://github.com/NREL/OpenStudio/releases/download/v3.11.0/OpenStudio-3.11.0%2B241b8abb4d-Windows.tar.gz
+          tar xzf 'OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz'
+      - name: stage the payload tree
+        run: rake windows:stage OPENSTUDIO_WINDOWS="$PWD/OpenStudio-3.11.0+241b8abb4d-Windows"
+      - name: tar the staged tree
+        run: tar czf stage.tar.gz -C packaging/windows stage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage
+          path: stage.tar.gz
+          retention-days: 1
+
+  package:
+    needs: stage
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: stage
+      - name: unpack the staged tree
+        run: tar xzf stage.tar.gz -C packaging/windows
+      - name: install the wine/Inno Setup toolchain
+        # Mirrors .devcontainer/setup.sh --wine, same pins and for the same
+        # reasons: ISCC.exe is 32-bit (hence wine32:i386), wine needs a
+        # display even for a headless compile (hence xvfb).
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wine wine32:i386 xvfb ruby rake
+          export WINEPREFIX="$HOME/.wine-innosetup"
+          curl -sSL -o /tmp/is6.exe https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe
+          WINEDEBUG=-all xvfb-run -a wine /tmp/is6.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+          test -f "$WINEPREFIX/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+      - name: compile the installer
+        run: rake windows:installer
+      - name: publish (tag push) or rehearse (dispatch, DRY_RUN)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          command -v gh >/dev/null || {
+            curl -sSL -o /tmp/gh.tgz https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_linux_amd64.tar.gz
+            sudo tar xzf /tmp/gh.tgz -C /usr/local/bin --strip-components=2 gh_2.63.2_linux_amd64/bin/gh
+          }
+          if [ "${{ github.event_name }}" = push ]; then
+            rake "windows:release[${GITHUB_REF_NAME}]"
+          else
+            TAG="v$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/necb-compliance.iss)"
+            DRY_RUN=1 rake "windows:release[$TAG]"
+          fi
