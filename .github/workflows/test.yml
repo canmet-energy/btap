@@ -76,7 +76,11 @@ jobs:
   #   gh workflow run test.yml --ref <branch>
   test:
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    # vars.CI_RUNNER unset -> GitHub-hosted (billed minutes). Set it to the
+    # CodeBuild runner label (infra/aws-ci/setup.sh prints it) and these jobs
+    # run on the AWS account instead — ZERO GitHub-hosted minutes, same Actions
+    # UI. Deleting the variable reverts instantly; no workflow edit either way.
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
     strategy:
       fail-fast: false
@@ -147,7 +151,7 @@ jobs:
   # must match the code coefficients.
   verify:
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
     steps:
       - uses: actions/checkout@v4
@@ -166,7 +170,7 @@ jobs:
   # legacy_pin/REF + Gemfile.lock. Not run on every push.
   parity:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
     env:
       LEGACY_PIN_REQUIRED: '1'
