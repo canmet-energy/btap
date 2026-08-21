@@ -3,8 +3,16 @@ name: test
 on:
   push:
     branches: [main, develop]
+    paths-ignore: ['**.md', 'docs/**', 'packaging/**']
   pull_request:
+    paths-ignore: ['**.md', 'docs/**', 'packaging/**']
   workflow_dispatch:
+
+# A superseded run is pure waste: pushing twice to a PR used to bill both runs
+# in full. Cancel the older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 # The nrel/openstudio image ships without a UTF-8 locale, so Ruby's default
 # external encoding is US-ASCII and any File.read of the gems' own output
@@ -60,7 +68,14 @@ jobs:
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
   # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
+  # ~24 of every run's ~26 billed minutes are this matrix + verify (the
+  # nrel/openstudio container jobs). They run on pushes to MAIN and on manual
+  # dispatch — not on every PR push, which was burning ~26 min per push against
+  # the org's shared 3000-minute allowance. PR pushes get the bare-runner lint
+  # (~20 s); run the full matrix on a PR when it matters with:
+  #   gh workflow run test.yml --ref <branch>
   test:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container: nrel/openstudio:3.11.0
     strategy:
@@ -131,6 +146,7 @@ jobs:
   # overwrite non-compliant proposed values, and the as-applied part-load curves
   # must match the code coefficients.
   verify:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     container: nrel/openstudio:3.11.0
     steps:
