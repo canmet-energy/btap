@@ -6,7 +6,7 @@
 # The .rb extension is REQUIRED, not stylistic: the Windows launcher runs this
 # through `openstudio execute_ruby_script`, which loads the file with `require`
 # — and require will not load an extensionless path. A POSIX-style
-# `exe/necb-compliance` fails there with a bare LoadError.
+# `exe/btap-compliance` fails there with a bare LoadError.
 #
 # The encoding line is LOAD-BEARING and must precede every require. Without a
 # UTF-8 default external encoding, Ruby tags the bytes it reads with whatever

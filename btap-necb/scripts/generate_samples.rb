@@ -31,9 +31,8 @@ ROOT = File.expand_path('../..', __dir__)
 # directories, and a literal token is what a rename's sed pass can catch.
 %w[
   btap-audit/lib/btap_audit
-  openstudio-hvac/lib/openstudio_hvac
-  btap-necb/lib/btap_necb/loads
-  openstudio-lighting/lib/openstudio_lighting
+  btap-modeling/lib/btap_modeling
+  btap-necb/lib/btap_necb
 ].each { |entry| require File.expand_path(entry, ROOT) }
 
 FIXTURE = File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm')
@@ -192,7 +191,7 @@ File.write(File.join(OUT, 'README.txt'), <<~TXT)
 
   All are tagged with NECB space types already, so no --space-type is needed:
 
-    necb-compliance samples\\01-baseboard-gas.osm --city toronto --quick
+    btap-compliance samples\\01-baseboard-gas.osm --city toronto --quick
 
   Drop --quick for a real 8.4.1.2 determination (40-90 min, four simulations).
   --quick shortens the run to a week and the tool refuses to call that a verdict.

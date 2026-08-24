@@ -6,7 +6,7 @@ module BtapNECB
   # The command-line face of Compliance.performance_compliance: one .osm in, a
   # verdict + EUIs + a self-contained HTML report out.
   #
-  # All logic lives here rather than in exe/necb-compliance so it is testable
+  # All logic lives here rather than in exe/btap-compliance so it is testable
   # IN-PROCESS against StringIO — a subprocess test of a 40-minute pipeline is
   # not a test anyone runs. `run` returns an Integer and never calls exit; the
   # shim does that.
@@ -111,7 +111,7 @@ module BtapNECB
 
     def build_parser(o, out)
       OptionParser.new do |p|
-        p.banner = "Usage: necb-compliance MODEL.osm --epw FILE [options]\n\n" \
+        p.banner = "Usage: btap-compliance MODEL.osm --epw FILE [options]\n\n" \
                    "NECB Part 8 performance-path compliance: runs the proposed and reference\n" \
                    "buildings and reports the 8.4.1.2 determination.\n\n"
         p.on('--epw PATH', 'weather file (required unless --simulate none)') { |v| o[:epw] = v }
@@ -146,7 +146,7 @@ module BtapNECB
 
         p.separator('')
         p.on('-h', '--help') { out.puts(p.help); o[:_printed] = true }
-        p.on('--version') { out.puts("necb-compliance #{BtapNECB::VERSION rescue 'dev'}"); o[:_printed] = true }
+        p.on('--version') { out.puts("btap-compliance #{BtapNECB::VERSION rescue 'dev'}"); o[:_printed] = true }
       end
     end
 
@@ -412,7 +412,7 @@ module BtapNECB
       # openstudio-hvac fixtures path answered instead. Layout-specific paths
       # need a test per LAYOUT, not per platform.
       def self.search
-        [ENV.fetch('NECB_HOME', nil)&.then { |h| File.join(h, 'weather') },
+        [(ENV.fetch('BTAP_HOME', nil) || ENV.fetch('NECB_HOME', nil))&.then { |h| File.join(h, 'weather') },
          File.expand_path('../../../../weather', __dir__),
          File.expand_path('../../../weather', __dir__),
          File.expand_path('../../../btap-modeling/test/fixtures/weather', __dir__)].compact
@@ -420,7 +420,7 @@ module BtapNECB
 
       def self.dirs = search.select { |d| Dir.exist?(d) }
 
-      # Earlier directories win: NECB_HOME is what the launcher actually set,
+      # Earlier directories win: BTAP_HOME is what the launcher actually set,
       # so it must not be shadowed by a checkout path that happens to exist.
       def self.available
         dirs.reverse.flat_map { |d| Dir.glob(File.join(d, '*.epw')) }

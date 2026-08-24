@@ -7,7 +7,7 @@ rem tool says so loudly - drop --quick for a real 8.4.1.2 verdict.
 setlocal
 set "HERE=%~dp0"
 
-"%HERE%..\bin\necb-compliance.cmd" "%HERE%5ZoneNoHVAC.osm" ^
+"%HERE%..\bin\btap-compliance.cmd" "%HERE%5ZoneNoHVAC.osm" ^
   --epw "%HERE%..\weather\CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw" ^
   --storeys 1 ^
   --space-type "Space Function/Office enclosed > 25 m2" ^
