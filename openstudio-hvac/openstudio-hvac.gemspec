@@ -33,6 +33,8 @@ Gem::Specification.new do |spec|
 
   # btap-audit: the shared AuditLog + article-coverage emitter.
   spec.add_dependency 'btap-audit'
+  spec.add_dependency 'btap-costing'
+  spec.add_dependency 'btap-modeling'
 
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'rake', '~> 13.0'

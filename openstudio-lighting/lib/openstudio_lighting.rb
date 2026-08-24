@@ -57,6 +57,17 @@ module OpenStudioLighting
   end
 end
 
+# Costing consolidated into btap-costing; the alias keeps callers working.
+begin
+  require 'btap_costing'
+rescue LoadError
+  require File.expand_path('../../btap-costing/lib/btap_costing', __dir__)
+end
+
+module OpenStudioLighting
+  Costing = BtapCosting::Lighting
+end
+
 require_relative 'openstudio_lighting/necb/apply_lights'
 require_relative 'openstudio_lighting/necb/exterior'
 require_relative 'openstudio_lighting/necb/reference'
@@ -69,13 +80,13 @@ require_relative 'openstudio_lighting/necb/storage_garage'
 # the module and the live 2020 rule).
 require_relative 'openstudio_lighting/necb/daylighted_areas_legacy_2011'
 require_relative 'openstudio_lighting/necb/reference_daylighting'
-require_relative 'openstudio_lighting/costing/database'
-require_relative 'openstudio_lighting/costing/fixtures'
-require_relative 'openstudio_lighting/costing/report'
 
 module OpenStudioLighting
   # Cost the model's lighting fixtures (legacy BTAP port). See Costing.cost.
+  # This facade is the NECB layer, so it supplies the daylighted-area provider
+  # btap-costing deliberately does not own (callers can still override it).
   def self.cost(model, **kwargs)
+    kwargs[:daylighting_areas] ||= NECB::Daylighting.costing_area_provider
     Costing.cost(model, **kwargs)
   end
 end

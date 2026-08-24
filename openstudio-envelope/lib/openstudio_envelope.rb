@@ -51,13 +51,16 @@ require_relative 'openstudio_envelope/necb/fenestration'
 require_relative 'openstudio_envelope/necb/prescriptive'
 require_relative 'openstudio_envelope/necb/thermal_bridging'
 require_relative 'openstudio_envelope/necb/reference'
-require_relative 'openstudio_envelope/costing/database'
-require_relative 'openstudio_envelope/costing/interpolate'
-require_relative 'openstudio_envelope/costing/assemblies'
-require_relative 'openstudio_envelope/costing/quantify'
-require_relative 'openstudio_envelope/costing/envelope_costs'
-require_relative 'openstudio_envelope/costing/thermal_bridging_costs'
-require_relative 'openstudio_envelope/costing/report'
+# Costing consolidated into btap-costing; the alias below keeps callers working.
+begin
+  require 'btap_costing'
+rescue LoadError
+  require File.expand_path('../../btap-costing/lib/btap_costing', __dir__)
+end
+
+module OpenStudioEnvelope
+  Costing = BtapCosting::Envelope
+end
 
 module OpenStudioEnvelope
   # ---- the public API, in one place ----------------------------------------

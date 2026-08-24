@@ -88,6 +88,7 @@ jobs:
       fail-fast: false
       matrix:
         gem:
+          - btap-costing
           - openstudio-envelope
           - btap-modeling
           - openstudio-hvac
