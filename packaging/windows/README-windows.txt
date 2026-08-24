@@ -17,10 +17,10 @@ directory; nothing is written to system folders or the registry.
 Quick start
 -----------
   1. Open the "NECB Compliance (console)" shortcut in the Start menu.
-  2. Run:  necb-compliance samples\5ZoneNoHVAC.osm --epw weather\<file>.epw
+  2. Run:  btap-compliance samples\5ZoneNoHVAC.osm --epw weather\<file>.epw
 Or double-click  samples\run-demo.cmd  for a worked example.
 
-  necb-compliance --help    lists every option.
+  btap-compliance --help    lists every option.
 
 Exit codes
 ----------

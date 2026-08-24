@@ -286,7 +286,7 @@ namespace :windows do
         total += 1
       end
     end
-    FileUtils.chmod(0o755, "#{STAGE}/gems/btap-necb/exe/necb-compliance.rb")
+    FileUtils.chmod(0o755, "#{STAGE}/gems/btap-necb/exe/btap-compliance.rb")
 
     # Sample + weather, taken from the shared fixtures.
     fixtures = 'btap-modeling/test/fixtures'
@@ -299,7 +299,7 @@ namespace :windows do
     FileUtils.cp("#{fixtures}/5ZoneNoHVAC.osm", "#{STAGE}/samples/")
     Dir.glob("#{fixtures}/weather/CAN_ON_Toronto*.{epw,ddy,stat}").each { |f| FileUtils.cp(f, "#{STAGE}/weather/") }
 
-    %w[necb-compliance.cmd].each { |f| FileUtils.cp("packaging/windows/#{f}", "#{STAGE}/bin/") }
+    %w[btap-compliance.cmd].each { |f| FileUtils.cp("packaging/windows/#{f}", "#{STAGE}/bin/") }
     FileUtils.cp('packaging/windows/run-demo.cmd', "#{STAGE}/samples/")
     FileUtils.cp('packaging/windows/README-windows.txt', STAGE)
     FileUtils.cp('LICENSE', "#{STAGE}/LICENSE-gems.txt")
@@ -338,7 +338,7 @@ namespace :windows do
   end
   desc 'Compile the staged tree into setup.exe via Inno Setup under wine'
   task :installer do
-    iss = 'packaging/windows/necb-compliance.iss'
+    iss = 'packaging/windows/btap-compliance.iss'
     abort("stage first: rake windows:stage (no #{STAGE})") unless Dir.exist?(STAGE)
 
     prefix = ENV['WINEPREFIX'] || File.expand_path('~/.wine-innosetup')
@@ -383,9 +383,9 @@ namespace :windows do
     # The .iss AppVersion is stamped into the exe name and the install tree.
     # Publishing v0.2.0 with a 0.1.0-named installer is a mislabel no later
     # guard catches, so refuse the mismatch here (suffixes like -rc1 are fine).
-    iss_version = File.read('packaging/windows/necb-compliance.iss')[/#define AppVersion\s+"([^"]+)"/, 1]
+    iss_version = File.read('packaging/windows/btap-compliance.iss')[/#define AppVersion\s+"([^"]+)"/, 1]
     unless tag == "v#{iss_version}" || tag.start_with?("v#{iss_version}-")
-      abort("tag #{tag} does not match AppVersion #{iss_version} in necb-compliance.iss — bump the .iss first")
+      abort("tag #{tag} does not match AppVersion #{iss_version} in btap-compliance.iss — bump the .iss first")
     end
 
     exe = Dir.glob('packaging/windows/Output/*.exe').max_by { |f| File.mtime(f) }
@@ -434,7 +434,7 @@ namespace :windows do
       administrator rights, and carries its own OpenStudio 3.11.0 and
       EnergyPlus 25.2.0, so nothing else has to be installed.
 
-      Run `necb-compliance --help` from the Start-menu console, or double-click
+      Run `btap-compliance --help` from the Start-menu console, or double-click
       `samples\\run-demo.cmd`. See README-windows.txt in the install directory.
 
       NOT YET VALIDATED ON WINDOWS — the CLI has been exercised on Linux and the

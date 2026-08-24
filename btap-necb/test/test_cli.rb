@@ -26,7 +26,7 @@ class TestCLI < Minitest::Test
 
   def test_help_exits_zero_and_documents_the_required_arguments
     assert_equal(0, run_cli('--help'))
-    assert_match(/Usage: necb-compliance MODEL\.osm --epw FILE/, @out.string)
+    assert_match(/Usage: btap-compliance MODEL\.osm --epw FILE/, @out.string)
     assert_match(/--space-type/, @out.string)
   end
 
@@ -229,19 +229,19 @@ class TestCLI < Minitest::Test
     end
   end
 
-  # NECB_HOME is what the launcher actually sets, so it must win over any
+  # BTAP_HOME is what the launcher actually sets, so it must win over any
   # checkout path that happens to exist on the same machine.
   def test_necb_home_takes_precedence
     Dir.mktmpdir do |home|
       FileUtils.mkdir_p(File.join(home, 'weather'))
       FileUtils.cp(EPW, File.join(home, 'weather', 'CAN_XX_Somewhere.123456_CWEC2020.epw'))
       begin
-        ENV['NECB_HOME'] = home
+        ENV['BTAP_HOME'] = home
         assert_equal(File.join(home, 'weather'), BtapNECB::CLI::Weather.search.first)
         assert_equal(File.join(home, 'weather', 'CAN_XX_Somewhere.123456_CWEC2020.epw'),
                      BtapNECB::CLI::Weather.available['somewhere'])
       ensure
-        ENV.delete('NECB_HOME')
+        ENV.delete('BTAP_HOME')
       end
     end
   end

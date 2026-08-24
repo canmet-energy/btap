@@ -21,7 +21,7 @@ jobs:
   # 'openstudio'), so it runs in the same container as the test matrix. The
   # ISCC compile needs apt + the i386 architecture, which the container job
   # cannot have — hence two jobs, handing over a TARRED tree because
-  # upload-artifact drops the exec bit on exe/necb-compliance.rb.
+  # upload-artifact drops the exec bit on exe/btap-compliance.rb.
   stage:
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
@@ -80,6 +80,6 @@ jobs:
           if [ "${{ github.event_name }}" = push ]; then
             rake "windows:release[${GITHUB_REF_NAME}]"
           else
-            TAG="v$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/necb-compliance.iss)"
+            TAG="v$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)"
             DRY_RUN=1 rake "windows:release[$TAG]"
           fi

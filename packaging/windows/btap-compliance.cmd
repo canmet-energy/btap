@@ -11,10 +11,10 @@ rem Ruby and no E+ need to be installed either.
 setlocal
 chcp 65001 >nul 2>&1
 
-set "NECB_HOME=%~dp0.."
+set "BTAP_HOME=%~dp0.."
 
 rem The escape hatch, for developers pointing at another build.
-if not defined OPENSTUDIO_CLI set "OPENSTUDIO_CLI=%NECB_HOME%\openstudio\bin\openstudio.exe"
+if not defined OPENSTUDIO_CLI set "OPENSTUDIO_CLI=%BTAP_HOME%\openstudio\bin\openstudio.exe"
 
 if not exist "%OPENSTUDIO_CLI%" (
   echo ERROR: openstudio.exe not found at "%OPENSTUDIO_CLI%".
@@ -26,5 +26,5 @@ if not exist "%OPENSTUDIO_CLI%" (
 rem Flags forward through execute_ruby_script unchanged - verified. Do NOT add
 rem a "--" separator: it arrives literally in ARGV and optparse would then treat
 rem every following flag as a positional argument.
-"%OPENSTUDIO_CLI%" execute_ruby_script "%NECB_HOME%\gems\btap-necb\exe\necb-compliance.rb" %*
+"%OPENSTUDIO_CLI%" execute_ruby_script "%BTAP_HOME%\gems\btap-necb\exe\btap-compliance.rb" %*
 exit /b %ERRORLEVEL%
