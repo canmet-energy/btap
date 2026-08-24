@@ -1,6 +1,6 @@
 module BtapNECB
   module Report
-    # SDK -> plain hashes. With report.rb (which drives the openstudio-hvac
+    # SDK -> plain hashes. With report.rb (which drives the btap-modeling
     # diagram engine), this is one of the only TWO renderer files that touch
     # the OpenStudio SDK; every other module (charts, sections, checklist) is
     # SDK-free and unit-testable. Never raises on odd models — missing data

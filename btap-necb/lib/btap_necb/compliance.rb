@@ -27,9 +27,9 @@ module BtapNECB
   #       failure; bounded by max_capacity_iterations; a still-failing
   #       result after the cap is a loud warning + non-compliance.
   #
-  # One clone, one audit: reference_hvac (openstudio-hvac), reference_envelope
+  # One clone, one audit: reference_hvac, reference_envelope
   # (envelope), reference_lighting (lighting — Part 4
-  # allowance LPDs) and reference_shw (openstudio-shw — Part 6 minimum
+  # allowance LPDs) and reference_shw (shw — Part 6 minimum
   # efficiencies) transform a single reference model, and optional costing of
   # both models lands in the same AuditLog.
   module Compliance
@@ -58,8 +58,7 @@ module BtapNECB
     #   transforms only (loud warning: selection kW thresholds stay unresolved)
     # @param run_period [Hash, nil] shortened weather run for TESTS — a non-annual
     #   period cannot determine code compliance and is flagged in the report
-    # @param costing [Boolean] cost BOTH models (HVAC via openstudio-hvac + envelope
-    #   via openstudio-envelope) into the same audit
+    # @param costing [Boolean] cost BOTH models (HVAC + envelope via btap-costing) into the same audit
     # @param city [String, nil] costing location (with province_state); nil = derived
     #   from the model's site, warning when underivable
     # @param province_state [String, nil] costing location — ALSO gates the NECB 2025
@@ -328,14 +327,14 @@ module BtapNECB
                  'schedules or those loads); interior lighting power is reset to the Part 4 allowance per ' \
                  '8.4.4.5.(1) (reference_lighting); service water heating efficiencies are reset to the ' \
                  'Part 6 minimums per 8.4.4.20 (reference_shw). Representativeness of the loads for the ' \
-                 "building type remains the modeller's input (see the openstudio-loads gem for NECB " \
+                 "building type remains the modeller's input (see the loads domain for NECB " \
                  'space-use data).',
                  article: '8.4.3.2.(1)-(2)')
       run.reference = reference
     end
 
     # 6. size the reference, then re-apply efficiencies on sized equipment
-    #    (the openstudio-hvac contract: efficiency rows are capacity-binned),
+    #    (the hvac-domain contract: efficiency rows are capacity-binned),
     #    plus the post-sizing determinations (5.2.10.1 ERV, 5.2.2.7 economizers)
     def size_reference!(run)
       opts = run.opts
@@ -681,7 +680,7 @@ module BtapNECB
     end
 
     # D-52: join the SDK heating-equipment inventory (names + fuels, from
-    # openstudio-hvac's Classify) with the proposed annual run's per-equipment
+    # BtapModeling::Classify) with the proposed annual run's per-equipment
     # delivered-heat sums — the data the 8.4.4.13.(2)(g) auxiliary-fuel
     # election consumes inside reference_hvac. SQL keys are upper-cased.
     def heating_election_data(proposed, inventory, audit)

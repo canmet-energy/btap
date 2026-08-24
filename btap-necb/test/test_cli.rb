@@ -205,7 +205,7 @@ class TestCLI < Minitest::Test
   end
   # The bug this pins: --list-cities reported "No weather files found in this
   # installation" on a real Windows install while every test here passed,
-  # because in a SOURCE CHECKOUT the openstudio-hvac fixtures path answered and
+  # because in a SOURCE CHECKOUT the shared fixtures path answered and
   # masked the wrong depth. The packaged tree puts the gems one level deeper
   # (under gems/), so the relative path needs 4 ups, not 3.
   #

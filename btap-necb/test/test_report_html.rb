@@ -29,9 +29,9 @@ class TestReportHTML < Minitest::Test
     assert_includes html, 'Sizing Fixture'
     # real models flow through ModelQuery: envelope chart renders
     assert_includes html, 'Area-weighted average U-value', 'envelope chart from the real model'
-    # HVAC diagrams now come from openstudio-hvac's loop-diagram engine: the icon
+    # HVAC diagrams now come from btap-modeling's loop-diagram engine: the icon
     # <defs> are embedded once and both proposed AND reference buildings render.
-    assert_includes html, '<symbol id="icon-', 'openstudio-hvac icon defs embedded'
+    assert_includes html, '<symbol id="icon-', 'modeling icon defs embedded'
     assert_includes html, 'Proposed building systems', 'proposed HVAC diagrams rendered'
     assert_includes html, 'Reference building systems', 'reference HVAC diagrams rendered'
     assert_operator html.scan('class="diagram"').size, :>=, 2, 'proposed + reference loop diagrams present'

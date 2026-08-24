@@ -14,7 +14,7 @@ module BtapCosting
 
 # Priced tables resolve: BTAP_COSTING_DIR (OPENSTUDIO_COSTING_DIR is the
       # honoured legacy name), then this gem's own shared placeholder copies.
-      # The cross-gem openstudio-hvac resolution died with the consolidation.
+      # The cross-gem resolution died with the consolidation.
       PRICED_FALLBACK_DIRS = [
         ENV['BTAP_COSTING_DIR'] || ENV['OPENSTUDIO_COSTING_DIR'],
         File.expand_path('../data', __dir__)

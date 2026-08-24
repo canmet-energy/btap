@@ -20,7 +20,7 @@ class TestSHW < Minitest::Test
       assert_operator coverage.size, :>=, 6
       coverage.each { |a| assert(a['how'] || a['gaps']) }
     end
-    # Vintage aliasing is owned by openstudio-loads (BtapNECB::Loads.data_vintage,
+    # Vintage aliasing is owned by the loads domain (BtapNECB::Loads.data_vintage,
     # called directly from necb/demand.rb) — shw does not vendor its own
     # data_vintage_alias key (removed as dead config; see provenance.note).
     assert_nil BtapNECB::SHW.rules('2025')['data_vintage_alias']

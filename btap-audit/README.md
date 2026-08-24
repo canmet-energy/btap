@@ -1,21 +1,21 @@
-# openstudio-audit
+# btap-audit
 
 The shared audit machinery of the NECB gem family (see the root README for the
 family map): **one** `AuditLog` class and **one** article-coverage emitter,
-used by openstudio-hvac, -envelope, -loads, -lighting, -shw, -geometry and the
-openstudio-necb umbrella.
+used by btap-modeling (authoring) + btap-necb (hvac rules), -envelope, -loads, -lighting, -shw, -geometry and the
+btap-necb umbrella.
 
 No domain knowledge, no OpenStudio dependency — this is the lowest-level gem in
 the family. It was extracted from the six verbatim `audit_log.rb` copies the
 gems used to each carry; each of those files is now a three-line alias
-(`OpenStudioHVAC::AuditLog = OpenStudioAudit::AuditLog`), so every existing call
+(`BtapModeling::AuditLog = BtapAudit::AuditLog`), so every existing call
 site keeps working unchanged. The aliases ARE the compatibility mechanism —
 there is no second implementation.
 
 ```ruby
-require_relative 'openstudio-audit/lib/openstudio_audit'
+require_relative 'btap-audit/lib/btap_audit'
 
-audit = OpenStudioAudit::AuditLog.new
+audit = BtapAudit::AuditLog.new
 audit.with_building('reference building') do
   audit.decision(:build, 'reference system operates on the proposed operating schedule',
                  target: 'SYS-3 air loop', inputs: { schedule: 'NECB-A' },
@@ -34,7 +34,7 @@ away. `level` is `:decision | :info | :warning`.
 - **`article:`** cites the CODE that mandates a value (e.g. `'8.4.4.8.(1)'`).
   Several citations join into one string with `; `.
 - **`ruling:`** cites the adjudicated project DECISION that says how we read
-  that code (`openstudio-necb/docs/necb_decisions.md`, mirrored machine-readably
+  that code (`btap-necb/docs/necb_decisions.md`, mirrored machine-readably
   in `decisions.json`). Two axes: what was done, and why we did it that way.
 - **`building:`** which model the entry is about (`'input model'`,
   `'proposed building'`, `'reference building'`; nil = cross-building verdict),
@@ -54,7 +54,7 @@ exactly this shape, so:
 - TOP-LEVEL kwarg, **never** inside `inputs:`;
 - a single-quoted literal on **ONE** line;
 - several ids = one space-separated string (`ruling: 'D-19 D-21'`), parsed with
-  `OpenStudioNECB::Decisions.ids_in`;
+  `BtapNECB::Decisions.ids_in`;
 - every id cited must exist in the registry, and every `kind: "runtime"` entry
   there must be cited by at least one tag — the test is hard in both directions;
 - `step: :coverage` entries are NOT tagged (manifest boilerplate would swamp the
@@ -69,13 +69,13 @@ from `NECB.rules(vintage)` (envelope, lighting, loads, shw), or from a data-file
 path (the umbrella). What happens next is identical everywhere and lives here:
 
 ```ruby
-OpenStudioAudit::Coverage.emit(coverage, audit)  # coverage = the resolved article_coverage hash
+BtapAudit::Coverage.emit(coverage, audit)  # coverage = the resolved article_coverage hash
 ```
 
 Every declared article lands in the audit as a `step: :coverage` entry carrying
 `inputs: { status:, decisions_citing: }` (plus `gap_owner:` and `code:` when
 present — `code` is the entry's "where is this dealt with" list of
-`path#method` refs, linted by `openstudio-necb/test/test_coverage_code_refs.rb`
+`path#method` refs, linted by `btap-necb/test/test_coverage_code_refs.rb`
 so a rename cannot leave a stale pointer) and
 the manifest's `article:`, so a missed requirement is visible in every log
 rather than discovered by review. Levels:
@@ -107,4 +107,4 @@ emits nothing.
 
 ## Tests
 
-`cd openstudio-audit && ruby test/test_audit.rb` (SDK-free and fast).
+`cd btap-audit && ruby test/test_audit.rb` (SDK-free and fast).

@@ -39,10 +39,10 @@ class TestReportUnits < Minitest::Test
     audit.info(:coverage, 'reference lighting applied (Part 4 allowance LPDs)',
                inputs: { status: 'implemented', decisions_citing: 2 }, article: '8.4.4.5.')
     # host_scope COVERED by 8.4.4.5. above (prefix match) — no checklist row
-    audit.info(:coverage, 'delegated to openstudio-lighting',
+    audit.info(:coverage, 'delegated to the lighting domain',
                inputs: { status: 'host_scope', decisions_citing: 0 }, article: '8.4.4.5.(1)')
     # host_scope ORPHAN — nothing implements 8.4.4.20. → warning checklist row
-    audit.info(:coverage, 'delegated to openstudio-shw',
+    audit.info(:coverage, 'delegated to the shw domain',
                inputs: { status: 'host_scope', decisions_citing: 0 }, article: '8.4.4.20.')
     audit.with_building('reference building') do
       audit.warn(:efficiency, 'unsized DX coil skipped by capacity-binned lookup',
@@ -259,7 +259,7 @@ class TestReportUnits < Minitest::Test
     refute_match(/@import|url\(/, html)
   end
 
-  # The HVAC section consumes the openstudio-hvac diagram bundles (plain hashes)
+  # The HVAC section consumes btap-modeling's diagram bundles (plain hashes)
   # that report.rb computes off the SDK models. With nil/absent models it must
   # render explanatory notes, never crash.
   def test_hvac_section_handles_nil_and_stub_bundles

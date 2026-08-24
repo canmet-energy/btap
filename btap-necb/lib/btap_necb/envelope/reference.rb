@@ -3,7 +3,7 @@ module BtapNECB
     # The performance-path reference ENVELOPE (2020: 8.4.4.1.(2)/8.4.4.3./8.4.4.4.;
     # 2025: 8.4.5.x, verbatim text) — greenfield: no legacy implementation exists.
     # Operates IN PLACE on a model the caller clones, so a compliance umbrella can
-    # chain openstudio-hvac's reference_hvac and this transform on ONE clone with
+    # chain the hvac domain's reference_hvac and this transform on ONE clone with
     # ONE audit (the AuditLog schemas are identical).
     #
     # Order of operations:
@@ -360,7 +360,7 @@ module BtapNECB
                        article: "#{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)", ruling: 'D-19 D-21')
       end
 
-      # Completeness accounting (same contract as openstudio-hvac).
+      # Completeness accounting (same contract as the hvac domain).
       def emit_article_coverage(vintage, audit)
         BtapAudit::Coverage.emit(Envelope.rules(vintage)['article_coverage'], audit)
       end

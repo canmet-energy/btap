@@ -41,7 +41,7 @@ require_relative 'btap_necb/report'
 
 # BtapNECB is the UMBRELLA: it composes the five SDK-only domain gems
 # (hvac reference systems + efficiencies, envelope
-# prescriptive/reference envelope + thermal bridging, openstudio-loads NECB
+# prescriptive/reference envelope + thermal bridging, loads-domain NECB
 # space-use loads, lighting LPD allowances + daylighting,
 # shw service-water-heating minimums) into the NECB Part 8
 # performance path — proposed vs reference building energy target (8.4.1.2) —

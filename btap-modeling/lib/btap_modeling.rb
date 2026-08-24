@@ -11,7 +11,7 @@ require_relative 'btap_modeling/plan_query'
 require_relative 'btap_modeling/plan_svg'
 require_relative 'btap_modeling/plan'
 
-# The HVAC-authoring half (ex openstudio-hvac's generic files). Order matters:
+# The HVAC-authoring half (the ex-hvac generic files). Order matters:
 # base_system before the systems that subclass-include it; ecm_air after the
 # air systems it decorates; classify/builder/catalog_report last, as in the
 # original facade.
@@ -467,7 +467,7 @@ module BtapModeling
 end
 
 # The authoring API, at module level (moved from the hvac facade with the
-# machinery it fronts). Costing stays with openstudio-hvac until btap-costing
+# machinery it fronts). Costing lives in btap-costing
 # exists.
 module BtapModeling
   # List the system catalog (MCP/tool-friendly: names are a closed, validated vocabulary).

@@ -12,16 +12,16 @@ The family map and the per-gem API guides are in the
 Every gem in this repository obeys the same rules:
 
 - **Pure OpenStudio SDK.** No `openstudio-standards`, no measures, no BTAP.
-- **Never simulates.** Only the umbrella (`openstudio-necb`) runs EnergyPlus.
+- **Never simulates.** Only the umbrella (`btap-necb`) runs EnergyPlus.
 - **One AuditLog schema** —
   `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
   levels `:decision | :info | :warning`. **Warnings are never silent.** The class
-  lives in `openstudio-audit`; every other gem's `audit_log.rb` is a three-line
+  lives in `btap-audit`; every other gem's `audit_log.rb` is a three-line
   alias of it.
 - **Two citation axes.** `article:` cites the code that mandates a value;
   `ruling:` cites the adjudicated decision that says how we read it. Every id
   must exist in
-  [openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+  [btap-necb/docs/necb_decisions.md](../btap-necb/docs/necb_decisions.md)
   and its machine-readable mirror; a drift test enforces both directions.
 - **Audit text convention:** violations are SHOUTED, passes are lowercase — the
   report's checklist classifier is deliberately case-sensitive about this.
@@ -104,7 +104,7 @@ supported configuration without hardcoding a host in the scripts.
 Each gem is self-contained:
 
 ```bash
-cd openstudio-hvac && ruby test/test_catalog.rb
+cd btap-modeling && ruby test/test_catalog.rb
 ```
 
 Cross-gem rule verification runs from the repository root:
@@ -151,7 +151,7 @@ git-clones from the path, which is far faster and works offline. Use the **same*
 lockfile, so changing it re-resolves and re-clones.
 
 ```bash
-cd openstudio-loads
+cd btap-necb
 LEGACY_PIN_REQUIRED=1 \
 LEGACY_PIN_REMOTE=/path/to/openstudio-standards \
 BUNDLE_GEMFILE=../legacy_pin/Gemfile \
@@ -160,8 +160,9 @@ BUNDLE_GEMFILE=../legacy_pin/Gemfile \
 
 `LEGACY_PIN_REQUIRED=1` turns "oracle not bundled" from a skip into a failure —
 CI and verification runs should always set it, because a skipped parity gate is a
-green-but-vacuous gate. The eleven gates live in openstudio-envelope (4),
-openstudio-loads (3), openstudio-lighting (3) and openstudio-shw (1).
+green-but-vacuous gate. All eleven gates live in `btap-necb/test/`,
+prefixed by their source domain: envelope (4), loads (3), lighting (3) and
+shw (1).
 
 ## History
 

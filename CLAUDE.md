@@ -1,7 +1,10 @@
-# CLAUDE.md — the NECB gem family (repository root)
+# CLAUDE.md — the btap gem family (repository root)
 
-Nine standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems implementing the NECB
-2020/2025 Part 8 performance path. [README.md](README.md) is written for the
+Five standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems, sliced by NATURE
+(D-77): `btap-audit` (evidence), `btap-simulation` (execution),
+`btap-modeling` (generic model authoring — no NECB anywhere), `btap-costing`
+(the licensed-data seam), and `btap-necb` (every NECB 2020/2025 Part 8 rule,
+the coverage manifests, the determination, the `btap-compliance` CLI). [README.md](README.md) is written for the
 BUILDING ENGINEER — install, run, read the verdict, and what is not implemented;
 the contributor material (family contract, devcontainer, MCP, test suites,
 parity gates) lives in [docs/DEVELOPERS.md](docs/DEVELOPERS.md). Do not put
@@ -13,11 +16,11 @@ to exist.
 ## Family contract (every gem obeys it)
 
 - **Pure OpenStudio SDK.** No `openstudio-standards`, no measures, no BTAP.
-- **Never simulates.** Only the umbrella (`openstudio-necb`) runs EnergyPlus.
+- **Never simulates.** Only the umbrella (`btap-necb`) runs EnergyPlus.
 - **One AuditLog schema** —
   `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
   levels `:decision | :info | :warning`. **Warnings are never silent.** The class
-  lives in `openstudio-audit`; every other gem's `audit_log.rb` is a three-line
+  lives in `btap-audit`; every other gem's `audit_log.rb` is a three-line
   alias. Change the schema THERE, never as a local copy.
 - **Two citation axes.** `article:` cites the code that mandates a value;
   `ruling:` cites the adjudicated decision saying how we read it. `ruling:` is a
@@ -25,15 +28,16 @@ to exist.
 - **Audit text convention:** violations SHOUTED, passes lowercase — the report's
   checklist classifier is deliberately case-SENSITIVE.
 - **Vintages 2020 + 2025 only.** 2011–2017 backfills are user-deferred.
-- Dependency flow: `audit` ← everything; `geometry` → `loads` → (`lighting`,
-  `shw`); `hvac` and `envelope` stand alone; the umbrella composes them and runs
-  E+ via `simulation`.
+- Dependency flow is ONE-WAY: `btap-necb` → `btap-costing` → `btap-modeling`
+  → `btap-audit`, with `btap-simulation` beside; the umbrella runs E+ via it.
+  Ruby modules are FLAT `Btap*` (`BtapNECB`, …). **`BTAP::*` is forbidden** —
+  the oracle's `module BTAP` is live in-process in ten parity gates (D-77).
 
 ## Commands
 
 ```bash
-cd openstudio-hvac && ruby test/test_catalog.rb   # a gem suite: plain ruby, no bundler
-rake gems                                          # the nine gems + versions
+cd btap-modeling && ruby test/test_catalog.rb     # a gem suite: plain ruby, no bundler
+rake gems                                          # the five gems + versions
 rake necb:verify                                   # orphan keys + 8.4.6 curves + hostile-outcome
 rake necb:coverage_doc                             # regenerate coverage documents
 rake legacy:pin                                    # the pinned oracle revision
@@ -51,8 +55,8 @@ preserved: 9,403 → 199 commits, `.git` 4.61 GiB → 4.7 MB. The branch was ren
 `phylroy_dnd` → `main`. **The originals still exist in the fork** — removing them
 is pending (see Open work).
 
-The gems' relative-path requires (`../openstudio-<sibling>`), the shared test
-fixtures in `openstudio-hvac/test/fixtures`, and all the doc cross-links depend
+The gems' relative-path requires (`../btap-<sibling>`), the shared test
+fixtures in `btap-modeling/test/fixtures`, and all the doc cross-links depend
 on this **flat sibling layout**. Do not nest the gems in a subdirectory or rename
 their directories without fixing every one of them.
 
@@ -68,7 +72,7 @@ them. Read a generated file with an explicit `encoding: 'UTF-8'`.
 **`Gem::MissingSpecError` descends from `LoadError`, NOT `StandardError`.** A
 bare `rescue StandardError` around `Gem::Specification.find_by_name` does not
 catch it. Name it (`rescue Gem::LoadError, StandardError`) — see
-`openstudio-envelope/lib/openstudio_envelope/costing/database.rb`.
+`btap-costing/lib/btap_costing/envelope/database.rb`.
 
 **The legacy oracle is ONE SHA, not a branch, and not a git remote.**
 `legacy_pin/REF` is the whole tie to openstudio-standards. Nothing here points at
@@ -106,20 +110,22 @@ warning.
 **Adding a `## D-XX` heading means adding a `decisions.json` entry**, and the
 doc's id-ordered TOC is generated. The drift test is hard in both directions:
 ```bash
-ruby openstudio-necb/scripts/generate_decisions_toc.rb   # after adding a decision
-cd openstudio-necb && ruby test/test_decisions_registry.rb
+ruby btap-necb/scripts/generate_decisions_toc.rb         # after adding a decision
+cd btap-necb && ruby test/test_decisions_registry.rb
 ```
 A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in some gem's
 `lib/`; entries that are not cited must NOT be `runtime` (use `process`,
 `data`, or `runtime_unwired`).
 
 **`spec.files` excludes `test/` in every gemspec.** So
-`openstudio-hvac/lib/openstudio_hvac/catalog_report.rb`'s `FIXTURE` constant is
+`btap-modeling/lib/btap_modeling/catalog_report.rb`'s `FIXTURE` constant is
 already broken in a *packaged* gem. Pre-existing, not extraction fallout.
 
-**openstudio-envelope and openstudio-lighting read openstudio-hvac's vendored
-priced costing CSVs.** Now declared in both gemspecs and resolved via the
-installed gem first, relative path second. Do not "simplify" that back.
+**All costing lives in btap-costing, and the priced pair is its shared
+`data/` copy.** The old cross-gem CSV resolution is DEAD — priced values
+resolve explicit-arg → `BTAP_COSTING_DIR` (`OPENSTUDIO_COSTING_DIR` still
+honoured) → the gem's own placeholder tables. Real RS-Means values are
+runtime-injected only and never committed or staged into the installer.
 
 **The tbd triplet is pinned by `legacy_pin/Gemfile.lock`, not by any gemspec
 constraint.** The suites run under plain `ruby`, so gemspec dependencies are
@@ -155,7 +161,7 @@ prerequisite for it, not an ordering preference.
 
 ## The command-line tool
 
-`openstudio-necb/exe/necb-compliance.rb` (logic in `lib/openstudio_necb/cli.rb`)
+`btap-necb/exe/btap-compliance.rb` (logic in `lib/btap_necb/cli.rb`)
 turns the whole pipeline into one command: `.osm` in, EUIs + verdict + HTML
 report out. `packaging/windows/` builds a Windows installer that bundles its own
 OpenStudio, so the recipient installs one thing; `rake windows:stage` assembles
@@ -174,7 +180,7 @@ dispatching it by hand rehearses the whole build but stops at `DRY_RUN`. Trigger
 every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
 
 - **`lint`** — bare runner, Ruby 3.2.2, no SDK. Orphan-key lint, the SDK-free
-  `openstudio-audit` suite, and the coverage-doc gate: it regenerates both
+  `btap-audit` suite, and the coverage-doc gate: it regenerates both
   generated documents and demands a clean tree.
 - **`test`** — matrix of the eight SDK gems in `nrel/openstudio:3.11.0`,
   `fail-fast: false`, `TBD_REQUIRED=1`. Each leg runs `rake test:gem[<gem>]`,
@@ -195,7 +201,7 @@ never fires. Dispatch it by hand whenever you bump `legacy_pin/REF`; that is the
 only moment the oracle can move under you.
 
 Costs are why parity is not on every push: a run was ~24 runner-minutes (~30
-with parity) against the org's Team-plan allowance, and `test (openstudio-hvac)`
+with parity) against the org's Team-plan allowance, and the biggest leg
 was 9–11 of them — more than the other seven gem suites combined. The repo is
 private, so those minutes are billed. `rake test:gem` cuts that leg; how much
 depends on the runner's core count, which the job now prints so the next person
@@ -212,13 +218,13 @@ does not have to guess (locally, 45 files drop from ~10 min to ~150 s).
   changes the costing sheets and `necb_2011.rb`. Absorbing means **bumping the
   pin and re-running the gates**, never copying code across.
 - **The LLM proposed-building workflow** (geometry → loads → constructions →
-  HVAC). The one real physics gap: `openstudio-envelope` cannot build an opaque
+  HVAC). The one real physics gap: the envelope domain cannot build an opaque
   construction from nothing — zero `DefaultConstructionSet` usage family-wide, and
   `opaque_at_conductance` requires a base to deep-copy. Wizard geometry has no
   constructions, so `apply_prescriptive` silently skips everything. The test-only
-  `seed_constructions` helper in `openstudio-geometry/test/test_bar.rb` is the
+  `seed_constructions` helper in `btap-modeling/test/test_bar.rb` is the
   placeholder to replace. Ordering constraint (D-75): thermostats come from
-  `openstudio-loads`' `apply_loads` and gate the whole envelope pass via
+  the loads domain's `apply_loads` and gate the whole envelope pass via
   `Geometry.conditioned?`.
 - **`NatLabRockies/openstudio-mcp`** (Python MCP server, ~150 tools) covers
   generic OpenStudio authoring but has **zero NECB content**, and its

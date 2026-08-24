@@ -459,6 +459,6 @@ namespace :windows do
     ok = system({ 'GH_TOKEN' => token }, 'gh', 'release', 'create', tag, exe,
                 '--title', "NECB Compliance #{tag}", '--notes', notes, '--target', sha)
     abort('gh release create failed') unless ok
-    puts "published: https://github.com/canmet-energy/openstudio-necb-gems/releases/tag/#{tag}"
+    puts "published: https://github.com/canmet-energy/btap-gems/releases/tag/#{tag}"
   end
 end

@@ -43,7 +43,7 @@ module BtapNECB
       proposed_data = proposed_model ? ModelQuery.extract(proposed_model) : nil
       reference_data = reference_model ? ModelQuery.extract(reference_model) : nil
 
-      # HVAC diagrams are drawn by openstudio-hvac's loop-diagram engine, driven
+      # HVAC diagrams are drawn by btap-modeling's loop-diagram engine, driven
       # DIRECTLY off the SDK models here. report.rb and model_query.rb are the
       # ONLY renderer files that touch the SDK — everything else under report/
       # consumes plain hashes. Each diagram is a plain hash of inline-SVG

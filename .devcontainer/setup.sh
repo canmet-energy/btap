@@ -377,7 +377,7 @@ cat <<'STEPS'
    Then, always with LEGACY_PIN_REQUIRED=1 — a skipped parity gate is a
    green-but-vacuous gate:
 
-     cd openstudio-loads && LEGACY_PIN_REQUIRED=1 \
+     cd btap-necb && LEGACY_PIN_REQUIRED=1 \
        BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle exec ruby test/test_apply_parity.rb
 
    MCP servers: .mcp.json was installed from .mcp.json.example above (codes,
