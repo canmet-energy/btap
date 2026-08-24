@@ -1,4 +1,4 @@
-module OpenStudioEnvelope
+module BtapModeling
   # SDK-only construction machinery — SI-native ports of the clean pieces of
   # OpenstudioStandards::Constructions plus the legacy BTAP conventions the parity
   # gate (and future costing) depend on:

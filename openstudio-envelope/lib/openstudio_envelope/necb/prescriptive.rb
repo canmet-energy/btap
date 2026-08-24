@@ -101,12 +101,12 @@ module OpenStudioEnvelope
         if apply_fdwr
           limit = NECB.max_fdwr(vintage: vintage, hdd: hdd, audit: audit)
           window_construction ||= subsurface_target_construction(model, 'window', vintage, hdd, include_films, cache, audit)
-          Geometry.apply_fdwr(model, limit, window_construction, audit: audit)
+          NECB::Fenestration.apply_fdwr(model, limit, window_construction, audit: audit)
         end
         if apply_srr
           limit = NECB.max_srr(vintage: vintage, audit: audit)
           skylight_construction ||= subsurface_target_construction(model, 'skylight', vintage, hdd, include_films, cache, audit)
-          Geometry.apply_srr(model, limit, skylight_construction, audit: audit)
+          NECB::Fenestration.apply_srr(model, limit, skylight_construction, audit: audit)
         end
 
         # 3.1.1.7: table values are EFFECTIVE transmittance — uprate for thermal

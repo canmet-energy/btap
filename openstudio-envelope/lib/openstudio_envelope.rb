@@ -15,7 +15,6 @@ require_relative 'openstudio_envelope/climate'
 #                      thermal bridging (TBD), reference-envelope transform
 #   costing/         — envelope assembly costing + thermal-bridging costing
 #   climate.rb       — HDD18 resolution (Table C-1 / .stat) + climate zones
-#   constructions.rb / geometry.rb — construction retargeting + surface math
 module OpenStudioEnvelope
   module NECB
     RULES_DIR = File.expand_path('openstudio_envelope/data/necb', __dir__)
@@ -34,9 +33,21 @@ module OpenStudioEnvelope
   end
 end
 
+# Constructions and the geometry census moved to btap-modeling; these aliases
+# keep this gem's remaining NECB/costing code working until it moves too.
+begin
+  require 'btap_modeling'
+rescue LoadError
+  require File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
+end
+
+module OpenStudioEnvelope
+  Constructions = BtapModeling::Constructions
+  Geometry      = BtapModeling::Geometry
+end
+
 require_relative 'openstudio_envelope/necb/rules'
-require_relative 'openstudio_envelope/constructions'
-require_relative 'openstudio_envelope/geometry'
+require_relative 'openstudio_envelope/necb/fenestration'
 require_relative 'openstudio_envelope/necb/prescriptive'
 require_relative 'openstudio_envelope/necb/thermal_bridging'
 require_relative 'openstudio_envelope/necb/reference'
