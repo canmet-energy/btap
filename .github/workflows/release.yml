@@ -64,6 +64,11 @@ jobs:
         # all it needs. The rake task remains the local path
         # (.devcontainer/setup.sh --wine).
         run: |
+          # The image's ISCC runs as uid 1000; the checkout is root-owned on
+          # CodeBuild, so pre-open the packaging tree and create Output/ or
+          # ISCC dies with "File access denied".
+          mkdir -p packaging/windows/Output
+          sudo chmod -R a+rwX packaging/windows
           docker run --rm -v "$PWD:/work" amake/innosetup:latest packaging/windows/necb-compliance.iss
           ls -la packaging/windows/Output/
       - name: install ruby for the release task
