@@ -1,6 +1,6 @@
 require 'json'
 
-module OpenStudioGeometry
+module BtapModeling
   # Measured-footprint massing: turn a real building outline (GeoJSON ring from
   # a building-stock source, a survey, a GIS export) plus a measured height into
   # zoned OpenStudio massing.

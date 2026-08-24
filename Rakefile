@@ -17,7 +17,7 @@ require 'etc'
 GEM_DIRS = %w[
   btap-audit
   openstudio-envelope
-  openstudio-geometry
+  btap-modeling
   openstudio-hvac
   openstudio-lighting
   openstudio-loads

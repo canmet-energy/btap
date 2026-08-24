@@ -1,11 +1,11 @@
-module OpenStudioGeometry
+module BtapModeling
   # The bar massing engine — verbatim port of OpenstudioStandards::Geometry
   # create_bar + bar_hash_setup_run (the David Goldwasser bar lineage) plus
   # their five polygon/space helpers from geometry/create.rb. The DOE/DEER
   # building-type-ratio wrappers (create_bar_from_building_type_ratios etc.)
   # are deliberately NOT ported — they depend on CreateTypical building-type
   # metadata and Standard.build; the family-native ratio entry is
-  # OpenStudioGeometry.bar (see openstudio_geometry.rb).
+  # BtapModeling.bar (see btap_modeling.rb).
   module Bar
     def self.create_bar(model, bar_hash)
       # ---- 1. Inputs, warnings, and story flattening ----

@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'btap-audit'
   spec.add_dependency 'openstudio-envelope'
-  spec.add_dependency 'openstudio-geometry'
+  spec.add_dependency 'btap-modeling'
   spec.add_dependency 'openstudio-hvac'
   spec.add_dependency 'openstudio-lighting'
   spec.add_dependency 'openstudio-loads'

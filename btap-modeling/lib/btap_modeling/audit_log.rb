@@ -5,6 +5,6 @@ rescue LoadError
   require File.expand_path('../../../btap-audit/lib/btap_audit', __dir__)
 end
 
-module OpenStudioGeometry
+module BtapModeling
   AuditLog = BtapAudit::AuditLog
 end

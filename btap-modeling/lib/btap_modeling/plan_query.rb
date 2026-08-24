@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module OpenStudioGeometry
+module BtapModeling
   # The floor-plan renderer's ONLY SDK-touching file: an OpenStudio model in,
   # plain hashes out (never raises). Everything downstream — `plan_svg.rb`,
   # `plan.rb` — is SDK-free and unit-testable against hand-written hashes.
@@ -29,7 +29,7 @@ module OpenStudioGeometry
     Z_TOL = 0.01
 
     # @param model [OpenStudio::Model::Model]
-    # @param audit [OpenStudioGeometry::AuditLog, nil] warnings sink (step :plan)
+    # @param audit [BtapModeling::AuditLog, nil] warnings sink (step :plan)
     # @return [Hash] the schema above; never raises
     def extract(model, audit: nil)
       pairs = model.getSpaces.sort_by(&:nameString).filter_map do |space|

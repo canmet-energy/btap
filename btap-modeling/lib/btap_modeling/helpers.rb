@@ -1,4 +1,4 @@
-module OpenStudioGeometry
+module BtapModeling
   # The three small BTAP geometry helpers the wizards depend on, ported
   # standalone (BTAP::Geometry.match_surfaces / rotate_model and
   # BTAP::Geometry::Surfaces.set_surfaces_boundary_condition).

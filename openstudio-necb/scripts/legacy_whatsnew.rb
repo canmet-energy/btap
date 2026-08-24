@@ -44,7 +44,7 @@ OWNERS = [
   [%r{^test/},                                                     'legacy TESTS — oracle behaviour, not our source'],
   [%r{^data/},                                                     'legacy DATA — check whether a gem vendored a copy'],
   [%r{/btap/costing/|/btap/common/.*\.csv$}, 'costing (hvac + envelope + lighting + shw)'],
-  [%r{/btap/geometry\.rb|create_shape|create_bar},                'openstudio-geometry'],
+  [%r{/btap/geometry\.rb|create_shape|create_bar},                'btap-modeling'],
   [%r{space_types\.json|schedules\.json|beps_compliance_path\.rb}, 'openstudio-loads'],
   [%r{lighting|daylight},                                          'openstudio-lighting'],
   [%r{service_water_heating|shw},                                  'openstudio-shw'],

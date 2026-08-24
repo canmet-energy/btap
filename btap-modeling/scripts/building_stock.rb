@@ -8,10 +8,10 @@
 #   ruby scripts/building_stock.rb --bbox -75.70,45.41,-75.69,45.43 --out /tmp/massing
 #   ruby scripts/building_stock.rb --from-cache records.json --out /tmp/massing   # offline
 #
-# WHY THIS IS A SCRIPT AND NOT PART OF THE GEM (D-71): openstudio-geometry is
+# WHY THIS IS A SCRIPT AND NOT PART OF THE GEM (D-71): btap-modeling is
 # SDK-only and offline, and `spec.files` is `lib/**/*`, so nothing here ships in
 # the gem. The fetch lives beside its consumer without putting a network
-# dependency inside it. `OpenStudioGeometry::Footprint` still never learns where
+# dependency inside it. `BtapModeling::Footprint` still never learns where
 # a ring came from.
 #
 # AUTH follows scripts/fetch_necb_8_4_text.rb in openstudio-necb: endpoint and
@@ -31,7 +31,7 @@ require 'net/http'
 require 'uri'
 require 'fileutils'
 require 'optparse'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 module BuildingStock
   SERVER = 'building-stock'
@@ -193,9 +193,9 @@ module BuildingStock
     # storey a modeller expects (gem-side, see Footprint.edge_orientation).
     #
     # @return [Hash] { model:, record:, audit:, skipped: <reason> }
-    def to_model(record, floor_to_floor_height: OpenStudioGeometry::Footprint::NRCAN_IMPLIED,
+    def to_model(record, floor_to_floor_height: BtapModeling::Footprint::NRCAN_IMPLIED,
                  zoning: :core_perimeter, multiplier: :mid, audit: nil)
-      audit ||= OpenStudioGeometry::AuditLog.new
+      audit ||= BtapModeling::AuditLog.new
       reason = Records.rejection(record)
       if reason
         audit.warn(:geometry, 'building-stock record skipped',
@@ -204,7 +204,7 @@ module BuildingStock
       end
 
       height, field = Records.height_of(record)
-      model = OpenStudioGeometry.create_from_footprint(
+      model = BtapModeling.create_from_footprint(
         geojson: record['geometry_geojson'], height_m: height,
         floor_to_floor_height: floor_to_floor_height, zoning: zoning, multiplier: multiplier,
         source: Records.provenance(record, field), audit: audit
@@ -235,7 +235,7 @@ end
 # ------------------------------------------------------------------ CLI
 
 if __FILE__ == $PROGRAM_NAME
-  options = { limit: 25, radius: 500, storey_height: OpenStudioGeometry::Footprint::NRCAN_IMPLIED,
+  options = { limit: 25, radius: 500, storey_height: BtapModeling::Footprint::NRCAN_IMPLIED,
               zoning: :core_perimeter, multiplier: :mid, out: nil, cache: nil,
               from_cache: nil, klass: nil }
   parser = OptionParser.new do |o|
@@ -248,7 +248,7 @@ if __FILE__ == $PROGRAM_NAME
     end
     o.on('--limit N', Integer, 'max records (25)') { |v| options[:limit] = v }
     o.on('--class NAME', 'keep only this building_class') { |v| options[:klass] = v }
-    o.on('--storey-height M', Float, "metres (#{OpenStudioGeometry::Footprint::NRCAN_IMPLIED})") do |v|
+    o.on('--storey-height M', Float, "metres (#{BtapModeling::Footprint::NRCAN_IMPLIED})") do |v|
       options[:storey_height] = v
     end
     o.on('--zoning MODE', %w[core_perimeter single], 'core_perimeter | single') { |v| options[:zoning] = v.to_sym }
@@ -287,7 +287,7 @@ if __FILE__ == $PROGRAM_NAME
   abort('--out is required to build') unless options[:out]
 
   FileUtils.mkdir_p(options[:out])
-  audit = OpenStudioGeometry::AuditLog.new
+  audit = BtapModeling::AuditLog.new
   manifest = []
   records.each do |record|
     result = BuildingStock::Adapter.to_model(
