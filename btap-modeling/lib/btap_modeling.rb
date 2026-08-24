@@ -58,7 +58,7 @@ require_relative 'btap_modeling/catalog_report'
 # Downstream: OpenStudioLoads.assign_space_types + apply_loads,
 # OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
 # BtapModeling.build_system, OpenStudioEnvelope prescriptive/reference,
-# OpenStudioNECB.performance_compliance.
+# BtapNECB.performance_compliance.
 module BtapModeling
   SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
 

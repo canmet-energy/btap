@@ -16,7 +16,7 @@ module BtapAudit
   #
   # ruling: WHICH adjudicated project decision(s) govern this code path — the
   # D-XX ids of the NECB gem family's decision record (mirrored machine-readably
-  # in openstudio-necb's decisions.json and surfaced in the AHJ report). Where
+  # in btap-necb's decisions.json and surfaced in the AHJ report). Where
   # `article` cites the CODE that mandates a value, `ruling` cites OUR judgement
   # call about how that code was interpreted or implemented, so a reader sees
   # both what was done and why we did it that way. Multiple ids are a single

@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.description = 'The one AuditLog class (entry schema, building stamping, article/ruling ' \
                      'citation axes, JSON + narrative rendering) and the one article-coverage ' \
                      'emitter shared by openstudio-hvac, -envelope, -loads, -lighting, -shw, ' \
-                     '-geometry and the openstudio-necb umbrella. No domain knowledge, no ' \
+                     '-geometry and the btap-necb umbrella. No domain knowledge, no ' \
                      'OpenStudio dependency — each family gem aliases the class into its own ' \
                      'namespace so existing call sites keep working.'
   spec.homepage = 'https://github.com/canmet-energy/openstudio-necb-gems'

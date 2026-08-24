@@ -22,7 +22,7 @@ GEM_DIRS = %w[
   openstudio-hvac
   openstudio-lighting
   openstudio-loads
-  openstudio-necb
+  btap-necb
   openstudio-shw
   btap-simulation
 ].freeze
@@ -71,7 +71,7 @@ end
 namespace :legacy do
   desc 'What has changed in the legacy fork since our pinned oracle (BRANCH=nrcan, LEGACY_FORK=/path for speed)'
   task :whatsnew do
-    abort('legacy:whatsnew failed') unless system(RbConfig.ruby, 'openstudio-necb/scripts/legacy_whatsnew.rb')
+    abort('legacy:whatsnew failed') unless system(RbConfig.ruby, 'btap-necb/scripts/legacy_whatsnew.rb')
   end
 
   desc 'Show the pinned oracle revision'
@@ -86,12 +86,12 @@ end
 # --- NECB gem-family rule verification -------------------------------------
 # Checks that declared NECB rules actually DO something, rather than trusting
 # the `article_coverage` manifests' prose. See
-# openstudio-necb/docs/necb_rule_verification.md for what each check proves.
+# btap-necb/docs/necb_rule_verification.md for what each check proves.
 namespace :necb do
   desc 'Lint: every rule key in a NECB ruleset JSON is read by that gem lib/'
   task :orphan_keys do
     # Pure Ruby, no OpenStudio SDK — safe on any CI node.
-    abort('necb:orphan_keys failed') unless system(RbConfig.ruby, 'openstudio-necb/scripts/necb_orphan_keys.rb')
+    abort('necb:orphan_keys failed') unless system(RbConfig.ruby, 'btap-necb/scripts/necb_orphan_keys.rb')
   end
 
   desc 'Hostile-outcome tests: reference transforms must overwrite non-compliant proposed values'
@@ -109,19 +109,19 @@ namespace :necb do
 
   desc 'Regenerate NECB_8_4_COVERAGE.html (+ NECB_GEM_COVERAGE.md) from manifests, citations and the cached 8.4 text'
   task :coverage_doc do
-    # Pure Ruby, no SDK. Text cache refresh (openstudio-necb/scripts/fetch_necb_8_4_text.rb)
+    # Pure Ruby, no SDK. Text cache refresh (btap-necb/scripts/fetch_necb_8_4_text.rb)
     # needs codes-MCP access and is NOT run here — CI regenerates from the
     # committed cache. Pass run evidence via NECB_AUDIT_JSONS=dir1:dir2
     # (directories containing audit.json + report.json from real runs).
-    abort('necb:coverage_doc failed') unless system(RbConfig.ruby, 'openstudio-necb/scripts/generate_necb_gem_coverage.rb') &&
-                                             system(RbConfig.ruby, 'openstudio-necb/scripts/generate_necb_8_4_coverage.rb')
+    abort('necb:coverage_doc failed') unless system(RbConfig.ruby, 'btap-necb/scripts/generate_necb_gem_coverage.rb') &&
+                                             system(RbConfig.ruby, 'btap-necb/scripts/generate_necb_8_4_coverage.rb')
   end
 
   desc 'Verify as-applied part-load curves against NECB 2025 Subsection 8.4.6 coefficients'
   task :curves do
     # SDK only, no CLI (components are hard-sized). Compares MODEL curves under
     # the documented transforms (FHeatPLC = PLR/eff, degF->degC surfaces).
-    abort('necb:curves failed') unless system(RbConfig.ruby, 'openstudio-necb/scripts/necb_8_4_6_curve_probe.rb')
+    abort('necb:curves failed') unless system(RbConfig.ruby, 'btap-necb/scripts/necb_8_4_6_curve_probe.rb')
   end
 
   desc 'All NECB rule-verification checks (runs every check, then reports)'
@@ -130,8 +130,8 @@ namespace :necb do
     # chaining aborts at the first failure, which hides the rest of the work
     # list. This is a "what still needs doing" report, so run everything.
     results = {
-      'orphan_keys' => system(RbConfig.ruby, 'openstudio-necb/scripts/necb_orphan_keys.rb'),
-      'curves_8_4_6' => system(RbConfig.ruby, 'openstudio-necb/scripts/necb_8_4_6_curve_probe.rb'),
+      'orphan_keys' => system(RbConfig.ruby, 'btap-necb/scripts/necb_orphan_keys.rb'),
+      'curves_8_4_6' => system(RbConfig.ruby, 'btap-necb/scripts/necb_8_4_6_curve_probe.rb'),
       # .map(&:...).all? — NOT .all? { }, which short-circuits on the first
       # failing gem and hides the remaining work.
       'hostile' => !HOSTILE_TESTS.empty? && HOSTILE_TESTS.map do |test|
@@ -258,15 +258,15 @@ namespace :windows do
         total += 1
       end
     end
-    FileUtils.chmod(0o755, "#{STAGE}/gems/openstudio-necb/exe/necb-compliance.rb")
+    FileUtils.chmod(0o755, "#{STAGE}/gems/btap-necb/exe/necb-compliance.rb")
 
     # Sample + weather, taken from the shared fixtures.
     fixtures = 'btap-modeling/test/fixtures'
     FileUtils.mkdir_p(["#{STAGE}/samples", "#{STAGE}/weather", "#{STAGE}/bin"])
     # The sample set: one building, many HVAC systems (see
-    # openstudio-necb/scripts/generate_samples.rb). Generated rather than
+    # btap-necb/scripts/generate_samples.rb). Generated rather than
     # committed — they are derived from the fixture and the catalog.
-    system(RbConfig.ruby, 'openstudio-necb/scripts/generate_samples.rb',
+    system(RbConfig.ruby, 'btap-necb/scripts/generate_samples.rb',
            File.join(STAGE, 'samples')) || abort('sample generation failed')
     FileUtils.cp("#{fixtures}/5ZoneNoHVAC.osm", "#{STAGE}/samples/")
     Dir.glob("#{fixtures}/weather/CAN_ON_Toronto*.{epw,ddy,stat}").each { |f| FileUtils.cp(f, "#{STAGE}/weather/") }

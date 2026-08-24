@@ -26,9 +26,9 @@ module BtapModeling
   # src/href/@import/url(), no web fonts) — a test asserts this. Inline <script>
   # and <style> make no network requests and are the mechanism here.
   #
-  # This file deliberately mirrors the approach of openstudio-necb's
+  # This file deliberately mirrors the approach of btap-necb's
   # report/{model_query,svg,diagrams,html}.rb but is REIMPLEMENTED self-contained
-  # here: openstudio-hvac sits BELOW openstudio-necb in the dependency graph and
+  # here: openstudio-hvac sits BELOW btap-necb in the dependency graph and
   # must not depend on it.
   module CatalogReport
     module_function
@@ -190,7 +190,7 @@ module BtapModeling
 
     # ------------------------------------------------- reusable diagram API
     # A REUSABLE, host-agnostic diagram bundle for ANY model. A consuming report
-    # (e.g. openstudio-necb's AHJ compliance report) drives its own proposed and
+    # (e.g. btap-necb's AHJ compliance report) drives its own proposed and
     # reference models through this to get the SAME OpenStudio-App-style loop
     # diagrams the catalog draws, without depending on catalog internals. Returns
     # PLAIN hashes (inline-SVG strings + labels) and NEVER raises — on any failure

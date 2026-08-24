@@ -35,7 +35,7 @@ jobs:
         with:
           ruby-version: '3.2.2'
       - name: Rule-key orphan lint
-        run: ruby openstudio-necb/scripts/necb_orphan_keys.rb
+        run: ruby btap-necb/scripts/necb_orphan_keys.rb
       # btap-audit is the one gem with no SDK dependency at all (json +
       # minitest). The decisions-registry drift test looks SDK-free but is not:
       # it `require`s every gem's facade to prove their AuditLog resolves to the
@@ -46,7 +46,7 @@ jobs:
       # are pure JSON + file reads — lint them here so a rename that strands a
       # pointer fails before anything pays for the container.
       - name: Coverage code refs resolve
-        run: cd openstudio-necb && ruby test/test_coverage_code_refs.rb
+        run: cd btap-necb && ruby test/test_coverage_code_refs.rb
       # NECB_GEM_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
       # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
       # made the committed copies track the manifests, so they drifted: an
@@ -60,10 +60,10 @@ jobs:
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          ruby openstudio-necb/scripts/generate_necb_gem_coverage.rb
-          ruby openstudio-necb/scripts/generate_necb_8_4_coverage.rb
-          git diff --exit-code -- openstudio-necb/docs/NECB_GEM_COVERAGE.md \
-                                  openstudio-necb/docs/NECB_8_4_COVERAGE.html \
+          ruby btap-necb/scripts/generate_necb_gem_coverage.rb
+          ruby btap-necb/scripts/generate_necb_8_4_coverage.rb
+          git diff --exit-code -- btap-necb/docs/NECB_GEM_COVERAGE.md \
+                                  btap-necb/docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
@@ -94,7 +94,7 @@ jobs:
           - openstudio-hvac
           - openstudio-lighting
           - openstudio-loads
-          - openstudio-necb
+          - btap-necb
           - openstudio-shw
           - btap-simulation
     env:
@@ -159,7 +159,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
-        run: cd openstudio-necb && ruby test/test_decisions_registry.rb
+        run: cd btap-necb && ruby test/test_decisions_registry.rb
       - name: rake necb:verify
         run: rake necb:verify
 

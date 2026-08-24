@@ -12,7 +12,7 @@ module BtapModeling
   #
   #  * {diagrams}    — a plain-hash bundle of inline SVG strings a HOST report
   #                    embeds (shaped like BtapModeling::CatalogReport
-  #                    .model_diagrams, the bundle openstudio-necb's AHJ report
+  #                    .model_diagrams, the bundle btap-necb's AHJ report
   #                    already knows how to consume). NEVER raises.
   #  * {html_report} — one self-contained standalone page (inline CSS, inline
   #                    SVG, native <details>, NO scripts and NO external
