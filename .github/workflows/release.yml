@@ -54,7 +54,9 @@ jobs:
         with:
           name: stage
       - name: unpack the staged tree
-        run: tar xzf stage.tar.gz -C packaging/windows
+        # rm after: the release task's clean-tree guard rightly counts the
+        # downloaded artifact as dirt.
+        run: tar xzf stage.tar.gz -C packaging/windows && rm stage.tar.gz
       - name: compile the installer (containerized ISCC)
         # Three rehearsals proved apt wine is a moving target here: 22.04's
         # wine 6.0.3 cannot run the IS6 installer at all, and winehq's wine 11
