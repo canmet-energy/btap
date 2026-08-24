@@ -150,6 +150,9 @@ RAW_CITATIONS = [].tap do |acc|
     end
   end
 end
+# Fail LOUD: an empty scan means the gem glob went stale (directory rename),
+# and the doc would regenerate 'cleanly' with every citation gone.
+abort('RAW_CITATIONS is empty — the openstudio-*/lib glob went stale') if RAW_CITATIONS.empty?
 
 def citations_for(vintage, articles)
   reference_prefix = vintage == '2020' ? '8.4.4' : '8.4.5'
@@ -198,6 +201,9 @@ def declarations_for(vintage)
       declarations[art] << e.merge('gem' => gem_name, 'vintage' => vintage, 'sentence' => sentence)
     end
   end
+  # Same fail-loud rationale as RAW_CITATIONS: silence here means the manifest
+  # glob went stale, not that nothing is declared.
+  abort("no 8.4 declarations found for #{vintage} — the manifest glob went stale") if declarations.empty?
   declarations
 end
 

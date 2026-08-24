@@ -10,7 +10,27 @@
 require 'rbconfig'
 require 'etc'
 
-GEM_DIRS = Dir.glob('openstudio-*').select { |d| File.directory?(d) }.sort.freeze
+# EXPLICIT, not a glob. A glob fails OPEN when directories rename (the btap-*
+# migration): test:all, windows:stage and the release staleness guard would all
+# go green while doing nothing. Editing this list is part of every gem move;
+# forgetting aborts every rake invocation instead of silently no-oping.
+GEM_DIRS = %w[
+  openstudio-audit
+  openstudio-envelope
+  openstudio-geometry
+  openstudio-hvac
+  openstudio-lighting
+  openstudio-loads
+  openstudio-necb
+  openstudio-shw
+  openstudio-simulation
+].freeze
+missing = GEM_DIRS.reject { |d| File.directory?(d) }
+abort("GEM_DIRS is stale — missing: #{missing.join(', ')}") unless missing.empty?
+
+# Derived from GEM_DIRS so a rename cannot leave a stale sibling glob behind.
+HOSTILE_TESTS = GEM_DIRS.map { |d| "#{d}/test/test_necb_hostile_reference.rb" }
+                        .select { |f| File.file?(f) }.freeze
 
 # Default parallelism: every core but a few.
 #
@@ -77,7 +97,8 @@ namespace :necb do
   task :hostile do
     # These need the SDK (require "openstudio") but NOT the openstudio CLI —
     # reference generation runs no EnergyPlus.
-    failed = Dir.glob('openstudio-*/test/test_necb_hostile_reference.rb').sort.reject do |test|
+    abort('no hostile-outcome tests found — HOSTILE_TESTS went stale') if HOSTILE_TESTS.empty?
+    failed = HOSTILE_TESTS.reject do |test|
       # chdir into the gem so the test's require_relative + fixture paths
       # resolve; pass the path RELATIVE to that new working directory.
       system(RbConfig.ruby, test.split('/', 2).last, chdir: test.split('/', 2).first)
@@ -112,7 +133,7 @@ namespace :necb do
       'curves_8_4_6' => system(RbConfig.ruby, 'openstudio-necb/scripts/necb_8_4_6_curve_probe.rb'),
       # .map(&:...).all? — NOT .all? { }, which short-circuits on the first
       # failing gem and hides the remaining work.
-      'hostile' => Dir.glob('openstudio-*/test/test_necb_hostile_reference.rb').sort.map do |test|
+      'hostile' => !HOSTILE_TESTS.empty? && HOSTILE_TESTS.map do |test|
         gem_dir, rel = test.split('/', 2)
         system(RbConfig.ruby, rel, chdir: gem_dir)
       end.all?
@@ -362,7 +383,9 @@ namespace :windows do
     # 3. The installer must be NEWER than every source it claims to contain.
     #    This is the guard that catches the common mistake: editing a gem, then
     #    publishing yesterday's build.
-    newest = Dir.glob('openstudio-*/lib/**/*.{rb,json,csv}').max_by { |f| File.mtime(f) }
+    sources = GEM_DIRS.flat_map { |d| Dir.glob("#{d}/lib/**/*.{rb,json,csv}") }
+    abort('release staleness guard found no sources — GEM_DIRS went stale') if sources.empty?
+    newest = sources.max_by { |f| File.mtime(f) }
     if newest && File.mtime(newest) > File.mtime(exe)
       abort("#{File.basename(exe)} is OLDER than #{newest} — rebuild before releasing")
     end

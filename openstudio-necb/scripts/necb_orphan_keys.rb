@@ -53,9 +53,12 @@ end
 quiet = ARGV.include?('--quiet')
 findings = []
 
+scanned_gems = 0
 Dir.glob(File.join(ROOT, 'openstudio-*')).sort.select { |d| File.directory?(d) }.each do |gem_dir|
   rulesets = Dir.glob(File.join(gem_dir, 'lib/**/data/**/*_rules_*.json'))
   next if rulesets.empty?
+
+  scanned_gems += 1
 
   source = gem_sources(gem_dir)
   gem_name = File.basename(gem_dir)
@@ -108,5 +111,9 @@ unless quiet
     REMEDY
   end
 end
+
+# Fail LOUD, not open: if the gem glob went stale (a directory rename), zero
+# gems scanned would otherwise print OK on nothing.
+abort('necb_orphan_keys scanned no gems — the gem glob went stale') if scanned_gems.zero?
 
 exit(findings.empty? ? 0 : 1)
