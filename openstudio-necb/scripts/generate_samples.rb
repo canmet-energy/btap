@@ -37,7 +37,7 @@ ROOT = File.expand_path('../..', __dir__)
   openstudio-shw/lib/openstudio_shw
 ].each { |entry| require File.expand_path(entry, ROOT) }
 
-FIXTURE = File.join(ROOT, 'openstudio-hvac/test/fixtures/5ZoneNoHVAC.osm')
+FIXTURE = File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm')
 OUT = ARGV[0] || File.join(ROOT, 'packaging/windows/samples')
 
 # One per family where the family is distinct enough to be worth a file, chosen
@@ -119,7 +119,7 @@ end
 # model; honour it here so this list self-corrects when a system is fixed rather
 # than needing a human to remember. All 97 pass as of the defrost-curve fix; the
 # gate stays because the next regression should skip a sample, not ship one.
-STATUS = File.join(ROOT, 'openstudio-hvac/test/fixtures/system_simulation_status.json')
+STATUS = File.join(ROOT, 'btap-modeling/test/fixtures/system_simulation_status.json')
 SIMULATABLE = if File.exist?(STATUS)
                 require 'json'
                 JSON.parse(File.read(STATUS, encoding: 'UTF-8'))

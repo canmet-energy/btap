@@ -37,5 +37,19 @@ module BtapModeling
       model.getPlanarSurfaceGroups.each { |group| group.changeTransformation(transformation) }
       model
     end
+    # Above-ground storey count: the declared standards value when set, else
+    # counted from storeys with any at-or-above-grade space. Lived in hvac's
+    # costing module historically, but it is pure geometry and the authoring
+    # systems (vav_reheat zoning) need it — so it lives here and costing
+    # delegates.
+    def above_ground_storeys(model)
+      declared = model.getBuilding.standardsNumberOfAboveGroundStories
+      return declared.get if declared.is_initialized
+
+      model.getBuildingStorys.count do |story|
+        story.spaces.any? { |s| s.zOrigin.to_f >= -0.01 }
+      end.clamp(1, 1000)
+    end
+
   end
 end

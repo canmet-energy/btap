@@ -207,7 +207,7 @@ namespace :hvac do
   desc 'Build EVERY catalog system and put each through an EnergyPlus sizing run ([JOBS=n])'
   task :simulate_systems do
     jobs = ENV.fetch('JOBS', default_jobs.to_s)
-    ok = system(RbConfig.ruby, 'openstudio-hvac/scripts/simulate_all_systems.rb', '--jobs', jobs)
+    ok = system(RbConfig.ruby, 'btap-modeling/scripts/simulate_all_systems.rb', '--jobs', jobs)
     abort('one or more systems do not produce a simulate-able model') unless ok
   end
 end
@@ -260,7 +260,7 @@ namespace :windows do
     FileUtils.chmod(0o755, "#{STAGE}/gems/openstudio-necb/exe/necb-compliance.rb")
 
     # Sample + weather, taken from the shared fixtures.
-    fixtures = 'openstudio-hvac/test/fixtures'
+    fixtures = 'btap-modeling/test/fixtures'
     FileUtils.mkdir_p(["#{STAGE}/samples", "#{STAGE}/weather", "#{STAGE}/bin"])
     # The sample set: one building, many HVAC systems (see
     # openstudio-necb/scripts/generate_samples.rb). Generated rather than

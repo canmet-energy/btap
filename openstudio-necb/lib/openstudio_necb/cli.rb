@@ -415,7 +415,7 @@ module OpenStudioNECB
         [ENV.fetch('NECB_HOME', nil)&.then { |h| File.join(h, 'weather') },
          File.expand_path('../../../../weather', __dir__),
          File.expand_path('../../../weather', __dir__),
-         File.expand_path('../../../openstudio-hvac/test/fixtures/weather', __dir__)].compact
+         File.expand_path('../../../btap-modeling/test/fixtures/weather', __dir__)].compact
       end
 
       def self.dirs = search.select { |d| Dir.exist?(d) }

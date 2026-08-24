@@ -11,6 +11,43 @@ require_relative 'btap_modeling/plan_query'
 require_relative 'btap_modeling/plan_svg'
 require_relative 'btap_modeling/plan'
 
+# The HVAC-authoring half (ex openstudio-hvac's generic files). Order matters:
+# base_system before the systems that subclass-include it; ecm_air after the
+# air systems it decorates; classify/builder/catalog_report last, as in the
+# original facade.
+require_relative 'btap_modeling/validation'
+require_relative 'btap_modeling/teardown'
+require_relative 'btap_modeling/naming'
+require_relative 'btap_modeling/canonical'
+require_relative 'btap_modeling/catalog'
+require_relative 'btap_modeling/components/curves'
+require_relative 'btap_modeling/components/coils'
+require_relative 'btap_modeling/components/schedules'
+require_relative 'btap_modeling/systems/base_system'
+require_relative 'btap_modeling/systems/plant_loops'
+require_relative 'btap_modeling/systems/baseboards'
+require_relative 'btap_modeling/systems/psz'
+require_relative 'btap_modeling/systems/vav_reheat'
+require_relative 'btap_modeling/systems/fan_coils'
+require_relative 'btap_modeling/systems/mau_ptac'
+require_relative 'btap_modeling/systems/baseboards_only'
+require_relative 'btap_modeling/components/ecm_air'
+require_relative 'btap_modeling/systems/doas_pthp'
+require_relative 'btap_modeling/systems/ashp_baseboard'
+require_relative 'btap_modeling/systems/doas_vrf'
+require_relative 'btap_modeling/systems/hp_plant_fancoils'
+require_relative 'btap_modeling/systems/zone_terminal'
+require_relative 'btap_modeling/systems/unit_heaters'
+require_relative 'btap_modeling/systems/furnace'
+require_relative 'btap_modeling/systems/evap_cooler'
+require_relative 'btap_modeling/systems/wshp'
+require_relative 'btap_modeling/systems/vrf'
+require_relative 'btap_modeling/systems/zone_ervs'
+require_relative 'btap_modeling/systems/doas'
+require_relative 'btap_modeling/classify'
+require_relative 'btap_modeling/builder'
+require_relative 'btap_modeling/catalog_report'
+
 # BtapModeling creates parametric building geometry — the authoring
 # on-ramp for the gem family (and the future MCP surface): footprint wizards
 # (rectangle, aspect-ratio, courtyard, H, L, T, U) with perimeter/core zoning,
@@ -18,7 +55,7 @@ require_relative 'btap_modeling/plan'
 #
 # Downstream: OpenStudioLoads.assign_space_types + apply_loads,
 # OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
-# OpenStudioHVAC.build_system, OpenStudioEnvelope prescriptive/reference,
+# BtapModeling.build_system, OpenStudioEnvelope prescriptive/reference,
 # OpenStudioNECB.performance_compliance.
 module BtapModeling
   SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
@@ -424,5 +461,50 @@ module BtapModeling
     raise(ArgumentError, "unknown parameter(s) #{unknown.join(', ')} — expected #{keys.join(', ')}") unless unknown.empty?
 
     keys.each_with_index.map { |key, index| params.key?(key) ? params[key] : defaults[index] }
+  end
+end
+
+# The authoring API, at module level (moved from the hvac facade with the
+# machinery it fronts). Costing stays with openstudio-hvac until btap-costing
+# exists.
+module BtapModeling
+  # List the system catalog (MCP/tool-friendly: names are a closed, validated vocabulary).
+  def self.systems(filter: nil, family: nil)
+    Catalog.list(filter: filter, family: family)
+  end
+
+  # Build a system by descriptive name. See Builder.build_system.
+  def self.build_system(model, system_name, zones, **kwargs)
+    Builder.build_system(model, system_name, zones, **kwargs)
+  end
+
+  # Zone-scoped teardown. See Teardown.remove_hvac_from_zones.
+  def self.remove_hvac_from_zones(model, zones)
+    Teardown.remove_hvac_from_zones(model, zones)
+  end
+
+  # Characterize ANY model's HVAC into a neutral, serializable facts hash.
+  def self.characterize(model, audit: nil)
+    Classify.characterize(model, audit: audit)
+  end
+
+  # Replace whatever HVAC currently serves these zones with a catalog system.
+  def self.replace_system(model, system_name, zones, **kwargs)
+    Builder.build_system(model, system_name, zones, **kwargs, remove_existing: true)
+  end
+
+  # Self-contained HTML catalog of every buildable system. See CatalogReport.to_html.
+  def self.catalog_html(path = nil, **opts)
+    CatalogReport.to_html(path, **opts)
+  end
+
+  # OpenStudio-App-style HVAC loop diagrams for ANY model, as inline-SVG strings.
+  def self.model_hvac_diagrams(model)
+    CatalogReport.model_diagrams(model)
+  end
+
+  # The hidden master <svg><defs> embedding every component icon ONCE.
+  def self.hvac_icon_defs
+    CatalogReport.icon_defs
   end
 end

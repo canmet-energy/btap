@@ -4,7 +4,7 @@ require 'json'
 require_relative '../lib/openstudio_shw'
 
 module FixtureHelper
-  HVAC_FIXTURES = File.expand_path('../../openstudio-hvac/test/fixtures', __dir__)
+  HVAC_FIXTURES = File.expand_path('../../btap-modeling/test/fixtures', __dir__)
   FIXTURE = File.join(HVAC_FIXTURES, '5ZoneNoHVAC.osm')
   EPW = File.join(HVAC_FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
   DDY = File.join(HVAC_FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
