@@ -65,7 +65,10 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wine wine32:i386 xvfb ruby rake
           export WINEPREFIX="$HOME/.wine-innosetup"
           curl -sSL -o /tmp/is6.exe https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe
-          WINEDEBUG=-all xvfb-run -a wine /tmp/is6.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+          # The IS6 installer exits nonzero under wine even on success (the
+          # devcontainer's setup.sh has the same guard); the test below is the
+          # real check.
+          WINEDEBUG=-all xvfb-run -a wine /tmp/is6.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART || true
           test -f "$WINEPREFIX/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe"
       - name: compile the installer
         run: rake windows:installer
