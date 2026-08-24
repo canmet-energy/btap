@@ -15,6 +15,8 @@ require_relative 'btap_modeling/plan'
 # base_system before the systems that subclass-include it; ecm_air after the
 # air systems it decorates; classify/builder/catalog_report last, as in the
 # original facade.
+require_relative 'btap_modeling/constructions'
+require_relative 'btap_modeling/geometry'
 require_relative 'btap_modeling/validation'
 require_relative 'btap_modeling/teardown'
 require_relative 'btap_modeling/naming'

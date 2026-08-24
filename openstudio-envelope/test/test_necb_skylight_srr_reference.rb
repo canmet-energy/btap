@@ -31,7 +31,7 @@ class TestNECBSkylightSRRReference < Minitest::Test
     construction = OpenStudio::Model::Construction.new(model)
     construction.setName('Proposed Skylight Construction')
     construction.setLayers([glazing])
-    ok = OpenStudioEnvelope::Geometry.apply_srr(model, srr, construction)
+    ok = OpenStudioEnvelope::NECB::Fenestration.apply_srr(model, srr, construction)
     raise('fixture builder failed to add skylights') unless ok
 
     model
