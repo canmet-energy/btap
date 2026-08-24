@@ -61,8 +61,17 @@ jobs:
         # display even for a headless compile (hence xvfb).
         run: |
           sudo dpkg --add-architecture i386
+          # Distro wine on CodeBuild's Ubuntu 22.04 is 6.0.3, and the IS6
+          # installer dies under it before writing anything. The devcontainer's
+          # proven toolchain is wine 9 — install winehq-stable to match
+          # (resolves on both jammy and noble).
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo curl -sSL -o /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+          . /etc/os-release
+          sudo curl -sSL -o "/etc/apt/sources.list.d/winehq-${VERSION_CODENAME}.sources" "https://dl.winehq.org/wine-builds/ubuntu/dists/${VERSION_CODENAME}/winehq-${VERSION_CODENAME}.sources"
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wine wine32:i386 xvfb ruby rake
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --install-recommends winehq-stable xvfb ruby rake
+          wine --version
           export WINEPREFIX="$HOME/.wine-innosetup"
           curl -sSL -o /tmp/is6.exe https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe
           # The IS6 installer exits nonzero under wine even on success (the
