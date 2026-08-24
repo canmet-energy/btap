@@ -47,9 +47,9 @@ class TestCostingCoverage < Minitest::Test
     REPRESENTATIVES.each do |family, name|
       model = load_fixture
       zones = model.getThermalZones.sort_by(&:nameString)
-      result = OpenStudioHVAC.build_system(model, name, zones)
+      result = BtapModeling.build_system(model, name, zones)
       hard_size(model)
-      report = OpenStudioHVAC.cost(model, systems: [result], city: 'TORONTO', province_state: 'ONTARIO')
+      report = BtapCosting::HVAC.cost(model, systems: [result], city: 'TORONTO', province_state: 'ONTARIO')
 
       failures << "#{family} (#{name}): no items" if report.items.empty?
       failures << "#{family} (#{name}): zero total" unless report.total.positive?

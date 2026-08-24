@@ -90,7 +90,6 @@ jobs:
         gem:
           - btap-costing
           - btap-modeling
-          - openstudio-hvac
           - openstudio-lighting
           - openstudio-loads
           - btap-necb
@@ -130,7 +129,7 @@ jobs:
           '
       # `rake test:gem` forks the suite's files instead of running them one at a
       # time. The matrix already parallelizes across GEMS; this parallelizes
-      # WITHIN one, which matters because openstudio-hvac (45 files) is by far
+      # WITHIN one, which matters because btap-necb and btap-modeling are by far
       # the longest leg and sets the wall-clock and the bill for the whole run.
       #
       # It excludes test_helper.rb and the *_parity.rb suites for the same

@@ -6,7 +6,7 @@ module BtapModeling
   # "Conditioned, non-plenum" is proxied by Space#partofTotalFloorArea + a zone
   # thermostat (the legacy check reads NECB space-type setpoint schedules; on
   # standards-untagged models the proxy is equivalent) — same convention as the
-  # openstudio-hvac gem's classifier.
+  # hvac classifier.
   module Geometry
     module_function
 

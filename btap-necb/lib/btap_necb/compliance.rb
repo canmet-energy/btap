@@ -49,7 +49,7 @@ module BtapNECB
     # @param vintage ['2020', '2025']
     # @param weather [Hash] { epw:, ddy:, stat: } — epw+ddy required unless simulate: :none
     # @param building [Hash, nil] facts for reference-system selection (storeys,
-    #   zone_types, winter_design_temp_c, ...) — see OpenStudioHVAC::NECB.reference_hvac
+    #   zone_types, winter_design_temp_c, ...) — see BtapNECB::HVAC.reference_hvac
     # @param hdd [Numeric, nil] heating degree-days; nil resolves via the envelope
     #   gem (explicit > Table C-1 nearest city > .stat)
     # @param run_dir [String] working directory (simulations, report.json, audit.json)
@@ -84,7 +84,7 @@ module BtapNECB
     #   space_type_map: {space name => [building_type, space_type]} (required),
     #   lights_type: 'NECB_Default'|'LED' (default NECB_Default),
     #   shw_fuel: 'NaturalGas'|'Electricity'|'FuelOilNo2'|nil (nil = no SHW),
-    #   hvac_system: catalog name for OpenStudioHVAC.build_system (nil = keep
+    #   hvac_system: catalog name for BtapModeling.build_system (nil = keep
     #   whatever HVAC the model carries)
     # @param path [:reference, :eui] :reference = the 8.4.4 (2025: 8.4.5)
     #   reference-building comparison; :eui = the NECB 2025 8.4.4 archetype-EUI
@@ -268,7 +268,7 @@ module BtapNECB
       return unless opts[:simulate] == :annual
 
       run.report['proposed']['mechanical_cooling'] = mechanical_cooling?(proposed)
-      inventory = OpenStudioHVAC::Classify.heating_election_inventory(proposed)
+      inventory = BtapModeling::Classify.heating_election_inventory(proposed)
       hp_present = inventory[:loops].any? { |_, e| e[:hp].any? } ||
                    inventory[:zones].any? { |_, list| list.any? { |e| e[:role] == :hp } }
       if hp_present
@@ -291,7 +291,7 @@ module BtapNECB
       reference = nil
       lighting_prefix = vintage.to_s == '2025' ? '8.4.5' : '8.4.4'
       audit.with_building('reference building') do
-        reference_result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: vintage,
+        reference_result = BtapNECB::HVAC.reference_hvac(proposed, vintage: vintage,
                                                                building: opts[:building], audit: audit,
                                                                proposed_annual: run.proposed_annual_data)
         reference = reference_result.model
@@ -351,16 +351,16 @@ module BtapNECB
           # the SmallHotel gas variant). Release to autosize first — a no-op on
           # clean references, and the 8.4.4.14 transfer below re-establishes
           # the proposed-equivalent W/(L/s) on the sized flows (D-27 machinery).
-          OpenStudioHVAC::NECB.prepare_for_resizing(reference, audit: audit)
+          BtapNECB::HVAC.prepare_for_resizing(reference, audit: audit)
           Runner.run_energyplus!(reference, File.join(opts[:run_dir], 'reference_sizing'), sizing_only: true)
           # proposed: enables the 8.4.4.14.(1)-(3) pump power transfer (the
           # proposed was sized in step 1, so its pump flows/powers are readable)
-          OpenStudioHVAC::NECB.apply_efficiencies(reference, vintage: vintage, audit: audit, proposed: run.proposed)
+          BtapNECB::HVAC.apply_efficiencies(reference, vintage: vintage, audit: audit, proposed: run.proposed)
           # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
           # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
-          OpenStudioHVAC::NECB.apply_energy_recovery(reference, vintage: vintage, hdd: run.hdd, audit: audit)
+          BtapNECB::HVAC.apply_energy_recovery(reference, vintage: vintage, hdd: run.hdd, audit: audit)
           # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
-          OpenStudioHVAC::NECB.apply_economizer_thresholds(reference, audit: audit)
+          BtapNECB::HVAC.apply_economizer_thresholds(reference, audit: audit)
           audit.info(:compliance, 'reference sized; efficiencies re-applied and the 5.2.10.1 energy-recovery ' \
                                   'determination evaluated on sized flows', target: 'reference')
         end
@@ -646,7 +646,7 @@ module BtapNECB
       OpenStudioSHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
       hvac = options[:hvac_system]
       if hvac
-        result = OpenStudioHVAC.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString))
+        result = BtapModeling.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString))
         # build_system takes no audit — record the built topology here so the
         # on-ramp HVAC generation is visible in the narrative, not just an
         # input on the summary line.
@@ -688,13 +688,13 @@ module BtapNECB
       coil = Runner.run_period_sums(proposed, 'Heating Coil Heating Energy')
       baseboard = Runner.run_period_sums(proposed, 'Baseboard Total Heating Energy')
       lookup = lambda do |name, variable|
-        source = variable == OpenStudioHVAC::Classify::BASEBOARD_VARIABLE ? baseboard : coil
+        source = variable == BtapModeling::Classify::BASEBOARD_VARIABLE ? baseboard : coil
         source[name.upcase] || 0.0
       end
       loops = inventory[:loops].to_h do |loop_name, entry|
         [loop_name,
-         { hp_j: entry[:hp].sum { |n| lookup.call(n, OpenStudioHVAC::Classify::COIL_VARIABLE) },
-           aux: entry[:aux].map { |a| { fuel: a[:fuel], j: lookup.call(a[:name], OpenStudioHVAC::Classify::COIL_VARIABLE) } } }]
+         { hp_j: entry[:hp].sum { |n| lookup.call(n, BtapModeling::Classify::COIL_VARIABLE) },
+           aux: entry[:aux].map { |a| { fuel: a[:fuel], j: lookup.call(a[:name], BtapModeling::Classify::COIL_VARIABLE) } } }]
       end
       zones = inventory[:zones].to_h do |zone_name, list|
         [zone_name, list.map { |e| { fuel: e[:fuel], j: lookup.call(e[:name], e[:variable]), role: e[:role] } }]
@@ -891,9 +891,9 @@ module BtapNECB
               # the previous efficiency pass hard-set against the OLD sizes
               # first — a frozen pump power against a freshly grown autosized
               # flow is an EnergyPlus input FATAL, not a modeling nuance.
-              OpenStudioHVAC::NECB.prepare_for_resizing(model, audit: audit)
+              BtapNECB::HVAC.prepare_for_resizing(model, audit: audit)
               Runner.run_energyplus!(model, "#{dir}_sizing", sizing_only: true)
-              OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: vintage, audit: audit, proposed: proposed)
+              BtapNECB::HVAC.apply_efficiencies(model, vintage: vintage, audit: audit, proposed: proposed)
             end
             run_annual(model, dir, run_period, report[label], audit: audit)
           end
@@ -1054,7 +1054,7 @@ module BtapNECB
     # behind both compliance paths' costing blocks (each path formats its own
     # report hash; the eui path deliberately omits the location keys).
     def cost_single_model(model, city:, province_state:, costs_csv:, audit:)
-      hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
+      hvac = BtapCosting::HVAC.cost(model, city: city, province_state: province_state,
                                  costs_csv: costs_csv, audit: audit)
       envelope = BtapCosting::Envelope.cost(model, city: hvac.city, province_state: hvac.province_state,
                                          costs_csv: costs_csv, audit: audit)

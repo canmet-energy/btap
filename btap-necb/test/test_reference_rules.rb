@@ -162,14 +162,14 @@ class TestReferenceRules < Minitest::Test
        DOAS\ with\ fan\ coil\ air-cooled\ chiller\ with\ district\ hot\ water].each do |escaped|
       system = escaped.tr('\\', '')
       model = load_fixture
-      OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: OpenStudioHVAC::AuditLog.new)
-      OpenStudioHVAC.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
+      OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: BtapNECB::AuditLog.new)
+      BtapModeling.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
 
       district = ->(m) { m.modelObjects.count { |o| o.iddObjectType.valueName.match?(/DistrictHeating/) } }
       assert_equal(1, district.call(model), "#{system}: the proposed should carry district heating")
 
-      reference = OpenStudioHVAC::NECB.reference_hvac(
-        model, vintage: '2020', building: { storeys: 1 }, audit: OpenStudioHVAC::AuditLog.new
+      reference = BtapNECB::HVAC.reference_hvac(
+        model, vintage: '2020', building: { storeys: 1 }, audit: BtapNECB::AuditLog.new
       ).model
 
       assert_equal(0, district.call(reference),

@@ -188,8 +188,8 @@ class TestLegacyArchetypeE2E < Minitest::Test
     osm = self.class.ensure_legacy_archetype!
     model = OpenStudio::Model::Model.load(OpenStudio::Path.new(osm)).get
 
-    zone_types = OpenStudioHVAC::NECB.zone_space_types(model)
-    storeys = OpenStudioHVAC::Costing::Geometry.above_ground_storeys(model)
+    zone_types = BtapNECB::HVAC.zone_space_types(model)
+    storeys = BtapCosting::HVAC::Geometry.above_ground_storeys(model)
     puts "[RAN] derived building facts: storeys=#{storeys}, zone_types=#{zone_types}"
 
     # FIRST FINDING CLASS: pre-flight space-type resolution. The legacy
@@ -221,7 +221,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
       retags.each { |r| puts "[RETAG] #{r[:space_type]}: '#{r[:old]}' -> '#{r[:new]}' (#{r[:spaces]} space(s))" }
       result = BtapNECB.performance_compliance(
         model, vintage: '2020', simulate: :none, hdd: 3890,
-        building: { storeys: storeys, zone_types: OpenStudioHVAC::NECB.zone_space_types(model) },
+        building: { storeys: storeys, zone_types: BtapNECB::HVAC.zone_space_types(model) },
         run_dir: dir
       )
     end
@@ -325,8 +325,8 @@ class TestLegacyArchetypeE2E < Minitest::Test
   def test_phase2_annual_run_hits_kiva_foundation_defect_or_reports_topline_numbers
     osm = self.class.ensure_legacy_archetype!
     model = OpenStudio::Model::Model.load(OpenStudio::Path.new(osm)).get
-    zone_types = OpenStudioHVAC::NECB.zone_space_types(model)
-    storeys = OpenStudioHVAC::Costing::Geometry.above_ground_storeys(model)
+    zone_types = BtapNECB::HVAC.zone_space_types(model)
+    storeys = BtapCosting::HVAC::Geometry.above_ground_storeys(model)
 
     dir = Dir.mktmpdir('necb-e2e-annual-')
     error = nil

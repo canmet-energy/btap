@@ -357,7 +357,7 @@ fi
 echo ""
 echo "📋 Next steps:"
 cat <<'STEPS'
-   Run one gem's suite         cd openstudio-hvac && ruby test/test_catalog.rb
+   Run one gem's suite         cd btap-modeling && ruby test/test_catalog.rb
    Cross-gem rule verification rake necb:verify
    List the gems               rake gems
    What has the fork done?     rake legacy:whatsnew

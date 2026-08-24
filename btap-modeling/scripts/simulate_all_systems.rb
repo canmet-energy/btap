@@ -35,7 +35,6 @@ ROOT = File.expand_path('../..', __dir__)
 # directories, and a literal token is what a rename's sed pass can catch.
 %w[
   btap-audit/lib/btap_audit
-  openstudio-hvac/lib/openstudio_hvac
   openstudio-loads/lib/openstudio_loads
   btap-simulation/lib/btap_simulation
 ].each { |entry| require File.expand_path(entry, ROOT) }

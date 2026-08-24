@@ -1,5 +1,5 @@
 module BtapCosting
-  # SHW costing — port of legacy shw_costing.rb on top of the openstudio-hvac
+  # SHW costing — port of legacy shw_costing.rb on top of the btap-costing hvac
   # costing engine (Database/materials_hvac, Ledger with per-item regional
   # factors, Geometry.building_data distances): tanks by fuel/efficiency class
   # with the largest-row multiplier rule, power vents for high-efficiency tanks,
@@ -165,7 +165,7 @@ module BtapCosting
   end
 
   # Cost the model's service water heating (legacy shw_costing port on the
-  # openstudio-hvac costing engine).
+  # btap-costing hvac costing engine).
   def self.cost(model, **kwargs)
     Costing.cost(model, **kwargs)
   end

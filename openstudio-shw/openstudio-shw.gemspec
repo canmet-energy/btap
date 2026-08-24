@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
 
-  # openstudio-hvac: the costing engine (Database/Ledger/Geometry) costing.rb
+  # btap-costing: the costing engine costing.rb
   # builds on — required at load time, not just in the monorepo.
   spec.add_dependency 'btap-audit'
   spec.add_dependency 'btap-costing'

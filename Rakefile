@@ -2,7 +2,7 @@
 #
 # Deliberately does NOT `require 'bundler/gem_tasks'` — that binds a Rakefile to
 # a single gemspec, and this repo holds nine. Build individual gems from their
-# own directory (`cd openstudio-hvac && gem build openstudio-hvac.gemspec`).
+# own directory (`cd btap-necb && gem build btap-necb.gemspec`).
 #
 # Every task below assumes it is run from the repository root, with the nine gem
 # directories as direct children.
@@ -18,7 +18,6 @@ GEM_DIRS = %w[
   btap-audit
   btap-costing
   btap-modeling
-  openstudio-hvac
   openstudio-lighting
   openstudio-loads
   btap-necb
@@ -152,15 +151,15 @@ end
 # --- Tests -----------------------------------------------------------------
 # The suites are plain `ruby test/test_x.rb` files with no shared state, so they
 # parallelize across FILES for free. CI's matrix already parallelizes across
-# gems; within a gem it runs them one at a time, which is why openstudio-hvac
+# gems; within a gem it runs them one at a time, which is why btap-necb
 # (46 files) is the slowest leg by a wide margin.
 #
 # Parity suites are excluded: they need the pinned oracle and are covered by the
 # `parity` job, where they cannot pass vacuously.
 namespace :test do
-  desc 'Run one gem\'s suite in parallel (rake test:gem[openstudio-hvac] [JOBS=n])'
+  desc 'Run one gem\'s suite in parallel (rake test:gem[btap-necb] [JOBS=n])'
   task :gem, [:name] do |_t, args|
-    name = args[:name] or abort('usage: rake test:gem[openstudio-hvac]')
+    name = args[:name] or abort('usage: rake test:gem[btap-necb]')
     dir = File.expand_path(name)
     abort("no such gem: #{name}") unless Dir.exist?(dir)
 
@@ -177,11 +176,19 @@ namespace :test do
     # Start a replacement the moment any job finishes.
     queue = files.dup
     running = {}
+    logs = {}
+    require 'tempfile'
     until queue.empty? && running.empty?
       while running.size < jobs && !queue.empty?
         f = queue.shift
+        # Capture each file's output rather than nulling it: a failure that
+        # only reproduces UNDER the pool (load-dependent) would otherwise be
+        # invisible — the old rerun-for-output ran serially and could pass,
+        # reporting a failure with green output.
+        log = Tempfile.create(['testlog-', '.txt'])
+        logs[f] = log
         running[Process.spawn(RbConfig.ruby, f, chdir: dir,
-                              out: File::NULL, err: [:child, :out])] = f
+                              out: log.fileno, err: [:child, :out])] = f
       end
       pid, status = Process.waitpid2(-1)
       f = running.delete(pid)
@@ -192,12 +199,16 @@ namespace :test do
     if failed.empty?
       puts "#{name}: #{files.size} files OK in #{elapsed}s (#{jobs}-way)"
     else
-      # Re-run the failures serially so their output is readable rather than
-      # interleaved with eleven other suites.
-      puts "#{name}: #{failed.size} of #{files.size} FAILED in #{elapsed}s — re-running for output"
-      failed.each { |f| system(RbConfig.ruby, f, chdir: dir) }
+      puts "#{name}: #{failed.size} of #{files.size} FAILED in #{elapsed}s — captured output:"
+      failed.each do |f|
+        log = logs[f]
+        log.rewind
+        puts "--- #{f} " + '-' * 40
+        puts log.read
+      end
       abort("failed: #{failed.join(', ')}")
     end
+    logs.each_value { |l| l.close rescue nil }
   end
 
   desc 'Run every gem suite in parallel ([JOBS=n])'

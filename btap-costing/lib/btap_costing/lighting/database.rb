@@ -6,12 +6,12 @@ module BtapCosting
     # materials_lighting — none carry dollar values); the PRICED tables (costs.csv,
     # costs_local_factors.csv) resolve at runtime exactly like the
     # gem's shared data/: explicit args, BTAP_COSTING_DIR, or the
-    # sibling openstudio-hvac gem's public vendored copies. Licensed values are
+    # gem's shared data/ copies. Licensed values are
     # runtime-injected only and never committed.
     class Database
       DATA_DIR = File.expand_path('../data/lighting', __dir__)
 
-      # The priced tables live in openstudio-hvac, the family's single public
+      # The priced tables live in this gem's shared data/, the single public
       # vendored copy. Resolve the INSTALLED gem first so this works when the
       # gems are installed separately (the relative path below only resolves
       # when they sit side by side in one checkout), and keep the relative path
@@ -19,7 +19,7 @@ module BtapCosting
 
       # Priced tables resolve: BTAP_COSTING_DIR (OPENSTUDIO_COSTING_DIR is the
       # honoured legacy name), then this gem's own shared placeholder copies.
-      # The cross-gem openstudio-hvac resolution died with the consolidation.
+      # The cross-gem resolution died with the consolidation.
       PRICED_FALLBACK_DIRS = [
         ENV['BTAP_COSTING_DIR'] || ENV['OPENSTUDIO_COSTING_DIR'],
         File.expand_path('../data', __dir__)
