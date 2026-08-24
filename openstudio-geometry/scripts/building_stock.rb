@@ -18,7 +18,7 @@
 # X-API-Key come from the environment, else from .mcp.json (gitignored, never
 # committed with a live key). Nothing is hardcoded, and the key is never
 # printed, never written to the cache, and never stored in a model.
-# openstudio-simulation's Remote backend declines to hardcode agent-facing MCP
+# btap-simulation's Remote backend declines to hardcode agent-facing MCP
 # endpoints for exactly this reason; reading them at runtime is the same rule
 # honoured, not an exception to it.
 #

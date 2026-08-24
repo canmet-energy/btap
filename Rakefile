@@ -23,7 +23,7 @@ GEM_DIRS = %w[
   openstudio-loads
   openstudio-necb
   openstudio-shw
-  openstudio-simulation
+  btap-simulation
 ].freeze
 missing = GEM_DIRS.reject { |d| File.directory?(d) }
 abort("GEM_DIRS is stale — missing: #{missing.join(', ')}") unless missing.empty?

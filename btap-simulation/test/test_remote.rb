@@ -6,7 +6,7 @@ require_relative 'test_helper'
 class TestRemote < Minitest::Test
   include FixtureHelper
 
-  Remote = OpenStudioSimulation::Remote
+  Remote = BtapSimulation::Remote
 
   # Records every call and replays canned responses. Deliberately not a mock
   # library — the seam is four methods wide.

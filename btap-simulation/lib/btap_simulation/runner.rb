@@ -1,6 +1,6 @@
 require 'fileutils'
 
-module OpenStudioSimulation
+module BtapSimulation
   # Simulation execution — the SDK+CLI recipe (pure `openstudio` gem + a
   # pluggable execution backend; no measures, no openstudio-standards, no NECB).
   #

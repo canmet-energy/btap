@@ -3,7 +3,7 @@ require 'uri'
 require 'json'
 require 'fileutils'
 
-module OpenStudioSimulation
+module BtapSimulation
   module_function
 
   # Absolute path of the `openstudio` CLI, resolved in this order:
@@ -64,14 +64,14 @@ module OpenStudioSimulation
     # when the CLI was right there. File::NULL is the portable spelling.
     def openstudio_cli?
       if @openstudio_cli.nil?
-        @openstudio_cli = system(OpenStudioSimulation.openstudio_cli_path, 'openstudio_version',
+        @openstudio_cli = system(BtapSimulation.openstudio_cli_path, 'openstudio_version',
                                  out: File::NULL, err: File::NULL)
       end
       @openstudio_cli
     end
 
     def execute(dir)
-      cli = OpenStudioSimulation.openstudio_cli_path
+      cli = BtapSimulation.openstudio_cli_path
       raise("openstudio CLI not available (tried #{cli}) — set OPENSTUDIO_CLI to its full path") unless openstudio_cli?
 
       # ARGV form again, and for a second reason: the old shell string

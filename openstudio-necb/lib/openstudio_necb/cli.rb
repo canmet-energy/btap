@@ -233,12 +233,12 @@ module OpenStudioNECB
     def select_backend(o)
       return nil unless o[:backend] == 'remote'
 
-      remote = OpenStudioSimulation::Remote.new
+      remote = BtapSimulation::Remote.new
       unless remote.configured?
         return '--backend remote needs HBIX_SIM_ENDPOINT and HBIX_API_KEY in the environment'
       end
 
-      OpenStudioSimulation::Runner.default_backend = remote
+      BtapSimulation::Runner.default_backend = remote
       nil
     end
 

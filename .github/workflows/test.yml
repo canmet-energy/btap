@@ -95,7 +95,7 @@ jobs:
           - openstudio-loads
           - openstudio-necb
           - openstudio-shw
-          - openstudio-simulation
+          - btap-simulation
     env:
       # openstudio-envelope's thermal-bridging gate skips when tbd is missing, and
       # a skipped gate is a green-but-vacuous gate — same reasoning as

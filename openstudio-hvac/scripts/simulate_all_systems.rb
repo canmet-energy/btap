@@ -31,7 +31,14 @@ require 'openstudio'
 DEFAULT_JOBS = [Etc.nprocessors - 4, 2].max
 
 ROOT = File.expand_path('../..', __dir__)
-%w[audit hvac loads simulation].each { |g| require File.expand_path("openstudio-#{g}/lib/openstudio_#{g}", ROOT) }
+# Explicit literal paths, not interpolation — the btap-* migration renames
+# directories, and a literal token is what a rename's sed pass can catch.
+%w[
+  btap-audit/lib/btap_audit
+  openstudio-hvac/lib/openstudio_hvac
+  openstudio-loads/lib/openstudio_loads
+  btap-simulation/lib/btap_simulation
+].each { |entry| require File.expand_path(entry, ROOT) }
 
 FIXTURES = File.join(ROOT, 'openstudio-hvac/test/fixtures')
 EPW = File.join(FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
@@ -67,8 +74,8 @@ systems.each_slice(jobs) do |batch|
       outcome = begin
         Dir.mktmpdir do |dir|
           model = build(name)
-          OpenStudioSimulation::Runner.attach_weather!(model, epw: EPW, ddy: DDY)
-          OpenStudioSimulation::Runner.run_energyplus!(model, dir, sizing_only: true)
+          BtapSimulation::Runner.attach_weather!(model, epw: EPW, ddy: DDY)
+          BtapSimulation::Runner.run_energyplus!(model, dir, sizing_only: true)
           { 'status' => 'ok' }
         end
       rescue StandardError => e

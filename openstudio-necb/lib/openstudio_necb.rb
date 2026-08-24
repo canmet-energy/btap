@@ -35,9 +35,9 @@ rescue LoadError
   require File.expand_path('../../openstudio-shw/lib/openstudio_shw', __dir__)
 end
 begin
-  require 'openstudio_simulation'
+  require 'btap_simulation'
 rescue LoadError
-  require File.expand_path('../../openstudio-simulation/lib/openstudio_simulation', __dir__)
+  require File.expand_path('../../btap-simulation/lib/btap_simulation', __dir__)
 end
 # openstudio-geometry: consumed by the AHJ report's floor-plan section (the
 # gem is otherwise upstream — it creates models rather than transforming them).
@@ -60,7 +60,7 @@ require_relative 'openstudio_necb/report'
 # space-use loads, openstudio-lighting LPD allowances + daylighting,
 # openstudio-shw service-water-heating minimums) into the NECB Part 8
 # performance path — proposed vs reference building energy target (8.4.1.2) —
-# with simulation execution via openstudio-simulation (the one place
+# with simulation execution via btap-simulation (the one place
 # simulation is allowed; the domain gems never simulate), unified costing,
 # and ONE AuditLog across everything. The seventh family gem,
 # openstudio-geometry, sits mostly UPSTREAM (it creates the model you feed
@@ -71,10 +71,10 @@ module OpenStudioNECB
   AuditLog = BtapAudit::AuditLog
 
   # Simulation execution now lives in the lowest-level family gem,
-  # openstudio-simulation (SDK+CLI, no compliance layer). Alias it so
+  # btap-simulation (SDK+CLI, no compliance layer). Alias it so
   # compliance.rb's Runner.attach_weather! / run_energyplus! / clean_run? /
   # energy_results / unmet_occupied_hours keep working unchanged.
-  Runner = OpenStudioSimulation::Runner
+  Runner = BtapSimulation::Runner
 
   # Run the full performance-path pipeline. See Compliance.performance_compliance.
   def self.performance_compliance(model, **kwargs)

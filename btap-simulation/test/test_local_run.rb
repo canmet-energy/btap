@@ -5,7 +5,7 @@ require_relative 'test_helper'
 class TestLocalRun < Minitest::Test
   include FixtureHelper
 
-  Runner = OpenStudioSimulation::Runner
+  Runner = BtapSimulation::Runner
 
   SCRATCH = File.join('/tmp/claude-1000/-workspaces-openstudio-standards',
                       '14d4ffe0-7e76-41d2-9609-bba51763b608/scratchpad', 'sim_local').freeze
@@ -15,7 +15,7 @@ class TestLocalRun < Minitest::Test
     FileUtils.mkdir_p(SCRATCH)
   end
 
-  # A model with a real, simulatable HVAC system. openstudio-simulation has NO
+  # A model with a real, simulatable HVAC system. btap-simulation has NO
   # runtime dependency on openstudio-hvac — this require is a TEST-TIME
   # convenience via the sibling monorepo path, nothing more.
   def proposed_with_hvac
@@ -36,7 +36,7 @@ class TestLocalRun < Minitest::Test
     model = load_fixture
     dir = File.join(SCRATCH, 'sizing')
 
-    result = OpenStudioSimulation.run(
+    result = BtapSimulation.run(
       model, run_dir: dir, weather: { epw: EPW, ddy: DDY }, sizing_only: true
     )
 
@@ -53,7 +53,7 @@ class TestLocalRun < Minitest::Test
     model = proposed_with_hvac
     dir = File.join(SCRATCH, 'annual')
 
-    result = OpenStudioSimulation.run(
+    result = BtapSimulation.run(
       model, run_dir: dir, weather: { epw: EPW, ddy: DDY },
       run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 }
     )
@@ -78,7 +78,7 @@ class TestLocalRun < Minitest::Test
     assert unmet.key?('heating')
     assert unmet.key?('cooling')
 
-    zones = OpenStudioSimulation::Runner.zone_unmet_occupied_hours(model)
+    zones = BtapSimulation::Runner.zone_unmet_occupied_hours(model)
     assert_instance_of Hash, zones
     refute_empty zones, 'per-zone unmet hours parsed from SystemSummary'
     zones.each_value do |hours|
