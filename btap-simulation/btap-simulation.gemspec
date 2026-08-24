@@ -1,8 +1,8 @@
-require_relative 'lib/openstudio_simulation/version'
+require_relative 'lib/btap_simulation/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'openstudio-simulation'
-  spec.version = OpenStudioSimulation::VERSION
+  spec.name = 'btap-simulation'
+  spec.version = BtapSimulation::VERSION
   spec.authors = ['NRCan / openstudio-standards contributors']
   spec.summary = 'Run EnergyPlus on an OpenStudio model and parse results — SDK+CLI, no compliance layer'
   spec.description = 'The lowest-level family gem: attach weather, run EnergyPlus (pluggable execution ' \

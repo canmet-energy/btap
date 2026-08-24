@@ -43,7 +43,7 @@
     "how": "the energy model accounts for the annual energy use of what the model contains",
     "gaps": "elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
     "code": [
-     "openstudio-simulation/lib/openstudio_simulation/runner.rb#energy_results",
+     "btap-simulation/lib/btap_simulation/runner.rb#energy_results",
      "openstudio-necb/lib/openstudio_necb/compliance.rb#run_annual"
     ]
    },
@@ -55,7 +55,7 @@
     "code": [
      "openstudio-necb/lib/openstudio_necb/compliance.rb#evaluate",
      "openstudio-necb/lib/openstudio_necb/cli.rb#verdict_exit",
-     "openstudio-simulation/lib/openstudio_simulation/runner.rb#run_energyplus!"
+     "btap-simulation/lib/btap_simulation/runner.rb#run_energyplus!"
     ]
    },
    {
@@ -65,7 +65,7 @@
     "how": "operating schedules and climatic data enter at an hourly interval",
     "code": [
      "openstudio-loads/lib/openstudio_loads/schedules.rb#add",
-     "openstudio-simulation/lib/openstudio_simulation/runner.rb#attach_weather!"
+     "btap-simulation/lib/btap_simulation/runner.rb#attach_weather!"
     ]
    },
    {
@@ -74,7 +74,7 @@
     "status": "implemented",
     "how": "software conformance rests on EnergyPlus’s ANSI/ASHRAE 140 testing (see 8.4.2.11.)",
     "code": [
-     "openstudio-simulation/lib/openstudio_simulation/backends.rb#execute"
+     "btap-simulation/lib/btap_simulation/backends.rb#execute"
     ]
    },
    {
@@ -97,7 +97,7 @@
     "status": "implemented",
     "how": "weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback",
     "code": [
-     "openstudio-simulation/lib/openstudio_simulation/runner.rb#attach_weather!",
+     "btap-simulation/lib/btap_simulation/runner.rb#attach_weather!",
      "openstudio-envelope/lib/openstudio_envelope/climate.rb#hdd18"
     ]
    },

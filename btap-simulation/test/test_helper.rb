@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'
-require_relative '../lib/openstudio_simulation'
+require_relative '../lib/btap_simulation'
 
 module FixtureHelper
   # Fixtures are shared with the sibling family gems (monorepo incubation) —
@@ -16,6 +16,6 @@ module FixtureHelper
   end
 
   def openstudio_cli?
-    OpenStudioSimulation::Runner.openstudio_cli?
+    BtapSimulation::Runner.openstudio_cli?
   end
 end

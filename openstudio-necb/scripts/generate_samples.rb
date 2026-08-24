@@ -27,9 +27,15 @@ require 'set'
 require 'openstudio'
 
 ROOT = File.expand_path('../..', __dir__)
-%w[audit hvac loads lighting shw].each do |g|
-  require File.expand_path("openstudio-#{g}/lib/openstudio_#{g}", ROOT)
-end
+# Explicit literal paths, not interpolation — the btap-* migration renames
+# directories, and a literal token is what a rename's sed pass can catch.
+%w[
+  btap-audit/lib/btap_audit
+  openstudio-hvac/lib/openstudio_hvac
+  openstudio-loads/lib/openstudio_loads
+  openstudio-lighting/lib/openstudio_lighting
+  openstudio-shw/lib/openstudio_shw
+].each { |entry| require File.expand_path(entry, ROOT) }
 
 FIXTURE = File.join(ROOT, 'openstudio-hvac/test/fixtures/5ZoneNoHVAC.osm')
 OUT = ARGV[0] || File.join(ROOT, 'packaging/windows/samples')

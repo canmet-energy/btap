@@ -1,22 +1,22 @@
 require 'openstudio'
 
-require_relative 'openstudio_simulation/version'
-require_relative 'openstudio_simulation/backends'
-require_relative 'openstudio_simulation/runner'
+require_relative 'btap_simulation/version'
+require_relative 'btap_simulation/backends'
+require_relative 'btap_simulation/runner'
 
-# OpenStudioSimulation is the LOWEST-level family gem: run EnergyPlus on an
+# BtapSimulation is the LOWEST-level family gem: run EnergyPlus on an
 # OpenStudio model and get results back, WITHOUT any compliance layer. It depends
 # on nothing else in the family — only the OpenStudio SDK (and, by default, the
 # `openstudio` CLI on PATH for local execution).
 #
 # Two entry points:
-#   * OpenStudioSimulation.run — the low-friction "just run a model" facade.
-#   * OpenStudioSimulation::Runner — the granular steps (attach_weather!,
+#   * BtapSimulation.run — the low-friction "just run a model" facade.
+#   * BtapSimulation::Runner — the granular steps (attach_weather!,
 #     run_energyplus!, clean_run?, energy_results, unmet_occupied_hours).
 #
 # Execution is pluggable via a Backend: Local (the `openstudio` CLI, default) or
 # Remote (a documented seam for a remote/AWS EnergyPlus service). See backends.rb.
-module OpenStudioSimulation
+module BtapSimulation
   # Result of a run. `clean` mirrors Runner.clean_run?; energy/unmet_hours are
   # nil for a sizing-only run (no annual results to parse).
   Result = Struct.new(:run_dir, :clean, :energy, :unmet_hours, keyword_init: true) do

@@ -6,10 +6,10 @@ require_relative 'test_helper'
 class TestBackends < Minitest::Test
   include FixtureHelper
 
-  Runner = OpenStudioSimulation::Runner
-  Backend = OpenStudioSimulation::Backend
-  Local = OpenStudioSimulation::Local
-  Remote = OpenStudioSimulation::Remote
+  Runner = BtapSimulation::Runner
+  Backend = BtapSimulation::Backend
+  Local = BtapSimulation::Local
+  Remote = BtapSimulation::Remote
 
   # A test backend: asserts the runner prepared the dir, records the call, and
   # lands the two artifacts the contract requires (canned, no E+).
@@ -66,10 +66,10 @@ class TestBackends < Minitest::Test
     dir = run_dir('facade')
     fake = FakeBackend.new(self)
 
-    result = OpenStudioSimulation.run(model, run_dir: dir, sizing_only: true, backend: fake)
+    result = BtapSimulation.run(model, run_dir: dir, sizing_only: true, backend: fake)
 
     assert_equal dir, fake.called_with
-    assert_instance_of OpenStudioSimulation::Result, result
+    assert_instance_of BtapSimulation::Result, result
     assert result.clean?
     assert_nil result.energy, 'sizing_only run has no energy results'
     assert_nil result.unmet_hours, 'sizing_only run has no unmet hours'
@@ -103,7 +103,7 @@ class TestBackends < Minitest::Test
       end
     end
 
-    assert called, 'default backend was not an OpenStudioSimulation::Local instance'
+    assert called, 'default backend was not an BtapSimulation::Local instance'
   end
 
   # --- Windows portability, pinned by Linux tests -------------------------
@@ -116,13 +116,13 @@ class TestBackends < Minitest::Test
   # one that works on Windows, where the CLI is not reliably on PATH.
   def test_cli_path_prefers_the_explicit_override
     with_env('OPENSTUDIO_CLI', '/somewhere/openstudio.exe') do
-      assert_equal('/somewhere/openstudio.exe', OpenStudioSimulation.openstudio_cli_path)
+      assert_equal('/somewhere/openstudio.exe', BtapSimulation.openstudio_cli_path)
     end
   end
 
   def test_cli_path_falls_back_to_the_sdk_absolute_path
     with_env('OPENSTUDIO_CLI', nil) do
-      path = OpenStudioSimulation.openstudio_cli_path
+      path = BtapSimulation.openstudio_cli_path
       skip('SDK too old to answer getOpenStudioCLI') if path == 'openstudio'
       assert(File.exist?(path), "SDK reported a CLI path that does not exist: #{path}")
       assert(File.absolute_path?(path), 'must be absolute — PATH is not searched on Windows')
@@ -134,7 +134,7 @@ class TestBackends < Minitest::Test
   # baffling "tried ''" message.
   def test_blank_override_is_ignored
     with_env('OPENSTUDIO_CLI', '') do
-      refute_equal('', OpenStudioSimulation.openstudio_cli_path)
+      refute_equal('', BtapSimulation.openstudio_cli_path)
     end
   end
 
