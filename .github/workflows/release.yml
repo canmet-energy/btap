@@ -31,7 +31,9 @@ jobs:
         # The same tarball packaging/windows/README.md documents: NREL ships
         # it alongside the .exe installer and it unpacks cleanly on Linux.
         run: |
-          curl -sSLO https://github.com/NREL/OpenStudio/releases/download/v3.11.0/OpenStudio-3.11.0%2B241b8abb4d-Windows.tar.gz
+          # -o, not -O: -O names the file by the URL's percent-encoded basename
+          # (%2B stays literal), and the tar below looks for the '+' spelling.
+          curl -sSL -o 'OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz' https://github.com/NREL/OpenStudio/releases/download/v3.11.0/OpenStudio-3.11.0%2B241b8abb4d-Windows.tar.gz
           tar xzf 'OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz'
       - name: stage the payload tree
         run: rake windows:stage OPENSTUDIO_WINDOWS="$PWD/OpenStudio-3.11.0+241b8abb4d-Windows"
