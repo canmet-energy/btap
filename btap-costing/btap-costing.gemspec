@@ -16,6 +16,6 @@ Gem::Specification.new do |spec|
   spec.metadata['allowed_push_host'] = 'none'
   spec.files = Dir['lib/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
-  spec.add_dependency 'btap-audit'
-  spec.add_dependency 'btap-modeling'
+  spec.add_dependency 'btap-audit', '~> 0.2'
+  spec.add_dependency 'btap-modeling', '~> 0.2'
 end
