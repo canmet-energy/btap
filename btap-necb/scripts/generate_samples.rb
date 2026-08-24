@@ -109,7 +109,7 @@ def seed(vintage)
   end
   audit = BtapNECB::AuditLog.new
   BtapNECB::Loads.apply_loads(model, vintage: vintage, audit: audit)
-  OpenStudioLighting.apply_lights(model, vintage: vintage, audit: audit)
+  BtapNECB::Lighting.apply_lights(model, vintage: vintage, audit: audit)
   OpenStudioSHW.apply_shw(model, vintage: vintage, fuel: 'NaturalGas', audit: audit)
   model
 end

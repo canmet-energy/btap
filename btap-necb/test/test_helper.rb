@@ -124,4 +124,13 @@ module FixtureHelper
     assert_operator unmet[:cooling], :<=, max_cooling_hours,
                     "#{context}: #{unmet[:cooling]} occupied cooling hours unmet (limit #{max_cooling_hours})"
   end
+
+  # Space-type tagging shorthand (from the lighting suites' old helper).
+  def tagged_space_type(model, building_type, space_type)
+    st = OpenStudio::Model::SpaceType.new(model)
+    st.setName("#{building_type} #{space_type}")
+    st.setStandardsBuildingType(building_type)
+    st.setStandardsSpaceType(space_type)
+    st
+  end
 end

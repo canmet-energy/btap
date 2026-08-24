@@ -682,7 +682,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (ON by default, D-51; placement per the 4.2.2.1.(10)-(15) rule, D-57) covers sentences (5)-(12).",
     "code": [
-     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#reference_lighting"
+     "btap-necb/lib/btap_necb/lighting/reference.rb#reference_lighting"
     ]
    },
    {
