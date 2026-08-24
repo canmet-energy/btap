@@ -1,5 +1,5 @@
-module OpenStudioEnvelope
-  module NECB
+module BtapNECB
+  module Envelope
     # Prescriptive Section 3.2 application: set every exterior/ground surface and
     # subsurface to its Table 3.2.2.x/3.2.3.1 maximum U at the building's HDD, and
     # optionally rebuild fenestration to the 3.2.1.4 FDWR/SRR limits.
@@ -99,14 +99,14 @@ module OpenStudioEnvelope
         end
 
         if apply_fdwr
-          limit = NECB.max_fdwr(vintage: vintage, hdd: hdd, audit: audit)
+          limit = Envelope.max_fdwr(vintage: vintage, hdd: hdd, audit: audit)
           window_construction ||= subsurface_target_construction(model, 'window', vintage, hdd, include_films, cache, audit)
-          NECB::Fenestration.apply_fdwr(model, limit, window_construction, audit: audit)
+          Fenestration.apply_fdwr(model, limit, window_construction, audit: audit)
         end
         if apply_srr
-          limit = NECB.max_srr(vintage: vintage, audit: audit)
+          limit = Envelope.max_srr(vintage: vintage, audit: audit)
           skylight_construction ||= subsurface_target_construction(model, 'skylight', vintage, hdd, include_films, cache, audit)
-          NECB::Fenestration.apply_srr(model, limit, skylight_construction, audit: audit)
+          Fenestration.apply_srr(model, limit, skylight_construction, audit: audit)
         end
 
         # 3.1.1.7: table values are EFFECTIVE transmittance — uprate for thermal
@@ -170,7 +170,7 @@ module OpenStudioEnvelope
           return
         end
 
-        u = NECB.max_u(vintage: vintage, surface: surface_class, boundary: 'outdoors', hdd: hdd)
+        u = Envelope.max_u(vintage: vintage, surface: surface_class, boundary: 'outdoors', hdd: hdd)
         r = (1.0 / u) - ENCLOSURE_R
         r -= Constructions.film_r_interzone(surface_class) if include_films
         target = 1.0 / r
@@ -191,7 +191,7 @@ module OpenStudioEnvelope
       end
 
       def target_conductance(vintage, surface_class, boundary, hdd, include_films, audit)
-        u = NECB.max_u(vintage: vintage, surface: surface_class, boundary: boundary, hdd: hdd)
+        u = Envelope.max_u(vintage: vintage, surface: surface_class, boundary: boundary, hdd: hdd)
         return u unless include_films
 
         r_films = Constructions.film_r(surface_class, boundary)
@@ -229,7 +229,7 @@ module OpenStudioEnvelope
       # path applied the strip U over the full area — both simplifications
       # diverge from the printed table, see D-32.)
       def assign_ground_floor(model, surface, vintage, hdd, include_films, cache, audit)
-        extent = NECB.ground_floor_extent(vintage: vintage, hdd: hdd)
+        extent = Envelope.ground_floor_extent(vintage: vintage, hdd: hdd)
         if extent[:extent] == :full_area
           assign_surface(model, surface, 'floor', 'ground', vintage, hdd, include_films, cache, audit)
           return
@@ -247,7 +247,7 @@ module OpenStudioEnvelope
           return
         end
 
-        u = NECB.max_u(vintage: vintage, surface: 'floor', boundary: 'ground', hdd: hdd)
+        u = Envelope.max_u(vintage: vintage, surface: 'floor', boundary: 'ground', hdd: hdd)
         target = include_films ? 1.0 / ((1.0 / u) - Constructions.film_r('floor', 'ground')) : u
         slab_r = 0.0
         construction = surface.construction

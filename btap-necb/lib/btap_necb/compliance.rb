@@ -217,7 +217,7 @@ module BtapNECB
       end
 
       # HDD for the envelope rules (explicit > Table C-1 from the EPW site > .stat)
-      run.hdd ||= OpenStudioEnvelope::Climate.hdd18(run.proposed, audit: audit)
+      run.hdd ||= BtapNECB::Envelope::Climate.hdd18(run.proposed, audit: audit)
       raise(ArgumentError, 'HDD unresolvable: pass hdd: or weather with a recognized site') if run.hdd.nil?
     end
 
@@ -295,7 +295,7 @@ module BtapNECB
                                                                building: opts[:building], audit: audit,
                                                                proposed_annual: run.proposed_annual_data)
         reference = reference_result.model
-        OpenStudioEnvelope::NECB.reference_envelope(reference, vintage: vintage, hdd: run.hdd,
+        BtapNECB::Envelope.reference_envelope(reference, vintage: vintage, hdd: run.hdd,
                                                     actual_roof_absorptance_used: opts[:actual_roof_absorptance_used],
                                                     thermal_bridging: opts[:thermal_bridging], audit: audit)
         # daylighting: tells reference_lighting whether (5)-(12) are covered by
@@ -564,7 +564,7 @@ module BtapNECB
         %i[epw ddy].each { |k| raise(ArgumentError, "weather[:#{k}] required") unless weather[k] }
         Runner.attach_weather!(proposed, epw: weather[:epw], ddy: weather[:ddy])
       end
-      hdd ||= OpenStudioEnvelope::Climate.hdd18(proposed, audit: audit)
+      hdd ||= BtapNECB::Envelope::Climate.hdd18(proposed, audit: audit)
 
       # Mapping -> model-derived areas -> HARD applicability (refuse outside
       # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a
@@ -1056,7 +1056,7 @@ module BtapNECB
     def cost_single_model(model, city:, province_state:, costs_csv:, audit:)
       hvac = OpenStudioHVAC.cost(model, city: city, province_state: province_state,
                                  costs_csv: costs_csv, audit: audit)
-      envelope = OpenStudioEnvelope.cost(model, city: hvac.city, province_state: hvac.province_state,
+      envelope = BtapCosting::Envelope.cost(model, city: hvac.city, province_state: hvac.province_state,
                                          costs_csv: costs_csv, audit: audit)
       [hvac, envelope]
     end

@@ -8,8 +8,8 @@ class TestPrescriptive < Minitest::Test
   HDD = 3890 # Toronto (Table C-1)
 
   def applied_model(**kwargs)
-    model = load_fixture
-    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD, **kwargs)
+    model = load_raw_fixture
+    audit = BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD, **kwargs)
     [model, audit]
   end
 
@@ -37,7 +37,7 @@ class TestPrescriptive < Minitest::Test
     # stay untouched and the gap is warned.
     ground = model.getSurfaces.select { |s| s.isGroundSurface && s.surfaceType == 'Floor' }
     refute_empty ground
-    before = load_fixture.getSurfaces.select { |s| s.isGroundSurface && s.surfaceType == 'Floor' }
+    before = load_raw_fixture.getSurfaces.select { |s| s.isGroundSurface && s.surfaceType == 'Floor' }
                          .to_h { |s| [s.nameString, s.construction.get.nameString] }
     ground.each do |surface|
       assert_equal before[surface.nameString], surface.construction.get.nameString,
@@ -80,21 +80,21 @@ class TestPrescriptive < Minitest::Test
 
     model, kiva, floor = build.call
     slab_before = floor.construction.get.nameString
-    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD) # zone 5 -> strip
+    audit = BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD) # zone 5 -> strip
     assert_equal slab_before, floor.construction.get.nameString, 'strip zone: slab field construction untouched'
     ins = kiva.interiorHorizontalInsulationMaterial
     assert ins.is_initialized, 'strip zone: Kiva interior horizontal insulation set'
     assert_in_delta 1.2, kiva.interiorHorizontalInsulationWidth.get, 1e-9
     mat = ins.get.to_StandardOpaqueMaterial.get
-    strip_target = 1.0 / ((1.0 / 0.757) - OpenStudioEnvelope::Constructions.film_r('floor', 'ground'))
+    strip_target = 1.0 / ((1.0 / 0.757) - BtapModeling::Constructions.film_r('floor', 'ground'))
     expected_r = (1.0 / strip_target) - (0.1 / 1.8)
     assert_in_delta expected_r, mat.thickness / mat.thermalConductivity, 1e-3,
                     'strip insulation R brings the strip assembly to the table U'
     assert(audit.entries.any? { |e| e[:article].to_s.include?('3.2.3.3') })
 
     model8, kiva8, floor8 = build.call
-    OpenStudioEnvelope::NECB.apply_prescriptive(model8, vintage: '2020', hdd: 8170) # zone 8 -> full area
-    full_target = 1.0 / ((1.0 / 0.379) - OpenStudioEnvelope::Constructions.film_r('floor', 'ground'))
+    BtapNECB::Envelope.apply_prescriptive(model8, vintage: '2020', hdd: 8170) # zone 8 -> full area
+    full_target = 1.0 / ((1.0 / 0.379) - BtapModeling::Constructions.film_r('floor', 'ground'))
     assert_in_delta full_target, floor8.construction.get.to_Construction.get.thermalConductance.to_f, 1e-4,
                     'zone 8: slab retargeted full-area to the 0.379 overall U'
     assert kiva8.interiorHorizontalInsulationMaterial.empty?, 'zone 8: no strip — full-area requirement instead'
@@ -111,14 +111,14 @@ class TestPrescriptive < Minitest::Test
 
   def test_fdwr_and_srr_mutators
     model, audit = applied_model(apply_fdwr: true, apply_srr: true)
-    census = OpenStudioEnvelope::Geometry.exposed_walls(model)
-    limit = OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: HDD) # (2000-778)/3000 = 0.4074
+    census = BtapModeling::Geometry.exposed_walls(model)
+    limit = BtapNECB::Envelope.max_fdwr(vintage: '2020', hdd: HDD) # (2000-778)/3000 = 0.4074
     assert_in_delta limit, census[:fdwr], 0.03, 'windows rebuilt to the FDWR limit'
     census[:walls].each do |wall|
       wall.subSurfaces.each { |ss| assert_equal 'FixedWindow', ss.subSurfaceType }
     end
 
-    roofs = OpenStudioEnvelope::Geometry.exposed_roofs(model)
+    roofs = BtapModeling::Geometry.exposed_roofs(model)
     assert_in_delta 0.02, roofs[:srr], 0.002, 'skylights at 2% of gross roof area'
     assert audit.entries.any? { |e| e[:step] == :geometry && e[:article].to_s.include?('3.2.1.4') }
   end
@@ -133,7 +133,7 @@ class TestPrescriptive < Minitest::Test
     assert_operator films_c, :>, btap_c,
                     'default (films) mode: construction conductance is higher so the OVERALL (with films) U meets the table'
     # default: overall U with films equals the table value (1.4.1.2 definition)
-    r_films = OpenStudioEnvelope::Constructions.film_r('wall', 'outdoors')
+    r_films = BtapModeling::Constructions.film_r('wall', 'outdoors')
     overall_u = 1.0 / ((1.0 / films_c) + r_films)
     assert_in_delta 0.265, overall_u, 1e-3
     # opt-out: construction-only conductance equals the table value (old BTAP)
@@ -169,11 +169,11 @@ class TestPrescriptive < Minitest::Test
     deck = attic.surfaces.find { |s| s.surfaceType == 'RoofCeiling' && s.outsideBoundaryCondition == 'Outdoors' }
     deck_before = deck.construction.get.nameString
 
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD)
 
     assert_equal deck_before, deck.construction.get.nameString, 'attic deck is not envelope — construction untouched'
     ceiling = cond.surfaces.find { |s| s.surfaceType == 'RoofCeiling' && s.outsideBoundaryCondition == 'Surface' }
-    target = 1.0 / ((1.0 / 0.156) - (1.0 / 6.25) - OpenStudioEnvelope::Constructions.film_r_interzone('roofceiling'))
+    target = 1.0 / ((1.0 / 0.156) - (1.0 / 6.25) - BtapModeling::Constructions.film_r_interzone('roofceiling'))
     assert_in_delta target, ceiling.construction.get.to_Construction.get.thermalConductance.to_f, 1e-4,
                     'ceiling to attic set to roof row with enclosure credit + interzone films'
     attic_floor = attic.surfaces.find { |s| s.surfaceType == 'Floor' }
@@ -182,7 +182,7 @@ class TestPrescriptive < Minitest::Test
   end
 
   def test_windows_preserve_shgc
-    model = load_fixture
+    model = load_raw_fixture
     # give one wall a window with a known SHGC before applying
     wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     wall.setWindowToWallRatio(0.3)
@@ -193,7 +193,7 @@ class TestPrescriptive < Minitest::Test
     construction.setLayers([glazing])
     wall.subSurfaces.each { |ss| ss.setSubSurfaceType('FixedWindow'); ss.setConstruction(construction) }
 
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD)
     ss = wall.subSurfaces.first
     new_glazing = ss.construction.get.to_Construction.get.layers.first.to_SimpleGlazing.get
     assert_in_delta 1.9, new_glazing.uFactor, 1e-6, 'window U at Table 3.2.2.3 value'
@@ -201,6 +201,6 @@ class TestPrescriptive < Minitest::Test
   end
 
   def test_unresolvable_hdd_raises
-    assert_raises(ArgumentError) { OpenStudioEnvelope::NECB.apply_prescriptive(load_fixture, vintage: '2020') }
+    assert_raises(ArgumentError) { BtapNECB::Envelope.apply_prescriptive(load_raw_fixture, vintage: '2020') }
   end
 end

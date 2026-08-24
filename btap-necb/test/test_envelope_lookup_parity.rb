@@ -30,7 +30,7 @@ class TestLookupParity < Minitest::Test
       'ground' => %w[wall roofceiling floor] }.each do |boundary, surfaces|
       surfaces.each do |surface|
         HDD_SWEEP.each do |hdd|
-          gem_u = OpenStudioEnvelope::NECB.max_u(vintage: '2020', surface: surface, boundary: boundary, hdd: hdd)
+          gem_u = BtapNECB::Envelope.max_u(vintage: '2020', surface: surface, boundary: boundary, hdd: hdd)
           legacy_u = legacy.max_u_necb(surface, boundary, hdd)
           next if (gem_u - legacy_u).abs < 1e-9
 
@@ -43,7 +43,7 @@ class TestLookupParity < Minitest::Test
 
   def test_max_fdwr_parity_sweep
     HDD_SWEEP.each do |hdd|
-      gem_v = OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: hdd)
+      gem_v = BtapNECB::Envelope.max_fdwr(vintage: '2020', hdd: hdd)
       legacy_v = legacy.max_fwdr(hdd)
       assert_in_delta legacy_v, gem_v, 1e-9, "fdwr mismatch at hdd=#{hdd}"
     end
@@ -51,7 +51,7 @@ class TestLookupParity < Minitest::Test
 
   def test_srr_parity
     legacy_srr = legacy.get_standards_constant('skylight_to_roof_ratio_max_value')
-    assert_in_delta legacy_srr, OpenStudioEnvelope::NECB.max_srr(vintage: '2020'), 1e-9
+    assert_in_delta legacy_srr, BtapNECB::Envelope.max_srr(vintage: '2020'), 1e-9
   end
 
   def test_hdd_parity_toronto
@@ -60,7 +60,7 @@ class TestLookupParity < Minitest::Test
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw)
 
     legacy_hdd = legacy.get_necb_hdd18(model: model, necb_hdd: true)
-    gem_hdd = OpenStudioEnvelope::Climate.hdd18(model)
+    gem_hdd = BtapNECB::Envelope::Climate.hdd18(model)
     assert_equal legacy_hdd, gem_hdd, 'nearest-Table-C-1-city HDD must match legacy'
   end
 end

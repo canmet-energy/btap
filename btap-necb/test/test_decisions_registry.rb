@@ -15,7 +15,7 @@ class TestDecisionsRegistry < Minitest::Test
   Decisions = BtapNECB::Decisions
 
   MONOREPO = File.expand_path('../..', __dir__)
-  GEMS = %w[btap-costing btap-necb openstudio-hvac openstudio-envelope openstudio-loads
+  GEMS = %w[btap-costing btap-necb openstudio-hvac openstudio-loads
             openstudio-lighting openstudio-shw btap-modeling].freeze
   DOC = File.expand_path('../docs/necb_decisions.md', __dir__)
   KINDS = %w[runtime runtime_unwired data process].freeze
@@ -159,7 +159,6 @@ class TestDecisionsRegistry < Minitest::Test
   # gem's constant IS the shared class".
   AUDIT_LOG_ALIASES = {
     'openstudio-hvac' => %w[openstudio_hvac OpenStudioHVAC],
-    'openstudio-envelope' => %w[openstudio_envelope OpenStudioEnvelope],
     'btap-modeling' => %w[btap_modeling BtapModeling],
     'btap-costing' => %w[btap_costing BtapCosting],
     'openstudio-lighting' => %w[openstudio_lighting OpenStudioLighting],

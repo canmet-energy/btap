@@ -662,7 +662,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#reference_envelope"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope"
     ]
    },
    {
@@ -671,7 +671,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_lightweight_construction"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_lightweight_construction"
     ]
    },
    {

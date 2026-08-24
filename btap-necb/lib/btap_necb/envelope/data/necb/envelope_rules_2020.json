@@ -149,8 +149,8 @@
     "title": "Determination of Thermal Characteristics",
     "status": "host_scope",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/thermal_bridging.rb#apply",
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#target_conductance"
+     "btap-necb/lib/btap_necb/envelope/thermal_bridging.rb#apply",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
     ],
     "how": "effective thermal characteristics: clear-field conductances resolved by the prescriptive lookup, and effective (thermal-bridging-derated) values via the tbd-based uprate/derate pass when thermal_bridging: is requested"
    },
@@ -160,8 +160,8 @@
     "status": "implemented",
     "how": "gross wall/roof area census + FDWR/SRR computed from exposed conditioned surfaces (Geometry module)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply",
-     "openstudio-envelope/lib/openstudio_envelope/necb/rules.rb#max_fdwr"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply",
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_fdwr"
     ]
    },
    {
@@ -171,7 +171,7 @@
     "gaps": "requires the tbd gem at runtime; without it (or when thermal_bridging: is not requested) values are clear-field and the audit WARNS",
     "how": "TBD-based uprate/derate: assemblies uprated so the DERATED effective Ut meets the table targets (thermal_bridging: option, BETBG PSI sets)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/thermal_bridging.rb#apply"
+     "btap-necb/lib/btap_necb/envelope/thermal_bridging.rb#apply"
     ]
    },
    {
@@ -180,9 +180,9 @@
     "status": "implemented",
     "how": "max_fdwr piecewise formula + 2% SRR; FDWR window rebuild and centroid-scaled skylights (apply_fdwr:/apply_srr:)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/rules.rb#max_fdwr",
-     "openstudio-envelope/lib/openstudio_envelope/necb/rules.rb#max_srr",
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply"
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_fdwr",
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_srr",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
     ]
    },
    {
@@ -191,7 +191,7 @@
     "status": "implemented",
     "how": "prescriptive application classifies and hard-assigns all above-ground assemblies",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#target_conductance"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
     ]
    },
    {
@@ -200,7 +200,7 @@
     "status": "implemented",
     "how": "opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#target_conductance"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
     ]
    },
    {
@@ -209,8 +209,8 @@
     "status": "implemented",
     "how": "window/skylight U via SimpleGlazing replacement preserving SHGC/VT; opaque doors via insulation solve",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#target_conductance",
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply_ground_strip"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply_ground_strip"
     ]
    },
    {
@@ -219,7 +219,7 @@
     "status": "implemented",
     "how": "door values applied (2025 split-out table == 2020 door row)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#subsurface_target_construction"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#subsurface_target_construction"
     ]
    },
    {
@@ -228,7 +228,7 @@
     "status": "implemented",
     "how": "ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) — warns when no Kiva foundation to carry it)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply"
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
     ]
    },
    {
@@ -251,7 +251,7 @@
     "status": "implemented",
     "how": "reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.4.3.(3) scaling)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#reference_envelope"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope"
     ]
    },
    {
@@ -270,10 +270,10 @@
     "gaps": "sentence (7) partitions are satisfied by the caller-side clone; humidification note n/a",
     "how": "roof absorptance 0.7 iff proposed used actual values; proportional per-orientation FDWR/SRR scaling of EXISTING fenestration; Space/Building shading + controls removed, Site shading kept; optics (SHGC/VT) preserved; air-leakage default I_AGW = (5/75)^0.6 x 1.50 x S/A_AGW per 8.4.3.3.(3)/8.4.2.9.(2)",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_roof_absorptance",
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#scale_fenestration_to_limits",
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#strip_shading",
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_air_leakage_default"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_roof_absorptance",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#scale_fenestration_to_limits",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#strip_shading",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default"
     ]
    },
    {
@@ -283,7 +283,7 @@
     "gaps": "VERIFIED against Note A-8.4.4.4.(1) (retrieved via MCP 2026-07-28, D-35): lightweight = light FRAME, not zero-mass - the rebuild is calibrated to the note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at the prescriptive resistance; the note's follow-the-proposed-layer-structure guidance is approximated by the single calibrated layer",
     "how": "opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_lightweight_construction"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_lightweight_construction"
     ]
    },
    {
@@ -292,8 +292,8 @@
     "status": "implemented",
     "how": "Envelope components accounted per the prescriptive Section 3.2 requirements via the reference transform (8.4.4.3./8.4.4.4.: U-values at the building HDD, FDWR/SRR, lightweight construction) — the realization of 8.4.1.1.(1) for the envelope slice.",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#reference_envelope",
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
     ]
    },
    {
@@ -302,7 +302,7 @@
     "status": "implemented",
     "how": "The (2) I_AGW operating-pressure conversion of the 75 Pa leakage rate is computed and applied per space in the reference air-leakage default (apply_air_leakage_default, which cites this article); (1) accounting happens through the infiltration objects on both models.",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_air_leakage_default"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default"
     ]
    }
   ]

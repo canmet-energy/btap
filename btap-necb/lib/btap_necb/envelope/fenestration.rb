@@ -1,5 +1,5 @@
-module OpenStudioEnvelope
-  module NECB
+module BtapNECB
+  module Envelope
     # The 3.2.1.4 fenestration-area rule appliers (FDWR window rebuild, SRR
     # centroid-scaled skylights) — rule application, hence NECB-side; the
     # generic census/scaling machinery they drive is BtapModeling::Geometry.

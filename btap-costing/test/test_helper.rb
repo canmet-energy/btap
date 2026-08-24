@@ -77,6 +77,6 @@ end
 # tokens) get rewritten by that fold.
 [
   '../../openstudio-hvac/lib/openstudio_hvac',
-  '../../openstudio-envelope/lib/openstudio_envelope',
+  '../../btap-necb/lib/btap_necb',
   '../../openstudio-shw/lib/openstudio_shw'
 ].each { |rel| require File.expand_path(rel, __dir__) }

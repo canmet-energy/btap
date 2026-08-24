@@ -1,6 +1,7 @@
 require 'json'
 
-module OpenStudioEnvelope
+module BtapNECB
+  module Envelope
   # HDD18 resolution for envelope rules, mirroring legacy get_necb_hdd18
   # (necb_2011.rb:196): an explicit value wins; else the nearest NECB Table C-1
   # city (haversine on the weather file's coordinates, 500 km tolerance); else
@@ -80,4 +81,5 @@ module OpenStudioEnvelope
       6371.0 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
     end
   end
+end
 end

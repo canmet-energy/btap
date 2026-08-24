@@ -21,8 +21,8 @@ class TestNECBHostileReferenceEnvelope < Minitest::Test
   HOSTILE_ELA_CM2 = 5000.0
 
   def build_reference(model)
-    OpenStudioEnvelope::NECB.reference_envelope(model, vintage: '2020', hdd: HDD,
-                                                audit: OpenStudioEnvelope::AuditLog.new)
+    BtapNECB::Envelope.reference_envelope(model, vintage: '2020', hdd: HDD,
+                                                audit: BtapNECB::AuditLog.new)
     model
   end
 
@@ -46,7 +46,7 @@ class TestNECBHostileReferenceEnvelope < Minitest::Test
   # DesignFlowRate. If this fails the harness is broken and the negative case
   # below proves nothing.
   def test_reference_replaces_hostile_design_flow_rate
-    model = load_fixture
+    model = load_raw_fixture
     model.getSpaces.each { |space| hostile_design_flow_rate!(space) }
     build_reference(model)
 
@@ -75,7 +75,7 @@ class TestNECBHostileReferenceEnvelope < Minitest::Test
   # EXPECTED TO FAIL until the transform clears every infiltration
   # representation.
   def test_reference_does_not_double_count_effective_leakage_area
-    model = load_fixture
+    model = load_raw_fixture
     model.getSpaces.each { |space| hostile_effective_leakage_area!(space) }
     survivors_before = model.getSpaceInfiltrationEffectiveLeakageAreas.size
     assert_operator survivors_before, :>, 0, 'precondition: the proposed has ELA infiltration'
@@ -93,7 +93,7 @@ class TestNECBHostileReferenceEnvelope < Minitest::Test
   # Same defect, other representation. Kept separate so a partial fix that
   # handles only ELA still reports the remaining hole.
   def test_reference_does_not_double_count_flow_coefficient
-    model = load_fixture
+    model = load_raw_fixture
     model.getSpaces.each do |space|
       coefficient = OpenStudio::Model::SpaceInfiltrationFlowCoefficient.new(space.model)
       coefficient.setName("#{space.nameString} HOSTILE FlowCoefficient")
@@ -111,13 +111,13 @@ class TestNECBHostileReferenceEnvelope < Minitest::Test
   # Pin the formula itself so a fix to the object-clearing above cannot quietly
   # change the resulting rate. I_AGW = (5/75)^0.6 x I75 x S / A_AGW.
   def test_reference_infiltration_matches_the_i_agw_formula
-    model = load_fixture
+    model = load_raw_fixture
     build_reference(model)
 
     envelope_area = 0.0
     wall_area = 0.0
     model.getSurfaces.each do |surface|
-      boundary = OpenStudioEnvelope::NECB::Prescriptive.boundary_of(surface)
+      boundary = BtapNECB::Envelope::Prescriptive.boundary_of(surface)
       next if boundary.nil?
 
       envelope_area += surface.grossArea

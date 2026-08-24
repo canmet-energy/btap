@@ -1,5 +1,5 @@
-module OpenStudioEnvelope
-  module NECB
+module BtapNECB
+  module Envelope
     # Core prescriptive lookups over the vendored rules data. Semantics are
     # legacy-exact (parity-gated against openstudio-standards NECB2020):
     # - max_u: scan HDD-bin ceilings ascending, return the first value where
@@ -15,7 +15,7 @@ module OpenStudioEnvelope
     # @param surface [String] wall|roofceiling|floor|window|skylight|door
     # @param boundary [String] outdoors|ground
     def max_u(vintage:, surface:, boundary:, hdd:, audit: nil)
-      table = NECB.rules(vintage).fetch('u_values').fetch(boundary.to_s) do
+      table = Envelope.rules(vintage).fetch('u_values').fetch(boundary.to_s) do
         raise(ArgumentError, "unknown boundary '#{boundary}' (#{BOUNDARIES.join('/')})")
       end
       bins = table.fetch(surface.to_s) do
@@ -34,7 +34,7 @@ module OpenStudioEnvelope
     # within a perimeter strip (3.2.3.3.(3)) — the slab field carries no
     # prescriptive maximum there.
     def ground_floor_extent(vintage:, hdd:)
-      ext = NECB.rules(vintage)['ground_floor_extent']
+      ext = Envelope.rules(vintage)['ground_floor_extent']
       return { extent: :full_area } if ext.nil? || hdd >= ext.fetch('full_area_min_hdd')
 
       { extent: :perimeter_strip, width_m: ext.fetch('strip_width_m') }
@@ -42,7 +42,7 @@ module OpenStudioEnvelope
 
     # Maximum fenestration-and-door-to-gross-wall ratio (3.2.1.4.(1)).
     def max_fdwr(vintage:, hdd:, audit: nil)
-      fdwr = NECB.rules(vintage).fetch('fdwr')
+      fdwr = Envelope.rules(vintage).fetch('fdwr')
       value = fdwr.fetch('pieces').each do |piece|
         if piece['linear']
           next unless hdd >= piece['min_hdd'] && hdd < piece['max_hdd']
@@ -65,7 +65,7 @@ module OpenStudioEnvelope
 
     # Maximum skylight-to-gross-roof-area ratio (3.2.1.4.(2)).
     def max_srr(vintage:, audit: nil)
-      srr = NECB.rules(vintage).fetch('srr_max')
+      srr = Envelope.rules(vintage).fetch('srr_max')
       audit&.decision(:rules, 'maximum skylight-to-roof ratio looked up',
                       inputs: { vintage: vintage }, value: srr['value'], article: srr['article'])
       srr['value']

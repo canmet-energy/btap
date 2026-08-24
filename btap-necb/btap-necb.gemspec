@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.name = 'btap-necb'
   spec.version = BtapNECB::VERSION
   spec.authors = ['NRCan / openstudio-standards contributors']
-  spec.summary = 'NECB performance-path compliance pipeline composing openstudio-hvac and openstudio-envelope'
+  spec.summary = 'NECB performance-path compliance pipeline composing the btap gem family'
   spec.description = 'Umbrella gem: proposed -> reference building generation (HVAC + envelope, one ' \
                      'clone, one audit), SDK+CLI sizing/annual simulation, NECB 8.4.1.2 building-energy-target ' \
                      'comparison, and unified compliance + costing reporting.'
@@ -24,7 +24,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'btap-audit'
-  spec.add_dependency 'openstudio-envelope'
+  spec.add_dependency 'btap-costing'
+  spec.add_dependency 'tbd'
   spec.add_dependency 'btap-modeling'
   spec.add_dependency 'openstudio-hvac'
   spec.add_dependency 'openstudio-lighting'

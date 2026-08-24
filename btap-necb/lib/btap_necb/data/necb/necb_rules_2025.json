@@ -98,7 +98,7 @@
     "how": "weather attach (CWEC EPW + DDY design days) via OpenStudioSimulation::Runner.attach_weather!; HDD resolution: explicit arg -> Table C-1 -> .stat fallback",
     "code": [
      "btap-simulation/lib/btap_simulation/runner.rb#attach_weather!",
-     "openstudio-envelope/lib/openstudio_envelope/climate.rb#hdd18"
+     "btap-necb/lib/btap_necb/envelope/climate.rb#hdd18"
     ]
    },
    {

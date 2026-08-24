@@ -223,7 +223,7 @@ class TestFootprint < Minitest::Test
   end
 
   # Windows are PURE GEOMETRY here: a caller-chosen ratio, no default, no code
-  # knowledge. The NECB maximum belongs to openstudio-envelope.
+  # knowledge. The NECB maximum belongs to btap-necb (envelope domain).
   def test_apply_wwr_scalar
     model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 2,
                                                      zoning: :single)
@@ -258,7 +258,7 @@ class TestFootprint < Minitest::Test
     assert_empty by_bin['West'].flat_map(&:subSurfaces)
   end
 
-  # The seam with openstudio-envelope: the NECB maximum is ITS rule (3.2.1.4),
+  # The seam with btap-necb (envelope domain): the NECB maximum is ITS rule (3.2.1.4),
   # this gem only cuts the opening. Pinned as a number so a change in either
   # gem is visible — HDD 4500 gives (2000 - 0.2*4500)/3000 by hand.
   def test_apply_wwr_accepts_an_externally_computed_necb_limit

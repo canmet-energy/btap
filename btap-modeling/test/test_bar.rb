@@ -84,9 +84,15 @@ class TestBar < Minitest::Test
     # Explicit list, and a MISSING member is a hard failure, not a skip: this
     # is the whole-family composition test, and a silent skip is exactly how a
     # directory rename would hollow it out while CI stays green.
-    %w[loads lighting shw hvac envelope].each do |gem_name|
-      path = File.expand_path("../../openstudio-#{gem_name}/lib/openstudio_#{gem_name}", __dir__)
-      flunk "openstudio-#{gem_name} missing — the family composition list went stale" unless File.exist?("#{path}.rb")
+    %w[
+      openstudio-loads/lib/openstudio_loads
+      openstudio-lighting/lib/openstudio_lighting
+      openstudio-shw/lib/openstudio_shw
+      openstudio-hvac/lib/openstudio_hvac
+      btap-necb/lib/btap_necb
+    ].each do |entry|
+      path = File.expand_path("../../#{entry}", __dir__)
+      flunk "#{entry} missing — the family composition list went stale" unless File.exist?("#{path}.rb")
       require path
     end
 
@@ -98,7 +104,7 @@ class TestBar < Minitest::Test
     OpenStudioLighting.apply_lights(model, vintage: '2020', audit: audit)
     OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
     BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
 
     refute_empty model.getPeoples.to_a, 'loads live on bar geometry'
     refute_empty model.getSpaceTypes.flat_map { |st| st.lights.to_a }, 'lighting live'

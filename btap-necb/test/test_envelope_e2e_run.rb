@@ -16,8 +16,8 @@ class TestE2ERun < Minitest::Test
   end
 
   def test_prescriptive_envelope_sizes_cleanly
-    model = attach_weather!(load_fixture)
-    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020',
+    model = attach_weather!(load_raw_fixture)
+    audit = BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020',
                                                         apply_fdwr: true, apply_srr: true)
     refute_empty audit.entries
 

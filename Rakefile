@@ -17,7 +17,6 @@ require 'etc'
 GEM_DIRS = %w[
   btap-audit
   btap-costing
-  openstudio-envelope
   btap-modeling
   openstudio-hvac
   openstudio-lighting
@@ -29,9 +28,13 @@ GEM_DIRS = %w[
 missing = GEM_DIRS.reject { |d| File.directory?(d) }
 abort("GEM_DIRS is stale — missing: #{missing.join(', ')}") unless missing.empty?
 
-# Derived from GEM_DIRS so a rename cannot leave a stale sibling glob behind.
-HOSTILE_TESTS = GEM_DIRS.map { |d| "#{d}/test/test_necb_hostile_reference.rb" }
-                        .select { |f| File.file?(f) }.freeze
+# EXPLICIT: the fold renames these files with domain prefixes, so a
+# name-pattern derivation would silently lose them.
+HOSTILE_TESTS = %w[
+  btap-necb/test/test_envelope_necb_hostile_reference.rb
+  openstudio-lighting/test/test_necb_hostile_reference.rb
+].select { |f| File.file?(f) }.freeze
+abort('HOSTILE_TESTS list is stale') unless HOSTILE_TESTS.size == 2
 
 # Default parallelism: every core but a few.
 #

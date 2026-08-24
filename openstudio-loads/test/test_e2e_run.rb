@@ -78,7 +78,7 @@ class TestE2ERun < Minitest::Test
     OpenStudioLoads.assign_space_types(model, office_map(model), vintage: '2020', audit: audit)
     OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
     OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
 
     steps = audit.entries.map { |e| e[:step] }.uniq
     %i[loads schedules coverage prescriptive].each { |s| assert_includes steps, s }

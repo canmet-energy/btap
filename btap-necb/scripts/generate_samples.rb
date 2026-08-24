@@ -17,7 +17,7 @@
 #     Shipping demo files that crash would be worse than shipping simple ones.
 #
 # Why not wizard geometry, which would be prettier: wizard output carries NO
-# constructions, and openstudio-envelope cannot build an opaque construction
+# constructions, and the envelope domain cannot build an opaque construction
 # from nothing (the one real physics gap in Open work), so apply_prescriptive
 # would silently skip and the reference envelope would be wrong. The shared
 # fixture is a real DOE prototype and carries constructions.
