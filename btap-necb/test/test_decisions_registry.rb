@@ -16,7 +16,7 @@ class TestDecisionsRegistry < Minitest::Test
 
   MONOREPO = File.expand_path('../..', __dir__)
   GEMS = %w[btap-costing btap-necb
-            openstudio-shw btap-modeling].freeze
+            btap-modeling].freeze
   DOC = File.expand_path('../docs/necb_decisions.md', __dir__)
   KINDS = %w[runtime runtime_unwired data process].freeze
 
@@ -160,7 +160,6 @@ class TestDecisionsRegistry < Minitest::Test
   AUDIT_LOG_ALIASES = {
     'btap-modeling' => %w[btap_modeling BtapModeling],
     'btap-costing' => %w[btap_costing BtapCosting],
-    'openstudio-shw' => %w[openstudio_shw OpenStudioSHW]
   }.freeze
 
   # The umbrella pulls in every domain gem except geometry (it sits upstream of

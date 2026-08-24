@@ -30,8 +30,7 @@
 # silence is never coverage.
 
 require 'openstudio'
-require_relative '../../openstudio-hvac/lib/openstudio_hvac'
-require_relative '../../openstudio-shw/lib/openstudio_shw'
+require_relative '../lib/btap_necb'
 
 TOL_SAMPLED = 0.03   # 3% max relative deviation on sampled PLR comparisons
 TOL_SURFACE = 0.005  # 0.5% on sampled temperature surfaces (coefficient-wise
@@ -278,7 +277,7 @@ heater = OpenStudio::Model::WaterHeaterMixed.new(swh_model)
 heater.setHeaterFuelType('NaturalGas')
 heater.setHeaterMaximumCapacity(30_000)
 heater.setTankVolume(0.3)
-OpenStudioSHW::NECB.apply_water_heater_efficiency(heater, vintage: '2020', audit: OpenStudioSHW::AuditLog.new)
+BtapNECB::SHW.apply_water_heater_efficiency(heater, vintage: '2020', audit: BtapNECB::AuditLog.new)
 
 # ---- comparisons -----------------------------------------------------------
 results = []

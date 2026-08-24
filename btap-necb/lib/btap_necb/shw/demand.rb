@@ -1,5 +1,5 @@
-module OpenStudioSHW
-  module NECB
+module BtapNECB
+  module SHW
     # SHW demand + plant — port of legacy model_add_swh / auto_size_shw_capacity:
     # per-space peak flows from the NECB space-type records (US gal/hr/ft2 x area x
     # scale), the weekly hourly demand profile from the NECB-<letter> SWH schedules
@@ -19,7 +19,7 @@ module OpenStudioSHW
       # @return [Hash] tank volume/capacity (SI), max temp, loop peak flow,
       #   parasitic loss, spaces_w_dhw
       def auto_size(model, vintage: '2020', shw_scale: 1.0, audit: nil)
-        rules = NECB.rules(vintage)['autosize']
+        rules = SHW.rules(vintage)['autosize']
         data_vintage = BtapNECB::Loads.data_vintage(vintage)
         schedules = BtapNECB::Loads.table(data_vintage, 'schedules')
         shw_scale = 1.0 if shw_scale.nil? || shw_scale == 'none' || shw_scale == 'NECB_Default'
@@ -132,7 +132,7 @@ module OpenStudioSHW
           return nil
         end
 
-        rules = NECB.rules(vintage)['autosize']
+        rules = SHW.rules(vintage)['autosize']
         data_vintage = BtapNECB::Loads.data_vintage(vintage)
         heat_pump = fuel.to_s == 'HeatPump'
         loop = build_loop(model, sizing, heat_pump ? 'Electricity' : fuel, rules, audit)

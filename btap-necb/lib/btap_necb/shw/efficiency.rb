@@ -1,5 +1,5 @@
-module OpenStudioSHW
-  module NECB
+module BtapNECB
+  module SHW
     # Water-heater performance — verbatim port of the NECB2020
     # water_heater_mixed_apply_efficiency (Table 6.2.2.1 via the UEF procedure +
     # Maguire-Roberts (2020) UA derivation + PNNL assumptions). Electric: thermal
@@ -32,7 +32,7 @@ module OpenStudioSHW
 
       def apply_efficiency(water_heater, vintage: '2020', audit: nil)
         audit ||= AuditLog.new
-        rules = NECB.rules(vintage)['efficiency']
+        rules = SHW.rules(vintage)['efficiency']
 
         capacity = optional(water_heater.heaterMaximumCapacity)
         volume_m3 = optional(water_heater.tankVolume)
@@ -275,7 +275,7 @@ module OpenStudioSHW
       # no EnergyPlus field — detected solar collectors get an audited
       # determination citing the printed minimums, never a silent skip.
       def apply_solar_pool_minimums(model, vintage: '2020', audit: nil)
-        spec = NECB.rules(vintage)['solar_pool_minimums']
+        spec = SHW.rules(vintage)['solar_pool_minimums']
         return if spec.nil?
 
         pool_loops = model.getSwimmingPoolIndoors.filter_map { |p| p.plantLoop.is_initialized ? p.plantLoop.get : nil }.uniq

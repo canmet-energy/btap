@@ -133,4 +133,15 @@ module FixtureHelper
     st.setStandardsSpaceType(space_type)
     st
   end
+
+  OFFICE = ['Space Function', 'Office enclosed > 25 m2'].freeze
+
+  # The raw fixture tagged office everywhere (offices carry SHW peak flows) —
+  # from the shw suites' old helper.
+  def tagged_model
+    model = load_raw_fixture
+    map = model.getSpaces.to_h { |s| [s.nameString, OFFICE] }
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020')
+    model
+  end
 end

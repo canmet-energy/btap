@@ -19,7 +19,6 @@ GEM_DIRS = %w[
   btap-costing
   btap-modeling
   btap-necb
-  openstudio-shw
   btap-simulation
 ].freeze
 missing = GEM_DIRS.reject { |d| File.directory?(d) }
@@ -161,8 +160,16 @@ namespace :test do
     dir = File.expand_path(name)
     abort("no such gem: #{name}") unless Dir.exist?(dir)
 
+    # Tests that MUTATE shared on-disk state cannot share the pool:
+    # test_cli.rb hides the priced costing CSVs mid-test (restored in ensure),
+    # and any pooled neighbour reading them in that window dies with
+    # "costs.csv not found". Before the btap-necb fold this could never
+    # collide — the reader and the mutator lived in different gems' legs,
+    # which test:all runs sequentially. They run AFTER the pool, serially.
+    serial = { 'btap-necb' => %w[test/test_cli.rb] }.fetch(name, [])
     files = Dir.glob('test/test_*.rb', base: dir)
                 .reject { |f| f.end_with?('test_helper.rb') || f.end_with?('_parity.rb') }
+                .reject { |f| serial.include?(f) }
                 .sort
     jobs = ENV.fetch('JOBS', default_jobs.to_s).to_i
     failed = []
@@ -193,9 +200,18 @@ namespace :test do
       failed << f if f && !status.success?
     end
 
+    serial.each do |f|
+      next if File.exist?(File.join(dir, f)) == false
+
+      log = Tempfile.create(['testlog-', '.txt'])
+      logs[f] = log
+      ok = system(RbConfig.ruby, f, chdir: dir, out: log.fileno, err: [:child, :out])
+      failed << f unless ok
+    end
+
     elapsed = (Time.now - started).round(1)
     if failed.empty?
-      puts "#{name}: #{files.size} files OK in #{elapsed}s (#{jobs}-way)"
+      puts "#{name}: #{files.size + serial.size} files OK in #{elapsed}s (#{jobs}-way + #{serial.size} serial)"
     else
       puts "#{name}: #{failed.size} of #{files.size} FAILED in #{elapsed}s — captured output:"
       failed.each do |f|

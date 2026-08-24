@@ -77,5 +77,4 @@ end
 # tokens) get rewritten by that fold.
 [
   '../../btap-necb/lib/btap_necb',
-  '../../openstudio-shw/lib/openstudio_shw'
 ].each { |rel| require File.expand_path(rel, __dir__) }

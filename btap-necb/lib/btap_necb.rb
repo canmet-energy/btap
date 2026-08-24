@@ -10,11 +10,6 @@ end
 
 # The domain gems: installed as gems, or monorepo siblings during incubation.
 begin
-  require 'openstudio_shw'
-rescue LoadError
-  require File.expand_path('../../openstudio-shw/lib/openstudio_shw', __dir__)
-end
-begin
   require 'btap_simulation'
 rescue LoadError
   require File.expand_path('../../btap-simulation/lib/btap_simulation', __dir__)
@@ -37,6 +32,7 @@ require_relative 'btap_necb/loads'
 require_relative 'btap_necb/envelope'
 require_relative 'btap_necb/hvac'
 require_relative 'btap_necb/lighting'
+require_relative 'btap_necb/shw'
 require_relative 'btap_necb/tiers'
 require_relative 'btap_necb/decisions'
 require_relative 'btap_necb/eui_archetypes'
@@ -47,7 +43,7 @@ require_relative 'btap_necb/report'
 # (hvac reference systems + efficiencies, envelope
 # prescriptive/reference envelope + thermal bridging, openstudio-loads NECB
 # space-use loads, lighting LPD allowances + daylighting,
-# openstudio-shw service-water-heating minimums) into the NECB Part 8
+# shw service-water-heating minimums) into the NECB Part 8
 # performance path — proposed vs reference building energy target (8.4.1.2) —
 # with simulation execution via btap-simulation (the one place
 # simulation is allowed; the domain gems never simulate), unified costing,

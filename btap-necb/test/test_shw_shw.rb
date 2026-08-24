@@ -6,7 +6,7 @@ class TestSHW < Minitest::Test
 
   def test_rules_and_coverage_lint
     %w[2020 2025].each do |vintage|
-      rules = OpenStudioSHW::NECB.rules(vintage)
+      rules = BtapNECB::SHW.rules(vintage)
       assert_equal 0.82, rules['efficiency']['fuel_fired']['burner_efficiency']
       plc = rules['efficiency']['part_load_curve']
       assert_equal [0.7576, 1.0071, -1.4443, 0.6844], plc['coefficients']
@@ -23,14 +23,14 @@ class TestSHW < Minitest::Test
     # Vintage aliasing is owned by openstudio-loads (BtapNECB::Loads.data_vintage,
     # called directly from necb/demand.rb) — shw does not vendor its own
     # data_vintage_alias key (removed as dead config; see provenance.note).
-    assert_nil OpenStudioSHW::NECB.rules('2025')['data_vintage_alias']
-    assert_match(/UEF >= 2.23/, OpenStudioSHW::NECB.rules('2025')['changes_vs_2020']['heat_pump_storage_water_heater'])
+    assert_nil BtapNECB::SHW.rules('2025')['data_vintage_alias']
+    assert_match(/UEF >= 2.23/, BtapNECB::SHW.rules('2025')['changes_vs_2020']['heat_pump_storage_water_heater'])
   end
 
   def test_apply_shw_builds_loop_and_demand
     model = tagged_model
-    audit = OpenStudioSHW::AuditLog.new
-    loop = OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    loop = BtapNECB::SHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
 
     refute_nil loop
     heater = model.getWaterHeaterMixeds.first
@@ -55,9 +55,9 @@ class TestSHW < Minitest::Test
   end
 
   def test_no_demand_no_loop
-    model = load_fixture # untagged: no space types -> no SHW demand
-    audit = OpenStudioSHW::AuditLog.new
-    result = OpenStudioSHW.apply_shw(model, vintage: '2020', audit: audit)
+    model = load_raw_fixture # untagged: no space types -> no SHW demand
+    audit = BtapNECB::AuditLog.new
+    result = BtapNECB::SHW.apply_shw(model, vintage: '2020', audit: audit)
     assert_nil result
     assert_empty model.getPlantLoops.to_a
     assert(audit.entries.any? { |e| e[:action].include?('no SHW loop added') })
@@ -70,8 +70,8 @@ class TestSHW < Minitest::Test
     heater.setTankVolume(0.150)
     heater.setHeaterMaximumCapacity(15_000)
     heater.setHeaterFuelType('NaturalGas')
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB.apply_water_heater_efficiency(heater, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW.apply_water_heater_efficiency(heater, vintage: '2020', audit: audit)
 
     assert_in_delta 0.82, heater.heaterThermalEfficiency.get, 1e-9, 'burner efficiency'
     uef = 0.6483 - 0.00045 * 150
@@ -84,7 +84,7 @@ class TestSHW < Minitest::Test
     electric.setTankVolume(0.200)
     electric.setHeaterMaximumCapacity(11_000)
     electric.setHeaterFuelType('Electricity')
-    OpenStudioSHW::NECB.apply_water_heater_efficiency(electric, vintage: '2020', audit: audit)
+    BtapNECB::SHW.apply_water_heater_efficiency(electric, vintage: '2020', audit: audit)
     assert_in_delta 1.0, electric.heaterThermalEfficiency.get, 1e-9
     expected_ua = OpenStudio.convert(80.0, 'W', 'Btu/hr').get / 70.0
     expected_ua_si = OpenStudio.convert(expected_ua, 'Btu/hr*R', 'W/K').get
@@ -95,7 +95,7 @@ class TestSHW < Minitest::Test
     large.setTankVolume(0.500)
     large.setHeaterMaximumCapacity(100_000)
     large.setHeaterFuelType('NaturalGas')
-    OpenStudioSHW::NECB.apply_water_heater_efficiency(large, vintage: '2020', audit: audit)
+    BtapNECB::SHW.apply_water_heater_efficiency(large, vintage: '2020', audit: audit)
     assert_operator large.heaterThermalEfficiency.get, :>, 0.9, 'Et + UA/capacity adjustment'
   end
 
@@ -106,7 +106,7 @@ class TestSHW < Minitest::Test
   # vendored cubic to the code quadratic coefficient-wise would be meaningless.
   def test_part_load_curve_is_functionally_the_code_fheatplc
     %w[2020 2025].each do |vintage|
-      plc = OpenStudioSHW::NECB.rules(vintage)['efficiency']['part_load_curve']
+      plc = BtapNECB::SHW.rules(vintage)['efficiency']['part_load_curve']
       cubic = plc['coefficients']
       a, b, c = plc['code_fheatplc']['coefficients']
       poly = ->(k, x) { k.each_with_index.sum { |v, i| v * (x**i) } }
@@ -130,7 +130,7 @@ class TestSHW < Minitest::Test
   # term, and a mis-shaped spec raises instead of being silently accepted.
   def test_part_load_curve_builder_honours_form
     model = OpenStudio::Model::Model.new
-    quad = OpenStudioSHW::NECB::Efficiency.part_load_curve(
+    quad = BtapNECB::SHW::Efficiency.part_load_curve(
       model, { 'name' => 'Probe Quadratic', 'form' => 'Quadratic', 'coefficients' => [0.021826, 0.97763, 0.000543] }
     )
     assert quad.to_CurveQuadratic.is_initialized, 'Quadratic form builds a Curve:Quadratic'
@@ -139,12 +139,12 @@ class TestSHW < Minitest::Test
                          quad.to_CurveQuadratic.get.coefficient3xPOW2, 1e-5
 
     assert_raises(ArgumentError) do
-      OpenStudioSHW::NECB::Efficiency.part_load_curve(
+      BtapNECB::SHW::Efficiency.part_load_curve(
         model, { 'name' => 'Bad', 'form' => 'Quadratic', 'coefficients' => [1.0, 2.0, 3.0, 4.0] }
       )
     end
     assert_raises(ArgumentError) do
-      OpenStudioSHW::NECB::Efficiency.part_load_curve(
+      BtapNECB::SHW::Efficiency.part_load_curve(
         model, { 'name' => 'Bad2', 'form' => 'Quartic', 'coefficients' => [1.0] }
       )
     end
@@ -160,8 +160,8 @@ class TestSHW < Minitest::Test
       h.setHeaterFuelType(fuel)
       h.setHeaterMaximumCapacity(30_000)
       h.setTankVolume(volume_m3)
-      audit = OpenStudioSHW::AuditLog.new
-      OpenStudioSHW::NECB.apply_water_heater_efficiency(h, vintage: '2020', audit: audit)
+      audit = BtapNECB::AuditLog.new
+      BtapNECB::SHW.apply_water_heater_efficiency(h, vintage: '2020', audit: audit)
       [h, audit]
     end
 
@@ -185,9 +185,9 @@ class TestSHW < Minitest::Test
 
   def test_reference_shw_coverage
     model = tagged_model
-    OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'Electricity')
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB.reference_shw(model, vintage: '2020', audit: audit)
+    BtapNECB::SHW.apply_shw(model, vintage: '2020', fuel: 'Electricity')
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW.reference_shw(model, vintage: '2020', audit: audit)
     assert(audit.entries.any? { |e| e[:article] == '8.4.4.20.(1)' })
     coverage = audit.entries.select { |e| e[:step] == :coverage }
     assert_operator coverage.size, :>=, 6
