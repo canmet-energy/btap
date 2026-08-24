@@ -8,11 +8,11 @@ class TestDataIntegrity < Minitest::Test
                          'Thermostat Setpoint-Cooling'].freeze
 
   def space_types
-    OpenStudioLoads::NECB.table('2020', 'space_types')
+    BtapNECB::Loads.table('2020', 'space_types')
   end
 
   def schedules
-    OpenStudioLoads::NECB.table('2020', 'schedules')
+    BtapNECB::Loads.table('2020', 'schedules')
   end
 
   def test_counts_and_keys
@@ -87,18 +87,18 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_2025_aliases_2020_with_renumbered_citations
-    rules = OpenStudioLoads::NECB.rules('2025')
-    assert_equal '2020', OpenStudioLoads::NECB.data_vintage('2025')
+    rules = BtapNECB::Loads.rules('2025')
+    assert_equal '2020', BtapNECB::Loads.data_vintage('2025')
     assert_equal 'A-8.4.3.2.(1)(b)', rules['schedule_table_prefix']
-    assert_equal 'A-8.4.3.2.(1)', OpenStudioLoads::NECB.rules('2020')['schedule_table_prefix']
+    assert_equal 'A-8.4.3.2.(1)', BtapNECB::Loads.rules('2020')['schedule_table_prefix']
     assert_match(/row-by-row/, rules['provenance']['method'])
-    assert_equal OpenStudioLoads::NECB.table('2020', 'space_types').size,
-                 OpenStudioLoads::NECB.table('2025', 'space_types').size
+    assert_equal BtapNECB::Loads.table('2020', 'space_types').size,
+                 BtapNECB::Loads.table('2025', 'space_types').size
   end
 
   def test_coverage_manifest_lint
     %w[2020 2025].each do |vintage|
-      coverage = OpenStudioLoads::NECB.rules(vintage)['article_coverage']['articles']
+      coverage = BtapNECB::Loads.rules(vintage)['article_coverage']['articles']
       # 5 core 8.4.3 entries + 8.4.2.7. internal loads (ffb58bc38) + 8.4.3.6.
       # outdoor air (f42f19533) — bump this pin when the manifest grows.
       # 8.4.3.2. is declared per sentence (3 rows) since the coverage-depth pass.
@@ -119,13 +119,13 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_space_type_lookup_api
-    record = OpenStudioLoads::NECB::SpaceTypes.record(
+    record = BtapNECB::Loads::SpaceTypes.record(
       building_type: 'Space Function', space_type: 'Office enclosed > 25 m2')
     assert_equal 'A', record['necb_schedule_type']
     assert_raises(ArgumentError) do
-      OpenStudioLoads::NECB::SpaceTypes.record(building_type: 'Nope', space_type: 'Nada')
+      BtapNECB::Loads::SpaceTypes.record(building_type: 'Nope', space_type: 'Nada')
     end
-    assert_operator OpenStudioLoads::NECB::SpaceTypes.list.size, :==, 308
+    assert_operator BtapNECB::Loads::SpaceTypes.list.size, :==, 308
   end
 
   def test_structural_equality_vs_legacy_merged_tables

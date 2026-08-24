@@ -50,13 +50,13 @@ class TestSchedulesParity < Minitest::Test
 
   def test_all_schedules_parity
     std = legacy
-    names = OpenStudioLoads::NECB.table('2020', 'schedules').map { |r| r['name'] }.uniq
+    names = BtapNECB::Loads.table('2020', 'schedules').map { |r| r['name'] }.uniq
     mismatches = []
 
     names.each do |name|
       gem_model = OpenStudio::Model::Model.new
       legacy_model = OpenStudio::Model::Model.new
-      gem_schedule = OpenStudioLoads::Schedules.add(gem_model, name)
+      gem_schedule = BtapNECB::Loads::Schedules.add(gem_model, name)
       legacy_schedule = std.model_add_schedule(legacy_model, name)
 
       gem_signature = ruleset_signature(gem_schedule)

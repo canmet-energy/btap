@@ -391,12 +391,12 @@ class TestLegacyArchetypeE2E < Minitest::Test
   # Contingency retag helper (spec: "retag the offending space types to the
   # nearest catalog name and continue, RECORDING every retag"). Uses the same
   # public catalog lookup / suggestion API compliance.rb's own pre-flight gate
-  # uses (OpenStudioLoads::NECB::SpaceTypes / BtapNECB::Compliance.
+  # uses (BtapNECB::Loads::SpaceTypes / BtapNECB::Compliance.
   # suggest_space_types), so the suggestions are identical to what the raised
   # ArgumentError already reports.
   def retag_unresolved_space_types!(model, vintage)
-    data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
-    catalog = OpenStudioLoads::NECB.table(data_vintage, 'space_types')
+    data_vintage = BtapNECB::Loads.data_vintage(vintage)
+    catalog = BtapNECB::Loads.table(data_vintage, 'space_types')
     retags = []
     model.getSpaceTypes.each do |space_type|
       next if space_type.spaces.empty?
@@ -405,8 +405,8 @@ class TestLegacyArchetypeE2E < Minitest::Test
       st = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
       next if st.nil? || st.downcase.include?('plenum')
 
-      record = bt && OpenStudioLoads::NECB::SpaceTypes.find(building_type: bt, space_type: st, vintage: data_vintage)
-      next unless record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+      record = bt && BtapNECB::Loads::SpaceTypes.find(building_type: bt, space_type: st, vintage: data_vintage)
+      next unless record.nil? || BtapNECB::Loads::SpaceTypes.undefined?(record)
 
       suggestions = BtapNECB::Compliance.suggest_space_types(st, catalog)
       next if suggestions.empty?

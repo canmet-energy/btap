@@ -64,7 +64,7 @@
     "status": "implemented",
     "how": "operating schedules and climatic data enter at an hourly interval",
     "code": [
-     "openstudio-loads/lib/openstudio_loads/schedules.rb#add",
+     "btap-necb/lib/btap_necb/loads/schedules.rb#add",
      "btap-simulation/lib/btap_simulation/runner.rb#attach_weather!"
     ]
    },

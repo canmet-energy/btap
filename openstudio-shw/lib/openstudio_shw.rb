@@ -1,17 +1,15 @@
 require 'openstudio'
 
-begin
-  require 'openstudio_loads'
-rescue LoadError
-  require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
-end
+# Loads folded into btap-necb; until THIS gem folds too, pull the loads
+# domain file directly (self-contained) across the sibling boundary.
+require File.expand_path('../../btap-necb/lib/btap_necb/loads', __dir__)
 
 require_relative 'openstudio_shw/version'
 require_relative 'openstudio_shw/audit_log'
 
 # OpenStudioSHW applies NECB service water heating to OpenStudio models: per-space
 # demand (WaterUseEquipment from the NECB space-type peak flows/temperatures/
-# schedules — openstudio-loads data), the legacy-parity auto-sized SHW plant loop
+# schedules — the loads-domain data), the legacy-parity auto-sized SHW plant loop
 # (WaterHeaterMixed + pump), Part 6 water-heater performance (Table 6.2.2.1,
 # NECB2020 UEF procedure), and the 8.4.4.20 reference treatment. SDK-only;
 # vendored article-tagged data (MCP-verified offline); shared AuditLog schema.

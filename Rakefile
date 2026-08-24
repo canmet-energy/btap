@@ -19,7 +19,6 @@ GEM_DIRS = %w[
   btap-costing
   btap-modeling
   openstudio-lighting
-  openstudio-loads
   btap-necb
   openstudio-shw
   btap-simulation

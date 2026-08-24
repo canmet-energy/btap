@@ -66,7 +66,7 @@ class TestDaylightingNecb2020 < Minitest::Test
     if space_type
       zone = OpenStudio::Model::ThermalZone.new(model)
       space.setThermalZone(zone)
-      OpenStudioLoads.assign_space_types(model, { space.nameString => ['Space Function', space_type] },
+      BtapNECB::Loads.assign_space_types(model, { space.nameString => ['Space Function', space_type] },
                                          vintage: '2020')
       OpenStudioLighting.apply_lights(model, vintage: '2020')
     end

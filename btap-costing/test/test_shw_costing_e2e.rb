@@ -72,7 +72,7 @@ class TestCostingE2E < Minitest::Test
 
     model = tagged_model
     audit = BtapNECB::AuditLog.new
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
     OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
     BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)

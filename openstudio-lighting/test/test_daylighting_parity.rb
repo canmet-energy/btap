@@ -135,7 +135,7 @@ class TestDaylightingParity < Minitest::Test
     # equality with whatever legacy produces, never a hardcoded count.
     legacy_model = load_fixture
     map = legacy_model.getSpaces.to_h { |s| [s.nameString, ['Space Function', 'Office enclosed > 25 m2']] }
-    OpenStudioLoads.assign_space_types(legacy_model, map, vintage: '2020')
+    BtapNECB::Loads.assign_space_types(legacy_model, map, vintage: '2020')
     wall = legacy_model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     wall.setWindowToWallRatio(0.4)
     gem_model = legacy_model.clone(true).to_Model

@@ -38,7 +38,7 @@ class TestApplyParity < Minitest::Test
 
   def existing_pairs
     PAIRS.select do |building_type, space_type|
-      OpenStudioLoads::NECB::SpaceTypes.find(building_type: building_type, space_type: space_type)
+      BtapNECB::Loads::SpaceTypes.find(building_type: building_type, space_type: space_type)
     end
   end
 
@@ -95,7 +95,7 @@ class TestApplyParity < Minitest::Test
     assert_operator pairs.size, :>=, 4, "enough real space types to compare (#{pairs.inspect})"
 
     gem_model = tagged_model(pairs)
-    OpenStudioLoads::NECB.apply_loads(gem_model, vintage: '2020')
+    BtapNECB::Loads.apply_loads(gem_model, vintage: '2020')
 
     legacy_model = tagged_model(pairs)
     legacy_model.getSpaceTypes.sort_by(&:nameString).each do |space_type|

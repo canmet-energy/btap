@@ -32,7 +32,7 @@ ROOT = File.expand_path('../..', __dir__)
 %w[
   btap-audit/lib/btap_audit
   openstudio-hvac/lib/openstudio_hvac
-  openstudio-loads/lib/openstudio_loads
+  btap-necb/lib/btap_necb/loads
   openstudio-lighting/lib/openstudio_lighting
   openstudio-shw/lib/openstudio_shw
 ].each { |entry| require File.expand_path(entry, ROOT) }
@@ -108,7 +108,7 @@ def seed(vintage)
     st.setStandardsSpaceType('Office enclosed > 25 m2')
   end
   audit = BtapNECB::AuditLog.new
-  OpenStudioLoads::NECB.apply_loads(model, vintage: vintage, audit: audit)
+  BtapNECB::Loads.apply_loads(model, vintage: vintage, audit: audit)
   OpenStudioLighting.apply_lights(model, vintage: vintage, audit: audit)
   OpenStudioSHW.apply_shw(model, vintage: vintage, fuel: 'NaturalGas', audit: audit)
   model

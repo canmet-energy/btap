@@ -162,7 +162,7 @@ class TestReferenceRules < Minitest::Test
        DOAS\ with\ fan\ coil\ air-cooled\ chiller\ with\ district\ hot\ water].each do |escaped|
       system = escaped.tr('\\', '')
       model = load_fixture
-      OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: BtapNECB::AuditLog.new)
+      BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: BtapNECB::AuditLog.new)
       BtapModeling.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
 
       district = ->(m) { m.modelObjects.count { |o| o.iddObjectType.valueName.match?(/DistrictHeating/) } }

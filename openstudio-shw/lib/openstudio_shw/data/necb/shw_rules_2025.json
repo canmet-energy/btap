@@ -13,7 +13,7 @@
   "generated": "2026-07-12",
   "method": "NECB 2025 Table 6.2.2.1 retrieved in full via the building-codes MCP and compared to 2020: every formula this gem implements is IDENTICAL (electric SL formulas, all gas UEF ladder coefficients, Et>=90%+SL large-equipment row, oil rows, solar/pool rows). The ONLY substantive 2025 change is the storage-type heat-pump water heater requirement: EF >= 2.1 -> UEF >= 2.23 (an equipment class this gem does not model — recorded below). 2025 therefore shares the 2020 algorithm parameters.",
   "reference_article": "8.4.5.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) were machine-verified against the full article text (D-41) and are satisfied by clone; Part 6 minimums apply on top. The 8.4.6.9 part-load fuel curve is applied to fuel-fired heaters (D-53).",
-  "note": "Vintage aliasing (which vintage's space-use/schedule tables a rules year draws from) is owned by openstudio-loads (OpenStudioLoads::NECB.data_vintage) — this gem calls that directly (necb/demand.rb) rather than vendoring its own data_vintage_alias key."
+  "note": "Vintage aliasing (which vintage's space-use/schedule tables a rules year draws from) is owned by the loads domain (BtapNECB::Loads.data_vintage) — this gem calls that directly (necb/demand.rb) rather than vendoring its own data_vintage_alias key."
  },
  "autosize": {
   "supply_temperature_default_c": 60.0,
@@ -200,7 +200,7 @@
     "article": "8.4.3.2. (SWH loads)",
     "title": "Service water heating loads representative of the building",
     "status": "implemented",
-    "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data)",
+    "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (loads-domain data)",
     "code": [
      "openstudio-shw/lib/openstudio_shw/necb/demand.rb#apply_shw",
      "openstudio-shw/lib/openstudio_shw/necb/demand.rb#add_water_use"

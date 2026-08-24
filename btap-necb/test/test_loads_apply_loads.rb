@@ -24,9 +24,9 @@ class TestApplyLoads < Minitest::Test
 
   def applied_model
     model, map = mapped_model
-    audit = OpenStudioLoads::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020', audit: audit)
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
     [model, audit]
   end
 
@@ -36,8 +36,8 @@ class TestApplyLoads < Minitest::Test
 
   def test_assign_space_types_on_ramp
     model, map = mapped_model
-    audit = OpenStudioLoads::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020', audit: audit)
     decision = audit.entries.find { |e| e[:action] == 'NECB space types assigned' }
     assert_equal 2, decision[:inputs][:space_types_created], 'one SpaceType per distinct pair'
     model.getSpaces.each do |space|
@@ -45,14 +45,14 @@ class TestApplyLoads < Minitest::Test
       assert space.spaceType.get.standardsBuildingType.is_initialized
     end
     assert_raises(ArgumentError) do
-      OpenStudioLoads.assign_space_types(model, { model.getSpaces.first.nameString => %w[Nope Nada] })
+      BtapNECB::Loads.assign_space_types(model, { model.getSpaces.first.nameString => %w[Nope Nada] })
     end
   end
 
   def test_people_and_equipment_golden
     model, = applied_model
     office = office_space_type(model)
-    record = OpenStudioLoads::NECB::SpaceTypes.record(
+    record = BtapNECB::Loads::SpaceTypes.record(
       building_type: 'Space Function', space_type: 'Office enclosed > 25 m2')
 
     people = office.people.first
@@ -71,7 +71,7 @@ class TestApplyLoads < Minitest::Test
   def test_ventilation_rescale_and_stash
     model, = applied_model
     office = office_space_type(model)
-    record = OpenStudioLoads::NECB::SpaceTypes.record(
+    record = BtapNECB::Loads::SpaceTypes.record(
       building_type: 'Space Function', space_type: 'Office enclosed > 25 m2')
     dsoa = office.designSpecificationOutdoorAir.get
 
@@ -91,7 +91,7 @@ class TestApplyLoads < Minitest::Test
   def test_schedules_thermostats_and_infiltration
     model, = applied_model
     office = office_space_type(model)
-    record = OpenStudioLoads::NECB::SpaceTypes.record(
+    record = BtapNECB::Loads::SpaceTypes.record(
       building_type: 'Space Function', space_type: 'Office enclosed > 25 m2')
 
     schedule_set = office.defaultScheduleSet.get
@@ -116,9 +116,9 @@ class TestApplyLoads < Minitest::Test
     model, map = mapped_model
     plenum = OpenStudio::Model::SpaceType.new(model)
     plenum.setName('Attic plenum')
-    audit = OpenStudioLoads::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020', audit: audit)
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
 
     assert(audit.entries.any? { |e| e[:action].include?('plenum space type skipped') })
     coverage = audit.entries.select { |e| e[:step] == :coverage }
@@ -137,9 +137,9 @@ class TestApplyLoads < Minitest::Test
 
   def test_2025_citation_prefix_flows_to_audit
     model, map = mapped_model
-    audit = OpenStudioLoads::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2025', audit: audit)
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2025', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2025', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2025', audit: audit)
     office = office_space_type(model)
     refute_nil office.people.first, '2025 aliases the 2020 data'
   end

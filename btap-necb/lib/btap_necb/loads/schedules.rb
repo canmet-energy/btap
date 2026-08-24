@@ -1,6 +1,7 @@
 require 'date'
 
-module OpenStudioLoads
+module BtapNECB
+  module Loads
   # The NECB schedule builder — exact port of the legacy model_add_schedule /
   # model_add_vals_to_sch semantics against the vendored schedules table:
   # one ScheduleRuleset per name; per data row the day_types tokens map to the
@@ -26,7 +27,7 @@ module OpenStudioLoads
       existing = model.getSchedules.sort_by(&:nameString).find { |s| s.nameString == name }
       return existing if existing
 
-      rows = NECB.table(vintage, 'schedules').select { |r| r['name'] == name }
+      rows = Loads.table(vintage, 'schedules').select { |r| r['name'] == name }
       if rows.empty?
         audit&.warn(:schedules, "no NECB #{vintage} schedule data named '#{name}' — falling back to Always On " \
                                 '(legacy fails silently here)',
@@ -108,4 +109,5 @@ module OpenStudioLoads
       day_schedule.model.version < OpenStudio::VersionString.new('3.8.0') ? false : 'No'
     end
   end
+end
 end

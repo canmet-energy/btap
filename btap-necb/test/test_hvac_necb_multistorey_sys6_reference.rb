@@ -40,7 +40,7 @@ class TestNecbMultistoreySys6Reference < Minitest::Test
       space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 1.0 },
       length: 40.0, width: 20.0, num_stories_above_grade: 3, wwr: 0.3
     )
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020')
+    BtapNECB::Loads.apply_loads(model, vintage: '2020')
     zones = model.getThermalZones.sort_by(&:nameString)
     BtapModeling.build_system(model, 'Baseboard gas boiler', zones)
     model

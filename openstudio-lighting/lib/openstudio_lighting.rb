@@ -1,11 +1,9 @@
 require 'openstudio'
 
 # The loads gem is the canonical NECB space-type data owner and schedule builder.
-begin
-  require 'openstudio_loads'
-rescue LoadError
-  require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
-end
+# Loads folded into btap-necb; until THIS gem folds too, pull the loads
+# domain file directly (self-contained) across the sibling boundary.
+require File.expand_path('../../btap-necb/lib/btap_necb/loads', __dir__)
 
 require_relative 'openstudio_lighting/version'
 require_relative 'openstudio_lighting/audit_log'

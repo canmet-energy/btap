@@ -20,8 +20,8 @@ module OpenStudioSHW
       #   parasitic loss, spaces_w_dhw
       def auto_size(model, vintage: '2020', shw_scale: 1.0, audit: nil)
         rules = NECB.rules(vintage)['autosize']
-        data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
-        schedules = OpenStudioLoads::NECB.table(data_vintage, 'schedules')
+        data_vintage = BtapNECB::Loads.data_vintage(vintage)
+        schedules = BtapNECB::Loads.table(data_vintage, 'schedules')
         shw_scale = 1.0 if shw_scale.nil? || shw_scale == 'none' || shw_scale == 'NECB_Default'
         shw_scale = shw_scale.to_s.strip.to_f if shw_scale.is_a?(String)
 
@@ -34,10 +34,10 @@ module OpenStudioSHW
           next if space.spaceType.empty? || space.spaceType.get.standardsSpaceType.empty? ||
                   space.spaceType.get.standardsBuildingType.empty?
 
-          record = OpenStudioLoads::NECB::SpaceTypes.find(
+          record = BtapNECB::Loads::SpaceTypes.find(
             building_type: space.spaceType.get.standardsBuildingType.get,
             space_type: space.spaceType.get.standardsSpaceType.get, vintage: data_vintage)
-          next if record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+          next if record.nil? || BtapNECB::Loads::SpaceTypes.undefined?(record)
           next if record['service_water_heating_peak_flow_per_area'].to_f.zero? &&
                   record['service_water_heating_peak_flow_rate'].to_f.zero?
           next if record['service_water_heating_schedule'].nil?
@@ -133,7 +133,7 @@ module OpenStudioSHW
         end
 
         rules = NECB.rules(vintage)['autosize']
-        data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
+        data_vintage = BtapNECB::Loads.data_vintage(vintage)
         heat_pump = fuel.to_s == 'HeatPump'
         loop = build_loop(model, sizing, heat_pump ? 'Electricity' : fuel, rules, audit)
 
@@ -237,7 +237,7 @@ module OpenStudioSHW
         equipment = OpenStudio::Model::WaterUseEquipment.new(definition)
         equipment.setName(space.nameString.capitalize.to_s)
         equipment.setSpace(space)
-        schedule = OpenStudioLoads::Schedules.add(model, entry['schedule'], vintage: data_vintage, audit: audit)
+        schedule = BtapNECB::Loads::Schedules.add(model, entry['schedule'], vintage: data_vintage, audit: audit)
         equipment.setFlowRateFractionSchedule(schedule)
 
         connections = OpenStudio::Model::WaterUseConnections.new(model)

@@ -85,7 +85,6 @@ class TestBar < Minitest::Test
     # is the whole-family composition test, and a silent skip is exactly how a
     # directory rename would hollow it out while CI stays green.
     %w[
-      openstudio-loads/lib/openstudio_loads
       openstudio-lighting/lib/openstudio_lighting
       openstudio-shw/lib/openstudio_shw
       btap-necb/lib/btap_necb
@@ -99,7 +98,7 @@ class TestBar < Minitest::Test
                                    num_stories_above_grade: 2, wwr: 0.4)
     seed_constructions(model) # wizard output carries no constructions; the envelope pass retargets existing ones
     audit = BtapModeling::AuditLog.new
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
     OpenStudioLighting.apply_lights(model, vintage: '2020', audit: audit)
     OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
     BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))

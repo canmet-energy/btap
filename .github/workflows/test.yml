@@ -91,7 +91,6 @@ jobs:
           - btap-costing
           - btap-modeling
           - openstudio-lighting
-          - openstudio-loads
           - btap-necb
           - openstudio-shw
           - btap-simulation
@@ -197,9 +196,9 @@ jobs:
             btap-necb/test_envelope_prescriptive_parity.rb \
             btap-necb/test_envelope_costing_parity.rb \
             btap-necb/test_envelope_data_integrity.rb \
-            openstudio-loads/test_schedules_parity.rb \
-            openstudio-loads/test_apply_parity.rb \
-            openstudio-loads/test_data_integrity.rb \
+            btap-necb/test_loads_schedules_parity.rb \
+            btap-necb/test_loads_apply_parity.rb \
+            btap-necb/test_loads_data_integrity.rb \
             openstudio-shw/test_shw_parity.rb \
             openstudio-lighting/test_lights_parity.rb \
             openstudio-lighting/test_daylighting_parity.rb \

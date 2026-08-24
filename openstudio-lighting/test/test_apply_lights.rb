@@ -13,7 +13,7 @@ class TestApplyLights < Minitest::Test
     st = tagged_space_type(model, *OFFICE)
     audit = OpenStudioLighting.apply_lights(model, vintage: '2020', audit: OpenStudioLighting::AuditLog.new)
 
-    record = OpenStudioLoads::NECB::SpaceTypes.record(building_type: OFFICE[0], space_type: OFFICE[1])
+    record = BtapNECB::Loads::SpaceTypes.record(building_type: OFFICE[0], space_type: OFFICE[1])
     lights = st.lights.first
     refute_nil lights
     expected = OpenStudio.convert(record['lighting_per_area'].to_f, 'W/ft^2', 'W/m^2').get
@@ -31,7 +31,7 @@ class TestApplyLights < Minitest::Test
     audit = OpenStudioLighting::AuditLog.new
     OpenStudioLighting.apply_lights(model, vintage: '2020', audit: audit)
 
-    record = OpenStudioLoads::NECB::SpaceTypes.record(building_type: CONFERENCE[0], space_type: CONFERENCE[1])
+    record = BtapNECB::Loads::SpaceTypes.record(building_type: CONFERENCE[0], space_type: CONFERENCE[1])
     assert_operator record['lighting_per_area'].to_f, :>, 0.799256505, 'fixture premise: above threshold'
 
     schedule = st.defaultScheduleSet.get.lightingSchedule.get
@@ -42,9 +42,9 @@ class TestApplyLights < Minitest::Test
     default = ruleset.defaultDaySchedule
     rel = record['rel_absence_occ'].to_f
     control = 1 - (rel * record['occ_sense'].to_f) - record['personal_control'].to_f
-    lighting_rows = OpenStudioLoads::NECB.table('2020', 'schedules')
+    lighting_rows = BtapNECB::Loads.table('2020', 'schedules')
                                          .select { |r| r['name'] == record['lighting_schedule'] }
-    occupancy_rows = OpenStudioLoads::NECB.table('2020', 'schedules')
+    occupancy_rows = BtapNECB::Loads.table('2020', 'schedules')
                                           .select { |r| r['name'] == record['occupancy_schedule'] }
     base = lighting_rows.find { |r| r['day_types'].include?('Default') }['values']
     occ = occupancy_rows.find { |r| r['day_types'].include?('Default') }['values']
@@ -94,7 +94,7 @@ class TestApplyLights < Minitest::Test
     st = tagged_space_type(model, *OFFICE)
     audit = OpenStudioLighting::AuditLog.new
     OpenStudioLighting.apply_lights(model, vintage: '2020', lights_scale: 0.5, audit: audit)
-    record = OpenStudioLoads::NECB::SpaceTypes.record(building_type: OFFICE[0], space_type: OFFICE[1])
+    record = BtapNECB::Loads::SpaceTypes.record(building_type: OFFICE[0], space_type: OFFICE[1])
     expected = OpenStudio.convert(record['lighting_per_area'].to_f * 0.5, 'W/ft^2', 'W/m^2').get
     assert_in_delta expected, st.lights.first.lightsDefinition.wattsperSpaceFloorArea.get, 1e-9
 

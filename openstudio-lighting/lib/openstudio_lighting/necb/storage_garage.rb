@@ -116,7 +116,7 @@ module OpenStudioLighting
 
           lighting_name = record['lighting_schedule'].to_s
           occupancy_name = record['occupancy_schedule'].to_s
-          schedules = OpenStudioLoads::NECB.table(data_vintage, 'schedules')
+          schedules = BtapNECB::Loads.table(data_vintage, 'schedules')
           lighting_rows = schedules.select { |r| r['name'] == lighting_name }
           occupancy_rows = schedules.select { |r| r['name'] == occupancy_name }
           if lighting_rows.empty? || occupancy_rows.empty?

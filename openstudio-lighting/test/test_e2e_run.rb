@@ -13,8 +13,8 @@ class TestE2ERun < Minitest::Test
     model.getLightss.each(&:remove)
     model.getLightsDefinitions.each(&:remove)
     map = model.getSpaces.to_h { |s| [s.nameString, OFFICE] }
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020')
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020')
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020')
+    BtapNECB::Loads.apply_loads(model, vintage: '2020')
     model
   end
 

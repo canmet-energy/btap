@@ -35,7 +35,7 @@ ROOT = File.expand_path('../..', __dir__)
 # directories, and a literal token is what a rename's sed pass can catch.
 %w[
   btap-audit/lib/btap_audit
-  openstudio-loads/lib/openstudio_loads
+  btap-necb/lib/btap_necb/loads
   btap-simulation/lib/btap_simulation
 ].each { |entry| require File.expand_path(entry, ROOT) }
 
@@ -56,7 +56,7 @@ def build(name)
     st.setStandardsBuildingType('Space Function')
     st.setStandardsSpaceType('Office enclosed > 25 m2')
   end
-  OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: BtapModeling::AuditLog.new)
+  BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: BtapModeling::AuditLog.new)
   BtapModeling.build_system(model, name, model.getThermalZones.sort_by(&:nameString))
   model
 end

@@ -18,7 +18,7 @@ module FixtureHelper
   def tagged_model
     model = load_fixture
     map = model.getSpaces.to_h { |s| [s.nameString, OFFICE] }
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020')
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020')
     model
   end
 
