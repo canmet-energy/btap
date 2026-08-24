@@ -249,7 +249,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
     # D-23: envelope_rules table values are OVERALL U (incl. films, per 1.4.1.2);
     # the applied construction is CONSTRUCTION-ONLY conductance. Convert to overall
     # before comparing (mirrors openstudio-envelope/test/test_prescriptive.rb:135-138).
-    r_films = OpenStudioEnvelope::Constructions.film_r('wall', 'outdoors')
+    r_films = BtapModeling::Constructions.film_r('wall', 'outdoors')
     got_overall_u = 1.0 / ((1.0 / got_wall_u) + r_films)
     puts "[RAN] (a) reference exterior wall U-value: expected #{expected_wall_u} W/m2K " \
          "(NECB 2020 Table 3.2.2.2, HDD=#{hdd} -> bin #{wall_bins.sort_by { |k, _| k.to_i }.find { |k, _| hdd < k.to_i }.first}), " \

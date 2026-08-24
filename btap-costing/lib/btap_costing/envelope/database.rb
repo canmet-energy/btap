@@ -109,7 +109,7 @@ module BtapCosting
         return explicit if explicit && File.exist?(explicit)
 
         raise(ArgumentError,
-              "#{filename} not found. Priced cost tables are not vendored in openstudio-envelope " \
+              "#{filename} not found. " \
               '— pass costs_csv:/local_factors_csv:, or set ' \
               'BTAP_COSTING_DIR.')
       end

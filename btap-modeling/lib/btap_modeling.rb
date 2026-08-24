@@ -57,7 +57,7 @@ require_relative 'btap_modeling/catalog_report'
 #
 # Downstream: OpenStudioLoads.assign_space_types + apply_loads,
 # OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
-# BtapModeling.build_system, OpenStudioEnvelope prescriptive/reference,
+# BtapModeling.build_system, BtapNECB::Envelope prescriptive/reference,
 # BtapNECB.performance_compliance.
 module BtapModeling
   SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
@@ -265,9 +265,9 @@ module BtapModeling
   #   BtapModeling.apply_wwr(model, 0.35)
   #   BtapModeling.apply_wwr(model, 'South' => 0.4, 'North' => 0.2)
   #
-  # For the NECB maximum use openstudio-envelope, which owns the rule:
+  # For the NECB maximum use btap-necb (envelope domain), which owns the rule:
   #
-  #   limit = OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: hdd)
+  #   limit = BtapNECB::Envelope.max_fdwr(vintage: '2020', hdd: hdd)
   #   BtapModeling.apply_wwr(model, limit)
   #
   # @param model [OpenStudio::Model::Model]

@@ -8,12 +8,12 @@ class TestThermalBridging < Minitest::Test
   HDD = 3890
 
   def tbd_available?
-    OpenStudioEnvelope::NECB::ThermalBridging.available?
+    BtapNECB::Envelope::ThermalBridging.available?
   end
 
   def test_not_requested_warns
-    model = load_fixture
-    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD)
+    model = load_raw_fixture
+    audit = BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD)
     warning = audit.warnings.find { |w| w[:action].include?('thermal bridging not requested') }
     refute_nil warning
     assert_equal '3.1.1.7.', warning[:article]
@@ -21,8 +21,8 @@ class TestThermalBridging < Minitest::Test
 
   def test_unavailable_is_loud
     ENV['OPENSTUDIO_ENVELOPE_DISABLE_TBD'] = '1'
-    audit = OpenStudioEnvelope::AuditLog.new
-    result = OpenStudioEnvelope::NECB::ThermalBridging.apply(load_fixture, vintage: '2020', hdd: HDD, audit: audit)
+    audit = BtapNECB::AuditLog.new
+    result = BtapNECB::Envelope::ThermalBridging.apply(load_raw_fixture, vintage: '2020', hdd: HDD, audit: audit)
     assert_equal false, result
     assert audit.warnings.any? { |w| w[:action].include?("NOT accounted") && w[:article] == '3.1.1.7.' }
   ensure
@@ -42,10 +42,10 @@ class TestThermalBridging < Minitest::Test
       ENV['TBD_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
     end
 
-    model = load_fixture
-    audit = OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: HDD,
+    model = load_raw_fixture
+    audit = BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: HDD,
                                                         thermal_bridging: 'efficient (BETBG)',
-                                                        audit: OpenStudioEnvelope::AuditLog.new)
+                                                        audit: BtapNECB::AuditLog.new)
 
     decision = audit.entries.find { |e| e[:step] == :thermal_bridging && e[:level] == :decision }
     refute_nil decision, 'TBD uprate/derate decision logged'
@@ -69,7 +69,7 @@ class TestThermalBridging < Minitest::Test
 
   def test_coverage_manifest_reflects_tbd_status
     %w[2020 2025].each do |v|
-      art = OpenStudioEnvelope::NECB.rules(v)['article_coverage']['articles']
+      art = BtapNECB::Envelope.rules(v)['article_coverage']['articles']
                                     .find { |a| a['article'] == '3.1.1.7.' }
       assert_equal 'implemented', art['status']
       assert_match(/tbd gem/, art['gaps'])

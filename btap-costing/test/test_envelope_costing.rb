@@ -12,8 +12,8 @@ class TestCosting < Minitest::Test
 
   def costed_model
     model = load_fixture
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890,
-                                                audit: OpenStudioEnvelope::AuditLog.new)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
+                                                audit: BtapNECB::AuditLog.new)
     model
   end
 
@@ -62,8 +62,8 @@ class TestCosting < Minitest::Test
   end
 
   def test_envelope_costing_covers_all_present_surface_types
-    audit = OpenStudioEnvelope::AuditLog.new
-    report = OpenStudioEnvelope.cost(costed_model, city: CITY, province_state: PROVINCE, audit: audit)
+    audit = BtapNECB::AuditLog.new
+    report = BtapCosting::Envelope.cost(costed_model, city: CITY, province_state: PROVINCE, audit: audit)
 
     assert_operator report.total, :>, 0
     types = report.envelope['surface_types']
@@ -88,9 +88,9 @@ class TestCosting < Minitest::Test
     model = costed_model
     wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     wall.setWindowToWallRatio(0.4)
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890,
-                                                audit: OpenStudioEnvelope::AuditLog.new)
-    report = OpenStudioEnvelope.cost(model, city: CITY, province_state: PROVINCE)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
+                                                audit: BtapNECB::AuditLog.new)
+    report = BtapCosting::Envelope.cost(model, city: CITY, province_state: PROVINCE)
 
     window = report.envelope['surface_types']['exterior_fixed_window']
     assert_operator window['cost'], :>, 0, 'windows costed (assembly curve + SHGC film premium)'
@@ -100,11 +100,11 @@ class TestCosting < Minitest::Test
 
   def test_zone_multiplier_scales_cost
     base_model = costed_model
-    base = OpenStudioEnvelope.cost(base_model, city: CITY, province_state: PROVINCE)
+    base = BtapCosting::Envelope.cost(base_model, city: CITY, province_state: PROVINCE)
 
     scaled_model = costed_model
     scaled_model.getThermalZones.each { |z| z.setMultiplier(3) }
-    scaled = OpenStudioEnvelope.cost(scaled_model, city: CITY, province_state: PROVINCE)
+    scaled = BtapCosting::Envelope.cost(scaled_model, city: CITY, province_state: PROVINCE)
     assert_in_delta base.total * 3.0, scaled.total, base.total * 0.01
   end
 
@@ -113,8 +113,8 @@ class TestCosting < Minitest::Test
                 'jamb' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 50.0 },
                 'transition' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 500.0 },
                 'ceiling' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 500.0 } }
-    audit = OpenStudioEnvelope::AuditLog.new
-    report = OpenStudioEnvelope.cost(costed_model, city: CITY, province_state: PROVINCE,
+    audit = BtapNECB::AuditLog.new
+    report = BtapCosting::Envelope.cost(costed_model, city: CITY, province_state: PROVINCE,
                                      tb_tallies: tallies, audit: audit)
 
     tb = report.thermal_bridging
@@ -136,15 +136,15 @@ class TestCosting < Minitest::Test
 
   def test_unknown_wall_reference_and_id_zero_warn_never_silent
     tallies = { 'corner' => { 'No-Such-Assembly good' => 10.0 } }
-    audit = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope.cost(costed_model, city: CITY, province_state: PROVINCE,
+    audit = BtapNECB::AuditLog.new
+    BtapCosting::Envelope.cost(costed_model, city: CITY, province_state: PROVINCE,
                             tb_tallies: tallies, audit: audit)
     assert(audit.warnings.any? { |w| w[:action].include?("wall reference 'No-Such-Assembly good'") })
 
     # corner rows for SteelFramed-1 reference material id '0' (no materials_opaque row)
     tallies2 = { 'corner' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 10.0 } }
-    audit2 = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope.cost(costed_model, city: CITY, province_state: PROVINCE,
+    audit2 = BtapNECB::AuditLog.new
+    BtapCosting::Envelope.cost(costed_model, city: CITY, province_state: PROVINCE,
                             tb_tallies: tallies2, audit: audit2)
     assert(audit2.warnings.any? { |w| w[:action].include?("material id '0'") },
            "id '0' rows are skipped LOUDLY")
@@ -166,9 +166,9 @@ class TestCosting < Minitest::Test
 
   def test_unified_audit_spans_compliance_and_costing
     model = load_fixture
-    audit = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope::NECB.reference_envelope(model, vintage: '2020', hdd: 3890, audit: audit)
-    OpenStudioEnvelope.cost(model, city: CITY, province_state: PROVINCE,
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Envelope.reference_envelope(model, vintage: '2020', hdd: 3890, audit: audit)
+    BtapCosting::Envelope.cost(model, city: CITY, province_state: PROVINCE,
                             tb_tallies: { 'parapet' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 10.0 } },
                             audit: audit)
     steps = audit.entries.map { |e| e[:step] }.uniq

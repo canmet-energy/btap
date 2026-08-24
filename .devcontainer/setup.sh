@@ -109,9 +109,9 @@ if command -v certctl >/dev/null 2>&1; then
 fi
 
 # ---------------------------------------------------------------------------
-# The tbd/osut/topolys TRIPLET — openstudio-envelope's third-party runtime deps.
+# The tbd/osut/topolys TRIPLET — btap-necb (envelope domain)'s third-party runtime deps.
 #
-# It is declared in openstudio-envelope.gemspec, but the suites run under plain
+# It is declared in btap-necb.gemspec, but the suites run under plain
 # `ruby`, not `bundle exec`, so nothing enforces gemspec dependencies. The gem
 # was therefore absent from this container and from CI, and
 # test_uprate_derate_meets_effective_targets — the only test proving the NECB
@@ -147,7 +147,7 @@ else
   else
     echo "   ⚠️  install failed (offline or blocked) — install manually later:"
     echo "      gem install $TRIPLET --user-install"
-    echo "      without it, openstudio-envelope warns that NECB 3.1.1.7 is unaccounted"
+    echo "      without it, btap-necb (envelope domain) warns that NECB 3.1.1.7 is unaccounted"
     echo "      and test_thermal_bridging.rb skips its uprate/derate case"
   fi
   if ruby -e "require 'tbd'" >/dev/null 2>&1 &&

@@ -21,7 +21,7 @@ class TestReferenceEnvelope < Minitest::Test
   # stays skylight-free so the FDWR/shading/absorptance/air-leakage tests below
   # are unaffected.
   def proposed_model
-    model = load_fixture
+    model = load_raw_fixture
     walls = model.getSurfaces.select { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     walls.each { |w| w.setWindowToWallRatio(0.6) }
 
@@ -35,19 +35,19 @@ class TestReferenceEnvelope < Minitest::Test
   end
 
   def reference(model, **kwargs)
-    audit = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope::NECB.reference_envelope(model, vintage: '2020', hdd: HDD, audit: audit, **kwargs)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Envelope.reference_envelope(model, vintage: '2020', hdd: HDD, audit: audit, **kwargs)
     audit
   end
 
   def test_fdwr_scaled_proportionally_not_rebuilt
     model = proposed_model
-    before = OpenStudioEnvelope::Geometry.exposed_walls(model)
+    before = BtapModeling::Geometry.exposed_walls(model)
     window_count_before = model.getSubSurfaces.size
     assert_operator before[:fdwr], :>, FDWR_LIMIT, 'fixture starts over the limit'
 
     audit = reference(model)
-    after = OpenStudioEnvelope::Geometry.exposed_walls(model)
+    after = BtapModeling::Geometry.exposed_walls(model)
     assert_in_delta FDWR_LIMIT, after[:fdwr], 0.005, 'scaled down to the limit'
     assert_equal window_count_before, model.getSubSurfaces.size,
                  '8.4.4.3.(3) scales EXISTING fenestration — no rebuild, same window count'
@@ -203,8 +203,8 @@ class TestReferenceEnvelope < Minitest::Test
     attic.setPartofTotalFloorArea(false)
     [cond, attic].each { |s| s.setThermalZone(OpenStudio::Model::ThermalZone.new(model)) }
 
-    audit = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope::NECB::Reference.apply_air_leakage_default(model, '8.4.4', audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Envelope::Reference.apply_air_leakage_default(model, '8.4.4', audit)
 
     decision = audit.entries.find { |e| e[:action] == 'air-leakage default applied' }
     assert_in_delta 320.0, decision[:inputs][:envelope_area_m2], 0.5, 'attic roof/gables excluded; ceiling included'
@@ -276,7 +276,7 @@ class TestReferenceEnvelope < Minitest::Test
                                                  building: { storeys: 1, zone_types: types,
                                                              winter_design_temp_c: -20 },
                                                  audit: audit)
-    OpenStudioEnvelope::NECB.reference_envelope(result.model, vintage: '2020', hdd: HDD, audit: audit)
+    BtapNECB::Envelope.reference_envelope(result.model, vintage: '2020', hdd: HDD, audit: audit)
 
     steps = audit.entries.map { |e| e[:step] }.uniq
     %i[selection build rules efficiency coverage reference prescriptive].each do |s|

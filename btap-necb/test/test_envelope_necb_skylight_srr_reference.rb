@@ -23,7 +23,7 @@ class TestNECBSkylightSRRReference < Minitest::Test
   # shrinks EXISTING subsurfaces via Geometry.scale_subsurfaces — it never
   # calls apply_srr, which only the prescriptive path uses to ADD skylights.
   def model_with_skylights(srr:)
-    model = load_fixture
+    model = load_raw_fixture
     glazing = OpenStudio::Model::SimpleGlazing.new(model)
     glazing.setUFactor(3.0)
     glazing.setSolarHeatGainCoefficient(0.5)
@@ -31,15 +31,15 @@ class TestNECBSkylightSRRReference < Minitest::Test
     construction = OpenStudio::Model::Construction.new(model)
     construction.setName('Proposed Skylight Construction')
     construction.setLayers([glazing])
-    ok = OpenStudioEnvelope::NECB::Fenestration.apply_srr(model, srr, construction)
+    ok = BtapNECB::Envelope::Fenestration.apply_srr(model, srr, construction)
     raise('fixture builder failed to add skylights') unless ok
 
     model
   end
 
   def reference(model)
-    audit = OpenStudioEnvelope::AuditLog.new
-    OpenStudioEnvelope::NECB.reference_envelope(model, vintage: '2020', hdd: HDD, audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Envelope.reference_envelope(model, vintage: '2020', hdd: HDD, audit: audit)
     audit
   end
 
@@ -49,23 +49,23 @@ class TestNECBSkylightSRRReference < Minitest::Test
   # for the first time in any test.
   def test_reference_shrinks_hostile_skylight_to_the_srr_limit
     model = model_with_skylights(srr: 0.10)
-    before_roofs = OpenStudioEnvelope::Geometry.exposed_roofs(model)
+    before_roofs = BtapModeling::Geometry.exposed_roofs(model)
     before_sub_area = before_roofs[:subsurface_area_m2]
-    before_walls = OpenStudioEnvelope::Geometry.exposed_walls(model)
+    before_walls = BtapModeling::Geometry.exposed_walls(model)
     before_window_area = before_walls[:subsurface_area_m2]
     before_window_count = model.getSubSurfaces.count { |s| s.subSurfaceType != 'Skylight' }
     assert_operator before_roofs[:srr], :>, SRR_LIMIT, 'fixture precondition: proposed SRR exceeds the limit'
 
     reference(model)
 
-    after_roofs = OpenStudioEnvelope::Geometry.exposed_roofs(model)
+    after_roofs = BtapModeling::Geometry.exposed_roofs(model)
     ratio = SRR_LIMIT / before_roofs[:srr]
     assert_in_delta before_sub_area * ratio, after_roofs[:subsurface_area_m2], 1e-3,
                     'skylight area must shrink by exactly limit/proposed_srr (8.4.4.3.(3))'
     assert_in_delta SRR_LIMIT, after_roofs[:srr], 1e-4, 'resulting SRR must land at the 2% cap'
     assert_operator after_roofs[:srr], :<=, SRR_LIMIT + 1e-6
 
-    after_walls = OpenStudioEnvelope::Geometry.exposed_walls(model)
+    after_walls = BtapModeling::Geometry.exposed_walls(model)
     assert_in_delta before_window_area, after_walls[:subsurface_area_m2], 1e-6,
                     'wall windows must be untouched by the roof-only SRR scaling'
     assert_equal before_window_count, model.getSubSurfaces.count { |s| s.subSurfaceType != 'Skylight' },

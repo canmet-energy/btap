@@ -1,5 +1,5 @@
-module OpenStudioEnvelope
-  module NECB
+module BtapNECB
+  module Envelope
     # The performance-path reference ENVELOPE (2020: 8.4.4.1.(2)/8.4.4.3./8.4.4.4.;
     # 2025: 8.4.5.x, verbatim text) — greenfield: no legacy implementation exists.
     # Operates IN PLACE on a model the caller clones, so a compliance umbrella can
@@ -48,7 +48,7 @@ module OpenStudioEnvelope
                        inputs: { hdd: hdd }, article: "#{prefix}.1.(2)")
 
         scale_fenestration_to_limits(model, vintage, hdd, prefix, audit)
-        roof_absorptance = NECB.rules(vintage).fetch('reference_envelope').fetch('roof_absorptance_if_actual_used')
+        roof_absorptance = Envelope.rules(vintage).fetch('reference_envelope').fetch('roof_absorptance_if_actual_used')
         apply_roof_absorptance(model, actual_roof_absorptance_used, roof_absorptance, prefix, audit)
         strip_shading(model, prefix, audit)
         audit.info(:reference, 'fenestration optics (SHGC/VT) preserved — only U changed by construction of the prescriptive transform',
@@ -64,7 +64,7 @@ module OpenStudioEnvelope
       # every wall preserves each orientation's share).
       def scale_fenestration_to_limits(model, vintage, hdd, prefix, audit)
         walls = Geometry.exposed_walls(model)
-        limit = NECB.max_fdwr(vintage: vintage, hdd: hdd)
+        limit = Envelope.max_fdwr(vintage: vintage, hdd: hdd)
         if walls[:fdwr] && walls[:fdwr] > limit
           ratio = limit / walls[:fdwr]
           walls[:walls].each { |w| Geometry.scale_subsurfaces(w, ratio) }
@@ -79,7 +79,7 @@ module OpenStudioEnvelope
         end
 
         roofs = Geometry.exposed_roofs(model)
-        srr_limit = NECB.max_srr(vintage: vintage)
+        srr_limit = Envelope.max_srr(vintage: vintage)
         return unless roofs[:srr] && roofs[:srr] > srr_limit
 
         ratio = srr_limit / roofs[:srr]
@@ -362,7 +362,7 @@ module OpenStudioEnvelope
 
       # Completeness accounting (same contract as openstudio-hvac).
       def emit_article_coverage(vintage, audit)
-        BtapAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
+        BtapAudit::Coverage.emit(Envelope.rules(vintage)['article_coverage'], audit)
       end
 
       # ---- internals (not API) ----

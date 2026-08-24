@@ -214,7 +214,7 @@ module BtapModeling
     # Cut windows into every exterior wall to hit a window-to-wall ratio.
     #
     # PURE GEOMETRY, and deliberately so. There is NO default ratio and no code
-    # knowledge here: NECB's FDWR maximum is an `openstudio-envelope` concern
+    # knowledge here: NECB's FDWR maximum is an `btap-necb (envelope domain)` concern
     # (`NECB.max_fdwr(vintage:, hdd:)`, article 3.2.1.4), and this gem carries no
     # NECB rules data by family contract. Callers pass a number they chose.
     #

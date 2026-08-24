@@ -53,8 +53,8 @@
     "status": "host_scope",
     "how": "implemented in the openstudio-envelope gem; the loads pass applies only the space-type modelling infiltration",
     "code": [
-     "openstudio-envelope/lib/openstudio_envelope/necb/reference.rb#apply_air_leakage_default",
-     "openstudio-envelope/lib/openstudio_envelope/necb/prescriptive.rb#apply"
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
     ]
    },
    {

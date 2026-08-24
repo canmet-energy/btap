@@ -9,13 +9,13 @@ class TestDataIntegrity < Minitest::Test
   BINS = %w[3000 4000 5000 6000 7000 9999].freeze
 
   def test_rules_load_and_unknown_vintage_raises
-    VINTAGES.each { |v| refute_nil OpenStudioEnvelope::NECB.rules(v) }
-    assert_raises(ArgumentError) { OpenStudioEnvelope::NECB.rules('1997') }
+    VINTAGES.each { |v| refute_nil BtapNECB::Envelope.rules(v) }
+    assert_raises(ArgumentError) { BtapNECB::Envelope.rules('1997') }
   end
 
   def test_u_values_complete_and_monotone
     VINTAGES.each do |vintage|
-      u = OpenStudioEnvelope::NECB.rules(vintage)['u_values']
+      u = BtapNECB::Envelope.rules(vintage)['u_values']
       SURFACES.each do |boundary, surfaces|
         surfaces.each do |surface|
           bins = u.fetch(boundary).fetch(surface)
@@ -33,7 +33,7 @@ class TestDataIntegrity < Minitest::Test
 
   def test_fdwr_piecewise_continuity
     VINTAGES.each do |vintage|
-      pieces = OpenStudioEnvelope::NECB.rules(vintage)['fdwr']['pieces']
+      pieces = BtapNECB::Envelope.rules(vintage)['fdwr']['pieces']
       assert_equal 3, pieces.size
       linear = pieces[1]['linear']
       at4000 = (linear['intercept'] + linear['slope'] * 4000) / linear['divisor']
@@ -45,7 +45,7 @@ class TestDataIntegrity < Minitest::Test
 
   def test_srr_is_two_percent
     VINTAGES.each do |vintage|
-      srr = OpenStudioEnvelope::NECB.rules(vintage)['srr_max']
+      srr = BtapNECB::Envelope.rules(vintage)['srr_max']
       assert_in_delta 0.02, srr['value'], 1e-9
       assert_match(/3\.2\.1\.4/, srr['article'])
     end
@@ -54,7 +54,7 @@ class TestDataIntegrity < Minitest::Test
   def test_provenance_and_coverage_lint
     valid = %w[implemented partial not_implemented satisfied_by_clone host_scope]
     VINTAGES.each do |vintage|
-      rules = OpenStudioEnvelope::NECB.rules(vintage)
+      rules = BtapNECB::Envelope.rules(vintage)
       prov = rules['provenance']
       assert_equal vintage, prov['edition']
       assert_match(/MCP/, prov['source'])
@@ -88,18 +88,18 @@ class TestDataIntegrity < Minitest::Test
     end
 
     legacy = JSON.parse(File.read(legacy_path))['tables']['surface_thermal_transmittance']['table']
-    gem_u = OpenStudioEnvelope::NECB.rules('2020')['u_values']
+    gem_u = BtapNECB::Envelope.rules('2020')['u_values']
     assert_equal legacy, gem_u, 'vendored 2020 U-values must equal legacy data structurally'
   end
 
   def test_2025_values_equal_2020
-    assert_equal OpenStudioEnvelope::NECB.rules('2020')['u_values'],
-                 OpenStudioEnvelope::NECB.rules('2025')['u_values'],
+    assert_equal BtapNECB::Envelope.rules('2020')['u_values'],
+                 BtapNECB::Envelope.rules('2025')['u_values'],
                  'verified via MCP: 2025 envelope tables are numerically identical to 2020'
   end
 
   def test_table_c1_vendored
-    path = File.join(OpenStudioEnvelope::NECB::RULES_DIR, 'table_c1.json')
+    path = File.join(BtapNECB::Envelope::RULES_DIR, 'table_c1.json')
     data = JSON.parse(File.read(path))
     assert_operator data['table'].size, :>=, 679
     row = data['table'].first
@@ -108,10 +108,10 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_audit_log_schema_matches_hvac_gem
-    audit = OpenStudioEnvelope::AuditLog.new
+    audit = BtapNECB::AuditLog.new
     audit.decision(:test, 'x', article: '3.2.1.4.')
     entry = JSON.parse(audit.to_json).first
     assert_equal %w[step action article level].sort, (entry.keys & %w[step action article level]).sort
-    assert_equal OpenStudioEnvelope::NECB::AuditLog, OpenStudioEnvelope::AuditLog
+    assert_equal BtapNECB::AuditLog, BtapNECB::AuditLog
   end
 end

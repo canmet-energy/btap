@@ -15,11 +15,6 @@ rescue LoadError
   require File.expand_path('../../openstudio-hvac/lib/openstudio_hvac', __dir__)
 end
 begin
-  require 'openstudio_envelope'
-rescue LoadError
-  require File.expand_path('../../openstudio-envelope/lib/openstudio_envelope', __dir__)
-end
-begin
   require 'openstudio_loads'
 rescue LoadError
   require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
@@ -46,8 +41,14 @@ begin
 rescue LoadError
   require File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
 end
+begin
+  require 'btap_costing'
+rescue LoadError
+  require File.expand_path('../../btap-costing/lib/btap_costing', __dir__)
+end
 
 require_relative 'btap_necb/version'
+require_relative 'btap_necb/envelope'
 require_relative 'btap_necb/tiers'
 require_relative 'btap_necb/decisions'
 require_relative 'btap_necb/eui_archetypes'
@@ -55,7 +56,7 @@ require_relative 'btap_necb/compliance'
 require_relative 'btap_necb/report'
 
 # BtapNECB is the UMBRELLA: it composes the five SDK-only domain gems
-# (openstudio-hvac reference systems + efficiencies, openstudio-envelope
+# (hvac reference systems + efficiencies, envelope
 # prescriptive/reference envelope + thermal bridging, openstudio-loads NECB
 # space-use loads, openstudio-lighting LPD allowances + daylighting,
 # openstudio-shw service-water-heating minimums) into the NECB Part 8

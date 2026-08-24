@@ -54,7 +54,7 @@ class TestCostingParity < Minitest::Test
     points_sets.each do |points|
       xs.each do |x|
         legacy_value, = BTAP::LinearRegression.interpolate(x_y_array: points.map(&:dup), x2: x)
-        gem_value = OpenStudioEnvelope::Costing::Interpolate.interpolate(x_y_array: points.map(&:dup), x2: x).value
+        gem_value = BtapCosting::Envelope::Interpolate.interpolate(x_y_array: points.map(&:dup), x2: x).value
         mismatches << [points.first, x, legacy_value, gem_value] unless (legacy_value.to_f - gem_value).abs < 1e-9
       end
     end
@@ -64,7 +64,7 @@ class TestCostingParity < Minitest::Test
 
   def test_cost_construction_parity_every_candidate
     coster = legacy
-    database = OpenStudioEnvelope::Costing::Database.new
+    database = BtapCosting::Envelope::Database.new
     checked = 0
     mismatches = []
 
@@ -73,7 +73,7 @@ class TestCostingParity < Minitest::Test
         database.construction_candidates(sheet, assembly).each do |rsi, construction|
           legacy_hash = { 'type' => construction['type'], 'id_layers' => construction['id_layers'].dup }
           coster.cost_construction(legacy_hash, PROVINCE, CITY)
-          gem_cost = OpenStudioEnvelope::Costing::EnvelopeCosts.construction_cost(
+          gem_cost = BtapCosting::Envelope::EnvelopeCosts.construction_cost(
             database, construction, PROVINCE, CITY)
           checked += 1
           next if (legacy_hash['cost'] - gem_cost).abs < 0.011 # per-layer cent rounding
@@ -90,23 +90,23 @@ class TestCostingParity < Minitest::Test
   def test_rsi_parity_vs_tbd
     legacy
     require 'tbd'
-    model = load_fixture
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890,
-                                                audit: OpenStudioEnvelope::AuditLog.new)
+    model = load_raw_fixture
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
+                                                audit: BtapNECB::AuditLog.new)
     wall = model.getSurfaces.find { |s| s.outsideBoundaryCondition == 'Outdoors' && s.surfaceType == 'Wall' }
     wall.setWindowToWallRatio(0.3)
-    OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890,
-                                                audit: OpenStudioEnvelope::AuditLog.new)
+    BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
+                                                audit: BtapNECB::AuditLog.new)
 
     mismatches = []
     model.getSurfaces.sort_by(&:nameString).each do |surface|
       next if surface.construction.empty? || surface.construction.get.to_LayeredConstruction.empty?
       next unless surface.outsideBoundaryCondition == 'Outdoors' ||
-                  OpenStudioEnvelope::Costing::Quantify::GROUND_BOUNDARIES.include?(surface.outsideBoundaryCondition)
+                  BtapCosting::Envelope::Quantify::GROUND_BOUNDARIES.include?(surface.outsideBoundaryCondition)
 
       lc = surface.construction.get.to_LayeredConstruction.get
       legacy_rsi = TBD.rsi(lc, surface.filmResistance)
-      gem_rsi = OpenStudioEnvelope::Costing::Quantify.rsi_of(surface, film: true)
+      gem_rsi = BtapCosting::Envelope::Quantify.rsi_of(surface, film: true)
       mismatches << [surface.nameString, legacy_rsi, gem_rsi] unless (legacy_rsi - gem_rsi).abs < 1e-6
     end
     model.getSubSurfaces.sort_by(&:nameString).each do |sub|
@@ -114,7 +114,7 @@ class TestCostingParity < Minitest::Test
 
       lc = sub.construction.get.to_LayeredConstruction.get
       legacy_rsi = TBD.rsi(lc, 0)
-      gem_rsi = OpenStudioEnvelope::Costing::Quantify.rsi_of(sub, film: false)
+      gem_rsi = BtapCosting::Envelope::Quantify.rsi_of(sub, film: false)
       mismatches << [sub.nameString, legacy_rsi, gem_rsi] unless (legacy_rsi - gem_rsi).abs < 1e-6
     end
     assert_empty mismatches, "RSI mismatches vs TBD.rsi: #{mismatches.inspect[0, 400]}"
@@ -128,8 +128,8 @@ class TestCostingParity < Minitest::Test
                 'rimjoist' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 30.0 },
                 'transition' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 500.0 } }
     legacy_quantities = BTAP::BridgingData.get_material_quantities_for_edges(tallies)
-    database = OpenStudioEnvelope::Costing::Database.new
-    gem_quantities, = OpenStudioEnvelope::Costing::ThermalBridgingCosts.material_quantities(
+    database = BtapCosting::Envelope::Database.new
+    gem_quantities, = BtapCosting::Envelope::ThermalBridgingCosts.material_quantities(
       tallies, database, nil)
     legacy_quantities.each do |id, qty|
       assert_in_delta qty, gem_quantities[id.to_s], 1e-9, "material #{id} quantity"

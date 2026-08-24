@@ -1,5 +1,5 @@
-module OpenStudioEnvelope
-  module NECB
+module BtapNECB
+  module Envelope
     # NECB 3.1.1.7: the Table 3.2.2.x values are EFFECTIVE overall thermal
     # transmittance — Ut = Uo + (Σψ·L)/A + (Σχ·n)/A — so clear-field U-values alone
     # under-insulate relative to code intent. This module integrates the TBD gem
@@ -52,9 +52,9 @@ module OpenStudioEnvelope
         raise(ArgumentError, 'HDD unresolvable: pass hdd: explicitly or set a weather file') if hdd.nil?
 
         targets = {
-          wall_ut: NECB.max_u(vintage: vintage, surface: 'wall', boundary: 'outdoors', hdd: hdd),
-          roof_ut: NECB.max_u(vintage: vintage, surface: 'roofceiling', boundary: 'outdoors', hdd: hdd),
-          floor_ut: NECB.max_u(vintage: vintage, surface: 'floor', boundary: 'outdoors', hdd: hdd)
+          wall_ut: Envelope.max_u(vintage: vintage, surface: 'wall', boundary: 'outdoors', hdd: hdd),
+          roof_ut: Envelope.max_u(vintage: vintage, surface: 'roofceiling', boundary: 'outdoors', hdd: hdd),
+          floor_ut: Envelope.max_u(vintage: vintage, surface: 'floor', boundary: 'outdoors', hdd: hdd)
         }
 
         TBD.clean!

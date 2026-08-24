@@ -617,7 +617,7 @@ html = <<~HTML
         demonstrably executed in at least one scenario. Still not proof of correct values.</li>
   </ul>
   <b>Prescriptive values</b> (U-values, LPDs, efficiencies) are governed by each gem's own data JSON — the number
-  the software actually applies and the thing to audit: <code>openstudio-envelope .../envelope_rules_*.json</code>,
+  the software actually applies and the thing to audit: <code>btap-necb .../envelope_rules_*.json</code>,
   <code>openstudio-loads .../space_types_*.json</code>, <code>openstudio-shw .../shw_rules_*.json</code>,
   <code>openstudio-hvac .../efficiencies_*.json</code>. The official code wording is available through the
   building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human reference only.</div>

@@ -66,20 +66,20 @@ class TestPrescriptiveParity < Minitest::Test
   def test_per_surface_conductance_parity
     std = legacy
 
-    legacy_model = attach_weather!(load_fixture)
+    legacy_model = attach_weather!(load_raw_fixture)
     std.model_add_constructions(legacy_model)
     complete_default_subsurface_set!(legacy_model)
     std.apply_standard_construction_properties(model: legacy_model)
     legacy_c = surface_conductances(legacy_model)
 
-    gem_model = attach_weather!(load_fixture)
+    gem_model = attach_weather!(load_raw_fixture)
     # same starting constructions as the legacy path so base assemblies match.
     # include_films: false — this is a MECHANISM-parity gate against legacy
     # apply_standard_construction_properties (BTAP, construction-only
     # conductance); the gem's default is include_films: true (code-literal,
     # matching the OSut path the NECB2020 prototypes actually use).
     std.model_add_constructions(gem_model)
-    OpenStudioEnvelope::NECB.apply_prescriptive(gem_model, vintage: '2020', include_films: false)
+    BtapNECB::Envelope.apply_prescriptive(gem_model, vintage: '2020', include_films: false)
     gem_c = surface_conductances(gem_model)
 
     mismatches = legacy_c.keys.filter_map do |name|
@@ -94,15 +94,15 @@ class TestPrescriptiveParity < Minitest::Test
   def test_fdwr_area_parity
     std = legacy
 
-    legacy_model = attach_weather!(load_fixture)
+    legacy_model = attach_weather!(load_raw_fixture)
     std.model_add_constructions(legacy_model)
     std.apply_standard_window_to_wall_ratio(model: legacy_model) # -1 default = NECB max
-    legacy_census = OpenStudioEnvelope::Geometry.exposed_walls(legacy_model)
+    legacy_census = BtapModeling::Geometry.exposed_walls(legacy_model)
 
-    gem_model = attach_weather!(load_fixture)
+    gem_model = attach_weather!(load_raw_fixture)
     std.model_add_constructions(gem_model)
-    OpenStudioEnvelope::NECB.apply_prescriptive(gem_model, vintage: '2020', apply_fdwr: true)
-    gem_census = OpenStudioEnvelope::Geometry.exposed_walls(gem_model)
+    BtapNECB::Envelope.apply_prescriptive(gem_model, vintage: '2020', apply_fdwr: true)
+    gem_census = BtapModeling::Geometry.exposed_walls(gem_model)
 
     assert_in_delta legacy_census[:fdwr], gem_census[:fdwr], 0.01,
                     'FDWR after mutation matches legacy apply_max_fdwr_nrcan'
