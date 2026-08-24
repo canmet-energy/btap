@@ -48,9 +48,9 @@ class TestE2ERun < Minitest::Test
     require envelope_lib
 
     model = loaded_lit_model
-    audit = OpenStudioHVAC::AuditLog.new
+    audit = BtapNECB::AuditLog.new
     OpenStudioLighting.apply_lights(model, vintage: '2020', audit: audit)
-    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
+    BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
     OpenStudioLighting.cost(model, vintage: '2020', city: 'TORONTO', province_state: 'ONTARIO', audit: audit)
 

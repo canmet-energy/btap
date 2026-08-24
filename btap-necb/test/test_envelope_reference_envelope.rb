@@ -268,11 +268,11 @@ class TestReferenceEnvelope < Minitest::Test
 
     proposed = proposed_model
     zones = proposed.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(proposed, 'Baseboard gas boiler', zones)
+    BtapModeling.build_system(proposed, 'Baseboard gas boiler', zones)
     types = proposed.getThermalZones.to_h { |z| [z.nameString, 'Office - enclosed'] }
 
-    audit = OpenStudioHVAC::AuditLog.new
-    result = OpenStudioHVAC::NECB.reference_hvac(proposed, vintage: '2020',
+    audit = BtapNECB::AuditLog.new
+    result = BtapNECB::HVAC.reference_hvac(proposed, vintage: '2020',
                                                  building: { storeys: 1, zone_types: types,
                                                              winter_design_temp_c: -20 },
                                                  audit: audit)

@@ -9,7 +9,7 @@ module BtapCosting
     #   NECB space-type setpoint schedules from standards_data, which the gem does not
     #   depend on). Plenums/attics are excluded from floor area in both schemes.
     # - The mechanical room can be pinned explicitly via the mech_room_name option on
-    #   OpenStudioHVAC.cost; otherwise the legacy election runs: a space whose space-type
+    #   BtapCosting::HVAC.cost; otherwise the legacy election runs: a space whose space-type
     #   name contains 'Electrical/Mechanical', else the lowest-storey space closest to the
     #   building centre.
     module Geometry

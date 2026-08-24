@@ -88,7 +88,6 @@ class TestBar < Minitest::Test
       openstudio-loads/lib/openstudio_loads
       openstudio-lighting/lib/openstudio_lighting
       openstudio-shw/lib/openstudio_shw
-      openstudio-hvac/lib/openstudio_hvac
       btap-necb/lib/btap_necb
     ].each do |entry|
       path = File.expand_path("../../#{entry}", __dir__)

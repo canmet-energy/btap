@@ -16,17 +16,17 @@ class TestLocalRun < Minitest::Test
   end
 
   # A model with a real, simulatable HVAC system. btap-simulation has NO
-  # runtime dependency on openstudio-hvac — this require is a TEST-TIME
+  # runtime dependency on btap-modeling — this require is a TEST-TIME
   # convenience via the sibling monorepo path, nothing more.
   def proposed_with_hvac
     begin
-      require 'openstudio_hvac'
+      require 'btap_modeling'
     rescue LoadError
-      require File.expand_path('../../openstudio-hvac/lib/openstudio_hvac', __dir__)
+      require File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
     end
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', zones)
+    BtapModeling.build_system(model, 'Baseboard gas boiler', zones)
     model
   end
 

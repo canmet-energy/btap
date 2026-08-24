@@ -71,10 +71,10 @@ class TestCostingE2E < Minitest::Test
     require envelope_lib
 
     model = tagged_model
-    audit = OpenStudioHVAC::AuditLog.new
+    audit = BtapNECB::AuditLog.new
     OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
     OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
-    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
+    BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
     OpenStudioSHW.cost(model, city: CITY, province_state: PROVINCE, audit: audit)
 

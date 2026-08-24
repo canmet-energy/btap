@@ -10,11 +10,6 @@ end
 
 # The domain gems: installed as gems, or monorepo siblings during incubation.
 begin
-  require 'openstudio_hvac'
-rescue LoadError
-  require File.expand_path('../../openstudio-hvac/lib/openstudio_hvac', __dir__)
-end
-begin
   require 'openstudio_loads'
 rescue LoadError
   require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
@@ -49,6 +44,7 @@ end
 
 require_relative 'btap_necb/version'
 require_relative 'btap_necb/envelope'
+require_relative 'btap_necb/hvac'
 require_relative 'btap_necb/tiers'
 require_relative 'btap_necb/decisions'
 require_relative 'btap_necb/eui_archetypes'

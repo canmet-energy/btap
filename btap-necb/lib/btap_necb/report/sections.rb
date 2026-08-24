@@ -350,7 +350,7 @@ module BtapNECB
       end
 
       # One labelled HVAC subsection for a building's diagram bundle. `bundle` is
-      # the plain hash from OpenStudioHVAC.model_hvac_diagrams (or nil). A nil
+      # the plain hash from BtapModeling.model_hvac_diagrams (or nil). A nil
       # bundle on the reference means there is no reference building on this path
       # (e.g. the 8.4.4 archetype-EUI path); a nil bundle when the key is absent
       # (canned/report-only render) is stated as such.

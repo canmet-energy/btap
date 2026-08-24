@@ -260,7 +260,7 @@
     "status": "host_scope",
     "how": "HVAC-side handled by openstudio-hvac reference_hvac (satisfied by clone there)",
     "code": [
-     "openstudio-hvac/lib/openstudio_hvac/necb/reference.rb#reference_hvac"
+     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
     ]
    },
    {

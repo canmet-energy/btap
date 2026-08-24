@@ -232,7 +232,7 @@ self_check!('8.4.6.7 EIR_FPLR', poly(ASHP_EIR_FPLR, 1.0))
 
 # ---- build + apply ---------------------------------------------------------
 model = OpenStudio::Model::Model.new
-audit = OpenStudioHVAC::AuditLog.new
+audit = BtapNECB::AuditLog.new
 
 boiler = OpenStudio::Model::BoilerHotWater.new(model)
 boiler.setName('Probe Boiler') # plain name: skips the Primary/Secondary staging logic
@@ -258,7 +258,7 @@ dx.setRatedAirFlowRate(1.0)
 # condenser water loop + cooling tower), same as a real reference model gets,
 # rather than faked with a bare unattached component.
 chillers = CHILLER_CAP_FT_EC_F.keys.to_h do |type|
-  loop_ = OpenStudioHVAC::Systems::PlantLoops.chilled_water(model, chiller_type: type, reuse: false,
+  loop_ = BtapModeling::Systems::PlantLoops.chilled_water(model, chiller_type: type, reuse: false,
                                                                    source: 'water_cooled')
   loop_.supplyComponents.select { |c| c.to_ChillerElectricEIR.is_initialized }
        .each { |c| c.to_ChillerElectricEIR.get.setReferenceCapacity(200_000) } # size Primary + Secondary alike
@@ -271,7 +271,7 @@ ashp_heat = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model)
 ashp_heat.setName('Probe ASHP Heating Coil')
 ashp_heat.setRatedTotalHeatingCapacity(15_000)
 
-OpenStudioHVAC::NECB.apply_efficiencies(model, vintage: '2020', audit: audit)
+BtapNECB::HVAC.apply_efficiencies(model, vintage: '2020', audit: audit)
 
 swh_model = OpenStudio::Model::Model.new
 heater = OpenStudio::Model::WaterHeaterMixed.new(swh_model)

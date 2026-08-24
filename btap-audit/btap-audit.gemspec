@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'Shared audit log + article-coverage emitter for the NECB gem family'
   spec.description = 'The one AuditLog class (entry schema, building stamping, article/ruling ' \
                      'citation axes, JSON + narrative rendering) and the one article-coverage ' \
-                     'emitter shared by openstudio-hvac, -envelope, -loads, -lighting, -shw, ' \
+                     'emitter shared by the btap gem family, ' \
                      '-geometry and the btap-necb umbrella. No domain knowledge, no ' \
                      'OpenStudio dependency — each family gem aliases the class into its own ' \
                      'namespace so existing call sites keep working.'

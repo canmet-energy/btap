@@ -32,7 +32,7 @@ class TestCostingEquipment < Minitest::Test
   def test_boiler_bucketing_and_ledger_items
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', zones)
+    BtapModeling.build_system(model, 'Baseboard gas boiler', zones)
     # hard-size so quantification works without a sizing run
     model.getBoilerHotWaters.each { |b| b.setNominalCapacity(50_000.0) } # 50 kW
     ledger, quantifier = quantify(model)
@@ -52,7 +52,7 @@ class TestCostingEquipment < Minitest::Test
   def test_zonal_walk_covers_gem_families
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'PTHP', zones)
+    BtapModeling.build_system(model, 'PTHP', zones)
     model.getCoilCoolingDXSingleSpeeds.each { |c| c.setRatedTotalCoolingCapacity(5000.0) }
     ledger, = quantify(model)
 
@@ -64,7 +64,7 @@ class TestCostingEquipment < Minitest::Test
   def test_vrf_outdoor_and_terminals
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'VRF', zones)
+    BtapModeling.build_system(model, 'VRF', zones)
     model.getAirConditionerVariableRefrigerantFlows.each { |u| u.setGrossRatedTotalCoolingCapacity(40_000.0) }
     model.getCoilCoolingDXVariableRefrigerantFlows.each { |c| c.setRatedTotalCoolingCapacity(5000.0) }
     ledger, = quantify(model)
@@ -77,7 +77,7 @@ class TestCostingEquipment < Minitest::Test
   def test_district_produces_warning_not_silent_zero
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'Baseboard district hot water', zones)
+    BtapModeling.build_system(model, 'Baseboard district hot water', zones)
     _, quantifier = quantify(model)
     assert(quantifier.warnings.any? { |w| w.include?('district') })
   end
@@ -85,7 +85,7 @@ class TestCostingEquipment < Minitest::Test
   def test_priced_end_to_end_with_placeholders
     model = load_fixture
     zones = model.getThermalZones.sort_by(&:nameString)
-    OpenStudioHVAC.build_system(model, 'Gas unit heaters', zones)
+    BtapModeling.build_system(model, 'Gas unit heaters', zones)
     model.getCoilHeatingGass.each { |c| c.setNominalCapacity(10_000.0) }
     ledger, = quantify(model)
     db = BtapCosting::HVAC::Database.new

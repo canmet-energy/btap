@@ -9,7 +9,7 @@ require_relative 'btap_audit/coverage'
 # It carries no domain knowledge and no OpenStudio dependency — it is the
 # lowest-level gem in the family, required by all of hvac, envelope, loads,
 # lighting, shw, geometry and the btap-necb umbrella. Each of those
-# aliases the class into its own namespace (`OpenStudioHVAC::AuditLog =
+# aliases the class into its own namespace (`BtapNECB::AuditLog =
 # BtapAudit::AuditLog`), so every existing call site keeps working; the
 # aliases are the compatibility mechanism, not a second implementation.
 module BtapAudit

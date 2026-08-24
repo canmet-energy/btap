@@ -41,7 +41,7 @@ end
 
 def with_proposed(model, catalog_name)
   zones = model.getThermalZones.sort_by(&:nameString)
-  OpenStudioHVAC.build_system(model, catalog_name, zones)
+  BtapModeling.build_system(model, catalog_name, zones)
   model
 end
 

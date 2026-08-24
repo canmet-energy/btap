@@ -107,7 +107,7 @@ def seed(vintage)
     st.setStandardsBuildingType('Space Function')
     st.setStandardsSpaceType('Office enclosed > 25 m2')
   end
-  audit = OpenStudioHVAC::AuditLog.new
+  audit = BtapNECB::AuditLog.new
   OpenStudioLoads::NECB.apply_loads(model, vintage: vintage, audit: audit)
   OpenStudioLighting.apply_lights(model, vintage: vintage, audit: audit)
   OpenStudioSHW.apply_shw(model, vintage: vintage, fuel: 'NaturalGas', audit: audit)
@@ -136,7 +136,7 @@ SAMPLES.each do |slug, system|
   end
 
   model = seed('2020')
-  OpenStudioHVAC.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
+  BtapModeling.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
   path = File.join(OUT, "#{slug}.osm")
   model.save(OpenStudio::Path.new(path), true)
   built << [slug, system, File.size(path)]
@@ -152,9 +152,9 @@ end
 notes = {}
 STAGED.each do |slug, lead, backup|
   model = seed('2020')
-  loop_ = OpenStudioHVAC::Systems::PlantLoops.hot_water(model, fuel: lead, backup_fuel: backup, reuse: false)
+  loop_ = BtapModeling::Systems::PlantLoops.hot_water(model, fuel: lead, backup_fuel: backup, reuse: false)
   loop_.setLoadDistributionScheme('SequentialLoad')
-  OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
+  BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
   path = File.join(OUT, "#{slug}.osm")
   model.save(OpenStudio::Path.new(path), true)
   built << [slug, "staged boilers: #{lead} lead, #{backup} second stage", File.size(path)]
@@ -173,7 +173,7 @@ STRESS_CASES.each do |slug, system, note, setup|
 
   model = seed('2020')
   setup&.call(model)
-  OpenStudioHVAC.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
+  BtapModeling.build_system(model, system, model.getThermalZones.sort_by(&:nameString))
   path = File.join(OUT, "#{slug}.osm")
   model.save(OpenStudio::Path.new(path), true)
   built << [slug, system, File.size(path)]

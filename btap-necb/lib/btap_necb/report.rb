@@ -49,8 +49,8 @@ module BtapNECB
       # consumes plain hashes. Each diagram is a plain hash of inline-SVG
       # strings; the engine never raises. The icon <defs> they reference are
       # embedded ONCE below.
-      proposed_hvac = proposed_model ? OpenStudioHVAC.model_hvac_diagrams(proposed_model) : nil
-      reference_hvac = reference_model ? OpenStudioHVAC.model_hvac_diagrams(reference_model) : nil
+      proposed_hvac = proposed_model ? BtapModeling.model_hvac_diagrams(proposed_model) : nil
+      reference_hvac = reference_model ? BtapModeling.model_hvac_diagrams(reference_model) : nil
 
       # Floor plans come from btap-modeling's plan engine, PROPOSED model
       # only — the reference's spaces/zones are identical by construction (the
@@ -77,10 +77,10 @@ module BtapNECB
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>NECB #{Html.esc(report['vintage'])} Compliance Report#{options[:project_name] ? " — #{Html.esc(options[:project_name])}" : ''}</title>
-        <style>#{Html::CSS}#{OpenStudioHVAC::CatalogReport::DIAGRAM_CSS}</style>
+        <style>#{Html::CSS}#{BtapModeling::CatalogReport::DIAGRAM_CSS}</style>
         </head>
         <body>
-        #{OpenStudioHVAC.hvac_icon_defs}
+        #{BtapModeling.hvac_icon_defs}
         #{body}
         #{loop_select_script}
         </body>

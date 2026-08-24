@@ -23,7 +23,7 @@ class TestCosting < Minitest::Test
     refute_empty db.materials_glazing
     refute_empty db.thermal_bridging
     refute_empty db.constructions
-    # priced tables resolved from the sibling openstudio-hvac vendored copies
+    # priced tables resolved from the shared data/ copies
     record = db.cost_record('070026')
     assert_operator record['materialOpCost'] + record['laborOpCost'], :>, 0
     # vendored materials sheets are UNPRICED (reference columns blanked at vendoring)

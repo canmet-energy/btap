@@ -76,7 +76,6 @@ end
 # remainders fold into btap-necb; these requires (and the tests' facade
 # tokens) get rewritten by that fold.
 [
-  '../../openstudio-hvac/lib/openstudio_hvac',
   '../../btap-necb/lib/btap_necb',
   '../../openstudio-shw/lib/openstudio_shw'
 ].each { |rel| require File.expand_path(rel, __dir__) }

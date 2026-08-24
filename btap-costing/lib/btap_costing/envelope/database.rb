@@ -24,7 +24,7 @@ module BtapCosting
                   :thermal_bridging, :locations
 
       # @param costs_csv [String, nil] priced unit-cost table (same columns as the
-      #   openstudio-hvac vendored costs.csv); overrides/extends the resolved base
+      #   vendored costs.csv); overrides/extends the resolved base
       # @param local_factors_csv [String, nil] city cost-index factors table
       def initialize(costs_csv: nil, local_factors_csv: nil)
         @warnings = []
