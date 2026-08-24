@@ -81,9 +81,12 @@ class TestBar < Minitest::Test
   end
 
   def test_full_family_composition_from_bar
+    # Explicit list, and a MISSING member is a hard failure, not a skip: this
+    # is the whole-family composition test, and a silent skip is exactly how a
+    # directory rename would hollow it out while CI stays green.
     %w[loads lighting shw hvac envelope].each do |gem_name|
       path = File.expand_path("../../openstudio-#{gem_name}/lib/openstudio_#{gem_name}", __dir__)
-      skip "openstudio-#{gem_name} not present" unless File.exist?("#{path}.rb")
+      flunk "openstudio-#{gem_name} missing — the family composition list went stale" unless File.exist?("#{path}.rb")
       require path
     end
 
