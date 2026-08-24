@@ -13,5 +13,5 @@ require_relative 'btap_audit/coverage'
 # BtapAudit::AuditLog`), so every existing call site keeps working; the
 # aliases are the compatibility mechanism, not a second implementation.
 module BtapAudit
-  VERSION = '0.1.0'.freeze
+  VERSION = '0.2.0'.freeze
 end

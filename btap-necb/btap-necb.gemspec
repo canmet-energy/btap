@@ -23,13 +23,9 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'exe/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'btap-audit'
-  spec.add_dependency 'btap-costing'
+  spec.add_dependency 'btap-audit', '~> 0.2'
+  spec.add_dependency 'btap-costing', '~> 0.2'
   spec.add_dependency 'tbd'
-  spec.add_dependency 'btap-modeling'
-  spec.add_dependency 'openstudio-hvac'
-  spec.add_dependency 'openstudio-lighting'
-  spec.add_dependency 'openstudio-loads'
-  spec.add_dependency 'openstudio-shw'
-  spec.add_dependency 'btap-simulation'
+  spec.add_dependency 'btap-modeling', '~> 0.2'
+  spec.add_dependency 'btap-simulation', '~> 0.2'
 end

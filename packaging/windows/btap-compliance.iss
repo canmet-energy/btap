@@ -14,7 +14,7 @@
 ; is under {app}.
 
 #define AppName    "BTAP Compliance"
-#define AppVersion "0.1.0"
+#define AppVersion "0.2.0"
 
 [Setup]
 AppName={#AppName}

@@ -22,5 +22,5 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'btap-audit'
+  spec.add_dependency 'btap-audit', '~> 0.2'
 end
