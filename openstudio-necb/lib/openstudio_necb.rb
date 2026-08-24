@@ -3,9 +3,9 @@ require 'openstudio'
 # The shared audit machinery (AuditLog + article-coverage emitter) the whole
 # family writes to. Installed as a gem, or a monorepo sibling during incubation.
 begin
-  require 'openstudio_audit'
+  require 'btap_audit'
 rescue LoadError
-  require File.expand_path('../../openstudio-audit/lib/openstudio_audit', __dir__)
+  require File.expand_path('../../btap-audit/lib/btap_audit', __dir__)
 end
 
 # The domain gems: installed as gems, or monorepo siblings during incubation.
@@ -66,9 +66,9 @@ require_relative 'openstudio_necb/report'
 # openstudio-geometry, sits mostly UPSTREAM (it creates the model you feed
 # in here) — the AHJ report also consumes its floor-plan engine.
 module OpenStudioNECB
-  # The shared audit class, now owned by openstudio-audit: every family gem
+  # The shared audit class, now owned by btap-audit: every family gem
   # aliases the SAME class, so one instance flows through all of them.
-  AuditLog = OpenStudioAudit::AuditLog
+  AuditLog = BtapAudit::AuditLog
 
   # Simulation execution now lives in the lowest-level family gem,
   # openstudio-simulation (SDK+CLI, no compliance layer). Alias it so

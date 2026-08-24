@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'exe/**/*', 'README.md', 'LICENSE*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'openstudio-audit'
+  spec.add_dependency 'btap-audit'
   spec.add_dependency 'openstudio-envelope'
   spec.add_dependency 'openstudio-geometry'
   spec.add_dependency 'openstudio-hvac'

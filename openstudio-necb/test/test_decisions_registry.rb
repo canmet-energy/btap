@@ -152,7 +152,7 @@ class TestDecisionsRegistry < Minitest::Test
 
   # -- one AuditLog, aliased everywhere ------------------------------------
 
-  # The class itself now lives in openstudio-audit; each family gem's
+  # The class itself now lives in btap-audit; each family gem's
   # `audit_log.rb` is a three-line ALIAS of it. That alias is the compatibility
   # mechanism for every existing call site, so what has to stay true is not
   # "the copies are byte-identical" (there are no copies any more) but "every
@@ -182,19 +182,19 @@ class TestDecisionsRegistry < Minitest::Test
     resolved = AUDIT_LOG_ALIASES.filter_map do |gem, (dir, mod)|
       next unless load_family_gem(gem, dir, mod)
 
-      assert_same OpenStudioAudit::AuditLog, Object.const_get(mod)::AuditLog,
-                  "#{mod}::AuditLog is not the shared OpenStudioAudit::AuditLog — " \
+      assert_same BtapAudit::AuditLog, Object.const_get(mod)::AuditLog,
+                  "#{mod}::AuditLog is not the shared BtapAudit::AuditLog — " \
                   'the alias is the compatibility mechanism; a second copy would drift'
       gem
     end
     skip 'sibling gems not on disk' if resolved.size < 2
 
     assert_equal AUDIT_LOG_ALIASES.size, resolved.size, 'a family gem did not resolve its AuditLog alias'
-    assert_same OpenStudioAudit::AuditLog, OpenStudioNECB::AuditLog, 'the umbrella aliases it too'
+    assert_same BtapAudit::AuditLog, OpenStudioNECB::AuditLog, 'the umbrella aliases it too'
   end
 
   def test_the_shared_audit_log_supports_the_ruling_kwarg
-    audit = OpenStudioAudit::AuditLog.new
+    audit = BtapAudit::AuditLog.new
     audit.decision(:build, 'reference system operates on the proposed operating schedule',
                    article: '8.4.4.7.(1)', ruling: 'D-19 D-21')
     entry = audit.entries.first

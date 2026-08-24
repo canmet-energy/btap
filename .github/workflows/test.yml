@@ -36,12 +36,12 @@ jobs:
           ruby-version: '3.2.2'
       - name: Rule-key orphan lint
         run: ruby openstudio-necb/scripts/necb_orphan_keys.rb
-      # openstudio-audit is the one gem with no SDK dependency at all (json +
+      # btap-audit is the one gem with no SDK dependency at all (json +
       # minitest). The decisions-registry drift test looks SDK-free but is not:
       # it `require`s every gem's facade to prove their AuditLog resolves to the
       # shared class, so it lives in the `verify` job's container.
       - name: AuditLog is SDK-free and fast
-        run: cd openstudio-audit && ruby test/test_audit.rb
+        run: cd btap-audit && ruby test/test_audit.rb
       # The coverage manifests' code refs ("where is this sentence dealt with")
       # are pure JSON + file reads — lint them here so a rename that strands a
       # pointer fails before anything pays for the container.

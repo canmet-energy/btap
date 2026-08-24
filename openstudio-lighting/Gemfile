@@ -4,7 +4,7 @@ gemspec
 
 # The sibling gems are not published to RubyGems — resolve them from this
 # repository's checkout rather than the index.
-gem 'openstudio-audit', path: '../openstudio-audit'
+gem 'btap-audit', path: '../btap-audit'
 gem 'openstudio-hvac', path: '../openstudio-hvac'
 gem 'openstudio-loads', path: '../openstudio-loads'
 

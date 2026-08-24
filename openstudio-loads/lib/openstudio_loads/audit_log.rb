@@ -1,10 +1,10 @@
-# The AuditLog moved to openstudio-audit — one implementation for the whole family.
+# The AuditLog moved to btap-audit — one implementation for the whole family.
 begin
-  require 'openstudio_audit'
+  require 'btap_audit'
 rescue LoadError
-  require File.expand_path('../../../openstudio-audit/lib/openstudio_audit', __dir__)
+  require File.expand_path('../../../btap-audit/lib/btap_audit', __dir__)
 end
 
 module OpenStudioLoads
-  AuditLog = OpenStudioAudit::AuditLog
+  AuditLog = BtapAudit::AuditLog
 end

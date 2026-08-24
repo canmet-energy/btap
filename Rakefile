@@ -15,7 +15,7 @@ require 'etc'
 # go green while doing nothing. Editing this list is part of every gem move;
 # forgetting aborts every rake invocation instead of silently no-oping.
 GEM_DIRS = %w[
-  openstudio-audit
+  btap-audit
   openstudio-envelope
   openstudio-geometry
   openstudio-hvac
@@ -55,7 +55,7 @@ end
 desc 'List the gems in this repository'
 task :gems do
   GEM_DIRS.each do |dir|
-    # Most gems keep VERSION in lib/<name>/version.rb; openstudio-audit declares
+    # Most gems keep VERSION in lib/<name>/version.rb; btap-audit declares
     # it inline in its entry file. Search both rather than assuming.
     source = Dir.glob("#{dir}/lib/**/version.rb").first || Dir.glob("#{dir}/lib/*.rb").first
     version = source && File.read(source)[/VERSION\s*=\s*'([^']+)'/, 1]
