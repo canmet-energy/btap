@@ -1,12 +1,12 @@
 require 'minitest/autorun'
 require 'json'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 # Measured-footprint gate: a real GeoJSON outline plus a measured height builds
 # valid zoned massing; the SDK traps that make raw outlines fail (winding,
 # non-decimating simplify, mitre overlap at reflex corners) stay pinned.
 class TestFootprint < Minitest::Test
-  F = OpenStudioGeometry::Footprint
+  F = BtapModeling::Footprint
 
   # A real NRCan building-stock record (feature 870226c8, Ottawa K1P): 69
   # vertices, 33 of them reflex, 5,266 m2 published area, 82.65 m measured.
@@ -133,8 +133,8 @@ class TestFootprint < Minitest::Test
     assert_in_delta 4.5 * 0.95, narrow, 1e-9, '5% headroom off the outline ceiling'
     assert_nil F.auto_perimeter_depth(rect_ring(3.0, 2.0)), 'below the useful minimum, no depth at all'
 
-    audit = OpenStudioGeometry::AuditLog.new
-    OpenStudioGeometry.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0,
+    audit = BtapModeling::AuditLog.new
+    BtapModeling.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0,
                                              decimate_tolerance: 4.0, audit: audit)
     reduced = audit.warnings.find { |w| w[:action].include?('reduced below the 15 ft convention') }
     refute_nil reduced, 'a non-conventional perimeter band must never be silent'
@@ -153,7 +153,7 @@ class TestFootprint < Minitest::Test
   # geometry, no polygon union) while the ZONE each joins is its orientation.
   # The SDK's own Surface#azimuth is the ground truth for the convention.
   def test_perimeter_zones_merge_by_orientation
-    model = OpenStudioGeometry.create_from_footprint(
+    model = BtapModeling.create_from_footprint(
       points: rect_ring(50.0, 30.0), storeys: 1, zoning: :core_perimeter, perimeter_zone_depth: 4.57
     )
     assert_equal 5, model.getSpaces.size, 'one space per edge plus the core'
@@ -182,7 +182,7 @@ class TestFootprint < Minitest::Test
   # The point of merging: a many-edged real outline collapses to the 4+1 zones a
   # modeller expects, without a single wall landing in the wrong bin.
   def test_orientation_merge_collapses_a_real_outline
-    model = OpenStudioGeometry.create_from_footprint(
+    model = BtapModeling.create_from_footprint(
       geojson: OTTAWA_TOWER, height_m: MEASURED_HEIGHT, floor_to_floor_height: F::NRCAN_IMPLIED,
       decimate_tolerance: 4.0, multiplier: :mid
     )
@@ -225,12 +225,12 @@ class TestFootprint < Minitest::Test
   # Windows are PURE GEOMETRY here: a caller-chosen ratio, no default, no code
   # knowledge. The NECB maximum belongs to openstudio-envelope.
   def test_apply_wwr_scalar
-    model = OpenStudioGeometry.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 2,
+    model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 2,
                                                      zoning: :single)
     assert_equal 0, model.getSubSurfaces.size, 'measured massing starts with no windows at all'
 
-    audit = OpenStudioGeometry::AuditLog.new
-    result = OpenStudioGeometry.apply_wwr(model, 0.35, audit: audit)
+    audit = BtapModeling::AuditLog.new
+    result = BtapModeling.apply_wwr(model, 0.35, audit: audit)
     assert_equal 8, result[:walls], '4 walls x 2 storeys'
     assert_equal 8, result[:glazed]
     assert_equal 0, result[:refused]
@@ -244,10 +244,10 @@ class TestFootprint < Minitest::Test
   # Orientation-specific glazing — the companion to orientation-merged zoning.
   # A bin left out of the hash gets NO windows, it does not fall back.
   def test_apply_wwr_per_orientation
-    model = OpenStudioGeometry.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
+    model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
                                                      zoning: :single)
     # both spellings must work: brace-less (parsed as keywords) and explicit Hash
-    OpenStudioGeometry.apply_wwr(model, 'South' => 0.5, 'North' => 0.15)
+    BtapModeling.apply_wwr(model, 'South' => 0.5, 'North' => 0.15)
 
     by_bin = model.getSurfaces
                   .select { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition == 'Outdoors' }
@@ -262,22 +262,22 @@ class TestFootprint < Minitest::Test
   # this gem only cuts the opening. Pinned as a number so a change in either
   # gem is visible — HDD 4500 gives (2000 - 0.2*4500)/3000 by hand.
   def test_apply_wwr_accepts_an_externally_computed_necb_limit
-    model = OpenStudioGeometry.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
+    model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
                                                      zoning: :single)
     necb_limit_hdd4500 = (2000 - (0.2 * 4500)) / 3000.0
     assert_in_delta 0.3667, necb_limit_hdd4500, 0.0001
-    result = OpenStudioGeometry.apply_wwr(model, necb_limit_hdd4500)
+    result = BtapModeling.apply_wwr(model, necb_limit_hdd4500)
     assert_in_delta necb_limit_hdd4500, result[:fdwr], 1e-6
   end
 
   def test_apply_wwr_rejects_bad_ratios
-    model = OpenStudioGeometry.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
+    model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
                                                      zoning: :single)
-    assert_raises(ArgumentError) { OpenStudioGeometry.apply_wwr(model, 1.0) }
-    assert_raises(ArgumentError) { OpenStudioGeometry.apply_wwr(model, -0.1) }
-    assert_raises(ArgumentError) { OpenStudioGeometry.apply_wwr(model, 'lots') }
-    assert_raises(ArgumentError) { OpenStudioGeometry.apply_wwr(model, 'South' => 1.5) }
-    assert_raises(ArgumentError) { OpenStudioGeometry.apply_wwr(model) }
+    assert_raises(ArgumentError) { BtapModeling.apply_wwr(model, 1.0) }
+    assert_raises(ArgumentError) { BtapModeling.apply_wwr(model, -0.1) }
+    assert_raises(ArgumentError) { BtapModeling.apply_wwr(model, 'lots') }
+    assert_raises(ArgumentError) { BtapModeling.apply_wwr(model, 'South' => 1.5) }
+    assert_raises(ArgumentError) { BtapModeling.apply_wwr(model) }
   end
 
   # Symbol bins and an explicit Hash must land in the same place as the
@@ -285,12 +285,12 @@ class TestFootprint < Minitest::Test
   def test_apply_wwr_hash_spellings_agree
     ratios = [{ 'South' => 0.4 }, nil, nil]
     achieved = ratios.each_with_index.map do |explicit, index|
-      model = OpenStudioGeometry.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
+      model = BtapModeling.create_from_footprint(points: rect_ring(50.0, 30.0), storeys: 1,
                                                        zoning: :single)
       case index
-      when 0 then OpenStudioGeometry.apply_wwr(model, explicit)
-      when 1 then OpenStudioGeometry.apply_wwr(model, 'South' => 0.4)
-      else OpenStudioGeometry.apply_wwr(model, South: 0.4)
+      when 0 then BtapModeling.apply_wwr(model, explicit)
+      when 1 then BtapModeling.apply_wwr(model, 'South' => 0.4)
+      else BtapModeling.apply_wwr(model, South: 0.4)
       end[:fdwr]
     end
     assert_equal 1, achieved.uniq.size, 'Hash, brace-less and Symbol bins agree'
@@ -308,8 +308,8 @@ class TestFootprint < Minitest::Test
   end
 
   def test_end_to_end_single_zone_massing
-    audit = OpenStudioGeometry::AuditLog.new
-    model = OpenStudioGeometry.create_from_footprint(
+    audit = BtapModeling::AuditLog.new
+    model = BtapModeling.create_from_footprint(
       geojson: OTTAWA_TOWER, height_m: MEASURED_HEIGHT, floor_to_floor_height: F::TEN_FEET,
       zoning: :single, decimate_tolerance: 4.0, audit: audit,
       source: { feature_id: '870226c8', dataset: 'nrcan-buildings' }
@@ -332,8 +332,8 @@ class TestFootprint < Minitest::Test
   end
 
   def test_end_to_end_core_perimeter_and_story_multiplier
-    audit = OpenStudioGeometry::AuditLog.new
-    model = OpenStudioGeometry.create_from_footprint(
+    audit = BtapModeling::AuditLog.new
+    model = BtapModeling.create_from_footprint(
       geojson: OTTAWA_TOWER, height_m: MEASURED_HEIGHT, floor_to_floor_height: F::NRCAN_IMPLIED,
       zoning: :core_perimeter, perimeter_zone_depth: 3.0, decimate_tolerance: 4.0,
       multiplier: :mid, audit: audit
@@ -356,8 +356,8 @@ class TestFootprint < Minitest::Test
   # Provenance is the whole reason this lives in the gem: a measured massing is
   # only reproducible if the audit records what it was measured from.
   def test_audit_records_full_provenance
-    audit = OpenStudioGeometry::AuditLog.new
-    OpenStudioGeometry.create_from_footprint(
+    audit = BtapModeling::AuditLog.new
+    BtapModeling.create_from_footprint(
       geojson: OTTAWA_TOWER, height_m: MEASURED_HEIGHT, decimate_tolerance: 4.0,
       source: { feature_id: '870226c8', dataset: 'nrcan-buildings', height_field: 'height_max_m' },
       audit: audit
@@ -377,8 +377,8 @@ class TestFootprint < Minitest::Test
   # Degradation must be loud: a noisy outline gets single-zone storeys AND a
   # warning naming the reason, never a silent overlap.
   def test_zoning_degrades_loudly
-    audit = OpenStudioGeometry::AuditLog.new
-    model = OpenStudioGeometry.create_from_footprint(
+    audit = BtapModeling::AuditLog.new
+    model = BtapModeling.create_from_footprint(
       geojson: OTTAWA_TOWER, height_m: 20.0, zoning: :core_perimeter,
       perimeter_zone_depth: 4.57, decimate_tolerance: 0, audit: audit
     )
@@ -404,16 +404,16 @@ class TestFootprint < Minitest::Test
   end
 
   def test_invalid_parameters
-    assert_raises(ArgumentError) { OpenStudioGeometry.create_from_footprint(height_m: 20.0) }
-    assert_raises(ArgumentError) { OpenStudioGeometry.create_from_footprint(geojson: OTTAWA_TOWER) }
+    assert_raises(ArgumentError) { BtapModeling.create_from_footprint(height_m: 20.0) }
+    assert_raises(ArgumentError) { BtapModeling.create_from_footprint(geojson: OTTAWA_TOWER) }
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.create_from_footprint(geojson: OTTAWA_TOWER, points: [], height_m: 20.0)
+      BtapModeling.create_from_footprint(geojson: OTTAWA_TOWER, points: [], height_m: 20.0)
     end
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0, zoning: :perimeter_only)
+      BtapModeling.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0, zoning: :perimeter_only)
     end
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0, multiplier: :all)
+      BtapModeling.create_from_footprint(geojson: OTTAWA_TOWER, height_m: 20.0, multiplier: :all)
     end
     assert_raises(ArgumentError) { F.project([[0, 0], [1, 1]]) }
   end

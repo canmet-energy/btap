@@ -1,6 +1,6 @@
 require_relative 'helpers'
 
-module OpenStudioGeometry
+module BtapModeling
   # Parametric footprint wizards — verbatim port of openstudio-standards
   # OpenstudioStandards::Geometry.create_shape_* (rectangle, aspect-ratio,
   # courtyard, H, L, T, U): per storey, perimeter/core floor-print polygons are

@@ -1,20 +1,20 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'tmpdir'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 # Per-storey floor plans: the SDK extraction (world coordinates, floor
 # surfaces, storey grouping), the SDK-free SVG layer (fills, labels, tooltips,
 # legend) and the self-contained standalone page.
 class TestFloorPlan < Minitest::Test
-  Query = OpenStudioGeometry::PlanQuery
-  Svg = OpenStudioGeometry::PlanSvg
-  Plan = OpenStudioGeometry::Plan
+  Query = BtapModeling::PlanQuery
+  Svg = BtapModeling::PlanSvg
+  Plan = BtapModeling::Plan
 
   # 15 spaces / 3 storeys (test_wizards.rb:9-32), 40 x 25 m footprint,
   # 4 m perimeter depth => a core space of exactly 32 x 17 m.
   def wizard_model(storeys: 2, below: 1)
-    OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+    BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0,
                               storeys: storeys, below_grade_storeys: below,
                               floor_to_floor_height: 3.6, perimeter_zone_depth: 4.0)
   end
@@ -31,7 +31,7 @@ class TestFloorPlan < Minitest::Test
   end
 
   def bar_model
-    OpenStudioGeometry.bar(space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
+    BtapModeling.bar(space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
                                                 ['Space Function', 'Corridor/Transition area other-sch-A'] => 0.3 },
                            length: 50.0, width: 20.0, storeys: 2, wwr: 0.4)
   end
@@ -51,7 +51,7 @@ class TestFloorPlan < Minitest::Test
   # ------------------------------------------------------------- extraction
 
   def test_multi_storey_wizard_numeric_polygons
-    audit = OpenStudioGeometry::AuditLog.new
+    audit = BtapModeling::AuditLog.new
     data = Query.extract(wizard_model, audit: audit)
 
     refute data[:inferred_storeys], 'the wizard sets BuildingStorys — nothing to infer'
@@ -98,7 +98,7 @@ class TestFloorPlan < Minitest::Test
     bare = OpenStudio::Model::Space.new(model)
     bare.setName('Shaft (no floor)')
 
-    audit = OpenStudioGeometry::AuditLog.new
+    audit = BtapModeling::AuditLog.new
     data = Query.extract(model, audit: audit)
     names = data[:storeys].flat_map { |s| s[:spaces].map { |sp| sp[:name] } }
     refute_includes names, 'Shaft (no floor)'
@@ -118,7 +118,7 @@ class TestFloorPlan < Minitest::Test
     floor = space.surfaces.find { |s| s.surfaceType == 'Floor' }
     local_before = floor.vertices.map { |p| [p.x.round(3), p.y.round(3)] }
 
-    OpenStudioGeometry::Helpers.rotate_model(model, 90)
+    BtapModeling::Helpers.rotate_model(model, 90)
     after = Query.extract(model)
 
     local_after = floor.vertices.map { |p| [p.x.round(3), p.y.round(3)] }
@@ -156,7 +156,7 @@ class TestFloorPlan < Minitest::Test
     model.getBuildingStorys.each(&:remove)
     assert_empty model.getBuildingStorys
 
-    audit = OpenStudioGeometry::AuditLog.new
+    audit = BtapModeling::AuditLog.new
     data = Query.extract(model, audit: audit)
     assert data[:inferred_storeys], 'the fallback flags itself'
     assert_equal ['Level 1', 'Level 2', 'Level 3'], data[:storeys].map { |s| s[:name] }
@@ -170,7 +170,7 @@ class TestFloorPlan < Minitest::Test
   # The courtyard void is space-less: no polygon covers the courtyard centre,
   # although the bounds enclose it.
   def test_courtyard_void_is_a_hole
-    model = OpenStudioGeometry.create(shape: 'courtyard', length: 50.0, width: 30.0,
+    model = BtapModeling.create(shape: 'courtyard', length: 50.0, width: 30.0,
                                       courtyard_length: 15.0, courtyard_width: 5.0, storeys: 1)
     data = Query.extract(model)
     assert_equal({ min_x: 0.0, min_y: 0.0, max_x: 50.0, max_y: 30.0 }, data[:bounds])
@@ -232,8 +232,8 @@ class TestFloorPlan < Minitest::Test
     refute_equal Svg.zone_color('Zone A'), Svg.zone_color('Zone B')
     assert_equal Svg::NO_ZONE_FILL, Svg.zone_color(nil)
 
-    lib = File.expand_path('../lib/openstudio_geometry', __dir__)
-    other = `ruby -e "require '#{lib}'; print OpenStudioGeometry::PlanSvg.zone_color('Zone A')"`
+    lib = File.expand_path('../lib/btap_modeling', __dir__)
+    other = `ruby -e "require '#{lib}'; print BtapModeling::PlanSvg.zone_color('Zone A')"`
     assert_equal Svg.zone_color('Zone A'), other,
                  'stable across processes (Ruby seeds String#hash per process)'
   end
@@ -262,8 +262,8 @@ class TestFloorPlan < Minitest::Test
   def test_standalone_page_is_self_contained
     Dir.mktmpdir do |dir|
       path = File.join(dir, 'plans.html')
-      audit = OpenStudioGeometry::AuditLog.new
-      bundle = OpenStudioGeometry.floor_plans(zone_every_space!(wizard_model), path: path, audit: audit)
+      audit = BtapModeling::AuditLog.new
+      bundle = BtapModeling.floor_plans(zone_every_space!(wizard_model), path: path, audit: audit)
 
       assert_equal 3, bundle[:storeys].size
       # Explicit UTF-8: the page carries em dashes, 'm²' and ellipses from
@@ -304,15 +304,15 @@ class TestFloorPlan < Minitest::Test
     Dir.mktmpdir do |dir|
       osm = File.join(dir, 'm.osm')
       wizard_model(storeys: 1, below: 0).save(OpenStudio::Path.new(osm), true)
-      bundle = OpenStudioGeometry.floor_plans(osm)
+      bundle = BtapModeling.floor_plans(osm)
       assert_equal 1, bundle[:storeys].size
       refute bundle[:empty]
     end
   end
 
   def test_unloadable_path_never_raises
-    audit = OpenStudioGeometry::AuditLog.new
-    bundle = OpenStudioGeometry.floor_plans('/nonexistent/nope.osm', audit: audit)
+    audit = BtapModeling::AuditLog.new
+    bundle = BtapModeling.floor_plans('/nonexistent/nope.osm', audit: audit)
     assert bundle[:empty]
     refute_nil bundle[:error]
     refute_empty audit.warnings
@@ -335,7 +335,7 @@ class TestFloorPlan < Minitest::Test
   def test_png_warns_loudly_when_no_rasterizer_exists
     original = ENV.fetch('PATH', '')
     ENV['PATH'] = ''
-    audit = OpenStudioGeometry::AuditLog.new
+    audit = BtapModeling::AuditLog.new
     Dir.mktmpdir do |dir|
       result = Plan.png('<svg xmlns="http://www.w3.org/2000/svg"/>', File.join(dir, 'x.png'), audit: audit)
       assert_nil result, 'no PNG, and no exception'
@@ -363,7 +363,7 @@ class TestFloorPlan < Minitest::Test
   def test_bundle_threads_the_model_north_axis_into_every_storey_svg
     model = zone_every_space!(wizard_model)
     model.getBuilding.setNorthAxis(30.0)
-    bundle = OpenStudioGeometry::Plan.diagrams(model)
+    bundle = BtapModeling::Plan.diagrams(model)
     refute_empty bundle[:storeys]
     bundle[:storeys].each { |storey| assert_includes storey[:svg], 'rotate(-30.0)' }
   end

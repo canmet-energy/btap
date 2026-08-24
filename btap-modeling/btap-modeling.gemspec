@@ -1,8 +1,8 @@
-require_relative 'lib/openstudio_geometry/version'
+require_relative 'lib/btap_modeling/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'openstudio-geometry'
-  spec.version = OpenStudioGeometry::VERSION
+  spec.name = 'btap-modeling'
+  spec.version = BtapModeling::VERSION
   spec.authors = ['NRCan / openstudio-standards contributors']
   spec.summary = 'Parametric building geometry wizards for OpenStudio models (SDK-only)'
   spec.description = 'Footprint wizards (rectangle, aspect-ratio, courtyard, H, L, T, U) with ' \

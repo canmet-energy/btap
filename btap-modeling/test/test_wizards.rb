@@ -1,14 +1,14 @@
 require 'minitest/autorun'
 require 'fileutils'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 # Wizard gate: every shape builds valid zoned massing; rectangle checked in
 # detail (space census, matched surfaces, below-grade BCs); unknown-parameter
 # typos raise instead of silently defaulting.
 class TestWizards < Minitest::Test
   def test_rectangle_census_and_matching
-    audit = OpenStudioGeometry::AuditLog.new
-    model = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+    audit = BtapModeling::AuditLog.new
+    model = BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0,
                                       storeys: 2, below_grade_storeys: 1,
                                       floor_to_floor_height: 3.6, perimeter_zone_depth: 4.0,
                                       audit: audit)
@@ -36,9 +36,9 @@ class TestWizards < Minitest::Test
   # engines' own spellings stay accepted, mixing the two raises, and the
   # unknown-parameter guard still fires for a real typo.
   def test_storey_aliases_and_guards
-    canonical = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+    canonical = BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0,
                                           storeys: 2, below_grade_storeys: 1, perimeter_zone_depth: 4.0)
-    legacy = OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+    legacy = BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0,
                                        above_ground_storys: 2, under_ground_storys: 1, perimeter_zone_depth: 4.0)
     assert_equal legacy.getSpaces.size, canonical.getSpaces.size, 'old names produce the same geometry'
     assert_equal legacy.getBuildingStorys.size, canonical.getBuildingStorys.size
@@ -47,22 +47,22 @@ class TestWizards < Minitest::Test
                  canonical.getSurfaces.map { |s| [s.surfaceType, s.outsideBoundaryCondition] }.tally
 
     # non-rectangle shapes: storeys: -> num_floors, no below-grade support
-    aliased = OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, storeys: 2)
-    assert_equal OpenStudioGeometry.create(shape: 'l', length: 40.0, width: 40.0, num_floors: 2).getSpaces.size,
+    aliased = BtapModeling.create(shape: 'l', length: 40.0, width: 40.0, storeys: 2)
+    assert_equal BtapModeling.create(shape: 'l', length: 40.0, width: 40.0, num_floors: 2).getSpaces.size,
                  aliased.getSpaces.size
-    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'l', storeys: 2, below_grade_storeys: 1) }
+    assert_raises(ArgumentError) { BtapModeling.create(shape: 'l', storeys: 2, below_grade_storeys: 1) }
 
     # alias + target together is ambiguous
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0, storeys: 2, above_ground_storys: 3)
+      BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0, storeys: 2, above_ground_storys: 3)
     end
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.create(shape: 'rectangle', length: 40.0, width: 25.0,
+      BtapModeling.create(shape: 'rectangle', length: 40.0, width: 25.0,
                                 below_grade_storeys: 1, under_ground_storys: 0)
     end
 
     # and a genuine typo still raises rather than silently defaulting
-    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'rectangle', storeyz: 2) }
+    assert_raises(ArgumentError) { BtapModeling.create(shape: 'rectangle', storeyz: 2) }
   end
 
   def test_every_shape_builds
@@ -72,7 +72,7 @@ class TestWizards < Minitest::Test
       'l' => { num_floors: 1 },
       't' => { num_floors: 1 },
       'u' => { num_floors: 1 } }.each do |shape, params|
-      model = OpenStudioGeometry.create(shape: shape, **params)
+      model = BtapModeling.create(shape: shape, **params)
       assert_operator model.getSpaces.size, :>=, 4, "#{shape}: zoned spaces"
       assert(model.getSpaces.all? { |s| s.floorArea > 0 }, "#{shape}: positive areas")
       exterior_walls = model.getSurfaces.count { |s| s.surfaceType == 'Wall' && s.outsideBoundaryCondition == 'Outdoors' }
@@ -81,20 +81,20 @@ class TestWizards < Minitest::Test
   end
 
   def test_courtyard_has_inner_facade
-    model = OpenStudioGeometry.create(shape: 'courtyard', length: 50.0, width: 30.0,
+    model = BtapModeling.create(shape: 'courtyard', length: 50.0, width: 30.0,
                                       courtyard_length: 20.0, courtyard_width: 10.0, num_floors: 1)
     footprint = model.getSpaces.sum(&:floorArea)
     assert_in_delta 50.0 * 30.0 - 20.0 * 10.0, footprint, 0.5, 'courtyard void excluded from floor area'
   end
 
   def test_invalid_parameters
-    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'dodecagon') }
-    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'rectangle', lenght: 40.0) } # typo must raise
-    assert_raises(ArgumentError) { OpenStudioGeometry.create(shape: 'rectangle', length: 10.0, width: 10.0, perimeter_zone_depth: 6.0) }
+    assert_raises(ArgumentError) { BtapModeling.create(shape: 'dodecagon') }
+    assert_raises(ArgumentError) { BtapModeling.create(shape: 'rectangle', lenght: 40.0) } # typo must raise
+    assert_raises(ArgumentError) { BtapModeling.create(shape: 'rectangle', length: 10.0, width: 10.0, perimeter_zone_depth: 6.0) }
   end
 
   def test_rotation_via_aspect_ratio
-    model = OpenStudioGeometry.create(shape: 'aspect_ratio', aspect_ratio: 0.5, floor_area: 1000.0,
+    model = BtapModeling.create(shape: 'aspect_ratio', aspect_ratio: 0.5, floor_area: 1000.0,
                                       rotation: 45.0, num_floors: 1)
     group = model.getSpaces.first
     assert_in_delta(45.0 * Math::PI / 180, Math.atan2(group.transformation.matrix[1, 0], group.transformation.matrix[0, 0]), 0.2)

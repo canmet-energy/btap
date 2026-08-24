@@ -1,17 +1,17 @@
 require 'openstudio'
 
-require_relative 'openstudio_geometry/version'
-require_relative 'openstudio_geometry/audit_log'
-require_relative 'openstudio_geometry/helpers'
-require_relative 'openstudio_geometry/footprint'
-require_relative 'openstudio_geometry/wizards'
-require_relative 'openstudio_geometry/bar'
-require_relative 'openstudio_geometry/render'
-require_relative 'openstudio_geometry/plan_query'
-require_relative 'openstudio_geometry/plan_svg'
-require_relative 'openstudio_geometry/plan'
+require_relative 'btap_modeling/version'
+require_relative 'btap_modeling/audit_log'
+require_relative 'btap_modeling/helpers'
+require_relative 'btap_modeling/footprint'
+require_relative 'btap_modeling/wizards'
+require_relative 'btap_modeling/bar'
+require_relative 'btap_modeling/render'
+require_relative 'btap_modeling/plan_query'
+require_relative 'btap_modeling/plan_svg'
+require_relative 'btap_modeling/plan'
 
-# OpenStudioGeometry creates parametric building geometry — the authoring
+# BtapModeling creates parametric building geometry — the authoring
 # on-ramp for the gem family (and the future MCP surface): footprint wizards
 # (rectangle, aspect-ratio, courtyard, H, L, T, U) with perimeter/core zoning,
 # below-grade storeys, and matched surfaces. SDK-only; shared AuditLog schema.
@@ -20,7 +20,7 @@ require_relative 'openstudio_geometry/plan'
 # OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
 # OpenStudioHVAC.build_system, OpenStudioEnvelope prescriptive/reference,
 # OpenStudioNECB.performance_compliance.
-module OpenStudioGeometry
+module BtapModeling
   SHAPES = %w[rectangle aspect_ratio courtyard h l t u].freeze
 
   # Canonical facade vocabulary (`storeys:` / `below_grade_storeys:`) mapped to
@@ -38,7 +38,7 @@ module OpenStudioGeometry
   # created when none is given); every call is audited with the full parameter
   # set so downstream QAQC can reproduce the massing.
   #
-  #   OpenStudioGeometry.create(shape: 'rectangle', length: 40, width: 25,
+  #   BtapModeling.create(shape: 'rectangle', length: 40, width: 25,
   #                             storeys: 3, below_grade_storeys: 1, audit: audit)
   #
   # `storeys:`/`below_grade_storeys:` are the canonical spellings; the engines'
@@ -114,9 +114,9 @@ module OpenStudioGeometry
   # `create` dispatches positional scalars (length, width, ...) through
   # `ordered`, and a coordinate ring is not that shape.
   #
-  #   OpenStudioGeometry.create_from_footprint(
+  #   BtapModeling.create_from_footprint(
   #     geojson: record['geometry_geojson'], height_m: record['height_max_m'],
-  #     floor_to_floor_height: OpenStudioGeometry::Footprint::TEN_FEET,
+  #     floor_to_floor_height: BtapModeling::Footprint::TEN_FEET,
   #     source: { feature_id: record['feature_id'], dataset: 'nrcan-buildings' })
   #
   # Storey count is derived from the measured height unless `storeys:` is given.
@@ -223,13 +223,13 @@ module OpenStudioGeometry
   # Cut windows into every exterior wall to a caller-chosen window-to-wall
   # ratio. There is NO default and no code knowledge — see Footprint.apply_wwr.
   #
-  #   OpenStudioGeometry.apply_wwr(model, 0.35)
-  #   OpenStudioGeometry.apply_wwr(model, 'South' => 0.4, 'North' => 0.2)
+  #   BtapModeling.apply_wwr(model, 0.35)
+  #   BtapModeling.apply_wwr(model, 'South' => 0.4, 'North' => 0.2)
   #
   # For the NECB maximum use openstudio-envelope, which owns the rule:
   #
   #   limit = OpenStudioEnvelope::NECB.max_fdwr(vintage: '2020', hdd: hdd)
-  #   OpenStudioGeometry.apply_wwr(model, limit)
+  #   BtapModeling.apply_wwr(model, limit)
   #
   # @param model [OpenStudio::Model::Model]
   # @param wwr [Float, Hash{String=>Float}] ratio(s) in [0, 1), optionally per
@@ -251,7 +251,7 @@ module OpenStudioGeometry
   # (The upstream DOE/DEER ratio wrappers are not ported; this replaces them
   # for the NECB family.)
   #
-  #   OpenStudioGeometry.bar(
+  #   BtapModeling.bar(
   #     space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 0.7,
   #                          ['Space Function', 'Corridor/Transition area other-sch-A'] => 0.3 },
   #     length: 50.0, width: 20.0, storeys: 3, wwr: 0.4)
@@ -328,7 +328,7 @@ module OpenStudioGeometry
   # standalone page to `path:` when given; returns the fragment either way
   # ('' when the model is unrenderable — audited, never raises).
   #
-  #   OpenStudioGeometry.render(model, path: 'building_3d.html')
+  #   BtapModeling.render(model, path: 'building_3d.html')
   def self.render(model_or_path, path: nil, height: 480, work_dir: nil, audit: nil)
     audit ||= AuditLog.new
     fragment = Render.geometry_viewer(model_or_path, height: height, work_dir: work_dir, audit: audit)
@@ -348,7 +348,7 @@ module OpenStudioGeometry
   # unreadable or floor-less model comes back as an empty bundle carrying
   # `error:`, so a host report can degrade gracefully.
   #
-  #   bundle = OpenStudioGeometry.floor_plans(model, path: 'plans.html')
+  #   bundle = BtapModeling.floor_plans(model, path: 'plans.html')
   #   bundle[:storeys].map { |s| s[:name] }   # => ["Story 0", "Story 1", ...]
   #
   # Unlike `render`, the standalone page written to `path:` is FULLY

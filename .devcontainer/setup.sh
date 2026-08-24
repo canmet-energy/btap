@@ -394,7 +394,7 @@ cat <<'STEPS'
    so the one key covers them:
 
      openstudio-necb/scripts/fetch_necb_8_4_text.rb
-     openstudio-geometry/scripts/building_stock.rb
+     btap-modeling/scripts/building_stock.rb
 
    HBIX_MCP_BASE_URL is the only other knob — it repoints all six servers at
    once, for the scripts and .mcp.json alike. There are no per-server overrides.

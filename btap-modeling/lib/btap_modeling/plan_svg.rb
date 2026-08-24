@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-module OpenStudioGeometry
+module BtapModeling
   # SDK-FREE inline-SVG primitives + the per-storey floor-plan drawing built
   # from them. Pure functions over the {PlanQuery} hashes, so every drawing
   # rule is unit-testable against a hand-written hash — no OpenStudio needed.
   #
   # The primitives (open_svg/close_svg/rect/line/text) are a LOCAL COPY of
   # openstudio-necb's `report/svg.rb`, plus the polygon/group/title helpers the
-  # family lacked. They are copied rather than required: openstudio-geometry
+  # family lacked. They are copied rather than required: btap-modeling
   # sits BELOW openstudio-necb in the dependency graph and must never depend
   # upward (the documented catalog_report.rb:29-32 precedent). The necb
   # convention is kept: a fit-to-width `viewBox` and NO width/height attributes,

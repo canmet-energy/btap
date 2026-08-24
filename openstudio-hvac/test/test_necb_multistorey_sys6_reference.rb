@@ -9,7 +9,7 @@ require_relative 'test_helper'
 # never been exercised for a System 6 selection, and no test has ever built a
 # REAL multi-storey zone stack through this path.
 #
-# This file builds an actual >=3-storey model with openstudio-geometry's bar
+# This file builds an actual >=3-storey model with btap-modeling's bar
 # engine (which tags space types with real NECB catalog names in the same
 # step), runs reference_hvac with NO storeys override, and asserts:
 #  1. the auto-derived storey count really is >= 3 and General Area zones
@@ -21,22 +21,22 @@ require_relative 'test_helper'
 class TestNecbMultistoreySys6Reference < Minitest::Test
   include FixtureHelper
 
-  GEOMETRY_LIB = File.expand_path('../../openstudio-geometry/lib/openstudio_geometry', __dir__)
+  GEOMETRY_LIB = File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
   LOADS_LIB = File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
 
   def setup
-    skip 'openstudio-geometry not present' unless File.exist?("#{GEOMETRY_LIB}.rb")
+    skip 'btap-modeling not present' unless File.exist?("#{GEOMETRY_LIB}.rb")
     skip 'openstudio-loads not present (needed for thermostats before build_system)' unless File.exist?("#{LOADS_LIB}.rb")
     require GEOMETRY_LIB
     require LOADS_LIB
   end
 
   # A real 3-storey office bar, tagged with the exact catalog office name in
-  # the SAME step (OpenStudioGeometry.bar's ratio-tagging), loads applied
+  # the SAME step (BtapModeling.bar's ratio-tagging), loads applied
   # (thermostats — build_system refuses zones without one), then a proposed
   # HVAC system built on every zone.
   def multistorey_proposed_model
-    model = OpenStudioGeometry.bar(
+    model = BtapModeling.bar(
       space_type_ratios: { ['Space Function', 'Office enclosed > 25 m2'] => 1.0 },
       length: 40.0, width: 20.0, num_stories_above_grade: 3, wwr: 0.3
     )

@@ -1,14 +1,14 @@
 require 'minitest/autorun'
 require 'json'
 require 'base64'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 # The campus-repo 3D renderer port: crash-isolated glTF export + fallback
 # ladder + palette boost + <model-viewer> HTML with the geometry embedded as
 # a base64 data URI.
 class TestRender < Minitest::Test
   def wizard_model
-    OpenStudioGeometry.create(shape: 'rectangle', length: 30.0, width: 20.0,
+    BtapModeling.create(shape: 'rectangle', length: 30.0, width: 20.0,
                               above_ground_storys: 2, floor_to_floor_height: 3.5,
                               perimeter_zone_depth: 3.0)
   end
@@ -20,8 +20,8 @@ class TestRender < Minitest::Test
   end
 
   def test_render_happy_path_embeds_boosted_gltf
-    audit = OpenStudioGeometry::AuditLog.new
-    html = OpenStudioGeometry.render(wizard_model, audit: audit)
+    audit = BtapModeling::AuditLog.new
+    html = BtapModeling.render(wizard_model, audit: audit)
 
     assert_includes html, '<model-viewer'
     assert_includes html, 'model-viewer.min.js', 'viewer component script tag present'
@@ -40,7 +40,7 @@ class TestRender < Minitest::Test
   def test_render_writes_standalone_page
     Dir.mktmpdir do |dir|
       path = File.join(dir, 'view.html')
-      fragment = OpenStudioGeometry.render(wizard_model, path: path)
+      fragment = BtapModeling.render(wizard_model, path: path)
       refute_empty fragment
       page = File.read(path)
       assert page.start_with?('<!DOCTYPE html>')
@@ -59,7 +59,7 @@ class TestRender < Minitest::Test
       File.write(out, '{"materials":[]}')
       true
     end
-    ok, note = OpenStudioGeometry::Render.export_repaired('unused.osm', File.join(Dir.tmpdir, 'l1.gltf'),
+    ok, note = BtapModeling::Render.export_repaired('unused.osm', File.join(Dir.tmpdir, 'l1.gltf'),
                                                           exporter: exporter)
     assert ok
     assert_match(/windows\/doors omitted/, note)
@@ -73,7 +73,7 @@ class TestRender < Minitest::Test
     Dir.mktmpdir do |dir|
       osm = File.join(dir, 'm.osm')
       model.save(OpenStudio::Path.new(osm), true)
-      handles = OpenStudioGeometry::Render.surface_handles(osm)
+      handles = BtapModeling::Render.surface_handles(osm)
       assert_operator handles.length, :>, 4
       bad = handles[3]
 
@@ -85,7 +85,7 @@ class TestRender < Minitest::Test
         File.write(out, '{"materials":[]}')
         true
       end
-      ok, note = OpenStudioGeometry::Render.export_repaired(osm, File.join(dir, 'out.gltf'),
+      ok, note = BtapModeling::Render.export_repaired(osm, File.join(dir, 'out.gltf'),
                                                             exporter: exporter)
       assert ok
       assert_match(/1 bad surface\(s\) omitted/, note)
@@ -101,7 +101,7 @@ class TestRender < Minitest::Test
       osm = File.join(dir, 'm.osm')
       model.save(OpenStudio::Path.new(osm), true)
       out = File.join(dir, 'shell.gltf')
-      ok = OpenStudioGeometry::Render.run_export(osm, out, { 'remove_subsurfaces' => true })
+      ok = BtapModeling::Render.run_export(osm, out, { 'remove_subsurfaces' => true })
       assert ok, 'worker exports the massing shell'
       names = JSON.parse(File.read(out))['materials'].map { |m| m['name'] }
       refute_includes names, 'Window', 'sub-surfaces removed before export'

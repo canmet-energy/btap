@@ -16,7 +16,7 @@ class TestDecisionsRegistry < Minitest::Test
 
   MONOREPO = File.expand_path('../..', __dir__)
   GEMS = %w[openstudio-necb openstudio-hvac openstudio-envelope openstudio-loads
-            openstudio-lighting openstudio-shw openstudio-geometry].freeze
+            openstudio-lighting openstudio-shw btap-modeling].freeze
   DOC = File.expand_path('../docs/necb_decisions.md', __dir__)
   KINDS = %w[runtime runtime_unwired data process].freeze
 
@@ -160,7 +160,7 @@ class TestDecisionsRegistry < Minitest::Test
   AUDIT_LOG_ALIASES = {
     'openstudio-hvac' => %w[openstudio_hvac OpenStudioHVAC],
     'openstudio-envelope' => %w[openstudio_envelope OpenStudioEnvelope],
-    'openstudio-geometry' => %w[openstudio_geometry OpenStudioGeometry],
+    'btap-modeling' => %w[btap_modeling BtapModeling],
     'openstudio-lighting' => %w[openstudio_lighting OpenStudioLighting],
     'openstudio-loads' => %w[openstudio_loads OpenStudioLoads],
     'openstudio-shw' => %w[openstudio_shw OpenStudioSHW]

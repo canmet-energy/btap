@@ -39,12 +39,12 @@ begin
 rescue LoadError
   require File.expand_path('../../btap-simulation/lib/btap_simulation', __dir__)
 end
-# openstudio-geometry: consumed by the AHJ report's floor-plan section (the
+# btap-modeling: consumed by the AHJ report's floor-plan section (the
 # gem is otherwise upstream — it creates models rather than transforming them).
 begin
-  require 'openstudio_geometry'
+  require 'btap_modeling'
 rescue LoadError
-  require File.expand_path('../../openstudio-geometry/lib/openstudio_geometry', __dir__)
+  require File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
 end
 
 require_relative 'openstudio_necb/version'
@@ -63,7 +63,7 @@ require_relative 'openstudio_necb/report'
 # with simulation execution via btap-simulation (the one place
 # simulation is allowed; the domain gems never simulate), unified costing,
 # and ONE AuditLog across everything. The seventh family gem,
-# openstudio-geometry, sits mostly UPSTREAM (it creates the model you feed
+# btap-modeling, sits mostly UPSTREAM (it creates the model you feed
 # in here) — the AHJ report also consumes its floor-plan engine.
 module OpenStudioNECB
   # The shared audit class, now owned by btap-audit: every family gem

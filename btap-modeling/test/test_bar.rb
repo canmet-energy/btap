@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'tmpdir'
-require_relative '../lib/openstudio_geometry'
+require_relative '../lib/btap_modeling'
 
 # Bar engine gate: ratio-true slicing with standards tagging, WWR, party walls,
 # below-grade handling — and the full-family composition (bar geometry through
@@ -30,8 +30,8 @@ class TestBar < Minitest::Test
   end
 
   def test_ratio_true_slicing_and_tagging
-    audit = OpenStudioGeometry::AuditLog.new
-    model = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 50.0, width: 20.0,
+    audit = BtapModeling::AuditLog.new
+    model = BtapModeling.bar(space_type_ratios: RATIOS, length: 50.0, width: 20.0,
                                    num_stories_above_grade: 2, wwr: 0.4, audit: audit)
 
     assert(model.getSpaces.all? { |s| s.spaceType.is_initialized }, 'every space typed')
@@ -50,7 +50,7 @@ class TestBar < Minitest::Test
   end
 
   def test_below_grade_and_party_walls
-    model = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 40.0, width: 15.0,
+    model = BtapModeling.bar(space_type_ratios: RATIOS, length: 40.0, width: 15.0,
                                    num_stories_above_grade: 2, num_stories_below_grade: 1,
                                    party_wall_stories_north: 2, wwr: 0.3)
     ground = model.getSurfaces.count { |s| s.outsideBoundaryCondition == 'Ground' }
@@ -63,10 +63,10 @@ class TestBar < Minitest::Test
   # (the engine's own spelling, used by the tests above) still works, and the
   # two together are ambiguous.
   def test_storey_aliases
-    audit = OpenStudioGeometry::AuditLog.new
-    canonical = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
+    audit = BtapModeling::AuditLog.new
+    canonical = BtapModeling.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
                                        storeys: 2, below_grade_storeys: 1, wwr: 0.3, audit: audit)
-    legacy = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
+    legacy = BtapModeling.bar(space_type_ratios: RATIOS, length: 30.0, width: 15.0,
                                     num_stories_above_grade: 2, num_stories_below_grade: 1, wwr: 0.3)
     assert_equal legacy.getSpaces.size, canonical.getSpaces.size, 'old names produce the same geometry'
     assert_in_delta legacy.getSpaces.sum(&:floorArea), canonical.getSpaces.sum(&:floorArea), 0.01
@@ -75,9 +75,9 @@ class TestBar < Minitest::Test
     assert_equal 1, inputs[:storeys_below]
 
     assert_raises(ArgumentError) do
-      OpenStudioGeometry.bar(space_type_ratios: RATIOS, storeys: 2, num_stories_above_grade: 3)
+      BtapModeling.bar(space_type_ratios: RATIOS, storeys: 2, num_stories_above_grade: 3)
     end
-    assert_raises(ArgumentError) { OpenStudioGeometry.bar(space_type_ratios: RATIOS, storeyz: 2) }
+    assert_raises(ArgumentError) { BtapModeling.bar(space_type_ratios: RATIOS, storeyz: 2) }
   end
 
   def test_full_family_composition_from_bar
@@ -90,7 +90,7 @@ class TestBar < Minitest::Test
       require path
     end
 
-    model = OpenStudioGeometry.bar(space_type_ratios: RATIOS, length: 50.0, width: 20.0,
+    model = BtapModeling.bar(space_type_ratios: RATIOS, length: 50.0, width: 20.0,
                                    num_stories_above_grade: 2, wwr: 0.4)
     seed_constructions(model) # wizard output carries no constructions; the envelope pass retargets existing ones
     audit = OpenStudioHVAC::AuditLog.new

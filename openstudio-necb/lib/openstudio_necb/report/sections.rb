@@ -163,7 +163,7 @@ module OpenStudioNECB
       end
 
       # -- floor_plans ---------------------------------------------------
-      # Per-storey plan views from openstudio-geometry's plan engine (PROPOSED
+      # Per-storey plan views from btap-modeling's plan engine (PROPOSED
       # model; the reference's spaces/zones are identical by clone — stated in
       # the section). ctx[:floor_plans] is the never-raise bundle
       # {storeys: [{name:, svg:}], legend_svg:, empty:, inferred_storeys:,

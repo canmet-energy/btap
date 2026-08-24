@@ -8,7 +8,7 @@ require 'rbconfig'
 require 'tempfile'
 require 'timeout'
 
-module OpenStudioGeometry
+module BtapModeling
   # 3D geometry viewer — Ruby port of the campus repo's renderer
   # (canmet-energy/campus, src/buildings/reports/geometry_view.py): export the
   # model to glTF with the SDK's GltfForwardTranslator and render it with
