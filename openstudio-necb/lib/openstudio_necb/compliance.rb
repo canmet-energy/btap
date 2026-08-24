@@ -1083,7 +1083,7 @@ module OpenStudioNECB
 
     # Completeness accounting for the umbrella's OWN manifest. Resolution is
     # ours (a data file next to this gem); the emission is the family's shared
-    # one (OpenStudioAudit::Coverage.emit, the same call the five domain gems
+    # one (BtapAudit::Coverage.emit, the same call the five domain gems
     # make): every declared article lands in the audit with its status,
     # partial/not_implemented warn — EXCEPT entries flagged gap_owner:
     # "modeller", which emit as info scope notes (project decision D-09,
@@ -1093,7 +1093,7 @@ module OpenStudioNECB
       path = File.expand_path("data/necb/necb_rules_#{vintage}.json", __dir__)
       return unless File.exist?(path)
 
-      OpenStudioAudit::Coverage.emit(JSON.parse(File.read(path))['article_coverage'], audit)
+      BtapAudit::Coverage.emit(JSON.parse(File.read(path))['article_coverage'], audit)
     end
 
     def write_outputs(run_dir, report, audit)

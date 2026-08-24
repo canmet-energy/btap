@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
   # vendored copy of the PRICED tables (costs.csv, costs_local_factors.csv,
   # locations.csv) from this gem. Undeclared until the gems were extracted,
   # because a side-by-side checkout resolved it by relative path.
-  spec.add_dependency 'openstudio-audit'
+  spec.add_dependency 'btap-audit'
   spec.add_dependency 'openstudio-hvac'
   spec.add_dependency 'openstudio-loads'
 end

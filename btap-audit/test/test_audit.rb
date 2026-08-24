@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 require 'json'
-require_relative '../lib/openstudio_audit'
+require_relative '../lib/btap_audit'
 
 # The AuditLog `ruling:` axis: every entry can cite the adjudicated project
 # decision(s) (D-XX) that govern the code path, alongside the `article:` axis
@@ -8,7 +8,7 @@ require_relative '../lib/openstudio_audit'
 # what they were before the axis existed.
 class TestAuditLog < Minitest::Test
   def audit
-    @audit ||= OpenStudioAudit::AuditLog.new
+    @audit ||= BtapAudit::AuditLog.new
   end
 
   def test_ruling_is_stored_top_level
@@ -79,7 +79,7 @@ end
 # tags against the manifest article id.
 class TestCoverageEmit < Minitest::Test
   def audit
-    @audit ||= OpenStudioAudit::AuditLog.new
+    @audit ||= BtapAudit::AuditLog.new
   end
 
   COVERAGE = {
@@ -104,7 +104,7 @@ class TestCoverageEmit < Minitest::Test
     audit.decision(:build, 'fan power', article: '8.4.4.7.(4); 8.4.4.18.(2)')
     audit.decision(:build, 'staged coil', article: '8.4.4.9.(7)')
     audit.decision(:build, 'water-side economizer', article: '5.2.2.9.(2)') # non-8.4: never counted
-    OpenStudioAudit::Coverage.emit(COVERAGE, audit)
+    BtapAudit::Coverage.emit(COVERAGE, audit)
     audit.entries.select { |e| e[:step] == :coverage }
   end
 
@@ -149,7 +149,7 @@ class TestCoverageEmit < Minitest::Test
   end
 
   def test_nil_coverage_is_a_no_op
-    OpenStudioAudit::Coverage.emit(nil, audit)
+    BtapAudit::Coverage.emit(nil, audit)
     assert_empty audit.entries
   end
 end

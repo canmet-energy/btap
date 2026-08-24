@@ -1,5 +1,5 @@
 Gem::Specification.new do |spec|
-  spec.name = 'openstudio-audit'
+  spec.name = 'btap-audit'
   spec.version = '0.1.0'
   spec.authors = ['NRCan / openstudio-standards contributors']
   spec.summary = 'Shared audit log + article-coverage emitter for the NECB gem family'

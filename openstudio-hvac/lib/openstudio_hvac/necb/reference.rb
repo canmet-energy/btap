@@ -705,7 +705,7 @@ module OpenStudioHVAC
     # unimplemented or partially-implemented articles surface as warnings, so a missed
     # requirement is visible in every log rather than discovered by review.
     def self.emit_article_coverage(ruleset, audit)
-      OpenStudioAudit::Coverage.emit(ruleset['article_coverage'], audit)
+      BtapAudit::Coverage.emit(ruleset['article_coverage'], audit)
     end
 
     def self.clone_model(model)

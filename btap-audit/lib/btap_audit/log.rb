@@ -1,6 +1,6 @@
 require 'json'
 
-module OpenStudioAudit
+module BtapAudit
   # The gem-wide decision/audit trail: proposed characterization, NECB reference
   # generation, efficiency application AND costing all write to the same log.
   #

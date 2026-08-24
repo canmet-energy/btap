@@ -1,7 +1,7 @@
-require_relative 'openstudio_audit/log'
-require_relative 'openstudio_audit/coverage'
+require_relative 'btap_audit/log'
+require_relative 'btap_audit/coverage'
 
-# OpenStudioAudit is the shared audit machinery of the NECB gem family: the ONE
+# BtapAudit is the shared audit machinery of the NECB gem family: the ONE
 # `AuditLog` class (entry schema, `building:` stamping, `article:`/`ruling:`
 # citation axes, JSON + narrative rendering) and the ONE article-coverage
 # emitter every gem runs at the end of its happy path.
@@ -10,8 +10,8 @@ require_relative 'openstudio_audit/coverage'
 # lowest-level gem in the family, required by all of hvac, envelope, loads,
 # lighting, shw, geometry and the openstudio-necb umbrella. Each of those
 # aliases the class into its own namespace (`OpenStudioHVAC::AuditLog =
-# OpenStudioAudit::AuditLog`), so every existing call site keeps working; the
+# BtapAudit::AuditLog`), so every existing call site keeps working; the
 # aliases are the compatibility mechanism, not a second implementation.
-module OpenStudioAudit
+module BtapAudit
   VERSION = '0.1.0'.freeze
 end

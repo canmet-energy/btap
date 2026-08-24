@@ -1,4 +1,4 @@
-module OpenStudioAudit
+module BtapAudit
   # Article-coverage emission: the ONE implementation of the completeness
   # accounting every family gem performs at the end of its happy path.
   #
@@ -22,7 +22,7 @@ module OpenStudioAudit
     # @param coverage [Hash, nil] the resolved `article_coverage` block — a
     #   Hash with an 'articles' list of
     #   {article, title, status, how, gaps, gap_owner} records
-    # @param audit [OpenStudioAudit::AuditLog] the run's audit log; entries are
+    # @param audit [BtapAudit::AuditLog] the run's audit log; entries are
     #   appended, and their `article:` tags are what the citation count reads
     # @return [void]
     def emit(coverage, audit)

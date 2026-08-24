@@ -321,7 +321,7 @@ module OpenStudioLighting
       end
 
       def emit_article_coverage(vintage, audit)
-        OpenStudioAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
+        BtapAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
       end
 
       # ---- internals (not API) ----
