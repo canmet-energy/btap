@@ -18,7 +18,6 @@ GEM_DIRS = %w[
   btap-audit
   btap-costing
   btap-modeling
-  openstudio-lighting
   btap-necb
   openstudio-shw
   btap-simulation
@@ -30,7 +29,7 @@ abort("GEM_DIRS is stale — missing: #{missing.join(', ')}") unless missing.emp
 # name-pattern derivation would silently lose them.
 HOSTILE_TESTS = %w[
   btap-necb/test/test_envelope_necb_hostile_reference.rb
-  openstudio-lighting/test/test_necb_hostile_reference.rb
+  btap-necb/test/test_lighting_necb_hostile_reference.rb
 ].select { |f| File.file?(f) }.freeze
 abort('HOSTILE_TESTS list is stale') unless HOSTILE_TESTS.size == 2
 

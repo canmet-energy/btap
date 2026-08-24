@@ -62,8 +62,8 @@
     "status": "host_scope",
     "how": "fan/system operating schedules ship in the schedule sets (NECB-<letter>-Fan); wiring them to systems is the openstudio-hvac / umbrella layer",
     "code": [
-     "openstudio-lighting/lib/openstudio_lighting/necb/apply_lights.rb#apply_to_space_type",
-     "openstudio-lighting/lib/openstudio_lighting/necb/reference.rb#apply_dwelling_rule"
+     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type",
+     "btap-necb/lib/btap_necb/lighting/reference.rb#apply_dwelling_rule"
     ]
    },
    {

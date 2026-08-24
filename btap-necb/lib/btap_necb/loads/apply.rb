@@ -1,7 +1,7 @@
 module BtapNECB
   module Loads
     # The loads pass — port of the legacy NECB space_type_apply_internal_loads
-    # (beps_compliance_path.rb) MINUS lights (openstudio-lighting territory) and
+    # (beps_compliance_path.rb) MINUS lights (the lighting domain's territory) and
     # of the parent space_type_apply_internal_load_schedules /
     # space_type_apply_thermostat_schedules (Standards.SpaceType.rb), against the
     # vendored data. Unit conversions are legacy-exact (data is IP; see the data

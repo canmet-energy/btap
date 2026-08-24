@@ -84,10 +84,10 @@ class TestNecbMurbDwellingReference < Minitest::Test
     space = OpenStudio::Model::Space.new(model) # a floor-area space so the type is consequential
     space.setSpaceType(space_type)
 
-    audit = OpenStudioLighting::AuditLog.new
-    OpenStudioLighting::NECB.reference_lighting(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Lighting.reference_lighting(model, vintage: '2020', audit: audit)
 
-    dwelling_lpd = OpenStudioLighting::NECB.rules('2020')['dwelling_unit_lpd_w_per_m2'].to_f
+    dwelling_lpd = BtapNECB::Lighting.rules('2020')['dwelling_unit_lpd_w_per_m2'].to_f
     assert_in_delta 5.0, dwelling_lpd, 1e-9, 'sanity: the data file still declares 5.0 W/m2 (8.4.4.5.(2))'
 
     actual = space_type.lights.first.lightsDefinition.wattsperSpaceFloorArea.get

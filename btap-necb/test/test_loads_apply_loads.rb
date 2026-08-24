@@ -128,7 +128,7 @@ class TestApplyLoads < Minitest::Test
     assert_equal 9, coverage.size, 'all declared entries accounted'
     partial = coverage.find { |e| e[:article] == '8.4.3.2.(1)' }
     assert_equal :warning, partial[:level], 'partial status WARNS (lighting+SHW schedule delegations)'
-    assert_match(/openstudio-lighting/, partial[:action])
+    assert_match(/lighting/, partial[:action])
     semi = coverage.find { |e| e[:article] == '8.4.3.2.(3)' }
     assert_equal :info, semi[:level], '(3) semi-heated set-point is a modeller input, not a warning'
     decisions = audit.entries.select { |e| e[:article].to_s.include?('8.4.3.2') && e[:level] == :decision }

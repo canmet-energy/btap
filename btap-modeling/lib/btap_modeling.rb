@@ -56,7 +56,7 @@ require_relative 'btap_modeling/catalog_report'
 # below-grade storeys, and matched surfaces. SDK-only; shared AuditLog schema.
 #
 # Downstream: BtapNECB::Loads.assign_space_types + apply_loads,
-# OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
+# BtapNECB::Lighting.apply_lights, OpenStudioSHW.apply_shw,
 # BtapModeling.build_system, BtapNECB::Envelope prescriptive/reference,
 # BtapNECB.performance_compliance.
 module BtapModeling

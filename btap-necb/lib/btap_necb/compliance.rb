@@ -28,7 +28,7 @@ module BtapNECB
   #       result after the cap is a loud warning + non-compliance.
   #
   # One clone, one audit: reference_hvac (openstudio-hvac), reference_envelope
-  # (openstudio-envelope), reference_lighting (openstudio-lighting — Part 4
+  # (envelope), reference_lighting (lighting — Part 4
   # allowance LPDs) and reference_shw (openstudio-shw — Part 6 minimum
   # efficiencies) transform a single reference model, and optional costing of
   # both models lands in the same AuditLog.
@@ -301,7 +301,7 @@ module BtapNECB
         # daylighting: tells reference_lighting whether (5)-(12) are covered by
         # the separate daylighting transform below — it shouts the gap only when
         # they are not (Phase 0 truth-up; the warning used to fire either way).
-        OpenStudioLighting::NECB.reference_lighting(reference, vintage: vintage,
+        BtapNECB::Lighting.reference_lighting(reference, vintage: vintage,
                                                     daylighting: opts[:reference_daylighting], audit: audit)
         if opts[:reference_daylighting]
           audit.decision(:compliance,
@@ -310,7 +310,7 @@ module BtapNECB
                          'a reference generated without them is non-conformant, so correctness outranks ' \
                          'the detailed-daylighting runtime cost (pass reference_daylighting: false to opt out)',
                          article: "#{lighting_prefix}.5.(9)-(12)", ruling: 'D-51')
-          OpenStudioLighting::NECB.reference_daylighting(reference, vintage: vintage,
+          BtapNECB::Lighting.reference_daylighting(reference, vintage: vintage,
                                                          proposed: proposed, audit: audit)
         else
           audit.warn(:compliance,
@@ -640,7 +640,7 @@ module BtapNECB
 
       BtapNECB::Loads.assign_space_types(proposed, map, vintage: vintage, audit: audit)
       BtapNECB::Loads.apply_loads(proposed, vintage: vintage, audit: audit)
-      OpenStudioLighting.apply_lights(proposed, vintage: vintage,
+      BtapNECB::Lighting.apply_lights(proposed, vintage: vintage,
                                       lights_type: options[:lights_type] || 'NECB_Default', audit: audit)
       shw_fuel = options[:shw_fuel]
       OpenStudioSHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
