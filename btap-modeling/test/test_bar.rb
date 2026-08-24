@@ -93,11 +93,11 @@ class TestBar < Minitest::Test
     model = BtapModeling.bar(space_type_ratios: RATIOS, length: 50.0, width: 20.0,
                                    num_stories_above_grade: 2, wwr: 0.4)
     seed_constructions(model) # wizard output carries no constructions; the envelope pass retargets existing ones
-    audit = OpenStudioHVAC::AuditLog.new
+    audit = BtapModeling::AuditLog.new
     OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
     OpenStudioLighting.apply_lights(model, vintage: '2020', audit: audit)
     OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
-    OpenStudioHVAC.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
+    BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     OpenStudioEnvelope::NECB.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
 
     refute_empty model.getPeoples.to_a, 'loads live on bar geometry'

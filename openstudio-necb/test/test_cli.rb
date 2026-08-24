@@ -155,7 +155,10 @@ class TestCLI < Minitest::Test
   # This pins that the COMPLIANCE path never touches them, so a future eager read
   # breaks CI here rather than shipping an installer that dies at run time.
   def test_compliance_runs_without_the_priced_costing_tables
-    costing = File.expand_path('../../lib/openstudio_hvac/data/costing', HVAC_FIXTURES)
+    # Explicit gem path, not derived from HVAC_FIXTURES — the fixtures moved
+    # to btap-modeling while the priced tables stay with hvac costing until
+    # btap-costing exists.
+    costing = File.expand_path('../../openstudio-hvac/lib/openstudio_hvac/data/costing', __dir__)
     priced = Dir.glob(File.join(costing, '{costs,costs_local_factors}.csv'))
     # NOT a skip: this checkout vendors both, and a silently-skipping packaging
     # gate is exactly the green-but-vacuous failure this repo already documents.

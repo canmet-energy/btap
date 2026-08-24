@@ -18,7 +18,7 @@ require 'json'
 class TestReferenceSelectionMatrix < Minitest::Test
   include FixtureHelper
 
-  GOLDEN = File.expand_path('fixtures/reference_selection_matrix.json', __dir__)
+  GOLDEN = File.expand_path('../../btap-modeling/test/fixtures/reference_selection_matrix.json', __dir__)
   SCENARIOS = {
     'general_2storey' => { storeys: 2, type: 'office' },
     'general_3storey' => { storeys: 3, type: 'office' },

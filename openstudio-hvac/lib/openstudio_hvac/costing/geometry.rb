@@ -139,13 +139,10 @@ module OpenStudioHVAC
         volume / floor_area
       end
 
+      # Moved to BtapModeling::Helpers (pure geometry the authoring systems
+      # need); this delegation keeps costing and NECB callers working.
       def above_ground_storeys(model)
-        declared = model.getBuilding.standardsNumberOfAboveGroundStories
-        return declared.get if declared.is_initialized
-
-        model.getBuildingStorys.count do |story|
-          story.spaces.any? { |s| s.zOrigin.to_f >= -0.01 }
-        end.clamp(1, 1000)
+        BtapModeling::Helpers.above_ground_storeys(model)
       end
 
       # Legacy getGeometryData: distances used by plant utility runs and header piping.
