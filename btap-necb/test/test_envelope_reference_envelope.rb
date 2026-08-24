@@ -4,7 +4,7 @@ require 'tmpdir'
 # P4 gate: the greenfield reference-envelope transform (8.4.4.3/8.4.4.4) — golden
 # assertions on scaling, absorptance, shading census, lightweight rebuild, air
 # leakage arithmetic, coverage emission; E2E clean E+ run; composition smoke with
-# openstudio-hvac (one clone, one audit).
+# the hvac domain (one clone, one audit).
 class TestReferenceEnvelope < Minitest::Test
   include FixtureHelper
 
@@ -101,7 +101,7 @@ class TestReferenceEnvelope < Minitest::Test
   # fixture's stock 0.7), so it is left green.
   #
   # EXPECTED TO FAIL until apply_lightweight_construction preserves the
-  # pre-rebuild absorptance. See openstudio-envelope/lib/openstudio_envelope/necb/reference.rb:137.
+  # pre-rebuild absorptance. See btap-necb/lib/btap_necb/envelope/reference.rb:137.
   def test_roof_absorptance_only_when_actual_used
     keep = proposed_model
     hostile_roof_absorptance!(keep, 0.3)
@@ -262,9 +262,7 @@ class TestReferenceEnvelope < Minitest::Test
 
   # Composition: HVAC + envelope reference on ONE clone with ONE audit.
   def test_composition_with_openstudio_hvac
-    hvac_lib = File.expand_path('../../openstudio-hvac/lib/openstudio_hvac', __dir__)
-    skip 'openstudio-hvac not present' unless File.exist?("#{hvac_lib}.rb")
-    require hvac_lib
+    # hvac lives inside btap-necb/btap-modeling now — loaded by test_helper
 
     proposed = proposed_model
     zones = proposed.getThermalZones.sort_by(&:nameString)

@@ -1,24 +1,24 @@
-# openstudio-necb
+# btap-necb
 
 The **umbrella** gem for the NECB Part 8 performance path. It composes the
 five SDK-only domain gems —
 
-- [openstudio-hvac](../openstudio-hvac): reference system selection (Table
+- [btap-modeling (authoring) + btap-necb (hvac rules)](../btap-modeling (authoring) + btap-necb (hvac rules)): reference system selection (Table
   8.4.4.7.-A), topology builds, capacity-binned efficiencies, ERV, fan rules
-- [openstudio-envelope](../openstudio-envelope): prescriptive Section 3.2,
+- [btap-necb (envelope)](../btap-necb (envelope)): prescriptive Section 3.2,
   thermal bridging (3.1.1.7 via TBD), the reference-envelope transform
   (8.4.4.3/.4), envelope + thermal-bridging costing
-- [openstudio-loads](../openstudio-loads): NECB space-type assignment and
+- [btap-necb (loads)](../btap-necb (loads)): NECB space-type assignment and
   space-use loads (occupancy, receptacles, ventilation, schedules)
-- [openstudio-lighting](../openstudio-lighting): Part 4 LPD allowances,
+- [btap-necb (lighting)](../btap-necb (lighting)): Part 4 LPD allowances,
   daylighting controls, the reference-lighting transform (8.4.4.5)
-- [openstudio-shw](../openstudio-shw): Part 6 service-water-heating demand
+- [btap-necb (shw)](../btap-necb (shw)): Part 6 service-water-heating demand
   and minimum efficiencies, the reference-SHW transform (8.4.4.20)
 
-— plus [openstudio-simulation](../openstudio-simulation) (the EnergyPlus
+— plus [btap-simulation](../btap-simulation) (the EnergyPlus
 runner) into the full proposed-vs-reference determination of **Article
 8.4.1.2** (Division B; wording stable across 2020/2025). The seventh family
-gem, [openstudio-geometry](../openstudio-geometry), sits upstream: it creates
+gem, [btap-modeling](../btap-modeling), sits upstream: it creates
 the model you feed in here.
 
 The 8.4.1.2 determination:
@@ -55,9 +55,9 @@ This block runs as-is from the repo root — it uses the family's shared test
 fixture and the bare-geometry on-ramp:
 
 ```ruby
-require_relative 'openstudio-necb/lib/openstudio_necb'
+require_relative 'btap-necb/lib/btap_necb'
 
-fixtures = 'openstudio-hvac/test/fixtures'
+fixtures = 'btap-modeling (authoring) + btap-necb (hvac rules)/test/fixtures'
 weather  = "#{fixtures}/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020"
 model    = OpenStudio::Model::Model.load(
              OpenStudio::Path.new("#{fixtures}/5ZoneNoHVAC.osm")).get
@@ -65,7 +65,7 @@ space_map = model.getSpaces.to_h do |s|
   [s.nameString, ['Space Function', 'Office enclosed > 25 m2']]
 end
 
-result = OpenStudioNECB.performance_compliance(
+result = BtapNECB.performance_compliance(
   model, vintage: '2020',
   weather: { epw: "#{weather}.epw", ddy: "#{weather}.ddy" },
   building: { storeys: 1 },
@@ -99,7 +99,7 @@ is never modified; the translation is recorded in the audit).
 ## What the pipeline does
 
 The step numbers below match the `# N.` markers in
-`lib/openstudio_necb/compliance.rb` — this list is the canonical one.
+`lib/btap_necb/compliance.rb` — this list is the canonical one.
 
 1. Load + validate the input model — on-ramp for bare geometry
    (`necb_loads:`), simulate-ability gates, the NECB space-type pre-flight.
@@ -112,11 +112,11 @@ The step numbers below match the `# N.` markers in
    carries a heat pump its annual heating-energy split feeds the
    8.4.4.13.(2)(g) auxiliary-fuel election in the reference build (D-52).
 5. **Reference build** on ONE clone, same audit:
-   `OpenStudioHVAC::NECB.reference_hvac` →
-   `OpenStudioEnvelope::NECB.reference_envelope` →
-   `OpenStudioLighting::NECB.reference_lighting` (Part 4 allowance LPDs,
+   `BtapNECB::HVAC.reference_hvac` →
+   `BtapNECB::Envelope.reference_envelope` →
+   `BtapNECB::Lighting.reference_lighting` (Part 4 allowance LPDs,
    dwelling units to 5 W/m²) + `reference_daylighting` (photocontrols, ON by
-   default per D-51) → `OpenStudioSHW::NECB.reference_shw` (Part 6 minimum
+   default per D-51) → `BtapNECB::SHW.reference_shw` (Part 6 minimum
    efficiencies). Schedules and occupancy/receptacle loads stay
    identical-by-clone per 8.4.3.2; lighting power and SHW efficiency do NOT.
 6. Sizing run of the reference, then **efficiencies re-applied** on the sized
@@ -160,7 +160,7 @@ reference building is generated or simulated; the building energy target is
 `BET = Σ(Aᵢ × EUIᵢ) + PL` from Table 8.4.4.1.:
 
 ```ruby
-result = OpenStudioNECB.performance_compliance(
+result = BtapNECB.performance_compliance(
   model, vintage: '2025', path: :eui,
   archetypes: { 'Office' => :all },       # archetype => :all | [space names]
   process_loads_kwh: 0,
@@ -183,14 +183,14 @@ authorizes the extra normalized run.
 
 ## Command line
 
-`exe/necb-compliance.rb` wraps `performance_compliance` for people who would
+`exe/btap-compliance.rb` wraps `performance_compliance` for people who would
 rather not write Ruby. One model in; EUIs, a verdict, and the HTML report out.
 
 ```bash
-ruby openstudio-necb/exe/necb-compliance.rb model.osm --epw toronto.epw
-ruby openstudio-necb/exe/necb-compliance.rb model.osm --city toronto --quick
-ruby openstudio-necb/exe/necb-compliance.rb --list-cities
-ruby openstudio-necb/exe/necb-compliance.rb --help
+ruby btap-necb/exe/btap-compliance.rb model.osm --epw toronto.epw
+ruby btap-necb/exe/btap-compliance.rb model.osm --city toronto --quick
+ruby btap-necb/exe/btap-compliance.rb --list-cities
+ruby btap-necb/exe/btap-compliance.rb --help
 ```
 
 Output is deliberately **ASCII-only** (the Windows console is CP437/CP1252), and
@@ -227,7 +227,7 @@ on-ramp takes either a uniform type or a per-space map:
 
 **Remote execution.** `--backend remote` offloads the EnergyPlus runs to the
 HBIX simulation service, reading `HBIX_SIM_ENDPOINT` and `HBIX_API_KEY` from the
-environment. It sets `OpenStudioSimulation::Runner.default_backend`, because the
+environment. It sets `BtapSimulation::Runner.default_backend`, because the
 umbrella calls `run_energyplus!` at ~8 sites and threading a parameter through
 every phase would be worse. Remote is a **scale** play (wide sweeps), not a
 latency win: one determination is 4–7 sequential simulations, each now carrying
@@ -269,7 +269,7 @@ authoritative copy):
 
 ## AHJ compliance report (HTML)
 
-`report_html: true` (or `OpenStudioNECB::Report.write_html(result, path, options)`
+`report_html: true` (or `BtapNECB::Report.write_html(result, path, options)`
 on any `ComplianceResult`) renders **one self-contained HTML file** for
 building-permit submission — no external resources, no scripts (native
 `<details>` only), print-ready. Its structure mirrors the City of Vancouver
@@ -303,7 +303,7 @@ Audit entries and code comments carry two citation axes:
 - **`ruling: 'D-nn'`** — the adjudicated *reading* of that clause where
   interpretation was required. The registry is
   [docs/necb_decisions.md](docs/necb_decisions.md) (human prose) +
-  `lib/openstudio_necb/data/decisions.json` (machine-readable; drift-tested).
+  `lib/btap_necb/data/decisions.json` (machine-readable; drift-tested).
 - `L-nn` = legacy-implementation findings ([docs/legacy_findings.md](docs/legacy_findings.md));
   `T-n` / `A-n` = the archived 2026-07-25 audit registers (see
   [docs/README.md](docs/README.md) for the register guide and the family
@@ -312,7 +312,7 @@ Audit entries and code comments carry two citation axes:
 ## Testing
 
 ```bash
-cd openstudio-necb
+cd btap-necb
 ruby test/test_compliance.rb   # pipeline modes, capacity iteration, pre-flight,
                                # input validation gates. E+ runs skip without the CLI.
 ruby test/test_archetypes.rb   # 8.4.4 mapping / conformance check / normalization

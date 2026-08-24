@@ -409,7 +409,7 @@ module BtapNECB
       #                               level deeper under gems/
       # Shipping only the 3-up form made --list-cities report "none" on a real
       # Windows install while every Linux test passed, because in a checkout the
-      # openstudio-hvac fixtures path answered instead. Layout-specific paths
+      # hvac fixtures path answered instead. Layout-specific paths
       # need a test per LAYOUT, not per platform.
       def self.search
         [(ENV.fetch('BTAP_HOME', nil) || ENV.fetch('NECB_HOME', nil))&.then { |h| File.join(h, 'weather') },

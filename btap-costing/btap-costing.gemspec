@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Prices model objects from RS-Means-schema tables. The vendored ' \
                      'CSVs are unpriced placeholders; licensed values are injected at ' \
                      'runtime via costs_csv:/BTAP_COSTING_DIR and never redistributed.'
-  spec.homepage = 'https://github.com/canmet-energy/openstudio-necb-gems'
+  spec.homepage = 'https://github.com/canmet-energy/btap-gems'
   spec.license = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2.0'
   spec.metadata['homepage_uri'] = spec.homepage

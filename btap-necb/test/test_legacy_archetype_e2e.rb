@@ -6,7 +6,7 @@ require 'json'
 require 'shellwords'
 
 # The first WHOLE-BUILDING cross-validation of the new NECB gem family
-# (openstudio-hvac/envelope/lighting/shw/necb) against the LEGACY
+# (the btap-necb domains) against the LEGACY
 # openstudio-standards NECB implementation living in this same monorepo
 # (lib/openstudio-standards, NECB2020 class).
 #
@@ -195,7 +195,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
     # FIRST FINDING CLASS: pre-flight space-type resolution. The legacy
     # NECB2020 SmallOffice archetype tags its office space type
     # 'Space Function' / 'Office enclosed <= 25 m2' (auto-zoning splits by
-    # floor area) — this IS a catalog name (openstudio-loads NECB 2020 table),
+    # floor area) — this IS a catalog name (the loads-domain NECB 2020 table),
     # so pre-flight is expected to pass without any retag.
     dir = Dir.mktmpdir('necb-e2e-preflight-')
     result = nil
@@ -228,16 +228,16 @@ class TestLegacyArchetypeE2E < Minitest::Test
     assert retags.empty?, 'expected the real legacy archetype tags to resolve cleanly against the catalog ' \
                           "(no retags needed) — got: #{retags.inspect}"
     puts '[RAN] pre-flight PASSED with no retags: legacy NECB2020 SmallOffice space types ' \
-         "('Space Function' / 'Office enclosed <= 25 m2') resolve directly against the openstudio-loads catalog"
+         "('Space Function' / 'Office enclosed <= 25 m2') resolve directly against the loads-domain catalog"
 
     reference = result.reference_model
     proposed = result.proposed_model
 
     # ---- (a) reference exterior wall U-value vs NECB 2020 Table 3.2.2.2, HDD bin ----
-    # Expected value read directly from openstudio-envelope's vendored rule data
+    # Expected value read directly from the envelope domain's vendored rule data
     # (rule: first bin where hdd < key), NOT hardcoded.
     envelope_rules = JSON.parse(File.read(File.join(
-      REPO_ROOT, 'openstudio-envelope/lib/openstudio_envelope/data/necb/envelope_rules_2020.json'
+      REPO_ROOT, 'btap-necb/lib/btap_necb/envelope/data/necb/envelope_rules_2020.json'
     )))
     wall_bins = envelope_rules.fetch('u_values').fetch('outdoors').fetch('wall')
     hdd = 3890
@@ -248,7 +248,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
     got_wall_u = wall.construction.get.to_Construction.get.thermalConductance.to_f
     # D-23: envelope_rules table values are OVERALL U (incl. films, per 1.4.1.2);
     # the applied construction is CONSTRUCTION-ONLY conductance. Convert to overall
-    # before comparing (mirrors openstudio-envelope/test/test_prescriptive.rb:135-138).
+    # before comparing (mirrors test_envelope_prescriptive.rb:135-138).
     r_films = BtapModeling::Constructions.film_r('wall', 'outdoors')
     got_overall_u = 1.0 / ((1.0 / got_wall_u) + r_films)
     puts "[RAN] (a) reference exterior wall U-value: expected #{expected_wall_u} W/m2K " \
@@ -259,7 +259,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
 
     # ---- (b) reference LPD for 'Office enclosed <= 25 m2' vs catalog (W/ft2 -> W/m2) ----
     catalog = JSON.parse(File.read(File.join(
-      REPO_ROOT, 'openstudio-loads/lib/openstudio_loads/data/necb/space_types_2020.json'
+      REPO_ROOT, 'btap-necb/lib/btap_necb/loads/data/necb/space_types_2020.json'
     )))['table']
     row = catalog.find { |r| r['building_type'] == 'Space Function' && r['space_type'] == 'Office enclosed <= 25 m2' }
     refute_nil row, 'catalog carries the Office enclosed <= 25 m2 space type'
@@ -297,9 +297,9 @@ class TestLegacyArchetypeE2E < Minitest::Test
   # PHASE 2 (continued) — the annual run + topline numbers. This is where the
   # whole-building cross-validation earns its keep: the legacy archetype's
   # REAL geometry carries Kiva slab-on-grade Foundation objects (5 zones on
-  # one shared OS:Foundation:Kiva), which openstudio-envelope's NECB reference
+  # one shared OS:Foundation:Kiva), which the envelope domain's NECB reference
   # envelope's lightweight-construction transform
-  # (openstudio-envelope/lib/openstudio_envelope/necb/reference.rb, method
+  # (btap-necb/lib/btap_necb/envelope/reference.rb, method
   # apply_lightweight_construction, ~line 137) does not special-case: it
   # rebuilds EVERY opaque surface's construction — including Foundation-
   # boundary ground floors — as a single-layer OpenStudio::Model::
@@ -310,7 +310,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
   # 'Foundation' Outside Boundary Condition must use only regular material
   # objects"), so the reference building's SIZING run (required before ANY
   # annual comparison — simulate: :sizing hits the identical failure) never
-  # completes. No hand-built gem fixture in openstudio-envelope's own test
+  # completes. No hand-built fixture in the envelope domain's own test
   # suite exercises a Kiva Foundation object, so this defect was invisible
   # until fed a real, legacy-generated archetype — precisely the point of
   # this cross-validation.
@@ -318,7 +318,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
   # RULES: no lib/ modifications. This test CHARACTERIZES the current defect
   # (captures a stable green assertion pinned to the exact failure) rather
   # than papering over it. If/when the defect is fixed upstream in
-  # openstudio-envelope, this assert_raises will start failing — that failure
+  # the envelope domain, this assert_raises will start failing — that failure
   # is the signal to convert this test into the full annual/topline
   # cross-check the `else` branch below already knows how to do.
   # ---------------------------------------------------------------------
@@ -355,7 +355,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
       assert_match(/Foundation/i, full_err, 'expected the Foundation-boundary root cause in eplusout.err')
       assert_match(/regular material objects/i, full_err,
                    'expected the "must use only regular material objects" root cause in eplusout.err')
-      puts "[FINDING] [RAN] Phase 2 annual run FAILED as characterized — openstudio-envelope's " \
+      puts "[FINDING] [RAN] Phase 2 annual run FAILED as characterized — the envelope domain's " \
            'reference-envelope lightweight-construction transform is incompatible with Kiva ' \
            "Foundation-boundary ground floors (real legacy archetype geometry). Raised: #{msg}\n" \
            "Root cause (eplusout.err):\n#{full_err[/\*\* Severe.*Kiva.*terminates\./m] || full_err[-1500..] || full_err}"

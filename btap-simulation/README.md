@@ -1,4 +1,4 @@
-# openstudio-simulation
+# btap-simulation
 
 Run EnergyPlus on an OpenStudio model and get results back — **without** any
 compliance layer. This is the lowest-level gem in the family: it depends on
@@ -11,9 +11,9 @@ now, or against a remote/AWS EnergyPlus service later via the same API.
 ## Quick start — the facade
 
 ```ruby
-require 'openstudio_simulation'
+require 'btap_simulation'
 
-result = OpenStudioSimulation.run(
+result = BtapSimulation.run(
   model,
   run_dir: '/tmp/myrun',
   weather: { epw: 'weather.epw', ddy: 'weather.ddy' }, # optional; attaches design days
@@ -29,7 +29,7 @@ result.unmet_hours # => { 'heating' => ..., 'cooling' => ... }
 `sizing_only: true` runs a design-day sizing pass only; `energy` and
 `unmet_hours` are then `nil`.
 
-## Granular API — `OpenStudioSimulation::Runner`
+## Granular API — `BtapSimulation::Runner`
 
 The backend-agnostic steps, if you want them individually:
 
@@ -65,8 +65,8 @@ failure.
   real AWS client or endpoints are fabricated — wire it to your own service.
 
 ```ruby
-OpenStudioSimulation.run(model, run_dir: dir,
-                         backend: OpenStudioSimulation::Remote.new(endpoint: '…', api_key: '…'))
+BtapSimulation.run(model, run_dir: dir,
+                         backend: BtapSimulation::Remote.new(endpoint: '…', api_key: '…'))
 ```
 
 Because every backend lands the same two artifacts on local disk, the result
@@ -77,10 +77,10 @@ transport-agnostic and work unchanged for local or cloud runs.
 
 `article:` in audit entries = the NECB clause that mandates a value;
 `ruling: 'D-nn'` = the adjudicated reading of it. The registry is
-[openstudio-necb/docs/necb_decisions.md](../openstudio-necb/docs/necb_decisions.md)
+[btap-necb/docs/necb_decisions.md](../btap-necb/docs/necb_decisions.md)
 (id-ordered index at the top) + its drift-tested `decisions.json` mirror;
 `L-nn` cites the legacy findings register. The family glossary lives in
-[openstudio-necb/docs/README.md](../openstudio-necb/docs/README.md).
+[btap-necb/docs/README.md](../btap-necb/docs/README.md).
 
 ## Remote execution (planned)
 
@@ -91,7 +91,7 @@ transport-agnostic and work unchanged for local or cloud runs.
 ## Tests
 
 ```bash
-cd openstudio-simulation
+cd btap-simulation
 ruby test/test_backends.rb    # no CLI needed — proves the backend seam
 ruby test/test_local_run.rb   # skips without the openstudio CLI — real E+ run
 ```

@@ -21,14 +21,9 @@ require_relative 'test_helper'
 class TestNecbMultistoreySys6Reference < Minitest::Test
   include FixtureHelper
 
-  GEOMETRY_LIB = File.expand_path('../../btap-modeling/lib/btap_modeling', __dir__)
-  LOADS_LIB = File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
 
   def setup
-    skip 'btap-modeling not present' unless File.exist?("#{GEOMETRY_LIB}.rb")
-    skip 'openstudio-loads not present (needed for thermostats before build_system)' unless File.exist?("#{LOADS_LIB}.rb")
-    require GEOMETRY_LIB
-    require LOADS_LIB
+    # modeling + loads are loaded by test_helper (btap_necb pulls btap-modeling)
   end
 
   # A real 3-storey office bar, tagged with the exact catalog office name in

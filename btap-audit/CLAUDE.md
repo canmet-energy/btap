@@ -1,4 +1,4 @@
-# CLAUDE.md — openstudio-audit
+# CLAUDE.md — btap-audit
 
 The family's shared audit machinery: **one** `AuditLog` class and **one**
 article-coverage emitter. 180 lines across three files, and the lowest-level gem
@@ -11,25 +11,19 @@ change *here* costs, which the README does not say.
 
 ## Blast radius — read before editing `log.rb`
 
-This is the one gem where a small edit reaches everywhere. `AuditLog` has
-**six aliases**, one per domain gem:
+This is the one gem where a small edit reaches everywhere. `AuditLog` is
+aliased once per family gem:
 
 ```
-openstudio-envelope/lib/openstudio_envelope/audit_log.rb    10 lines
-openstudio-geometry/lib/openstudio_geometry/audit_log.rb    10 lines
-openstudio-hvac/lib/openstudio_hvac/audit_log.rb            10 lines
-openstudio-lighting/lib/openstudio_lighting/audit_log.rb    10 lines
-openstudio-loads/lib/openstudio_loads/audit_log.rb          10 lines
-openstudio-shw/lib/openstudio_shw/audit_log.rb              10 lines
-```
-
-plus two second-level shims (`openstudio-envelope/.../necb/audit_log.rb`,
-`openstudio-hvac/.../necb/audit_log.rb`) that re-alias into the `NECB`
-namespace. **The aliases ARE the compatibility mechanism — there is no second
+btap-modeling/lib/btap_modeling/audit_log.rb      BtapModeling::AuditLog
+btap-costing/lib/btap_costing/audit_log.rb        BtapCosting::AuditLog
+btap-necb/lib/btap_necb.rb (module body)          BtapNECB::AuditLog
+btap-necb/lib/btap_necb/loads.rb (guarded)        BtapNECB::AuditLog
+``` **The aliases ARE the compatibility mechanism — there is no second
 implementation.** Do not "tidy" them into a real class, and do not add a local
-copy of the schema to a gem. `openstudio-necb`'s `test_decisions_registry.rb`
+copy of the schema to a gem. `btap-necb`'s `test_decisions_registry.rb`
 asserts that every family gem's `AuditLog` still resolves to
-`OpenStudioAudit::AuditLog`, and fails if one stops.
+`BtapAudit::AuditLog`, and fails if one stops.
 
 Changing the schema, the level names, or `to_s`'s format changes the AHJ report:
 
@@ -78,7 +72,7 @@ audit-adjacent tests generally.
 ## Tests
 
 ```bash
-cd openstudio-audit && ruby test/test_audit.rb   # SDK-free, sub-second
+cd btap-audit && ruby test/test_audit.rb   # SDK-free, sub-second
 ```
 
 There is no Gemfile.lock to honour and no fixtures; the suite is self-contained.

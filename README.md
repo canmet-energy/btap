@@ -11,7 +11,7 @@ plus a complete audit trail of every decision it made and the code article
 behind each one.
 
 ```
-necb-compliance my-building.osm --city toronto
+btap-compliance my-building.osm --city toronto
 ```
 
 ```
@@ -51,7 +51,7 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 ## Installing on Windows
 
-Download `necb-compliance-setup-<version>.exe` and run it.
+Download `btap-compliance-setup-<version>.exe` and run it.
 
 That is the whole prerequisite list. The installer carries its own copy of
 **OpenStudio 3.11.0 and EnergyPlus 25.2.0**, so you do not need to install
@@ -64,7 +64,7 @@ either, and it will not disturb any OpenStudio you already have.
 - Everything lives in one directory you can delete.
 
 Then open **NECB Compliance (console)** from the Start menu and type
-`necb-compliance --help`, or double-click `samples\run-demo.cmd` for a worked
+`btap-compliance --help`, or double-click `samples\run-demo.cmd` for a worked
 example.
 
 Building the installer yourself is covered in
@@ -80,11 +80,11 @@ The tool is plain Ruby and runs anywhere OpenStudio 3.11 does. See
 ## Running a check
 
 ```bat
-necb-compliance MODEL.osm --city toronto
+btap-compliance MODEL.osm --city toronto
 ```
 
 `--city` uses the weather files that ship with the installer;
-`necb-compliance --list-cities` shows them. To use your own weather, pass
+`btap-compliance --list-cities` shows them. To use your own weather, pass
 `--epw path\to\file.epw` — a matching `.ddy` must sit beside it, because the
 sizing runs need design days.
 
@@ -154,9 +154,9 @@ point is still written.
 
 Coverage is generated from the code, not hand-maintained:
 
-- **[NECB_GEM_COVERAGE.md](openstudio-necb/docs/NECB_GEM_COVERAGE.md)** — every
+- **[NECB_GEM_COVERAGE.md](btap-necb/docs/NECB_GEM_COVERAGE.md)** — every
   article each gem declares, with its status and its gaps.
-- **[NECB_8_4_COVERAGE.html](openstudio-necb/docs/NECB_8_4_COVERAGE.html)** —
+- **[NECB_8_4_COVERAGE.html](btap-necb/docs/NECB_8_4_COVERAGE.html)** —
   Section 8.4 article by article, down to sentence and clause text, showing
   where each is applied in the code. One collapsible part per edition, each in
   its own article numbering — 2020's 8.4.4 is the reference building where
@@ -194,7 +194,7 @@ usefully, for each partial article's specific gap.
 
 Where the code needs interpreting, the interpretation is written down rather than
 buried in the source. **75 decisions** are recorded in
-**[necb_decisions.md](openstudio-necb/docs/necb_decisions.md)** — 40 of them
+**[necb_decisions.md](btap-necb/docs/necb_decisions.md)** — 40 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -261,18 +261,14 @@ types without the compliance run.
 
 | Gem | One line |
 |---|---|
-| [openstudio-audit](openstudio-audit) | the shared AuditLog + article-coverage emitter every other gem writes to |
-| [openstudio-geometry](openstudio-geometry) | model creation: seven shape wizards, the bar-by-shape engine, measured-footprint massing, a 3D viewer |
-| [openstudio-loads](openstudio-loads) | NECB space types, space-use loads, schedules, thermostats |
-| [openstudio-lighting](openstudio-lighting) | Part 4 LPD allowances, daylighting controls, exterior lighting, fixture costing |
-| [openstudio-shw](openstudio-shw) | Part 6 service-water-heating demand, Table 6.2.2.1 efficiencies, costing |
-| [openstudio-hvac](openstudio-hvac) | 97-system topology catalog, Table 8.4.4.7.-A reference systems, efficiencies, HVAC costing |
-| [openstudio-envelope](openstudio-envelope) | prescriptive Section 3.2, thermal bridging (TBD), reference envelope, costing |
-| [openstudio-simulation](openstudio-simulation) | the EnergyPlus runner |
-| [openstudio-necb](openstudio-necb) | **the umbrella**: the 8.4.1.2 determination, one audit, the AHJ report |
+| [btap-audit](btap-audit) | the shared AuditLog + article-coverage emitter every other gem writes to |
+| [btap-modeling](btap-modeling) | model AUTHORING, no NECB anywhere: seven shape wizards, the bar-by-shape engine, measured footprints, the 97-system HVAC topology catalog and builders, constructions, the surface census |
+| [btap-costing](btap-costing) | capital costing (HVAC, envelope, lighting, SHW) and the licensed-data seam — placeholder tables vendored, real RS-Means values injected at runtime, never redistributed |
+| [btap-necb](btap-necb) | **the code-compliance layer**: every NECB rule (loads, lighting, SHW, HVAC selection + efficiencies, envelope), the coverage manifests, the 8.4.1.2 determination, one audit, the AHJ report, and the `btap-compliance` CLI |
+| [btap-simulation](btap-simulation) | the EnergyPlus runner (local, or the HBIX remote backend) |
 
 Each gem's README is its API guide.
-[openstudio-necb/docs/README.md](openstudio-necb/docs/README.md) explains the
+[btap-necb/docs/README.md](btap-necb/docs/README.md) explains the
 decision registers.
 
 ---

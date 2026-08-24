@@ -1,4 +1,4 @@
-# CLAUDE.md — openstudio-necb (the umbrella)
+# CLAUDE.md — btap-necb (the umbrella)
 
 Composes the six SDK-only domain gems (hvac, envelope, loads, lighting, shw,
 geometry) into the full NECB Part 8 determination. **This is the ONLY gem
@@ -84,7 +84,7 @@ the adjudicated decision(s) governing the code path, so a report reader learns
 - **Adding a `## D-XX` heading means adding a registry entry**, and a
   `kind: runtime` entry must be cited by ≥1 `ruling:` tag.
   `test/test_decisions_registry.rb` enforces both directions (and that every
-  family gem's `AuditLog` resolves to the shared `OpenStudioAudit::AuditLog`).
+  family gem's `AuditLog` resolves to the shared `BtapAudit::AuditLog`).
 - `report/sections.rb#rulings_appendix` renders the decisions that FIRED in the
   run (id, title, summary, fire count, anchor to the first audit entry). It is
   ALWAYS rendered — the TOC link is unconditional and `test_report_html.rb`
@@ -97,14 +97,14 @@ the adjudicated decision(s) governing the code path, so a report reader learns
 ## Modules
 
 - `compliance.rb` — the pipeline + eui path + capacity iteration + costing.
-- `Runner` is an ALIAS of `OpenStudioSimulation::Runner` (the runner was
-  extracted to the openstudio-simulation gem): weather attach,
+- `Runner` is an ALIAS of `BtapSimulation::Runner` (the runner was
+  extracted to the btap-simulation gem): weather attach,
   `run_energyplus!`, `energy_results` (End Uses via TabularData GJ rows —
   SqlFile has NO fuel-agnostic end-use methods), unmet hours, `clean_run?`.
   District accessors renamed across SDK versions — `respond_to?` probe.
 - `eui_archetypes.rb` — the 8.4.4 machinery: mapping/areas/applicability +
   Table 8.4.4.2 conformance check + normalization (built THROUGH
-  openstudio-loads' record machinery with synthetic archetype records). Named
+  btap-necb (loads)' record machinery with synthetic archetype records). Named
   for the 8.4.4 *building* archetypes — NOT the 17-building legacy validation
   fleet (see the glossary in `docs/README.md`).
 - `data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
@@ -134,7 +134,7 @@ the adjudicated decision(s) governing the code path, so a report reader learns
 
 ## Key facts / traps
 
-- **The CLI is `exe/necb-compliance.rb`; the logic is `lib/openstudio_necb/cli.rb`.**
+- **The CLI is `exe/btap-compliance.rb`; the logic is `lib/btap_necb/cli.rb`.**
   Logic lives in `lib/` so it is testable in-process — `CLI.run(argv, out:, err:)`
   returns an Integer and never calls exit. The `.rb` extension on the entry point
   is **mandatory, not stylistic**: the Windows launcher runs it through
@@ -174,8 +174,8 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   with a loud warning.
 - A shortened `run_period:` computes the same arithmetic but flags NOT
   code-compliant (`report['annual'] = false` + warning + report strip).
-- `AuditLog` here is an alias of `OpenStudioAudit::AuditLog` (as every family
-  gem's is — the class lives in the openstudio-audit gem).
+- `AuditLog` here is an alias of `BtapAudit::AuditLog` (as every family
+  gem's is — the class lives in the btap-audit gem).
 - **Cloning a SpaceType for load overrides? Clone its DefaultScheduleSet
   too** — a fresh set severs Lights schedule inheritance and EnergyPlus
   FATALS on schedule-less Lights (found by the E+ battery, invisible to
@@ -194,7 +194,7 @@ the adjudicated decision(s) governing the code path, so a report reader learns
 ## Tests
 
 ```bash
-cd openstudio-necb
+cd btap-necb
 ruby test/test_compliance.rb          # pipeline modes + capacity iteration + pre-flight
 ruby test/test_archetypes.rb          # 8.4.4 mapping/check/normalize (round-trip pinned)
 ruby test/test_tiers_eui.rb           # tiers, 8.4.4 EUI path, GHG
@@ -205,7 +205,7 @@ ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 ```
 
 E+ tests skip without the CLI; annual tests use week runs (~1 min each).
-Fixtures shared from `../openstudio-hvac/test/fixtures`.
+Fixtures shared from `../btap-modeling (authoring) + btap-necb (hvac rules)/test/fixtures`.
 
 `test_legacy_archetype_e2e.rb` generates/caches the 17-building legacy
 archetype fleet against the legacy NECB implementation. It now runs under the

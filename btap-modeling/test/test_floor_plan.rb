@@ -284,7 +284,7 @@ class TestFloorPlan < Minitest::Test
       assert_includes html, 'Story 1 Core Space'
       assert_includes html, 'Zone Story 1 Core Space'
 
-      # --- copied verbatim from openstudio-hvac/test/test_catalog_report.rb:75-80
+      # --- copied verbatim from test_catalog_report.rb:75-80
       refute_match(/src\s*=\s*["']https?:/i, html, 'no remote src')
       refute_match(/<link\b/i, html, 'no <link> (external stylesheet/asset)')
       refute_match(/@import/i, html, 'no CSS @import')

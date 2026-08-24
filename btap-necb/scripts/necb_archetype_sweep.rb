@@ -58,7 +58,7 @@ FUEL = ENV.fetch('FUEL', 'Electricity')
 LOC = ENV.fetch('LOC', 'toronto')
 LOCATIONS = {
   # HDD18 from the gem's Table C-1 (table_c1.json) — the same source the pipeline resolves from
-  'toronto' => { epw: File.join(ROOT, 'openstudio-hvac', 'test', 'fixtures', 'weather',
+  'toronto' => { epw: File.join(ROOT, 'btap-modeling', 'test', 'fixtures', 'weather',
                                 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw'), hdd: 3890 },
   'edmonton' => { epw: File.join(ROOT, 'data', 'weather', 'CAN_AB_Edmonton.Intl.AP.711230_CWEC2020.epw'), hdd: 5120 },
   'yellowknife' => { epw: File.join(ROOT, 'data', 'weather', 'CAN_NT_Yellowknife.AP.719360_CWEC2020.epw'), hdd: 8170 }

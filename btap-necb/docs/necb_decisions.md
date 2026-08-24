@@ -106,6 +106,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-74** — Window-to-wall ratio is a caller input; the prescriptive limit stays in openstudio-envelope _(process)_
 - **D-75** — Correction to D-74: thermostats gate the envelope pass, not construction seeding _(process)_
 - **D-76** — Field-test articles are declared modeller scope, and the assumed value is stated _(runtime)_
+- **D-77** — The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems _(process)_
 
 <!-- TOC END -->
 
@@ -4146,3 +4147,50 @@ and keeps warning. Cf. D-09.
 
 - **Who/when:** Claude, 2026-08-19, prompted by phylroy asking what the three
   not-implemented articles are and whether they can be implemented.
+
+## D-77
+
+**Decided:** The family is sliced by NATURE, not by domain — five `btap-*`
+gems replacing the nine `openstudio-*` gems (2026-08-24): `btap-audit`
+(evidence), `btap-simulation` (execution), `btap-modeling` (generic
+model authoring — the geometry wizards, the 97-system HVAC catalog and
+builders, constructions, the surface census; no NECB anywhere),
+`btap-costing` (all capital costing and the licensed-data seam), and
+`btap-necb` (every NECB rule, the coverage manifests, the parity gates, the
+umbrella pipeline and the `btap-compliance` CLI — the thing an AHJ audits).
+Dependency direction is one-way: `necb → costing → modeling → audit`, with
+`simulation` beside.
+
+Line counts drove it: openstudio-hvac was 69% generic authoring and
+openstudio-envelope 59% — a gem named for the NECB would have mislabeled the
+larger half of its own code, and every domain gem already carried the true
+seam as a `necb/` subdirectory. The authoring gem now serves futures beyond
+the NECB (an MCP tool surface, a hypothetical 90.1 layer, the deferred
+2011–2017 backfills) without dragging compliance code along.
+
+Ruby modules are FLAT `Btap*` (`BtapNECB`, `BtapModeling`, …), and
+**`BTAP::*` is forbidden**: ten of the eleven parity gates load the pinned
+openstudio-standards oracle in-process, where the legacy `module BTAP` is a
+live constant (`BTAP::Costing`, `BTAP::Database` are called directly by two
+gates). Ruby constants are case-sensitive, so `Btap*` cannot collide.
+
+Costing's one dependency-direction violation was inverted rather than
+grandfathered: lighting fixture costing takes a `daylighting_areas:`
+provider (and RAISES when controls exist and none is given), with the NECB
+layer supplying it by default — costing never requires NECB code.
+
+**Accepted costs, deliberately:** a domain's rule and its mechanism now live
+in two gems (understanding "how the reference gets its boiler" spans
+btap-necb and btap-modeling); and NECB-vocabulary DATA KEYS
+(`DXCOOL-NECB2011-REF-*` curve names, `NECB20xx` lighting_sets row keys)
+stay in the generic gems — they are catalog identifiers, not rule
+dependencies, and renaming them is data churn with no behavioural payoff.
+Coverage attribution switched from gem directories to DOMAIN labels
+(`hvac`, `envelope`, …), derived from the manifest basename or the
+`btap_necb/<domain>/` subdirectory.
+
+- **Kind:** process — the slice is architecture; no runtime citation exists
+  or should.
+- **Who/when:** phylroy + Claude, 2026-08-21 → 2026-08-24; the by-nature
+  insight from line-count analysis, the btap- prefix and flat modules and
+  full rebrand chosen by phylroy.

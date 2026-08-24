@@ -7,15 +7,15 @@ require_relative 'test_helper'
 # happens to match the "residential" keyword — it is NOT a dwelling-unit
 # `space_type` row. The real catalog dwelling row is:
 #   { "building_type": "Space Function", "space_type": "Dwelling units general" }
-# (openstudio-loads/lib/openstudio_loads/data/necb/space_types_2020.json).
+# (btap-necb/lib/btap_necb/loads/data/necb/space_types_2020.json).
 #
 # This file tags a model with that exact name and exercises BOTH gems' dwelling
 # detection through the SAME model, on MODEL VALUES only:
-#  1. openstudio-lighting's reference_lighting: dwelling units are overridden
+#  1. the lighting domain's reference_lighting: dwelling units are overridden
 #     to 5 W/m2 (8.4.4.5.(2)) via `standardsSpaceType =~ /dwelling/i`
 #     (necb/reference.rb apply_dwelling_rule) — regardless of the Part-4
 #     catalog LPD row, and regardless of a deliberately hostile 99 W/m2 input.
-#  2. openstudio-hvac's category_for keyword vote: 'dwelling' is a keyword of
+#  2. the hvac domain's category_for keyword vote: 'dwelling' is a keyword of
 #     the "Residential/Accommodation Area" category (selection.categories in
 #     reference_rules_2020.json) — a real model tagged with the dwelling
 #     catalog name must vote that category and take the `special: residential`
@@ -24,7 +24,6 @@ require_relative 'test_helper'
 class TestNecbMurbDwellingReference < Minitest::Test
   include FixtureHelper
 
-  LIGHTING_LIB = File.expand_path('../../openstudio-lighting/lib/openstudio_lighting', __dir__)
   DWELLING_BUILDING_TYPE = 'Space Function'
   DWELLING_SPACE_TYPE = 'Dwelling units general'
   HOSTILE_W_PER_M2 = 99.0
@@ -71,8 +70,7 @@ class TestNecbMurbDwellingReference < Minitest::Test
   # ---- (2) reference lighting dwelling override, at MODEL level ----
 
   def test_reference_lighting_applies_5_w_per_m2_dwelling_override_over_a_hostile_lpd
-    skip 'openstudio-lighting not present' unless File.exist?("#{LIGHTING_LIB}.rb")
-    require LIGHTING_LIB
+    # lighting is part of btap-necb now — already loaded by test_helper
 
     model = OpenStudio::Model::Model.new
     space_type = dwelling_tagged_space_type(model)

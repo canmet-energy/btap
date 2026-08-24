@@ -28,7 +28,7 @@ module BtapModeling
   #
   # This file deliberately mirrors the approach of btap-necb's
   # report/{model_query,svg,diagrams,html}.rb but is REIMPLEMENTED self-contained
-  # here: openstudio-hvac sits BELOW btap-necb in the dependency graph and
+  # here: this gem sits BELOW btap-necb in the dependency graph and
   # must not depend on it.
   module CatalogReport
     module_function

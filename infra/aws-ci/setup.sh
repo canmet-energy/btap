@@ -12,7 +12,7 @@ set -euo pipefail
 
 REGION="${AWS_REGION:-ca-central-1}"
 PROJECT="necb-ci"
-REPO_URL="https://github.com/canmet-energy/openstudio-necb-gems"
+REPO_URL="https://github.com/canmet-energy/btap-gems"
 ECR_REPO="nrel-openstudio"
 IMAGE_TAG="3.11.0"
 

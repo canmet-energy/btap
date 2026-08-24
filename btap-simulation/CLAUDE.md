@@ -1,4 +1,4 @@
-# CLAUDE.md — openstudio-simulation
+# CLAUDE.md — btap-simulation
 
 The lowest-level gem of the family: EnergyPlus execution with a pluggable
 backend. **Only this gem and the umbrella (via its `Runner` alias) ever
@@ -58,4 +58,4 @@ simulate** — the domain gems are SDK-only by contract.
 
 ## Tests
 
-`cd openstudio-simulation && ruby test/test_XX.rb` (skip without the CLI).
+`cd btap-simulation && ruby test/test_XX.rb` (skip without the CLI).

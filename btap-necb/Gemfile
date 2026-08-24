@@ -7,8 +7,6 @@ gemspec
 gem 'btap-audit', path: '../btap-audit'
 gem 'btap-costing', path: '../btap-costing'
 gem 'btap-modeling', path: '../btap-modeling'
-gem 'openstudio-hvac', path: '../openstudio-hvac'
-gem 'openstudio-loads', path: '../openstudio-loads'
 gem 'btap-simulation', path: '../btap-simulation'
 
 # Test tooling (this gemspec declares no development dependencies).

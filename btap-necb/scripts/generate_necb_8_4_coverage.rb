@@ -344,7 +344,7 @@ def declaration_rows(decls, art_executed)
   # A host_scope row beside the row that actually implements the article is
   # bookkeeping, not information: it exists so an hvac-only RUN still audits
   # "this is envelope's job", but a reader looking at 8.4.4.3 does not need
-  # "openstudio-hvac: Delegated" as a peer of the envelope implementation. When
+  # "hvac: Delegated" as a peer of the envelope implementation. When
   # an implementing declaration is present, delegations collapse to a footnote;
   # they render as rows only in the "(none in family)" case, where the
   # delegation IS the open item.
@@ -618,8 +618,8 @@ html = <<~HTML
   </ul>
   <b>Prescriptive values</b> (U-values, LPDs, efficiencies) are governed by each gem's own data JSON — the number
   the software actually applies and the thing to audit: <code>btap-necb .../envelope_rules_*.json</code>,
-  <code>btap-necb .../space_types_*.json</code>, <code>openstudio-shw .../shw_rules_*.json</code>,
-  <code>openstudio-hvac .../efficiencies_*.json</code>. The official code wording is available through the
+  <code>btap-necb .../space_types_*.json</code>, <code>btap-necb .../shw_rules_*.json</code>,
+  <code>btap-necb .../efficiencies_*.json</code>. The official code wording is available through the
   building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human reference only.</div>
 
   <p class="lede"><b>Jump to:</b> <a href="#v2020">NECB 2020</a> (#{parts['2020'][:articles].size} articles,

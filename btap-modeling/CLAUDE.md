@@ -1,4 +1,10 @@
-# CLAUDE.md — openstudio-geometry
+# CLAUDE.md — btap-modeling
+
+**Scope since D-77:** this gem is ALL generic authoring — the ex-geometry
+wizards below PLUS the ex-hvac catalog/builders/components/classify/teardown
+(under the same flat `BtapModeling` module) and ex-envelope
+constructions/geometry census. No `article:` citation is permitted anywhere
+in this gem; rule application lives in btap-necb.
 
 SDK-only geometry-authoring gem: the seven parametric shape wizards
 (rectangle, aspect-ratio, courtyard, H, L, T, U) and the Goldwasser bar
@@ -12,7 +18,7 @@ envelope.
 - One AuditLog schema `{step, target, action, inputs, value, article,
   evidence, building, level}`; warnings never silent; `building:` stamp via
   `audit.with_building`. `audit_log.rb` aliases the shared class in
-  **openstudio-audit** — schema changes happen there, never as a local copy.
+  **btap-audit** — schema changes happen there, never as a local copy.
 - No NECB rules data here — this gem is code-agnostic authoring, so there is
   no article-coverage manifest.
 
@@ -26,7 +32,7 @@ envelope.
   excluded) + a 5-helper closure from `create.rb`.
 - `helpers.rb` — `match_surfaces` / `rotate_model` / `set_boundary_condition`.
 - `footprint.rb` — MEASURED-footprint massing (facade
-  `OpenStudioGeometry.create_from_footprint(geojson:, height_m:, ...)`): a real
+  `BtapModeling.create_from_footprint(geojson:, height_m:, ...)`): a real
   outline (GeoJSON ring from a building-stock service, survey or GIS export)
   plus a measured height in, zoned storeys out. **The one file here that is NOT
   a port** — there is no upstream equivalent; the wizards build their polygons
@@ -37,7 +43,7 @@ envelope.
   records, choosing a storey height, and class→space-type mapping are the
   caller's, never the gem's.
 - **Floor plans** (`plan_query.rb` → `plan_svg.rb` → `plan.rb`, facade
-  `OpenStudioGeometry.floor_plans(model_or_path, path:, png_dir:)`): per-storey
+  `BtapModeling.floor_plans(model_or_path, path:, png_dir:)`): per-storey
   2D plans. `plan_query.rb` is the ONLY SDK-touching file (plain hashes out,
   never raises — the necb `report/model_query.rb` boundary); `plan_svg.rb`
   holds a LOCAL COPY of necb's `report/svg.rb` primitives (fit-to-width
@@ -49,8 +55,8 @@ envelope.
   scripts, no external references) — which the 3D `render` deliberately
   cannot. `Plan.png`/`Plan.pngs` are optional (rsvg-convert → cairosvg →
   magick; loud warn + nil when absent).
-- Facade: `OpenStudioGeometry.create(shape:, **params)` and
-  `OpenStudioGeometry.bar(space_type_ratios: {[building_type, space_type] => fraction}, ...)`.
+- Facade: `BtapModeling.create(shape:, **params)` and
+  `BtapModeling.bar(space_type_ratios: {[building_type, space_type] => fraction}, ...)`.
 - **Facade storeys vocabulary is `storeys:` / `below_grade_storeys:`** on BOTH
   entry points; audit inputs are `storeys_above:`/`storeys_below:`. The engines
   keep their upstream spellings, so the aliases are normalized per entry point
@@ -135,7 +141,7 @@ envelope.
   of a small house's floor area (mean 1.60%), against 2.87% worst / 0.67% mean
   once the tolerance scales as `sqrt(area)/25` clamped to [0.25, 3.0].
 - **`apply_wwr(model, ratio)` is PURE GEOMETRY — no default, no code
-  knowledge.** NECB's FDWR maximum is `openstudio-envelope`'s rule
+  knowledge.** NECB's FDWR maximum is `btap-necb (envelope)`'s rule
   (`NECB.max_fdwr(vintage:, hdd:)`, article 3.2.1.4, vintages '2020'/'2025' —
   NOT 'NECB2020'); this gem carries no NECB rules data by family contract, so
   the caller passes a number it chose. Accepts a Float or per-orientation bins
@@ -143,31 +149,31 @@ envelope.
   brace-less, Symbol) because with an `audit:` kwarg Ruby 3 parses a brace-less
   hash as keywords — hence the `**bins` catch.
 - **THERMOSTATS gate the whole envelope pass** (corrected, D-75 — an earlier
-  note here blamed construction seeding). `OpenStudioEnvelope::Geometry.conditioned?`
+  note here blamed construction seeding). `BtapNECB::Envelope::Geometry.conditioned?`
   requires `partofTotalFloorArea` AND a zone `thermostatSetpointDualSetpoint`;
   `exposed_walls`/`exposed_roofs` filter on it, so on measured massing — zones
   but NO thermostats — the census returns 0 walls and
   `apply_prescriptive(apply_fdwr: true)` bails silently at 0 subsurfaces. Add a
   dual-setpoint thermostat per zone and the SAME call yields 60 windows at
   FDWR 0.3667 with 60/60 constructions, on a model that started windowless.
-- **openstudio-envelope CAN seed fenestration constructions, but NOT opaque
+- **btap-necb (envelope) CAN seed fenestration constructions, but NOT opaque
   ones.** `subsurface_target_construction` (private; invoked automatically by
   `apply_fdwr:`/`apply_srr:`) builds a SimpleGlazing construction at the
   prescriptive U from nothing. Opaque has no equivalent: `assign_surface` warns
   "no layered construction — skipped", `Constructions.opaque_at_conductance`
   deep-copies a base you must supply, and `Reference` does
   `next if surface.construction.empty?` and reads conductance off the original.
-  So an opaque SEED is still the real missing piece — openstudio-envelope's own
+  So an opaque SEED is still the real missing piece — btap-necb (envelope)'s own
   future-work note.
 - `apply_wwr` therefore is NOT the only way to get windows on measured massing
   (thermostats + `apply_fdwr:` also works). It stays useful because it is pure
   geometry — a ratio YOU choose, per-orientation, no thermostats, no NECB.
 - **Wizard/bar output has NO constructions** — envelope passes retarget
   EXISTING constructions, so authored models need a seed construction set
-  before any envelope work (future: seed helper in openstudio-envelope).
+  before any envelope work (future: seed helper in btap-necb (envelope)).
 - **Bar output IS standards-TAGGED** (creates SpaceTypes with
   standardsBuildingType/standardsSpaceType and slices ratio-true, verified to
-  1%); wizard output is NOT tagged — run openstudio-loads assignment on it.
+  1%); wizard output is NOT tagged — run btap-necb (loads) assignment on it.
 - `bar_hash[:space_types]` entries need ABSOLUTE `:floor_area` values, not
   ratios — the facade converts.
 - The verbatim ports must stay verbatim: when re-extracting legacy chunks, the
@@ -197,7 +203,7 @@ where a ring came from.
 
 - Transport: stateless JSON-RPC `tools/call` to the HTTP MCP server; the reply
   is an SSE `data:` frame whose `result.content[0].text` is itself JSON. Same
-  shape as `openstudio-necb/scripts/fetch_necb_8_4_text.rb`.
+  shape as `btap-necb/scripts/fetch_necb_8_4_text.rb`.
 - Auth: `HBIX_API_KEY` (one key for all six servers — see `.env.example`),
   else `.mcp.json` (gitignored, and its `${VAR}` placeholders are expanded at
   runtime). `HBIX_MCP_BASE_URL` repoints all six; there is no per-server
@@ -215,21 +221,21 @@ where a ring came from.
 
 ## Tests
 
-`cd openstudio-geometry && ruby test/test_wizards.rb test/test_bar.rb`
+`cd btap-modeling && ruby test/test_wizards.rb test/test_bar.rb`
 (`test/test_render.rb`, `test/test_floor_plan.rb` for the two renderers,
 `test/test_footprint.rb` for measured footprints — ~35 s, it builds 27-storey
 massing several times over). `test/fixtures/footprint_ottawa_tower.json` is a
 REAL NRCan building-stock record (feature `870226c8`, Ottawa K1P, 69 vertices /
 33 reflex / 5,266 m² published / 82.65 m) kept verbatim so the traps above
 cannot quietly stop being tested — do not tidy it.
-Fixtures shared from `../openstudio-hvac/test/fixtures`.
+Fixtures shared from `../btap-modeling (authoring) + btap-necb (hvac rules)/test/fixtures`.
 
 ## 3D renderer (campus port)
 
 - `render.rb` + `render_worker.rb` — port of canmet-energy/campus
   `src/buildings/reports/geometry_view.py`: SDK `GltfForwardTranslator` →
   glTF → Google `<model-viewer>` HTML, geometry embedded as a base64 data
-  URI. Facade: `OpenStudioGeometry.render(model_or_path, path:, height:)`.
+  URI. Facade: `BtapModeling.render(model_or_path, path:, height:)`.
 - **Every export runs in a child process** (`render_worker.rb` via
   `Process.spawn`) because the C++ translator can SEGFAULT on
   un-triangulatable surfaces — never call `modelToGLTF` in-process on

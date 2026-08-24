@@ -54,7 +54,7 @@ quiet = ARGV.include?('--quiet')
 findings = []
 
 scanned_gems = 0
-Dir.glob(File.join(ROOT, 'openstudio-*')).sort.select { |d| File.directory?(d) }.each do |gem_dir|
+Dir.glob(File.join(ROOT, 'btap-*')).sort.select { |d| File.directory?(d) }.each do |gem_dir|
   rulesets = Dir.glob(File.join(gem_dir, 'lib/**/data/**/*_rules_*.json'))
   next if rulesets.empty?
 

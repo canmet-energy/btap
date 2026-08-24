@@ -41,11 +41,7 @@ class TestE2ERun < Minitest::Test
   end
 
   def test_full_family_composition_one_audit
-    hvac_lib = File.expand_path('../../openstudio-hvac/lib/openstudio_hvac', __dir__)
-    envelope_lib = File.expand_path('../../openstudio-envelope/lib/openstudio_envelope', __dir__)
-    skip 'sibling gems not present' unless File.exist?("#{hvac_lib}.rb") && File.exist?("#{envelope_lib}.rb")
-    require hvac_lib
-    require envelope_lib
+    # hvac + envelope live inside btap-necb/btap-modeling now — loaded by test_helper
 
     model = loaded_lit_model
     audit = BtapNECB::AuditLog.new

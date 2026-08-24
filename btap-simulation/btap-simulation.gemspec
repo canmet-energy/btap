@@ -9,14 +9,14 @@ Gem::Specification.new do |spec|
                      'backend — local `openstudio` CLI now, a documented remote/AWS seam for later), and ' \
                      'parse site energy / end-use / unmet-hours results from the SQL. Pure OpenStudio SDK; ' \
                      'no measures, no openstudio-standards, no NECB compliance.'
-  spec.homepage = 'https://github.com/canmet-energy/openstudio-necb-gems'
+  spec.homepage = 'https://github.com/canmet-energy/btap-gems'
   spec.metadata = {
     # These gems are not published: the repository is private and the costing
     # data is licence-encumbered. Publishing is a deliberate act — clear this
     # entry consciously, do not let a stray `gem push` make the decision.
     'allowed_push_host' => 'none',
-    'source_code_uri' => 'https://github.com/canmet-energy/openstudio-necb-gems',
-    'homepage_uri' => 'https://github.com/canmet-energy/openstudio-necb-gems'
+    'source_code_uri' => 'https://github.com/canmet-energy/btap-gems',
+    'homepage_uri' => 'https://github.com/canmet-energy/btap-gems'
   }
   spec.license = 'LGPL-3.0-or-later'
   spec.required_ruby_version = '>= 3.2'
