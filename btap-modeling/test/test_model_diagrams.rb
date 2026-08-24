@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-# The REUSABLE diagram API consumed by host reports (e.g. openstudio-necb's AHJ
+# The REUSABLE diagram API consumed by host reports (e.g. btap-necb's AHJ
 # compliance report): BtapModeling.model_hvac_diagrams(model) draws the same
 # OpenStudio-App-style loop diagrams the catalog draws, for ANY model — plus the
 # self-contained icon defs + CSS a host document needs. SDK-only (no CLI).

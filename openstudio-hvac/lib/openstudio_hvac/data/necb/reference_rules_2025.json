@@ -646,7 +646,7 @@
     "status": "host_scope",
     "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems.",
     "code": [
-     "openstudio-necb/lib/openstudio_necb/compliance.rb#build_reference!"
+     "btap-necb/lib/btap_necb/compliance.rb#build_reference!"
     ]
    },
    {

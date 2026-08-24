@@ -15,7 +15,7 @@ module BtapAudit
   # "modeller"`, whose remaining gaps are wholly the modeller's responsibility:
   # those emit as info scope notes instead, so the AHJ report is not
   # permanently stamped with warnings no model change can clear (project
-  # decision D-09, openstudio-necb/docs/necb_decisions.md).
+  # decision D-09, btap-necb/docs/necb_decisions.md).
   module Coverage
     module_function
 

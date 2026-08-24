@@ -14,7 +14,7 @@
 # dependency inside it. `BtapModeling::Footprint` still never learns where
 # a ring came from.
 #
-# AUTH follows scripts/fetch_necb_8_4_text.rb in openstudio-necb: endpoint and
+# AUTH follows scripts/fetch_necb_8_4_text.rb in btap-necb: endpoint and
 # X-API-Key come from the environment, else from .mcp.json (gitignored, never
 # committed with a live key). Nothing is hardcoded, and the key is never
 # printed, never written to the cache, and never stored in a model.

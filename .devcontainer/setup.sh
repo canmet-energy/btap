@@ -393,7 +393,7 @@ cat <<'STEPS'
    The two Ruby scripts that hit these servers directly read HBIX_API_KEY too,
    so the one key covers them:
 
-     openstudio-necb/scripts/fetch_necb_8_4_text.rb
+     btap-necb/scripts/fetch_necb_8_4_text.rb
      btap-modeling/scripts/building_stock.rb
 
    HBIX_MCP_BASE_URL is the only other knob — it repoints all six servers at

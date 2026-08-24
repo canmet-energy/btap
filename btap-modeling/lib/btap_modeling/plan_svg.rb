@@ -6,9 +6,9 @@ module BtapModeling
   # rule is unit-testable against a hand-written hash — no OpenStudio needed.
   #
   # The primitives (open_svg/close_svg/rect/line/text) are a LOCAL COPY of
-  # openstudio-necb's `report/svg.rb`, plus the polygon/group/title helpers the
+  # btap-necb's `report/svg.rb`, plus the polygon/group/title helpers the
   # family lacked. They are copied rather than required: btap-modeling
-  # sits BELOW openstudio-necb in the dependency graph and must never depend
+  # sits BELOW btap-necb in the dependency graph and must never depend
   # upward (the documented catalog_report.rb:29-32 precedent). The necb
   # convention is kept: a fit-to-width `viewBox` and NO width/height attributes,
   # so a host stylesheet's `svg { width: 100% }` scales the plan to the page.

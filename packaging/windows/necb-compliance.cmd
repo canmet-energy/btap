@@ -26,5 +26,5 @@ if not exist "%OPENSTUDIO_CLI%" (
 rem Flags forward through execute_ruby_script unchanged - verified. Do NOT add
 rem a "--" separator: it arrives literally in ARGV and optparse would then treat
 rem every following flag as a positional argument.
-"%OPENSTUDIO_CLI%" execute_ruby_script "%NECB_HOME%\gems\openstudio-necb\exe\necb-compliance.rb" %*
+"%OPENSTUDIO_CLI%" execute_ruby_script "%NECB_HOME%\gems\btap-necb\exe\necb-compliance.rb" %*
 exit /b %ERRORLEVEL%

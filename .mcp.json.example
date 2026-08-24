@@ -12,7 +12,7 @@
     "",
     "The two Ruby scripts that talk to these servers directly read HBIX_API_KEY too,",
     "and expand the placeholders below themselves, so the one key covers everything:",
-    "  openstudio-necb/scripts/fetch_necb_8_4_text.rb",
+    "  btap-necb/scripts/fetch_necb_8_4_text.rb",
     "  btap-modeling/scripts/building_stock.rb",
     "",
     "HBIX_MCP_BASE_URL is the only other knob and moves all six at once. There is no",

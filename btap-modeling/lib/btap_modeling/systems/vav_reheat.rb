@@ -152,7 +152,7 @@ module BtapModeling
           # 'Single Maximum' damper action, a VAV box in reheat may open to at most half
           # its cooling design flow (air_loop_hvac_apply_vav_damper_action,
           # necb/NECB2011/hvac_systems.rb:466). T11: legacy parity (T11 = 2026-07-25 audit
-          # register item; see openstudio-necb/docs/README.md).
+          # register item; see btap-necb/docs/README.md).
           terminal.setMaximumFlowFractionDuringReheat(0.5)
         end
 
