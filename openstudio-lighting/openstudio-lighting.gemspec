@@ -30,5 +30,4 @@ Gem::Specification.new do |spec|
   # because a side-by-side checkout resolved it by relative path.
   spec.add_dependency 'btap-audit'
   spec.add_dependency 'btap-costing'
-  spec.add_dependency 'openstudio-loads'
 end

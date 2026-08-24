@@ -1,5 +1,5 @@
-module OpenStudioLoads
-  module NECB
+module BtapNECB
+  module Loads
     # The loads pass — port of the legacy NECB space_type_apply_internal_loads
     # (beps_compliance_path.rb) MINUS lights (openstudio-lighting territory) and
     # of the parent space_type_apply_internal_load_schedules /
@@ -44,7 +44,7 @@ module OpenStudioLoads
       # type in the model. NO Lights, NO service water heating (sibling gems).
       def apply_loads(model, vintage: '2020', audit: nil)
         audit ||= AuditLog.new
-        rules = NECB.rules(vintage)
+        rules = Loads.rules(vintage)
         prefix = rules['schedule_table_prefix']
         applied = 0
 
@@ -293,7 +293,7 @@ module OpenStudioLoads
       end
 
       def emit_article_coverage(vintage, audit)
-        BtapAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
+        BtapAudit::Coverage.emit(Loads.rules(vintage)['article_coverage'], audit)
       end
 
       def single_instance(instances, audit)

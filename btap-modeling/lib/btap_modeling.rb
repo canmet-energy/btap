@@ -55,7 +55,7 @@ require_relative 'btap_modeling/catalog_report'
 # (rectangle, aspect-ratio, courtyard, H, L, T, U) with perimeter/core zoning,
 # below-grade storeys, and matched surfaces. SDK-only; shared AuditLog schema.
 #
-# Downstream: OpenStudioLoads.assign_space_types + apply_loads,
+# Downstream: BtapNECB::Loads.assign_space_types + apply_loads,
 # OpenStudioLighting.apply_lights, OpenStudioSHW.apply_shw,
 # BtapModeling.build_system, BtapNECB::Envelope prescriptive/reference,
 # BtapNECB.performance_compliance.
@@ -286,7 +286,7 @@ module BtapModeling
 
   # The family-native bar entry: sliced bar massing with NECB space types
   # assigned by ratio in ONE step — geometry AND standards tagging, ready for
-  # OpenStudioLoads.apply_loads without a separate assign_space_types call.
+  # BtapNECB::Loads.apply_loads without a separate assign_space_types call.
   # (The upstream DOE/DEER ratio wrappers are not ported; this replaces them
   # for the NECB family.)
   #

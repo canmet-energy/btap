@@ -10,11 +10,6 @@ end
 
 # The domain gems: installed as gems, or monorepo siblings during incubation.
 begin
-  require 'openstudio_loads'
-rescue LoadError
-  require File.expand_path('../../openstudio-loads/lib/openstudio_loads', __dir__)
-end
-begin
   require 'openstudio_lighting'
 rescue LoadError
   require File.expand_path('../../openstudio-lighting/lib/openstudio_lighting', __dir__)
@@ -43,6 +38,7 @@ rescue LoadError
 end
 
 require_relative 'btap_necb/version'
+require_relative 'btap_necb/loads'
 require_relative 'btap_necb/envelope'
 require_relative 'btap_necb/hvac'
 require_relative 'btap_necb/tiers'
@@ -65,7 +61,7 @@ require_relative 'btap_necb/report'
 module BtapNECB
   # The shared audit class, now owned by btap-audit: every family gem
   # aliases the SAME class, so one instance flows through all of them.
-  AuditLog = BtapAudit::AuditLog
+  AuditLog = BtapAudit::AuditLog unless const_defined?(:AuditLog)
 
   # Simulation execution now lives in the lowest-level family gem,
   # btap-simulation (SDK+CLI, no compliance layer). Alias it so

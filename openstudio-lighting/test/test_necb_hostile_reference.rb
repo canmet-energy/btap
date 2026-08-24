@@ -26,7 +26,7 @@ class TestNECBHostileReferenceLighting < Minitest::Test
   UNKNOWN_SPACE_TYPE = 'Office - enclosed'.freeze
 
   def catalog_lpd_w_per_m2(space_type)
-    record = OpenStudioLoads::NECB::SpaceTypes.find(building_type: 'Space Function',
+    record = BtapNECB::Loads::SpaceTypes.find(building_type: 'Space Function',
                                                     space_type: space_type, vintage: '2020')
     refute_nil record, "fixture precondition: '#{space_type}' must exist in the catalog"
     OpenStudio.convert(record['lighting_per_area'].to_f, 'W/ft^2', 'W/m^2').get

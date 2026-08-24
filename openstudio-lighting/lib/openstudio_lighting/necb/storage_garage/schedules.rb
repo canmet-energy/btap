@@ -12,7 +12,7 @@ module OpenStudioLighting
         st = space_type.standardsSpaceType
         return nil unless bt.is_initialized && st.is_initialized
 
-        OpenStudioLoads::NECB::SpaceTypes.find(building_type: bt.get, space_type: st.get, vintage: data_vintage)
+        BtapNECB::Loads::SpaceTypes.find(building_type: bt.get, space_type: st.get, vintage: data_vintage)
       end
 
       def lighting_power_density(space)
@@ -103,7 +103,7 @@ module OpenStudioLighting
           ruleset.defaultDaySchedule.setName("#{name.sub(' Ruleset', '')} Default")
           write_values(ruleset.defaultDaySchedule, values)
         end
-        return unless OpenStudioLoads::Schedules::DAY_TOKENS.any? { |t| day_types.include?(t) }
+        return unless BtapNECB::Loads::Schedules::DAY_TOKENS.any? { |t| day_types.include?(t) }
 
         rule = OpenStudio::Model::ScheduleRule.new(ruleset)
         rule.daySchedule.setName("#{name.sub(' Ruleset', '')}-#{day_types}")

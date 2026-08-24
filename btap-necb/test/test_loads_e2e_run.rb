@@ -38,9 +38,9 @@ class TestE2ERun < Minitest::Test
     assert_empty model.getPeoples.to_a
     assert model.getThermalZones.none? { |z| z.thermostatSetpointDualSetpoint.is_initialized }
 
-    audit = OpenStudioLoads::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, office_map(model), vintage: '2020', audit: audit)
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::Loads.assign_space_types(model, office_map(model), vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
 
     assert model.getThermalZones.all? { |z| z.thermostatSetpointDualSetpoint.is_initialized },
            'space-type thermostats hooked to every zone'
@@ -75,8 +75,8 @@ class TestE2ERun < Minitest::Test
 
     model = bare_geometry
     audit = BtapNECB::AuditLog.new
-    OpenStudioLoads.assign_space_types(model, office_map(model), vintage: '2020', audit: audit)
-    OpenStudioLoads::NECB.apply_loads(model, vintage: '2020', audit: audit)
+    BtapNECB::Loads.assign_space_types(model, office_map(model), vintage: '2020', audit: audit)
+    BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
     BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
 

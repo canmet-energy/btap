@@ -61,10 +61,10 @@ module OpenStudioLighting
 
           building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
           standards_type = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
-          record = OpenStudioLoads::NECB::SpaceTypes.find(building_type: building_type,
+          record = BtapNECB::Loads::SpaceTypes.find(building_type: building_type,
                                                           space_type: standards_type,
-                                                          vintage: OpenStudioLoads::NECB.data_vintage(vintage))
-          next unless record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+                                                          vintage: BtapNECB::Loads.data_vintage(vintage))
+          next unless record.nil? || BtapNECB::Loads::SpaceTypes.undefined?(record)
 
           { name: space_type.nameString, building_type: building_type, space_type: standards_type }
         end
@@ -76,10 +76,10 @@ module OpenStudioLighting
 
         building_type = space_type.standardsBuildingType.is_initialized ? space_type.standardsBuildingType.get : nil
         standards_type = space_type.standardsSpaceType.is_initialized ? space_type.standardsSpaceType.get : nil
-        record = OpenStudioLoads::NECB::SpaceTypes.find(building_type: building_type,
+        record = BtapNECB::Loads::SpaceTypes.find(building_type: building_type,
                                                         space_type: standards_type,
-                                                        vintage: OpenStudioLoads::NECB.data_vintage(vintage))
-        if record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+                                                        vintage: BtapNECB::Loads.data_vintage(vintage))
+        if record.nil? || BtapNECB::Loads::SpaceTypes.undefined?(record)
           if consequential?(space_type)
             audit.warn(:lighting,
                        "space type '#{name}' [#{building_type.inspect}, #{standards_type.inspect}] has no NECB " \
@@ -191,14 +191,14 @@ module OpenStudioLighting
           space_type.setDefaultScheduleSet(schedule_set)
         end
 
-        data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
+        data_vintage = BtapNECB::Loads.data_vintage(vintage)
         lpd = record['lighting_per_area'].to_f
         threshold = NECB.rules(vintage)['sensor_schedule_lpd_threshold_w_per_ft2'].to_f
         lighting_name = record['lighting_schedule']
         return if lighting_name.nil?
 
         if lpd <= threshold
-          schedule_set.setLightingSchedule(OpenStudioLoads::Schedules.add(model, lighting_name, vintage: data_vintage, audit: audit))
+          schedule_set.setLightingSchedule(BtapNECB::Loads::Schedules.add(model, lighting_name, vintage: data_vintage, audit: audit))
           return
         end
 
@@ -206,13 +206,13 @@ module OpenStudioLighting
         rel_absence = record['rel_absence_occ'].to_f
         personal = record['personal_control'].to_f
         occ_sense = record['occ_sense'].to_f
-        schedules = OpenStudioLoads::NECB.table(data_vintage, 'schedules')
+        schedules = BtapNECB::Loads.table(data_vintage, 'schedules')
         occupancy_rows = schedules.select { |r| r['name'] == occupancy_name }
         lighting_rows = schedules.select { |r| r['name'] == lighting_name }
         if occupancy_rows.empty? || lighting_rows.empty?
           audit.warn(:lighting, "sensor-schedule synthesis needs both '#{occupancy_name}' and '#{lighting_name}' — " \
                                 'falling back to the plain lighting schedule', target: space_type.nameString)
-          schedule_set.setLightingSchedule(OpenStudioLoads::Schedules.add(model, lighting_name, vintage: data_vintage, audit: audit))
+          schedule_set.setLightingSchedule(BtapNECB::Loads::Schedules.add(model, lighting_name, vintage: data_vintage, audit: audit))
           return
         end
 
@@ -258,7 +258,7 @@ module OpenStudioLighting
             day.setName("#{name.sub(' Ruleset', '')} Default")
             add_values(day, values)
           end
-          if OpenStudioLoads::Schedules::DAY_TOKENS.any? { |t| day_types.include?(t) }
+          if BtapNECB::Loads::Schedules::DAY_TOKENS.any? { |t| day_types.include?(t) }
             rule = OpenStudio::Model::ScheduleRule.new(ruleset)
             day = rule.daySchedule
             day.setName("#{name.sub(' Ruleset', '')}-#{day_types}-Light Day")

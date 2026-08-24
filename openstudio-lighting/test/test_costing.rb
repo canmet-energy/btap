@@ -12,7 +12,7 @@ class TestCosting < Minitest::Test
   def costed_fixture_model(lights_type: 'NECB_Default')
     model = load_fixture
     map = model.getSpaces.to_h { |s| [s.nameString, OFFICE] }
-    OpenStudioLoads.assign_space_types(model, map, vintage: '2020')
+    BtapNECB::Loads.assign_space_types(model, map, vintage: '2020')
     OpenStudioLighting.apply_lights(model, vintage: '2020', lights_type: lights_type)
     model
   end

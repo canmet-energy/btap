@@ -49,7 +49,7 @@ module OpenStudioLighting
                 "reference lighting ABORTED: #{unmatched.size} space type(s) have no NECB #{vintage} catalog " \
                 "record, so the #{prefix}.5.(1) interior lighting allowance cannot be established: " \
                 "#{pairs.join('; ')}. Tag the model with NECB space functions " \
-                '(OpenStudioLoads assign_space_types, or correct standardsBuildingType/standardsSpaceType) — ' \
+                '(BtapNECB::Loads assign_space_types, or correct standardsBuildingType/standardsSpaceType) — ' \
                 'proceeding would silently keep the proposed lighting power in the reference.')
         end
 

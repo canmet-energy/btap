@@ -28,5 +28,4 @@ Gem::Specification.new do |spec|
   # builds on — required at load time, not just in the monorepo.
   spec.add_dependency 'btap-audit'
   spec.add_dependency 'btap-costing'
-  spec.add_dependency 'openstudio-loads'
 end

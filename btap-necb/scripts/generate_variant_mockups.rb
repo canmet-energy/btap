@@ -34,8 +34,8 @@ def base_model(space_type)
   # strip the fixture's untagged space types; tag every space with ONE real
   # NECB catalog type and bake the catalog loads/schedules/thermostats in.
   map = model.getSpaces.to_h { |s| [s.nameString, ['Space Function', space_type]] }
-  OpenStudioLoads.assign_space_types(model, map, vintage: '2020')
-  OpenStudioLoads::NECB::Apply.apply_loads(model, vintage: '2020')
+  BtapNECB::Loads.assign_space_types(model, map, vintage: '2020')
+  BtapNECB::Loads::Apply.apply_loads(model, vintage: '2020')
   model
 end
 

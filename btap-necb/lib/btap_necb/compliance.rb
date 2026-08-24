@@ -638,8 +638,8 @@ module BtapNECB
       map = options[:space_type_map] || options['space_type_map']
       raise(ArgumentError, 'necb_loads requires space_type_map: {space name => [building_type, space_type]}') if map.nil?
 
-      OpenStudioLoads.assign_space_types(proposed, map, vintage: vintage, audit: audit)
-      OpenStudioLoads::NECB.apply_loads(proposed, vintage: vintage, audit: audit)
+      BtapNECB::Loads.assign_space_types(proposed, map, vintage: vintage, audit: audit)
+      BtapNECB::Loads.apply_loads(proposed, vintage: vintage, audit: audit)
       OpenStudioLighting.apply_lights(proposed, vintage: vintage,
                                       lights_type: options[:lights_type] || 'NECB_Default', audit: audit)
       shw_fuel = options[:shw_fuel]
@@ -1188,7 +1188,7 @@ module BtapNECB
     # simulation or transform, so a mistagged model fails in milliseconds with
     # actionable names instead of producing a silently-wrong determination.
     def validate_space_types!(proposed, vintage, audit)
-      data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
+      data_vintage = BtapNECB::Loads.data_vintage(vintage)
       problems = {}
       checked = 0
       proposed.getSpaces.sort_by(&:nameString).each do |space|
@@ -1202,9 +1202,9 @@ module BtapNECB
         bt = space_type&.standardsBuildingType&.then { |o| o.is_initialized ? o.get : nil }
         st = space_type&.standardsSpaceType&.then { |o| o.is_initialized ? o.get : nil }
         st = nil if st&.downcase&.include?('plenum')
-        record = bt && st && OpenStudioLoads::NECB::SpaceTypes.find(building_type: bt, space_type: st,
+        record = bt && st && BtapNECB::Loads::SpaceTypes.find(building_type: bt, space_type: st,
                                                                     vintage: data_vintage)
-        next unless record.nil? || OpenStudioLoads::NECB::SpaceTypes.undefined?(record)
+        next unless record.nil? || BtapNECB::Loads::SpaceTypes.undefined?(record)
 
         (problems[[name, bt, st]] ||= []) << space.nameString
       end
@@ -1217,7 +1217,7 @@ module BtapNECB
         return
       end
 
-      catalog = OpenStudioLoads::NECB.table(data_vintage, 'space_types')
+      catalog = BtapNECB::Loads.table(data_vintage, 'space_types')
       lines = problems.map do |(name, bt, st), spaces|
         audit.warn(:compliance,
                    "space type '#{name}' [#{bt.inspect}, #{st.inspect}] is UNRESOLVABLE against the NECB " \

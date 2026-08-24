@@ -14,7 +14,7 @@ class TestSchedules < Minitest::Test
 
   def test_hourly_ruleset_day_values
     model = OpenStudio::Model::Model.new
-    schedule = OpenStudioLoads::Schedules.add(model, 'NECB-A-Occupancy')
+    schedule = BtapNECB::Loads::Schedules.add(model, 'NECB-A-Occupancy')
     ruleset = schedule.to_ScheduleRuleset.get
     expected = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.9, 0.9, 0.9, 0.5, 0.5,
                 0.9, 0.9, 0.9, 0.7, 0.3, 0.1, 0.1, 0.1, 0.1, 0.0]
@@ -27,13 +27,13 @@ class TestSchedules < Minitest::Test
 
   def test_design_days_and_setpoints
     model = OpenStudio::Model::Model.new
-    heating = OpenStudioLoads::Schedules.add(model, 'NECB-A-Thermostat Setpoint-Heating')
+    heating = BtapNECB::Loads::Schedules.add(model, 'NECB-A-Thermostat Setpoint-Heating')
                                         .to_ScheduleRuleset.get
     default = hourly_values(heating.defaultDaySchedule)
     assert_equal [18.0] * 6 + [20.0] + [22.0] * 14 + [18.0] * 3, default
 
     # design-day schedules exist when the data carries WntrDsn/SmrDsn rows
-    rows = OpenStudioLoads::NECB.table('2020', 'schedules').select { |r| r['name'] == 'NECB-A-Thermostat Setpoint-Heating' }
+    rows = BtapNECB::Loads.table('2020', 'schedules').select { |r| r['name'] == 'NECB-A-Thermostat Setpoint-Heating' }
     if rows.any? { |r| r['day_types'].to_s.include?('WntrDsn') }
       refute heating.winterDesignDaySchedule.values.empty?
     end
@@ -41,8 +41,8 @@ class TestSchedules < Minitest::Test
 
   def test_memoized_and_activity_constant
     model = OpenStudio::Model::Model.new
-    first = OpenStudioLoads::Schedules.add(model, 'NECB-Activity')
-    again = OpenStudioLoads::Schedules.add(model, 'NECB-Activity')
+    first = BtapNECB::Loads::Schedules.add(model, 'NECB-Activity')
+    again = BtapNECB::Loads::Schedules.add(model, 'NECB-Activity')
     assert_equal first.handle, again.handle, 'same object returned on repeat'
     count = model.getScheduleRulesets.count { |s| s.nameString == 'NECB-Activity' }
     assert_equal 1, count
@@ -50,8 +50,8 @@ class TestSchedules < Minitest::Test
 
   def test_unknown_name_warns_never_silent
     model = OpenStudio::Model::Model.new
-    audit = OpenStudioLoads::AuditLog.new
-    schedule = OpenStudioLoads::Schedules.add(model, 'NECB-Z-Nonsense', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    schedule = BtapNECB::Loads::Schedules.add(model, 'NECB-Z-Nonsense', audit: audit)
     assert_equal model.alwaysOnDiscreteSchedule.handle, schedule.handle
     warning = audit.warnings.find { |w| w[:action].include?("'NECB-Z-Nonsense'") }
     refute_nil warning, 'unknown schedule warns (legacy is silent here)'
@@ -59,10 +59,10 @@ class TestSchedules < Minitest::Test
 
   def test_every_vendored_schedule_builds
     model = OpenStudio::Model::Model.new
-    audit = OpenStudioLoads::AuditLog.new
-    names = OpenStudioLoads::NECB.table('2020', 'schedules').map { |r| r['name'] }.uniq
+    audit = BtapNECB::AuditLog.new
+    names = BtapNECB::Loads.table('2020', 'schedules').map { |r| r['name'] }.uniq
     names.each do |name|
-      schedule = OpenStudioLoads::Schedules.add(model, name, audit: audit)
+      schedule = BtapNECB::Loads::Schedules.add(model, name, audit: audit)
       refute_nil schedule, name
     end
     assert_equal 0, audit.warnings.size, 'no fallbacks while building the full catalog'

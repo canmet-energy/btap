@@ -37,7 +37,7 @@ class TestDataIntegrity < Minitest::Test
       { "Atrium (height < 6m)-sch-#{letter}" => 4.2,
         "Atrium (6 =< height <= 12m)-sch-#{letter}" => 5.2,
         "Atrium (height > 12m)-sch-#{letter}" => 6.5 }.each do |name, si|
-        record = OpenStudioLoads::NECB::SpaceTypes.record(building_type: 'Space Function', space_type: name)
+        record = BtapNECB::Loads::SpaceTypes.record(building_type: 'Space Function', space_type: name)
         assert_in_delta si, record['lighting_per_area'].to_f * 10.7639, 0.05, name
       end
     end

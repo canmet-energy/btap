@@ -84,7 +84,7 @@ module OpenStudioLighting
                        office_match: :legacy, unknown_control_requirement: :required, audit: nil)
         audit ||= AuditLog.new
         placement = resolve_placement(placement, option, audit)
-        data_vintage = OpenStudioLoads::NECB.data_vintage(vintage)
+        data_vintage = BtapNECB::Loads.data_vintage(vintage)
         created = 0
         fractions = {}
 
@@ -408,7 +408,7 @@ module OpenStudioLighting
         space_type = space.spaceType.get
         return nil unless space_type.standardsBuildingType.is_initialized && space_type.standardsSpaceType.is_initialized
 
-        record = OpenStudioLoads::NECB::SpaceTypes.find(
+        record = BtapNECB::Loads::SpaceTypes.find(
           building_type: space_type.standardsBuildingType.get,
           space_type: space_type.standardsSpaceType.get, vintage: data_vintage)
         return nil if record.nil?

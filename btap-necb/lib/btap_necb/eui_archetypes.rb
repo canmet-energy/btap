@@ -263,7 +263,7 @@ module BtapNECB
     # @param audit [AuditLog]
     # @return [OpenStudio::Model::Model] the normalized model
     def normalize!(model, resolved, vintage:, audit:)
-      apply = OpenStudioLoads::NECB::Apply
+      apply = BtapNECB::Loads::Apply
       clones = {}
       resolved[:archetypes].each do |archetype, info|
         record = synthetic_record(archetype)
@@ -297,7 +297,7 @@ module BtapNECB
             # POWER untouched — the loads gem's wiring deliberately excludes
             # lighting, so it is wired here) and per-instance overrides on the
             # clone's Lights are cleared so the set governs.
-            fresh.setLightingSchedule(OpenStudioLoads::Schedules.add(model, record['lighting_schedule'],
+            fresh.setLightingSchedule(BtapNECB::Loads::Schedules.add(model, record['lighting_schedule'],
                                                                      vintage: vintage, audit: audit))
             st.lights.each(&:resetSchedule)
             st
@@ -443,12 +443,12 @@ module BtapNECB
 
     def target_schedules(scratch, record, vintage)
       quiet = BtapNECB::AuditLog.new
-      { 'occupancy' => OpenStudioLoads::Schedules.add(scratch, record['occupancy_schedule'], vintage: vintage, audit: quiet),
-        'lighting' => OpenStudioLoads::Schedules.add(scratch, record['lighting_schedule'], vintage: vintage, audit: quiet),
-        'electric equipment' => OpenStudioLoads::Schedules.add(scratch, record['electric_equipment_schedule'], vintage: vintage, audit: quiet),
-        'heating setpoint' => OpenStudioLoads::Schedules.add(scratch, record['heating_setpoint_schedule'], vintage: vintage, audit: quiet),
-        'cooling setpoint' => OpenStudioLoads::Schedules.add(scratch, record['cooling_setpoint_schedule'], vintage: vintage, audit: quiet),
-        'SWH' => OpenStudioLoads::Schedules.add(scratch, record['service_water_heating_schedule'], vintage: vintage, audit: quiet) }
+      { 'occupancy' => BtapNECB::Loads::Schedules.add(scratch, record['occupancy_schedule'], vintage: vintage, audit: quiet),
+        'lighting' => BtapNECB::Loads::Schedules.add(scratch, record['lighting_schedule'], vintage: vintage, audit: quiet),
+        'electric equipment' => BtapNECB::Loads::Schedules.add(scratch, record['electric_equipment_schedule'], vintage: vintage, audit: quiet),
+        'heating setpoint' => BtapNECB::Loads::Schedules.add(scratch, record['heating_setpoint_schedule'], vintage: vintage, audit: quiet),
+        'cooling setpoint' => BtapNECB::Loads::Schedules.add(scratch, record['cooling_setpoint_schedule'], vintage: vintage, audit: quiet),
+        'SWH' => BtapNECB::Loads::Schedules.add(scratch, record['service_water_heating_schedule'], vintage: vintage, audit: quiet) }
     end
 
     # Hourly profile comparison across the full year. true, or a short reason
@@ -521,7 +521,7 @@ module BtapNECB
         return
       end
       share = target / equipment.size
-      quiet_sched = OpenStudioLoads::Schedules.add(model, record['service_water_heating_schedule'],
+      quiet_sched = BtapNECB::Loads::Schedules.add(model, record['service_water_heating_schedule'],
                                                    vintage: vintage, audit: audit)
       equipment.each do |e|
         # definitions may be shared across spaces — give this instance its own
