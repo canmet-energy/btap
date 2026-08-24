@@ -22,7 +22,7 @@
     "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
     "status": "partial",
     "how": "occupancy and receptacle densities, thermostats and the NECB-letter schedule sets applied per space type from the NECB records (2025 values verified identical to 2020)",
-    "gaps": "lighting schedules are provided by openstudio-lighting and SWH schedules by openstudio-shw — apply them after apply_loads",
+    "gaps": "lighting schedules are provided by the lighting domain and SWH schedules by the shw domain — apply them after apply_loads",
     "code": [
      "btap-necb/lib/btap_necb/loads/apply.rb#apply_loads",
      "btap-necb/lib/btap_necb/loads/apply.rb#assign_space_types",

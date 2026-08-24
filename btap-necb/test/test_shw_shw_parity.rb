@@ -35,7 +35,7 @@ class TestSHWParity < Minitest::Test
     std.model_add_swh(model: legacy_model, swh_fueltype: 'NaturalGas', shw_scale: 1.0)
 
     gem_model = tagged_model
-    OpenStudioSHW.apply_shw(gem_model, vintage: '2020', fuel: 'NaturalGas')
+    BtapNECB::SHW.apply_shw(gem_model, vintage: '2020', fuel: 'NaturalGas')
 
     legacy_heater = legacy_model.getWaterHeaterMixeds.first
     gem_heater = gem_model.getWaterHeaterMixeds.first
@@ -89,7 +89,7 @@ class TestSHWParity < Minitest::Test
       gem_heater.setTankVolume(volume_m3)
       gem_heater.setHeaterMaximumCapacity(capacity_w)
       gem_heater.setHeaterFuelType(fuel)
-      OpenStudioSHW::NECB.apply_water_heater_efficiency(gem_heater, vintage: '2020')
+      BtapNECB::SHW.apply_water_heater_efficiency(gem_heater, vintage: '2020')
 
       eff_delta = (optional(legacy_heater.heaterThermalEfficiency) - optional(gem_heater.heaterThermalEfficiency)).abs
       ua_l = optional(legacy_heater.offCycleLossCoefficienttoAmbientTemperature)

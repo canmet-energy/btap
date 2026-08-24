@@ -711,7 +711,7 @@
     "status": "host_scope",
     "how": "purchased service water heating belongs to openstudio-shw (8.4.4.20.)",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/reference.rb#reference_shw"
+     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
     ]
    },
    {
@@ -1127,7 +1127,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies.",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/reference.rb#reference_shw"
+     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
     ]
    },
    {

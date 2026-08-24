@@ -11,13 +11,13 @@ class TestCostingE2E < Minitest::Test
 
   def shw_model(fuel: 'NaturalGas')
     model = tagged_model
-    OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: fuel)
+    BtapNECB::SHW.apply_shw(model, vintage: '2020', fuel: fuel)
     model
   end
 
   def test_costing_gas_tank
-    audit = OpenStudioSHW::AuditLog.new
-    report = OpenStudioSHW.cost(shw_model, city: CITY, province_state: PROVINCE, audit: audit)
+    audit = BtapNECB::AuditLog.new
+    report = BtapNECB::SHW.cost(shw_model, city: CITY, province_state: PROVINCE, audit: audit)
     assert_operator report.total, :>, 0
     assert_operator report.shw[:tanks], :>=, 1
     # small-volume tanks route to the Et=0.9 'all others' row -> efficiency >= 0.85
@@ -32,8 +32,8 @@ class TestCostingE2E < Minitest::Test
   end
 
   def test_costing_electric_tank_no_flue
-    audit = OpenStudioSHW::AuditLog.new
-    report = OpenStudioSHW.cost(shw_model(fuel: 'Electricity'), city: CITY, province_state: PROVINCE, audit: audit)
+    audit = BtapNECB::AuditLog.new
+    report = BtapNECB::SHW.cost(shw_model(fuel: 'Electricity'), city: CITY, province_state: PROVINCE, audit: audit)
     assert_operator report.total, :>, 0
     assert_operator report.shw[:elec], :>=, 1
     decisions = audit.entries.select { |e| e[:step] == :costing_equipment }.map { |e| e[:action] }
@@ -42,7 +42,7 @@ class TestCostingE2E < Minitest::Test
   end
 
   def test_no_shw_costs_nothing
-    report = OpenStudioSHW.cost(load_fixture, city: CITY, province_state: PROVINCE)
+    report = BtapNECB::SHW.cost(load_fixture, city: CITY, province_state: PROVINCE)
     assert_equal 0.0, report.total
   end
 
@@ -73,10 +73,10 @@ class TestCostingE2E < Minitest::Test
     model = tagged_model
     audit = BtapNECB::AuditLog.new
     BtapNECB::Loads.apply_loads(model, vintage: '2020', audit: audit)
-    OpenStudioSHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
+    BtapNECB::SHW.apply_shw(model, vintage: '2020', fuel: 'NaturalGas', audit: audit)
     BtapModeling.build_system(model, 'Baseboard gas boiler', model.getThermalZones.sort_by(&:nameString))
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890, audit: audit)
-    OpenStudioSHW.cost(model, city: CITY, province_state: PROVINCE, audit: audit)
+    BtapNECB::SHW.cost(model, city: CITY, province_state: PROVINCE, audit: audit)
 
     steps = audit.entries.map { |e| e[:step] }.uniq
     %i[loads shw shw_efficiency prescriptive costing_shw].each { |s| assert_includes steps, s }

@@ -319,7 +319,7 @@ module BtapNECB
                      'target it sets is more lenient than the code requires',
                      article: "#{lighting_prefix}.5.(9)-(12)", ruling: 'D-51')
         end
-        OpenStudioSHW::NECB.reference_shw(reference, vintage: vintage, audit: audit)
+        BtapNECB::SHW.reference_shw(reference, vintage: vintage, audit: audit)
       end
       audit.building = nil
       audit.info(:compliance,
@@ -643,7 +643,7 @@ module BtapNECB
       BtapNECB::Lighting.apply_lights(proposed, vintage: vintage,
                                       lights_type: options[:lights_type] || 'NECB_Default', audit: audit)
       shw_fuel = options[:shw_fuel]
-      OpenStudioSHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
+      BtapNECB::SHW.apply_shw(proposed, vintage: vintage, fuel: shw_fuel, audit: audit) if shw_fuel
       hvac = options[:hvac_system]
       if hvac
         result = BtapModeling.build_system(proposed, hvac, proposed.getThermalZones.sort_by(&:nameString))

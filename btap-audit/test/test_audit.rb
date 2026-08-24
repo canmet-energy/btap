@@ -92,7 +92,7 @@ class TestCoverageEmit < Minitest::Test
         'gaps' => 'everything' },
       { 'article' => '8.4.4.3.', 'title' => 'Envelope carried over', 'status' => 'satisfied_by_clone' },
       { 'article' => '8.4.4.20.', 'title' => 'Service water heating', 'status' => 'host_scope',
-        'how' => 'Delegated to openstudio-shw' },
+        'how' => 'Delegated to the shw domain' },
       { 'article' => '8.4.1.1. (HVAC)', 'title' => 'Modeller inputs', 'status' => 'partial',
         'gap_owner' => 'modeller', 'how' => 'schedules read from the model',
         'gaps' => 'occupancy assumptions' }
@@ -144,7 +144,7 @@ class TestCoverageEmit < Minitest::Test
                  entries.find { |e| e[:article] == '8.4.4.9.' }[:action]
     assert_equal 'Something unbuilt — not implemented. Gaps: everything',
                  entries.find { |e| e[:article] == '8.4.4.11.' }[:action]
-    assert_equal 'Service water heating — host scope: Delegated to openstudio-shw',
+    assert_equal 'Service water heating — host scope: Delegated to the shw domain',
                  entries.find { |e| e[:article] == '8.4.4.20.' }[:action]
   end
 

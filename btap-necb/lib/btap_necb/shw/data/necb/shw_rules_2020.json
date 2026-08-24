@@ -9,11 +9,10 @@
   "note": "Pool-heater minimums are SET on detected pool-serving heaters (apply-when-present; no archetype carries one). Solar SEF is an equipment RATING with no EnergyPlus field: detected solar-thermal equipment gets an audited determination citing the printed minimums, with the collectors modeled physically as cloned."
  },
  "provenance": {
-  "vintage": "2025",
+  "vintage": "2020",
   "generated": "2026-07-12",
-  "method": "NECB 2025 Table 6.2.2.1 retrieved in full via the building-codes MCP and compared to 2020: every formula this gem implements is IDENTICAL (electric SL formulas, all gas UEF ladder coefficients, Et>=90%+SL large-equipment row, oil rows, solar/pool rows). The ONLY substantive 2025 change is the storage-type heat-pump water heater requirement: EF >= 2.1 -> UEF >= 2.23 (an equipment class this gem does not model — recorded below). 2025 therefore shares the 2020 algorithm parameters.",
-  "reference_article": "8.4.5.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) were machine-verified against the full article text (D-41) and are satisfied by clone; Part 6 minimums apply on top. The 8.4.6.9 part-load fuel curve is applied to fuel-fired heaters (D-53).",
-  "note": "Vintage aliasing (which vintage's space-use/schedule tables a rules year draws from) is owned by the loads domain (BtapNECB::Loads.data_vintage) — this gem calls that directly (necb/demand.rb) rather than vendoring its own data_vintage_alias key."
+  "method": "Algorithm parameters transcribed from the legacy NECB2020 water_heater_mixed_apply_efficiency and auto_size_shw_capacity, cross-verified against NECB 2020 Table 6.2.2.1 via the building-codes MCP (electric standby-loss formulas, gas-fired storage UEF ladders by tank volume + first-hour rating, Et >= 90% + SL formula for large equipment, oil rows). SHW demand data (peak flows, temperatures, schedules) lives in the openstudio-loads space-type records. Runtime never contacts the MCP.",
+  "reference_article": "8.4.4.20: reference SWH identical to proposed (storage capacity, power input, energy type); HP-source SWH -> air-source HP. Sentences (3)-(4) were machine-verified against the full article text (D-41) and are satisfied by clone; Part 6 minimums apply on top. The 8.4.5.9 part-load fuel curve is applied to fuel-fired heaters (D-53)."
  },
  "autosize": {
   "supply_temperature_default_c": 60.0,
@@ -117,7 +116,7 @@
     "NaturalGas",
     "FuelOilNo2"
    ],
-   "article": "8.4.6.9.(2)",
+   "article": "8.4.5.9.(2)",
    "code_fheatplc": {
     "form": "Quadratic",
     "coefficients": [
@@ -126,7 +125,7 @@
      0.000543
     ]
    },
-   "derivation": "8.4.6.9.(2) writes a FUEL-RATIO curve: FHeatPLC = a + b(Qpl/Qdes) + c(Qpl/Qdes)^2, with Fuelpartload = Fueldesign x FHeatPLC. The EnergyPlus WaterHeater:Mixed 'Part Load Factor Curve Name' field is not that quantity — it is a DEGRADATION DIVISOR (fuel = Q_load / (eta x PLF)). The code curve therefore maps into the model field as PLF(x) = x / FHeatPLC(x), which is RATIONAL, not polynomial; the vendored cubic is its polynomial image and is probe-verified equivalent (max 0.98% over PLR 0.25-1.0, 1.47% down to PLR 0.10 — necb_8_4_6_curve_probe.rb, rake necb:curves). Vendoring the raw quadratic in the PLF field would invert the relation and overstate part-load fuel by +92% at half load and +253% at quarter load, and would double-count the a-term standby that E+ already carries as off-cycle parasitic fuel + tank UA. See D-53. The NECB2011-era NAME is retained deliberately for the legacy parity gate.",
+   "derivation": "8.4.5.9.(2) writes a FUEL-RATIO curve: FHeatPLC = a + b(Qpl/Qdes) + c(Qpl/Qdes)^2, with Fuelpartload = Fueldesign x FHeatPLC. The EnergyPlus WaterHeater:Mixed 'Part Load Factor Curve Name' field is not that quantity — it is a DEGRADATION DIVISOR (fuel = Q_load / (eta x PLF)). The code curve therefore maps into the model field as PLF(x) = x / FHeatPLC(x), which is RATIONAL, not polynomial; the vendored cubic is its polynomial image and is probe-verified equivalent (max 0.98% over PLR 0.25-1.0, 1.47% down to PLR 0.10 — necb_8_4_6_curve_probe.rb, rake necb:curves). Vendoring the raw quadratic in the PLF field would invert the relation and overstate part-load fuel by +92% at half load and +253% at quarter load, and would double-count the a-term standby that E+ already carries as off-cycle parasitic fuel + tank UA. See D-53. The NECB2011-era NAME is retained deliberately for the legacy parity gate.",
    "applies_to_note": "Fuel-fired only, and BOTH storage and instantaneous: the article is titled 'Fuel-Fired Service Water Heater' and governs 'the reference fuel-fired service water heater' without distinguishing storage from instantaneous. Electricity is outside the article's scope (D-53), not a silent skip."
   },
   "parasitic": {
@@ -143,8 +142,8 @@
     "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented",
     "gaps": "pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered — the extraction LOST the solar/pool sections in both editions and the Volume of Tank column in all 27 rows, so the D-41 MCP cross-check could not see them; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/efficiency.rb#apply_efficiency",
-     "openstudio-shw/lib/openstudio_shw/necb/efficiency.rb#part_load_curve"
+     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_efficiency",
+     "btap-necb/lib/btap_necb/shw/efficiency.rb#part_load_curve"
     ]
    },
    {
@@ -160,7 +159,7 @@
     "status": "implemented",
     "how": "the storage tank is built with an automatic setpoint: a constant ScheduleRuleset at the sizing max temperature is installed as BOTH the loop SetpointManagerScheduled and the WaterHeaterMixed setpointTemperatureSchedule, with a 2 C deadband and Cycle control, so the tank is temperature-controlled and the setpoint is adjustable by editing one schedule",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#build_loop"
+     "btap-necb/lib/btap_necb/shw/demand.rb#build_loop"
     ]
    },
    {
@@ -176,7 +175,7 @@
     "status": "implemented",
     "how": "CHECKED against the sized demand: the fraction of total design flow whose target temperature exceeds 60 C is computed from the per-space demand before auto_size collapses it to one max_temp_c. Below 50% the sentence requires separate booster heaters for the hot portions, and a single-water-heater model is a SHOUTED finding; at or above 50%, or with no load above 60 C, the determination is audited as met or vacuous",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/prescriptive.rb#check_booster_heaters"
+     "btap-necb/lib/btap_necb/shw/prescriptive.rb#check_booster_heaters"
     ]
    },
    {
@@ -193,55 +192,55 @@
     "how": "pool-heater minimum efficiencies ARE applied when a SwimmingPoolIndoor is present in the model (gas Et 82% / oil 78% / heat-pump COP 4.0, D-63, apply-when-present)",
     "gaps": "the 6.2.7.1. shutoff device and pump/heater time switches are installed controls with no model object; 6.2.7.2. covers govern heated OUTDOOR pools and tubs, and EnergyPlus models INDOOR pools only, so that sentence is permanently outside model scope",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/efficiency.rb#apply_solar_pool_minimums"
+     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_solar_pool_minimums"
     ]
    },
    {
     "article": "8.4.3.2. (SWH loads)",
     "title": "Service water heating loads representative of the building",
     "status": "implemented",
-    "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (loads-domain data)",
+    "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data)",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#apply_shw",
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#add_water_use"
+     "btap-necb/lib/btap_necb/shw/demand.rb#apply_shw",
+     "btap-necb/lib/btap_necb/shw/demand.rb#add_water_use"
     ]
    },
    {
-    "article": "8.4.5.20.(1)",
-    "title": "Reference SWH identical to proposed (storage, power, energy type) (2025 renumbered performance path)",
+    "article": "8.4.4.20.(1)",
+    "title": "Reference SWH identical to proposed (storage, power, energy type)",
     "status": "satisfied_by_clone",
     "how": "the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/reference.rb#reference_shw"
+     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
     ]
    },
    {
-    "article": "8.4.5.20.(2)",
-    "title": "HP-source SWH -> air-source HP in the reference (2025 renumbered performance path)",
+    "article": "8.4.4.20.(2)",
+    "title": "HP-source SWH -> air-source HP in the reference",
     "status": "implemented",
     "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#wrap_heat_pump",
-     "openstudio-shw/lib/openstudio_shw/necb/efficiency.rb#apply_heat_pump_efficiency"
+     "btap-necb/lib/btap_necb/shw/demand.rb#wrap_heat_pump",
+     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_heat_pump_efficiency"
     ]
    },
    {
-    "article": "8.4.5.20.(3)-(4)",
-    "title": "Remaining reference SWH sentences (2025 renumbered performance path)",
+    "article": "8.4.4.20.(3)-(4)",
+    "title": "Remaining reference SWH sentences",
     "status": "partial",
-    "how": "(3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically — trivially matching the (4)(a) ratio (Note A-8.4.5.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.6.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.6.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater — there is no electric counterpart in 8.4.6 to apply.",
+    "how": "(3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically — trivially matching the (4)(a) ratio (Note A-8.4.4.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.5.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.5.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater — there is no electric counterpart in 8.4.5 to apply.",
     "gaps": "REFINED after machine-verification (D-41) and D-53: (3)/(4)/(6)/(7)/(8) are satisfied by clone and (5) is closed for every article-eligible heater. Remaining: (9) circulation-pump consolidation is satisfied BY CONSTRUCTION for models this gem authors — necb/demand.rb builds exactly ONE PumpConstantSpeed per service water loop, so there is never a set of pumps to consolidate. It is unverified only for a FOREIGN proposed that arrives with several pumps on one SHW loop; such a model is cloned as-is, keeping identical W/(L/s) (energy-equivalent, topology differs). No consolidation pass is implemented because it would be unreachable code on every model this toolchain produces.",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/reference.rb#reference_shw"
+     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
     ]
    },
    {
     "article": "8.4.1.1. (SWH)",
     "title": "General — SWH components accounted",
     "status": "implemented",
-    "how": "Service water heating accounted per the prescriptive Section 6.2 requirements via the reference SHW transform (8.4.5.20.) and heater efficiency application — the realization of 8.4.1.1.(1) for the SWH slice.",
+    "how": "Service water heating accounted per the prescriptive Section 6.2 requirements via the reference SHW transform (8.4.4.20.) and heater efficiency application — the realization of 8.4.1.1.(1) for the SWH slice.",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#apply_shw"
+     "btap-necb/lib/btap_necb/shw/demand.rb#apply_shw"
     ]
    },
    {
@@ -250,16 +249,9 @@
     "status": "implemented",
     "how": "SWH loads accounted from NECB space-use demand data (per-space peak flows + schedules aggregated to the building system); EnergyPlus computes the resulting energy.",
     "code": [
-     "openstudio-shw/lib/openstudio_shw/necb/demand.rb#add_water_use"
+     "btap-necb/lib/btap_necb/shw/demand.rb#add_water_use"
     ]
    }
   ]
- },
- "non_rule_keys": [
-  "changes_vs_2020"
- ],
- "changes_vs_2020": {
-  "heat_pump_storage_water_heater": "EF >= 2.1 (2020) -> UEF >= 2.23 (2025); class not modeled",
-  "implemented_formulas": "none changed"
  }
 }

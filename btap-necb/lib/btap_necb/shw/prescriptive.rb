@@ -1,5 +1,5 @@
-module OpenStudioSHW
-  module NECB
+module BtapNECB
+  module SHW
     # Section 6.2 prescriptive requirements that a MODEL can actually answer.
     #
     # Most of 6.2.3-6.2.7 cannot be: they govern installed hardware (a device

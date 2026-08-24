@@ -107,8 +107,8 @@ class TestDataIntegrity < Minitest::Test
       # schedule sentence still names both sibling gems in its gaps.
       article = coverage.find { |a| a['article'] == '8.4.3.2.(1)' }
       assert_equal 'partial', article['status'], 'honest: lighting + SHW schedules delegated'
-      assert_match(/openstudio-lighting/, article['gaps'])
-      assert_match(/openstudio-shw/, article['gaps'])
+      assert_match(/lighting/, article['gaps'])
+      assert_match(/shw/, article['gaps'])
       semi = coverage.find { |a| a['article'] == '8.4.3.2.(3)' }
       assert_equal 'modeller', semi['gap_owner'], '(3) set-point-from-specs is a modeller input'
       coverage.each do |a|

@@ -1,5 +1,5 @@
-module OpenStudioSHW
-  module NECB
+module BtapNECB
+  module SHW
     # Reference-building SWH — NECB 2020 8.4.4.20 (2025: 8.4.5.20):
     #   (1) storage capacity, power input and energy type identical to proposed —
     #       satisfied by construction in the umbrella (the reference is a clone
@@ -27,7 +27,7 @@ module OpenStudioSHW
       end
 
       def emit_article_coverage(vintage, audit)
-        BtapAudit::Coverage.emit(NECB.rules(vintage)['article_coverage'], audit)
+        BtapAudit::Coverage.emit(SHW.rules(vintage)['article_coverage'], audit)
       end
 
       # ---- internals (not API) ----

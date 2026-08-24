@@ -5,7 +5,7 @@ require_relative 'test_helper'
 class TestPrescriptive < Minitest::Test
   include FixtureHelper
 
-  P = OpenStudioSHW::NECB::Prescriptive
+  P = BtapNECB::SHW::Prescriptive
 
   # spaces_w_dhw entries only need the two keys the rule reads.
   def sizing(*pairs)
@@ -15,7 +15,7 @@ class TestPrescriptive < Minitest::Test
   def run_check(sizing_hash, water_heaters: 1)
     model = OpenStudio::Model::Model.new
     water_heaters.times { OpenStudio::Model::WaterHeaterMixed.new(model) }
-    audit = OpenStudioSHW::AuditLog.new
+    audit = BtapNECB::AuditLog.new
     result = P.check_booster_heaters(sizing_hash, model, audit)
     [result, audit]
   end
@@ -80,7 +80,7 @@ class TestPrescriptive < Minitest::Test
   # The clauses no model can answer must still be NAMED, or their silence reads
   # as "not applicable" when they very much apply.
   def test_unanswerable_clauses_are_declared_individually
-    audit = OpenStudioSHW::AuditLog.new
+    audit = BtapNECB::AuditLog.new
     P.declare_field_verified(audit)
     %w[6.2.3.1. 6.2.4.3. 6.2.6.1. 6.2.6.2. 6.2.7.1. 6.2.7.2.].each do |article|
       e = audit.entries.find { |x| x[:article] == article }
@@ -95,7 +95,7 @@ class TestPrescriptive < Minitest::Test
   def test_every_coverage_status_is_legal
     valid = %w[implemented partial not_implemented satisfied_by_clone host_scope]
     %w[2020 2025].each do |vintage|
-      OpenStudioSHW::NECB.rules(vintage)['article_coverage']['articles'].each do |art|
+      BtapNECB::SHW.rules(vintage)['article_coverage']['articles'].each do |art|
         assert_includes(valid, art['status'], "#{vintage} #{art['article']}: illegal status")
         assert(art['how'] || art['gaps'], "#{vintage} #{art['article']}: needs how or gaps")
         next unless art['gap_owner']

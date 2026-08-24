@@ -5,7 +5,7 @@ require_relative 'test_helper'
 # audit 2026-08-02); values come from the vendored solar_pool_minimums block.
 class TestSolarPoolMinimums < Minitest::Test
   def spec
-    OpenStudioSHW::NECB.rules('2020')['solar_pool_minimums']
+    BtapNECB::SHW.rules('2020')['solar_pool_minimums']
   end
 
   def pool_model(fuel)
@@ -39,8 +39,8 @@ class TestSolarPoolMinimums < Minitest::Test
 
   def test_gas_pool_heater_takes_the_printed_minimum
     model, heater = pool_model('NaturalGas')
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
     assert_in_delta 0.82, heater.heaterThermalEfficiency.get, 1e-9
     entry = audit.entries.find { |e| e[:action].include?('pool heater set to the Table 6.2.2.1 minimum') }
     refute_nil entry
@@ -49,13 +49,13 @@ class TestSolarPoolMinimums < Minitest::Test
 
   def test_oil_pool_heater_takes_its_row_and_electric_is_audited_not_forced
     model, heater = pool_model('FuelOilNo2')
-    OpenStudioSHW::NECB::Efficiency.apply_solar_pool_minimums(model, vintage: '2020',
-                                                              audit: OpenStudioSHW::AuditLog.new)
+    BtapNECB::SHW::Efficiency.apply_solar_pool_minimums(model, vintage: '2020',
+                                                              audit: BtapNECB::AuditLog.new)
     assert_in_delta 0.78, heater.heaterThermalEfficiency.get, 1e-9
 
     model, heater = pool_model('Electricity')
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
     assert_in_delta 0.95, heater.heaterThermalEfficiency.get, 1e-9, 'no printed electric pool row — left as cloned'
     assert(audit.entries.any? { |e| e[:action].include?('no Table 6.2.2.1 pool row') })
   end
@@ -63,8 +63,8 @@ class TestSolarPoolMinimums < Minitest::Test
   def test_solar_collectors_get_the_rating_level_determination
     model = OpenStudio::Model::Model.new
     OpenStudio::Model::SolarCollectorFlatPlateWater.new(model)
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
     entry = audit.entries.find { |e| e[:action].include?('Solar Energy') }
     refute_nil entry, 'solar SEF determination recorded'
     assert_includes entry[:action], 'RATING'
@@ -74,8 +74,8 @@ class TestSolarPoolMinimums < Minitest::Test
   def test_no_op_without_pools_or_collectors
     model = OpenStudio::Model::Model.new
     OpenStudio::Model::WaterHeaterMixed.new(model)
-    audit = OpenStudioSHW::AuditLog.new
-    OpenStudioSHW::NECB::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
+    audit = BtapNECB::AuditLog.new
+    BtapNECB::SHW::Efficiency.apply_solar_pool_minimums(model, vintage: '2020', audit: audit)
     assert_empty audit.entries.select { |e| e[:ruling].to_s.include?('D-63') }, 'apply-when-present: silent no-op'
   end
 end

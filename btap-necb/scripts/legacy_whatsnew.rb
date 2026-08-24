@@ -47,7 +47,7 @@ OWNERS = [
   [%r{/btap/geometry\.rb|create_shape|create_bar},                'btap-modeling'],
   [%r{space_types\.json|schedules\.json|beps_compliance_path\.rb}, 'openstudio-loads'],
   [%r{lighting|daylight},                                          'openstudio-lighting'],
-  [%r{service_water_heating|shw},                                  'openstudio-shw'],
+  [%r{service_water_heating|shw},                                  'btap-necb (shw)'],
   [%r{hvac_system|autozone|efficienc|curves|chiller|boiler|/fan},  'openstudio-hvac'],
   [%r{building_envelope|thermal_transmittance|fdwr|thermal_bridging}, 'btap-necb (envelope)'],
   [%r{necb_20\d\d\.rb},                                            'btap-necb (+ the domain each hunk touches)']

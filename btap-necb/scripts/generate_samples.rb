@@ -34,7 +34,6 @@ ROOT = File.expand_path('../..', __dir__)
   openstudio-hvac/lib/openstudio_hvac
   btap-necb/lib/btap_necb/loads
   openstudio-lighting/lib/openstudio_lighting
-  openstudio-shw/lib/openstudio_shw
 ].each { |entry| require File.expand_path(entry, ROOT) }
 
 FIXTURE = File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm')
@@ -110,7 +109,7 @@ def seed(vintage)
   audit = BtapNECB::AuditLog.new
   BtapNECB::Loads.apply_loads(model, vintage: vintage, audit: audit)
   BtapNECB::Lighting.apply_lights(model, vintage: vintage, audit: audit)
-  OpenStudioSHW.apply_shw(model, vintage: vintage, fuel: 'NaturalGas', audit: audit)
+  BtapNECB::SHW.apply_shw(model, vintage: vintage, fuel: 'NaturalGas', audit: audit)
   model
 end
 
