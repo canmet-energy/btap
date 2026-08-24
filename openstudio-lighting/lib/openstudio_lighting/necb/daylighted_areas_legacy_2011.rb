@@ -244,6 +244,16 @@ module OpenStudioLighting
       # ---- internals (not API) ---- (moved here with their callers; the rest of
       # Daylighting's private list stays in daylighting.rb)
       private_class_method :dist, :triangle_height, :wall_point_distance
+
+      # The costing inversion: BtapCosting owns no daylighted-area geometry
+      # (rule machinery), so the NECB layer hands it this provider.
+      def costing_area_provider
+        lambda do |space|
+          { sidelighted_m2: sidelighting_parameters(space)[:area_m2],
+            skylight_m2: skylight_parameters(space)[:area_m2] }
+        end
+      end
+
     end
   end
 end

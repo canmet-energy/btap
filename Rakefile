@@ -16,6 +16,7 @@ require 'etc'
 # forgetting aborts every rake invocation instead of silently no-oping.
 GEM_DIRS = %w[
   btap-audit
+  btap-costing
   openstudio-envelope
   btap-modeling
   openstudio-hvac

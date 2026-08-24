@@ -67,7 +67,7 @@ module OpenStudioNECB
     #   annual run without it silently skips the GHG level
     # @param costs_csv [String, nil] path to the licensed RS-Means costs CSV —
     #   runtime injection only, never committed (falls back to
-    #   OPENSTUDIO_COSTING_DIR, then the public vendored sheets)
+    #   BTAP_COSTING_DIR — OPENSTUDIO_COSTING_DIR still honoured — then the vendored sheets)
     # @param thermal_bridging [String, Hash, nil] TBD PSI set for the envelope transforms
     # @param actual_roof_absorptance_used [Boolean] declare that the proposed models
     #   its ACTUAL roof solar absorptance — the reference's roof absorptance is then

@@ -41,4 +41,19 @@ require_relative 'openstudio_shw/necb/demand'
 require_relative 'openstudio_shw/necb/efficiency'
 require_relative 'openstudio_shw/necb/prescriptive'
 require_relative 'openstudio_shw/necb/reference'
-require_relative 'openstudio_shw/costing'
+# Costing consolidated into btap-costing; the alias keeps callers working.
+begin
+  require 'btap_costing'
+rescue LoadError
+  require File.expand_path('../../btap-costing/lib/btap_costing', __dir__)
+end
+
+module OpenStudioSHW
+  Costing = BtapCosting::SHW
+
+  # SHW capital costing on a SIZED model (delegator lost when costing.rb
+  # consolidated into btap-costing).
+  def self.cost(model, **kwargs)
+    Costing.cost(model, **kwargs)
+  end
+end

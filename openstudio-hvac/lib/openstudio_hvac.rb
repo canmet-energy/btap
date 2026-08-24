@@ -11,12 +11,12 @@ end
 
 require_relative 'openstudio_hvac/version'
 require_relative 'openstudio_hvac/audit_log'
-require_relative 'openstudio_hvac/costing/database'
-require_relative 'openstudio_hvac/costing/ledger'
-require_relative 'openstudio_hvac/costing/geometry'
-require_relative 'openstudio_hvac/costing/quantify_equipment'
-require_relative 'openstudio_hvac/costing/ventilation'
-require_relative 'openstudio_hvac/costing/report'
+# Costing consolidated into btap-costing; the alias below keeps callers working.
+begin
+  require 'btap_costing'
+rescue LoadError
+  require File.expand_path('../../btap-costing/lib/btap_costing', __dir__)
+end
 require_relative 'openstudio_hvac/necb/audit_log'
 require_relative 'openstudio_hvac/necb/reference'
 require_relative 'openstudio_hvac/necb/energy_recovery'
@@ -30,6 +30,7 @@ module OpenStudioHVAC
   # The authoring machinery moved to BtapModeling. These aliases keep this
   # gem's remaining NECB/costing code (and external callers) working until it
   # folds into btap-necb, where references become fully qualified.
+  Costing       = BtapCosting::HVAC
   Catalog       = BtapModeling::Catalog
   Builder       = BtapModeling::Builder
   Classify      = BtapModeling::Classify

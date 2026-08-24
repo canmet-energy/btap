@@ -42,7 +42,8 @@ Gem::Specification.new do |spec|
   # from this gem. Undeclared until the gems were extracted, because a
   # side-by-side checkout resolved it by relative path.
   spec.add_dependency 'btap-audit'
-  spec.add_dependency 'openstudio-hvac'
+  spec.add_dependency 'btap-costing'
+  spec.add_dependency 'btap-modeling'
   spec.add_dependency 'tbd'
 
   spec.add_development_dependency 'minitest', '~> 5.0'

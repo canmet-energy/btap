@@ -15,7 +15,7 @@ class TestDecisionsRegistry < Minitest::Test
   Decisions = OpenStudioNECB::Decisions
 
   MONOREPO = File.expand_path('../..', __dir__)
-  GEMS = %w[openstudio-necb openstudio-hvac openstudio-envelope openstudio-loads
+  GEMS = %w[btap-costing openstudio-necb openstudio-hvac openstudio-envelope openstudio-loads
             openstudio-lighting openstudio-shw btap-modeling].freeze
   DOC = File.expand_path('../docs/necb_decisions.md', __dir__)
   KINDS = %w[runtime runtime_unwired data process].freeze
@@ -161,6 +161,7 @@ class TestDecisionsRegistry < Minitest::Test
     'openstudio-hvac' => %w[openstudio_hvac OpenStudioHVAC],
     'openstudio-envelope' => %w[openstudio_envelope OpenStudioEnvelope],
     'btap-modeling' => %w[btap_modeling BtapModeling],
+    'btap-costing' => %w[btap_costing BtapCosting],
     'openstudio-lighting' => %w[openstudio_lighting OpenStudioLighting],
     'openstudio-loads' => %w[openstudio_loads OpenStudioLoads],
     'openstudio-shw' => %w[openstudio_shw OpenStudioSHW]
