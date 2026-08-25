@@ -1,10 +1,10 @@
 # Rakefile for the NECB gem family.
 #
 # Deliberately does NOT `require 'bundler/gem_tasks'` — that binds a Rakefile to
-# a single gemspec, and this repo holds nine. Build individual gems from their
+# a single gemspec, and this repo holds five. Build individual gems from their
 # own directory (`cd btap-necb && gem build btap-necb.gemspec`).
 #
-# Every task below assumes it is run from the repository root, with the nine gem
+# Every task below assumes it is run from the repository root, with the five gem
 # directories as direct children.
 
 require 'rbconfig'
@@ -149,7 +149,7 @@ end
 # The suites are plain `ruby test/test_x.rb` files with no shared state, so they
 # parallelize across FILES for free. CI's matrix already parallelizes across
 # gems; within a gem it runs them one at a time, which is why btap-necb
-# (46 files) is the slowest leg by a wide margin.
+# (57 files) is the slowest leg by a wide margin.
 #
 # Parity suites are excluded: they need the pinned oracle and are covered by the
 # `parity` job, where they cannot pass vacuously.
