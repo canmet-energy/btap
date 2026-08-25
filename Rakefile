@@ -449,7 +449,7 @@ namespace :windows do
       puts '--- DRY RUN: nothing will be created or uploaded ---'
       puts "  tag      #{tag}  ->  #{sha[0, 12]}"
       puts "  asset    #{exe} (#{size_mb} MB)"
-      puts "  title    NECB Compliance #{tag}"
+      puts "  title    BTAP Compliance #{tag}"
       existing = `git ls-remote --tags origin refs/tags/#{tag} 2>/dev/null`.strip
       puts "  WARNING  tag #{tag} ALREADY EXISTS on the remote" unless existing.empty?
       puts '  notes:'
@@ -460,7 +460,7 @@ namespace :windows do
 
     puts "publishing #{tag} -> #{File.basename(exe)} (#{size_mb} MB) from #{sha[0, 12]}"
     ok = system({ 'GH_TOKEN' => token }, 'gh', 'release', 'create', tag, exe,
-                '--title', "NECB Compliance #{tag}", '--notes', notes, '--target', sha)
+                '--title', "BTAP Compliance #{tag}", '--notes', notes, '--target', sha)
     abort('gh release create failed') unless ok
     puts "published: https://github.com/canmet-energy/btap-gems/releases/tag/#{tag}"
   end
