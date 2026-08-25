@@ -8,7 +8,7 @@
 #
 #   ruby scripts/generate_necb_gem_coverage.rb
 #
-# Run from the repo root. Reads openstudio-*/lib/**/data/necb/*_rules_*.json.
+# Run from the repo root. Reads {openstudio,btap}-*/lib/**/data/*_rules_*.json.
 
 require 'json'
 
@@ -66,7 +66,7 @@ end
 
 # ---- collect every manifest entry ----------------------------------------
 records = []
-manifests = Dir.glob(File.join(ROOT, '{openstudio,btap}-*', 'lib', '**', 'data', 'necb', '*_rules_*.json')).sort
+manifests = Dir.glob(File.join(ROOT, '{openstudio,btap}-*', 'lib', '**', 'data', '*_rules_*.json')).sort
 abort('no coverage manifests found — the glob went stale') if manifests.empty?
 manifests.each do |path|
   begin

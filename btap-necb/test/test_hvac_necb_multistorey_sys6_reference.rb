@@ -60,7 +60,7 @@ class TestNecbMultistoreySys6Reference < Minitest::Test
   # 6 anywhere in the repo (test_necb_reference.rb's sys6 test asserts supply
   # pressureRise and BOTH return pressureRise/efficiency, but never supply
   # efficiency). fans['system_6']['supply_efficiency'] in
-  # data/necb/reference_rules_2020.json declares 0.55 (8.4.4.18.(4)); assert
+  # data/reference_rules_2020.json declares 0.55 (8.4.4.18.(4)); assert
   # the BUILT model actually carries that value.
   def test_system_6_supply_fan_total_efficiency_matches_the_declared_0_55
     model = multistorey_proposed_model

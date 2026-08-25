@@ -5,7 +5,7 @@ module BtapNECB
   module Lighting
     Costing = BtapCosting::Lighting
 
-    DATA_DIR = File.expand_path('lighting/data/necb', __dir__)
+    DATA_DIR = File.expand_path('lighting/data', __dir__)
 
     def self.rules(vintage)
       @rules ||= {}

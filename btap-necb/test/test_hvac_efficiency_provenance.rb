@@ -8,7 +8,7 @@ require 'json'
 # from the code text fails HERE with the printed number in the message.
 class TestEfficiencyProvenance < Minitest::Test
   DATA = JSON.parse(File.read(
-                      File.expand_path('../lib/btap_necb/hvac/data/necb/efficiencies_2020.json', __dir__)
+                      File.expand_path('../lib/btap_necb/hvac/data/efficiencies_2020.json', __dir__)
                     ))
   KW_PER_TON = 3.51685
 
@@ -106,7 +106,7 @@ class TestEfficiencyProvenance < Minitest::Test
   # ==================== NECB 2025 (D-60) ====================
 
   DATA_2025 = JSON.parse(File.read(
-                           File.expand_path('../lib/btap_necb/hvac/data/necb/efficiencies_2025.json', __dir__)
+                           File.expand_path('../lib/btap_necb/hvac/data/efficiencies_2025.json', __dir__)
                          ))
 
   # 2025 -K/-N and the -G PTAC coefficients are byte-identical to 2020's

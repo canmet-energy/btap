@@ -3,14 +3,14 @@ require 'json'
 module BtapNECB
   # NECB performance-path helpers: reference HVAC selection (Table 8.4.4.7.-A/-B) and,
   # in later phases, the proposed->reference transform and vintage efficiency application.
-  # All rule content lives in data/necb/reference_rules_<vintage>.json (vendored, with
+  # All rule content lives in data/reference_rules_<vintage>.json (vendored, with
   # article-level provenance); this code is a rules interpreter, not a rules store.
   module HVAC
-    RULES_DIR = File.expand_path('data/necb', __dir__)
+    RULES_DIR = File.expand_path('data', __dir__)
 
     # Load (and memoize) the vendored NECB reference ruleset for a vintage.
     # @param vintage [String] NECB vintage ('2020' or '2025')
-    # @return [Hash] parsed data/necb/reference_rules_<vintage>.json
+    # @return [Hash] parsed data/reference_rules_<vintage>.json
     def self.rules(vintage)
       @rules ||= {}
       @rules[vintage.to_s] ||= begin

@@ -1089,7 +1089,7 @@ module BtapNECB
     # btap-necb/docs/necb_decisions.md). Emitted at the end of the happy
     # path only — a crash flush must not assert coverage.
     def emit_article_coverage(vintage, audit)
-      path = File.expand_path("data/necb/necb_rules_#{vintage}.json", __dir__)
+      path = File.expand_path("data/necb_rules_#{vintage}.json", __dir__)
       return unless File.exist?(path)
 
       BtapAudit::Coverage.emit(JSON.parse(File.read(path))['article_coverage'], audit)

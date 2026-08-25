@@ -237,7 +237,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
     # Expected value read directly from the envelope domain's vendored rule data
     # (rule: first bin where hdd < key), NOT hardcoded.
     envelope_rules = JSON.parse(File.read(File.join(
-      REPO_ROOT, 'btap-necb/lib/btap_necb/envelope/data/necb/envelope_rules_2020.json'
+      REPO_ROOT, 'btap-necb/lib/btap_necb/envelope/data/envelope_rules_2020.json'
     )))
     wall_bins = envelope_rules.fetch('u_values').fetch('outdoors').fetch('wall')
     hdd = 3890
@@ -259,7 +259,7 @@ class TestLegacyArchetypeE2E < Minitest::Test
 
     # ---- (b) reference LPD for 'Office enclosed <= 25 m2' vs catalog (W/ft2 -> W/m2) ----
     catalog = JSON.parse(File.read(File.join(
-      REPO_ROOT, 'btap-necb/lib/btap_necb/loads/data/necb/space_types_2020.json'
+      REPO_ROOT, 'btap-necb/lib/btap_necb/loads/data/space_types_2020.json'
     )))['table']
     row = catalog.find { |r| r['building_type'] == 'Space Function' && r['space_type'] == 'Office enclosed <= 25 m2' }
     refute_nil row, 'catalog carries the Office enclosed <= 25 m2 space type'

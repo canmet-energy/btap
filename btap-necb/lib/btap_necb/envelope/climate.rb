@@ -9,7 +9,7 @@ module BtapNECB
   module Climate
     module_function
 
-    TABLE_C1_PATH = File.expand_path('data/necb/table_c1.json', __dir__)
+    TABLE_C1_PATH = File.expand_path('data/table_c1.json', __dir__)
     TOLERANCE_KM = 500.0
 
     def table_c1
