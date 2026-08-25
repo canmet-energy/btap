@@ -71,7 +71,7 @@ jobs:
           # ISCC dies with "File access denied".
           mkdir -p packaging/windows/Output
           sudo chmod -R a+rwX packaging/windows
-          docker run --rm -v "$PWD:/work" amake/innosetup:latest packaging/windows/necb-compliance.iss
+          docker run --rm -v "$PWD:/work" amake/innosetup:latest packaging/windows/btap-compliance.iss
           ls -la packaging/windows/Output/
       - name: install ruby for the release task
         run: |
