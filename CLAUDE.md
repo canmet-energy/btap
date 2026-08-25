@@ -118,7 +118,7 @@ A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in some gem's
 `data`, or `runtime_unwired`).
 
 **`spec.files` excludes `test/` in every gemspec.** So
-`btap-modeling/lib/btap_modeling/catalog_report.rb`'s `FIXTURE` constant is
+`btap-modeling/lib/btap_modeling/hvac/catalog_report.rb`'s `FIXTURE` constant is
 already broken in a *packaged* gem. Pre-existing, not extraction fallout.
 
 **All costing lives in btap-costing, and the priced pair is its shared

@@ -1,5 +1,23 @@
 # CLAUDE.md — btap-modeling
 
+## Layout
+
+`lib/btap_modeling/` is organized by authoring domain, mirroring the
+btap-necb/btap-costing convention:
+
+- `geometry/` — footprint wizards, the bar engine, plan/render tooling
+- `hvac/` — the 97-system catalog + builders (`systems/`, `components/`,
+  `data/`), classify, teardown, naming, canonical, validation
+- `envelope/` — constructions machinery and the exposed-surface census
+- top level — the facade, `audit_log.rb` (its `../../../btap-audit` climb is
+  depth-sensitive: do NOT move it deeper), `version.rb`
+
+There is NO `lighting/` or `shw/` here: those domains had no NECB-free
+authoring half at the refactor (their "authoring" was applying NECB tables —
+they live wholesale in btap-necb); only geometry, hvac and envelope had
+generic machinery. Modules stay FLAT (`BtapModeling::X`) — directories are
+organization only.
+
 **Scope since D-77:** this gem is ALL generic authoring — the ex-geometry
 wizards below PLUS the ex-hvac catalog/builders/components/classify/teardown
 (under the same flat `BtapModeling` module) and ex-envelope

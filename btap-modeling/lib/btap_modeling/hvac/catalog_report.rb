@@ -33,7 +33,7 @@ module BtapModeling
   module CatalogReport
     module_function
 
-    FIXTURE = File.expand_path('../../test/fixtures/5ZoneNoHVAC.osm', __dir__)
+    FIXTURE = File.expand_path('../../../test/fixtures/5ZoneNoHVAC.osm', __dir__)
 
     # ---- component classification (mirrors necb ModelQuery::COMPONENT_KINDS) ----
     # Order matters: the FIRST matching regex wins, so specific rules precede

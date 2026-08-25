@@ -8,7 +8,7 @@
 #                        needs_boiler)
 #   SYSTEM_CATALOG.txt   plain-text listing grouped by family: legacy name -> canonical name
 #
-# Run after ANY edit to lib/btap_modeling/data/systems.json (or to canonical.rb,
+# Run after ANY edit to lib/btap_modeling/hvac/data/systems.json (or to canonical.rb,
 # which generates the canonical names) so the committed artifacts cannot drift:
 #
 #   cd btap-modeling && ruby scripts/regenerate_catalog.rb
