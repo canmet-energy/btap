@@ -25,6 +25,22 @@ The workflow reads `vars.CI_RUNNER` for the container matrix, `verify` and
 `parity`; unset it and everything reverts to `ubuntu-latest`. No workflow edit
 in either direction.
 
+## Changing the project's source DETACHES the webhook
+
+`aws codebuild update-project --source …` silently drops the project's
+webhook — every subsequent CI job then queues forever, because nothing
+delivers `WORKFLOW_JOB_QUEUED` any more (paid for once, at the
+openstudio-necb-gems → btap-gems rename). After ANY source change, always:
+
+```bash
+aws codebuild create-webhook --project-name necb-ci \
+  --filter-groups '[[{"type":"EVENT","pattern":"WORKFLOW_JOB_QUEUED"}]]'
+```
+
+and verify the hook is back on the repo (`gh api repos/<owner>/<repo>/hooks`).
+A GitHub-side repo RENAME alone is harmless — the hook lives on the repo and
+survives; it is the CodeBuild-side source update that kills it.
+
 ## What runs where afterwards
 
 | job | runner | GitHub minutes |

@@ -437,9 +437,12 @@ namespace :windows do
       Run `btap-compliance --help` from the Start-menu console, or double-click
       `samples\\run-demo.cmd`. See README-windows.txt in the install directory.
 
-      NOT YET VALIDATED ON WINDOWS — the CLI has been exercised on Linux and the
-      installer verified to install, but the packaged tool has not been run on a
-      real Windows machine.
+      Validated on Windows Server 2022 (2026-08-24, clean EC2 instance): silent
+      per-user install into a path with spaces, `--list-cities`, a full annual
+      determination (exit 1), the quick-run refusal (exit 6), usage errors
+      (exit 2), UTF-8 report glyphs intact, immunity to a different OpenStudio
+      on PATH, and clean uninstall preserving user output. Not yet field-tested
+      on desktop Windows 10/11 — reports welcome.
     NOTES
 
     if dry_run
