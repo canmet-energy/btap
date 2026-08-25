@@ -109,7 +109,7 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   btap-necb (loads)' record machinery with synthetic archetype records). Named
   for the 8.4.4 *building* archetypes — NOT the 17-building legacy validation
   fleet (see the glossary in `docs/README.md`).
-- `lib/btap_necb/data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
+- `lib/btap_necb/data/necb_rules_{2020,2025}.json` — the umbrella's own
   `article_coverage` manifests (8.4.1.2 determination, 8.4.2.x methods,
   8.4.4.x EUI). Emitted at runtime by `Compliance.emit_article_coverage` at
   the end of every successful run (happy path only — never on crash flush).

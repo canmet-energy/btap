@@ -7,7 +7,7 @@ require_relative 'test_helper'
 # happens to match the "residential" keyword — it is NOT a dwelling-unit
 # `space_type` row. The real catalog dwelling row is:
 #   { "building_type": "Space Function", "space_type": "Dwelling units general" }
-# (btap-necb/lib/btap_necb/loads/data/necb/space_types_2020.json).
+# (btap-necb/lib/btap_necb/loads/data/space_types_2020.json).
 #
 # This file tags a model with that exact name and exercises BOTH gems' dwelling
 # detection through the SAME model, on MODEL VALUES only:

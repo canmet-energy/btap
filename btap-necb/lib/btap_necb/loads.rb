@@ -16,7 +16,7 @@ end
 # the 2020 tables where verified identical).
 module BtapNECB
   module Loads
-    DATA_DIR = File.expand_path('loads/data/necb', __dir__)
+    DATA_DIR = File.expand_path('loads/data', __dir__)
 
     def self.rules(vintage)
       @rules ||= {}

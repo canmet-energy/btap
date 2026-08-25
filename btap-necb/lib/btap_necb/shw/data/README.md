@@ -1,4 +1,4 @@
-# data/necb — Part 6 rules provenance
+# data — Part 6 rules provenance
 
 `shw_rules_2020.json` / `shw_rules_2025.json` — one ruleset per vintage. Top
 keys: `autosize` (tank/loop sizing parameters), `efficiency` (Table 6.2.2.1

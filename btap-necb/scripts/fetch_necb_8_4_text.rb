@@ -4,7 +4,7 @@
 # Fetches every NECB Section 8.4 article from the building-codes MCP for ONE
 # edition (EDITION=2025 default, EDITION=2020 supported),
 # parses each into a sentence/clause tree with STRICT sanity checks, and caches
-# the result to data/necb/necb_8_4_articles_2025.json for the coverage-document
+# the result to data/necb_8_4_articles_2025.json for the coverage-document
 # generator (which must run in CI without MCP access).
 #
 #   ruby scripts/fetch_necb_8_4_text.rb
@@ -32,7 +32,7 @@ ROOT = File.expand_path('../..', __dir__)
 # edition, not a renumbering of one list.
 EDITION = ENV.fetch('EDITION', '2025')
 abort("unsupported EDITION #{EDITION} (2020|2025)") unless %w[2020 2025].include?(EDITION)
-OUT = File.expand_path("../data/necb/necb_8_4_articles_#{EDITION}.json", __dir__)
+OUT = File.expand_path("../data/necb_8_4_articles_#{EDITION}.json", __dir__)
 
 ARTICLES = if EDITION == '2020'
              [

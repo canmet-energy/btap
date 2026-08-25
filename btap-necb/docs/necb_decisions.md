@@ -117,7 +117,7 @@ audit are drained and archived — see `docs/README.md`.
 - **Who/when:** phylroy, 2026-07-22.
 - **Why:** NRCan is the Crown; NECB copyright is the Government of Canada's.
 - **Evidence:** `NECB_8_4_COVERAGE.html` renders full clause text; cache in
-  `data/necb/necb_8_4_articles_2025.json`. Commit `09c011740`.
+  `data/necb_8_4_articles_2025.json`. Commit `09c011740`.
 
 ## D-02 — Unresolvable space types are a hard error (BREAKING)
 

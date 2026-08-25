@@ -9,11 +9,11 @@
 #
 # Inputs, each independent and joined here:
 #
-#   1. data/necb/necb_8_4_articles_2025.json — every Section 8.4 article's
+#   1. data/necb_8_4_articles_2025.json — every Section 8.4 article's
 #      requirement text, parsed into a sentence/clause tree with strict sanity
 #      checks (scripts/fetch_necb_8_4_text.rb). This is the DENOMINATOR: all 57
 #      articles render, so coverage cannot be overstated by omission.
-#   2. openstudio-*/lib/**/data/necb/*_rules_*.json article_coverage manifests
+#   2. {openstudio,btap}-*/lib/**/data/*_rules_*.json article_coverage manifests
 #      (including the umbrella's), vintage-directionally canonicalized to 2025
 #      numbering.
 #   3. `article:` citations in lib/**/*.rb, classified by the audit call they
@@ -47,8 +47,8 @@ OUT = File.expand_path('../docs/NECB_8_4_COVERAGE.html', __dir__)
 # each vintage part of this document walks its own edition's articles under its
 # own numbers. "Text under a wrong number is worse than no tree."
 CACHES = {
-  '2020' => File.expand_path('../data/necb/necb_8_4_articles_2020.json', __dir__),
-  '2025' => File.expand_path('../data/necb/necb_8_4_articles_2025.json', __dir__)
+  '2020' => File.expand_path('../data/necb_8_4_articles_2020.json', __dir__),
+  '2025' => File.expand_path('../data/necb_8_4_articles_2025.json', __dir__)
 }.freeze
 DISPOSITION = File.expand_path('necb_8_4_disposition.json', __dir__)
 # The gems were extracted OUT of the openstudio-standards fork (2026-08-16), so
@@ -213,7 +213,7 @@ end
 
 def declarations_for(vintage)
   declarations = Hash.new { |h, k| h[k] = [] }
-  Dir.glob(File.join(ROOT, "{openstudio,btap}-*/lib/**/data/necb/*_rules_#{vintage}.json")).sort.each do |path|
+  Dir.glob(File.join(ROOT, "{openstudio,btap}-*/lib/**/data/*_rules_#{vintage}.json")).sort.each do |path|
     data = JSON.parse(File.read(path))
     entries = data.dig('article_coverage', 'articles') or next
     gem_name = manifest_domain(path)

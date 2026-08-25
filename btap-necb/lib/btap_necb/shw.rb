@@ -5,7 +5,7 @@ module BtapNECB
   module SHW
     Costing = BtapCosting::SHW
 
-    DATA_DIR = File.expand_path('shw/data/necb', __dir__)
+    DATA_DIR = File.expand_path('shw/data', __dir__)
 
     def self.rules(vintage)
       @rules ||= {}

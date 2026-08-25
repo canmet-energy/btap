@@ -11,7 +11,7 @@ module BtapNECB
     Constructions = BtapModeling::Constructions
     Costing       = BtapCosting::Envelope
 
-    RULES_DIR = File.expand_path('envelope/data/necb', __dir__)
+    RULES_DIR = File.expand_path('envelope/data', __dir__)
 
     # Load the vendored envelope rules for a vintage ('2020', '2025').
     def self.rules(vintage)

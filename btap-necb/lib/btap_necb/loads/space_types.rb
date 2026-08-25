@@ -1,6 +1,6 @@
 module BtapNECB
   module Loads
-    # Access to the vendored NECB space-type records (data/necb/space_types_<v>.json).
+    # Access to the vendored NECB space-type records (data/space_types_<v>.json).
     # Records are keyed the legacy way: (building_type, space_type) — the pair the
     # OpenStudio SpaceType carries as standardsBuildingType/standardsSpaceType.
     module SpaceTypes

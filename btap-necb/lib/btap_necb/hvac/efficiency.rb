@@ -5,7 +5,7 @@ module BtapNECB
   module HVAC
     # Vintage efficiency application — a faithful, SDK-only port of the NECB subset of
     # openstudio-standards' model_apply_hvac_efficiency_standard, driven entirely by the
-    # vendored data/necb/efficiencies_<vintage>.json (NECB Table 5.2.12.1 values +
+    # vendored data/efficiencies_<vintage>.json (NECB Table 5.2.12.1 values +
     # performance curves).
     #
     # Covered components: hot-water boilers (incl. NECB primary/secondary staging),
