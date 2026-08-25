@@ -1,6 +1,6 @@
 # MCP server configuration — holds live API keys. NEVER commit.
-# The two scripts that read it (openstudio-geometry/scripts/building_stock.rb,
-# openstudio-necb/scripts/fetch_necb_8_4_text.rb) fall back to environment
+# The two scripts that read it (btap-modeling/scripts/building_stock.rb,
+# btap-necb/scripts/fetch_necb_8_4_text.rb) fall back to environment
 # variables, so an absent .mcp.json is a supported configuration.
 .mcp.json
 
@@ -19,7 +19,7 @@
 # committed (it points the oracle's bundle at the shared vendor/ dir), and git
 # cannot re-include a file whose parent directory is excluded.
 /.bundle/
-openstudio-*/.bundle/
+btap-*/.bundle/
 /vendor
 /.venv
 
@@ -68,6 +68,12 @@ audit.json
 audit.txt
 report.json
 
+# CLI run output: btap-compliance defaults -o to ./necb_run_<model> in the
+# CURRENT directory, so runs launched from the repo root land here. The
+# individual-file patterns above happen to cover today's contents; this
+# ignores the DIRECTORY so any future artifact inside it stays invisible too.
+necb_run_*/
+
 *.DS_Store
 
 # Corporate CAs copied off the HOST's trust store by devcontainer.json's
@@ -76,7 +82,7 @@ report.json
 /.devcontainer/certs/
 
 # Windows packaging build output. `rake windows:stage` assembles a COPY of the
-# nine gems' lib/ trees (plus, when OPENSTUDIO_WINDOWS is set, a ~1.1 GB
+# five gems' lib/ trees (plus, when OPENSTUDIO_WINDOWS is set, a ~1.1 GB
 # OpenStudio) — all of it derived, none of it source.
 /packaging/windows/stage/
 /packaging/windows/Output/

@@ -1,7 +1,9 @@
 # CLAUDE.md — btap-necb (the umbrella)
 
-Composes the six SDK-only domain gems (hvac, envelope, loads, lighting, shw,
-geometry) into the full NECB Part 8 determination. **This is the ONLY gem
+The code-compliance layer: every NECB rule as internal domains
+(`envelope/ hvac/ loads/ lighting/ shw/` under `lib/btap_necb/`), composed
+with btap-modeling's authoring machinery and btap-costing into the full
+NECB Part 8 determination. **This is the ONLY gem
 allowed to run EnergyPlus** (pure SDK + `openstudio` CLI — no measures, no
 openstudio-standards). One clone carries both reference transforms; ONE
 AuditLog spans everything.
@@ -107,7 +109,7 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   btap-necb (loads)' record machinery with synthetic archetype records). Named
   for the 8.4.4 *building* archetypes — NOT the 17-building legacy validation
   fleet (see the glossary in `docs/README.md`).
-- `data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
+- `lib/btap_necb/data/necb/necb_rules_{2020,2025}.json` — the umbrella's own
   `article_coverage` manifests (8.4.1.2 determination, 8.4.2.x methods,
   8.4.4.x EUI). Emitted at runtime by `Compliance.emit_article_coverage` at
   the end of every successful run (happy path only — never on crash flush).
@@ -121,8 +123,8 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   (5)/(6) equipment exclusions and the 8.4.2.3.(2) urban-dataset choice — are
   individual scope notes. test_compliance pins the per-sentence entries; match
   coverage articles by PREFIX.
-- `tiers.rb` + `data/eui_targets_2025.json` / `ghg_factors_2025.json` —
-  Section 10 tiers (≤100/75/50/<40% → 1–4, identical 2020/2025), 8.4.4 BET
+- `tiers.rb` + `lib/btap_necb/data/eui_targets_2025.json` /
+  `ghg_factors_2025.json` — Section 10 tiers (≤100/75/50/<40% → 1–4, identical 2020/2025), 8.4.4 BET
   arithmetic, Part 11 GHG levels A–F (provincial factors: ON elec 57.9 g/kWh,
   gas 185).
 - `report.rb` + `report/` — the AHJ HTML report.
@@ -131,6 +133,17 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   SDK-free. Single self-contained file: inline SVG/CSS, no scripts (native
   `<details>` only), no external references — tests enforce this. Goldens in
   `test/goldens/` (`UPDATE_GOLDEN=1` to regenerate).
+
+## Two directories named `data` — the rule
+
+- **`lib/btap_necb/data/`** SHIPS in the gem (`spec.files` is `lib/**/*`):
+  the rules manifests, `decisions.json`, EUI targets, GHG factors — anything
+  the running gem reads.
+- **Gem-root `btap-necb/data/`** is deliberately OUTSIDE `spec.files` and
+  never ships: the MCP-fetched NECB 8.4 article-text caches
+  (`necb_8_4_articles_{2020,2025}.json`), consumed only by the coverage-doc
+  generator scripts. New data goes in the first unless it is script-only
+  input that must never reach a user's install.
 
 ## Key facts / traps
 
@@ -205,7 +218,7 @@ ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 ```
 
 E+ tests skip without the CLI; annual tests use week runs (~1 min each).
-Fixtures shared from `../btap-modeling (authoring) + btap-necb (hvac rules)/test/fixtures`.
+Fixtures shared from `../btap-modeling/test/fixtures`.
 
 `test_legacy_archetype_e2e.rb` generates/caches the 17-building legacy
 archetype fleet against the legacy NECB implementation. It now runs under the

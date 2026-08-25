@@ -16,7 +16,7 @@
 # as `building:` overrides — the same mechanism a real modeller uses.
 #
 # Regenerate with:  ruby btap-necb/scripts/generate_variant_mockups.rb
-# Consumed by:      btap-necb/test/test_variant_mockups.rb
+# Consumed by:      btap-necb/test/test_hvac_variant_mockups.rb
 
 require 'fileutils'
 require 'json'
