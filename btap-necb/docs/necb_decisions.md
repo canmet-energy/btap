@@ -1031,7 +1031,7 @@ kitchen_hood (hood route -> System 4 + article), purchased_energy
 (district heating/cooling -> gas-boiler + air-cooled-chiller
 representations on a storeys-3 sys 6). Generator:
 scripts/generate_variant_mockups.rb -> test/fixtures/variant_mockups/;
-gate: test/test_variant_mockups.rb (8 runs, sizing mode with the CLI,
+gate: test/test_hvac_variant_mockups.rb (8 runs, sizing mode with the CLI,
 :none fallback without). All green including E+ sizing on every mockup.
 
 Finding logged en passant: 'Museum general exhibition area' selects
@@ -2125,8 +2125,8 @@ selector 26/82, classify 6/26, murb 2/8, reference 10/89, reference_hp 3/22,
 hp_election 7/22, hp_plant_fancoils 3/29 all green (notably: NO existing test
 pinned the hotel TTW behavior — the defect was invisible to every suite). The
 adjudicated matrix is vendored as
-`openstudio-hvac/test/fixtures/reference_selection_matrix.json` and pinned by
-`test_reference_selection_matrix.rb` (full rebuild + catalog-vs-scrubbed
+`btap-modeling/test/fixtures/reference_selection_matrix.json` and pinned by
+`test_hvac_reference_selection_matrix.rb` (full rebuild + catalog-vs-scrubbed
 parity; `UPDATE_GOLDEN=1` regenerates).
 
 **Fleet impact [RAN, week sweep, 15/15 PASS]:** zero TTW decisions remain in
