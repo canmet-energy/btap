@@ -10,6 +10,18 @@ a per-storey 2D floor-plan renderer — plus, since the by-nature refactor
 schedule components, `Classify.characterize`, teardown, and the envelope
 authoring pieces (`Constructions`, the exposed-surface census in `Geometry`):
 
+## Layout
+
+```
+lib/btap_modeling/
+  geometry/   wizards, bar engine, footprints, plans, 3D render
+  hvac/       97-system catalog + builders (systems/, components/, data/)
+  envelope/   constructions + surface census
+```
+
+(No lighting/ or shw/: their authoring is NECB-table application and lives
+in btap-necb — see CLAUDE.md.)
+
 ## Footprint wizards
 
 `OpenstudioStandards::Geometry.create_shape_*` ported whole (rectangle,

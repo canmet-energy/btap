@@ -693,7 +693,7 @@
     "gaps": "the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
     "code": [
      "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type",
-     "btap-modeling/lib/btap_modeling/systems/plant_loops.rb#hot_water"
+     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#hot_water"
     ]
    },
    {
@@ -704,7 +704,7 @@
     "gaps": "the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
     "code": [
      "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type",
-     "btap-modeling/lib/btap_modeling/systems/plant_loops.rb#chilled_water"
+     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#chilled_water"
     ]
    },
    {
@@ -796,7 +796,7 @@
     "status": "implemented",
     "how": "hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass",
     "code": [
-     "btap-modeling/lib/btap_modeling/systems/plant_loops.rb#hot_water",
+     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#hot_water",
      "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_boiler"
     ]
    },
@@ -817,7 +817,7 @@
     "status": "implemented",
     "how": "heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
     "code": [
-     "btap-modeling/lib/btap_modeling/components/curves.rb#build",
+     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build",
      "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply"
     ]
    },
@@ -860,7 +860,7 @@
     "status": "implemented",
     "how": "cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
     "code": [
-     "btap-modeling/lib/btap_modeling/components/curves.rb#build",
+     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build",
      "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply"
     ]
    },
@@ -870,7 +870,7 @@
     "status": "implemented",
     "how": "hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor — plant defaults + the efficiency pass",
     "code": [
-     "btap-modeling/lib/btap_modeling/systems/plant_loops.rb#chilled_water",
+     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#chilled_water",
      "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_chiller"
     ]
    },
@@ -969,7 +969,7 @@
     "gaps": "the tower coefficients are not individually verified by the curves probe",
     "code": [
      "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules",
-     "btap-modeling/lib/btap_modeling/components/curves.rb#build"
+     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build"
     ]
    },
    {
@@ -989,7 +989,7 @@
     "how": "a water-LOOP heat pump (internal loop; auxiliary boiler/tower allowed) KEEPS its Table 8.4.5.7.-A selection per the printed split (D-37, Note A-8.4.5.13)",
     "code": [
      "btap-necb/lib/btap_necb/hvac/reference.rb#heat_pump_redirects?",
-     "btap-modeling/lib/btap_modeling/classify.rb#plant_facts"
+     "btap-modeling/lib/btap_modeling/hvac/classify.rb#plant_facts"
     ]
    },
    {
@@ -1148,7 +1148,7 @@
     "how": "Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies — components are constructed, not approximated by thermodynamically-similar substitutes.",
     "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified.",
     "code": [
-     "btap-modeling/lib/btap_modeling/builder.rb#build_system",
+     "btap-modeling/lib/btap_modeling/hvac/builder.rb#build_system",
      "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
     ]
    }

@@ -98,6 +98,6 @@ icons.each do |stem, info|
 end
 out << "    }.freeze\n  end\nend\n"
 
-dest = File.expand_path('../lib/btap_modeling/catalog_icons.rb', __dir__)
+dest = File.expand_path('../lib/btap_modeling/hvac/catalog_icons.rb', __dir__)
 File.write(dest, out)
 warn "\nWrote #{dest} (#{out.bytesize} bytes, #{icons.size} icons, #{MAP.size} idd mappings)"
