@@ -71,12 +71,13 @@ jobs:
                                   btap-necb/docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
 
-  # The Python port (D-79): stdlib-only unittest over python/ — the ported
-  # subpackages' suites plus the cross-language gate (the Python AuditLog vs
-  # the Ruby gem, diffed under verification/compare_runs.py's Leg-B rules).
-  # Bare runner like lint: nothing ported so far needs the SDK, and ruby is
-  # here only to run the cross-language reference script. Runs on every PR —
-  # it is seconds, not container minutes.
+  # The Python port (D-79): unittest over python/ — the ported subpackages'
+  # suites plus the audit cross-language gate (Python AuditLog vs the Ruby
+  # gem, diffed under verification/compare_runs.py's Leg-B rules). Bare
+  # runner, runs on every PR. The wheel is REQUIRED here so the SDK-dependent
+  # suites can never silently skip; the EnergyPlus-dependent tests DO skip on
+  # this runner (no engine, no openstudio CLI) — the `verify` job runs the
+  # whole suite with everything required, cross-language simulation included.
   python:
     runs-on: ubuntu-latest
     steps:
@@ -84,11 +85,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'   # the project floor; local dev may be newer
+          cache: pip
+          cache-dependency-path: python/pyproject.toml
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.2'
-      - name: Python suites (unittest, stdlib-only)
+      - name: Install the openstudio wheel
+        run: pip install -q 'openstudio~=3.11.0'
+      - name: Python suites (SDK required, engine tests skip here)
         working-directory: python
+        env:
+          BTAP_SDK_REQUIRED: '1'
         run: python3 -m unittest discover tests -v
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
@@ -182,6 +189,24 @@ jobs:
         run: cd btap-necb && ruby test/test_decisions_registry.rb
       - name: rake necb:verify
         run: rake necb:verify
+      # The Python port's FULL suite, in the one place that has everything at
+      # once: ruby + the openstudio CLI (the Ruby gems' backend, one half of
+      # every cross-language gate) + the bundled EnergyPlus (the engine the
+      # Python Local backend spawns). The REQUIRED flags turn every
+      # dependency-skip into a failure — this is the job where the
+      # cross-language gates must never go vacuous (D-79).
+      # No wheel download here: the nrel image ships the SAME 3.11.0 Python
+      # bindings at /usr/local/openstudio-3.11.0/Python (identical native lib
+      # under both languages — exactly what a cross-language parity run
+      # wants), and the bundled EnergyPlus is the engine.
+      - name: Python suites, everything required (cross-language gates included)
+        working-directory: python
+        run: |
+          command -v python3 > /dev/null || (apt-get update -qq && apt-get install -y -qq python3)
+          PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 \
+            python3 -m unittest discover tests
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
