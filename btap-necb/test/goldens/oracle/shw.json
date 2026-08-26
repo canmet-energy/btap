@@ -1,0 +1,93 @@
+{
+  "swh": {
+    "heater": {
+      "tank_volume_m3": 0.123900477623,
+      "capacity_w": 6473.799956,
+      "parasitic_w": 24.076937564,
+      "fuel": "NaturalGas"
+    },
+    "water_use": [
+      {
+        "space": "Story 1 Core Space",
+        "peak_flow_m3s": 8.010022475e-06,
+        "schedule": "NECB-A-Service Water Heating"
+      },
+      {
+        "space": "Story 1 East Perimeter Space",
+        "peak_flow_m3s": 1.685350033e-06,
+        "schedule": "NECB-A-Service Water Heating"
+      },
+      {
+        "space": "Story 1 North Perimeter Space",
+        "peak_flow_m3s": 3.869860769e-06,
+        "schedule": "NECB-A-Service Water Heating"
+      },
+      {
+        "space": "Story 1 South Perimeter Space",
+        "peak_flow_m3s": 3.869860769e-06,
+        "schedule": "NECB-A-Service Water Heating"
+      },
+      {
+        "space": "Story 1 West Perimeter Space",
+        "peak_flow_m3s": 1.685350033e-06,
+        "schedule": "NECB-A-Service Water Heating"
+      }
+    ]
+  },
+  "efficiencies": {
+    "Electricity/11000/0.2": {
+      "efficiency": 1.0,
+      "ua_w_k": 2.057142857,
+      "plf_curve": false,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "Electricity/11000/0.3": {
+      "efficiency": 1.0,
+      "ua_w_k": 2.779714286,
+      "plf_curve": false,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "Electricity/40000/0.3": {
+      "efficiency": 1.0,
+      "ua_w_k": 0.016474286,
+      "plf_curve": false,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "NaturalGas/15000/0.1": {
+      "efficiency": 0.82,
+      "ua_w_k": 4.192662725,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "NaturalGas/15000/0.15": {
+      "efficiency": 0.82,
+      "ua_w_k": 4.807274362,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "NaturalGas/20000/0.3": {
+      "efficiency": 0.82,
+      "ua_w_k": 0.837637434,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "NaturalGas/25000/0.4": {
+      "efficiency": 0.82,
+      "ua_w_k": 2.288797769,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "NaturalGas/100000/0.5": {
+      "efficiency": 0.903746104,
+      "ua_w_k": 9.632840058,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    },
+    "FuelOilNo2/15000/0.15": {
+      "efficiency": 0.82,
+      "ua_w_k": 4.807274362,
+      "plf_curve": true,
+      "parasitic_frac_to_tank": 0.8
+    }
+  }
+}

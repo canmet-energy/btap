@@ -1,0 +1,177 @@
+{
+  "Space Function Office enclosed > 25 m2": {
+    "loads": {
+      "people_per_m2": 0.050018171,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 7.502725662,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0003048,
+      "oa_per_person": 0.002539077,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-A-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-A-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-A-Thermostat Setpoint-Heating",
+      "cooling": "NECB-A-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Corridor/Transition area other-sch-A": {
+    "loads": {
+      "people_per_m2": 0.010003634,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": null,
+      "epd_frac_latent": null,
+      "epd_frac_radiant": null,
+      "epd_frac_lost": null,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0003048,
+      "oa_per_person": 0.0,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-A-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-A-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-A-Thermostat Setpoint-Heating",
+      "cooling": "NECB-A-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Dining area - family dining": {
+    "loads": {
+      "people_per_m2": 0.100036342,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 1.000363422,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0009144,
+      "oa_per_person": 0.026660311,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-B-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-B-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-B-Thermostat Setpoint-Heating",
+      "cooling": "NECB-B-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Food preparation area": {
+    "loads": {
+      "people_per_m2": 0.050018171,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 10.003634216,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0006096,
+      "oa_per_person": 0.015234463,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-B-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-B-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-B-Thermostat Setpoint-Heating",
+      "cooling": "NECB-B-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Warehouse storage area medium to bulky palletized items": {
+    "loads": {
+      "people_per_m2": 0.010003634,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 1.000363422,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0003048,
+      "oa_per_person": 0.0,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-A-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-A-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-A-Thermostat Setpoint-Heating",
+      "cooling": "NECB-A-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Classroom/Lecture hall/Training room other": {
+    "loads": {
+      "people_per_m2": 0.13338179,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 5.001817108,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0003048,
+      "oa_per_person": 0.018567002,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-D-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-D-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-D-Thermostat Setpoint-Heating",
+      "cooling": "NECB-D-Thermostat Setpoint-Cooling"
+    }
+  },
+  "Space Function Computer/Server room-sch-A": {
+    "loads": {
+      "people_per_m2": 0.010003634,
+      "people_frac_radiant": 0.3,
+      "epd_w_m2": 200.072684325,
+      "epd_frac_latent": 0.0,
+      "epd_frac_radiant": 0.5,
+      "epd_frac_lost": 0.0,
+      "gas_w_m2": null,
+      "oa_method": "Sum",
+      "oa_per_area": 0.0003048,
+      "oa_per_person": 0.126953862,
+      "oa_ach": 0.0,
+      "infil_per_ext": 0.000250063,
+      "infil_per_wall": null,
+      "infil_ach": null,
+      "occ_sch": "NECB-A-Occupancy",
+      "act_sch": "NECB-Activity",
+      "equip_sch": "NECB-A-Electric-Equipment"
+    },
+    "thermostat": {
+      "heating": "NECB-A-Thermostat Setpoint-Heating",
+      "cooling": "NECB-A-Thermostat Setpoint-Cooling"
+    }
+  }
+}
