@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # P1 gate: the vendored NECB loads data is structurally sound, equals the legacy
 # MERGED runtime tables, and matches MCP-verified code values.
@@ -129,16 +130,13 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_structural_equality_vs_legacy_merged_tables
-    begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-    rescue LoadError => e
-      msg = "legacy oracle not bundled (run under BUNDLE_GEMFILE=legacy_pin/Gemfile): #{e.message[0, 60]}"
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-    legacy = Standard.build('NECB2020').standards_data
-    assert_equal legacy['tables']['space_types']['table'], space_types,
+    std = OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
+    # The runtime deep-merged legacy tables, via the probe the Leg-C golden
+    # exporter also freezes (D-78).
+    legacy = OracleProbes::Loads.merged_tables(std)
+    assert_equal legacy['space_types'], space_types,
                  'vendored space types == legacy MERGED runtime table'
-    assert_equal legacy['tables']['schedules']['table'], schedules,
+    assert_equal legacy['schedules'], schedules,
                  'vendored schedules == legacy MERGED runtime table'
   end
 end

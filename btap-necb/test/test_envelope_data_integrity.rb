@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # P1 gate: the vendored rules data is complete, internally consistent, provenance-
 # tagged, and structurally identical to the legacy openstudio-standards data (2020).
@@ -77,17 +78,15 @@ class TestDataIntegrity < Minitest::Test
   end
 
   def test_2020_matches_legacy_surface_thermal_transmittance
-    rel = 'lib/openstudio-standards/standards/necb/NECB2020/data/surface_thermal_transmittance.json'
-    # Prefer the PINNED oracle checkout (legacy_pin/Gemfile) when bundled;
-    # fall back to the in-tree copy so this data lint still runs bare.
-    pinned = Gem.loaded_specs['openstudio-standards']&.full_gem_path
-    legacy_path = pinned ? File.join(pinned, rel) : File.expand_path("../../#{rel}", __dir__)
-    unless File.exist?(legacy_path)
-      msg = "legacy data not present at #{legacy_path}"
+    # The pinned oracle's data file, via the probe the Leg-C golden exporter
+    # also freezes (D-78).
+    pinned = OracleProbes::Access.pin_root
+    legacy = pinned && OracleProbes::Envelope.u_table(pinned)
+    if legacy.nil?
+      msg = 'legacy U-table not present (run under BUNDLE_GEMFILE=legacy_pin/Gemfile)'
       ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
     end
 
-    legacy = JSON.parse(File.read(legacy_path))['tables']['surface_thermal_transmittance']['table']
     gem_u = BtapNECB::Envelope.rules('2020')['u_values']
     assert_equal legacy, gem_u, 'vendored 2020 U-values must equal legacy data structurally'
   end

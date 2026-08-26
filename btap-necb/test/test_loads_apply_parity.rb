@@ -1,39 +1,19 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # P3 gate (parity half): per-object load values match legacy
 # space_type_apply_internal_loads(set_lights: false) + schedule/thermostat applies
 # on identically tagged models, across several space types (occupancy-heavy,
 # ventilation-ACH, gas-equipment). Runs under the repo bundle.
+# Oracle-side signatures come from OracleProbes::Loads.apply — the same
+# function the Leg-C golden exporter freezes (D-78).
 class TestApplyParity < Minitest::Test
   include FixtureHelper
 
-  PAIRS = [
-    ['Space Function', 'Office enclosed > 25 m2'],
-    ['Space Function', 'Corridor/Transition area other-sch-A'],
-    ['Space Function', 'Dining area - family dining'],
-    ['Space Function', 'Food preparation area'],
-    ['Space Function', 'Warehouse storage area medium to bulky palletized items'],
-    ['Space Function', 'Classroom/Lecture hall/Training room other'],
-    ['Space Function', 'Computer/Server room-sch-A']
-  ].freeze
-
-  def self.legacy
-    @legacy ||= begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-      Standard.build('NECB2020')
-    rescue LoadError, StandardError => e
-      warn "legacy parity skipped: #{e.class}: #{e.message[0, 80]}"
-      :unavailable
-    end
-  end
+  PAIRS = OracleProbes::Loads::PAIRS
 
   def legacy
-    std = self.class.legacy
-    if std == :unavailable
-      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-    std
+    OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
   end
 
   def existing_pairs
@@ -53,40 +33,8 @@ class TestApplyParity < Minitest::Test
     model
   end
 
-  def optional_f(value)
-    value.is_initialized ? value.get.round(9) : nil
-  end
-
-  def signature(space_type)
-    people = space_type.people.first
-    equip = space_type.electricEquipment.first
-    gas = space_type.gasEquipment.first
-    dsoa = space_type.designSpecificationOutdoorAir
-    infiltration = space_type.spaceInfiltrationDesignFlowRates.first
-    schedule_set = space_type.defaultScheduleSet
-    {
-      people_per_m2: people ? optional_f(people.peopleDefinition.peopleperSpaceFloorArea) : nil,
-      people_frac_radiant: people ? people.peopleDefinition.fractionRadiant.round(9) : nil,
-      epd_w_m2: equip ? optional_f(equip.electricEquipmentDefinition.wattsperSpaceFloorArea) : nil,
-      epd_frac_latent: equip ? equip.electricEquipmentDefinition.fractionLatent.round(9) : nil,
-      epd_frac_radiant: equip ? equip.electricEquipmentDefinition.fractionRadiant.round(9) : nil,
-      epd_frac_lost: equip ? equip.electricEquipmentDefinition.fractionLost.round(9) : nil,
-      gas_w_m2: gas ? optional_f(gas.gasEquipmentDefinition.wattsperSpaceFloorArea) : nil,
-      oa_method: dsoa.is_initialized ? dsoa.get.outdoorAirMethod : nil,
-      oa_per_area: dsoa.is_initialized ? dsoa.get.outdoorAirFlowperFloorArea.round(9) : nil,
-      oa_per_person: dsoa.is_initialized ? dsoa.get.outdoorAirFlowperPerson.round(9) : nil,
-      oa_ach: dsoa.is_initialized ? dsoa.get.outdoorAirFlowAirChangesperHour.round(9) : nil,
-      infil_per_ext: infiltration ? optional_f(infiltration.flowperExteriorSurfaceArea) : nil,
-      infil_per_wall: infiltration ? optional_f(infiltration.flowperExteriorWallArea) : nil,
-      infil_ach: infiltration ? optional_f(infiltration.airChangesperHour) : nil,
-      occ_sch: schedule_set.is_initialized ? optional_name(schedule_set.get.numberofPeopleSchedule) : nil,
-      act_sch: schedule_set.is_initialized ? optional_name(schedule_set.get.peopleActivityLevelSchedule) : nil,
-      equip_sch: schedule_set.is_initialized ? optional_name(schedule_set.get.electricEquipmentSchedule) : nil
-    }
-  end
-
   def optional_name(optional)
-    optional.is_initialized ? optional.get.nameString : nil
+    OracleProbes::Signatures.optional_name(optional)
   end
 
   def test_per_object_parity
@@ -97,20 +45,14 @@ class TestApplyParity < Minitest::Test
     gem_model = tagged_model(pairs)
     BtapNECB::Loads.apply_loads(gem_model, vintage: '2020')
 
-    legacy_model = tagged_model(pairs)
-    legacy_model.getSpaceTypes.sort_by(&:nameString).each do |space_type|
-      std.space_type_apply_internal_loads(space_type: space_type, set_lights: false)
-      std.space_type_apply_internal_load_schedules(space_type, set_lights: false)
-      std.space_type_apply_thermostat_schedules(space_type)
-    end
+    legacy_signatures = OracleProbes::Loads.apply(std, pairs)
 
     mismatches = []
     pairs.each do |building_type, space_type_name|
       full = "#{building_type} #{space_type_name}"
       gem_st = gem_model.getSpaceTypes.find { |s| s.nameString == full }
-      legacy_st = legacy_model.getSpaceTypes.find { |s| s.nameString == full }
-      gem_signature = signature(gem_st)
-      legacy_signature = signature(legacy_st)
+      gem_signature = OracleProbes::Signatures.loads_signature(gem_st)
+      legacy_signature = legacy_signatures.fetch(full)['loads']
       next if gem_signature == legacy_signature
 
       diff = gem_signature.keys.select { |k| gem_signature[k] != legacy_signature[k] }
@@ -123,12 +65,12 @@ class TestApplyParity < Minitest::Test
     pairs.each do |building_type, space_type_name|
       full = "#{building_type} #{space_type_name} Thermostat"
       gem_t = gem_model.getThermostatSetpointDualSetpoints.find { |t| t.nameString == full }
-      legacy_t = legacy_model.getThermostatSetpointDualSetpoints.find { |t| t.nameString == full }
+      legacy_t = legacy_signatures.fetch("#{building_type} #{space_type_name}")['thermostat']
       refute_nil gem_t, full
       refute_nil legacy_t, full
-      assert_equal optional_name(legacy_t.heatingSetpointTemperatureSchedule),
+      assert_equal legacy_t['heating'],
                    optional_name(gem_t.heatingSetpointTemperatureSchedule), full
-      assert_equal optional_name(legacy_t.coolingSetpointTemperatureSchedule),
+      assert_equal legacy_t['cooling'],
                    optional_name(gem_t.coolingSetpointTemperatureSchedule), full
     end
   end
