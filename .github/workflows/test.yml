@@ -206,6 +206,7 @@ jobs:
             btap-necb/test_lighting_lights_parity.rb \
             btap-necb/test_lighting_daylighting_parity.rb \
             btap-necb/test_lighting_costing.rb \
+            btap-necb/test_oracle_goldens_current.rb \
           ; do
             gem_dir="${t%%/*}"; file="${t##*/}"
             echo "::group::$t"
