@@ -74,6 +74,14 @@ report.json
 # ignores the DIRECTORY so any future artifact inside it stays invisible too.
 necb_run_*/
 
+# The Python port (python/) + the verification harness's interpreter droppings
+__pycache__/
+*.pyc
+python/.venv/
+python/*.egg-info/
+python/build/
+python/dist/
+
 *.DS_Store
 
 # Corporate CAs copied off the HOST's trust store by devcontainer.json's

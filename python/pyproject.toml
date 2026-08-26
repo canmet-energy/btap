@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "btap"
+version = "0.1.0.dev0"
+description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "LGPL-3.0-or-later" }
+# The SDK: same SWIG layer as the Ruby gems, published on PyPI by NREL.
+# btap.audit needs none of it; simulation/modeling/costing/necb do.
+dependencies = ["openstudio~=3.11.0"]
+
+[tool.setuptools.packages.find]
+include = ["btap*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# The D-77 one-way dependency arrows, enforced in-package (one distribution,
+# five subpackages): necb -> costing -> modeling -> audit; simulation beside.
+[tool.importlinter]
+root_package = "btap"
+
+[[tool.importlinter.contracts]]
+name = "family dependency direction (D-77)"
+type = "layers"
+layers = ["btap.necb", "btap.costing", "btap.modeling", "btap.audit"]
+
+[[tool.importlinter.contracts]]
+name = "simulation depends only on audit"
+type = "forbidden"
+source_modules = ["btap.simulation"]
+forbidden_modules = ["btap.modeling", "btap.costing", "btap.necb"]
+
+[[tool.importlinter.contracts]]
+name = "audit is SDK-free and bottom of the family"
+type = "forbidden"
+source_modules = ["btap.audit"]
+forbidden_modules = ["openstudio", "btap.simulation", "btap.modeling", "btap.costing", "btap.necb"]
