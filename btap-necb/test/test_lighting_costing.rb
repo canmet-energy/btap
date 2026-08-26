@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # P4 gate: lighting fixture costing on real spaces — set matching, height bins,
 # zone multipliers, loud daylighting note, and legacy parity where callable.
@@ -75,47 +76,15 @@ class TestCosting < Minitest::Test
   end
 
   def test_legacy_parity_led_2020
-    begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-      legacy_dir = File.join(Gem.loaded_specs['openstudio-standards'].full_gem_path,
-                             'lib/openstudio-standards/btap')
-      # PR #2120 renamed these: btap/common_paths -> btap/paths,
-      # btap/costing/btap_database -> btap/costing/database, and the classes
-      # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
-      require File.join(legacy_dir, 'paths')
-      require File.join(legacy_dir, 'costing/database')
-      require File.join(legacy_dir, 'costing/btap_costing')
-      require File.join(legacy_dir, 'costing/lighting_costing')
-      require File.join(legacy_dir, 'costing/led_lighting_costing')
-      require File.join(legacy_dir, 'costing/daylighting_sensor_control_costing')
-    rescue LoadError, StandardError => e
-      msg = "legacy oracle not bundled (run under BUNDLE_GEMFILE=legacy_pin/Gemfile): #{e.message[0, 60]}"
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-
-    # legacy needs the sorted-accessor monkeypatches from attributes.rb
-    OpenStudio::Model::Model.class_eval do
-      define_method(:getThermalZonesSorted) { getThermalZones.sort_by { |z| z.name.get } }
-    end
-    OpenStudio::Model::ThermalZone.class_eval do
-      define_method(:getSpacesSorted) { spaces.sort_by { |s| s.name.get } }
-    end
+    # Oracle acquisition + stubs live in OracleProbes (the same code the
+    # Leg-C golden exporter freezes, D-78).
+    coster = OracleProbes::Access.gate!(self, OracleProbes::Access.lighting_coster)
+    std = OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
 
     model = costed_fixture_model(lights_type: 'LED') # NECB2020 template => legacy forces LED
     model.getBuilding.setStandardsTemplate('NECB2020')
 
-    coster = BTAP::Costing.allocate
-    coster.instance_variable_set(:@costing_database, BTAP::Database.instance)
-    coster.instance_variable_set(:@costing_report,
-                                 { 'province_state' => PROVINCE, 'city' => CITY,
-                                   'lighting' => {} })
-    coster.instance_variable_set(:@cost_items, [])
-    def coster.add_costed_item(**_kwargs); end
-    def coster.cost_audit_daylighting_sensor_control(model:, prototype_creator:); 0.0; end
-    def coster.cost_audit_led_lighting(model:, prototype_creator:); 0.0; end
-
-    prototype = Standard.build('NECB2020')
-    legacy_total = coster.cost_audit_lighting(model, prototype)
+    legacy_total = OracleProbes::Costing.lighting_total(coster, std, model, PROVINCE, CITY)
 
     gem_report = BtapNECB::Lighting.cost(model, vintage: '2020', city: CITY, province_state: PROVINCE)
     assert_in_delta legacy_total, gem_report.total, [legacy_total.abs * 0.001, 0.05].max,

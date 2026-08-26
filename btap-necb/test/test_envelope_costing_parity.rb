@@ -1,84 +1,52 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # Costing parity vs legacy BTAP: (1) the interpolator, (2) cost_construction dollar
 # math across EVERY constructions.json candidate, (3) per-surface RSI convention vs
 # TBD.rsi. Runs under the repo bundle (openstudio-standards + tbd); skips standalone.
+# Oracle-side values come from OracleProbes::Costing — the same functions the
+# Leg-C golden exporter freezes (D-78).
 class TestCostingParity < Minitest::Test
   include FixtureHelper
 
   CITY = 'TORONTO'.freeze
   PROVINCE = 'ONTARIO'.freeze
 
-  def self.legacy
-    @legacy ||= begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-      # BTAP sub-files are required BY PATH inside the oracle — resolve the
-      # oracle's own root (the pinned checkout), never this repo's lib/.
-      legacy_root = Gem.loaded_specs['openstudio-standards'].full_gem_path
-      legacy_dir = File.join(legacy_root, 'lib/openstudio-standards/btap')
-      # PR #2120 renamed these: btap/common_paths -> btap/paths,
-      # btap/costing/btap_database -> btap/costing/database, and the classes
-      # BTAPCosting/BTAPDatabase are now BTAP::Costing / BTAP::Database.
-      require File.join(legacy_dir, 'paths')
-      require File.join(legacy_dir, 'costing/database')
-      require File.join(legacy_dir, 'costing/btap_costing')
-      require File.join(legacy_dir, 'costing/envelope_costing')
-      require File.join(legacy_dir, 'linear_regression')
-      coster = BTAP::Costing.allocate
-      coster.instance_variable_set(:@costing_database, BTAP::Database.instance)
-      coster
-    rescue LoadError, StandardError => e
-      warn "legacy costing parity skipped: #{e.class}: #{e.message[0, 100]}"
-      :unavailable
-    end
-  end
-
   def legacy
-    coster = self.class.legacy
-    if coster == :unavailable
-      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-    coster
+    OracleProbes::Access.gate!(self, OracleProbes::Access.coster)
   end
 
   def test_interpolate_parity
     legacy
-    points_sets = [
-      [[1.0, 10.0], [2.0, 20.0], [4.0, 30.0]],
-      [[0.5, 100.0], [0.9, 90.0], [1.7, 260.0], [3.2, 410.0]],
-      [[2.0, 55.5]]
-    ]
-    xs = [0.4, 0.5, 0.55, 0.99, 1.0, 1.5, 2.0, 3.05, 3.99, 4.0, 4.05, 4.2, 9.0]
+    legacy_values = OracleProbes::Costing.interpolations
     mismatches = []
-    points_sets.each do |points|
-      xs.each do |x|
-        legacy_value, = BTAP::LinearRegression.interpolate(x_y_array: points.map(&:dup), x2: x)
+    OracleProbes::Costing::INTERPOLATE_POINT_SETS.each_with_index do |points, set_index|
+      OracleProbes::Costing::INTERPOLATE_XS.each do |x|
+        legacy_value = legacy_values.fetch("#{set_index}/#{x}")
         gem_value = BtapCosting::Envelope::Interpolate.interpolate(x_y_array: points.map(&:dup), x2: x).value
-        mismatches << [points.first, x, legacy_value, gem_value] unless (legacy_value.to_f - gem_value).abs < 1e-9
+        mismatches << [points.first, x, legacy_value, gem_value] unless (legacy_value - gem_value).abs < 1e-9
       end
     end
-    BTAP::LinearRegression.extrapolation_boundaries_exceeded? # reset legacy sticky flag
     assert_empty mismatches, "interpolate mismatches: #{mismatches.inspect[0, 400]}"
   end
 
   def test_cost_construction_parity_every_candidate
     coster = legacy
     database = BtapCosting::Envelope::Database.new
+    legacy_costs = OracleProbes::Costing.construction_costs(coster, database, PROVINCE, CITY)
     checked = 0
     mismatches = []
 
     database.constructions.each do |sheet, assemblies|
       assemblies.each_key do |assembly|
         database.construction_candidates(sheet, assembly).each do |rsi, construction|
-          legacy_hash = { 'type' => construction['type'], 'id_layers' => construction['id_layers'].dup }
-          coster.cost_construction(legacy_hash, PROVINCE, CITY)
+          legacy_cost = legacy_costs.fetch("#{sheet}/#{assembly}/#{rsi.round(3)}")
           gem_cost = BtapCosting::Envelope::EnvelopeCosts.construction_cost(
             database, construction, PROVINCE, CITY)
           checked += 1
-          next if (legacy_hash['cost'] - gem_cost).abs < 0.011 # per-layer cent rounding
+          next if (legacy_cost - gem_cost).abs < 0.011 # per-layer cent rounding
 
-          mismatches << [sheet, assembly, rsi.round(3), legacy_hash['cost'], gem_cost]
+          mismatches << [sheet, assembly, rsi.round(3), legacy_cost, gem_cost]
         end
       end
     end
@@ -89,7 +57,6 @@ class TestCostingParity < Minitest::Test
 
   def test_rsi_parity_vs_tbd
     legacy
-    require 'tbd'
     model = load_raw_fixture
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
                                                 audit: BtapNECB::AuditLog.new)
@@ -98,46 +65,30 @@ class TestCostingParity < Minitest::Test
     BtapNECB::Envelope.apply_prescriptive(model, vintage: '2020', hdd: 3890,
                                                 audit: BtapNECB::AuditLog.new)
 
+    legacy_rsi = OracleProbes::Costing.tbd_rsi(model)
     mismatches = []
-    model.getSurfaces.sort_by(&:nameString).each do |surface|
-      next if surface.construction.empty? || surface.construction.get.to_LayeredConstruction.empty?
-      next unless surface.outsideBoundaryCondition == 'Outdoors' ||
-                  BtapCosting::Envelope::Quantify::GROUND_BOUNDARIES.include?(surface.outsideBoundaryCondition)
-
-      lc = surface.construction.get.to_LayeredConstruction.get
-      legacy_rsi = TBD.rsi(lc, surface.filmResistance)
+    legacy_rsi['surfaces'].each do |name, l|
+      surface = model.getSurfaces.find { |s| s.nameString == name }
       gem_rsi = BtapCosting::Envelope::Quantify.rsi_of(surface, film: true)
-      mismatches << [surface.nameString, legacy_rsi, gem_rsi] unless (legacy_rsi - gem_rsi).abs < 1e-6
+      mismatches << [name, l, gem_rsi] unless (l - gem_rsi).abs < 1e-6
     end
-    model.getSubSurfaces.sort_by(&:nameString).each do |sub|
-      next if sub.construction.empty? || sub.construction.get.to_LayeredConstruction.empty?
-
-      lc = sub.construction.get.to_LayeredConstruction.get
-      legacy_rsi = TBD.rsi(lc, 0)
+    legacy_rsi['sub_surfaces'].each do |name, l|
+      sub = model.getSubSurfaces.find { |s| s.nameString == name }
       gem_rsi = BtapCosting::Envelope::Quantify.rsi_of(sub, film: false)
-      mismatches << [sub.nameString, legacy_rsi, gem_rsi] unless (legacy_rsi - gem_rsi).abs < 1e-6
+      mismatches << [name, l, gem_rsi] unless (l - gem_rsi).abs < 1e-6
     end
     assert_empty mismatches, "RSI mismatches vs TBD.rsi: #{mismatches.inspect[0, 400]}"
   end
 
   def test_tb_material_quantities_parity
     legacy
-    tallies = { 'parapet' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 100.0 },
-                'jamb' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 50.0 },
-                'sill' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 25.0 },
-                'rimjoist' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 30.0 },
-                'transition' => { 'BTAP-ExteriorWall-SteelFramed-1 good' => 500.0 } }
-    legacy_quantities = BTAP::BridgingData.get_material_quantities_for_edges(tallies)
+    legacy_quantities = OracleProbes::Costing.tb_material_quantities
     database = BtapCosting::Envelope::Database.new
     gem_quantities, = BtapCosting::Envelope::ThermalBridgingCosts.material_quantities(
-      tallies, database, nil)
+      OracleProbes::Costing::TB_TALLIES, database, nil)
     legacy_quantities.each do |id, qty|
       assert_in_delta qty, gem_quantities[id.to_s], 1e-9, "material #{id} quantity"
     end
-    assert_equal legacy_quantities.keys.sort, gem_quantities.keys.sort
-  rescue NameError
-    # BridgingData needs the tbd-dependent bridging.rb; load it explicitly
-    require File.join(Gem.loaded_specs['openstudio-standards'].full_gem_path, 'lib/openstudio-standards/btap/bridging')
-    retry
+    assert_equal legacy_quantities.keys.sort, gem_quantities.keys.map(&:to_s).sort
   end
 end

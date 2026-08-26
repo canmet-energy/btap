@@ -1,28 +1,16 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # P3 gate (parity half): resulting PER-SURFACE construction conductances match legacy
 # apply_standard_construction_properties (mechanism-agnostic — legacy rewrites default
 # construction sets via BTAP; the gem hard-assigns). Skips without openstudio-standards.
+# Oracle-side values come from OracleProbes::Envelope.prescriptive — the same
+# function the Leg-C golden exporter freezes (D-78).
 class TestPrescriptiveParity < Minitest::Test
   include FixtureHelper
 
-  def self.legacy_standard
-    @legacy_standard ||= begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-      Standard.build('NECB2020')
-    rescue LoadError, StandardError => e
-      warn "legacy parity skipped: #{e.class}: #{e.message[0, 80]}"
-      :unavailable
-    end
-  end
-
   def legacy
-    std = self.class.legacy_standard
-    if std == :unavailable
-      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-    std
+    OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
   end
 
   # The BTAP-Mass default set in this repo lacks a few subsurface constructions
@@ -49,28 +37,18 @@ class TestPrescriptiveParity < Minitest::Test
     end
   end
 
-  def surface_conductances(model)
-    model.getSurfaces.sort_by(&:nameString).filter_map do |s|
-      next unless %w[Outdoors Ground Foundation].include?(s.outsideBoundaryCondition)
-      # D-32: ground FLOORS excluded — legacy BTAP retargets them to the Table
-      # 3.2.3.1 strip value over the FULL area; the gem implements the printed
-      # zone-conditional rule (perimeter strip only below zone 8), an
-      # intentional divergence verified against the code text via MCP.
-      next if s.isGroundSurface && s.surfaceType == 'Floor'
-      next if s.construction.empty? || s.construction.get.to_Construction.empty?
-
-      [s.nameString, s.construction.get.to_Construction.get.thermalConductance.to_f.round(4)]
-    end.to_h
+  def legacy_prescriptive
+    @legacy_prescriptive ||= OracleProbes::Envelope.prescriptive(
+      legacy,
+      attach_weather!(load_raw_fixture),
+      attach_weather!(load_raw_fixture),
+      subsurface_patch: method(:complete_default_subsurface_set!)
+    )
   end
 
   def test_per_surface_conductance_parity
     std = legacy
-
-    legacy_model = attach_weather!(load_raw_fixture)
-    std.model_add_constructions(legacy_model)
-    complete_default_subsurface_set!(legacy_model)
-    std.apply_standard_construction_properties(model: legacy_model)
-    legacy_c = surface_conductances(legacy_model)
+    legacy_c = legacy_prescriptive['conductances']
 
     gem_model = attach_weather!(load_raw_fixture)
     # same starting constructions as the legacy path so base assemblies match.
@@ -80,7 +58,7 @@ class TestPrescriptiveParity < Minitest::Test
     # matching the OSut path the NECB2020 prototypes actually use).
     std.model_add_constructions(gem_model)
     BtapNECB::Envelope.apply_prescriptive(gem_model, vintage: '2020', include_films: false)
-    gem_c = surface_conductances(gem_model)
+    gem_c = OracleProbes::Signatures.surface_conductances(gem_model)
 
     mismatches = legacy_c.keys.filter_map do |name|
       l = legacy_c[name]
@@ -93,18 +71,14 @@ class TestPrescriptiveParity < Minitest::Test
 
   def test_fdwr_area_parity
     std = legacy
-
-    legacy_model = attach_weather!(load_raw_fixture)
-    std.model_add_constructions(legacy_model)
-    std.apply_standard_window_to_wall_ratio(model: legacy_model) # -1 default = NECB max
-    legacy_census = BtapModeling::Geometry.exposed_walls(legacy_model)
+    legacy_fdwr = legacy_prescriptive['fdwr']
 
     gem_model = attach_weather!(load_raw_fixture)
     std.model_add_constructions(gem_model)
     BtapNECB::Envelope.apply_prescriptive(gem_model, vintage: '2020', apply_fdwr: true)
     gem_census = BtapModeling::Geometry.exposed_walls(gem_model)
 
-    assert_in_delta legacy_census[:fdwr], gem_census[:fdwr], 0.01,
+    assert_in_delta legacy_fdwr, gem_census[:fdwr], 0.01,
                     'FDWR after mutation matches legacy apply_max_fdwr_nrcan'
   end
 end

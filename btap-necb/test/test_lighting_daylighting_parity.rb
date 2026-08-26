@@ -1,28 +1,17 @@
 require_relative 'test_helper'
+require_relative 'support/oracle_probes'
 
 # Daylighted-area geometry parity vs legacy get_parameters_sidelighting /
 # get_parameters_skylight, plus NECB_Default selection parity vs
 # model_add_daylighting_controls. Repo bundle only.
+# Oracle-side values come from OracleProbes::Lighting — the same functions
+# the Leg-C golden exporter freezes (D-78; the parametric cases are keyed by
+# their build parameters, so goldens reproduce the exact geometry).
 class TestDaylightingParity < Minitest::Test
   include FixtureHelper
 
-  def self.legacy
-    @legacy ||= begin
-      require 'openstudio-standards' # the PINNED oracle (legacy_pin/Gemfile)
-      Standard.build('NECB2020')
-    rescue LoadError, StandardError => e
-      warn "legacy parity skipped: #{e.class}: #{e.message[0, 80]}"
-      :unavailable
-    end
-  end
-
   def legacy
-    std = self.class.legacy
-    if std == :unavailable
-      msg = 'legacy oracle not bundled — run under BUNDLE_GEMFILE=legacy_pin/Gemfile'
-      ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-    end
-    std
+    OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
   end
 
   def add_surface(model, space, points, type)
@@ -75,14 +64,6 @@ class TestDaylightingParity < Minitest::Test
     [model, space, floor]
   end
 
-  def legacy_sidelighting(std, space, floor)
-    floor_vertices = [floor.vertices]
-    std.get_parameters_sidelighting(daylight_space: space, floor_surface: floor,
-                                    floor_vertices: floor_vertices, floor_area: floor.netArea,
-                                    primary_sidelighted_area: 0.0, area_weighted_vt_handle: 0.0,
-                                    window_area_sum: 0.0)
-  end
-
   def test_sidelighting_area_parity
     std = legacy
     cases = [
@@ -92,7 +73,7 @@ class TestDaylightingParity < Minitest::Test
     ]
     cases.each_with_index do |c, index|
       model, space, floor = build_case(**c)
-      legacy_psa, legacy_vt, legacy_win = legacy_sidelighting(std, space, floor)
+      legacy_psa, legacy_vt, legacy_win = OracleProbes::Lighting.sidelighting(std, space, floor)
       gem = BtapNECB::Lighting::Daylighting.sidelighting_parameters(space)
       assert_in_delta legacy_psa, gem[:area_m2], 1e-9, "case #{index}: primary sidelighted area"
       assert_in_delta legacy_vt, gem[:vt_handle], 1e-9, "case #{index}: VT handle"
@@ -105,9 +86,7 @@ class TestDaylightingParity < Minitest::Test
     # skylight + window: the window loop re-computes the width/length, then the
     # area is accumulated ONCE (#2119 moved the accumulation out of that loop).
     model, space, = build_case(window: [2.0, 6.0, 0.8, 2.5], skylight: [4.0, 6.0, 3.0, 5.0])
-    legacy_area, legacy_vt, legacy_sum = std.get_parameters_skylight(
-      daylight_space: space, skylight_area_weighted_vt_handle: 0.0,
-      skylight_area_sum: 0.0, daylighted_under_skylight_area: 0.0)
+    legacy_area, legacy_vt, legacy_sum = OracleProbes::Lighting.skylight(std, space)
     gem = BtapNECB::Lighting::Daylighting.skylight_parameters(space)
     assert_in_delta legacy_area, gem[:area_m2], 1e-9, 'daylighted area under skylight'
     assert_in_delta legacy_vt, gem[:vt_handle], 1e-9
@@ -117,9 +96,7 @@ class TestDaylightingParity < Minitest::Test
     # (the accumulator sat inside the exterior-window loop). #2119 fixed legacy;
     # the quarantine port mirrors it, so both are now NONZERO and equal.
     model2, space2, = build_case(skylight: [4.0, 6.0, 3.0, 5.0])
-    legacy_area2, legacy_vt2, legacy_sum2 = std.get_parameters_skylight(
-      daylight_space: space2, skylight_area_weighted_vt_handle: 0.0,
-      skylight_area_sum: 0.0, daylighted_under_skylight_area: 0.0)
+    legacy_area2, legacy_vt2, legacy_sum2 = OracleProbes::Lighting.skylight(std, space2)
     gem2 = BtapNECB::Lighting::Daylighting.skylight_parameters(space2)
     assert_operator legacy_area2, :>, 0.0, 'post-#2119 legacy: a skylight-only space has a real daylighted area'
     assert_in_delta legacy_area2, gem2[:area_m2], 1e-9, 'skylight-only daylighted area tracks fixed legacy'
@@ -140,7 +117,7 @@ class TestDaylightingParity < Minitest::Test
     wall.setWindowToWallRatio(0.4)
     gem_model = legacy_model.clone(true).to_Model
 
-    std.model_add_daylighting_controls(model: legacy_model, daylighting_type: 'NECB_Default')
+    legacy_controls = OracleProbes::Lighting.daylighting_controls(std, legacy_model)
     audit = BtapNECB::AuditLog.new
     # placement: :necb2011 names the legacy rule explicitly — neither of the
     # other two placements does what legacy does (:all is the blanket default of
@@ -149,8 +126,7 @@ class TestDaylightingParity < Minitest::Test
     created = BtapNECB::Lighting.add_daylighting_controls(gem_model, vintage: '2020',
                                                           placement: :necb2011, audit: audit)
 
-    legacy_controls = legacy_model.getDaylightingControls
-    gem_controls = gem_model.getDaylightingControls
+    gem_controls = OracleProbes::Signatures.daylighting_controls_signature(gem_model)
 
     assert_operator legacy_controls.size, :>, 0,
                     'post-#2119 legacy premise: the 2011 criteria DO place controls on this fixture'
@@ -159,16 +135,15 @@ class TestDaylightingParity < Minitest::Test
 
     # Same spaces, same sensor positions (legacy puts one sensor at the centre
     # of the lowest-floor bounding box, 0.8 m up).
-    assert_equal legacy_controls.map(&:nameString).sort, gem_controls.map(&:nameString).sort,
+    assert_equal legacy_controls.map { |c| c['name'] }.sort, gem_controls.map { |c| c['name'] }.sort,
                  'controls land on the same spaces'
-    legacy_pos = legacy_controls.to_h { |c| [c.nameString, [c.positionXCoordinate, c.positionYCoordinate, c.positionZCoordinate]] }
+    legacy_pos = legacy_controls.to_h { |c| [c['name'], [c['x'], c['y'], c['z']]] }
     gem_controls.each do |control|
-      expected = legacy_pos[control.nameString]
+      expected = legacy_pos[control['name']]
       %w[x y z].each_with_index do |axis, i|
-        actual = [control.positionXCoordinate, control.positionYCoordinate, control.positionZCoordinate][i]
-        assert_in_delta expected[i], actual, 1e-9, "#{control.nameString}: sensor #{axis} position"
+        assert_in_delta expected[i], control[axis], 1e-9, "#{control['name']}: sensor #{axis} position"
       end
-      assert_equal 'Stepped', control.lightingControlType
+      assert_equal 'Stepped', control['control_type']
     end
 
     # #2119 replaced legacy's exact 'Office - enclosed' comparison with
