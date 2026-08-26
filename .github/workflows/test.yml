@@ -71,6 +71,26 @@ jobs:
                                   btap-necb/docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
 
+  # The Python port (D-79): stdlib-only unittest over python/ — the ported
+  # subpackages' suites plus the cross-language gate (the Python AuditLog vs
+  # the Ruby gem, diffed under verification/compare_runs.py's Leg-B rules).
+  # Bare runner like lint: nothing ported so far needs the SDK, and ruby is
+  # here only to run the cross-language reference script. Runs on every PR —
+  # it is seconds, not container minutes.
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'   # the project floor; local dev may be newer
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+      - name: Python suites (unittest, stdlib-only)
+        working-directory: python
+        run: python3 -m unittest discover tests -v
+
   # Everything that needs `require "openstudio"`. The image carries the SDK and
   # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
   # ~24 of every run's ~26 billed minutes are this matrix + verify (the
