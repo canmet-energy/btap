@@ -32,7 +32,15 @@ load_model = -> { OpenStudio::Model::Model.load(OpenStudio::Path.new(FIXTURE)).g
 sizing = BtapSimulation.run(load_model.call, run_dir: File.join(out_dir, 'sizing'),
                             weather: { epw: EPW, ddy: DDY }, sizing_only: true)
 
-annual = BtapSimulation.run(load_model.call, run_dir: File.join(out_dir, 'annual'),
+# The annual leg carries a real HVAC system (as the Ruby gem's own
+# test_local_run does) so heating/fan end-uses are non-zero and the
+# cross-language equality is exercised on real numbers. Both languages build
+# 'Baseboard gas boiler' with their OWN btap-modeling port.
+require File.expand_path('../../../../btap-modeling/lib/btap_modeling', __dir__)
+annual_model = load_model.call
+BtapModeling.build_system(annual_model, 'Baseboard gas boiler',
+                          annual_model.getThermalZones.sort_by(&:nameString))
+annual = BtapSimulation.run(annual_model, run_dir: File.join(out_dir, 'annual'),
                             weather: { epw: EPW, ddy: DDY },
                             run_period: { begin_month: 1, begin_day: 1, end_month: 1, end_day: 7 })
 

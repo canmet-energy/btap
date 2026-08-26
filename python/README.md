@@ -12,7 +12,9 @@ During the migration the Ruby gems remain the shipping product and the Leg-B
 baseline; behaviour changes land Ruby-first or not at all.
 
 ```bash
-cd python && python3 -m unittest discover tests   # stdlib-only, no install needed
+cd python && python3 -m unittest discover tests   # stdlib-only, no install needed (serial)
+cd python && .venv/bin/pytest -n auto tests/      # parallel (pytest-xdist worker
+                                                  # processes; ~10x on the E+ suites)
 ```
 
 `btap/_compat.py` holds the cross-cutting Ruby-parity contracts (round-half-

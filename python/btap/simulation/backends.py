@@ -77,8 +77,15 @@ class Local(Backend):
         if epw is not None:
             cmd += ["-w", epw]
         cmd.append(str(idf))
+        # cwd MUST be the run's own output dir: `-x` (ExpandObjects) writes
+        # its intermediates (expanded.idf, ...) into the CURRENT directory,
+        # so concurrent runs sharing a cwd clobber each other — 36 of 97
+        # systems failed in the parallel sweep before this, every one of
+        # them passing when run alone. (`openstudio run` runs E+ in the run
+        # directory for the same reason.)
         with open(run_dir / "cli.log", "w", encoding="utf-8") as log:
-            ok = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT).returncode == 0
+            ok = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT,
+                                cwd=str(out_dir)).returncode == 0
 
         err_path = out_dir / "eplusout.err"
         if not err_path.is_file():
