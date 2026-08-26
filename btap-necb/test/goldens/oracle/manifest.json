@@ -1,0 +1,17 @@
+{
+  "legacy_ref": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+  "exported": "2026-08-26",
+  "files": {
+    "envelope_lookups.json": "7bc82a2efe07ea04f86d254a5ecdd1b2af841c6fab254f434452f5c9a468aeb2",
+    "envelope_prescriptive.json": "c401970a45ffaa6e4e8f09d23914919d20a365c3edea0870be48abe1015db208",
+    "envelope_u_table.json": "5c7d6836e43b2b6b8b714a965b96c5682acb01ac5c649f19f46a490f66491a49",
+    "costing_envelope.json": "2b4a5fd293b65a5210e3eeb21ce11c76f21d6ca0af9692b1ab0bad95ba2ca28e",
+    "loads_schedules.json": "7d9df19da881572b24a5707a9acbc0169d38353cab50fb11e1c446a3d15e26fa",
+    "loads_apply.json": "dbf41d2801ae96bfb7e48cb0675392975852d65fed6672cd91bc1ba99f28785d",
+    "loads_merged_tables.json": "5c4cadb8048c1aacbc944f4fde1c07180e4b48ee0f21db695a9a3b75cc02490f",
+    "lighting_lights.json": "b06f7ee847b3f68cfe9bab1813f90c2531bdc7dd7bcfde74278cf4e5ae752dc9",
+    "lighting_daylighting.json": "0d906ddf85e15c133484b24864f51fa63e5f06fa26866cc4458c9415621f66a4",
+    "lighting_costing.json": "20bd096dd4ce853be66b5c3d4a51cf13186dc2f926cdd62c922ec3590cd139f5",
+    "shw.json": "148b775cc5a13a82c67d8cafa3ec1976a24e971d51c43f5f286df751d0a05311"
+  }
+}

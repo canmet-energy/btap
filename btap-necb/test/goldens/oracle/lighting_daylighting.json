@@ -1,0 +1,61 @@
+{
+  "sidelighting": {
+    "window=2,6,0.8,2.5": [
+      12.999999999999998,
+      4.08,
+      6.8
+    ],
+    "window=0.2,3,0.5,2.9": [
+      10.44,
+      4.032,
+      6.72
+    ],
+    "window=0,10,0,3": [
+      30.0,
+      18.0,
+      30.0
+    ]
+  },
+  "skylight": {
+    "skylight=4,6,3,5+window=2,6,0.8,2.5": [
+      38.43999999999999,
+      2.8,
+      4.0
+    ],
+    "skylight=4,6,3,5": [
+      38.43999999999999,
+      2.8,
+      4.0
+    ]
+  },
+  "controls_on_fixture": [
+    {
+      "name": "Story 1 East Perimeter Space daylighting control",
+      "x": 2.285,
+      "y": 5.43,
+      "z": 0.8,
+      "control_type": "Stepped"
+    },
+    {
+      "name": "Story 1 North Perimeter Space daylighting control",
+      "x": 15.43,
+      "y": 2.285,
+      "z": 0.8,
+      "control_type": "Stepped"
+    },
+    {
+      "name": "Story 1 South Perimeter Space daylighting control",
+      "x": 20.0,
+      "y": 2.285,
+      "z": 0.8,
+      "control_type": "Stepped"
+    },
+    {
+      "name": "Story 1 West Perimeter Space daylighting control",
+      "x": 2.285,
+      "y": 10.0,
+      "z": 0.8,
+      "control_type": "Stepped"
+    }
+  ]
+}
