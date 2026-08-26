@@ -41,7 +41,6 @@ class TestCanonical(unittest.TestCase):
         hits = modeling.systems(filter='packaged single-zone')
         self.assertTrue(hits, 'filter should match canonical names too')
 
-    @unittest.skip('needs systems wave (M3)')
     def test_resolve_and_build_by_canonical_name(self):
         from btap._compat import sorted_by_name
         from tests.support import load_fixture
