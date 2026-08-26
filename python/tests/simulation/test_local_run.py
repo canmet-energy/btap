@@ -116,7 +116,15 @@ class TestCrossLanguageSimulation(unittest.TestCase):
 
             sizing = run(load_fixture(), run_dir=str(Path(tmp) / "py" / "sizing"),
                          weather={"epw": str(EPW), "ddy": str(DDY)}, sizing_only=True)
-            annual = run(load_fixture(), run_dir=str(Path(tmp) / "py" / "annual"),
+            # The annual leg carries a real HVAC system, built by EACH
+            # language's own btap-modeling port — MUST mirror the ruby
+            # reference script's system and zone ordering.
+            import btap.modeling as modeling
+            from btap._compat import sorted_by_name
+            annual_model = load_fixture()
+            modeling.build_system(annual_model, "Baseboard gas boiler",
+                                  sorted_by_name(annual_model.getThermalZones()))
+            annual = run(annual_model, run_dir=str(Path(tmp) / "py" / "annual"),
                          weather={"epw": str(EPW), "ddy": str(DDY)}, run_period=week())
             py_results = {"sizing": {"clean": sizing.is_clean()},
                           "annual": {"clean": annual.is_clean(), "energy": annual.energy,
@@ -130,9 +138,11 @@ class TestCrossLanguageSimulation(unittest.TestCase):
             self.assertEqual([], diffs,
                              "Ruby-vs-Python simulation results differ under the Leg-B rules:\n"
                              + "\n".join(diffs))
-            # non-vacuous: both ran cleanly and produced real numbers
+            # non-vacuous: both ran cleanly, and the gas-heated January week
+            # produced real heating energy for the equality to bite on
             self.assertTrue(ruby_results["annual"]["clean"])
-            self.assertIsNotNone(ruby_results["annual"]["energy"]["total_site_kwh"])
+            self.assertGreater(ruby_results["annual"]["energy"]["total_site_kwh"], 0)
+            self.assertGreater(ruby_results["annual"]["energy"]["end_uses_kwh"]["heating"], 0)
 
     @staticmethod
     def _load_compare_runs():

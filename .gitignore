@@ -78,6 +78,7 @@ necb_run_*/
 __pycache__/
 *.pyc
 python/.venv/
+python/.ci-venv/
 python/*.egg-info/
 python/build/
 python/dist/

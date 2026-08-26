@@ -90,13 +90,17 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.2'
-      - name: Install the openstudio wheel
-        run: pip install -q 'openstudio~=3.11.0'
+      - name: Install the openstudio wheel + test runner
+        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist
+      # pytest-xdist runs test files in parallel worker PROCESSES (the same
+      # per-file forking the Ruby Rakefile does) — the suites are stdlib
+      # unittest classes, collected by pytest unchanged; plain
+      # `python3 -m unittest discover tests` remains the zero-install way.
       - name: Python suites (SDK required, engine tests skip here)
         working-directory: python
         env:
           BTAP_SDK_REQUIRED: '1'
-        run: python3 -m unittest discover tests -v
+        run: pytest -n auto -q tests/
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
   # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
@@ -199,14 +203,21 @@ jobs:
       # bindings at /usr/local/openstudio-3.11.0/Python (identical native lib
       # under both languages — exactly what a cross-language parity run
       # wants), and the bundled EnergyPlus is the engine.
+      # Parallel via pytest-xdist (worker processes; the E+-touching suites
+      # dominate serial wall time ~10x). The venv exists only to carry
+      # pytest — the SDK still comes from the image via PYTHONPATH, so both
+      # languages run the identical native lib. Falls back loudly, never
+      # silently: every dependency is REQUIRED.
       - name: Python suites, everything required (cross-language gates included)
         working-directory: python
         run: |
-          command -v python3 > /dev/null || (apt-get update -qq && apt-get install -y -qq python3)
+          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q pytest pytest-xdist
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 \
-            python3 -m unittest discover tests
+            .ci-venv/bin/pytest -n auto -q tests/
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
