@@ -45,8 +45,13 @@ gate is a green-but-vacuous gate).
    regeneration gates. Flipped assertions = the upstream change reached a
    compared behavior — attribute every one (the D-68 discipline) before
    accepting.
-4. Commit `REF` + `Gemfile.lock` together with the attribution notes and
-   any gem-side flips.
+4. **Re-export the Leg-C oracle goldens** (D-78): dispatch `test.yml` with
+   `export_goldens=true`, download the `oracle-goldens` artifact into
+   `btap-necb/test/goldens/oracle/`, and commit it with the bump —
+   `test_oracle_goldens_current.rb` fails the parity job loudly until the
+   manifest's `legacy_ref` matches the new `REF`.
+5. Commit `REF` + `Gemfile.lock` + the goldens together with the
+   attribution notes and any gem-side flips.
 
 ## Remotes
 
