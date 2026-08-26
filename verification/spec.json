@@ -1,0 +1,14 @@
+{
+  "_comment": "Leg-B comparison spec (D-78): normalization + tolerance rules for diffing two runs' audit.json/report.json. Written ONCE as data so the Ruby and Python sides never encode different rules. Consumed by verification/compare_runs.py.",
+  "strip_keys": ["run_dir"],
+  "absent_equals_null": true,
+  "float_abs_tol": 1e-09,
+  "string_float_tol": 1e-06,
+  "tolerances": [
+    { "path_regex": "unmet_occupied_hours", "abs": 1e-06,
+      "_why": "raw SQL floats, never pre-rounded by the writer" }
+  ],
+  "files": ["audit.json", "report.json"],
+  "audit_ordered": true,
+  "_provenance": "tolerance table from the 2026-08-26 gate/writer inventory: energies round(1), dollars round(2), factors round(3), U-values round(4) are pre-rounded by the writers and compare exactly; unmet hours are raw."
+}
