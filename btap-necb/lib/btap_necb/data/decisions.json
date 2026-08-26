@@ -749,6 +749,13 @@
       "kind": "process",
       "summary": "audit/simulation/modeling/costing/necb, one-way dependencies (necb -> costing -> modeling -> audit), flat Btap* modules because the oracle's module BTAP is live in-process in ten parity gates, coverage attribution by domain label, and the costing->necb daylighting call inverted into a provider. Accepted costs: rule and mechanism for one domain span two gems; NECB-vocabulary data keys stay in the generic gems as catalog identifiers.",
       "articles": []
+    },
+    {
+      "id": "D-78",
+      "title": "Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens",
+      "kind": "process",
+      "summary": "Leg A: the eleven parity gates (Ruby vs pinned oracle, via shared probe code). Leg B: a Python, spec-driven differ over both CLIs' audit/report JSON, self-tested Ruby-vs-Ruby. Leg C: goldens frozen FROM the oracle under the pin, consumed directly by the Python port so a faithfully-ported bug still fails; a currency meta-test pins the goldens to legacy_pin/REF.",
+      "articles": []
     }
   ]
 }

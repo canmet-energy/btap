@@ -164,6 +164,27 @@ green-but-vacuous gate. All eleven gates live in `btap-necb/test/`,
 prefixed by their source domain: envelope (4), loads (3), lighting (3) and
 shw (1).
 
+## Three-way verification (D-78)
+
+```
+            Leg A (the eleven gates)
+  oracle ◄──────────────────────────► Ruby gems
+    │  Leg C: frozen goldens              │  Leg B: dual-CLI run diffs
+    ▼  (test/goldens/oracle/,             ▼  (verification/compare_runs.py)
+  goldens ◄──────────────────── future Python port
+```
+
+- **Leg C goldens**: exported from the PINNED oracle by
+  `btap-necb/scripts/export_oracle_goldens.rb` via the same probe code the
+  gates run (`test/support/oracle_probes.rb`). Regenerate whenever
+  `legacy_pin/REF` bumps: dispatch `test.yml` with `export_goldens=true`,
+  download the `oracle-goldens` artifact, commit.
+  `test_oracle_goldens_current.rb` fails the parity job until you do.
+- **Leg B differ**: `python3 verification/compare_runs.py RUN_A RUN_B`
+  (rules in `verification/spec.json`); `bash verification/selftest.sh`
+  runs the corpus twice through the Ruby CLI and proves zero-diff.
+
+
 ## History
 
 These gems were developed inside a fork of
