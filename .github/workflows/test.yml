@@ -7,6 +7,11 @@ on:
   pull_request:
     paths-ignore: ['**.md', 'docs/**', 'packaging/**']
   workflow_dispatch:
+    inputs:
+      export_goldens:
+        description: 'Also export the Leg-C oracle goldens as an artifact (D-78)'
+        type: boolean
+        default: false
 
 # A superseded run is pure waste: pushing twice to a PR used to bill both runs
 # in full. Cancel the older one.
@@ -208,3 +213,18 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
+      # Leg-C golden export (D-78): the pin bundle lives HERE, so this is how
+      # goldens are (re)generated — dispatch with export_goldens=true, download
+      # the artifact into btap-necb/test/goldens/oracle/, commit. Run it
+      # whenever legacy_pin/REF bumps; test_oracle_goldens_current.rb fails
+      # loudly until the re-exported goldens are committed.
+      - name: Export the oracle goldens
+        if: inputs.export_goldens
+        run: bundle exec ruby btap-necb/scripts/export_oracle_goldens.rb
+      - uses: actions/upload-artifact@v4
+        if: inputs.export_goldens
+        with:
+          name: oracle-goldens
+          path: btap-necb/test/goldens/oracle/
+          retention-days: 7
+          if-no-files-found: error
