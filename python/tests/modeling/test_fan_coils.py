@@ -10,8 +10,8 @@ TPFC_DX = 'TPFC MAU DX Coils with Scroll Chiller'
 @needs_sdk
 class TestFanCoils(unittest.TestCase):
     def test_fpfc_dx_builds_mau_fan_coils_and_full_plant(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -51,8 +51,8 @@ class TestFanCoils(unittest.TestCase):
         self.assertAlmostEqual(13.0, spm.maximumSupplyAirTemperature(), delta=1e-6)
 
     def test_tpfc_uses_seasonal_availability_schedules(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -67,8 +67,8 @@ class TestFanCoils(unittest.TestCase):
             fc.coolingCoil().to_CoilCoolingWater().get().availabilitySchedule().nameString())
 
     def test_hydronic_mau_cooling_coil_on_chw_loop(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -82,8 +82,8 @@ class TestFanCoils(unittest.TestCase):
                             for c in model.getChillerElectricEIRs()))
 
     def test_pipe_names_match_legacy_convention(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -98,8 +98,8 @@ class TestFanCoils(unittest.TestCase):
                          r2.air_loops[0].nameString())
 
     def test_remove_existing_tears_down_fan_coil_plant(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())

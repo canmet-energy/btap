@@ -121,6 +121,7 @@ class TestEnvelopeCosting(unittest.TestCase):
 
     def test_glazing_film_cost_applies_to_windows(self):
         import openstudio
+
         import btap.costing.envelope as envelope
         model = self.costed_model()
         wall = next(s for s in model.getSurfaces()

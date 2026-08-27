@@ -51,7 +51,7 @@ systems.select! { |n, _| n.include?(only) } if only
 puts "#{systems.size} systems, #{jobs} at a time"
 
 def build(name)
-  model = OpenStudio::Model::Model.load(OpenStudio::Path.new(File.join(FIXTURES, '5ZoneNoHVAC.osm'))).get
+  model = OpenStudio::Model::Model.load(OpenStudio::Path.new(File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm'))).get
   model.getSpaceTypes.select { |st| st.spaces.any? }.each do |st|
     st.setStandardsBuildingType('Space Function')
     st.setStandardsSpaceType('Office enclosed > 25 m2')

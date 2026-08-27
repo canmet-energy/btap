@@ -13,7 +13,6 @@ test: a small high-%OA system is "R" under 2020, waved through by 2011)."""
 
 from __future__ import annotations
 
-import re
 import unittest
 
 import openstudio

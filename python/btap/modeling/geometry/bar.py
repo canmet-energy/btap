@@ -52,7 +52,7 @@ def create_bar(model, bar_hash):
     # flatten story_hash out to individual stories included in building area
     stories_flat = []
     stories_flat_counter = 0
-    for i, (k, v) in enumerate(bar_hash['stories'].items()):
+    for i, (_k, v) in enumerate(bar_hash['stories'].items()):
         # k is invalid in some cases, old story object that has been removed,
         # should be from low to high including basement
         # skip if source story isn't included in building area
@@ -141,7 +141,7 @@ def create_bar(model, bar_hash):
     elif bar_hash['bar_division_method'] == 'Multiple Space Types - Individual Stories Sliced':
 
         # update story_hash for partial_story_above
-        for i, (k, v) in enumerate(story_hash.items()):
+        for i, (k, _v) in enumerate(story_hash.items()):
             # adjust size of bar of top story is not a full story
             if i + 1 == len(story_hash):
                 story_hash[k]['partial_story_multiplier'] = (1.0 - math.ceil(bar_hash['num_stories_above_grade']) + bar_hash['num_stories_above_grade'])
@@ -337,7 +337,7 @@ def create_bar(model, bar_hash):
                 story_bounding[story] = {'spaces': [space]}
 
         # get bounding box for each story
-        for story, v in story_bounding.items():
+        for _story, v in story_bounding.items():
             # get bounding_box
             bounding_box = openstudio.BoundingBox()
             for space in v['spaces']:
@@ -401,7 +401,7 @@ def create_bar(model, bar_hash):
     space_type_wwr_overrides = {}
 
     # loop through building stories, spaces, and surfaces
-    for i, (key, story) in enumerate(sorted(sorted_stories.items(), key=lambda kv: kv[0])):
+    for i, (_key, story) in enumerate(sorted(sorted_stories.items(), key=lambda kv: kv[0])):
         # (Ruby block-locals: fresh per iteration, nil unless assigned)
         adiabatic_floor = False
         adiabatic_ceiling = False
@@ -453,7 +453,7 @@ def create_bar(model, bar_hash):
                     space_type = surface.space().get().spaceType().get()
 
                     # see if space type has wwr value
-                    for k, v in bar_hash['space_types'].items():
+                    for _k, v in bar_hash['space_types'].items():
                         if 'space_type' in v and space_type == v['space_type'] and 'wwr' in v:
                             # if matching space type specifies a wwr then override the
                             # orientation specific recommendations for this surface.
@@ -877,7 +877,7 @@ def create_sliced_bar_multi_polygons(space_types, length, width, footprint_origi
     valid_bar_area_min_m2 = valid_bar_width_min_m * bar_length
 
     # loop through stories to populate footprints
-    for i, (k, v) in enumerate(story_hash.items()):
+    for i, (_k, v) in enumerate(story_hash.items()):
         # update the length and width for partial floors
         if i + 1 == len(story_hash):
             area_multiplier = v['partial_story_multiplier']
@@ -1034,7 +1034,7 @@ def create_sliced_bar_simple_polygons(space_types, length, width, footprint_orig
     # ---- 2. Space type areas, sort order, and bar-end sizing rules ----
     # total building floor area to calculate ratios from space type floor areas
     total_floor_area = 0.0
-    for space_type, space_type_hash in space_types.items():
+    for _space_type, space_type_hash in space_types.items():
         total_floor_area += space_type_hash['floor_area']
 
     # sort array by floor area but shift largest object to front

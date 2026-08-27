@@ -305,13 +305,11 @@ class TestReferenceEnvelope(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import envelope
 
-        try:
-            from btap.necb import hvac
-            reference_hvac = hvac.reference_hvac
-        except (ImportError, AttributeError) as e:  # pragma: no cover - M5 ordering
-            self.skipTest(f'btap.necb.hvac.reference_hvac not available yet: {e}')
+        # Plain import: M5 delivered this. A guard here would let a
+        # regression that removes reference_hvac pass as a green skip.
+        from btap.necb import envelope, hvac
+        reference_hvac = hvac.reference_hvac
 
         proposed = proposed_model()
         zones = sorted_by_name(proposed.getThermalZones())

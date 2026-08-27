@@ -31,7 +31,8 @@ import openstudio
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
 from btap.modeling.envelope import geometry as Geometry
-from btap.necb.envelope import climate, prescriptive as Prescriptive
+from btap.necb.envelope import climate
+from btap.necb.envelope import prescriptive as Prescriptive
 from btap.necb.envelope.rules import max_fdwr, max_srr
 
 AIR_LEAKAGE_I75 = 1.50   # L/(s.m2) @ 75 Pa, 8.4.3.3.(3)

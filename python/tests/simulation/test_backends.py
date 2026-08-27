@@ -9,9 +9,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.support import load_fixture, needs_sdk
-
 from btap.simulation import Backend, Local, Remote, Result, run, runner
+from tests.support import load_fixture, needs_sdk
 
 
 class FakeBackend(Backend):

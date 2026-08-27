@@ -5,7 +5,6 @@ model needed (but the catalog resolution test touches the SDK-free catalog)."""
 from __future__ import annotations
 
 import copy
-import re
 import unittest
 
 from btap.audit import AuditLog

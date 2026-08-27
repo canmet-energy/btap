@@ -109,12 +109,12 @@ class TestBar(unittest.TestCase):
         import json
 
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
         from btap.necb import envelope as necb_envelope
         from btap.necb import lighting as necb_lighting
         from btap.necb import loads as necb_loads
         from btap.necb import shw as necb_shw
-        from btap._compat import sorted_by_name
-        from btap.audit import AuditLog
 
         model = modeling.bar(space_type_ratios=RATIOS, length=50.0, width=20.0,
                              num_stories_above_grade=2, wwr=0.4)

@@ -171,7 +171,7 @@ def detect_light_type(space, template, _audit):
     if len(lights) == 0:
         return "LED" if template in ("NECB2020", "NECB2025") else "CFL"
 
-    if any("LED lighting" in l.lightsDefinition().nameString() for l in lights):
+    if any("LED lighting" in fixture.lightsDefinition().nameString() for fixture in lights):
         return "LED"
     return "CFL"
 

@@ -16,6 +16,7 @@ class TestModelDiagrams(unittest.TestCase):
         """Build a hydronic boiler system on the fixture so there is a real hot-water
         loop (pump -> boiler supply, baseboard demand) to diagram."""
         import openstudio
+
         from btap._compat import sorted_by_name
 
         model = load_fixture()
@@ -38,7 +39,7 @@ class TestModelDiagrams(unittest.TestCase):
         self.assertIsInstance(loop['label'], str)
         self.assertIn('<svg', loop['svg'], 'loop diagram is inline SVG')
         # the hot-water loop demand surfaces the served hydronic baseboards
-        all_svg = ''.join(l['svg'] for l in bundle['loops'])
+        all_svg = ''.join(loop['svg'] for loop in bundle['loops'])
         self.assertIn('Baseboard (hydronic)', all_svg, 'demand branch lists served baseboards')
         # a boiler cell references the embedded boiler icon (resolves against icon_defs)
         self.assertIn('<use href="#icon-', all_svg, 'cells reference embedded OS App icons')
@@ -48,6 +49,7 @@ class TestModelDiagrams(unittest.TestCase):
         host dropdown chooser can tell packaged single-zone units apart instead of
         listing several ambiguous "Air loop" entries."""
         import openstudio
+
         from btap._compat import sorted_by_name
 
         model = load_fixture()
@@ -60,7 +62,7 @@ class TestModelDiagrams(unittest.TestCase):
         zone = sorted_by_name(model.getThermalZones())[0]
         modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Hot Water Baseboard', [zone])
         bundle = modeling.model_hvac_diagrams(model)
-        air = next((l for l in bundle['loops'] if l['kind'] == 'air'), None)
+        air = next((loop for loop in bundle['loops'] if loop['kind'] == 'air'), None)
         self.assertIsNotNone(air, 'a PSZ builds an air loop')
         self.assertRegex(air['label'], r'\AAir loop — ',
                          "single-zone air loop is labelled with its served zone, "

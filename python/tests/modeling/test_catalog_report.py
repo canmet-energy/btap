@@ -9,6 +9,7 @@ import os
 import re
 import tempfile
 import unittest
+from pathlib import Path
 
 import btap.modeling as modeling
 from tests.support import needs_sdk
@@ -300,3 +301,43 @@ class TestCatalogReport(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@needs_sdk
+class TestSeedModelContracts(unittest.TestCase):
+    """Two independent contracts, split deliberately (review, 2026-08-27).
+
+    The default seed model must resolve from wherever the package is
+    installed, AND an unreadable path must fail loudly. They are separate
+    because the original defect satisfied neither: the default pointed
+    outside the package (absent from a wheel) and the failure was silent,
+    so a wheel user got a 1 MB catalog with 97 'diagram unavailable' cards
+    that looked like a successful report.
+    """
+
+    def test_default_seed_resolves_through_the_package(self):
+        from btap.modeling.hvac import catalog_report
+        seed = Path(catalog_report.FIXTURE)
+        self.assertTrue(seed.is_file(), f"packaged seed model missing: {seed}")
+        # It must live INSIDE the package, not be reached by walking out of it.
+        package_root = Path(catalog_report.__file__).resolve().parent
+        self.assertTrue(seed.resolve().is_relative_to(package_root),
+                        f"seed model is outside the package: {seed}")
+
+    def test_unreadable_seed_raises_instead_of_degrading(self):
+        from btap.modeling.hvac import catalog_report
+        with self.assertRaises(ValueError) as ctx:
+            catalog_report.to_html(fixture="/nonexistent/seed.osm")
+        self.assertIn("/nonexistent/seed.osm", str(ctx.exception),
+                      "the error must name the path it could not read")
+
+    def test_empty_optional_never_reaches_get(self):
+        # Guards the root cause: OptionalModel.get() on an EMPTY optional
+        # returns an empty Model rather than raising (Ruby raises), and
+        # .get() on other empty Optionals raises SystemError while leaving
+        # the C error indicator set — which can segfault a later call.
+        import openstudio
+        empty = openstudio.model.Model.load(openstudio.path("/nonexistent.osm"))
+        self.assertFalse(empty.is_initialized())
+        self.assertEqual(0, len(empty.get().getThermalZones()),
+                         "documents the trap: .get() yields an EMPTY model, no raise")

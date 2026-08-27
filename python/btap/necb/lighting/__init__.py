@@ -78,13 +78,15 @@ def led_record(building_type, space_type):
 # daylighting.py re-exports from it, so it loads WITH (just before)
 # daylighting instead. See the header of _legacy_2011.py.
 from btap.necb.lighting import apply_lights as _apply_lights  # noqa: E402
+from btap.necb.lighting import (  # noqa: E402
+    daylight_control_requirement as _daylight_control_requirement,
+)
+from btap.necb.lighting import daylighted_areas as _daylighted_areas  # noqa: E402
+from btap.necb.lighting import daylighting as _daylighting  # noqa: E402
 from btap.necb.lighting import exterior as _exterior  # noqa: E402
 from btap.necb.lighting import reference as _reference  # noqa: E402
-from btap.necb.lighting import daylighted_areas as _daylighted_areas  # noqa: E402
-from btap.necb.lighting import daylight_control_requirement as _daylight_control_requirement  # noqa: E402
-from btap.necb.lighting import daylighting as _daylighting  # noqa: E402
-from btap.necb.lighting import storage_garage as _storage_garage  # noqa: E402
 from btap.necb.lighting import reference_daylighting as _reference_daylighting  # noqa: E402
+from btap.necb.lighting import storage_garage as _storage_garage  # noqa: E402
 
 #: Ruby's nested modules, reachable under their Ruby spelling
 #: (``Lighting::DaylightedAreas.areas`` -> ``lighting.DaylightedAreas.areas``).

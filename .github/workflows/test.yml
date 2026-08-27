@@ -91,7 +91,7 @@ jobs:
         with:
           ruby-version: '3.2.2'
       - name: Install the openstudio wheel + test runner
-        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter
+        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
       # The D-77 dependency arrows as an enforced contract, not a convention:
       # necb -> costing -> modeling -> audit, simulation beside, and audit
       # SDK-free (the property the bare-runner audit suite depends on). It
@@ -104,11 +104,23 @@ jobs:
       # per-file forking the Ruby Rakefile does) — the suites are stdlib
       # unittest classes, collected by pytest unchanged; plain
       # `python3 -m unittest discover tests` remains the zero-install way.
+      - name: Ruff (the lint policy in pyproject is enforced, not decorative)
+        working-directory: python
+        run: ruff check .
       - name: Python suites (SDK required, engine tests skip here)
         working-directory: python
         env:
           BTAP_SDK_REQUIRED: '1'
         run: pytest -n auto -q tests/
+      # Distribution integrity. The suites above run against the CHECKOUT,
+      # where every data file exists because the repo exists; a wheel is a
+      # different artifact. This builds one, installs it into a clean venv,
+      # and exercises it from OUTSIDE the checkout so the source tree cannot
+      # shadow the install. It exists because catalog_html() once resolved
+      # its seed model outside the package and degraded silently from a wheel.
+      - name: Installed-wheel smoke (distribution integrity)
+        working-directory: python
+        run: python3 scripts/wheel_smoke.py
 
   # Everything that needs `require "openstudio"`. The image carries the SDK and
   # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
@@ -222,9 +234,13 @@ jobs:
           apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q pytest pytest-xdist
+          # FULL_MATRIX=1: the D-58 reference-selection matrix defaults to a
+          # 22-system subset for PR speed. The M5 acceptance claim is about
+          # all 97, so the claim is enforced HERE rather than resting on a
+          # manual run someone did once.
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 \
+          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 FULL_MATRIX=1 \
             .ci-venv/bin/pytest -n auto -q tests/
 
   # The legacy-parity gates, against the PINNED oracle revision.

@@ -20,7 +20,7 @@ require 'fileutils'
 require File.expand_path('../../../../btap-simulation/lib/btap_simulation', __dir__)
 
 FIXTURES = File.expand_path('../../../../btap-modeling/test/fixtures', __dir__)
-FIXTURE = File.join(FIXTURES, '5ZoneNoHVAC.osm')
+FIXTURE = File.expand_path('../../../../btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm', __dir__)
 EPW = File.join(FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
 DDY = File.join(FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
 

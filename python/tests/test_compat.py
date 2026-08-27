@@ -129,6 +129,7 @@ class TestRubyDivision(unittest.TestCase):
 
     def test_division_by_zero_matches_ruby(self):
         import math
+
         from btap._compat import ruby_div
         self.assertEqual(math.inf, ruby_div(1.0, 0.0))
         self.assertEqual(-math.inf, ruby_div(-1.0, 0.0))
@@ -150,6 +151,7 @@ class TestRoundingNonFinite(unittest.TestCase):
 
     def test_non_finite_passes_through_with_digits(self):
         import math
+
         from btap._compat import ruby_round
         self.assertEqual(math.inf, ruby_round(math.inf, 2))
         self.assertEqual(-math.inf, ruby_round(-math.inf, 3))
@@ -157,6 +159,7 @@ class TestRoundingNonFinite(unittest.TestCase):
 
     def test_non_finite_to_integer_raises_like_ruby(self):
         import math
+
         from btap._compat import ruby_round
         for value in (math.inf, -math.inf, math.nan):
             with self.assertRaises(ValueError):

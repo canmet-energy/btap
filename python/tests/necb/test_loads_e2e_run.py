@@ -85,13 +85,11 @@ class TestThreeDomainComposition(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import loads
 
-        try:
-            from btap.necb import envelope
-            apply_prescriptive = envelope.apply_prescriptive
-        except (ImportError, AttributeError) as e:  # pragma: no cover - M5 ordering
-            self.skipTest(f"btap.necb.envelope.apply_prescriptive not available yet: {e}")
+        # Plain import: M5 delivered this. A guard here would let a
+        # regression that removes apply_prescriptive pass as a green skip.
+        from btap.necb import envelope, loads
+        apply_prescriptive = envelope.apply_prescriptive
 
         model = bare_geometry()
         audit = AuditLog()

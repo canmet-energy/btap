@@ -280,7 +280,9 @@ def _array(value):
 # storage_garage.rb — the helpers below (space_types, build_reduced_ruleset,
 # add_daylight_control, ...) are what the transforms above call.
 from btap.necb.lighting.storage_garage import perimeter as Perimeter  # noqa: E402,F401
-from btap.necb.lighting.storage_garage.schedules import (  # noqa: E402
+from btap.necb.lighting.storage_garage.schedules import (  # noqa: E402,F401
+    # Re-exported: schedules.rb REOPENS StorageGarage in Ruby, so these names
+    # belong to this module's public surface even though nothing here calls them.
     add_daylight_control,
     build_night_reduced_ruleset,
     build_reduced_ruleset,

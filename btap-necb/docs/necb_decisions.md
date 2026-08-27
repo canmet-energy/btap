@@ -4298,7 +4298,38 @@ sort order); one dead-code defect was deleted outright after adjudication
 (`BtapCosting.cost`, which delegated to a constant left behind by the C7
 rename and could only ever raise).
 
+**Never call `.get()` on an unchecked SDK Optional in Python.** This is the
+sharpest of the binding differences and it does not fail the way Ruby does.
+`OptionalModel.get()` on an EMPTY optional RETURNS AN EMPTY MODEL rather than
+raising, so a failed `Model.load` flows onward as a model with no zones;
+`OptionalDouble`/`OptionalString` do raise, but as `SystemError`, which
+leaves the C-level error indicator set and can segfault the interpreter on a
+later unrelated call. Ruby raises cleanly in every one of these cases. Always
+test `is_initialized()` first — which is what `_compat.opt()` does, and why
+it exists. The catalog report bypassed it and shipped a wheel whose
+`catalog_html()` produced a 1 MB document with 97 "diagram unavailable"
+cards instead of failing (found by review, 2026-08-27).
+
+**The catalog seed model is RUNTIME-owned in both languages.** It moved from
+`btap-modeling/test/fixtures/` to `btap-modeling/lib/btap_modeling/hvac/data/`
+so the gem's `spec.files` ships it, and the Python package carries a
+byte-identical copy resolved through `importlib.resources`. Two separate
+contracts, tested separately: the default seed resolves from wherever the
+package is installed, AND an unreadable seed raises instead of degrading.
+Fixed on BOTH sides in one change rather than Python-only, per the
+Ruby-first rule; a `scripts/wheel_smoke.py` CI gate now exercises the built
+wheel from outside the checkout, because the suite alone runs against the
+source tree and cannot see this class of defect.
+
+**Leg C covers NECB 2020 only, and structurally cannot cover 2025.** The
+pinned oracle predates the 2025 edition — its probes sweep `NECB2020`, and
+NECB 2025 is this project's own implementation — so no 2025 values exist to
+freeze. This is a boundary of the method, not a testing gap to close: 2025
+correctness rests on the adjudicated decision record plus data-integrity and
+cross-edition tests.
+
 - **Kind:** process — migration architecture; no runtime citation exists
   or should.
 - **Who/when:** phylroy (the Python direction and the milestone boundary) +
-  Claude, 2026-08-27.
+  Claude, 2026-08-27; extended 2026-08-27 after review (the seed-model
+  defect, the unchecked-`.get()` hazard, and the 2025/Leg-C boundary).

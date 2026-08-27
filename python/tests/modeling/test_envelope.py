@@ -50,6 +50,7 @@ class TestOpaqueAtConductance(unittest.TestCase):
 
     def test_fenestration_builds_a_shared_simple_glazing(self):
         import openstudio
+
         from btap.modeling.envelope import constructions
         model = openstudio.model.Model()
         glazing = openstudio.model.SimpleGlazing(model)
@@ -69,9 +70,10 @@ class TestExposedCensus(unittest.TestCase):
     def test_thermostats_gate_the_census(self):
         # The D-75 fact: zones without dual-setpoint thermostats are not
         # 'conditioned', so the census returns nothing on bare massing.
+        import openstudio
+
         import btap.modeling as modeling
         from btap.modeling.envelope import geometry
-        import openstudio
 
         model = modeling.create(shape="rectangle", length=20, width=15,
                                 storeys=1, below_grade_storeys=0)

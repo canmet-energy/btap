@@ -8,7 +8,6 @@ split-system HP heating HSPF 7.4 -> 7.8."""
 
 from __future__ import annotations
 
-import re
 import unittest
 
 import btap.modeling as modeling

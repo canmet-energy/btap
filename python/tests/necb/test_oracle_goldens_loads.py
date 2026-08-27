@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import json
 import unittest
-from pathlib import Path
 
 from tests.support import REPO_ROOT, needs_sdk
 

@@ -31,7 +31,6 @@ from btap import __version__ as VERSION
 from btap.modeling.geometry import plan_query as PlanQuery
 from btap.modeling.geometry import plan_svg as PlanSvg
 
-
 # ------------------------------------------------------------- bundle
 
 def diagrams(model, audit=None):

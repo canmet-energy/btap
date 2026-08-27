@@ -73,7 +73,16 @@ def ruby_div(numerator, denominator) -> float:
 
 def opt(optional):
     """Unwrap an SDK Optional: the value, or None when empty (Ruby's
-    ``x.is_initialized ? x.get : nil``). None passes through."""
+    ``x.is_initialized ? x.get : nil``). None passes through.
+
+    ALWAYS route through this rather than calling ``.get()`` directly. The
+    Python bindings do not fail the way Ruby does: ``OptionalModel.get()`` on
+    an EMPTY optional RETURNS AN EMPTY MODEL instead of raising (so a failed
+    ``Model.load`` flows onward silently), while ``OptionalDouble``/
+    ``OptionalString`` raise ``SystemError`` and leave the C-level error
+    indicator set, which can segfault the interpreter on a later unrelated
+    call. Ruby raises cleanly in all of these. See D-79.
+    """
     if optional is None:
         return None
     return optional.get() if optional.is_initialized() else None

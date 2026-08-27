@@ -7,9 +7,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.support import load_fixture, needs_sdk
-
 from btap.simulation import Remote, engine
+from tests.support import load_fixture, needs_sdk
 
 
 class FakeTransport:

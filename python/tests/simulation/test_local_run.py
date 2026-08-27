@@ -17,9 +17,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.support import DDY, EPW, REPO_ROOT, load_fixture, needs_engine
-
 from btap.simulation import run, runner
+from tests.support import DDY, EPW, REPO_ROOT, load_fixture, needs_engine
 
 RUBY_SCRIPT = Path(__file__).parent / "cross_language" / "ruby_reference.rb"
 COMPARE_RUNS = REPO_ROOT / "verification" / "compare_runs.py"

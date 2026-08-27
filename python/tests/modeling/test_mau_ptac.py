@@ -9,8 +9,8 @@ HW = 'PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC'
 @needs_sdk
 class TestMauPtac(unittest.TestCase):
     def test_electric_mau_ptac_builds(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -54,8 +54,8 @@ class TestMauPtac(unittest.TestCase):
                                delta=1e-9)
 
     def test_hot_water_variant_builds_boiler_for_mau_and_baseboards(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -67,8 +67,8 @@ class TestMauPtac(unittest.TestCase):
                          len(model.getZoneHVACBaseboardConvectiveWaters()))
 
     def test_pipe_name_matches_legacy_convention(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())

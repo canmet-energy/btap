@@ -29,6 +29,14 @@ so a comparison that silently shrinks fails loudly instead of passing
 vacuously. Two domains additionally carry **negative controls** — deliberately
 perturbing an input and confirming the gate fails.
 
+**Leg C covers NECB 2020 only, and cannot cover 2025.** This is a structural
+boundary, not missing test work: the pinned oracle predates the 2025 edition
+(its probes sweep `NECB2020`; NECB 2025 is this project's own
+implementation), so there are no 2025 values in existence to freeze. Do not
+try to close this by exporting more goldens — there is nothing to export
+from. 2025 correctness rests on the adjudicated decision record plus the
+data-integrity and cross-edition tests, which is the only available basis.
+
 ---
 
 ## What has landed
@@ -40,11 +48,26 @@ perturbing an input and confirming the gate fails.
 | **M2** | `btap.simulation` + the EnergyPlus provisioner | Ruby-CLI vs Python-engine runs agree on a gas-heated week (energies exact, unmet hours in tolerance) |
 | **M3** | `btap.modeling` (11.8k lines) | 97-system EnergyPlus battery agrees with the Ruby sweep **97/97**; the 97-system catalog HTML is **byte-identical** between languages |
 | **M4** | `btap.costing` | **134** oracle-frozen values reproduced (39 interpolations, 92 construction costs, 3 TB quantities) |
-| **M5** | the five `btap.necb` rule domains (8.5k lines) | ~630 oracle-frozen values across five domains; the D-58 reference matrix verified across the **full 97-system catalog**, both naming passes × 4 scenarios |
+| **M5** | the five `btap.necb` rule domains (8.5k lines) | ~630 oracle-frozen values across five domains; the D-58 reference matrix run across the **full 97-system catalog** (both naming passes × 4 scenarios) as a CI gate, not a manual run |
 
-Current suite: **620 passed, 4 skipped**, ~2.5 min parallel. Import contracts:
-3 kept. The Ruby side is untouched and green throughout (matrix + verify +
-the 12-gate parity job).
+Current suite: **623 passed, 4 skipped**, ~2.5 min parallel. Import contracts:
+3 kept. Ruff: clean (enforced in CI). The Ruby side is green throughout
+(matrix + verify + the 12-gate parity job).
+
+Three gates make the claims above continuously enforced rather than
+manually observed — a review found that gap and it is now closed:
+
+- **Installed-wheel smoke** (`python/scripts/wheel_smoke.py`, run in CI):
+  builds the wheel, installs it into a clean venv, and exercises it from
+  OUTSIDE the checkout so the source tree cannot shadow the install. It
+  exists because `catalog_html()` used to resolve its seed model outside the
+  package and degrade silently from a wheel — 97 'diagram unavailable' cards
+  in a 1 MB document that looked like a report.
+- **`FULL_MATRIX=1` in the container `verify` job**: the D-58 matrix defaults
+  to a 22-system subset for PR speed; the full 97 now run on every
+  main/dispatch build, so the M5 acceptance claim tracks a gate.
+- **Ruff**, enforced with a ruleset this codebase can honestly hold (see
+  `pyproject.toml` for why `UP` and `E501` are deliberately out).
 
 The four remaining skips each name a real reason: two await the M7 TBD
 bridge, one needs an SVG rasterizer on PATH, one is a Leg-A gate needing the
@@ -57,10 +80,16 @@ waiting on it are ported and enabled in that same milestone.
 ## M6 — the next milestone, not started
 
 **Scope:** `compliance.rb` (the pipeline, capacity iteration, the EUI path),
-`eui_archetypes.rb`, `tiers.rb`, the renderer (`report/` + `report.rb`,
-~1,240 lines, plus btap-modeling's diagram/plan renderers, ~2,100), and
-`cli.rb` (496) — then the **Leg-B corpus convergence**, which is the
-migration's decisive acceptance.
+`eui_archetypes.rb`, `tiers.rb`, the NECB report renderer (`report/` +
+`report.rb`, ~1,240 lines), and `cli.rb` (496) — then the **Leg-B corpus
+convergence**, which is the migration's decisive acceptance.
+
+btap-modeling's diagram and plan renderers are **already ported** (M3:
+`plan_query.py`, `plan_svg.py`, `plan.py`, `render.py`, `catalog_report.py`,
+exposed as `model_hvac_diagrams`, `hvac_icon_defs` and `floor_plans`). M6
+INTEGRATES those outputs into the NECB report — it does not port them
+again. An earlier draft of this file said otherwise; it had been copied
+from the pre-M3 plan.
 
 Everything M6 builds on is ported and green.
 

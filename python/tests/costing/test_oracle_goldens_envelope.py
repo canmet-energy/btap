@@ -21,7 +21,6 @@ which needs the M7 bridge.
 
 import json
 import unittest
-from pathlib import Path
 
 from btap._compat import ruby_round, ruby_str
 from tests.support import REPO_ROOT

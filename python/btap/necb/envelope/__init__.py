@@ -50,12 +50,14 @@ rules = _load_rules
 
 # The domain files, in the Ruby require order. Each defines its behaviour on
 # its own module; the two conveniences the old facade added are below.
-from btap.necb.envelope import climate  # noqa: E402
+from btap.necb.envelope import (  # noqa: E402
+    climate,  # noqa: E402
+    fenestration,  # noqa: E402
+    prescriptive,  # noqa: E402
+    reference,  # noqa: E402
+    thermal_bridging,  # noqa: E402
+)
 from btap.necb.envelope import rules as _rules_module  # noqa: E402,F401
-from btap.necb.envelope import fenestration  # noqa: E402
-from btap.necb.envelope import prescriptive  # noqa: E402
-from btap.necb.envelope import thermal_bridging  # noqa: E402
-from btap.necb.envelope import reference  # noqa: E402
 from btap.necb.envelope.prescriptive import apply_prescriptive  # noqa: E402
 from btap.necb.envelope.reference import reference_envelope  # noqa: E402
 from btap.necb.envelope.rules import (  # noqa: E402

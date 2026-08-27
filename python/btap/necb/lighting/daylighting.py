@@ -47,7 +47,6 @@ and 4.2.2.5. (skylights).
 
 from __future__ import annotations
 
-import math
 import re
 
 import openstudio
