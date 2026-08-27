@@ -79,7 +79,13 @@ jobs:
   # this runner (no engine, no openstudio CLI) — the `verify` job runs the
   # whole suite with everything required, cross-language simulation included.
   python:
-    runs-on: ubuntu-latest
+    # Same AWS switch as the container jobs. This job is no longer the ~40 s
+    # it was at M1: the wheel gate, ruff and the full suite put it near six
+    # minutes, and on a private repo those are BILLED GitHub minutes. With
+    # vars.CI_RUNNER set it runs on CodeBuild instead; unset reverts to
+    # GitHub-hosted with no workflow edit. No `container:` here on purpose —
+    # the point of this job is a bare environment that installs the wheel.
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
