@@ -171,7 +171,7 @@ shw (1).
   oracle ◄──────────────────────────► Ruby gems
     │  Leg C: frozen goldens              │  Leg B: dual-CLI run diffs
     ▼  (test/goldens/oracle/,             ▼  (verification/compare_runs.py)
-  goldens ◄──────────────────── future Python port
+  goldens ◄──────────────────────────── the Python port
 ```
 
 - **Leg C goldens**: exported from the PINNED oracle by
@@ -183,6 +183,36 @@ shw (1).
 - **Leg B differ**: `python3 verification/compare_runs.py RUN_A RUN_B`
   (rules in `verification/spec.json`); `bash verification/selftest.sh`
   runs the corpus twice through the Ruby CLI and proves zero-diff.
+
+
+## The Python port (`python/`, D-79)
+
+A second implementation lives in `python/` — one pip distribution, `btap`,
+with five subpackages mirroring the gems. It is ported milestone by
+milestone against the gates above; see `PORT_STATUS.md` at the repo root
+for what has landed, what each milestone was gated on, and what the next
+one inherits.
+
+```bash
+cd python
+python3 -m venv .venv && .venv/bin/pip install 'openstudio~=3.11.0' pytest pytest-xdist import-linter
+.venv/bin/pytest -n auto tests/     # the whole suite, parallel (~2.5 min)
+.venv/bin/lint-imports              # the D-77 arrows + audit stays SDK-free
+python3 -m unittest discover tests  # zero-install fallback, serial
+```
+
+Cross-cutting Ruby-vs-Python semantics are solved once in `btap/_compat.py`
+(stdlib-only, so `btap.audit` keeps running on a runner with no OpenStudio)
+and `btap/_sdk.py`. **Use those helpers rather than the raw Python
+equivalents** — `ruby_round` (half away from zero, not banker's),
+`ruby_div` (Ruby float division never raises), `opt`/`opt_or`,
+`sorted_by_name`, `NullAudit`. Each exists because the naive translation
+changes results silently; D-79 records why.
+
+EnergyPlus comes from `btap.simulation.engine`, which provisions a pinned,
+sha256-verified build (`BTAP_ENERGYPLUS` overrides it;
+`BTAP_ENERGYPLUS_ARCHIVE` side-loads on a TLS-intercepting network). The
+wheel carries the SDK and the ForwardTranslator but no engine and no CLI.
 
 
 ## History

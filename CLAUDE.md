@@ -213,6 +213,24 @@ private, so those minutes are billed. `rake test:gem` cuts that leg; how much
 depends on the runner's core count, which the job now prints so the next person
 does not have to guess (locally, 45 files drop from ~10 min to ~150 s).
 
+## The Python port (D-79)
+
+A second implementation lives in `python/` — one pip distribution, `btap`,
+with five subpackages mirroring the gems, ported milestone by milestone
+against the D-78 verification. **`PORT_STATUS.md` at the repo root is the
+handoff document**: what has landed, what each milestone was gated on, the
+hazards the next one inherits, and the working agreements. Read it before
+touching `python/`. Developer setup is in
+[docs/DEVELOPERS.md](docs/DEVELOPERS.md#the-python-port-python-d-79).
+
+M0–M5 are done (audit, simulation + the EnergyPlus provisioner, modeling,
+costing, the five necb rule domains). **M6 — the umbrella pipeline,
+renderer, CLI, and the Leg-B corpus convergence — is not started.** Ruby is
+FROZEN except bugfixes while the port runs: it is the shipping product and
+the Leg-B baseline, so a behaviour change lands Ruby-first or not at all,
+and a Ruby defect found by porting is flagged and ported AS-IS rather than
+quietly fixed on one side.
+
 ## Open work
 
 - **Retire the originals in the fork.** Remove the nine dirs + `legacy_pin/` from

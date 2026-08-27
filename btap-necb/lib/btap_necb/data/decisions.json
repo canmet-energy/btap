@@ -756,6 +756,13 @@
       "kind": "process",
       "summary": "Leg A: the eleven parity gates (Ruby vs pinned oracle, via shared probe code). Leg B: a Python, spec-driven differ over both CLIs' audit/report JSON, self-tested Ruby-vs-Ruby. Leg C: goldens frozen FROM the oracle under the pin, consumed directly by the Python port so a faithfully-ported bug still fails; a currency meta-test pins the goldens to legacy_pin/REF.",
       "articles": []
+    },
+    {
+      "id": "D-79",
+      "title": "The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences",
+      "kind": "process",
+      "summary": "Bottom-up milestones (audit, simulation, modeling, costing, necb domains, umbrella), each landing only when its ported Ruby suites AND its slice of the D-78 verification pass. One pip distribution with five subpackages; the D-77 arrows enforced by import-linter, plus a contract keeping btap.audit SDK-free. Cross-cutting Ruby semantics live in _compat (ruby_round half-away incl. non-finite, ruby_div never raising, opt/opt_or, sorted_by_name, NullAudit, esc/ruby_str) and _sdk (ensure_sdk_hashable), each pinned against real Ruby output. Forced divergences: the wheel has no CLI so the Local backend translates in-process and spawns a provisioned EnergyPlus (WarmupFlag differs, test-only); Ruby module reopening becomes a re-exported module, preserving the legacy-2011 daylighting quarantine. Ruby stays frozen except bugfixes as the Leg-B baseline.",
+      "articles": []
     }
   ]
 }
