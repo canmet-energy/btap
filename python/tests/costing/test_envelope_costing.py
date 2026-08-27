@@ -229,12 +229,30 @@ class TestEnvelopeCosting(unittest.TestCase):
         self.assertIn("transition", tallies,
                       "kept in tallies; skipped at costing time")
 
-    @unittest.skip("needs btap.necb (reference_envelope) — later milestone")
     def test_unified_audit_spans_compliance_and_costing(self):
-        """Ruby: ONE audit spans BtapNECB::Envelope.reference_envelope +
-        BtapCosting::Envelope.cost (steps prescriptive/reference/coverage/
-        costing_envelope/costing_thermal_bridging in one log, >30 JSON
-        entries). Portable only once btap.necb's envelope domain lands."""
+        """ONE audit spans reference generation + costing: the steps
+        prescriptive/reference/coverage/costing_envelope/
+        costing_thermal_bridging all land in a single log. Unblocked by M5's
+        envelope domain."""
+        import json
+
+        import btap.costing.envelope as envelope
+        from btap.audit import AuditLog
+        from btap.necb import envelope as necb_envelope
+
+        model = load_fixture()
+        audit = AuditLog()
+        necb_envelope.reference_envelope(model, vintage="2020", hdd=3890, audit=audit)
+        envelope.cost(
+            model, city=CITY, province_state=PROVINCE,
+            tb_tallies={"parapet": {"BTAP-ExteriorWall-SteelFramed-1 good": 10.0}},
+            audit=audit)
+
+        steps = list(dict.fromkeys(e["step"] for e in audit.entries))
+        for step in ("prescriptive", "reference", "coverage",
+                     "costing_envelope", "costing_thermal_bridging"):
+            self.assertIn(step, steps, "ONE audit spans reference generation + costing")
+        self.assertGreater(len(json.loads(audit.to_json())), 30)
 
 
 if __name__ == "__main__":

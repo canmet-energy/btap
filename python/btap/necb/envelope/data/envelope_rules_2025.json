@@ -1,0 +1,311 @@
+{
+ "provenance": {
+  "code": "NECB",
+  "edition": "2025",
+  "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors, split out in 2025), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). ALL VALUES VERIFIED IDENTICAL to NECB 2020 (opaque/fenestration/ground tables byte-match; 2025 door table equals the 2020 door row). Performance-path articles renumbered 8.4.4.x -> 8.4.5.x (verbatim text).",
+  "generated": "2026-07-12",
+  "articles": [
+   "3.1.1.6",
+   "3.1.1.7",
+   "3.2.1.4",
+   "3.2.2.2",
+   "3.2.2.3",
+   "3.2.2.4",
+   "3.2.3.1",
+   "8.4.5.1",
+   "8.4.5.3",
+   "8.4.5.4"
+  ],
+  "note": "RE-VERIFIED 2026-08-02 against the post-hbix-fix extraction (D-61): all values match the corrected printed table exactly. Runtime never contacts the MCP. U-values are EFFECTIVE transmittance per 3.1.1.7."
+ },
+ "non_rule_keys": [
+  "u_values_units",
+  "hdd_bins_note"
+ ],
+ "u_values_units": "W/(m2.K) — maximum overall (EFFECTIVE) thermal transmittance",
+ "u_values": {
+  "outdoors": {
+   "wall": {
+    "3000": 0.29,
+    "4000": 0.265,
+    "5000": 0.24,
+    "6000": 0.215,
+    "7000": 0.19,
+    "9999": 0.165
+   },
+   "roofceiling": {
+    "3000": 0.164,
+    "4000": 0.156,
+    "5000": 0.138,
+    "6000": 0.121,
+    "7000": 0.117,
+    "9999": 0.11
+   },
+   "floor": {
+    "3000": 0.193,
+    "4000": 0.175,
+    "5000": 0.156,
+    "6000": 0.138,
+    "7000": 0.121,
+    "9999": 0.117
+   },
+   "window": {
+    "3000": 1.9,
+    "4000": 1.9,
+    "5000": 1.73,
+    "6000": 1.73,
+    "7000": 1.44,
+    "9999": 1.44
+   },
+   "skylight": {
+    "3000": 2.69,
+    "4000": 2.69,
+    "5000": 2.41,
+    "6000": 2.41,
+    "7000": 2.01,
+    "9999": 2.01
+   },
+   "door": {
+    "3000": 2.12,
+    "4000": 1.9,
+    "5000": 1.9,
+    "6000": 1.9,
+    "7000": 1.9,
+    "9999": 1.44
+   }
+  },
+  "ground": {
+   "wall": {
+    "3000": 0.568,
+    "4000": 0.379,
+    "5000": 0.284,
+    "6000": 0.284,
+    "7000": 0.284,
+    "9999": 0.21
+   },
+   "roofceiling": {
+    "3000": 0.568,
+    "4000": 0.379,
+    "5000": 0.284,
+    "6000": 0.284,
+    "7000": 0.284,
+    "9999": 0.21
+   },
+   "floor": {
+    "3000": 0.757,
+    "4000": 0.757,
+    "5000": 0.757,
+    "6000": 0.757,
+    "7000": 0.757,
+    "9999": 0.379
+   }
+  }
+ },
+ "ground_floor_extent": {
+  "article": "3.2.3.3.(3); Table 3.2.3.1.",
+  "full_area_min_hdd": 7000,
+  "strip_width_m": 1.2,
+  "note": "Table 3.2.3.1 floors row reads '0.757 for 1.2 m' in zones 4-7B — a perimeter strip per 3.2.3.3.(3); the slab FIELD carries no prescriptive maximum below zone 8 — vs '0.379 for full area' in zone 8. The strip/full-area U is the u_values.ground.floor bin at the building HDD (u_values itself is structurally pinned to the legacy JSON, so the extent lives here). Verified against the printed table via the codes MCP (necb 2020 and 2025 identical)."
+ },
+ "fdwr": {
+  "article": "3.2.1.4.(1)",
+  "text": "FDWR = 0.40 for HDD <= 4000; FDWR = (2000 - 0.2 x HDD)/3000 for 4000 < HDD < 7000; FDWR = 0.20 for HDD >= 7000",
+  "boundary_note": "Code text says <= 4000 -> 0.40; legacy openstudio-standards uses < 4000 with the linear branch at exactly 4000 — identical result ((2000-800)/3000 = 0.40).",
+  "pieces": [
+   {
+    "max_hdd": 4000,
+    "value": 0.4
+   },
+   {
+    "min_hdd": 4000,
+    "max_hdd": 7000,
+    "linear": {
+     "intercept": 2000.0,
+     "slope": -0.2,
+     "divisor": 3000.0
+    }
+   },
+   {
+    "min_hdd": 7000,
+    "value": 0.2
+   }
+  ]
+ },
+ "srr_max": {
+  "article": "3.2.1.4.(2)",
+  "value": 0.02,
+  "text": "The total skylight area shall be less than 2% of the gross roof area"
+ },
+ "hdd_bins_note": "keys are HDD bin CEILINGS {3000,4000,5000,6000,7000,9999} = zones 4/5/6/7A/7B/8; lookup rule (legacy-exact): first value where hdd < key, fallback 0.110",
+ "reference_envelope": {
+  "articles": "8.4.5.1.(2), 8.4.5.3., 8.4.5.4.",
+  "roof_absorptance_if_actual_used": 0.7,
+  "note": "populated fully in P4 (lightweight layers from Note A-8.4.4.4.(1), air leakage from 8.4.3.3.(3))"
+ },
+ "article_coverage": {
+  "note": "Envelope-slice coverage; statuses flip as phases land.",
+  "articles": [
+   {
+    "article": "3.1.1.5.",
+    "title": "Determination of Thermal Characteristics",
+    "status": "host_scope",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/thermal_bridging.rb#apply",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
+    ],
+    "how": "effective thermal characteristics: clear-field conductances resolved by the prescriptive lookup, and effective (thermal-bridging-derated) values via the tbd-based uprate/derate pass when thermal_bridging: is requested"
+   },
+   {
+    "article": "3.1.1.6.",
+    "title": "Determination of Areas (FDWR/SRR area basis)",
+    "status": "implemented",
+    "how": "gross wall/roof area census + FDWR/SRR computed from exposed conditioned surfaces (Geometry module)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply",
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_fdwr"
+    ]
+   },
+   {
+    "article": "3.1.1.7.",
+    "title": "Thermal Characteristics of Building Assemblies (EFFECTIVE transmittance incl. thermal bridging)",
+    "status": "implemented",
+    "gaps": "requires the tbd gem at runtime; without it (or when thermal_bridging: is not requested) values are clear-field and the audit WARNS",
+    "how": "TBD-based uprate/derate: assemblies uprated so the DERATED effective Ut meets the table targets (thermal_bridging: option, BETBG PSI sets)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/thermal_bridging.rb#apply"
+    ]
+   },
+   {
+    "article": "3.2.1.4.",
+    "title": "Allowable Fenestration and Door Area (FDWR + 2% skylights)",
+    "status": "implemented",
+    "how": "max_fdwr piecewise formula + 2% SRR; FDWR window rebuild and centroid-scaled skylights (apply_fdwr:/apply_srr:)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_fdwr",
+     "btap-necb/lib/btap_necb/envelope/rules.rb#max_srr",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
+    ]
+   },
+   {
+    "article": "3.2.2.1.",
+    "title": "General (above-ground assemblies)",
+    "status": "implemented",
+    "how": "prescriptive application classifies and hard-assigns all above-ground assemblies",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
+    ]
+   },
+   {
+    "article": "3.2.2.2.",
+    "title": "Opaque above-ground U-values by HDD zone",
+    "status": "implemented",
+    "how": "opaque U-values applied per HDD bin (legacy-compatible construction conductance; include_films: for overall)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance"
+    ]
+   },
+   {
+    "article": "3.2.2.3.",
+    "title": "Fenestration/skylight U-values by HDD zone",
+    "status": "implemented",
+    "how": "window/skylight U via SimpleGlazing replacement preserving SHGC/VT; opaque doors via insulation solve",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#target_conductance",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply_ground_strip"
+    ]
+   },
+   {
+    "article": "3.2.2.4.",
+    "title": "Door U-values (2025 split-out table; 2020: within 3.2.2.x)",
+    "status": "implemented",
+    "how": "door values applied (2025 split-out table == 2020 door row)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#subsurface_target_construction"
+    ]
+   },
+   {
+    "article": "3.2.3.1.",
+    "title": "Building assemblies in contact with the ground",
+    "status": "implemented",
+    "how": "ground-contact wall/roof U-values applied full-area; floors follow the zone-conditional extent (zone 8 full-area retarget; zones 4-7B keep the slab field and get a 1.2 m Kiva perimeter strip per 3.2.3.3.(3) — warns when no Kiva foundation to carry it)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
+    ]
+   },
+   {
+    "article": "3.2.4.1.",
+    "title": "Air Leakage — continuous air barrier system",
+    "status": "not_implemented",
+    "gap_owner": "modeller",
+    "gaps": "3.2.4.1. requires a continuous air barrier complying with 3.2.4.2. or 3.2.4.3. Compliance is established by a WHOLE-BUILDING ASTM E3158 test on the CONSTRUCTED building, so no energy model can verify it — an .osm has no air-barrier continuity to inspect. The associated leakage RATE is applied to the model (see 8.4.2.9. and 8.4.4.3./8.4.5.3.); the barrier itself is verified on site."
+   },
+   {
+    "article": "3.2.4.2.",
+    "title": "Air barrier system — 1.50 L/(s.m2) @ 75 Pa tested rate",
+    "status": "not_implemented",
+    "gap_owner": "modeller",
+    "gaps": "the 1.50 L/(s.m2) @ 75 Pa normalized rate is ASSUMED by the model as the untested default and drives the infiltration coefficients, but the sentence is a TEST requirement (ASTM E3158, pressurized and depressurized, averaged) on the finished building. The model states the assumed rate and flags it as pending field verification; a measured rate should be substituted once tested. Previously undeclared in any gem despite being the article the deviation warning cites."
+   },
+   {
+    "article": "8.4.5.1.",
+    "title": "Reference building basis (envelope meets Section 3.2)",
+    "status": "implemented",
+    "how": "reference envelope meets prescriptive Section 3.2 (U-values at the building HDD; FDWR/SRR enforced via 8.4.5.3.(3) scaling)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope"
+    ]
+   },
+   {
+    "article": "8.4.5.2.",
+    "title": "Operating schedules/loads identical",
+    "status": "host_scope",
+    "how": "HVAC-side handled by openstudio-hvac reference_hvac (satisfied by clone there)",
+    "code": [
+     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
+    ]
+   },
+   {
+    "article": "8.4.5.3.",
+    "title": "Reference envelope: absorptance, FDWR scaling, shading, fenestration optics",
+    "status": "implemented",
+    "gaps": "sentence (7) partitions are satisfied by the caller-side clone; humidification note n/a",
+    "how": "roof absorptance 0.7 iff proposed used actual values; proportional per-orientation FDWR/SRR scaling of EXISTING fenestration; Space/Building shading + controls removed, Site shading kept; optics (SHGC/VT) preserved; air-leakage default I_AGW = (5/75)^0.6 x 1.50 x S/A_AGW per 8.4.3.3.(3)/8.4.2.9.(2)",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_roof_absorptance",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#scale_fenestration_to_limits",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#strip_shading",
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default"
+    ]
+   },
+   {
+    "article": "8.4.5.4.",
+    "title": "Lightweight construction + space thermal characteristics",
+    "status": "implemented",
+    "gaps": "VERIFIED against Note A-8.4.5.4.(1) (retrieved via MCP 2026-07-28, D-35): lightweight = light FRAME, not zero-mass - the rebuild is calibrated to the note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at the prescriptive resistance; the note's follow-the-proposed-layer-structure guidance is approximated by the single calibrated layer",
+    "how": "opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_lightweight_construction"
+    ]
+   },
+   {
+    "article": "8.4.1.1. (envelope)",
+    "title": "General — envelope components accounted",
+    "status": "implemented",
+    "how": "Envelope components accounted per the prescriptive Section 3.2 requirements via the reference transform (8.4.5.3./8.4.5.4.: U-values at the building HDD, FDWR/SRR, lightweight construction) — the realization of 8.4.1.1.(1) for the envelope slice.",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope",
+     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
+    ]
+   },
+   {
+    "article": "8.4.2.9.",
+    "title": "Air Leakage",
+    "status": "implemented",
+    "how": "The (2) I_AGW operating-pressure conversion of the 75 Pa leakage rate is computed and applied per space in the reference air-leakage default (apply_air_leakage_default, which cites this article); (1) accounting happens through the infiltration objects on both models.",
+    "code": [
+     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default"
+    ]
+   }
+  ]
+ }
+}
