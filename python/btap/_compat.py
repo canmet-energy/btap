@@ -139,32 +139,6 @@ def ruby_float_str(x: float) -> str:
     return s
 
 
-_sdk_hash_patched = False
-
-
-def ensure_sdk_hashable() -> None:
-    """Make SDK model objects usable as dict keys (idempotent).
-
-    The openstudio wheel's ModelObject/IdfObject define __eq__ (handle
-    equality) WITHOUT __hash__, so Python marks them unhashable — but the
-    ported code keys dicts by SpaceType/BuildingStory/ThermalZone exactly as
-    the Ruby did. This patches a handle-based __hash__ consistent with the
-    wheel's __eq__. Call it at the top of any module that keys a dict or set
-    by SDK objects; lazy so _compat itself stays importable without the SDK.
-    """
-    global _sdk_hash_patched
-    if _sdk_hash_patched:
-        return
-    import openstudio
-
-    def _handle_hash(self):
-        return hash(str(self.handle()))
-
-    openstudio.model.ModelObject.__hash__ = _handle_hash
-    openstudio.IdfObject.__hash__ = _handle_hash
-    _sdk_hash_patched = True
-
-
 def _ruby_inspect(value) -> str:
     """Ruby ``#inspect`` for array elements: strings quoted, nil literal."""
     if value is None:
@@ -172,3 +146,8 @@ def _ruby_inspect(value) -> str:
     if isinstance(value, str):
         return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
     return ruby_str(value)
+
+
+# NOTE: SDK-touching helpers (ensure_sdk_hashable) live in btap._sdk — this
+# module stays stdlib-only so btap.audit can depend on it and still run on a
+# runner with no OpenStudio. The import-linter contract enforces that.

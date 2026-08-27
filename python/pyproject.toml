@@ -30,6 +30,8 @@ testpaths = ["tests"]
 # five subpackages): necb -> costing -> modeling -> audit; simulation beside.
 [tool.importlinter]
 root_package = "btap"
+# Required because the audit contract forbids an EXTERNAL module (openstudio).
+include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "family dependency direction (D-77)"

@@ -91,7 +91,15 @@ jobs:
         with:
           ruby-version: '3.2.2'
       - name: Install the openstudio wheel + test runner
-        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist
+        run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter
+      # The D-77 dependency arrows as an enforced contract, not a convention:
+      # necb -> costing -> modeling -> audit, simulation beside, and audit
+      # SDK-free (the property the bare-runner audit suite depends on). It
+      # has already caught real drift — a lazily-imported SDK helper that had
+      # crept into the stdlib-only _compat module.
+      - name: Import contracts (D-77 direction, audit SDK-free)
+        working-directory: python
+        run: lint-imports
       # pytest-xdist runs test files in parallel worker PROCESSES (the same
       # per-file forking the Ruby Rakefile does) — the suites are stdlib
       # unittest classes, collected by pytest unchanged; plain
