@@ -204,7 +204,11 @@ def cost_pump_piping(quantifier, counts, _audit):
     quantifier.add("ValvesGate", 1, ["SHW"], "SHW gate valves", count=1.0 * pumps)
 
 
-# NOTE (suspected Ruby bug, not ported): shw.rb also defines a module-level
-# ``BtapCosting.cost`` that delegates to ``Costing.cost`` — a constant that
-# exists nowhere in the gem, so calling it raises NameError in Ruby. It is
-# dead code and has no Python counterpart.
+# NOTE: shw.rb used to define a module-level ``BtapCosting.cost`` delegating
+# to ``Costing.cost`` — a constant left behind by the C7 rename, so the call
+# always raised NameError while ``respond_to?(:cost)`` still answered true.
+# Nothing called it (every caller uses the umbrella's ``SHW.cost``), and it
+# has been DELETED from the gem rather than ported: the family exposes its
+# domains as BtapCosting::SHW / ::HVAC / ::Envelope / ::Lighting, with no
+# top-level facade, and a bare ``cost`` that priced only service water was
+# misleading either way. Do not reintroduce it here.
