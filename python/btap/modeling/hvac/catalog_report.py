@@ -323,12 +323,13 @@ def load_model(fixture):
     and leaves the C-level error indicator set, which can segfault the
     interpreter on a later unrelated call. Check first, always.
     """
-    loaded = openstudio.model.Model.load(openstudio.path(str(fixture)))
-    if not loaded.is_initialized():
+    from btap._sdk import load_model as _checked_load
+    try:
+        return _checked_load(fixture)
+    except ValueError as e:
         raise ValueError(
             f"catalog seed model could not be read: {fixture} "
-            "(pass fixture=<path to a .osm with thermal zones>)")
-    return loaded.get()
+            "(pass fixture=<path to a .osm with thermal zones>)") from e
 
 
 def extract(model, zones):

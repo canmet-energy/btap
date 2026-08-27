@@ -12,8 +12,8 @@ from tests.support import FIXTURE_OSM
 
 def load_raw_fixture():
     """The RAW shared fixture — thermostats, no standardsSpaceType tags, no HVAC."""
-    import openstudio
-    return openstudio.model.Model.load(openstudio.path(str(FIXTURE_OSM))).get()
+    from btap._sdk import load_model
+    return load_model(FIXTURE_OSM)
 
 
 def load_fixture():

@@ -78,15 +78,14 @@ def prepared_base(work_dir: Path) -> Path:
 
 def run_one(name: str, base_osm: str) -> dict:
     """Child-process body: build the system on the base model, sizing-run it."""
-    import openstudio
-
     import btap.modeling as modeling
     from btap._compat import sorted_by_name
+    from btap._sdk import load_model
     from btap.simulation import runner
 
     try:
         with tempfile.TemporaryDirectory() as run_dir:
-            model = openstudio.model.Model.load(openstudio.path(base_osm)).get()
+            model = load_model(base_osm)
             modeling.build_system(model, name, sorted_by_name(model.getThermalZones()))
             runner.attach_weather(model, epw=str(EPW), ddy=str(DDY))
             runner.run_energyplus(model, run_dir, sizing_only=True)

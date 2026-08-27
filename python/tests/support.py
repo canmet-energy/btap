@@ -79,5 +79,6 @@ def _hard_fail(cls_or_fn, message):
 
 
 def load_fixture():
-    import openstudio
-    return openstudio.model.Model.load(openstudio.path(str(FIXTURE_OSM))).get()
+
+    from btap._sdk import load_model
+    return load_model(FIXTURE_OSM)

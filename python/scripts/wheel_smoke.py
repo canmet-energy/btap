@@ -90,12 +90,10 @@ def run_checks() -> int:
     check("an unreadable seed model fails loudly", bad_seed_is_loud)
 
     def domain_operation():
-        import openstudio
-
+        from btap._sdk import load_model
         from btap.audit import AuditLog
         from btap.necb import loads
-        model = openstudio.model.Model.load(
-            openstudio.path(modeling.hvac.catalog_report.FIXTURE)).get()
+        model = load_model(modeling.hvac.catalog_report.FIXTURE)
         for st in model.getSpaceTypes():
             if st.spaces():
                 st.setStandardsBuildingType("Space Function")
