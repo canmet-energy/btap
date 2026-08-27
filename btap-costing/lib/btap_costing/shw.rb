@@ -163,10 +163,4 @@ module BtapCosting
       quantifier.add('ValvesGate', 1, %w[SHW], 'SHW gate valves', count: 1.0 * pumps)
     end
   end
-
-  # Cost the model's service water heating (legacy shw_costing port on the
-  # btap-costing hvac costing engine).
-  def self.cost(model, **kwargs)
-    Costing.cost(model, **kwargs)
-  end
 end

@@ -29,7 +29,7 @@ _LOG = 'openstudio.standards.Geometry.Create'
 # The engine (and the facade's space_types_hash) key dicts by
 # SpaceType/BuildingStory objects exactly as the Ruby does — the wheel's SWIG
 # bindings need the shared handle-hash patch for that (see _compat).
-from btap._compat import ensure_sdk_hashable  # noqa: E402
+from btap._sdk import ensure_sdk_hashable  # noqa: E402
 
 ensure_sdk_hashable()
 
