@@ -6,6 +6,8 @@ use these instead of the raw Python equivalents:
 
 - ``ruby_round``   — Ruby ``Float#round`` (half AWAY from zero, on the
   shortest decimal representation); Python's ``round()`` is banker's.
+- ``ruby_div``     — Ruby FLOAT division, which never raises: x/0.0 is
+  ±Infinity and 0.0/0.0 is NaN, where Python raises ZeroDivisionError.
 - ``opt``/``opt_or`` — SDK ``Optional`` unwrapping; routes every call through
   one greppable site and retires the missing-``()`` truthy-bound-method bug.
 - ``NullAudit``    — null-object stand-in for AuditLog, replacing Ruby's 235
@@ -21,6 +23,7 @@ Stdlib only. This module must never import openstudio.
 
 from __future__ import annotations
 
+import math
 from contextlib import contextmanager
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
@@ -30,17 +33,56 @@ def ruby_round(x, ndigits: int = 0):
     """Ruby ``Float#round(ndigits)``: half away from zero on the value's
     shortest decimal representation (so ``ruby_round(2.675, 2) == 2.68`` even
     though the double is 2.67499...). Returns int for ``ndigits <= 0`` and
-    float otherwise, exactly as Ruby returns Integer/Float."""
+    float otherwise, exactly as Ruby returns Integer/Float.
+
+    Non-finite input follows Ruby exactly: with ndigits > 0 the value comes
+    back unchanged (``Infinity.round(2) == Infinity``, ``NaN.round(4) ==
+    NaN``), while ndigits <= 0 must produce an Integer and so raises, as
+    Ruby's FloatDomainError does. This matters because Ruby float division
+    never raises — see ``ruby_div`` — so NaN/Infinity reach rounding on
+    perfectly ordinary code paths."""
     if isinstance(x, int) and ndigits >= 0:
         return x
+    value = float(x)
+    if math.isnan(value) or math.isinf(value):
+        if ndigits > 0:
+            return value
+        raise ValueError(f"cannot round {value} to an integer (Ruby: FloatDomainError)")
     quantum = Decimal(1).scaleb(-ndigits)
-    d = Decimal(repr(float(x))).quantize(quantum, rounding=ROUND_HALF_UP)
+    d = Decimal(repr(value)).quantize(quantum, rounding=ROUND_HALF_UP)
     return int(d) if ndigits <= 0 else float(d)
+
+
+def ruby_div(numerator, denominator) -> float:
+    """Ruby FLOAT division, which never raises: ``x/0.0`` is ±Infinity and
+    ``0.0/0.0`` is NaN, where Python raises ZeroDivisionError.
+
+    This is a family-wide porting hazard, not a curiosity. Ruby code
+    routinely divides by a possibly-zero area or count and then relies on the
+    result comparing false (``NaN <= 0.006`` is false), which is how several
+    NECB criteria skip an inapplicable half. Transliterating such a division
+    turns a silent skip into a crash, so every ported float division whose
+    denominator can be zero goes through here."""
+    n, d = float(numerator), float(denominator)
+    if d != 0.0:
+        return n / d
+    if n == 0.0 or math.isnan(n):
+        return math.nan
+    return math.inf if (n > 0) == (not math.copysign(1.0, d) < 0) else -math.inf
 
 
 def opt(optional):
     """Unwrap an SDK Optional: the value, or None when empty (Ruby's
-    ``x.is_initialized ? x.get : nil``). None passes through."""
+    ``x.is_initialized ? x.get : nil``). None passes through.
+
+    ALWAYS route through this rather than calling ``.get()`` directly. The
+    Python bindings do not fail the way Ruby does: ``OptionalModel.get()`` on
+    an EMPTY optional RETURNS AN EMPTY MODEL instead of raising (so a failed
+    ``Model.load`` flows onward silently), while ``OptionalDouble``/
+    ``OptionalString`` raise ``SystemError`` and leave the C-level error
+    indicator set, which can segfault the interpreter on a later unrelated
+    call. Ruby raises cleanly in all of these. See D-79.
+    """
     if optional is None:
         return None
     return optional.get() if optional.is_initialized() else None

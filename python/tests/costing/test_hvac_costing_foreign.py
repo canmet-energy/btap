@@ -120,15 +120,41 @@ class TestCostingForeign(unittest.TestCase):
                             f"warning not mirrored: {w}")
         self.assertGreater(len(json.loads(audit.to_json())), 0)
 
-    @unittest.skip('needs btap.necb reference_hvac (later milestone port); the Ruby '
-                   'original threads ONE AuditLog through BtapNECB::HVAC.reference_hvac '
-                   'and cost() and asserts a single chronological narrative '
-                   '(characterize/selection/build/rules/efficiency/coverage before '
-                   'costing_equipment/costing)')
     def test_unified_audit_across_reference_and_costing(self):
         """ONE audit for compliance + costing: thread a single AuditLog through
-        reference_hvac and cost and get one chronological narrative."""
-        raise NotImplementedError
+        reference_hvac and cost and get one chronological narrative.
+        Unblocked by M5's hvac rules domain."""
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.costing.hvac import report as hvac_report
+        from btap.necb import hvac as necb_hvac
+
+        model = load_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        modeling.build_system(model, 'Baseboard gas boiler', zones)
+        types = {z.nameString(): 'Office - enclosed' for z in model.getThermalZones()}
+
+        audit = AuditLog()
+        result = necb_hvac.reference_hvac(
+            model, building={'storeys': 1, 'zone_types': types,
+                             'winter_design_temp_c': -20}, audit=audit)
+        ref = result.model
+        for boiler in ref.getBoilerHotWaters():
+            boiler.setNominalCapacity(60_000.0)
+        for coil in ref.getCoilCoolingDXSingleSpeeds():
+            coil.setRatedTotalCoolingCapacity(15_000.0)
+        report = hvac_report.cost(ref, city='TORONTO', province_state='ONTARIO', audit=audit)
+
+        self.assertIs(report.audit, result.audit, 'one AuditLog object end to end')
+        steps = list(dict.fromkeys(e['step'] for e in audit.entries))
+        # compliance narrative first, costing narrative after — one chronological log
+        for step in ('characterize', 'selection', 'build', 'rules', 'efficiency',
+                     'coverage', 'costing_equipment', 'costing'):
+            self.assertIn(step, steps)
+        self.assertLess(steps.index('coverage'), steps.index('costing_equipment'),
+                        'reference generation precedes costing in the same log')
+        self.assertGreater(len(json.loads(audit.to_json())), 50)
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ module BtapModeling
   module CatalogReport
     module_function
 
-    FIXTURE = File.expand_path('../../../test/fixtures/5ZoneNoHVAC.osm', __dir__)
+    FIXTURE = File.expand_path('data/5ZoneNoHVAC.osm', __dir__)
 
     # ---- component classification (mirrors necb ModelQuery::COMPONENT_KINDS) ----
     # Order matters: the FIRST matching regex wins, so specific rules precede
@@ -292,8 +292,19 @@ module BtapModeling
       card
     end
 
+    # Refuse an unreadable seed LOUDLY. An empty Optional here used to reach
+    # `.get` and (in the Python port) yield an EMPTY model, so every one of the
+    # 97 systems rendered "diagram unavailable" and the caller got a 1 MB
+    # document that looked like a report. A bad path is an error, not a
+    # degraded result.
     def load_model(fixture)
-      OpenStudio::Model::Model.load(OpenStudio::Path.new(fixture)).get
+      loaded = OpenStudio::Model::Model.load(OpenStudio::Path.new(fixture))
+      if loaded.empty?
+        raise(ArgumentError, "catalog seed model could not be read: #{fixture} " \
+                             '(pass fixture: <path to a .osm with thermal zones>)')
+      end
+
+      loaded.get
     end
 
     # Extract a plain-hash topology snapshot (mirrors necb ModelQuery, extended

@@ -26,7 +26,7 @@ ROOT = File.expand_path('../..', __dir__)
 require File.join(ROOT, 'btap-necb', 'lib', 'btap_necb')
 
 OUT = File.join(ROOT, 'btap-necb', 'test', 'fixtures', 'variant_mockups')
-FIXTURE = File.join(ROOT, 'btap-modeling', 'test', 'fixtures', '5ZoneNoHVAC.osm')
+FIXTURE = File.join(ROOT, 'btap-modeling', 'lib', 'btap_modeling', 'hvac', 'data', '5ZoneNoHVAC.osm')
 FileUtils.mkdir_p(OUT)
 
 def base_model(space_type)

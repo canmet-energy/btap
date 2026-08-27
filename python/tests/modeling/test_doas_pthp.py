@@ -8,8 +8,8 @@ HS11 = 'hs11_ashp_pthp'
 @needs_sdk
 class TestDoasPthp(unittest.TestCase):
     def test_hs11_builds_doas_and_zone_pthps(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -62,8 +62,8 @@ class TestDoasPthp(unittest.TestCase):
                          'electric supplemental: no boiler')
 
     def test_hs11_pipe_name_matches_legacy_format(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())

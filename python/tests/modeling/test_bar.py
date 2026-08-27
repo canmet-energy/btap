@@ -105,26 +105,28 @@ class TestBar(unittest.TestCase):
     # than skipping — here the whole test is skipped until M5 lands the btap.necb
     # port; unskipping it (and fixing the anticipated btap.necb spellings below)
     # is part of that milestone.
-    @unittest.skip('needs btap.necb (M5)')
     def test_full_family_composition_from_bar(self):
         import json
 
         import btap.modeling as modeling
-        from btap import necb
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
+        from btap.necb import envelope as necb_envelope
+        from btap.necb import lighting as necb_lighting
+        from btap.necb import loads as necb_loads
+        from btap.necb import shw as necb_shw
 
         model = modeling.bar(space_type_ratios=RATIOS, length=50.0, width=20.0,
                              num_stories_above_grade=2, wwr=0.4)
         # wizard output carries no constructions; the envelope pass retargets existing ones
         self.seed_constructions(model)
         audit = AuditLog()
-        necb.apply_loads(model, vintage='2020', audit=audit)
-        necb.apply_lights(model, vintage='2020', audit=audit)
-        necb.apply_shw(model, vintage='2020', fuel='NaturalGas', audit=audit)
+        necb_loads.apply_loads(model, vintage='2020', audit=audit)
+        necb_lighting.apply_lights(model, vintage='2020', audit=audit)
+        necb_shw.apply_shw(model, vintage='2020', fuel='NaturalGas', audit=audit)
         modeling.build_system(model, 'Baseboard gas boiler',
                               sorted_by_name(model.getThermalZones()))
-        necb.apply_prescriptive(model, vintage='2020', hdd=3890, audit=audit)
+        necb_envelope.apply_prescriptive(model, vintage='2020', hdd=3890, audit=audit)
 
         self.assertTrue(list(model.getPeoples()), 'loads live on bar geometry')
         self.assertTrue([light for st in model.getSpaceTypes() for light in st.lights()],

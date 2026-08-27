@@ -33,3 +33,24 @@ def ensure_sdk_hashable() -> None:
     openstudio.model.ModelObject.__hash__ = _handle_hash
     openstudio.IdfObject.__hash__ = _handle_hash
     _sdk_hash_patched = True
+
+
+def load_model(path):
+    """Load an .osm, refusing an unreadable path LOUDLY.
+
+    THE reason this exists: ``OptionalModel.get()`` on an EMPTY optional
+    RETURNS AN EMPTY MODEL rather than raising (Ruby raises), so an
+    unreadable path flows onward as a model with no spaces and no zones and
+    surfaces later as dozens of meaningless downstream failures. Other empty
+    Optionals raise ``SystemError`` and leave the C-level error indicator
+    set, which can segfault the interpreter on a later unrelated call.
+
+    Never write ``Model.load(...).get()``. Use this. The invariant is
+    enforced by tests/test_sdk_invariants.py, not just documented (D-79).
+    """
+    import openstudio
+
+    loaded = openstudio.model.Model.load(openstudio.path(str(path)))
+    if not loaded.is_initialized():
+        raise ValueError(f"could not read an OpenStudio model at: {path}")
+    return loaded.get()

@@ -4,7 +4,7 @@ require_relative '../lib/btap_costing'
 
 module FixtureHelper
   # Fixtures shared from btap-modeling (monorepo incubation).
-  FIXTURE = File.expand_path('../../btap-modeling/test/fixtures/5ZoneNoHVAC.osm', __dir__)
+  FIXTURE = File.expand_path('../../btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm', __dir__)
   EPW = File.expand_path('../../btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw', __dir__)
   DDY = File.expand_path('../../btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy', __dir__)
 

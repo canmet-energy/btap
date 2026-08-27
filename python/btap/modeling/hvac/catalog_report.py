@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import math
 import re
+from importlib import resources
 from pathlib import Path
 
 import openstudio
@@ -41,10 +42,13 @@ from btap.modeling.hvac import builder, canonical, catalog
 from btap.modeling.hvac.catalog_icons import ICON_DATA, ICON_FOR_IDD
 from btap.modeling.hvac.components import coils
 
-# The bundled 5-zone fixture (the Ruby gem's spec.files excludes test/, so
-# this path is already broken in a *packaged* gem — pre-existing, ported as-is).
-FIXTURE = str(Path(__file__).resolve().parents[4]
-              / 'btap-modeling' / 'test' / 'fixtures' / '5ZoneNoHVAC.osm')
+# The bundled 5-zone seed model. It is RUNTIME-owned (shipped inside the
+# package, as the gem now ships it under lib/), not a test fixture reached by
+# walking out of the install: the previous path resolved outside the package
+# and simply did not exist in a built wheel, where it degraded into a report
+# with 97 "diagram unavailable" cards instead of failing. Resolved through the
+# package so it works identically from a source tree and from a wheel.
+FIXTURE = str(resources.files('btap.modeling.hvac') / 'data' / '5ZoneNoHVAC.osm')
 
 # ---- component classification (mirrors necb ModelQuery::COMPONENT_KINDS) ----
 # Order matters: the FIRST matching regex wins, so specific rules precede
@@ -309,7 +313,23 @@ def build_card(row, base):
 
 
 def load_model(fixture):
-    return openstudio.model.Model.load(openstudio.path(str(fixture))).get()
+    """Load the seed model, refusing an unreadable path LOUDLY.
+
+    This must never call ``.get()`` on an unchecked Optional. In the Python
+    bindings ``OptionalModel.get()`` on an EMPTY optional returns an empty
+    Model rather than raising (Ruby raises), so the whole catalog rendered 97
+    "diagram unavailable" cards and returned a 1 MB document that looked like
+    a report. Worse, ``.get()`` on other empty Optionals raises SystemError
+    and leaves the C-level error indicator set, which can segfault the
+    interpreter on a later unrelated call. Check first, always.
+    """
+    from btap._sdk import load_model as _checked_load
+    try:
+        return _checked_load(fixture)
+    except ValueError as e:
+        raise ValueError(
+            f"catalog seed model could not be read: {fixture} "
+            "(pass fixture=<path to a .osm with thermal zones>)") from e
 
 
 def extract(model, zones):
@@ -1568,7 +1588,7 @@ def wrap_label(string, max_chars, max_lines=2):
             lines.append(word)
         else:
             lines[-1] = f'{lines[-1]} {word}'
-    return [f'{l[:max_chars - 1]}…' if len(l) > max_chars else l for l in lines]
+    return [f'{line[:max_chars - 1]}…' if len(line) > max_chars else line for line in lines]
 
 
 # ---------------------------------------------------------------- HTML

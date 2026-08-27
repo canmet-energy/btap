@@ -15,7 +15,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "btap-modeling" / "test" / "fixtures"
-FIXTURE_OSM = FIXTURES / "5ZoneNoHVAC.osm"
+# The seed model is RUNTIME-owned now (shipped in the package and in the gem
+# under lib/); only the weather files remain test fixtures.
+FIXTURE_OSM = (REPO_ROOT / "btap-modeling" / "lib" / "btap_modeling" / "hvac"
+               / "data" / "5ZoneNoHVAC.osm")
 EPW = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 
@@ -76,5 +79,6 @@ def _hard_fail(cls_or_fn, message):
 
 
 def load_fixture():
-    import openstudio
-    return openstudio.model.Model.load(openstudio.path(str(FIXTURE_OSM))).get()
+
+    from btap._sdk import load_model
+    return load_model(FIXTURE_OSM)

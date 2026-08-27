@@ -6,7 +6,7 @@ module FixtureHelper
   # Fixtures are shared with the sibling domain gems (monorepo incubation) —
   # no third copy of the weather trio.
   HVAC_FIXTURES = File.expand_path('../../btap-modeling/test/fixtures', __dir__)
-  FIXTURE = File.join(HVAC_FIXTURES, '5ZoneNoHVAC.osm')
+  FIXTURE = File.expand_path('../../btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm', __dir__)
   EPW = File.join(HVAC_FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
   DDY = File.join(HVAC_FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
   STAT = File.join(HVAC_FIXTURES, 'weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.stat')

@@ -33,7 +33,7 @@ FIXTURE_ARGS = (BASE_ARGS + ['--space-type', 'Space Function/Office enclosed > 2
 SIZING_SUBSET = %w[01-baseboard-gas 02-psz-gas-dx 09-water-source-hp].freeze
 
 runs = Dir.glob(File.join(SAMPLES, '*.osm')).sort.map { |m| [File.basename(m, '.osm'), m, BASE_ARGS] }
-runs << ['5zone-onramp', File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm'), FIXTURE_ARGS]
+runs << ['5zone-onramp', File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm'), FIXTURE_ARGS]
 runs.select! { |name, _, _| SIZING_SUBSET.include?(name) } if TIER == 'sizing'
 
 failures = []

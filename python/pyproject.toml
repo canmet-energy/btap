@@ -16,12 +16,40 @@ dependencies = ["openstudio~=3.11.0"]
 [tool.setuptools.packages.find]
 include = ["btap*"]
 
+# The rules/catalog/cost tables are the product, not incidental assets: every
+# domain reads them by path at runtime, so a wheel without them fails on the
+# first call. setuptools ships only .py by default — verified by building one
+# and finding zero data files in it. Keep this in step with any new data dir.
+#
+# The costing CSVs here are the PLACEHOLDER schema copies (source column:
+# placeholder/custom/industry — never RS-Means), and they DO belong in the
+# wheel: a wheel is the analogue of the Ruby GEM, whose spec.files ships
+# them, not of the Windows INSTALLER, which strips them via the Rakefile's
+# PRICED_CSVS. Anyone building an end-user Python installer later should
+# mirror that exclusion there, not here. Real RS-Means values are
+# runtime-injected (costs_csv= / BTAP_COSTING_DIR) and never live in the tree.
+[tool.setuptools.package-data]
+"*" = ["data/**/*.json", "data/**/*.csv", "data/**/*.md", "data/**/*.osm"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP"]
+# Enforced in CI, so the selection is what this codebase can honestly hold:
+#   E4/E7/E9 + F + B + I — real defects, bugbear traps, import hygiene.
+# Deliberately NOT enabled:
+#   E501 (line length) — the port mirrors Ruby's line structure; reflowing
+#     ~745 lines would bury the port diff in noise for no defect caught.
+#   UP  (pyupgrade)    — it rewrites %-formatting to f-strings, and the
+#     audit narrative's "[%-8s] %-13s %s" is deliberate BYTE-PARITY with
+#     Ruby's format(). Auto-modernizing it would silently break the report's
+#     case-sensitive checklist parsing.
+select = ["E4", "E7", "E9", "F", "B", "I"]
+# Ruby's Array#zip PADS the shorter side with nil; Python's zip truncates and
+# strict=True raises. Neither matches, and the ported code handles length
+# mismatch explicitly where it matters — a blanket strict= would diverge.
+ignore = ["B905"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

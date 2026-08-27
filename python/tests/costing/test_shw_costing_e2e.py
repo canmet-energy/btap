@@ -10,13 +10,15 @@ directly with the SDK — a 'Main Service Water Loop' PlantLoop carrying one
 WaterHeaterMixed (fuel/efficiency/capacity as the NECB layer would set them:
 small-volume tanks route to the Et=0.9 'all others' row) and one constant-
 speed pump. The two NECB-composition tests (EnergyPlus run of the applied
-SHW schedules, family one-audit composition) cannot run without btap.necb
-and SKIP loudly with that reason until M5 re-enables them.
+SHW schedules, family one-audit composition) were placeheld until btap.necb
+landed; M5 re-enabled them and they now drive the REAL apply_loads /
+apply_shw / apply_prescriptive path, as the Ruby original does.
 """
 
 import unittest
 
-from tests.support import load_fixture, needs_sdk
+from btap.audit import AuditLog
+from tests.support import load_fixture, needs_engine, needs_sdk
 
 # A concurrent agent may own tests/costing/support.py; import it if present,
 # inline what we need otherwise (never create it here).
@@ -97,15 +99,67 @@ class TestCostingE2E(unittest.TestCase):
         report = shw.cost(load_fixture(), city=CITY, province_state=PROVINCE)
         self.assertEqual(0.0, report.total)
 
-    @unittest.skip("needs btap.necb (M5): apply_shw builds the NECB SWH schedules "
-                   "this EnergyPlus gate exercises")
+    @needs_engine
     def test_shw_energy_alive_in_energyplus(self):
-        self.fail("unreachable until btap.necb lands (M5)")
+        # Unblocked by M5: the loop now comes from the real NECB apply_shw,
+        # so this exercises the NECB SWH schedules rather than a hand-built
+        # topology — the whole point of the gate.
+        import tempfile
 
-    @unittest.skip("needs btap.necb (M5): Loads/SHW/Envelope application drive the "
-                   "one-audit family composition")
+        from btap._compat import opt
+        from btap.necb import loads as necb_loads
+        from btap.necb import shw as necb_shw
+        from btap.simulation import runner
+        from tests.necb.support import tagged_model
+        from tests.support import DDY, EPW
+
+        model = tagged_model()
+        audit = AuditLog()
+        necb_loads.apply_loads(model, vintage="2020", audit=audit)
+        necb_shw.apply_shw(model, vintage="2020", fuel="NaturalGas", audit=audit)
+        for zone in model.getThermalZones():
+            zone.setUseIdealAirLoads(True)
+
+        with tempfile.TemporaryDirectory(prefix="osshw-e2e-") as tmp:
+            runner.attach_weather(model, epw=str(EPW), ddy=str(DDY))
+            run_dir = runner.run_energyplus(model, f"{tmp}/shw", sizing_only=False,
+                                            run_period={"begin_month": 1, "begin_day": 1,
+                                                        "end_month": 1, "end_day": 7})
+            self.assertTrue(runner.is_clean_run(run_dir), "NECB SHW run must be clean")
+
+            sql = opt(model.sqlFile())
+            water_gj = opt(sql.execAndReturnFirstDouble(
+                "SELECT SUM(Value) FROM TabularDataWithStrings WHERE "
+                "ReportName='AnnualBuildingUtilityPerformanceSummary' AND "
+                "TableName='End Uses' AND RowName='Water Systems' AND Units='GJ'"))
+            self.assertIsNotNone(water_gj)
+            self.assertGreater(water_gj, 0,
+                               "water systems consume energy on the NECB SWH schedule")
+
     def test_family_composition_one_audit(self):
-        self.fail("unreachable until btap.necb lands (M5)")
+        # Unblocked by M5. ONE audit spans loads -> shw -> hvac -> envelope ->
+        # costing; the family contract is that every stage writes to it.
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.necb import envelope as necb_envelope
+        from btap.necb import loads as necb_loads
+        from btap.necb import shw as necb_shw
+        from tests.necb.support import tagged_model
+
+        model = tagged_model()
+        audit = AuditLog()
+        necb_loads.apply_loads(model, vintage="2020", audit=audit)
+        necb_shw.apply_shw(model, vintage="2020", fuel="NaturalGas", audit=audit)
+        modeling.build_system(model, "Baseboard gas boiler",
+                              sorted_by_name(model.getThermalZones()))
+        necb_envelope.apply_prescriptive(model, vintage="2020", hdd=3890, audit=audit)
+        necb_shw.cost(model, city=CITY, province_state=PROVINCE, audit=audit)
+
+        steps = list(dict.fromkeys(e["step"] for e in audit.entries))
+        for step in ("loads", "shw", "shw_efficiency", "prescriptive", "costing_shw"):
+            self.assertIn(step, steps)
+        self.assertEqual(2, len(model.getPlantLoops()), "SHW loop + heating loop coexist")
+        self.assertTrue(any("6.2.2.1" in str(e.get("article") or "") for e in audit.entries))
 
 
 if __name__ == "__main__":

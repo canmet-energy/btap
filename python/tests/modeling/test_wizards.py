@@ -13,9 +13,8 @@ import math
 import unittest
 from collections import Counter
 
-from tests.support import needs_sdk
-
 from btap.audit import AuditLog
+from tests.support import needs_sdk
 
 
 @needs_sdk

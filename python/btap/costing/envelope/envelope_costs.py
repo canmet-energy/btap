@@ -13,7 +13,8 @@ from __future__ import annotations
 import re
 
 from btap._compat import ruby_round, ruby_str
-from btap.costing.envelope import assemblies, interpolate as interpolate_mod, quantify
+from btap.costing.envelope import assemblies, quantify
+from btap.costing.envelope import interpolate as interpolate_mod
 from btap.costing.envelope.database import to_f, to_s
 
 

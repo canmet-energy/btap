@@ -35,7 +35,7 @@ ROOT = File.expand_path('../..', __dir__)
   btap-necb/lib/btap_necb
 ].each { |entry| require File.expand_path(entry, ROOT) }
 
-FIXTURE = File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm')
+FIXTURE = File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm')
 OUT = ARGV[0] || File.join(ROOT, 'packaging/windows/samples')
 
 # One per family where the family is distinct enough to be worth a file, chosen

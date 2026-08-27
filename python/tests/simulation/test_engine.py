@@ -10,9 +10,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.support import CONTAINER_ENERGYPLUS
-
 from btap.simulation import engine
+from tests.support import CONTAINER_ENERGYPLUS
 
 
 class EngineTestCase(unittest.TestCase):

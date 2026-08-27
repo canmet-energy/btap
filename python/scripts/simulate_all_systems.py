@@ -43,6 +43,8 @@ REPO_ROOT = PYTHON_ROOT.parent
 FIXTURES = REPO_ROOT / "btap-modeling" / "test" / "fixtures"
 EPW = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
+SEED_OSM = (REPO_ROOT / "btap-modeling" / "lib" / "btap_modeling" / "hvac"
+            / "data" / "5ZoneNoHVAC.osm")
 RUBY_STATUS = FIXTURES / "system_simulation_status.json"
 
 PREP_RUBY = """
@@ -67,7 +69,7 @@ def prepared_base(work_dir: Path) -> Path:
     script.write_text(PREP_RUBY, encoding="utf-8")
     result = subprocess.run(
         ["ruby", "-ropenstudio", str(script), str(REPO_ROOT),
-         str(FIXTURES / "5ZoneNoHVAC.osm"), str(base)],
+         str(SEED_OSM), str(base)],
         capture_output=True, text=True)
     if result.returncode != 0 or not base.is_file():
         raise SystemExit(f"base-model prep failed (needs ruby + the Ruby gems):\n{result.stderr[-2000:]}")
@@ -76,15 +78,14 @@ def prepared_base(work_dir: Path) -> Path:
 
 def run_one(name: str, base_osm: str) -> dict:
     """Child-process body: build the system on the base model, sizing-run it."""
-    import openstudio
-
     import btap.modeling as modeling
     from btap._compat import sorted_by_name
+    from btap._sdk import load_model
     from btap.simulation import runner
 
     try:
         with tempfile.TemporaryDirectory() as run_dir:
-            model = openstudio.model.Model.load(openstudio.path(base_osm)).get()
+            model = load_model(base_osm)
             modeling.build_system(model, name, sorted_by_name(model.getThermalZones()))
             runner.attach_weather(model, epw=str(EPW), ddy=str(DDY))
             runner.run_energyplus(model, run_dir, sizing_only=True)

@@ -118,3 +118,49 @@ class TestRubyStr(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRubyDivision(unittest.TestCase):
+    """Ruby float division NEVER raises — the family-wide hazard found while
+    porting the NECB lighting criteria, where dividing by a zero aperture
+    area yields NaN and the ANDed comparison then correctly skips the
+    inapplicable half. Python's ZeroDivisionError would turn that silent
+    skip into a crash."""
+
+    def test_division_by_zero_matches_ruby(self):
+        import math
+
+        from btap._compat import ruby_div
+        self.assertEqual(math.inf, ruby_div(1.0, 0.0))
+        self.assertEqual(-math.inf, ruby_div(-1.0, 0.0))
+        self.assertTrue(math.isnan(ruby_div(0.0, 0.0)))
+        self.assertEqual(-math.inf, ruby_div(1.0, -0.0), "signed zero, as Ruby")
+        self.assertEqual(2.0, ruby_div(6.0, 3.0))
+
+    def test_nan_comparison_is_false_as_in_ruby(self):
+        from btap._compat import ruby_div
+        self.assertFalse(ruby_div(0.0, 0.0) <= 0.006,
+                         "NaN <= x is false in both languages — the skip criterion")
+
+
+class TestRoundingNonFinite(unittest.TestCase):
+    """Ruby: Infinity.round(2) == Infinity, NaN.round(4) == NaN, but
+    .round with no digits must yield an Integer and so raises
+    FloatDomainError. ruby_round used to raise InvalidOperation on infinity,
+    which would crash any domain rounding a ruby_div result."""
+
+    def test_non_finite_passes_through_with_digits(self):
+        import math
+
+        from btap._compat import ruby_round
+        self.assertEqual(math.inf, ruby_round(math.inf, 2))
+        self.assertEqual(-math.inf, ruby_round(-math.inf, 3))
+        self.assertTrue(math.isnan(ruby_round(math.nan, 4)))
+
+    def test_non_finite_to_integer_raises_like_ruby(self):
+        import math
+
+        from btap._compat import ruby_round
+        for value in (math.inf, -math.inf, math.nan):
+            with self.assertRaises(ValueError):
+                ruby_round(value)

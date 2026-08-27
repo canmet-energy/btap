@@ -35,7 +35,7 @@ abort('the pinned oracle is not bundled — run under BUNDLE_GEMFILE=legacy_pin/
 coster = OracleProbes::Access.coster
 abort('the BTAP costing oracle failed to load') if coster == :unavailable
 
-FIXTURE = File.join(ROOT, 'btap-modeling/test/fixtures/5ZoneNoHVAC.osm')
+FIXTURE = File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm')
 EPW = File.join(ROOT, 'btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
 DDY = File.join(ROOT, 'btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
 

@@ -6,8 +6,8 @@ from tests.support import load_fixture, needs_sdk
 @needs_sdk
 class TestHpPlantFanCoils(unittest.TestCase):
     def test_hs14_gshp_plants_and_fancoils(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -51,8 +51,8 @@ class TestHpPlantFanCoils(unittest.TestCase):
                          result.air_loops[0].nameString())
 
     def test_hs15_cawhp_companion_heat_pumps(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())
@@ -74,8 +74,8 @@ class TestHpPlantFanCoils(unittest.TestCase):
         self.assertEqual(0, len(model.getChillerElectricEIRs()))
 
     def test_hs16_uses_ashp_doas(self):
-        from btap._compat import sorted_by_name
         import btap.modeling as modeling
+        from btap._compat import sorted_by_name
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())

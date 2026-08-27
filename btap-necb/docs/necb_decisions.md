@@ -108,6 +108,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-76** — Field-test articles are declared modeller scope, and the assumed value is stated _(runtime)_
 - **D-77** — The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems _(process)_
 - **D-78** — Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens _(process)_
+- **D-79** — The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences _(process)_
 
 <!-- TOC END -->
 
@@ -4229,3 +4230,106 @@ Python `repr` render differently).
 - **Kind:** process — verification architecture; no runtime citation exists
   or should.
 - **Who/when:** phylroy (the three-way requirement) + Claude, 2026-08-26.
+
+## D-79
+
+**Decided:** The Ruby→Python port is executed MILESTONE BY MILESTONE against
+gates that already exist, never gates written to fit the port (2026-08-27).
+The order is bottom-up — audit → simulation → modeling → costing → the necb
+rule domains → the umbrella — and each milestone lands only when its Ruby
+suites are ported and passing AND its slice of the D-78 verification holds.
+One pip distribution, `btap`, carries five subpackages mirroring the gems;
+the D-77 dependency arrows are enforced by import-linter contracts in CI
+rather than by package boundaries, plus a fourth contract keeping
+`btap.audit` SDK-free (the property the bare-runner audit suite depends on).
+
+**Cross-cutting Ruby-parity contracts live in `btap/_compat.py`** (stdlib
+only) and `btap/_sdk.py` (anything needing `import openstudio`). Each exists
+because a specific Ruby-vs-Python semantic difference silently changes
+results, and each was pinned against real Ruby output rather than reasoned
+about:
+
+- `ruby_round` — Ruby `Float#round` is half AWAY from zero on the shortest
+  decimal representation; Python's `round` is banker's. Fuzz-verified over
+  19,154 generated cases, zero mismatches. Non-finite input follows Ruby
+  too: `Infinity.round(2)` returns Infinity, while `.round` with no digits
+  must yield an Integer and so raises, as `FloatDomainError` does.
+- `ruby_div` — Ruby float division NEVER raises: `x/0.0` is ±Infinity and
+  `0.0/0.0` is NaN. `NaN <= 0.006` being false is precisely how several
+  NECB criteria skip an inapplicable half, so a transliterated `/` turns a
+  silent skip into a `ZeroDivisionError`.
+- `opt`/`opt_or` — the SDK Optional protocol at ~970 sites, routed through
+  two greppable helpers. Ruby lets you drop parens on SWIG calls; Python
+  does not, and a forgotten `()` yields a truthy bound method that passes
+  silently.
+- `sorted_by_name` — `sort_by(&:nameString)`, the determinism idiom.
+- `NullAudit` — replaces Ruby's 235 `audit&.warn` safe-navigation sites.
+- `esc`/`Raw`/`ruby_str` — the report's escaping and Ruby's string
+  interpolation of scalars, for narrative byte-parity.
+- `_sdk.ensure_sdk_hashable` — the wheel's ModelObject/IdfObject define
+  `__eq__` without `__hash__`, so SDK objects are unhashable; Ruby code
+  keys dicts by them routinely.
+
+**Two deliberate divergences from the gems, both forced and both narrow.**
+The `openstudio` wheel ships the SDK and the ForwardTranslator but no
+EnergyPlus and no CLI, so `btap.simulation`'s Local backend reproduces
+`openstudio run` in process — translate, add the two output requests the
+workflow's preprocess adds (at the WORKSPACE, so `in.osm` stays
+byte-comparable), then spawn an engine that `btap.simulation.engine`
+provisions: `BTAP_ENERGYPLUS` → user cache → `BTAP_ENERGYPLUS_ARCHIVE`
+side-load → sha256-verified download of the pinned NREL release, with the
+version locked to the wheel's own `energyPlusVersion()` and skew refused up
+front. Consequence, verified both ways: `openstudio run` writes
+`Time.WarmupFlag = 0` where the bare binary writes NULL. It is test-only in
+both languages and `run_period_sums` filters on `EnvironmentType`, so Leg B
+and the D-52 election are unaffected — but no new hourly consumer may
+filter on WarmupFlag. Second divergence: Ruby module reopening has no
+Python equivalent, so a file that reopens another's module becomes its own
+module re-exported from the original. `daylighted_areas_legacy_2011.rb`
+becomes `_legacy_2011.py` re-exported from `daylighting.py` — NOT merged,
+because the quarantine is the entire point of that file.
+
+**Ruby stays frozen except bugfixes** while the port runs: it is the
+shipping product and the Leg-B baseline, so a behaviour change lands
+Ruby-first or not at all. Two Ruby defects found by porting were flagged and
+ported AS-IS rather than fixed (`apply_zone_fan_rules` digging a key the
+vendored JSON lacks; `check_minimum_efficiencies` zipping by post-rename
+sort order); one dead-code defect was deleted outright after adjudication
+(`BtapCosting.cost`, which delegated to a constant left behind by the C7
+rename and could only ever raise).
+
+**Never call `.get()` on an unchecked SDK Optional in Python.** This is the
+sharpest of the binding differences and it does not fail the way Ruby does.
+`OptionalModel.get()` on an EMPTY optional RETURNS AN EMPTY MODEL rather than
+raising, so a failed `Model.load` flows onward as a model with no zones;
+`OptionalDouble`/`OptionalString` do raise, but as `SystemError`, which
+leaves the C-level error indicator set and can segfault the interpreter on a
+later unrelated call. Ruby raises cleanly in every one of these cases. Always
+test `is_initialized()` first — which is what `_compat.opt()` does, and why
+it exists. The catalog report bypassed it and shipped a wheel whose
+`catalog_html()` produced a 1 MB document with 97 "diagram unavailable"
+cards instead of failing (found by review, 2026-08-27).
+
+**The catalog seed model is RUNTIME-owned in both languages.** It moved from
+`btap-modeling/test/fixtures/` to `btap-modeling/lib/btap_modeling/hvac/data/`
+so the gem's `spec.files` ships it, and the Python package carries a
+byte-identical copy resolved through `importlib.resources`. Two separate
+contracts, tested separately: the default seed resolves from wherever the
+package is installed, AND an unreadable seed raises instead of degrading.
+Fixed on BOTH sides in one change rather than Python-only, per the
+Ruby-first rule; a `scripts/wheel_smoke.py` CI gate now exercises the built
+wheel from outside the checkout, because the suite alone runs against the
+source tree and cannot see this class of defect.
+
+**Leg C covers NECB 2020 only, and structurally cannot cover 2025.** The
+pinned oracle predates the 2025 edition — its probes sweep `NECB2020`, and
+NECB 2025 is this project's own implementation — so no 2025 values exist to
+freeze. This is a boundary of the method, not a testing gap to close: 2025
+correctness rests on the adjudicated decision record plus data-integrity and
+cross-edition tests.
+
+- **Kind:** process — migration architecture; no runtime citation exists
+  or should.
+- **Who/when:** phylroy (the Python direction and the milestone boundary) +
+  Claude, 2026-08-27; extended 2026-08-27 after review (the seed-model
+  defect, the unchecked-`.get()` hazard, and the 2025/Leg-C boundary).
