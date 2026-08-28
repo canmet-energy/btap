@@ -4348,10 +4348,43 @@ the corpus runner's `sizing` tier had never actually run — it passed no
 `--epw`, so the CLI's usage guard exited 2 before any simulation, and
 nothing had ever depended on it until the cross-language run did.
 
+**M7 (thermal bridging) integrates natively — Option A of the M6/M7
+review — with NO Ruby bridge.** The planned `openstudio
+execute_ruby_script` subprocess was obsoleted by `canmet-energy/py-tbd`, a
+native Python port of rd2/tbd; `tbd.process(model, argh)` mutates the same
+in-process SDK model the Ruby gem's does. The decisive question was the
+BASELINE, not the engineering: py-tbd's main ports upstream TBD 3.6.0,
+while this family's oracle is frozen on the Ruby triplet tbd 3.5.2 / osut
+0.8.2 / topolys 0.6.2 — and 3.5.2-vs-3.6.0 is physical output, not
+serialization noise (3.5.2 REFUSES an infeasible uprate outright where
+3.6.0 partially uprates; ~43% apart on the same wall, and it is exactly
+this fixture's walls that trip it). Option A was chosen: a
+**`tbd-3.5.2-compat` branch of py-tbd**, backporting the v3.5.2
+`uo`/`uprate` semantics, the boundary-string casing and the
+no-interzone-film-override behaviour, with EVERY py-tbd golden regenerated
+from the Ruby 3.5.2 + OSut 0.8.2 gems and its full suite green against
+them. The probe that settled it: byte-identical warnings and zero numeric
+diffs vs the Ruby 3.5.2 gem on the btap fixture. btap pins py-tbd by
+COMMIT SHA (py-topolys pinned transitively inside py-tbd's pyproject —
+neither has a tagged release, so the SHA is the only immutable reference),
+asserts the engine identity (`tbd.VERSION`/`UPSTREAM_SHA`) in the suite,
+and gates with `BTAP_TBD_REQUIRED=1` in CI's verify job. Enabled with it:
+the uprate/derate gate, the frozen `tbd_rsi` Leg-C golden (1e-6, key-set
+both ways), a direct Ruby-vs-Python `TBD.process` parity gate
+(surfaces/edges/warnings at 1e-9), the post-reference-rebuild
+target-retention gate, and an assembled Leg-B compliance case with
+`thermal_bridging: 'efficient (BETBG)'` — the corpus itself never requests
+thermal bridging, so that dedicated case is the M7 evidence. The
+family-wide rebaseline onto TBD 3.6.x stays PARKED as its own adjudicated
+event (bump the Ruby triplet first, re-run Leg A, re-export goldens,
+retire the compat branch — naturally paired with the pending pin bump).
+
 - **Kind:** process — migration architecture; no runtime citation exists
   or should.
 - **Who/when:** phylroy (the Python direction and the milestone boundary) +
   Claude, 2026-08-27; extended 2026-08-27 after review (the seed-model
   defect, the unchecked-`.get()` hazard, and the 2025/Leg-C boundary);
   extended 2026-08-28 (M6: the umbrella pipeline, renderer, CLI, and the
-  Leg-B cross-language corpus convergence).
+  Leg-B cross-language corpus convergence); extended 2026-08-28 (M7:
+  native py-tbd on the `tbd-3.5.2-compat` baseline, Option A — phylroy
+  chose the option, per Sol's review).
