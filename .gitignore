@@ -97,3 +97,4 @@ python/dist/
 /packaging/windows/Output/
 /packaging/windows/samples/
 python/tests/generated/
+python/.parity-venv/
