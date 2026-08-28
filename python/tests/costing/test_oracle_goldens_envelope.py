@@ -53,6 +53,16 @@ def golden():
 
 
 class TestOracleGoldensEnvelope(unittest.TestCase):
+    def test_golden_top_level_key_set_both_directions(self):
+        """The golden group's top-level shape, asserted in BOTH directions
+        (D-80 R1: this was the one goldens file without the family's
+        key-set discipline) — a group the exporter stopped producing, or a
+        new group nothing here consumes, both fail by name."""
+        self.assertEqual(
+            sorted(golden().keys()),
+            sorted(["interpolations", "construction_costs", "priced_table",
+                    "tbd_rsi", "tb_material_quantities"]))
+
     def test_interpolations_match_the_oracle(self):
         from btap.costing.envelope.interpolate import interpolate
         legacy_values = golden()["interpolations"]

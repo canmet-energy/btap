@@ -53755,7 +53755,7 @@
    "tests/necb/test_oracle_goldens_lighting.py",
    "tests/costing/test_oracle_goldens_envelope.py"
   ],
-  "collected": 22
+  "collected": 23
  },
  "bootstrap_provenance": {
   "note": "schedule_names and costing_candidates were derived ONCE from the gem data (the last gem-derived act); golden_inventory from the committed goldens exported at the pinned oracle.",
