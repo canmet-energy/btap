@@ -33,7 +33,19 @@ class TestCostingParity < Minitest::Test
   def test_cost_construction_parity_every_candidate
     coster = legacy
     database = BtapCosting::Envelope::Database.new
-    legacy_costs = OracleProbes::Costing.construction_costs(coster, database, PROVINCE, CITY)
+    # The probe takes candidate RECORDS since D-80 (the exporter feeds it the
+    # request manifest's); this Leg-A gate's contract is the GEM's own
+    # catalog vs the oracle, so it derives the records from its Database.
+    candidates = []
+    database.constructions.each do |sheet, assemblies|
+      assemblies.each_key do |assembly|
+        database.construction_candidates(sheet, assembly).each do |rsi, construction|
+          candidates << { 'key' => "#{sheet}/#{assembly}/#{rsi.round(3)}",
+                          'type' => construction['type'], 'id_layers' => construction['id_layers'] }
+        end
+      end
+    end
+    legacy_costs = OracleProbes::Costing.construction_costs(coster, candidates, PROVINCE, CITY)
     checked = 0
     mismatches = []
 
