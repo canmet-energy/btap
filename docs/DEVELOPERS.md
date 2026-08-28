@@ -212,7 +212,16 @@ changes results silently; D-79 records why.
 EnergyPlus comes from `btap.simulation.engine`, which provisions a pinned,
 sha256-verified build (`BTAP_ENERGYPLUS` overrides it;
 `BTAP_ENERGYPLUS_ARCHIVE` side-loads on a TLS-intercepting network). The
-wheel carries the SDK and the ForwardTranslator but no engine and no CLI.
+wheel carries the SDK and the ForwardTranslator but no engine; the umbrella
+CLI ships as the `btap-compliance` console script (M6), and
+`python -m btap.necb.cli` is the no-install spelling.
+
+The Leg-B cross-language gate (M6): `CLI_B=python bash
+verification/selftest.sh` runs the Ruby and Python CLIs over the same corpus
+and diffs every pair's `audit.json`/`report.json` under the rules in
+`verification/spec.json`; `TIER=sizing|annual` climbs into real EnergyPlus.
+CI runs `none`+`sizing` in the `verify` job and `annual` in the
+dispatch-only `parity` job.
 
 
 ## History

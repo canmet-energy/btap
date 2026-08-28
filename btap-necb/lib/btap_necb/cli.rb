@@ -155,6 +155,14 @@ module BtapNECB
     # run — a user who fat-fingered a path should not wait for that.
     def validate(o)
       return "model not found: #{o[:model]}" unless File.exist?(o[:model].to_s)
+
+      # Supplied FILE arguments are checked in EVERY mode: these used to sit
+      # after the --simulate none early return, so a fat-fingered
+      # --space-type-map under none-mode sailed past validation into file
+      # I/O and surfaced as exit 5 (internal) instead of the documented
+      # usage exit 2 (found by review, 2026-08-28).
+      return "costs csv not found: #{o[:costs_csv]}" if o[:costs_csv] && !File.exist?(o[:costs_csv])
+      return "space-type map not found: #{o[:space_type_map]}" if o[:space_type_map] && !File.exist?(o[:space_type_map])
       return nil if o[:simulate] == :none
 
       return 'no --epw given (required unless --simulate none)' unless o[:epw]
@@ -165,8 +173,6 @@ module BtapNECB
         return "ddy not found: #{o[:ddy]}\n       " \
                'a design-day file is required; pass --ddy explicitly if it is not beside the .epw'
       end
-      return "costs csv not found: #{o[:costs_csv]}" if o[:costs_csv] && !File.exist?(o[:costs_csv])
-      return "space-type map not found: #{o[:space_type_map]}" if o[:space_type_map] && !File.exist?(o[:space_type_map])
 
       nil
     end
@@ -196,8 +202,13 @@ module BtapNECB
     def model_argument(o)
       return o[:model] unless o[:space_type]
 
-      OpenStudio::OSVersion::VersionTranslator.new
-                                              .loadModel(OpenStudio::Path.new(o[:model])).get
+      # Memoized on the options hash: necb_loads calls this to enumerate
+      # space names and compliance_kwargs calls it again for the pipeline
+      # argument — without the memo the "load once" contract above was a
+      # comment, not a behaviour, and the VersionTranslator ran twice
+      # (found by review, 2026-08-28).
+      o[:_loaded_model] ||= OpenStudio::OSVersion::VersionTranslator.new
+                                                                    .loadModel(OpenStudio::Path.new(o[:model])).get
     end
 
     def necb_loads(o)
@@ -231,7 +242,14 @@ module BtapNECB
     #
     # @return [String, nil] an error message, or nil on success
     def select_backend(o)
-      return nil unless o[:backend] == 'remote'
+      unless o[:backend] == 'remote'
+        # CLI.run is in-process API by design (the test suites call it
+        # repeatedly): a previous run's remote selection must not leak into
+        # a later local run, so local EXPLICITLY resets the process-wide
+        # default rather than assuming it (found by review, 2026-08-28).
+        BtapSimulation::Runner.default_backend = nil
+        return nil
+      end
 
       remote = BtapSimulation::Remote.new
       unless remote.configured?

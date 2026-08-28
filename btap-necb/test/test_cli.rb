@@ -177,6 +177,44 @@ class TestCLI < Minitest::Test
     end
   end
 
+  # --- review regressions (2026-08-28) ------------------------------------
+
+  # Backend selection must not leak across in-process runs: CLI.run is
+  # in-process API, and the default backend is process-wide state — a run
+  # that selected remote must not silently make every LATER local run remote.
+  def test_backend_selection_does_not_leak_across_in_process_runs
+    BtapSimulation::Runner.default_backend = BtapSimulation::Remote.new
+    BtapNECB::CLI.select_backend({ backend: 'local' })
+    assert_instance_of(BtapSimulation::Local, BtapSimulation::Runner.default_backend,
+                       'local selection must RESET the process-wide default')
+  ensure
+    BtapSimulation::Runner.default_backend = nil
+  end
+
+  # Supplied file arguments are validated in EVERY mode: a missing
+  # --space-type-map under --simulate none used to reach file I/O and exit 5
+  # instead of the documented usage exit 2.
+  def test_missing_space_type_map_is_a_usage_error_even_under_simulate_none
+    assert_equal(2, run_cli(FIXTURE, '--simulate', 'none', '--hdd', '3890',
+                            '--storeys', '1', '--space-type-map', '/nope/map.json'))
+    assert_match(%r{space-type map not found: /nope/map\.json}, @err.string)
+  end
+
+  def test_missing_costs_csv_is_a_usage_error_even_under_simulate_none
+    assert_equal(2, run_cli(FIXTURE, '--simulate', 'none', '--hdd', '3890',
+                            '--storeys', '1', '--costs-csv', '/nope/costs.csv'))
+    assert_match(%r{costs csv not found: /nope/costs\.csv}, @err.string)
+  end
+
+  # --space-type loads the model to enumerate space names AND hands it to the
+  # pipeline — that must be ONE VersionTranslator pass, not two.
+  def test_space_type_model_is_translated_once
+    o = { model: FIXTURE, space_type: 'Space Function/Office enclosed > 25 m2' }
+    first = BtapNECB::CLI.model_argument(o)
+    assert_same(first, BtapNECB::CLI.model_argument(o),
+                'model_argument must memoize — the "load once" contract')
+  end
+
   # --- weather -----------------------------------------------------------
 
   def test_list_cities_needs_no_model

@@ -1,9 +1,10 @@
 # Ruby → Python port: status and handoff
 
-**As of 2026-08-27.** Milestones M0–M5 are done (M0–M4 merged; M5 open as
-PR #9). **M6 has not been started** and is the next step. The governing
-decision is **D-79** (`btap-necb/docs/necb_decisions.md`); the verification
-architecture it plugs into is **D-78**.
+**As of 2026-08-28.** Milestones M0–M6 are done (M0–M5 merged; M6 on branch
+`python-m6-umbrella`). **M7 (the TBD bridge) and M8 (CI/docs closeout) are
+what remain.** The governing decision is **D-79**
+(`btap-necb/docs/necb_decisions.md`); the verification architecture it plugs
+into is **D-78**.
 
 This file is the durable record. If you are an agent picking this up with no
 prior context, read this, then D-79, then D-78, then `python/README.md`.
@@ -49,10 +50,12 @@ data-integrity and cross-edition tests, which is the only available basis.
 | **M3** | `btap.modeling` (11.8k lines) | 97-system EnergyPlus battery agrees with the Ruby sweep **97/97**; the 97-system catalog HTML is **byte-identical** between languages |
 | **M4** | `btap.costing` | **134** oracle-frozen values reproduced (39 interpolations, 92 construction costs, 3 TB quantities) |
 | **M5** | the five `btap.necb` rule domains (8.5k lines) | ~630 oracle-frozen values across five domains; the D-58 reference matrix run across the **full 97-system catalog** (both naming passes × 4 scenarios) as a CI gate, not a manual run |
+| **M6** | the umbrella (`compliance`, `eui_archetypes`, `tiers`, the renderer, the CLI) | **The Leg-B corpus convergence**: Ruby CLI vs Python CLI over the whole corpus, every pair EQUIVALENT under the Leg-B rules — 18/18 at tier `none`, 3/3 at `sizing`, 2/2 at `annual --quick`. Plus: the renderer's chart primitive reproduces the Ruby suite's `paired_bars.svg` golden **byte-identically** (now consumed as a cross-language gate) |
 
-Current suite: **623 passed, 4 skipped**, ~2.5 min parallel. Import contracts:
-3 kept. Ruff: clean (enforced in CI). The Ruby side is green throughout
-(matrix + verify + the 12-gate parity job).
+Current suite: **703 passed, 4 skipped**, ~6 min parallel (the M6
+engine-backed suites run real EnergyPlus). Import contracts: 3 kept. Ruff:
+clean (enforced in CI). The Ruby side is green throughout (matrix + verify +
+the 12-gate parity job).
 
 Three gates make the claims above continuously enforced rather than
 manually observed — a review found that gap and it is now closed:
@@ -71,65 +74,89 @@ manually observed — a review found that gap and it is now closed:
 
 The four remaining skips each name a real reason: two await the M7 TBD
 bridge, one needs an SVG rasterizer on PATH, one is a Leg-A gate needing the
-live pinned oracle (its Leg-C twin is named in the skip message). **There are
+live pinned oracle (its Leg-C twin is named in the skip message). The M6
+sample-dependent tests skip only where the sample corpus is not generated;
+CI's `verify` job generates it, so they run there. **There are
 no stale exemptions** — when a milestone supplies a dependency, the tests
 waiting on it are ported and enabled in that same milestone.
 
 ---
 
-## M6 — the next milestone, not started
+## M6 — the umbrella, DONE (2026-08-28)
 
-**Scope:** `compliance.rb` (the pipeline, capacity iteration, the EUI path),
-`eui_archetypes.rb`, `tiers.rb`, the NECB report renderer (`report/` +
-`report.rb`, ~1,240 lines), and `cli.rb` (496) — then the **Leg-B corpus
-convergence**, which is the migration's decisive acceptance.
+**What landed:** `btap/necb/compliance.py` (the eleven-phase pipeline,
+capacity iteration, the EUI path), `eui_archetypes.py`, `tiers.py`,
+`decisions.py`, the renderer (`btap/necb/report/` — html, svg, charts,
+checklist, model_query, sections + the assembler), and `cli.py` with the
+`btap-compliance` console script (`[project.scripts]` in pyproject). The
+eight Ruby test suites are ported (`test_compliance`, `test_archetypes`,
+`test_tiers_eui`, `test_report_units`, `test_report_model_query`,
+`test_report_html`, `test_cli`, `test_reference_rules`).
 
-btap-modeling's diagram and plan renderers are **already ported** (M3:
-`plan_query.py`, `plan_svg.py`, `plan.py`, `render.py`, `catalog_report.py`,
-exposed as `model_hvac_diagrams`, `hvac_icon_defs` and `floor_plans`). M6
-INTEGRATES those outputs into the NECB report — it does not port them
-again. An earlier draft of this file said otherwise; it had been copied
-from the pre-M3 plan.
+**The decisive acceptance held on the first convergence run, essentially.**
+`verification/run_corpus.rb` gained `--cli python` (drives
+`python -m btap.necb.cli` over the same models/args) and `selftest.sh`
+gained `CLI_B=python`; the whole cross-language corpus came back EQUIVALENT
+with exactly ONE diff in total across 18 none-tier runs — Ruby's
+`simulate: :none` symbol-inspect literal vs Python's `simulate: none` in one
+warning string. After carrying the literal verbatim: 18/18 `none`, 3/3
+`sizing`, 2/2 `annual --quick`, all EQUIVALENT. The renderer reproduced the
+Ruby suite's `paired_bars.svg` golden byte-identically on the first render;
+the Python unit suite now consumes that Ruby golden file directly.
 
-Everything M6 builds on is ported and green.
+### What the hazards list predicted vs what happened
 
-M6 is qualitatively different from M0–M5: those were mostly mechanical
-translation gated by values someone had already frozen. M6 is where the
-judgement lives — the renderer is the one place where faithful porting and
-idiomatic Python genuinely conflict, and Leg-B convergence is open-ended
-debugging rather than porting.
+- **`--quick` never prints COMPLIANT** — ported as specified; `verdict_exit`
+  returns 6 whenever `report['annual']` is False, pinned by the CLI e2e test.
+- **`model_query` stays the only SDK renderer file** (with the assembler) —
+  boundary kept; the rest of `report/` runs SDK-free (18 unit tests).
+- **Renderer: direct port** — held, and over-delivered (the byte-identical
+  golden above).
+- **CLI mechanics** — as planned: argparse subclass raising instead of
+  exiting, seven exit codes, Progress as a daemon thread + stop `Event`
+  (stopped on every path `run` can take), `os._exit` in `main`.
+- **The three unsorted SDK iterations did NOT trip** at any tier on this
+  corpus — energies are pre-rounded and equal, and audit order matched. They
+  remain latent (`envelope/reference.rb:236`, `report/model_query.rb:28`,
+  `hvac/reference.rb:378`); if a future corpus model diverges on entry
+  order, fix Ruby-side first and re-baseline, as planned.
+- **New find: the corpus runner's `sizing` tier had never run.** It passed
+  no `--epw`, so the Ruby CLI exited 2 (usage) before any simulation — the
+  committed harness had only ever been exercised at tier `none`. Fixed in
+  `verification/` (the harness, not gem code): simulating tiers now pass the
+  fixture weather trio explicitly.
+- Two small Python-side seams found by the ported suites: the loads
+  appliers index `gas_equipment_per_area`/`gas_equipment_schedule` that
+  Ruby's synthetic archetype record simply omitted (nil semantics) — the
+  Python `synthetic_record` carries them as explicit `None`; and
+  `AuditLog.warnings` is a property in Python where Ruby has a method.
 
-### Hazards, each already paid for once
+### CI wiring (landed with M6)
 
-- **`--quick` must never print COMPLIANT.** `evaluate` returns a boolean
-  regardless of run period; the CLI treats the flag as overriding it and
-  exits 6. A week-long run passed off as a determination would be the worst
-  bug this tool could have.
-- **`report/model_query.rb` is the ONLY SDK-touching renderer file** — plain
-  hashes out, never raises. Keep that boundary; it is what lets the rest of
-  the renderer be tested without the SDK.
-- **Renderer: direct port, not Jinja2.** Zero-dependency self-contained HTML
-  is a family value. Byte-identical output is NOT required (Leg B gates
-  `audit.json`/`report.json` only), but `Html.fmt` and the SVG layout want
-  their own golden tests. Precedent: M3's catalog report came out
-  byte-identical to Ruby's on a direct port.
-- **CLI**: `argparse` with `exit_on_error=False`, reproducing the seven exit
-  codes exactly (`0` compliant, `1` not compliant, `2` usage, `3` pre-flight,
-  `4` simulation, `5` internal, `6` no determination). The Progress ticker is
-  a daemon thread with a cooperative stop `Event` — `Thread#kill` has no
-  Python equivalent and Ruby stops it in six places. `os._exit` mirrors
-  `exit!`.
-- **Leg B at annual tier** will likely surface three unsorted SDK iterations
-  (`envelope/reference.rb:236`, `report/model_query.rb:28`,
-  `hvac/reference.rb:378`). Fix them **Ruby-side first**, re-baseline, then
-  continue — that keeps the comparison meaningful.
-- **Backend SQL divergence** (found in M5, verified both ways): `openstudio
-  run` writes `Time.WarmupFlag = 0`; the bare `energyplus` binary writes
-  NULL. Test-only in both languages today, and `run_period_sums` filters on
-  `EnvironmentType`, so Leg B and the D-52 election are unaffected — but no
-  new hourly consumer may filter on WarmupFlag.
+- **`verify`** now also: generates the sample corpus (Ruby SDK — so the
+  sample-dependent `test_reference_rules` tests run instead of skipping)
+  and runs the **Leg-B cross-language corpus** at tiers `none` and `sizing`
+  on every main/dispatch build.
+- **`parity`** (dispatch-only) gains the **`annual --quick` tier** of the
+  same gate — each side runs four EnergyPlus simulations per model, priced
+  like everything else in that job.
+- **`wheel_smoke`** now also asserts the `btap-compliance` console script is
+  installed and answers `--help`.
 
-### After M6
+### Residual risk, stated plainly
+
+The annual-tier Leg-B gate runs `--quick` (a one-week period): it exercises
+the full determination arithmetic, the unmet-hours logic, the report and
+exit 6 — but **no gate compares a real full-year determination returning
+exit 0 or 1 across the two languages**. That is a runtime-cost decision
+(each side is 40–90 minutes per model), not a confidence claim: the
+arithmetic between a week and a year is identical code, but the year is the
+shipping code path and it has only ever been run one language at a time.
+Named by review (2026-08-28) as the principal residual M6 risk; a
+deliberate one-off full-year convergence run is the cheapest way to retire
+it when someone wants to.
+
+### What remains
 
 **M7** — thermal bridging. `tbd` has no Python equivalent; the plan is a
 small Ruby bridge invoked via `openstudio execute_ruby_script`, degrading to

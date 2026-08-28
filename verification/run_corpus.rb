@@ -1,24 +1,35 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Leg-B corpus runner (D-78): drive the Ruby btap-compliance CLI over the
-# committed corpus deterministically, so two invocations (or, later, the Ruby
-# and Python CLIs) produce comparable run directories for compare_runs.py.
+# Leg-B corpus runner (D-78): drive a btap-compliance CLI over the committed
+# corpus deterministically, so two invocations — two Ruby passes, or one Ruby
+# and one PYTHON pass — produce comparable run directories for
+# compare_runs.py.
 #
-#   ruby verification/run_corpus.rb OUT_ROOT [--tier none|sizing]
+#   ruby verification/run_corpus.rb OUT_ROOT [--tier none|sizing|annual] [--cli ruby|python]
+#
+# --cli python (M6) drives the Python port's CLI (python -m btap.necb.cli)
+# over the SAME models with the SAME arguments; PYTHON_CLI names the
+# interpreter (default: python/.venv/bin/python if present, else python3).
+# Sample generation always uses Ruby — the corpus models are shared inputs.
 #
 # Corpus v1: the 17 generated installer samples (regenerated on demand — they
 # are derived artifacts, never committed) + the raw 5-zone fixture driven
 # through the space-type on-ramp. Tier `none` runs every model with
 # --simulate none (fast; full reference-transform + rules coverage); tier
-# `sizing` runs a subset through real E+ sizing (needs the openstudio CLI).
+# `sizing` runs a subset through real E+ sizing (needs the openstudio CLI —
+# or, for the Python side, the provisioned engine).
 require 'fileutils'
 require 'rbconfig'
 
 ROOT = File.expand_path('..', __dir__)
-OUT_ROOT = ARGV[0] or abort('usage: run_corpus.rb OUT_ROOT [--tier none|sizing]')
+OUT_ROOT = ARGV[0] or abort('usage: run_corpus.rb OUT_ROOT [--tier none|sizing|annual] [--cli ruby|python]')
 TIER = ARGV.include?('--tier') ? ARGV[ARGV.index('--tier') + 1] : 'none'
+CLI_KIND = ARGV.include?('--cli') ? ARGV[ARGV.index('--cli') + 1] : 'ruby'
+abort("unknown --cli #{CLI_KIND} (ruby|python)") unless %w[ruby python].include?(CLI_KIND)
 CLI = File.join(ROOT, 'btap-necb/exe/btap-compliance.rb')
+DEFAULT_VENV = File.join(ROOT, 'python/.venv/bin/python')
+PYTHON = ENV['PYTHON_CLI'] || (File.exist?(DEFAULT_VENV) ? DEFAULT_VENV : 'python3')
 SAMPLES = File.join(OUT_ROOT, '_samples')
 
 # Samples are generated, not committed — build them once per corpus root.
@@ -28,20 +39,43 @@ unless File.exist?(File.join(SAMPLES, '01-baseboard-gas.osm'))
          out: File::NULL, err: File::NULL) or abort('sample generation failed')
 end
 
+# The shared fixture weather trio (epw/ddy/stat beside each other) — the
+# simulating tiers need it; the committed corpus args carried no --epw, so
+# tier `sizing` had never actually run (exit 2 at the CLI's usage guard).
+WEATHER = File.join(ROOT, 'btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
 BASE_ARGS = ['--hdd', '3890', '--storeys', '1', '--no-report', '--quiet'].freeze
 FIXTURE_ARGS = (BASE_ARGS + ['--space-type', 'Space Function/Office enclosed > 25 m2']).freeze
 SIZING_SUBSET = %w[01-baseboard-gas 02-psz-gas-dx 09-water-source-hp].freeze
+# Tier `annual` is `--simulate annual --quick` (a one-week run period): the
+# full determination arithmetic incl. unmet hours and the 8.4.1.2.(2)-(4)
+# verdict entries, exit 6 by design (a shortened period is never a
+# determination). Two models, per the M6 acceptance.
+ANNUAL_SUBSET = %w[01-baseboard-gas 02-psz-gas-dx].freeze
 
 runs = Dir.glob(File.join(SAMPLES, '*.osm')).sort.map { |m| [File.basename(m, '.osm'), m, BASE_ARGS] }
 runs << ['5zone-onramp', File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm'), FIXTURE_ARGS]
 runs.select! { |name, _, _| SIZING_SUBSET.include?(name) } if TIER == 'sizing'
+runs.select! { |name, _, _| ANNUAL_SUBSET.include?(name) } if TIER == 'annual'
 
 failures = []
 runs.each do |name, model, args|
   out_dir = File.join(OUT_ROOT, TIER, name)
   FileUtils.mkdir_p(out_dir)
-  cmd = [RbConfig.ruby, CLI, model, '--simulate', TIER, *args, '-o', out_dir]
-  ok = system(*cmd, out: File.join(out_dir, 'stdout.log'), err: %i[child out])
+  simulate_args = TIER == 'annual' ? ['--simulate', 'annual', '--quick'] : ['--simulate', TIER]
+  simulate_args += ['--epw', WEATHER] unless TIER == 'none'
+  cmd = if CLI_KIND == 'python'
+          [PYTHON, '-m', 'btap.necb.cli', model, *simulate_args, *args, '-o', out_dir]
+        else
+          [RbConfig.ruby, CLI, model, *simulate_args, *args, '-o', out_dir]
+        end
+  # Prepend, never clobber: in the SDK container the openstudio bindings
+  # arrive via the CALLER's PYTHONPATH (no wheel there).
+  env = if CLI_KIND == 'python'
+          { 'PYTHONPATH' => [File.join(ROOT, 'python'), ENV['PYTHONPATH']].compact.join(File::PATH_SEPARATOR) }
+        else
+          {}
+        end
+  ok = system(env, *cmd, out: File.join(out_dir, 'stdout.log'), err: %i[child out])
   # --simulate none/sizing exit 6 (no determination) BY DESIGN; only crashes
   # (nil exitstatus) and internal errors (5) are failures here.
   code = Process.last_status&.exitstatus

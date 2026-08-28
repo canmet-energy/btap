@@ -22,3 +22,20 @@ away rounding, SDK Optional unwrapping, the NullAudit, determinism-critical
 sorting, HTML escaping). New code uses those helpers, never the raw Python
 equivalents — the differences they paper over are exactly the silent
 Ruby-vs-Python drifts the census identified.
+
+## The CLI (M6)
+
+The umbrella pipeline and its command line are ported:
+
+```bash
+pip install .                      # installs the btap-compliance console script
+btap-compliance model.osm --epw weather.epw          # full 8.4.1.2 determination
+python3 -m btap.necb.cli model.osm --simulate none   # no-install equivalent
+```
+
+Same seven exit codes as the Ruby CLI (0 compliant, 1 not compliant, 2
+usage, 3 pre-flight, 4 simulation, 5 internal, 6 no determination), and the
+same refusal to call a `--quick` week a determination. The Leg-B corpus gate
+(`CLI_B=python bash verification/selftest.sh`) diffs this CLI's
+`audit.json`/`report.json` against the Ruby CLI's over the whole corpus —
+every pair equivalent at the `none`, `sizing`, and `annual` tiers.
