@@ -4328,8 +4328,30 @@ freeze. This is a boundary of the method, not a testing gap to close: 2025
 correctness rests on the adjudicated decision record plus data-integrity and
 cross-edition tests.
 
+**M6 (the umbrella) landed against the Leg-B corpus, both directions of the
+renderer precedent holding.** `compliance.py` mirrors the eleven-phase
+pipeline (including the sentence-(5) secant capacity iteration and the D-52
+election join), `eui_archetypes.py` the 8.4.4 machinery, `tiers.py` the
+Section 10/Part 11 scoring, and `cli.py` the seven exit codes exactly (the
+Progress ticker is a daemon thread with a cooperative stop Event; `os._exit`
+mirrors `exit!`; `--quick` still exits 6, never a verdict). The renderer is
+a direct port, not a template engine, and its chart primitive reproduced the
+Ruby suite's `paired_bars.svg` golden BYTE-IDENTICALLY on the first render —
+the Python unit suite now consumes that Ruby golden file as a cross-language
+gate. The decisive acceptance: `verification/selftest.sh CLI_B=python` runs
+the Ruby CLI and the Python CLI over the same corpus and diffs every pair
+under the Leg-B rules — all 18 none-tier runs came back EQUIVALENT with ONE
+initial diff in total (a `simulate: :none` symbol-inspect literal), and the
+E+ tiers (sizing; annual `--quick` on two models) are gated the same way.
+One harness defect surfaced and was fixed in `verification/` (not gem code):
+the corpus runner's `sizing` tier had never actually run — it passed no
+`--epw`, so the CLI's usage guard exited 2 before any simulation, and
+nothing had ever depended on it until the cross-language run did.
+
 - **Kind:** process — migration architecture; no runtime citation exists
   or should.
 - **Who/when:** phylroy (the Python direction and the milestone boundary) +
   Claude, 2026-08-27; extended 2026-08-27 after review (the seed-model
-  defect, the unchecked-`.get()` hazard, and the 2025/Leg-C boundary).
+  defect, the unchecked-`.get()` hazard, and the 2025/Leg-C boundary);
+  extended 2026-08-28 (M6: the umbrella pipeline, renderer, CLI, and the
+  Leg-B cross-language corpus convergence).

@@ -223,13 +223,15 @@ hazards the next one inherits, and the working agreements. Read it before
 touching `python/`. Developer setup is in
 [docs/DEVELOPERS.md](docs/DEVELOPERS.md#the-python-port-python-d-79).
 
-M0–M5 are done (audit, simulation + the EnergyPlus provisioner, modeling,
-costing, the five necb rule domains). **M6 — the umbrella pipeline,
-renderer, CLI, and the Leg-B corpus convergence — is not started.** Ruby is
-FROZEN except bugfixes while the port runs: it is the shipping product and
-the Leg-B baseline, so a behaviour change lands Ruby-first or not at all,
-and a Ruby defect found by porting is flagged and ported AS-IS rather than
-quietly fixed on one side.
+M0–M6 are done (audit, simulation + the EnergyPlus provisioner, modeling,
+costing, the five necb rule domains, and the umbrella: pipeline, renderer,
+the `btap-compliance` console script, and the Leg-B corpus convergence —
+Ruby CLI vs Python CLI equivalent over the whole corpus at the `none`,
+`sizing` and `annual --quick` tiers). **M7 (the TBD bridge) and M8
+(closeout) remain.** Ruby is FROZEN except bugfixes while the port runs: it
+is the shipping product and the Leg-B baseline, so a behaviour change lands
+Ruby-first or not at all, and a Ruby defect found by porting is flagged and
+ported AS-IS rather than quietly fixed on one side.
 
 ## Open work
 
