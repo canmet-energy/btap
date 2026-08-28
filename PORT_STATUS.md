@@ -1,10 +1,9 @@
 # Ruby → Python port: status and handoff
 
-**As of 2026-08-28.** Milestones M0–M6 are done (M0–M5 merged; M6 on branch
-`python-m6-umbrella`). **M7 (the TBD bridge) and M8 (CI/docs closeout) are
-what remain.** The governing decision is **D-79**
-(`btap-necb/docs/necb_decisions.md`); the verification architecture it plugs
-into is **D-78**.
+**As of 2026-08-28.** Milestones M0–M7 are done (M0–M6 merged; M7 on branch
+`python-m7-tbd`). **Only M8 (closeout) remains.** The governing decision is
+**D-79** (`btap-necb/docs/necb_decisions.md`); the verification architecture
+it plugs into is **D-78**.
 
 This file is the durable record. If you are an agent picking this up with no
 prior context, read this, then D-79, then D-78, then `python/README.md`.
@@ -51,11 +50,12 @@ data-integrity and cross-edition tests, which is the only available basis.
 | **M4** | `btap.costing` | **134** oracle-frozen values reproduced (39 interpolations, 92 construction costs, 3 TB quantities) |
 | **M5** | the five `btap.necb` rule domains (8.5k lines) | ~630 oracle-frozen values across five domains; the D-58 reference matrix run across the **full 97-system catalog** (both naming passes × 4 scenarios) as a CI gate, not a manual run |
 | **M6** | the umbrella (`compliance`, `eui_archetypes`, `tiers`, the renderer, the CLI) | **The Leg-B corpus convergence**: Ruby CLI vs Python CLI over the whole corpus, every pair EQUIVALENT under the Leg-B rules — 18/18 at tier `none`, 3/3 at `sizing`, 2/2 at `annual --quick`. Plus: the renderer's chart primitive reproduces the Ruby suite's `paired_bars.svg` golden **byte-identically** (now consumed as a cross-language gate) |
+| **M7** | thermal bridging (NECB 3.1.1.7) via **native py-tbd**, Option A | Direct Ruby-vs-Python `TBD.process` parity on the fixture (surfaces/edges/**warnings byte-identical**, numerics 1e-9); the frozen `tbd_rsi` Leg-C golden (1e-6, key-set both ways); the uprate/derate gate incl. the infeasible-wall refusal; the post-reference-rebuild target-retention gate; an assembled Leg-B compliance case with `efficient (BETBG)` EQUIVALENT cross-language; engine identity asserted; wheel installs and processes from the `[tbd]` extra |
 
-Current suite: **703 passed, 4 skipped**, ~6 min parallel (the M6
-engine-backed suites run real EnergyPlus). Import contracts: 3 kept. Ruff:
-clean (enforced in CI). The Ruby side is green throughout (matrix + verify +
-the 12-gate parity job).
+Current suite: **715 passed, 2 skipped**, ~6 min parallel (the M6
+engine-backed suites run real EnergyPlus; the M7 gates run both TBD
+engines). Import contracts: 3 kept. Ruff: clean (enforced in CI). The Ruby
+side is green throughout (matrix + verify + the 12-gate parity job).
 
 Three gates make the claims above continuously enforced rather than
 manually observed — a review found that gap and it is now closed:
@@ -72,11 +72,13 @@ manually observed — a review found that gap and it is now closed:
 - **Ruff**, enforced with a ruleset this codebase can honestly hold (see
   `pyproject.toml` for why `UP` and `E501` are deliberately out).
 
-The four remaining skips each name a real reason: two await the M7 TBD
-bridge, one needs an SVG rasterizer on PATH, one is a Leg-A gate needing the
-live pinned oracle (its Leg-C twin is named in the skip message). The M6
-sample-dependent tests skip only where the sample corpus is not generated;
-CI's `verify` job generates it, so they run there. **There are
+The two remaining skips each name a real reason: one needs an SVG
+rasterizer on PATH, one is a Leg-A gate needing the live pinned oracle (its
+Leg-C twin is named in the skip message). The formerly-M7 TBD skips are
+ENABLED (M7 landed); the M6 sample-dependent tests and the M7
+cross-language TBD gates skip only where their dependency is absent, and
+CI's `verify` job supplies every one of them (samples generated, both tbd
+engines installed, `BTAP_TBD_REQUIRED=1`). **There are
 no stale exemptions** — when a milestone supplies a dependency, the tests
 waiting on it are ported and enabled in that same milestone.
 
@@ -158,15 +160,95 @@ it when someone wants to.
 
 ### What remains
 
-**M7** — thermal bridging. `tbd` has no Python equivalent; the plan is a
-small Ruby bridge invoked via `openstudio execute_ruby_script`, degrading to
-the existing audited warning when absent. The Python side already raises a
-`RuntimeError` naming this bridge rather than pretending, and two tests skip
-with that exact reason. **M8** — CI completion and docs. (D-79 was originally
-assigned to M8 but was written early, in M5's documentation pass, because 31
-citations already pointed at it.)
+**M8** — closeout: the docs/README sweep and any final CI polish. (D-79 was
+originally assigned to M8 but was written early, in M5's documentation
+pass; the M6 and M7 records were appended to it as they landed.)
 
----
+Concrete M8 items, from the post-M7 postponed-work sweep (2026-08-28):
+
+1. **Retire the Leg-A lighting-costing skip.** The one test that has never
+   run anywhere: `tests/necb/test_lighting_costing.py`'s Leg-A gate needs
+   the LIVE pinned oracle (`BUNDLE_GEMFILE=legacy_pin/Gemfile`), which only
+   the `parity` job bundles — and parity does not run pytest. Wire one
+   targeted pytest invocation into the parity job so the skip retires (its
+   Leg-C twin already covers the value, so this closes redundancy, not a
+   coverage hole).
+2. **Retire the SVG-rasterizer skip.** `tests/modeling/test_floor_plan.py`
+   skips without a rasterizer on PATH; `rsvg-convert` is one apt install in
+   the container jobs.
+3. **Sweep the stale milestone-tense comments.** Three found:
+   `tests/modeling/test_bar.py` still says "skipped until M5 lands" above a
+   test that runs; `tests/simulation/test_local_run.py` and
+   `tests/costing/test_lighting_costing_smoke.py` carry pre-M5 phrasing in
+   their docstrings. Doc rot only — no behavior.
+
+### M7, as it actually went (2026-08-28)
+
+The planned Ruby bridge (`openstudio execute_ruby_script`) was never
+built: the M6/M7 review found `canmet-energy/py-tbd` — a native Python port
+of rd2/tbd — and reframed M7 as a dependency integration with ONE blocking
+decision: the baseline. py-tbd main ports upstream TBD **3.6.0**; the
+family's oracle is frozen on Ruby TBD **3.5.2** / OSut 0.8.2 / Topolys
+0.6.2, and the two land ~43% apart on exactly the kind of infeasible-uprate
+wall the btap fixture has (3.5.2 refuses; 3.6.0 partially uprates).
+**Option A** was chosen and executed:
+
+- **py-tbd gained a `tbd-3.5.2-compat` branch** (pinned by btap at its
+  SHA): `uo`/`uprate` backported to the v3.5.2 algorithms (hard refusal;
+  largest-area/lowest-film merge), boundary strings keep SDK casing, the
+  3.6.0 interzone-film override removed — and EVERY py-tbd golden
+  regenerated from the Ruby 3.5.2 + OSut 0.8.2 gems, its whole suite green
+  against them (156 tests). Empirics before semantics: the fixture probe
+  came back with byte-identical warnings and zero numeric diffs vs the
+  Ruby gem before any test was written.
+- **btap's adapter is thin**: `_bridge_available` imports `tbd`,
+  `_process` is `tbd.oslg.clean()` → `tbd.process(model, argh)` → THAT
+  call's logs, returned call-locally (no module-level "last logs" state).
+  The three behaviour states are preserved exactly: not-requested warns,
+  unavailable returns False with the loud NOT-accounted warning, and an
+  available-but-failing engine ABORTS (a negative control pins that it can
+  never be relabeled as unavailability).
+- **The pin is falsifiable, not aspirational**: pyproject's `[tbd]` extra
+  pins py-tbd by commit SHA (py-topolys pinned transitively inside
+  py-tbd's own pyproject — neither project has a tagged release yet); the
+  suite asserts `tbd.VERSION`/`UPSTREAM_VERSION`/`UPSTREAM_SHA`;
+  `BTAP_TBD_REQUIRED=1` turns absence into failure (set in the python job
+  and in verify, which also installs the RUBY triplet so the
+  cross-language TBD gates run rather than skip); wheel smoke installs the
+  extra and runs a real `tbd.process` outside the checkout.
+- **Both formerly-M7 skips are enabled** (the uprate/derate gate and the
+  frozen `tbd_rsi` Leg-C golden — 1e-6 with key-set equality both ways),
+  plus the new gates: direct `TBD.process` parity Ruby-vs-Python
+  (surfaces, edges, warning texts; 1e-9), the post-reference-rebuild
+  assertion (nothing downstream may erase the uprate), and a dedicated
+  assembled Leg-B case running the FULL compliance pipeline with
+  `thermal_bridging='efficient (BETBG)'` on both sides — the corpus never
+  requests thermal bridging, so that case, not a corpus re-run, is the M7
+  evidence.
+
+**The M7 review (Sol, 2026-08-28) found six issues; all dispositioned in
+`dbcf74e`.** The one that mattered most existed identically in Ruby and was
+fixed RUBY-FIRST: TBD reports invalid input by LOGGING fatal/error and
+returning a PARTIAL result, and both languages' `apply` narrated that as
+'assemblies uprated' (reproduced both sides: invalid PSI set → status 5,
+30 surfaces returned, decision emitted). Both now check fatal/error after
+capturing logs and RAISE before any decision can be recorded, pinned by
+real-engine invalid-PSI tests on both sides. Also from the review: a broken
+py-tbd install (failed transitive import) now propagates instead of taking
+the benign 'not available' branch (Ruby's bare `rescue LoadError` had the
+same relabeling — fixed first, on `LoadError#path`); osut/oslg are pinned
+EXACTLY in the compat branch's metadata (pin `bfb23e68`) and asserted in
+the engine-identity test; engine operations run under a module lock
+(process-safe AND thread-safe); the assembled Leg-B test uses production
+`compare_file` so `strip_keys` applies; and the two-flags split
+(`BTAP_TBD_REQUIRED` = Python engine, `TBD_REQUIRED` = Ruby gem — the
+family's existing flag, not a new name) had already landed when CI caught
+the conflation on the first dispatch.
+
+**Parked deliberately:** the family-wide rebaseline onto TBD 3.6.x is its
+own future adjudication — bump the Ruby triplet first, re-run Leg A,
+re-export the goldens, retire the compat branch — and pairs naturally with
+the pending `legacy_pin/REF` bump.
 
 ## Working agreements that produced this
 

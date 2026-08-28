@@ -39,3 +39,18 @@ same refusal to call a `--quick` week a determination. The Leg-B corpus gate
 (`CLI_B=python bash verification/selftest.sh`) diffs this CLI's
 `audit.json`/`report.json` against the Ruby CLI's over the whole corpus —
 every pair equivalent at the `none`, `sizing`, and `annual` tiers.
+
+## Thermal bridging (M7)
+
+NECB 3.1.1.7 runs through **py-tbd** (native Python, no Ruby subprocess),
+pinned by commit SHA to its `tbd-3.5.2-compat` branch — the revision
+verified against the family's frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle
+baseline:
+
+```bash
+pip install '.[tbd]'
+```
+
+Without it the pipeline still works: `thermal_bridging=` degrades to the
+same loud audited 3.1.1.7-not-accounted warning the Ruby gem emits without
+its tbd gem — never a silent clear-field result.

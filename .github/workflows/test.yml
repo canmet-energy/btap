@@ -98,6 +98,13 @@ jobs:
           ruby-version: '3.2.2'
       - name: Install the openstudio wheel + test runner
         run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
+      # M7 (D-79 Option A): the pinned py-tbd engine — SDK-only, so its
+      # gates run on this bare runner too (the Ruby-vs-Python TBD gates need
+      # the Ruby gem and run in verify). Pinned by SHA in pyproject's [tbd]
+      # extra; installed here the same way so the pin is the single source.
+      - name: Install the pinned py-tbd engine (the [tbd] extra)
+        working-directory: python
+        run: pip install -q "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['optional-dependencies']['tbd'][0])")"
       # The D-77 dependency arrows as an enforced contract, not a convention:
       # necb -> costing -> modeling -> audit, simulation beside, and audit
       # SDK-free (the property the bare-runner audit suite depends on). It
@@ -117,6 +124,7 @@ jobs:
         working-directory: python
         env:
           BTAP_SDK_REQUIRED: '1'
+          BTAP_TBD_REQUIRED: '1'
         run: pytest -n auto -q tests/
       # Distribution integrity. The suites above run against the CHECKOUT,
       # where every data file exists because the repo exists; a wheel is a
@@ -240,19 +248,37 @@ jobs:
       # tests run instead of skipping (a skipped gate is green-but-vacuous).
       - name: Generate the sample corpus (Ruby SDK)
         run: ruby btap-necb/scripts/generate_samples.rb packaging/windows/samples
-      - name: Python suites, everything required (cross-language gates included)
+      # M7: BOTH engines, both pinned — the Ruby tbd triplet (the frozen
+      # oracle baseline) and py-tbd's tbd-3.5.2-compat SHA — so the direct
+      # Ruby-vs-Python TBD process-parity gate and the assembled Leg-B
+      # thermal-bridging case run here rather than skip.
+      - name: Install the pinned tbd triplet (Ruby) + py-tbd (Python)
         working-directory: python
         run: |
+          gem install $(ruby ../legacy_pin/tbd_triplet.rb) --no-document
           apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q pytest pytest-xdist
+          # py-tbd itself with --no-deps: its openstudio requirement would
+          # pull the PyPI wheel into the venv and SHADOW the image SDK this
+          # job's premise is built on (venv site-packages beat PYTHONPATH).
+          # Every other dep is pure Python; the py-topolys SHA mirrors the
+          # pin inside py-tbd's own pyproject.
+          .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
+            "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@364703051cb27fbe6a686f9764a996389bd0ad73"
+          .ci-venv/bin/pip install -q --no-deps "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['optional-dependencies']['tbd'][0])")"
+      - name: Python suites, everything required (cross-language gates included)
+        working-directory: python
+        run: |
+          # (.ci-venv was built in the tbd install step above — pytest,
+          # pytest-xdist and the pinned py-tbd already live in it.)
           # FULL_MATRIX=1: the D-58 reference-selection matrix defaults to a
           # 22-system subset for PR speed. The M5 acceptance claim is about
           # all 97, so the claim is enforced HERE rather than resting on a
           # manual run someone did once.
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 FULL_MATRIX=1 \
+          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 TBD_REQUIRED=1 FULL_MATRIX=1 \
             .ci-venv/bin/pytest -n auto -q tests/
       # The M6 decisive acceptance, continuously enforced: the Ruby CLI and
       # the PYTHON CLI over the same corpus, every pair diffed under the

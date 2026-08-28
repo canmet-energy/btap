@@ -27,7 +27,14 @@ module BtapNECB
         @available = begin
           require 'tbd'
           true
-        rescue LoadError
+        rescue LoadError => e
+          # Only ABSENCE of tbd itself is the benign fallback. A LoadError
+          # from tbd's own requires (osut/topolys/oslg) is a BROKEN
+          # configured engine — relabeling it as unavailability would hand a
+          # user who requested thermal bridging clear-field values behind a
+          # warning that claims the gem is missing (review, 2026-08-28).
+          raise unless e.path == 'tbd'
+
           false
         end
       end
@@ -72,6 +79,18 @@ module BtapNECB
         end
 
         result = TBD.process(model, argh)
+        # TBD reports invalid input by LOGGING error/fatal and returning a
+        # PARTIAL result — returning it would let the audit declare
+        # 'assemblies uprated' after a failed run (reproduced with an
+        # invalid PSI set: status 5, 30 surfaces returned; review,
+        # 2026-08-28). An available-but-failing engine must ABORT, never be
+        # recorded as success or relabeled as unavailability.
+        if TBD.fatal? || TBD.error?
+          problems = TBD.logs.select { |l| l[:level].to_i >= 4 }.map { |l| l[:message] }
+          raise("TBD FAILED (status #{TBD.status}) — NECB 3.1.1.7 effective transmittance has " \
+                "NOT been applied: #{problems.join('; ')}")
+        end
+
         surfaces = result[:surfaces] || {}
         derated = surfaces.select { |_, s| s[:deratable] && s[:heatloss].to_f.abs > 1e-9 }
 

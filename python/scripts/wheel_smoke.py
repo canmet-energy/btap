@@ -105,6 +105,26 @@ def run_checks() -> int:
     check("a real domain operation runs end to end (necb loads on the packaged seed)",
           domain_operation)
 
+    def tbd_engine_operates():
+        # M7 (D-79 Option A): the pinned py-tbd engine — installed via the
+        # [tbd] extra — must import with the verified 3.5.2-compat identity
+        # and run a REAL process operation on the packaged seed model.
+        import tbd
+
+        from btap.necb.envelope import thermal_bridging as tb
+        assert tbd.VERSION == tb.PINNED_TBD_VERSION, (
+            f"engine {tbd.VERSION} != pinned {tb.PINNED_TBD_VERSION}")
+        assert tbd.UPSTREAM_SHA == tb.PINNED_TBD_UPSTREAM_SHA, "upstream SHA drift"
+        from btap._sdk import load_model
+        model = load_model(modeling.hvac.catalog_report.FIXTURE)
+        tbd.oslg.clean()
+        result = tbd.process(model, {"option": "efficient (BETBG)"})
+        surfaces = result.get("surfaces") or {}
+        derated = sum(1 for s in surfaces.values()
+                      if abs(float(s.get("heatloss") or 0.0)) > 1e-9)
+        assert derated > 0, "tbd.process derated nothing on the seed model"
+    check("the pinned py-tbd engine installs and processes (M7)", tbd_engine_operates)
+
     def console_script_answers():
         # M6: the wheel declares the btap-compliance entry point. It must be
         # on the venv's bin path and --help must exit 0 — a broken entry
@@ -146,7 +166,13 @@ def main(argv) -> int:
         subprocess.run([sys.executable, "-m", "venv", str(venv)], check=True)
         pip, python = venv / "bin" / "pip", venv / "bin" / "python"
         print("installing into a clean venv...")
-        subprocess.run([str(pip), "install", "-q", "openstudio~=3.11.0", str(wheel)], check=True)
+        # [tbd] pulls the PINNED py-tbd (git SHA, py-topolys pinned
+        # transitively) — the M7 engine must install and operate from the
+        # DISTRIBUTION, not just the checkout: a broken git pin, missing
+        # package data or import-resolution failure in the optional extra is
+        # invisible to every source-tree test.
+        subprocess.run([str(pip), "install", "-q", "openstudio~=3.11.0",
+                        f"{wheel}[tbd]"], check=True)
 
         # CWD outside the repo: a local btap/ must not be importable.
         print(f"running checks from {work_dir} (outside the checkout)\n")

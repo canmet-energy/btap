@@ -223,6 +223,22 @@ and diffs every pair's `audit.json`/`report.json` under the rules in
 CI runs `none`+`sizing` in the `verify` job and `annual` in the
 dispatch-only `parity` job.
 
+Thermal bridging (M7, D-79 Option A) uses **py-tbd** — the native Python
+port of rd2/tbd — pinned to its `tbd-3.5.2-compat` branch, the revision
+verified against the SAME Ruby TBD 3.5.2 / OSut 0.8.2 baseline the parity
+oracle is frozen on (py-tbd main ports 3.6.0, a physically different
+uprate):
+
+```bash
+cd python && .venv/bin/pip install '.[tbd]'   # the SHA-pinned engine
+BTAP_TBD_REQUIRED=1 .venv/bin/pytest tests/necb/test_envelope_thermal_bridging.py
+```
+
+The suite asserts the engine identity (`tbd.VERSION`/`UPSTREAM_SHA`), and
+the Ruby-vs-Python TBD gates additionally need the pinned Ruby triplet
+(`gem install $(ruby legacy_pin/tbd_triplet.rb)`). `BTAP_TBD_REQUIRED=1`
+turns absence into failure — CI's `verify` job supplies both engines.
+
 
 ## History
 

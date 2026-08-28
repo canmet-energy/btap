@@ -67,6 +67,30 @@ class TestThermalBridging < Minitest::Test
     refute_empty per_surface, 'per-surface derating evidence in the audit'
   end
 
+  # Review (2026-08-28): TBD reports invalid input by LOGGING fatal/error and
+  # returning a PARTIAL result — before this fix, apply() narrated that
+  # partial result as 'assemblies uprated' (reproduced: invalid PSI set,
+  # status 5, 30 surfaces returned, decision emitted). A failing AVAILABLE
+  # engine must ABORT, never claim success or be relabeled unavailability.
+  def test_engine_failure_aborts_never_claims_success
+    unless tbd_available?
+      msg = 'tbd gem not available (gem install tbd)'
+      ENV['TBD_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
+    end
+
+    audit = BtapNECB::AuditLog.new
+    error = assert_raises(RuntimeError) do
+      BtapNECB::Envelope::ThermalBridging.apply(load_raw_fixture, vintage: '2020', hdd: HDD,
+                                                psi_set: 'no such set', audit: audit)
+    end
+    assert_includes error.message, 'TBD FAILED'
+    assert_includes error.message, 'NOT been applied'
+    refute(audit.entries.any? { |e| e[:step] == :thermal_bridging && e[:level] == :decision },
+           'no uprated decision may be recorded for a failed run')
+    refute(audit.warnings.any? { |w| w[:action].include?('NOT accounted') },
+           'a processing failure must never be relabeled as unavailability')
+  end
+
   def test_coverage_manifest_reflects_tbd_status
     %w[2020 2025].each do |v|
       art = BtapNECB::Envelope.rules(v)['article_coverage']['articles']

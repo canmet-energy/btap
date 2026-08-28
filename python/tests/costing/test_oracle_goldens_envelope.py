@@ -15,8 +15,11 @@ here even when Ruby↔Python and Ruby↔oracle each agree. The golden's dollars
 were priced from the vendored PLACEHOLDER costs.csv (the package's own data/
 copy — the default resolution), never licensed values.
 
-The 'tbd_rsi' key SKIPS: reproducing it means running TBD on the fixture,
-which needs the M7 bridge.
+- tbd_rsi:                   |Δ| < 1e-6, and identical key sets (both
+  directions) — enabled with M7. The golden's values are TBD.rsi on a
+  prescriptive-applied fixture; the Python side reproduces the model
+  recipe (apply_prescriptive → 0.3 WWR on the first outdoors wall →
+  apply_prescriptive again) and compares Quantify.rsi_of.
 """
 
 import json
@@ -112,11 +115,57 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
         self.assertEqual(sorted(str(k) for k in legacy_quantities),
                          sorted(str(k) for k in quantities))
 
-    @unittest.skip("needs TBD bridge (M7)")
     def test_tbd_rsi_matches_the_oracle(self):
-        """The golden's 'tbd_rsi' surfaces/sub_surfaces were computed on a
-        prescriptive-applied fixture whose uprated_Uo comes from TBD.process;
-        reproducing them needs the M7 TBD bridge (tolerance there: 1e-6)."""
+        """The golden's 'tbd_rsi' surfaces/sub_surfaces are TBD.rsi values
+        frozen from the pinned oracle on a prescriptive-applied fixture
+        (export_oracle_goldens.rb: apply_prescriptive -> WWR 0.3 on the
+        FIRST outdoors wall in SDK order -> apply_prescriptive again).
+        Reproduced here with Quantify.rsi_of (surfaces WITH films,
+        subsurfaces without — the exact TBD.rsi(lc, filmResistance) /
+        TBD.rsi(lc, 0) split the probe used), enabled with M7."""
+        from btap.audit import AuditLog
+        from btap.costing.envelope.quantify import GROUND_BOUNDARIES, rsi_of
+        from btap.necb import envelope
+        from tests.necb.support import load_raw_fixture
+
+        model = load_raw_fixture()
+        envelope.apply_prescriptive(model, vintage="2020", hdd=3890,
+                                    audit=AuditLog())
+        wall = next(s for s in model.getSurfaces()
+                    if s.outsideBoundaryCondition() == "Outdoors"
+                    and s.surfaceType() == "Wall")
+        wall.setWindowToWallRatio(0.3)
+        envelope.apply_prescriptive(model, vintage="2020", hdd=3890,
+                                    audit=AuditLog())
+
+        legacy = golden()["tbd_rsi"]
+        surfaces = {}
+        for surface in sorted(model.getSurfaces(),
+                              key=lambda x: x.nameString()):
+            base = surface.construction()
+            if base.is_initialized() and \
+                    base.get().to_LayeredConstruction().is_initialized() and \
+                    (surface.outsideBoundaryCondition() == "Outdoors"
+                     or surface.outsideBoundaryCondition() in GROUND_BOUNDARIES):
+                surfaces[surface.nameString()] = rsi_of(surface, film=True)
+        sub_surfaces = {}
+        for sub in sorted(model.getSubSurfaces(),
+                          key=lambda x: x.nameString()):
+            base = sub.construction()
+            if base.is_initialized() and \
+                    base.get().to_LayeredConstruction().is_initialized():
+                sub_surfaces[sub.nameString()] = rsi_of(sub, film=False)
+
+        # key sets, BOTH directions — a comparison that silently shrinks
+        # would pass vacuously
+        self.assertEqual(sorted(legacy["surfaces"]), sorted(surfaces))
+        self.assertEqual(sorted(legacy["sub_surfaces"]), sorted(sub_surfaces))
+        for name, rsi in legacy["surfaces"].items():
+            self.assertAlmostEqual(rsi, surfaces[name], delta=1e-6,
+                                   msg=f"surface {name} RSI")
+        for name, rsi in legacy["sub_surfaces"].items():
+            self.assertAlmostEqual(rsi, sub_surfaces[name], delta=1e-6,
+                                   msg=f"sub surface {name} RSI")
 
 
 if __name__ == "__main__":

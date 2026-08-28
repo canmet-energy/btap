@@ -5,25 +5,29 @@ under-insulate relative to code intent. The Ruby module integrates the TBD gem
 each opaque assembly so its DERATED effective transmittance meets the
 prescriptive target.
 
-PORT STATUS (M7): **TBD has no Python equivalent.** rd2/tbd is a Ruby gem with
-no PyPI counterpart, and reaching it needs the M7 TBD bridge (a Ruby
-subprocess speaking to the same SDK model). Until that exists:
+M7 (D-79, Option A of the M6/M7 review): the engine is **py-tbd**, the
+native Python port of rd2/tbd, pinned to the ``tbd-3.5.2-compat`` branch —
+a revision verified against the SAME Ruby TBD 3.5.2 / OSut 0.8.2 baseline
+the family's verification oracle is frozen on (main ports 3.6.0, which
+PARTIALLY uprates an infeasible construction where 3.5.2 refuses — ~43%
+apart on the same wall; see py-tbd's UPSTREAM.md). No Ruby subprocess
+bridge: ``tbd.process(model, argh)`` mutates the same in-process SDK model
+the Ruby gem's TBD.process does.
 
-- ``is_available()`` is False, so ``apply`` takes the SAME unavailable branch
-  the Ruby takes when the gem is missing: it returns False and writes the
-  LOUD audit warning that 3.1.1.7 is not accounted. Never a silent
-  clear-field result — that contract is preserved exactly.
-- the uprate path itself (``_process``) raises a RuntimeError naming the M7
-  bridge rather than pretending to compute anything.
-
-Everything around the gem call — HDD resolution, the effective-U targets, the
-TBD argument hash, and the audit narration of a result — is ported, so wiring
-M7 means supplying ``_process``/``_logs`` and flipping ``_bridge_available``.
+The optional dependency is declared in pyproject's ``[project.optional-
+dependencies] tbd`` extra; because py-tbd has no PyPI release yet, install
+is pinned by commit SHA (py-topolys first, then ``--no-deps`` py-tbd — pip
+refuses two spellings of the same git direct reference). When unavailable,
+``apply`` takes the SAME branch the Ruby takes without the gem: returns
+False with the LOUD 3.1.1.7-not-accounted warning. Never a silent
+clear-field result. Logs are CALL-LOCAL: ``_process`` returns (result,
+logs) from the one operation, so concurrent calls cannot interleave.
 """
 
 from __future__ import annotations
 
 import os
+import threading
 
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
@@ -37,21 +41,45 @@ BUILT_IN_PSI_SETS = ["poor (BETBG)", "regular (BETBG)", "efficient (BETBG)",
                      "spandrel (BETBG)", "spandrel HP (BETBG)",
                      "code (Quebec)", "uncompliant (Quebec)", "(non thermal bridging)"]
 
-TBD_BRIDGE_MESSAGE = (
-    "NECB 3.1.1.7 thermal bridging needs the TBD engine (rd2/tbd), which is a "
-    "RUBY gem with no Python equivalent. The M7 TBD bridge — the Ruby "
-    "subprocess that runs TBD.process on the model and returns its :surfaces "
-    "result — is not built yet, so the uprate/derate path cannot run from "
-    "Python. Until M7 lands, call the Ruby btap-necb gem for thermal bridging, "
-    "or accept the audited clear-field warning (is_available() is False, so "
-    "apply() warns loudly and returns False rather than raising)."
-)
+#: The verified engine baseline (Option A): the py-tbd tbd-3.5.2-compat
+#: branch. tests/necb/test_envelope_thermal_bridging.py asserts the
+#: installed engine matches — a silently different engine would compare
+#: different physics against the frozen goldens.
+PINNED_TBD_VERSION = "3.5.2"
+PINNED_TBD_UPSTREAM_SHA = "95156a922f54e45293e1896eba11bc29cd1b5c6d"
+
+_available: bool | None = None
+
+#: One engine operation at a time: tbd.oslg is PROCESS-GLOBAL state, so the
+#: clean -> process -> logs sequence must not interleave across threads.
+#: (Ruby's TBD shares the same global-log pattern; both integrations are
+#: process-safe — pytest-xdist forks processes — and this lock makes the
+#: Python side thread-safe too.)
+_ENGINE_LOCK = threading.Lock()
 
 
 def _bridge_available() -> bool:
-    """The M7 TBD bridge. False until it is built — flipping this to True is
-    the whole wiring change, alongside ``_process``/``_logs``."""
-    return False
+    """Is the py-tbd engine importable? Memoized per process, like Ruby's
+    ``@available`` (the env-var opt-out is checked BEFORE this, uncached).
+
+    Only ABSENCE of py-tbd itself is the benign fallback. An import failure
+    from inside it — a missing/broken py_topolys, osut, oslg or openstudio —
+    is a BROKEN configured engine and PROPAGATES: relabeling it as
+    unavailability would hand a user who requested thermal bridging
+    clear-field values behind a warning that claims the gem is missing
+    (review, 2026-08-28; the Ruby module discriminates on LoadError#path the
+    same way)."""
+    global _available
+    if _available is None:
+        try:
+            import tbd  # noqa: F401
+
+            _available = True
+        except ModuleNotFoundError as e:
+            if e.name != "tbd":
+                raise
+            _available = False
+    return _available
 
 
 def is_available() -> bool:
@@ -61,13 +89,31 @@ def is_available() -> bool:
 
 
 def _process(model, argh):
-    """TBD.clean! + TBD.process — the M7 bridge's job."""
-    raise RuntimeError(TBD_BRIDGE_MESSAGE)
+    """TBD.clean! + TBD.process + TBD.logs — one engine operation, under
+    the engine lock (tbd.oslg is process-global).
 
+    :return: (the TBD result dict, THAT call's logs) — logs are captured
+        here, call-locally, so a later operation cannot mutate them.
+    :raises RuntimeError: when the engine logged error/fatal — TBD reports
+        invalid input by LOGGING it and returning a PARTIAL result
+        (reproduced: an invalid PSI set returns 30 surfaces at status 5);
+        narrating that partial result would record 'assemblies uprated' for
+        a failed run. Same fix landed Ruby-first (review, 2026-08-28)."""
+    import tbd
 
-def _logs():
-    """TBD.logs — the M7 bridge's job."""
-    raise RuntimeError(TBD_BRIDGE_MESSAGE)
+    with _ENGINE_LOCK:
+        tbd.oslg.clean()
+        result = tbd.process(model, argh)
+        logs = [dict(entry) for entry in tbd.oslg.logs()]
+        status = int(tbd.oslg.status())
+        failed = bool(tbd.oslg.is_fatal() or tbd.oslg.is_error())
+    if failed:
+        problems = "; ".join(str(entry["message"]) for entry in logs
+                             if int(entry["level"]) >= 4)
+        raise RuntimeError(
+            f"TBD FAILED (status {status}) — NECB 3.1.1.7 effective "
+            f"transmittance has NOT been applied: {problems}")
+    return result, logs
 
 
 def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
@@ -109,13 +155,13 @@ def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
     else:
         argh["option"] = psi_set
 
-    result = _process(model, argh)
-    return _record(result, psi_set, hdd, targets, audit)
+    result, logs = _process(model, argh)
+    return _record(result, logs, psi_set, hdd, targets, audit)
 
 
-def _record(result, psi_set, hdd, targets, audit):
+def _record(result, logs, psi_set, hdd, targets, audit):
     """Narrate a TBD result into the audit (the second half of the Ruby
-    ``apply``); split out so the M7 bridge only has to supply the result."""
+    ``apply``). ``logs`` are the engine logs of THIS call (call-local)."""
     surfaces = result.get("surfaces") or {}
     derated = {name: s for name, s in surfaces.items()
                if s.get("deratable") and abs(float(s.get("heatloss") or 0.0)) > 1e-9}
@@ -123,7 +169,7 @@ def _record(result, psi_set, hdd, targets, audit):
     # Forward every TBD warning+ into the audit — 'Unable to uprate X' means
     # the geometry's edge losses alone exceed the effective target with this
     # PSI set (physically infeasible), which must be visible, never swallowed.
-    for entry in _logs():
+    for entry in logs:
         if int(entry["level"]) >= 3:
             audit.warn("thermal_bridging", f"TBD: {entry['message']}", article="3.1.1.7.")
 
