@@ -106,8 +106,16 @@ def validate(value, skeleton, path="$"):
         return errors
     if mode == "keyed":
         fields = skeleton["key"]
+        have = {}
         try:
-            have = {_key_of(item, fields, path): item for item in value}
+            for item in value:
+                key = _key_of(item, fields, path)
+                if key in have:
+                    # Silently collapsing duplicates would let a malformed
+                    # oracle result overwrite one entry with another and
+                    # still validate — a false-green in the inventory gate.
+                    errors.append(f"{path}: duplicate item {key!r} (key {fields})")
+                have[key] = item
         except (TypeError, KeyError) as exc:
             return [f"{path}: keyed list items lack key fields {fields}: {exc}"]
         want = skeleton["items"]

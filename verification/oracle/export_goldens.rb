@@ -59,6 +59,24 @@ abort('the pinned oracle is not bundled — run under BUNDLE_GEMFILE=legacy_pin/
 coster = OracleProbes::Access.coster
 abort('the BTAP costing oracle failed to load') if coster == :unavailable
 
+# ---- provenance binding: the prep must come from THESE inputs ------------
+# The prep manifest records what oracle_prep.py ran against; a stale prep
+# directory paired with a newer request manifest (or a changed prep script,
+# or a changed seed) could otherwise be exported as long as its model
+# shapes still satisfied the inventory. Hard failures — re-running prep is
+# cheap; a golden with mixed provenance is not.
+{
+  'request_manifest_sha256' => File.join(__dir__, 'request_manifest.json'),
+  'oracle_prep_sha256' => File.join(ROOT, 'python/scripts/oracle_prep.py'),
+  'seed_sha256' => File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm')
+}.each do |field, current_path|
+  recorded = PREP_MANIFEST['provenance'][field]
+  current = Digest::SHA256.hexdigest(File.read(current_path, encoding: 'BINARY'))
+  next if recorded == current
+
+  abort("prep provenance mismatch on #{field}: the prep directory was built against "         "#{recorded ? recorded[0, 12] : 'nothing'} but the current file is #{current[0, 12]} "         "(#{current_path}) — STALE PREP. Re-run python/scripts/oracle_prep.py at this revision.")
+end
+
 # ---- OpenStudio identity: prep and probe must be the same build ----------
 prep_os = PREP_MANIFEST['provenance']['openstudio']
 export_os = { 'sdk_version' => OpenStudio.openStudioVersion, 'build_sha' => OpenStudio.openStudioVersionBuildSHA }

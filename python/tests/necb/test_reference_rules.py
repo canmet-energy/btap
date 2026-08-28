@@ -37,9 +37,12 @@ SAMPLES = Path(os.environ.get(
 def sample(test, slug):
     path = SAMPLES / f"{slug}.osm"
     if not path.exists():
-        test.skipTest("sample not generated: run "
-                      "python3 scripts/generate_samples.py tests/generated/samples "
-                      "(or set BTAP_SAMPLES_DIR)")
+        msg = ("sample not generated: run "
+               "python3 scripts/generate_samples.py tests/generated/samples "
+               "(or set BTAP_SAMPLES_DIR)")
+        if os.environ.get("BTAP_SAMPLES_REQUIRED") == "1":
+            test.fail(msg)  # the family's flag discipline: no vacuous green
+        test.skipTest(msg)
     return str(path)
 
 

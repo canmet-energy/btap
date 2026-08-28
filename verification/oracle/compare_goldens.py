@@ -34,22 +34,61 @@ def tolerance(group, path):
     return 0.0
 
 
-def diff_values(group, fresh, committed, path="$"):
+def _keyed_map(group, side, items, fields, path):
+    out, errors = {}, []
+    for item in items:
+        key = "|".join(str(item[f]) for f in fields)
+        if key in out:
+            errors.append(f"{group}: {path} duplicate item {key!r} in {side}")
+        out[key] = item
+    return out, errors
+
+
+def diff_values(group, fresh, committed, skeleton=None, path="$"):
+    """Skeleton-aware value diff: lists the request manifest declares
+    ``keyed`` compare by key and ``set`` by canonical membership, so a
+    harmless reordering the inventory accepts is not rejected here as a
+    false failure; everything else compares by structure and index."""
     errors = []
     if isinstance(fresh, dict) and isinstance(committed, dict):
+        spec = (skeleton or {}).get("__dict__", {})
         for k in sorted(set(fresh) | set(committed)):
             if k not in fresh:
                 errors.append(f"{group}: {path}/{k} only in committed")
             elif k not in committed:
                 errors.append(f"{group}: {path}/{k} only in fresh")
             else:
-                errors.extend(diff_values(group, fresh[k], committed[k], f"{path}/{k}"))
+                errors.extend(diff_values(group, fresh[k], committed[k],
+                                          spec.get(k), f"{path}/{k}"))
         return errors
     if isinstance(fresh, list) and isinstance(committed, list):
+        mode = skeleton.get("__list__") if isinstance(skeleton, dict) else None
+        if mode == "keyed":
+            fields = skeleton["key"]
+            have_f, errs_f = _keyed_map(group, "fresh", fresh, fields, path)
+            have_c, errs_c = _keyed_map(group, "committed", committed, fields, path)
+            errors.extend(errs_f + errs_c)
+            for k in sorted(set(have_f) | set(have_c)):
+                if k not in have_f:
+                    errors.append(f"{group}: {path}[{k}] only in committed")
+                elif k not in have_c:
+                    errors.append(f"{group}: {path}[{k}] only in fresh")
+                else:
+                    errors.extend(diff_values(group, have_f[k], have_c[k],
+                                              skeleton["items"].get(k), f"{path}[{k}]"))
+            return errors
+        if mode == "set":
+            want_f = sorted(fresh, key=json.dumps)
+            want_c = sorted(committed, key=json.dumps)
+            if want_f != want_c:
+                errors.append(f"{group}: {path} set membership differs")
+            return errors
         if len(fresh) != len(committed):
             return [f"{group}: {path} length {len(fresh)} != {len(committed)}"]
+        item_specs = skeleton.get("items", []) if isinstance(skeleton, dict) else []
         for i, (f, c) in enumerate(zip(fresh, committed)):
-            errors.extend(diff_values(group, f, c, f"{path}[{i}]"))
+            spec_i = item_specs[i] if i < len(item_specs) else None
+            errors.extend(diff_values(group, f, c, spec_i, f"{path}[{i}]"))
         return errors
     if isinstance(fresh, (int, float)) and isinstance(committed, (int, float)) \
             and not isinstance(fresh, bool) and not isinstance(committed, bool):
@@ -83,7 +122,8 @@ def main(argv):
                           for e in validate(data, request["golden_inventory"][group]))
             sides[label] = data
         if len(sides) == 2:
-            errors.extend(diff_values(group, sides["fresh"], sides["committed"]))
+            errors.extend(diff_values(group, sides["fresh"], sides["committed"],
+                                      request["golden_inventory"][group]))
 
     if errors:
         print(f"COMMITTED GOLDENS DISAGREE WITH THE LIVE ORACLE "

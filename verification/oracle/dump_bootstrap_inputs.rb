@@ -31,13 +31,15 @@ database.constructions.each do |sheet, assemblies|
   end
 end
 
-# Provenance: the gem data files these inventories came from.
+# Provenance: the gem data files these inventories ACTUALLY came from —
+# schedule_names from the loads schedules table, costing_candidates from the
+# envelope constructions catalog (post-merge review: the first bootstrap
+# scanned btap-necb/data and a nonexistent btap-costing/data, recording
+# unrelated NECB files and no costing hashes at all).
 sources = {}
-[File.join(ROOT, 'btap-necb/lib/btap_necb/data'),
- File.join(ROOT, 'btap-costing/data')].each do |dir|
-  Dir[File.join(dir, '**', '*.{json,csv}')].sort.each do |path|
-    sources[path.sub("#{ROOT}/", '')] = Digest::SHA256.hexdigest(File.read(path))
-  end
+[File.join(ROOT, 'btap-necb/lib/btap_necb/loads/data/schedules_2020.json'),
+ *Dir[File.join(ROOT, 'btap-costing/lib/btap_costing/data/envelope/*.{json,csv}')].sort].each do |path|
+  sources[path.sub("#{ROOT}/", '')] = Digest::SHA256.hexdigest(File.read(path, encoding: 'BINARY'))
 end
 
 puts JSON.pretty_generate(
