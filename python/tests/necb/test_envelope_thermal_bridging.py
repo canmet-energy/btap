@@ -202,13 +202,19 @@ class TestThermalBridgingCrossLanguage(unittest.TestCase):
         return probe.returncode == 0, probe.stdout.strip()
 
     def test_process_parity_on_the_btap_fixture(self):
+        # BTAP_TBD_REQUIRED governs the PY-TBD engine (needs_tbd above);
+        # the RUBY gem is a separate dependency with the family's existing
+        # flag: TBD_REQUIRED=1, set wherever the pinned triplet is installed
+        # (the matrix envelope leg and verify) — the bare python job
+        # deliberately has only the Python engine.
         ok, version = self.ruby_tbd_available()
         if not ok:
-            if os.environ.get('BTAP_TBD_REQUIRED') == '1':
-                self.fail('BTAP_TBD_REQUIRED=1 but the Ruby tbd gem is not '
+            if os.environ.get('TBD_REQUIRED') == '1':
+                self.fail('TBD_REQUIRED=1 but the Ruby tbd gem is not '
                           'installed (ruby legacy_pin/tbd_triplet.rb prints '
                           'the pinned install args)')
-            self.skipTest('needs the pinned Ruby tbd gem beside py-tbd')
+            self.skipTest('needs the pinned Ruby tbd gem beside py-tbd '
+                          '(TBD_REQUIRED=1 makes this a failure)')
         self.assertEqual('3.5.2', version,
                          'the Ruby side must be the PINNED 3.5.2 baseline')
 
@@ -275,10 +281,11 @@ class TestThermalBridgingLegB(unittest.TestCase):
             ['ruby', '-e', 'require "tbd"; print TBD::VERSION'],
             capture_output=True, text=True)
         if probe.returncode != 0:
-            if os.environ.get('BTAP_TBD_REQUIRED') == '1':
-                self.fail('BTAP_TBD_REQUIRED=1 but the Ruby tbd gem is not '
+            if os.environ.get('TBD_REQUIRED') == '1':
+                self.fail('TBD_REQUIRED=1 but the Ruby tbd gem is not '
                           'installed')
-            self.skipTest('needs the pinned Ruby tbd gem beside py-tbd')
+            self.skipTest('needs the pinned Ruby tbd gem beside py-tbd '
+                          '(TBD_REQUIRED=1 makes this a failure)')
 
         with tempfile.TemporaryDirectory() as tmp:
             ruby_dir = Path(tmp) / 'ruby'
