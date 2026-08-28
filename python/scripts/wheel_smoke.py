@@ -105,6 +105,19 @@ def run_checks() -> int:
     check("a real domain operation runs end to end (necb loads on the packaged seed)",
           domain_operation)
 
+    def console_script_answers():
+        # M6: the wheel declares the btap-compliance entry point. It must be
+        # on the venv's bin path and --help must exit 0 — a broken entry
+        # point is invisible to every in-process test.
+        exe = Path(sys.executable).parent / "btap-compliance"
+        if not exe.exists():
+            raise AssertionError(f"console script not installed: {exe}")
+        proc = subprocess.run([str(exe), "--help"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
+        assert "--epw" in proc.stdout, "help does not document --epw"
+    check("the btap-compliance console script answers --help", console_script_answers)
+
     if failures:
         print(f"\nWHEEL SMOKE FAILED ({len(failures)}):")
         for f in failures:

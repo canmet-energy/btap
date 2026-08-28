@@ -17,6 +17,7 @@ from tests.support import (  # noqa: F401  (re-exported for the necb suites)
     FIXTURES,
     HAVE_SDK,
     load_fixture,
+    needs_engine,
     needs_sdk,
 )
 
@@ -38,3 +39,36 @@ def tagged_model():
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
     loads.assign_space_types(model, map_, vintage="2020")
     return model
+
+
+#: Ruby FixtureHelper::STAT — the third of the weather trio.
+STAT = EPW.with_suffix(".stat")
+
+
+def compliance_fixture():
+    """Ruby FixtureHelper#load_fixture (the compliance suites' shape): the
+    shared fixture is ASHRAE-tagged with no standardsSpaceType, which the
+    performance-path pre-flight (correctly) rejects — tag the one space type
+    the five floor-area spaces use with a real NECB catalog name."""
+    model = load_raw_fixture()
+    for st in model.getSpaceTypes():
+        if st.spaces():
+            st.setStandardsBuildingType("Space Function")
+            st.setStandardsSpaceType("Office enclosed > 25 m2")
+    return model
+
+
+def proposed_with_hvac(system="Baseboard gas boiler"):
+    """A proposed building: the tagged fixture + a package-built HVAC
+    system."""
+    import btap.modeling as modeling
+    from btap._compat import sorted_by_name
+
+    model = compliance_fixture()
+    modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
+    return model
+
+
+def zone_types_for(model):
+    return {z.nameString(): "Office - enclosed"
+            for z in model.getThermalZones()}

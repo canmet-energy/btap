@@ -12,10 +12,20 @@ SHOUTED, passes lowercase — the report's checklist classifier is
 deliberately case-SENSITIVE.
 
 Vintages are '2020' and '2025' only. Import domains directly
-(``from btap.necb import loads``); the umbrella pipeline and CLI arrive
-with M6.
+(``from btap.necb import loads``). The umbrella pipeline is
+``performance_compliance`` (M6); the CLI is ``btap.necb.cli`` (console
+script ``btap-compliance``).
 """
 
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent / "data"
+
+
+def performance_compliance(model, **kwargs):
+    """The NECB Part 8 performance-path pipeline — see
+    :func:`btap.necb.compliance.performance_compliance`. Imported lazily so
+    ``btap.necb`` stays importable without the SDK."""
+    from btap.necb import compliance
+
+    return compliance.performance_compliance(model, **kwargs)
