@@ -11,6 +11,8 @@ import io
 import json
 import os
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -127,33 +129,56 @@ class TestCLIPreflight(CLICase):
         # --costs-csv at their own. This pins that the COMPLIANCE path never
         # touches them, so a future eager read breaks CI here rather than
         # shipping a distribution that dies at run time.
+        #
+        # PROBE MECHANICS (learned the hard way): Ruby's version renamed the
+        # shared CSVs on disk and restored them after — safe there because
+        # its runner forks per GEM, so nothing else could read them in the
+        # window. Under pytest-xdist the costing suites run CONCURRENTLY in
+        # sibling workers, and hiding the real files crashed five of them in
+        # CI. The probe is now PROCESS-LOCAL and stronger: a subprocess runs
+        # the CLI with builtins.open guarded so ANY read of either priced
+        # filename raises — nothing on disk moves, and eager reads through
+        # any resolution layer are caught, not just the vendored copies.
         costing = Path(cli.__file__).parents[1] / "costing" / "data"
-        priced = [costing / "costs.csv", costing / "costs_local_factors.csv"]
         # NOT a skip: this checkout vendors both, and a silently-skipping
         # packaging gate is exactly the green-but-vacuous failure this repo
         # already documents.
-        for f in priced:
-            self.assertTrue(f.exists(),
-                            f"expected the priced table {f} in {costing}")
+        for name in ("costs.csv", "costs_local_factors.csv"):
+            self.assertTrue((costing / name).exists(),
+                            f"expected the priced table {name} in {costing}")
 
-        moved = [(f, f.with_suffix(f.suffix + ".hidden")) for f in priced]
-        try:
-            for src, dst in moved:
-                src.rename(dst)
-            with tempfile.TemporaryDirectory() as dir:
-                code = self.run_cli(
-                    FIXTURE, *self.weather_args(), "--simulate", "none",
-                    "--hdd", "3890", "--storeys", "1", "--no-report",
-                    "--quiet", "--space-type",
-                    "Space Function/Office enclosed > 25 m2",
-                    "-o", os.path.join(dir, "run"))
-                self.assertEqual(6, code,
-                                 "the compliance path must not need the "
-                                 f"priced tables: {self.err.getvalue()}")
-        finally:
-            for src, dst in moved:
-                if dst.exists():
-                    dst.rename(src)
+        wrapper = (
+            "import builtins, os.path, sys\n"
+            "_real = builtins.open\n"
+            "def guarded(file, *a, **k):\n"
+            "    if os.path.basename(str(file)) in ('costs.csv',"
+            " 'costs_local_factors.csv'):\n"
+            "        raise AssertionError('the compliance path read a priced"
+            " table: %s' % file)\n"
+            "    return _real(file, *a, **k)\n"
+            "builtins.open = guarded\n"
+            "from btap.necb import cli\n"
+            "sys.exit(cli.run(sys.argv[1:]))\n")
+        with tempfile.TemporaryDirectory() as dir:
+            script = os.path.join(dir, "guarded_cli.py")
+            Path(script).write_text(wrapper, encoding="utf-8")
+            env = dict(os.environ)
+            python_root = str(Path(cli.__file__).parents[2])
+            env["PYTHONPATH"] = os.pathsep.join(
+                p for p in (python_root, env.get("PYTHONPATH")) if p)
+            proc = subprocess.run(
+                [sys.executable, script,
+                 FIXTURE, *self.weather_args(), "--simulate", "none",
+                 "--hdd", "3890", "--storeys", "1", "--no-report",
+                 "--quiet", "--space-type",
+                 "Space Function/Office enclosed > 25 m2",
+                 "-o", os.path.join(dir, "run")],
+                capture_output=True, text=True, env=env, timeout=600)
+            self.assertEqual(6, proc.returncode,
+                             "the compliance path must not need the priced "
+                             f"tables: {proc.stderr[-2000:]}")
+            self.assertNotIn("priced table", proc.stderr,
+                             "a priced table WAS read")
 
 
 class TestCLIOutput(CLICase):
