@@ -3,7 +3,7 @@
 
 # Exports the Leg-C ORACLE GOLDENS (D-78): every oracle-side value the eleven
 # parity gates compare, frozen to test/goldens/oracle/*.json — the files the
-# future Python port tests against DIRECTLY, so a bug faithfully ported from
+# Python port tests against DIRECTLY, so a bug faithfully ported from
 # Ruby still fails even when Ruby and Python agree.
 #
 #   BUNDLE_GEMFILE=<repo>/legacy_pin/Gemfile bundle exec \

@@ -4,6 +4,16 @@ The lowest-level gem of the family: EnergyPlus execution with a pluggable
 backend. **Only this gem and the umbrella (via its `Runner` alias) ever
 simulate** — the domain gems are SDK-only by contract.
 
+## The Python twin (btap.simulation)
+
+This gem is fully mirrored by `python/btap/simulation/` (the port is complete —
+D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
+here is a change to BOTH implementations**: land it Ruby-first, port it, and
+keep the Leg-B gates green — audit `action`/`article`/`ruling` strings are
+compared VERBATIM cross-language, so even wording is load-bearing. A defect
+found on either side is fixed on both or flagged in D-79, never silently on
+one.
+
 ## Architecture
 
 - `runner.rb` — `attach_weather!(model, epw:, ddy:)` (EPW + DDY design days),

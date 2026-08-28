@@ -9,7 +9,7 @@ require 'digest'
 # with the frozen files, and assert the manifest's legacy_ref equals
 # legacy_pin/REF. A REF bump without re-export
 # (scripts/export_oracle_goldens.rb) is a loud failure here, never a silently
-# stale golden. The future Python port consumes these same files directly.
+# stale golden. The Python port consumes these same files directly.
 class TestOracleGoldensCurrent < Minitest::Test
   GOLDEN_DIR = File.expand_path('goldens/oracle', __dir__)
   REMEDY = 'regenerate under the pin: BUNDLE_GEMFILE=legacy_pin/Gemfile bundle exec ' \

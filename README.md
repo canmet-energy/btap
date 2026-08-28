@@ -266,7 +266,8 @@ Each is described in `samples\README.txt` with the article it exercises.
 
 The tool is assembled from nine standalone Ruby gems. Most users never need to
 know this; it matters if you want to use one part on its own — say, NECB space
-types without the compliance run.
+types without the compliance run. (The [Python implementation](python/) mirrors
+the five core gems as subpackages of one `btap` distribution.)
 
 | Gem | One line |
 |---|---|

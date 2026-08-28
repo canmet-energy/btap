@@ -2,14 +2,15 @@
 
 The Python port of the btap gem family — one distribution, five subpackages
 mirroring the gems (`btap.audit`, `btap.simulation`, `btap.modeling`,
-`btap.costing`, `btap.necb`), same one-way dependency direction (D-77),
-ported milestone by milestone under the three-way verification harness
-(D-78/D-79): every module lands against the Ruby suites' ported tests, the
-Leg-C oracle goldens, and — once the CLI exists — the Leg-B corpus diff
-against the Ruby `btap-compliance`.
+`btap.costing`, `btap.necb`), same one-way dependency direction (D-77).
+The port is COMPLETE (M0–M8, 2026-08-28; the record is `../PORT_STATUS.md`
+and D-79), verified three ways: every Ruby suite ported, the Leg-C oracle
+goldens consumed (frozen AND live), and the Leg-B corpus diff holding the
+Ruby and Python `btap-compliance` CLIs equivalent at the `none`, `sizing`
+and `annual --quick` tiers.
 
-During the migration the Ruby gems remain the shipping product and the Leg-B
-baseline; behaviour changes land Ruby-first or not at all.
+The Ruby gems remain the shipping product and the Leg-B baseline; behaviour
+changes land Ruby-first or not at all.
 
 ```bash
 cd python && python3 -m unittest discover tests   # stdlib-only, no install needed (serial)

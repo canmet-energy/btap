@@ -1,5 +1,15 @@
 # CLAUDE.md — btap-modeling
 
+## The Python twin (btap.modeling)
+
+This gem is fully mirrored by `python/btap/modeling/` (the port is complete —
+D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
+here is a change to BOTH implementations**: land it Ruby-first, port it, and
+keep the Leg-B gates green — audit `action`/`article`/`ruling` strings are
+compared VERBATIM cross-language, so even wording is load-bearing. A defect
+found on either side is fixed on both or flagged in D-79, never silently on
+one.
+
 ## Layout
 
 `lib/btap_modeling/` is organized by authoring domain, mirroring the

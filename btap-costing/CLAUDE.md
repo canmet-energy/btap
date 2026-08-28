@@ -4,6 +4,16 @@ Consolidated costing (D-77): `BtapCosting::{HVAC,Envelope,Lighting,SHW}`,
 sub-namespaced because `Database`/`Report` exist per domain. Depends on
 btap-modeling + btap-audit only.
 
+## The Python twin (btap.costing)
+
+This gem is fully mirrored by `python/btap/costing/` (the port is complete —
+D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
+here is a change to BOTH implementations**: land it Ruby-first, port it, and
+keep the Leg-B gates green — audit `action`/`article`/`ruling` strings are
+compared VERBATIM cross-language, so even wording is load-bearing. A defect
+found on either side is fixed on both or flagged in D-79, never silently on
+one.
+
 ## Traps
 
 - **The dependency direction is the design.** Costing never requires
