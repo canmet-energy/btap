@@ -264,7 +264,7 @@ jobs:
           # job's premise is built on (venv site-packages beat PYTHONPATH).
           # Every other dep is pure Python; the py-topolys SHA mirrors the
           # pin inside py-tbd's own pyproject.
-          .ci-venv/bin/pip install -q "oslg>=0.4.0" "osut>=0.9.0" "jsonschema>=4" \
+          .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
             "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@364703051cb27fbe6a686f9764a996389bd0ad73"
           .ci-venv/bin/pip install -q --no-deps "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['optional-dependencies']['tbd'][0])")"
       - name: Python suites, everything required (cross-language gates included)

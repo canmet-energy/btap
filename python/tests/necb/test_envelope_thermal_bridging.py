@@ -87,6 +87,11 @@ class TestThermalBridgingEngine(unittest.TestCase):
         self.assertEqual(tb.PINNED_TBD_VERSION, tbd.UPSTREAM_VERSION)
         self.assertEqual(tb.PINNED_TBD_UPSTREAM_SHA, tbd.UPSTREAM_SHA)
         self.assertEqual("https://github.com/rd2/tbd", tbd.UPSTREAM_REPO)
+        # the engine's own dependency versions are part of the baseline
+        # identity (the compat branch pins them exactly; review, 2026-08-28)
+        from importlib.metadata import version
+        self.assertEqual("0.9.1", version("osut"))
+        self.assertEqual("0.4.0", version("oslg"))
 
     def test_uprate_derate_meets_effective_targets(self):
         # The Ruby gate, verbatim: with tbd available,
@@ -163,6 +168,71 @@ class TestThermalBridgingEngine(unittest.TestCase):
             'the FINAL reference roof (after the lightweight rebuild) must '
             'still meet the effective target — nothing downstream may erase '
             'the uprate')
+
+    def test_invalid_psi_set_aborts_through_the_real_engine(self):
+        # Review finding (2026-08-28), reproduced BEFORE the fix: TBD
+        # reports an invalid PSI set by LOGGING fatal and returning a
+        # PARTIAL result (status 5, all 30 surfaces present) — and the
+        # adapter narrated it as 'assemblies uprated'. The mocked-exception
+        # negative control below cannot see that path; this one drives the
+        # REAL engine. Fixed Ruby-first (the Ruby module had the identical
+        # flaw, pinned by its own test).
+        from btap.audit import AuditLog
+
+        audit = AuditLog()
+        with self.assertRaises(RuntimeError) as ctx:
+            self.n.thermal_bridging.apply(load_raw_fixture(), vintage='2020',
+                                          hdd=HDD, psi_set='no such set',
+                                          audit=audit)
+        self.assertIn('TBD FAILED', str(ctx.exception))
+        self.assertIn('NOT been applied', str(ctx.exception))
+        self.assertFalse(any(e['step'] == 'thermal_bridging'
+                             and e['level'] == 'decision'
+                             for e in audit.entries),
+                         'no uprated decision may be recorded for a failed run')
+        self.assertFalse(any('NOT accounted' in w['action']
+                             for w in audit.warnings),
+                         'a processing failure must never be relabeled as '
+                         'unavailability')
+
+    def test_broken_engine_install_propagates_never_relabels(self):
+        # Review finding (2026-08-28): a BROKEN py-tbd installation (a
+        # missing/broken transitive dep) must propagate as an error, never
+        # take the benign 'tbd is not available' fallback — only absence of
+        # the top-level package does. Simulated by making the import of tbd
+        # fail from INSIDE (ModuleNotFoundError naming a dependency).
+        import builtins
+        import sys
+
+        tb = self.n.thermal_bridging
+        real_import = builtins.__import__
+
+        def broken(name, *args, **kwargs):
+            if name == 'tbd':
+                raise ModuleNotFoundError("No module named 'py_topolys'",
+                                          name='py_topolys')
+            return real_import(name, *args, **kwargs)
+
+        saved_memo = tb._available
+        saved_module = sys.modules.pop('tbd', None)
+        try:
+            tb._available = None
+            with mock.patch('builtins.__import__', side_effect=broken):
+                with self.assertRaises(ModuleNotFoundError):
+                    tb.is_available()
+            # absence of tbd ITSELF still takes the benign branch
+            def absent(name, *args, **kwargs):
+                if name == 'tbd':
+                    raise ModuleNotFoundError("No module named 'tbd'",
+                                              name='tbd')
+                return real_import(name, *args, **kwargs)
+            tb._available = None
+            with mock.patch('builtins.__import__', side_effect=absent):
+                self.assertFalse(tb.is_available())
+        finally:
+            tb._available = saved_memo
+            if saved_module is not None:
+                sys.modules['tbd'] = saved_module
 
     def test_available_engine_failure_aborts_never_degrades(self):
         # Negative control (review gate 9): an AVAILABLE engine that FAILS
@@ -310,10 +380,13 @@ class TestThermalBridgingLegB(unittest.TestCase):
             spec = spec_module.load_spec(REPO_ROOT / 'verification'
                                          / 'spec.json')
             diffs = []
+            # compare_file, not a hand-rolled diff: production first strips
+            # spec['strip_keys'] recursively, and bypassing that would make
+            # this test fail on a deliberately ignored path later (review,
+            # 2026-08-28).
             for name in spec['files']:
-                a = json.loads((ruby_dir / name).read_text(encoding='utf-8'))
-                b = json.loads((py_dir / name).read_text(encoding='utf-8'))
-                spec_module.diff(a, b, spec, name, diffs)
+                spec_module.compare_file(str(ruby_dir), str(py_dir), name,
+                                         spec, diffs)
             self.assertEqual(
                 [], diffs,
                 'thermal-bridging compliance runs diverge under Leg-B '

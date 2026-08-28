@@ -27,6 +27,7 @@ logs) from the one operation, so concurrent calls cannot interleave.
 from __future__ import annotations
 
 import os
+import threading
 
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
@@ -49,17 +50,34 @@ PINNED_TBD_UPSTREAM_SHA = "95156a922f54e45293e1896eba11bc29cd1b5c6d"
 
 _available: bool | None = None
 
+#: One engine operation at a time: tbd.oslg is PROCESS-GLOBAL state, so the
+#: clean -> process -> logs sequence must not interleave across threads.
+#: (Ruby's TBD shares the same global-log pattern; both integrations are
+#: process-safe — pytest-xdist forks processes — and this lock makes the
+#: Python side thread-safe too.)
+_ENGINE_LOCK = threading.Lock()
+
 
 def _bridge_available() -> bool:
     """Is the py-tbd engine importable? Memoized per process, like Ruby's
-    ``@available`` (the env-var opt-out is checked BEFORE this, uncached)."""
+    ``@available`` (the env-var opt-out is checked BEFORE this, uncached).
+
+    Only ABSENCE of py-tbd itself is the benign fallback. An import failure
+    from inside it — a missing/broken py_topolys, osut, oslg or openstudio —
+    is a BROKEN configured engine and PROPAGATES: relabeling it as
+    unavailability would hand a user who requested thermal bridging
+    clear-field values behind a warning that claims the gem is missing
+    (review, 2026-08-28; the Ruby module discriminates on LoadError#path the
+    same way)."""
     global _available
     if _available is None:
         try:
             import tbd  # noqa: F401
 
             _available = True
-        except ImportError:
+        except ModuleNotFoundError as e:
+            if e.name != "tbd":
+                raise
             _available = False
     return _available
 
@@ -71,16 +89,30 @@ def is_available() -> bool:
 
 
 def _process(model, argh):
-    """TBD.clean! + TBD.process + TBD.logs — one engine operation.
+    """TBD.clean! + TBD.process + TBD.logs — one engine operation, under
+    the engine lock (tbd.oslg is process-global).
 
     :return: (the TBD result dict, THAT call's logs) — logs are captured
-        here, call-locally, so concurrent operations cannot interleave; a
-        module-level "last logs" would."""
+        here, call-locally, so a later operation cannot mutate them.
+    :raises RuntimeError: when the engine logged error/fatal — TBD reports
+        invalid input by LOGGING it and returning a PARTIAL result
+        (reproduced: an invalid PSI set returns 30 surfaces at status 5);
+        narrating that partial result would record 'assemblies uprated' for
+        a failed run. Same fix landed Ruby-first (review, 2026-08-28)."""
     import tbd
 
-    tbd.oslg.clean()
-    result = tbd.process(model, argh)
-    logs = [dict(entry) for entry in tbd.oslg.logs()]
+    with _ENGINE_LOCK:
+        tbd.oslg.clean()
+        result = tbd.process(model, argh)
+        logs = [dict(entry) for entry in tbd.oslg.logs()]
+        status = int(tbd.oslg.status())
+        failed = bool(tbd.oslg.is_fatal() or tbd.oslg.is_error())
+    if failed:
+        problems = "; ".join(str(entry["message"]) for entry in logs
+                             if int(entry["level"]) >= 4)
+        raise RuntimeError(
+            f"TBD FAILED (status {status}) — NECB 3.1.1.7 effective "
+            f"transmittance has NOT been applied: {problems}")
     return result, logs
 
 

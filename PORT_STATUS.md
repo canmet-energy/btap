@@ -52,7 +52,7 @@ data-integrity and cross-edition tests, which is the only available basis.
 | **M6** | the umbrella (`compliance`, `eui_archetypes`, `tiers`, the renderer, the CLI) | **The Leg-B corpus convergence**: Ruby CLI vs Python CLI over the whole corpus, every pair EQUIVALENT under the Leg-B rules — 18/18 at tier `none`, 3/3 at `sizing`, 2/2 at `annual --quick`. Plus: the renderer's chart primitive reproduces the Ruby suite's `paired_bars.svg` golden **byte-identically** (now consumed as a cross-language gate) |
 | **M7** | thermal bridging (NECB 3.1.1.7) via **native py-tbd**, Option A | Direct Ruby-vs-Python `TBD.process` parity on the fixture (surfaces/edges/**warnings byte-identical**, numerics 1e-9); the frozen `tbd_rsi` Leg-C golden (1e-6, key-set both ways); the uprate/derate gate incl. the infeasible-wall refusal; the post-reference-rebuild target-retention gate; an assembled Leg-B compliance case with `efficient (BETBG)` EQUIVALENT cross-language; engine identity asserted; wheel installs and processes from the `[tbd]` extra |
 
-Current suite: **713 passed, 2 skipped**, ~6 min parallel (the M6
+Current suite: **715 passed, 2 skipped**, ~6 min parallel (the M6
 engine-backed suites run real EnergyPlus; the M7 gates run both TBD
 engines). Import contracts: 3 kept. Ruff: clean (enforced in CI). The Ruby
 side is green throughout (matrix + verify + the 12-gate parity job).
