@@ -39,7 +39,8 @@ def cost(model, *, city=None, province_state=None, structure=None,
       — drives the costed wall assembly (default: steel-framed)
     performance: 'lp' or 'hp' assembly tier
     tbd_result: a TBD.process result dict — edges are tallied and costed, and
-      the parapet allowance is applied (producing one needs the M7 TBD bridge)
+      the parapet allowance is applied (produce one with the pinned py-tbd
+      engine — the [tbd] extra, M7)
     tb_tallies: pre-built {edge_type: {wall_ref: m}} tallies (legacy shape);
       takes precedence over tbd_result
     tb_quality: 'good' or 'bad' detail tier for the wall reference

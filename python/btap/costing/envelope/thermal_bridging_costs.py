@@ -14,7 +14,8 @@ Per legacy comment, NO regional factors apply: edge piecework is costed
 nationwide.
 
 The edge TALLIES consume a precomputed TBD.process result (or a pre-built
-tallies dict) — running TBD itself needs the M7 bridge; the quantity/table
+tallies dict) — a live TBD run needs the pinned py-tbd engine (M7, the
+[tbd] extra); the quantity/table
 math here is TBD-free.
 """
 

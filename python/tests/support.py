@@ -82,3 +82,31 @@ def load_fixture():
 
     from btap._sdk import load_model
     return load_model(FIXTURE_OSM)
+
+
+def tbd_available() -> bool:
+    """Is the pinned py-tbd engine importable (and not opted out)?"""
+    if os.environ.get("OPENSTUDIO_ENVELOPE_DISABLE_TBD") == "1":
+        return False
+    try:
+        import tbd  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def needs_tbd(cls_or_fn):
+    """The M7 engine-dependency gate, same discipline as needs_sdk/
+    needs_engine: skips name the install, and BTAP_TBD_REQUIRED=1 turns the
+    skip into a FAILURE (CI's verify job sets it — a skipped TBD gate is the
+    green-but-vacuous failure the Ruby suite already documents)."""
+    if not HAVE_SDK:
+        return needs_sdk(cls_or_fn)
+    if tbd_available():
+        return cls_or_fn
+    if os.environ.get("BTAP_TBD_REQUIRED") == "1":
+        return _hard_fail(cls_or_fn,
+                          "BTAP_TBD_REQUIRED=1 but the pinned py-tbd engine is not importable")
+    return unittest.skip(
+        "needs the pinned py-tbd engine (pip install 'btap[tbd]', or see "
+        "docs/DEVELOPERS.md)")(cls_or_fn)

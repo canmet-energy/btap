@@ -13,6 +13,18 @@ license = { text = "LGPL-3.0-or-later" }
 # btap.audit needs none of it; simulation/modeling/costing/necb do.
 dependencies = ["openstudio~=3.11.0"]
 
+# NECB 3.1.1.7 thermal bridging (M7, D-79 Option A): py-tbd's
+# tbd-3.5.2-compat branch — the revision verified against the SAME Ruby
+# TBD 3.5.2 / OSut 0.8.2 oracle baseline the family is frozen on (py-tbd
+# main ports 3.6.0, a physically different uprate). Pinned by COMMIT SHA on
+# both py-tbd and (transitively, inside py-tbd's own pyproject) py-topolys:
+# neither has a tagged release yet, and an unpinned git ref would let the
+# verification baseline move without a commit here.
+# tests/necb/test_envelope_thermal_bridging.py asserts the installed engine
+# identity; BTAP_TBD_REQUIRED=1 turns its absence from a skip into a failure.
+[project.optional-dependencies]
+tbd = ["py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@a6222d0f4851d318119689e020cc589aba1dceb2"]
+
 [project.scripts]
 btap-compliance = "btap.necb.cli:main"
 

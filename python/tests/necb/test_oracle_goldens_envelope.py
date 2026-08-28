@@ -23,8 +23,9 @@ here even when Ruby↔Python and Ruby↔oracle each agree. Every comparison
 asserts KEY-SET EQUALITY IN BOTH DIRECTIONS, so a shrunken comparison fails
 loudly instead of silently checking fewer entries than the golden holds.
 
-The costing golden's 'tbd_rsi' key stays SKIPPED in tests/costing — and the
-envelope domain's own TBD path is likewise unreachable until the M7 bridge.
+The costing golden's 'tbd_rsi' key is consumed in tests/costing (enabled
+with M7); the envelope domain's TBD path runs through the pinned py-tbd
+engine (see test_envelope_thermal_bridging.py).
 """
 
 from __future__ import annotations
