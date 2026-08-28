@@ -143,6 +143,19 @@ the Python unit suite now consumes that Ruby golden file directly.
 - **`wheel_smoke`** now also asserts the `btap-compliance` console script is
   installed and answers `--help`.
 
+### Residual risk, stated plainly
+
+The annual-tier Leg-B gate runs `--quick` (a one-week period): it exercises
+the full determination arithmetic, the unmet-hours logic, the report and
+exit 6 — but **no gate compares a real full-year determination returning
+exit 0 or 1 across the two languages**. That is a runtime-cost decision
+(each side is 40–90 minutes per model), not a confidence claim: the
+arithmetic between a week and a year is identical code, but the year is the
+shipping code path and it has only ever been run one language at a time.
+Named by review (2026-08-28) as the principal residual M6 risk; a
+deliberate one-off full-year convergence run is the cheapest way to retire
+it when someone wants to.
+
 ### What remains
 
 **M7** — thermal bridging. `tbd` has no Python equivalent; the plan is a

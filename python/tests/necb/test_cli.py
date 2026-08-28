@@ -181,6 +181,53 @@ class TestCLIPreflight(CLICase):
                              "a priced table WAS read")
 
 
+class TestCLIReviewRegressions(CLICase):
+    """The 2026-08-28 review findings, pinned (Ruby carries the same tests —
+    findings 2 and 3 were fixed Ruby-first per the working agreement)."""
+
+    def test_backend_selection_does_not_leak_across_in_process_runs(self):
+        # cli.run is in-process API, and the default backend is process-wide
+        # state — a run that selected remote must not silently make every
+        # LATER local run remote.
+        from btap.simulation import Local, Remote, runner
+
+        runner.set_default_backend(Remote())
+        try:
+            cli.select_backend({"backend": "local"})
+            self.assertIsInstance(runner.default_backend(), Local,
+                                  "local selection must RESET the "
+                                  "process-wide default")
+        finally:
+            runner.set_default_backend(None)
+
+    def test_missing_space_type_map_is_a_usage_error_even_under_none(self):
+        # Supplied file arguments are validated in EVERY mode: a missing
+        # --space-type-map under --simulate none used to reach file I/O and
+        # exit 5 instead of the documented usage exit 2.
+        self.assertEqual(2, self.run_cli(
+            FIXTURE, "--simulate", "none", "--hdd", "3890", "--storeys", "1",
+            "--space-type-map", "/nope/map.json"))
+        self.assertRegex(self.err.getvalue(),
+                         r"space-type map not found: /nope/map\.json")
+
+    def test_missing_costs_csv_is_a_usage_error_even_under_none(self):
+        self.assertEqual(2, self.run_cli(
+            FIXTURE, "--simulate", "none", "--hdd", "3890", "--storeys", "1",
+            "--costs-csv", "/nope/costs.csv"))
+        self.assertRegex(self.err.getvalue(),
+                         r"costs csv not found: /nope/costs\.csv")
+
+    @needs_sdk
+    def test_space_type_model_is_translated_once(self):
+        # --space-type loads the model to enumerate space names AND hands it
+        # to the pipeline — that must be ONE VersionTranslator pass, not two.
+        o = {"model": FIXTURE,
+             "space_type": "Space Function/Office enclosed > 25 m2"}
+        first = cli.model_argument(o)
+        self.assertIs(first, cli.model_argument(o),
+                      'model_argument must memoize — the "load once" contract')
+
+
 class TestCLIOutput(CLICase):
     def test_help_output_is_pure_ascii(self):
         self.run_cli("--help")

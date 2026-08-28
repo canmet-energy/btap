@@ -262,6 +262,16 @@ def validate(o):
     :return: an error message, or None"""
     if not os.path.exists(str(o.get("model"))):
         return f"model not found: {o.get('model')}"
+
+    # Supplied FILE arguments are checked in EVERY mode: these used to sit
+    # after the --simulate none early return, so a fat-fingered
+    # --space-type-map under none-mode sailed past validation into file I/O
+    # and surfaced as exit 5 (internal) instead of the documented usage exit
+    # 2. Fixed Ruby-first (found by review, 2026-08-28).
+    if o.get("costs_csv") and not os.path.exists(o["costs_csv"]):
+        return f"costs csv not found: {o['costs_csv']}"
+    if o.get("space_type_map") and not os.path.exists(o["space_type_map"]):
+        return f"space-type map not found: {o['space_type_map']}"
     if o["simulate"] == "none":
         return None
 
@@ -277,10 +287,6 @@ def validate(o):
         return (f"ddy not found: {o['ddy']}\n       "
                 "a design-day file is required; pass --ddy explicitly if it "
                 "is not beside the .epw")
-    if o.get("costs_csv") and not os.path.exists(o["costs_csv"]):
-        return f"costs csv not found: {o['costs_csv']}"
-    if o.get("space_type_map") and not os.path.exists(o["space_type_map"]):
-        return f"space-type map not found: {o['space_type_map']}"
 
     return None
 
@@ -318,12 +324,21 @@ def model_argument(o):
     if not o.get("space_type"):
         return o["model"]
 
+    # Memoized on the options dict: necb_loads calls this to enumerate space
+    # names and compliance_kwargs calls it again for the pipeline argument —
+    # without the memo the "load once" contract above was a comment, not a
+    # behaviour, and the VersionTranslator ran twice. Fixed Ruby-first
+    # (found by review, 2026-08-28).
+    if "_loaded_model" in o:
+        return o["_loaded_model"]
+
     import openstudio
 
     translator = openstudio.osversion.VersionTranslator()
     model = opt(translator.loadModel(openstudio.path(o["model"])))
     if model is None:
         raise ValueError(f"input model could not be loaded: {o['model']}")
+    o["_loaded_model"] = model
     return model
 
 
@@ -362,6 +377,14 @@ def select_backend(o):
     once here rather than a parameter threaded through every phase.
     :return: an error message, or None on success"""
     if o.get("backend") != "remote":
+        # cli.run is in-process API by design (the suites call it
+        # repeatedly): a previous run's remote selection must not leak into
+        # a later local run, so local EXPLICITLY resets the process-wide
+        # default rather than assuming it. Fixed on both sides (found by
+        # review, 2026-08-28).
+        from btap.simulation import runner
+
+        runner.set_default_backend(None)
         return None
 
     from btap.simulation import Remote, runner
