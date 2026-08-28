@@ -3,12 +3,13 @@ zone multipliers, loud daylighting note, and the D-77 provider seam (the NECB
 layer supplies the daylighted-area geometry btap.costing deliberately does not
 own).
 
-Port of btap-necb/test/test_lighting_costing.rb. Its last case
-(``test_legacy_parity_led_2020``) is the LIVE Leg-C gate — Python vs the
-LIVE pinned oracle (M8; needs the oracle bundle, which only the parity job
-carries). Its FROZEN Leg-C twin — the ``lighting_costing`` golden — is
-asserted in test_oracle_goldens_lighting.py (D-78: Ruby-vs-oracle is Leg A;
-Python-vs-oracle is Leg C, frozen or live).
+Port of btap-necb/test/test_lighting_costing.rb. The former last case
+(``test_legacy_parity_led_2020``, the M8 single-value LIVE Leg-C gate) was
+RETIRED in D-80 R1: the parity job now runs verification/live_leg_c.sh,
+which proves Python against the live oracle across ALL golden groups —
+lighting costing included — with zero skips. The FROZEN Leg-C assertion for
+this domain stays in test_oracle_goldens_lighting.py (D-78:
+Ruby-vs-oracle is Leg A; Python-vs-oracle is Leg C, frozen or live).
 """
 
 import unittest
@@ -121,75 +122,3 @@ class TestCosting(unittest.TestCase):
         report = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
         self.assertGreater(report.lighting["daylighting_sensor_cost"], 0)
 
-    def test_legacy_parity_led_2020(self):
-        """The Python LIVE Leg-C gate (enabled M8): Python lighting.cost vs
-        the LIVE pinned oracle — not the frozen golden. D-78 terminology:
-        Leg A is RUBY vs the oracle; PYTHON vs the oracle is Leg C whether
-        the oracle values are frozen or, as here, computed live (the
-        placeholder this replaced mislabeled itself Leg A). The oracle
-        value comes from a Ruby probe running the SAME OracleProbes recipe
-        the Ruby Leg-A gate runs, under BUNDLE_GEMFILE=legacy_pin/Gemfile;
-        the tolerance is that gate's own (max of 0.1% and $0.05). Skips
-        where the oracle is not bundled — LEGACY_PIN_REQUIRED=1 (the same
-        flag the Ruby gates use) turns that skip into a failure, and CI's
-        parity job (the one place the oracle exists) sets it. Its FROZEN
-        Leg-C twin is test_oracle_goldens_lighting.py's
-        lighting_costing['led_2020_total'] assertion (D-78)."""
-        import json
-        import os
-        import subprocess
-        import tempfile
-        from pathlib import Path
-
-        from btap.necb import lighting
-        from tests.support import REPO_ROOT
-
-        probe = (Path(__file__).parent / "cross_language"
-                 / "ruby_lighting_oracle_probe.rb")
-        env = dict(os.environ)
-        env.setdefault("BUNDLE_GEMFILE", str(REPO_ROOT / "legacy_pin"
-                                             / "Gemfile"))
-        # `bundle check` is the availability gate — the same one the Ruby
-        # e2e suite uses: an oracle that is pinned but not checked out fails
-        # it loudly ("not yet checked out"), and `bundle exec` would die in
-        # gem_prelude before the probe even ran.
-        check = subprocess.run(["bundle", "check"], capture_output=True,
-                               text=True, env=env, cwd=str(REPO_ROOT))
-        if check.returncode != 0:
-            msg = ("legacy oracle not bundled — run under "
-                   "BUNDLE_GEMFILE=legacy_pin/Gemfile after bundle install")
-            if os.environ.get("LEGACY_PIN_REQUIRED") == "1":
-                self.fail(msg)
-            self.skipTest(msg)
-
-        with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp) / "oracle.json"
-            proc = subprocess.run(
-                ["bundle", "exec", "ruby", str(probe), str(out)],
-                capture_output=True, text=True, env=env,
-                cwd=str(REPO_ROOT))
-            if proc.returncode == 3:
-                msg = ("legacy oracle bundle present but the probe could not "
-                       "load it")
-                if os.environ.get("LEGACY_PIN_REQUIRED") == "1":
-                    self.fail(msg)
-                self.skipTest(msg)
-            self.assertEqual(0, proc.returncode,
-                             f"oracle probe failed: {proc.stderr[-2000:]}")
-            legacy_total = json.loads(
-                out.read_text(encoding="utf-8"))["led_2020_total"]
-
-        # NECB2020 template => the legacy coster forces LED
-        report = lighting.cost(costed_fixture_model(lights_type="LED"),
-                               vintage="2020", city=CITY,
-                               province_state=PROVINCE)
-        self.assertGreater(legacy_total, 0, "non-vacuous: the oracle costed")
-        self.assertAlmostEqual(
-            legacy_total, report.total,
-            delta=max(abs(legacy_total) * 0.001, 0.05),
-            msg="fixture-costing dollar parity vs the LIVE oracle "
-                "cost_audit_lighting (LED/NECB2020 path)")
-
-
-if __name__ == "__main__":
-    unittest.main()

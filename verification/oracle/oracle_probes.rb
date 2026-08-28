@@ -282,7 +282,33 @@ module OracleProbes
       std.model_add_constructions(fdwr_model)
       std.apply_standard_window_to_wall_ratio(model: fdwr_model) # -1 default = NECB max
       { 'conductances' => Signatures.surface_conductances(conductance_model),
-        'fdwr' => BtapModeling::Geometry.exposed_walls(fdwr_model)[:fdwr] }
+        'fdwr' => census_fdwr(fdwr_model) }
+    end
+
+    # Inline SDK-only mirror of BtapModeling::Geometry.exposed_walls's :fdwr
+    # (D-80: verification must not depend on the gems). Conditioned = part of
+    # total floor area with a dual-setpoint thermostat; walls near-vertical
+    # (tilt 89-91 deg) and Outdoors; areas multiplier-weighted.
+    def census_fdwr(model, min_angle: 89, max_angle: 91)
+      wall_area = 0.0
+      sub_area = 0.0
+      model.getSpaces.sort_by(&:nameString).each do |space|
+        next unless space.partofTotalFloorArea
+
+        zone = space.thermalZone
+        next unless zone.is_initialized && zone.get.thermostatSetpointDualSetpoint.is_initialized
+
+        space.surfaces.sort_by(&:nameString).each do |surface|
+          next unless surface.surfaceType == 'Wall' && surface.outsideBoundaryCondition == 'Outdoors'
+
+          tilt = surface.tilt * 180.0 / Math::PI
+          next unless tilt >= min_angle && tilt <= max_angle
+
+          wall_area += surface.grossArea * space.multiplier
+          surface.subSurfaces.each { |ss| sub_area += ss.grossArea * space.multiplier }
+        end
+      end
+      wall_area < 0.1 ? nil : sub_area / wall_area
     end
 
     # The legacy 2020 U-table JSON node, read from the pinned gem tree.
@@ -298,6 +324,10 @@ module OracleProbes
 
   # --------------------------------------------------------------- costing
   module Costing
+    # Inline copy of BtapCosting::Envelope::Quantify::GROUND_BOUNDARIES
+    # (D-80: verification must not depend on the gems).
+    GROUND_BOUNDARIES = %w[Ground Foundation GroundFCfactorMethod GroundSlabPreprocessorAverage].freeze
+
     INTERPOLATE_POINT_SETS = [
       [[1.0, 10.0], [2.0, 20.0], [4.0, 30.0]],
       [[0.5, 100.0], [0.9, 90.0], [1.7, 260.0], [3.2, 410.0]],
@@ -325,19 +355,17 @@ module OracleProbes
       out
     end
 
-    # {'sheet/assembly/rsi3' => dollars} for every candidate in the vendored
-    # catalogs, priced at (province, city) with whatever priced table is in
-    # effect (the caller records that context).
-    def construction_costs(coster, database, province, city)
+    # {'sheet/assembly/rsi3' => dollars} for every candidate record, priced
+    # at (province, city) with whatever priced table is in effect (the caller
+    # records that context). Candidates come from the COMMITTED request
+    # manifest ({'key','type','id_layers'} records, bootstrapped once from
+    # the gem Database — D-80), never re-derived from the gems.
+    def construction_costs(coster, candidates, province, city)
       out = {}
-      database.constructions.each do |sheet, assemblies|
-        assemblies.each_key do |assembly|
-          database.construction_candidates(sheet, assembly).each do |rsi, construction|
-            legacy_hash = { 'type' => construction['type'], 'id_layers' => construction['id_layers'].dup }
-            coster.cost_construction(legacy_hash, province, city)
-            out["#{sheet}/#{assembly}/#{rsi.round(3)}"] = legacy_hash['cost'].to_f
-          end
-        end
+      candidates.each do |candidate|
+        legacy_hash = { 'type' => candidate['type'], 'id_layers' => candidate['id_layers'].dup }
+        coster.cost_construction(legacy_hash, province, city)
+        out[candidate['key']] = legacy_hash['cost'].to_f
       end
       out
     end
@@ -350,7 +378,7 @@ module OracleProbes
       model.getSurfaces.sort_by(&:nameString).each do |surface|
         next if surface.construction.empty? || surface.construction.get.to_LayeredConstruction.empty?
         next unless surface.outsideBoundaryCondition == 'Outdoors' ||
-                    BtapCosting::Envelope::Quantify::GROUND_BOUNDARIES.include?(surface.outsideBoundaryCondition)
+                    GROUND_BOUNDARIES.include?(surface.outsideBoundaryCondition)
 
         lc = surface.construction.get.to_LayeredConstruction.get
         surfaces[surface.nameString] = TBD.rsi(lc, surface.filmResistance)

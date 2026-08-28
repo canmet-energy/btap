@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P2 gate (parity half): gem lookups byte-match legacy openstudio-standards NECB2020.
 # Skips when the host repo isn't loadable (the gem suite must stand alone).

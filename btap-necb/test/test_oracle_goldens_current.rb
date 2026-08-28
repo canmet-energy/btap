@@ -1,74 +1,62 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
 require 'json'
 require 'digest'
 
-# The TWELFTH pin-gated test (D-78): the committed Leg-C oracle goldens
-# (test/goldens/oracle/) are PROVABLY-CURRENT snapshots of the pinned oracle —
-# re-run a fast representative subset of the probes live and assert equality
-# with the frozen files, and assert the manifest's legacy_ref equals
-# legacy_pin/REF. A REF bump without re-export
-# (scripts/export_oracle_goldens.rb) is a loud failure here, never a silently
-# stale golden. The Python port consumes these same files directly.
+# The TWELFTH pin-gated test (D-78/D-80): the committed Leg-C oracle goldens
+# (verification/oracle/goldens/) are internally consistent and current with
+# the pin. Slimmed in D-80 R1 to EXACTLY FOUR duties — REF equality, file
+# existence, checksums, and request-manifest inventory consistency. Live
+# freshness (frozen values vs the live oracle) is the freshness comparator's
+# job — verification/oracle/compare_goldens.py inside live_leg_c.sh — so
+# there are never two overlapping freshness implementations.
 class TestOracleGoldensCurrent < Minitest::Test
-  GOLDEN_DIR = File.expand_path('goldens/oracle', __dir__)
-  REMEDY = 'regenerate under the pin: BUNDLE_GEMFILE=legacy_pin/Gemfile bundle exec ' \
-           'ruby btap-necb/scripts/export_oracle_goldens.rb (or dispatch the goldens workflow)'
+  GOLDEN_DIR = File.expand_path('../../verification/oracle/goldens', __dir__)
+  REQUEST = File.expand_path('../../verification/oracle/request_manifest.json', __dir__)
+  REMEDY = 'regenerate under the pin: python/scripts/oracle_prep.py then ' \
+           'verification/oracle/export_goldens.rb (or dispatch the goldens workflow)'
 
-  def golden(name)
-    path = File.join(GOLDEN_DIR, "#{name}.json")
-    flunk_or_skip("golden #{name}.json missing — #{REMEDY}") unless File.exist?(path)
-    JSON.parse(File.read(path))
-  end
-
-  def flunk_or_skip(msg)
-    ENV['LEGACY_PIN_REQUIRED'] == '1' ? flunk(msg) : skip(msg)
-  end
-
-  def legacy
-    OracleProbes::Access.gate!(self, OracleProbes::Access.standard)
-  end
-
-  def test_manifest_matches_the_pin
+  def manifest
     path = File.join(GOLDEN_DIR, 'manifest.json')
-    flunk_or_skip("goldens manifest missing — #{REMEDY}") unless File.exist?(path)
-    manifest = JSON.parse(File.read(path))
+    flunk("goldens manifest missing — #{REMEDY}") unless File.exist?(path)
+    JSON.parse(File.read(path, encoding: 'UTF-8'))
+  end
+
+  # Duty 1: the goldens describe THE pinned oracle revision.
+  def test_manifest_ref_equals_the_pin
     ref = File.read(File.expand_path('../../legacy_pin/REF', __dir__)).strip
     assert_equal ref, manifest['legacy_ref'],
                  "goldens were exported from a DIFFERENT oracle revision — #{REMEDY}"
-    manifest['files'].each do |name, sha|
+  end
+
+  # Duties 2 + 3: every listed file exists and matches its checksum — and
+  # the directory holds NOTHING beyond the listed files (an obsolete group
+  # with a valid checksum and no consumer is a failure, not an extra).
+  def test_files_exist_and_match_checksums
+    listed = manifest['files']
+    refute_empty listed
+    listed.each do |name, sha|
       file = File.join(GOLDEN_DIR, name)
       assert File.exist?(file), "manifest lists #{name} but it is missing — #{REMEDY}"
-      assert_equal sha, Digest::SHA256.hexdigest(File.read(file)),
+      assert_equal sha, Digest::SHA256.hexdigest(File.read(file, encoding: 'BINARY')),
                    "#{name} does not match its manifest checksum — hand-edited? #{REMEDY}"
     end
+    on_disk = Dir[File.join(GOLDEN_DIR, '*.json')].map { |f| File.basename(f) } - ['manifest.json']
+    assert_equal listed.keys.sort, on_disk.sort,
+                 "goldens directory does not hold exactly the manifest's file set — #{REMEDY}"
   end
 
-  def test_envelope_lookups_current
-    std = legacy
-    frozen = golden('envelope_lookups')
-    live = OracleProbes::Envelope.lookups(std)
-    mismatches = frozen['max_u'].reject { |k, v| (live['max_u'][k] - v).abs < 1e-12 }.keys +
-                 frozen['max_fdwr'].reject { |k, v| (live['max_fdwr'][k] - v).abs < 1e-12 }.keys
-    assert_empty mismatches, "frozen envelope lookups drifted from the live oracle: #{mismatches.first(5)} — #{REMEDY}"
-    assert_in_delta frozen['srr_max'], live['srr_max'], 1e-12
-  end
-
-  def test_loads_schedules_current_sample
-    std = legacy
-    frozen = golden('loads_schedules')
-    # A representative sample keeps this test fast; the exporter froze all 86.
-    sample = frozen.keys.sort.each_slice((frozen.size / 8.0).ceil).map(&:first)
-    live = OracleProbes::Loads.schedules(std, sample)
-    stale = sample.reject { |name| frozen[name] == live[name] }
-    assert_empty stale, "frozen schedule goldens drifted: #{stale.inspect} — #{REMEDY}"
-  end
-
-  def test_shw_efficiencies_current
-    std = legacy
-    frozen = golden('shw')['efficiencies']
-    live = OracleProbes::Shw.efficiencies(std)
-    stale = frozen.reject { |k, v| live[k] == v }.keys
-    assert_empty stale, "frozen SHW efficiency goldens drifted: #{stale.inspect} — #{REMEDY}"
+  # Duty 4: every golden matches the request manifest's recursive inventory
+  # (the implementation-independent statement of what the oracle was asked).
+  def test_request_manifest_inventory_consistency
+    require_relative '../../verification/oracle/inventory'
+    request = JSON.parse(File.read(REQUEST, encoding: 'UTF-8'))
+    assert_equal request['golden_groups'].sort, manifest['files'].keys.map { |f| f.sub('.json', '') }.sort,
+                 'the goldens file set and the request manifest golden_groups disagree'
+    request['golden_groups'].each do |group|
+      data = JSON.parse(File.read(File.join(GOLDEN_DIR, "#{group}.json"), encoding: 'UTF-8'))
+      violations = OracleInventory.validate(data, request['golden_inventory'][group])
+      assert_empty violations.first(10),
+                   "#{group} violates the request-manifest inventory — #{REMEDY}"
+    end
   end
 end

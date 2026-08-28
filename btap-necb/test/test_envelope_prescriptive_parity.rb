@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P3 gate (parity half): resulting PER-SURFACE construction conductances match legacy
 # apply_standard_construction_properties (mechanism-agnostic — legacy rewrites default

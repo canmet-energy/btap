@@ -170,16 +170,31 @@ shw (1).
             Leg A (the eleven gates)
   oracle ◄──────────────────────────► Ruby gems
     │  Leg C: frozen goldens              │  Leg B: dual-CLI run diffs
-    ▼  (test/goldens/oracle/,             ▼  (verification/compare_runs.py)
+    ▼  (verification/oracle/goldens/,     ▼  (verification/compare_runs.py)
   goldens ◄──────────────────────────── the Python port
 ```
 
-- **Leg C goldens**: exported from the PINNED oracle by
-  `btap-necb/scripts/export_oracle_goldens.rb` via the same probe code the
-  gates run (`test/support/oracle_probes.rb`). Regenerate whenever
-  `legacy_pin/REF` bumps: dispatch `test.yml` with `export_goldens=true`,
-  download the `oracle-goldens` artifact, commit.
+- **Leg C goldens**: exported from the PINNED oracle by the gem-free
+  `verification/oracle/export_goldens.rb` via the same probe code the gates
+  run (`verification/oracle/oracle_probes.rb`), against prep models built
+  by `python/scripts/oracle_prep.py` and probe requests from the committed
+  `verification/oracle/request_manifest.json` (D-80 python-prep /
+  ruby-probe). Regenerate whenever `legacy_pin/REF` bumps: dispatch
+  `test.yml` with `export_goldens=true`, download the `oracle-goldens`
+  artifact into `verification/oracle/goldens/`, commit.
   `test_oracle_goldens_current.rb` fails the parity job until you do.
+- **LIVE Leg C** (D-80): the parity job runs `verification/live_leg_c.sh` —
+  Python prep → fresh oracle export → `compare_goldens.py` (committed ≡
+  live) → the five goldens pytest files against the FRESH export with zero
+  skips asserted. Locally it needs the pin bundle; the committed-goldens
+  fast path (`pytest tests/necb tests/costing`) needs nothing extra.
+- **The generator/CLI matrix** (D-80 R2): `bash verification/matrix.sh` runs
+  sample-generator (ruby|python) × CLI (ruby|python) — all four cells at
+  tiers `none`/`sizing` (CLI parity per corpus AND generator equivalence
+  per CLI); `TIER=annual` is the reduced check (Python CLI over both
+  corpora). `run_corpus.rb --samples-gen ruby|python` picks the generator;
+  the slug set and run counts are asserted against
+  `python/scripts/sample_manifest.json` either way.
 - **Leg B differ**: `python3 verification/compare_runs.py RUN_A RUN_B`
   (rules in `verification/spec.json`); `bash verification/selftest.sh`
   runs the corpus twice through the Ruby CLI and proves zero-diff.

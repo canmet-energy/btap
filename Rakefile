@@ -296,7 +296,9 @@ namespace :windows do
     # committed — they are derived from the fixture and the catalog.
     system(RbConfig.ruby, 'btap-necb/scripts/generate_samples.rb',
            File.join(STAGE, 'samples')) || abort('sample generation failed')
-    FileUtils.cp("#{fixtures}/5ZoneNoHVAC.osm", "#{STAGE}/samples/")
+    # The seed lives in the gem's lib data (spec.files ships it); the old
+    # test/fixtures copy is gone — staging from it broke silently (D-80 R1).
+    FileUtils.cp('btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm', "#{STAGE}/samples/")
     Dir.glob("#{fixtures}/weather/CAN_ON_Toronto*.{epw,ddy,stat}").each { |f| FileUtils.cp(f, "#{STAGE}/weather/") }
 
     %w[btap-compliance.cmd].each { |f| FileUtils.cp("packaging/windows/#{f}", "#{STAGE}/bin/") }

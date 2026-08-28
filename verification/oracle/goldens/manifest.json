@@ -1,6 +1,6 @@
 {
   "legacy_ref": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
-  "exported": "2026-08-26",
+  "exported": "2026-08-28",
   "files": {
     "envelope_lookups.json": "7bc82a2efe07ea04f86d254a5ecdd1b2af841c6fab254f434452f5c9a468aeb2",
     "envelope_prescriptive.json": "c401970a45ffaa6e4e8f09d23914919d20a365c3edea0870be48abe1015db208",
@@ -13,5 +13,20 @@
     "lighting_daylighting.json": "0d906ddf85e15c133484b24864f51fa63e5f06fa26866cc4458c9415621f66a4",
     "lighting_costing.json": "20bd096dd4ce853be66b5c3d4a51cf13186dc2f926cdd62c922ec3590cd139f5",
     "shw.json": "148b775cc5a13a82c67d8cafa3ec1976a24e971d51c43f5f286df751d0a05311"
-  }
+  },
+  "prep_provenance": {
+    "commit": "dde44e588e5e3c370e5222e26920ef990e4838aa",
+    "dirty": false,
+    "canonical": true,
+    "allow_dirty_override": false,
+    "oracle_prep_sha256": "34de0b1bfe87165f77ae70ac7ce3d72ad6395409f46589973cab95e302864eb4",
+    "request_manifest_sha256": "1a82a048e2e3c21ba0f4a01d40dc139b4334349dccb1a29295ea36e26c1dbcbe",
+    "seed_sha256": "532d43e6fedb08425f4bb0450c7f2bb1219d53f1db74d4ba09f8db6d39c38aed",
+    "seed": "btap.modeling.hvac data 5ZoneNoHVAC.osm",
+    "openstudio": {
+      "sdk_version": "3.11.0",
+      "build_sha": "241b8abb4d"
+    }
+  },
+  "version_skew_override": false
 }

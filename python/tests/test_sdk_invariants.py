@@ -60,16 +60,39 @@ class TestNoUncheckedOptionalGet(unittest.TestCase):
     def test_the_documented_hazard_still_holds(self):
         # If a future SDK release makes .get() raise properly, this fails and
         # the whole invariant can be revisited rather than cargo-culted.
+        #
+        # Probed in a SUBPROCESS: .get() on an empty optional can leave the
+        # C-level error indicator set (the very hazard family this file
+        # documents), and in-process that detonated on the NEXT attribute
+        # lookup as a spurious AttributeError ('...has no attribute
+        # 'assertEqual'') — poisoning the test runner itself. Isolation
+        # makes the probe deterministic; the markers are printed before any
+        # further SDK call so a post-probe detonation cannot hide them.
         try:
-            import openstudio
+            import openstudio  # noqa: F401
         except ImportError:
             self.skipTest("needs the openstudio wheel")
 
-        empty = openstudio.model.Model.load(openstudio.path("/nonexistent.osm"))
-        self.assertFalse(empty.is_initialized())
-        model = empty.get()  # does NOT raise — that is the hazard
-        self.assertEqual(0, len(model.getSpaces()),
-                         "empty optional yielded a populated model — invariant changed")
+        import subprocess
+        import sys
+        probe = (
+            "import openstudio\n"
+            "empty = openstudio.model.Model.load("
+            "openstudio.path('/nonexistent.osm'))\n"
+            "assert not empty.is_initialized()\n"
+            "model = empty.get()\n"  # would raise here if the SDK were fixed
+            "print('GOT_MODEL', flush=True)\n"
+            "print('SPACES', len(model.getSpaces()), flush=True)\n"
+        )
+        out = subprocess.run([sys.executable, "-c", probe],
+                             capture_output=True, text=True, check=False)
+        self.assertIn("GOT_MODEL", out.stdout,
+                      ".get() on an empty optional RAISED — the documented "
+                      "hazard no longer holds; revisit the load_model "
+                      f"invariant. stderr: {out.stderr[:400]}")
+        self.assertIn("SPACES 0", out.stdout,
+                      "empty optional yielded a populated model — invariant "
+                      f"changed. stdout: {out.stdout[:200]}")
 
     def test_the_checked_loader_names_the_path(self):
         from btap._sdk import load_model

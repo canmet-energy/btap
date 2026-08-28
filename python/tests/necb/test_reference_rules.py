@@ -8,9 +8,13 @@ brittle proxy for that. Everything here runs simulate='none' — no EnergyPlus
 — except the two marked as needing an annual run, because the rules they
 cover cannot fire without one.
 
-The samples are the Ruby installer's generated corpus (.osm files are
-language-neutral): ruby btap-necb/scripts/generate_samples.rb"""
+The samples are the PYTHON-generated corpus (D-80 R2: Python-owned paths —
+no packaging/windows read): python3 scripts/generate_samples.py
+tests/generated/samples, or point BTAP_SAMPLES_DIR at an existing corpus
+(.osm files are language-neutral, so a Ruby-generated corpus also works —
+that cross-generator equivalence is exactly what the 2x2 matrix proves)."""
 
+import os
 import re
 import tempfile
 import unittest
@@ -25,15 +29,17 @@ from tests.necb.support import (
     needs_sdk,
 )
 
-SAMPLES = (Path(__file__).resolve().parents[3] / "packaging" / "windows"
-           / "samples")
+SAMPLES = Path(os.environ.get(
+    "BTAP_SAMPLES_DIR",
+    Path(__file__).resolve().parents[1] / "generated" / "samples"))
 
 
 def sample(test, slug):
     path = SAMPLES / f"{slug}.osm"
     if not path.exists():
         test.skipTest("sample not generated: run "
-                      "ruby btap-necb/scripts/generate_samples.rb")
+                      "python3 scripts/generate_samples.py tests/generated/samples "
+                      "(or set BTAP_SAMPLES_DIR)")
     return str(path)
 
 

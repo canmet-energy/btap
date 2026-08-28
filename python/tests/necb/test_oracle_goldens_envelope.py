@@ -34,9 +34,9 @@ import json
 import unittest
 
 from tests.necb.support import EPW, load_raw_fixture, needs_sdk
-from tests.support import REPO_ROOT
+from tests.support import oracle_goldens_dir
 
-GOLDEN_DIR = REPO_ROOT / "btap-necb" / "test" / "goldens" / "oracle"
+GOLDEN_DIR = oracle_goldens_dir()
 
 # The exact probe inputs behind the golden keys (OracleProbes::Envelope).
 HDD_SWEEP = [0, 1500, 2999, 3000, 3999, 4000, 4001, 5500, 6999, 7000, 8000,

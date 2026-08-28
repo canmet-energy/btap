@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P1 gate: the vendored NECB loads data is structurally sound, equals the legacy
 # MERGED runtime tables, and matches MCP-verified code values.

@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P1 gate: the vendored rules data is complete, internally consistent, provenance-
 # tagged, and structurally identical to the legacy openstudio-standards data (2020).

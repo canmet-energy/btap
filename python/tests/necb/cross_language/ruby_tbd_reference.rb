@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# D-80: RETIRES WITH R6. This driver runs the RUBY implementation as the
+# cross-language baseline, so it lives exactly as long as the gems do; when
+# the Ruby product is deleted (R6), the test that shells out to this file
+# retires with it (its cross-language duty passes to the R4 frozen
+# scenario suite).
+
 # The Ruby half of the M7 TBD process-parity gate (D-79 Option A): run the
 # PINNED Ruby engine triplet (tbd 3.5.2 / osut 0.8.2 / topolys 0.6.2) on the
 # btap fixture with the SAME arguments btap's thermal_bridging module builds,

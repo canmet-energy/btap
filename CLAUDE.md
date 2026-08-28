@@ -75,10 +75,14 @@ catch it. Name it (`rescue Gem::LoadError, StandardError`) — see
 `btap-costing/lib/btap_costing/envelope/database.rb`.
 
 **The Leg-C oracle goldens follow legacy_pin/REF.** Bumping the pin without
-re-exporting `btap-necb/test/goldens/oracle/` fails the parity job's
+re-exporting `verification/oracle/goldens/` fails the parity job's
 currency meta-test loudly (D-78). Export happens IN CI (the pin bundle
 lives there): dispatch `test.yml` with `export_goldens=true` and commit the
-artifact. Never hand-edit a golden — the manifest checksums are asserted.
+artifact. The exporter is GEM-FREE (D-80 python-prep / ruby-probe): prep
+models come from `python/scripts/oracle_prep.py`, probe requests from the
+committed `verification/oracle/request_manifest.json` — immutable except by
+adjudicated update. Never hand-edit a golden — the manifest checksums are
+asserted.
 
 **The legacy oracle is ONE SHA, not a branch, and not a git remote.**
 `legacy_pin/REF` is the whole tie to openstudio-standards. Nothing here points at

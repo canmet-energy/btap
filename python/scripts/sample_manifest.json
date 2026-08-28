@@ -1,0 +1,21 @@
+{
+  "_comment": "The exact sample .osm stems generate_samples.py must produce, in order. Derived from the sample tables in btap-necb/scripts/generate_samples.rb (SAMPLES 01-10, STAGED 11-12, STRESS_CASES 13-16) and cross-checked against a run of that Ruby generator. Both generators are asserted against this list in BOTH directions, so a corpus that silently shrinks fails loudly instead of passing vacuously.",
+  "samples": [
+    "01-baseboard-gas",
+    "02-psz-gas-dx",
+    "03-vav-reheat-chiller",
+    "04-fancoil-chiller",
+    "05-ptac-electric",
+    "06-unit-heaters-gas",
+    "07-furnace-forced-air",
+    "08-vrf",
+    "09-water-source-hp",
+    "10-ashp-pthp",
+    "11-staged-boilers-gas-lead",
+    "12-staged-boilers-electric-lead",
+    "13-district-heating",
+    "14-general-2storey",
+    "15-general-3storey",
+    "16-ashp-electric-supp-hw-baseboard"
+  ]
+}

@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # Parity vs legacy: (1) auto-size arithmetic + water-use objects vs
 # model_add_swh; (2) efficiency values across every bin vs the NECB2020

@@ -22,9 +22,9 @@ import json
 import unittest
 
 from tests.necb.support import load_raw_fixture, needs_sdk
-from tests.support import REPO_ROOT
+from tests.support import oracle_goldens_dir
 
-GOLDENS = REPO_ROOT / "btap-necb" / "test" / "goldens" / "oracle"
+GOLDENS = oracle_goldens_dir()
 
 #: OracleProbes::Lighting::PAIRS
 PAIRS = [["Space Function", "Office enclosed > 25 m2"],

@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# D-80: RETIRES WITH R6. This driver runs the RUBY implementation as the
+# cross-language baseline, so it lives exactly as long as the gems do; when
+# the Ruby product is deleted (R6), the test that shells out to this file
+# retires with it (its cross-language duty passes to the R4 frozen
+# scenario suite).
+
 # Cross-language M2 gate (D-79): run the SAME model through the RUBY
 # btap-simulation gem (Local backend = the `openstudio` CLI) that
 # test_local_run.py runs through the PYTHON port (Local backend = in-process
