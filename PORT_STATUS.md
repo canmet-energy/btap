@@ -164,6 +164,24 @@ it when someone wants to.
 originally assigned to M8 but was written early, in M5's documentation
 pass; the M6 and M7 records were appended to it as they landed.)
 
+Concrete M8 items, from the post-M7 postponed-work sweep (2026-08-28):
+
+1. **Retire the Leg-A lighting-costing skip.** The one test that has never
+   run anywhere: `tests/necb/test_lighting_costing.py`'s Leg-A gate needs
+   the LIVE pinned oracle (`BUNDLE_GEMFILE=legacy_pin/Gemfile`), which only
+   the `parity` job bundles — and parity does not run pytest. Wire one
+   targeted pytest invocation into the parity job so the skip retires (its
+   Leg-C twin already covers the value, so this closes redundancy, not a
+   coverage hole).
+2. **Retire the SVG-rasterizer skip.** `tests/modeling/test_floor_plan.py`
+   skips without a rasterizer on PATH; `rsvg-convert` is one apt install in
+   the container jobs.
+3. **Sweep the stale milestone-tense comments.** Three found:
+   `tests/modeling/test_bar.py` still says "skipped until M5 lands" above a
+   test that runs; `tests/simulation/test_local_run.py` and
+   `tests/costing/test_lighting_costing_smoke.py` carry pre-M5 phrasing in
+   their docstrings. Doc rot only — no behavior.
+
 ### M7, as it actually went (2026-08-28)
 
 The planned Ruby bridge (`openstudio execute_ruby_script`) was never
