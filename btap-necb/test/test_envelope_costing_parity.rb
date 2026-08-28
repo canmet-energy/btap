@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # Costing parity vs legacy BTAP: (1) the interpolator, (2) cost_construction dollar
 # math across EVERY constructions.json candidate, (3) per-surface RSI convention vs

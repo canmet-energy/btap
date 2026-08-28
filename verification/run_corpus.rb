@@ -6,12 +6,17 @@
 # and one PYTHON pass — produce comparable run directories for
 # compare_runs.py.
 #
-#   ruby verification/run_corpus.rb OUT_ROOT [--tier none|sizing|annual] [--cli ruby|python]
+#   ruby verification/run_corpus.rb OUT_ROOT [--tier none|sizing|annual] \
+#     [--cli ruby|python] [--samples-gen ruby|python]
 #
 # --cli python (M6) drives the Python port's CLI (python -m btap.necb.cli)
 # over the SAME models with the SAME arguments; PYTHON_CLI names the
 # interpreter (default: python/.venv/bin/python if present, else python3).
-# Sample generation always uses Ruby — the corpus models are shared inputs.
+# --samples-gen selects WHICH implementation generates the corpus models
+# (D-80 R2: the 2x2 generator/CLI matrix needs both) — the generated slug
+# set is asserted against python/scripts/sample_manifest.json in both
+# directions either way, and the run count is asserted per tier, so a
+# generator that silently shrinks the corpus fails loudly.
 #
 # Corpus v1: the 17 generated installer samples (regenerated on demand — they
 # are derived artifacts, never committed) + the raw 5-zone fixture driven
@@ -27,6 +32,8 @@ OUT_ROOT = ARGV[0] or abort('usage: run_corpus.rb OUT_ROOT [--tier none|sizing|a
 TIER = ARGV.include?('--tier') ? ARGV[ARGV.index('--tier') + 1] : 'none'
 CLI_KIND = ARGV.include?('--cli') ? ARGV[ARGV.index('--cli') + 1] : 'ruby'
 abort("unknown --cli #{CLI_KIND} (ruby|python)") unless %w[ruby python].include?(CLI_KIND)
+SAMPLES_GEN = ARGV.include?('--samples-gen') ? ARGV[ARGV.index('--samples-gen') + 1] : 'ruby'
+abort("unknown --samples-gen #{SAMPLES_GEN} (ruby|python)") unless %w[ruby python].include?(SAMPLES_GEN)
 CLI = File.join(ROOT, 'btap-necb/exe/btap-compliance.rb')
 DEFAULT_VENV = File.join(ROOT, 'python/.venv/bin/python')
 PYTHON = ENV['PYTHON_CLI'] || (File.exist?(DEFAULT_VENV) ? DEFAULT_VENV : 'python3')
@@ -34,9 +41,28 @@ SAMPLES = File.join(OUT_ROOT, '_samples')
 
 # Samples are generated, not committed — build them once per corpus root.
 unless File.exist?(File.join(SAMPLES, '01-baseboard-gas.osm'))
-  puts 'generating the sample corpus…'
-  system(RbConfig.ruby, File.join(ROOT, 'btap-necb/scripts/generate_samples.rb'), SAMPLES,
-         out: File::NULL, err: File::NULL) or abort('sample generation failed')
+  puts "generating the sample corpus (#{SAMPLES_GEN})…"
+  gen_ok = if SAMPLES_GEN == 'python'
+             env = { 'PYTHONPATH' => [File.join(ROOT, 'python'), ENV['PYTHONPATH']].compact.join(File::PATH_SEPARATOR) }
+             system(env, PYTHON, File.join(ROOT, 'python/scripts/generate_samples.py'), SAMPLES,
+                    out: File::NULL, err: File::NULL)
+           else
+             system(RbConfig.ruby, File.join(ROOT, 'btap-necb/scripts/generate_samples.rb'), SAMPLES,
+                    out: File::NULL, err: File::NULL)
+           end
+  gen_ok or abort("sample generation (#{SAMPLES_GEN}) failed")
+end
+
+# The exact-corpus contract (D-80 R2): the generated slug set must equal the
+# committed manifest in BOTH directions — a generator that drops, renames, or
+# invents a sample fails here, not as a silently smaller diff downstream.
+require 'json'
+EXPECTED_SLUGS = JSON.parse(File.read(File.join(ROOT, 'python/scripts/sample_manifest.json')))['samples'].sort
+actual_slugs = Dir.glob(File.join(SAMPLES, '*.osm')).map { |m| File.basename(m, '.osm') }.sort
+unless actual_slugs == EXPECTED_SLUGS
+  abort("corpus does not match sample_manifest.json:\n" \
+        "  missing: #{(EXPECTED_SLUGS - actual_slugs).inspect}\n" \
+        "  extra:   #{(actual_slugs - EXPECTED_SLUGS).inspect}")
 end
 
 # The shared fixture weather trio (epw/ddy/stat beside each other) — the
@@ -85,4 +111,14 @@ runs.each do |name, model, args|
 end
 
 abort("corpus failures: #{failures.join(', ')}") unless failures.empty?
-puts "corpus complete: #{runs.size} runs under #{File.join(OUT_ROOT, TIER)}"
+
+# Run-count contract per tier (the silent-shrink hazard): a subset name that
+# stops matching a generated sample would otherwise just shrink the corpus.
+expected_runs = { 'none' => EXPECTED_SLUGS.size + 1,
+                  'sizing' => SIZING_SUBSET.size,
+                  'annual' => ANNUAL_SUBSET.size }.fetch(TIER)
+unless runs.size == expected_runs
+  abort("tier #{TIER} ran #{runs.size} models, expected #{expected_runs} — " \
+        'a corpus subset silently shrank')
+end
+puts "corpus complete: #{runs.size}/#{expected_runs} runs under #{File.join(OUT_ROOT, TIER)}"

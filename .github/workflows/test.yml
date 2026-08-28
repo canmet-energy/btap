@@ -242,12 +242,16 @@ jobs:
       # pytest — the SDK still comes from the image via PYTHONPATH, so both
       # languages run the identical native lib. Falls back loudly, never
       # silently: every dependency is REQUIRED.
-      # The corpus samples are DERIVED artifacts (never committed) and need
-      # the Ruby SDK to generate — this container is the one place that has
-      # it, so generate here and the sample-dependent Python reference-rules
-      # tests run instead of skipping (a skipped gate is green-but-vacuous).
-      - name: Generate the sample corpus (Ruby SDK)
-        run: ruby btap-necb/scripts/generate_samples.rb packaging/windows/samples
+      # The corpus samples are DERIVED artifacts (never committed). The
+      # Python suite reads a PYTHON-generated corpus at its Python-owned
+      # default location (D-80 R2: no packaging/windows read), so the
+      # sample-dependent reference-rules tests run instead of skipping (a
+      # skipped gate is green-but-vacuous). The matrix step below generates
+      # the Ruby corpus separately via run_corpus --samples-gen.
+      - name: Generate the sample corpus (Python)
+        run: |
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+            python3 python/scripts/generate_samples.py python/tests/generated/samples
       # M7: BOTH engines, both pinned — the Ruby tbd triplet (the frozen
       # oracle baseline) and py-tbd's tbd-3.5.2-compat SHA — so the direct
       # Ruby-vs-Python TBD process-parity gate and the assembled Leg-B
@@ -291,13 +295,16 @@ jobs:
       # 3-model subset through real EnergyPlus on BOTH backends. The annual
       # --quick tier lives in the dispatch-only parity job (it is the
       # expensive one, like everything else there).
-      - name: Leg-B cross-language corpus (Ruby CLI vs Python CLI)
+      - name: Leg-B / D-80 generator-CLI matrix (all four cells, none + sizing)
         run: |
+          # The 2x2 (D-80 R2): sample generator x compliance CLI. Subsumes
+          # the former shared-corpus CLI-parity step — CLI parity on each
+          # corpus AND generator equivalence per CLI, at both tiers.
           PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            CLI_B=python bash verification/selftest.sh /tmp/legb-none
+            bash verification/matrix.sh /tmp/matrix-none
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            TIER=sizing CLI_B=python bash verification/selftest.sh /tmp/legb-sizing
+            TIER=sizing bash verification/matrix.sh /tmp/matrix-sizing
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
@@ -350,22 +357,22 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
-      # The Python LIVE Leg-C gate (M8): Python lighting.cost vs the LIVE
-      # pinned oracle — the last suite skip that had never run anywhere,
-      # enabled here because this is the ONLY job that bundles the oracle.
-      # D-78 terminology: Leg A is RUBY vs the oracle (the eleven gates
-      # above); PYTHON vs the oracle is Leg C, whether the oracle values
-      # are frozen goldens or, as here, computed live. The job-level
-      # BUNDLE_GEMFILE + LEGACY_PIN_REQUIRED env make the gate required,
-      # not skippable.
-      - name: Python live Leg-C gate (lighting costing vs the pinned oracle)
-        working-directory: python
+      # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
+      # golden groups — python-prep / ruby-probe, the committed-goldens
+      # freshness comparison, then the five goldens test files against the
+      # fresh export with ZERO skips asserted. This superseded the M8
+      # single-value lighting gate. It lives here because this is the ONLY
+      # job that bundles the oracle. D-78 terminology: Leg A is RUBY vs the
+      # oracle (the gates above); PYTHON vs the oracle is Leg C, whether
+      # frozen or, as here, live.
+      - name: Live Leg C (python-prep / ruby-probe, all golden groups)
         run: |
           apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
-          python3 -m venv .parity-venv
-          .parity-venv/bin/pip install -q pytest
-          PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
-            .parity-venv/bin/pytest -q "tests/necb/test_lighting_costing.py::TestCosting::test_legacy_parity_led_2020"
+          python3 -m venv python/.parity-venv
+          python/.parity-venv/bin/pip install -q pytest
+          export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
+          BTAP_PYTHON="$PWD/python/.parity-venv/bin/python" \
+            bash verification/live_leg_c.sh /tmp/live-leg-c
       # Leg-B at the ANNUAL tier (M6): --simulate annual --quick on two
       # models, Ruby CLI vs Python CLI, every pair diffed. The full
       # determination arithmetic — unmet hours, the 8.4.1.2.(2)-(4) verdict
@@ -381,18 +388,30 @@ jobs:
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             TIER=annual CLI_B=python bash verification/selftest.sh /tmp/legb-annual
-      # Leg-C golden export (D-78): the pin bundle lives HERE, so this is how
-      # goldens are (re)generated — dispatch with export_goldens=true, download
-      # the artifact into btap-necb/test/goldens/oracle/, commit. Run it
-      # whenever legacy_pin/REF bumps; test_oracle_goldens_current.rb fails
-      # loudly until the re-exported goldens are committed.
+          # D-80 R2 reduced annual generator check: the Python CLI over BOTH
+          # generated corpora (a generator can change schedules, loads, or
+          # fuels that only ANNUAL energy distinguishes).
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+            TIER=annual bash verification/matrix.sh /tmp/matrix-annual
+      # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
+      # is how goldens are (re)generated — dispatch with export_goldens=true,
+      # download the artifact into verification/oracle/goldens/, commit. Run
+      # it whenever legacy_pin/REF bumps; test_oracle_goldens_current.rb
+      # fails loudly until the re-exported goldens are committed. Reuses the
+      # live-Leg-C stages: --canonical prep (refuses a dirty tree), then the
+      # completeness-gated atomic export at the committed location.
       - name: Export the oracle goldens
         if: inputs.export_goldens
-        run: bundle exec ruby btap-necb/scripts/export_oracle_goldens.rb
+        run: |
+          export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
+          python3 python/scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
+          bundle exec ruby verification/oracle/export_goldens.rb \
+            --prep /tmp/oracle-prep --out verification/oracle/goldens
       - uses: actions/upload-artifact@v4
         if: inputs.export_goldens
         with:
           name: oracle-goldens
-          path: btap-necb/test/goldens/oracle/
+          path: verification/oracle/goldens/
           retention-days: 7
           if-no-files-found: error

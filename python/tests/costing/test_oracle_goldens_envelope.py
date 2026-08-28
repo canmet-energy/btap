@@ -1,7 +1,7 @@
 """Leg-C: Python envelope costing vs the ORACLE's own frozen values (D-78).
 
-Consumes btap-necb/test/goldens/oracle/costing_envelope.json — exported from
-the PINNED openstudio-standards revision by scripts/export_oracle_goldens.rb
+Consumes verification/oracle/goldens/costing_envelope.json — exported from
+the PINNED openstudio-standards revision by verification/oracle/export_goldens.rb
 via the same probes the Ruby parity gates run (OracleProbes::Costing) — and
 reproduces every value with the PORTED code, under the SAME tolerances the
 Ruby gate (btap-necb/test/test_envelope_costing_parity.rb) uses:
@@ -26,10 +26,9 @@ import json
 import unittest
 
 from btap._compat import ruby_round, ruby_str
-from tests.support import REPO_ROOT
+from tests.support import oracle_goldens_dir
 
-GOLDEN = (REPO_ROOT / "btap-necb" / "test" / "goldens" / "oracle"
-          / "costing_envelope.json")
+GOLDEN = oracle_goldens_dir() / "costing_envelope.json"
 
 # The exact probe inputs behind the golden keys (OracleProbes::Costing).
 INTERPOLATE_POINT_SETS = (

@@ -756,6 +756,20 @@
       "kind": "process",
       "summary": "Leg A: the eleven parity gates (Ruby vs pinned oracle, via shared probe code). Leg B: a Python, spec-driven differ over both CLIs' audit/report JSON, self-tested Ruby-vs-Ruby. Leg C: goldens frozen FROM the oracle under the pin, consumed directly by the Python port so a faithfully-ported bug still fails; a currency meta-test pins the goldens to legacy_pin/REF.",
       "articles": []
+    },
+    {
+      "id": "D-79",
+      "title": "The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences",
+      "kind": "process",
+      "summary": "Bottom-up milestones (audit, simulation, modeling, costing, necb domains, umbrella), each landing only when its ported Ruby suites AND its slice of the D-78 verification pass. One pip distribution with five subpackages; the D-77 arrows enforced by import-linter, plus a contract keeping btap.audit SDK-free. Cross-cutting Ruby semantics live in _compat (ruby_round half-away incl. non-finite, ruby_div never raising, opt/opt_or, sorted_by_name, NullAudit, esc/ruby_str) and _sdk (ensure_sdk_hashable), each pinned against real Ruby output. Forced divergences: the wheel has no CLI so the Local backend translates in-process and spawns a provisioned EnergyPlus (WarmupFlag differs, test-only); Ruby module reopening becomes a re-exported module, preserving the legacy-2011 daylighting quarantine. Ruby stays frozen except bugfixes as the Leg-B baseline. Never call .get() on an unchecked SDK Optional: OptionalModel.get() on an empty optional returns an EMPTY model instead of raising, and other empty Optionals raise SystemError that can later segfault — use _compat.opt(). The catalog seed model is runtime-owned in both languages (gem lib/, Python package resources) with two separately tested contracts: the default resolves from an install, and an unreadable seed raises rather than degrading; an installed-wheel smoke gate runs outside the checkout. Leg C covers 2020 only and structurally cannot cover 2025, because the pinned oracle predates that edition.",
+      "articles": []
+    },
+    {
+      "id": "D-80",
+      "title": "Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path",
+      "kind": "process",
+      "summary": "The btap Ruby gems will be retired in favour of the Python implementation — freeze first (R3 primacy flip), delete later (R6) — and the verification chain is decoupled from the gems now. openstudio-standards is Ruby forever, so the oracle side always runs Ruby as pinned infrastructure (legacy_pin/ + verification/oracle/), never as product. Live Leg C is python-prep / ruby-probe: an implementation-independent committed request manifest (schedule names, costing candidates, a recursive typed golden inventory with per-list comparison modes, the goldens pytest file list + collected count) so Python never defines both question and expected answer; a gem-free Ruby exporter whose gem-tainted prep chains moved wholly to Python (oracle_prep.py, composition contracts, full provenance incl. dirty state and the OpenStudio identity as sdk_version+build_sha, hard version-skew failure, atomic completeness-gated exact-set publication); and one live run proving BOTH Python == live oracle (zero skips, pass count == manifest collected count) AND committed goldens == live oracle (tbd_rsi absorbed at 1e-6; the WWR wall stays the historical SDK-iteration-order Surface 8 — sorted selection is its own adjudicated change). The manifest bootstrap was the last gem-derived act, recorded with source hashes. Registry authority: Ruby's decisions.json is authoritative through the support window and synced to the Python copy by generation (this repaired the Python copy's silent drift to 78 entries, missing D-79); Python becomes authoritative at R3. Leg A stays green until R6; gate 2's assembly premise stays the accepted loss; order-independent of the parked REF bump / TBD 3.6.x rebaseline. Review of record: docs/d80_retirement_plan_review.md.",
+      "articles": []
     }
   ]
 }

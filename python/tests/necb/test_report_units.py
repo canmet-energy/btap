@@ -19,8 +19,10 @@ from btap.necb.report import html as H
 from btap.necb.report import render as render_report
 from btap.necb.report import sections as Sections
 
-RUBY_GOLDEN = (Path(__file__).resolve().parents[3] / "btap-necb" / "test"
-               / "goldens" / "paired_bars.svg")
+# The Python-owned copy of the Ruby paired-bars golden — byte-identity with
+# the gem-tree original is enforced by tests/test_fixture_drift.py until R6.
+RUBY_GOLDEN = (Path(__file__).resolve().parents[1] / "fixtures"
+               / "paired_bars.svg")
 
 
 def canned_audit():

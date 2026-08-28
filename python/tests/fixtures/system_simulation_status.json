@@ -1,0 +1,487 @@
+[
+  {
+    "status": "ok",
+    "name": "Baseboard district hot water",
+    "family": "baseboards"
+  },
+  {
+    "status": "ok",
+    "name": "Baseboard electric",
+    "family": "baseboards"
+  },
+  {
+    "status": "ok",
+    "name": "Baseboard gas boiler",
+    "family": "baseboards"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS ventilation only",
+    "family": "doas"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with VRF",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil air-cooled chiller with boiler",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil air-cooled chiller with district hot water",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil chiller with boiler",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil chiller with district hot water",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil district chilled water with boiler",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with fan coil district chilled water with district hot water",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with water source heat pumps cooling tower with boiler",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with water source heat pumps fluid cooler with boiler",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "DOAS with water source heat pumps with ground source heat pump",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "Direct evap coolers with baseboard electric",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "Direct evap coolers with no heat",
+    "family": "evap_cooler"
+  },
+  {
+    "status": "ok",
+    "name": "Electric unit heaters",
+    "family": "unit_heaters"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU Chilled Water Coils with Centrifugal Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU Chilled Water Coils with Reciprocating Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU Chilled Water Coils with Scroll Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU DX Coils with Centrifugal Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU DX Coils with Reciprocating Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU DX Coils with Rotary Screw Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "FPFC MAU DX Coils with Scroll Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "Forced air furnace",
+    "family": "furnace"
+  },
+  {
+    "status": "ok",
+    "name": "Gas unit heaters",
+    "family": "unit_heaters"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Electric Heating Coil Scroll Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Centrifugal Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Reciprocating Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Rotary Screw Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ MAU Electric and DX Coils and Hot Water Baseboard with PTAC",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ MAU Hot Water and DX Coils and Electric Baseboard with PTAC",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ MAU Hot Water and DX Coils and Hot Water Baseboard with PTAC",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Electric and ASHP Coils and Electric Baseboard with Electric Reheat",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Electric and ASHP Coils and Hot Water Baseboard with Electric Reheat",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Gas and ASHP Coils and Electric Baseboard with Gas Reheat",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Gas and ASHP Coils and Hot Water Baseboard with Gas Reheat",
+    "family": "mau_ptac"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU Electric and DX Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU Electric and DX Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU Gas and DX Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust ASHP with Electric and ASHP with Electric Supp. Heat Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust ASHP with Gas and ASHP with Gas Supp. Heat Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust Electric and DX Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust Electric and DX Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust Gas and DX Coils and Electric Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ RTU with exhaust Gas and DX Coils and Hot Water Baseboard",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ-AC with electric baseboard heat",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ-AC with electric coil",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ-AC with gas boiler",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PSZ-AC with gas coil",
+    "family": "psz"
+  },
+  {
+    "status": "ok",
+    "name": "PTAC with baseboard electric",
+    "family": "zone_terminal"
+  },
+  {
+    "status": "ok",
+    "name": "PTAC with baseboard gas boiler",
+    "family": "zone_terminal"
+  },
+  {
+    "status": "ok",
+    "name": "PTHP",
+    "family": "zone_terminal"
+  },
+  {
+    "status": "ok",
+    "name": "PVAV with gas boiler reheat",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "Residential AC with baseboard electric",
+    "family": "composite"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU Chilled Water Coils with Centrifugal Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU Chilled Water Coils with Reciprocating Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU Chilled Water Coils with Rotary Screw Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU Chilled Water Coils with Scroll Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU DX Coils with Centrifugal Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU DX Coils with Reciprocating Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU DX Coils with Rotary Screw Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "TPFC MAU DX Coils with Scroll Chiller",
+    "family": "fan_coils"
+  },
+  {
+    "status": "ok",
+    "name": "VAV chiller with gas boiler reheat",
+    "family": "vav_reheat"
+  },
+  {
+    "status": "ok",
+    "name": "VRF",
+    "family": "vrf"
+  },
+  {
+    "status": "ok",
+    "name": "Water source heat pumps",
+    "family": "wshp"
+  },
+  {
+    "status": "ok",
+    "name": "Window AC with baseboard electric",
+    "family": "zone_terminal"
+  },
+  {
+    "status": "ok",
+    "name": "Zone ERVs",
+    "family": "zone_ervs"
+  },
+  {
+    "status": "ok",
+    "name": "hs08_ccashp_vrf",
+    "family": "ecm_doas_vrf"
+  },
+  {
+    "status": "ok",
+    "name": "hs09_ccashp_baseboard",
+    "family": "ecm_ashp_baseboard"
+  },
+  {
+    "status": "ok",
+    "name": "hs11_ashp_pthp",
+    "family": "doas_pthp"
+  },
+  {
+    "status": "ok",
+    "name": "hs12_ashp_baseboard",
+    "family": "ecm_ashp_baseboard"
+  },
+  {
+    "status": "ok",
+    "name": "hs13_ashp_vrf",
+    "family": "ecm_doas_vrf"
+  },
+  {
+    "status": "ok",
+    "name": "hs14_cgshp_fancoils",
+    "family": "ecm_hp_fancoils"
+  },
+  {
+    "status": "ok",
+    "name": "hs15_cawhp_fancoils",
+    "family": "ecm_hp_fancoils"
+  },
+  {
+    "status": "ok",
+    "name": "hs16_ashp_cawhp_fancoils",
+    "family": "ecm_hp_fancoils"
+  }
+]

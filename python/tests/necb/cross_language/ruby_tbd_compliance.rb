@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# D-80: RETIRES WITH R6. This driver runs the RUBY implementation as the
+# cross-language baseline, so it lives exactly as long as the gems do; when
+# the Ruby product is deleted (R6), the test that shells out to this file
+# retires with it (its cross-language duty passes to the R4 frozen
+# scenario suite).
+
 # The Ruby half of the M7 assembled Leg-B thermal-bridging gate: a full
 # performance_compliance run (simulate: :none — the reference transforms,
 # incl. the 3.1.1.7 TBD pass with 'efficient (BETBG)') on the tagged

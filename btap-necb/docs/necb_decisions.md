@@ -109,6 +109,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-77** — The family is sliced by nature: five btap-* gems replace the nine openstudio-* gems _(process)_
 - **D-78** — Three-way verification for the Python migration: gates, run diffs, and direct oracle goldens _(process)_
 - **D-79** — The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences _(process)_
+- **D-80** — Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path _(process)_
 
 <!-- TOC END -->
 
@@ -4393,3 +4394,90 @@ retire the compat branch — naturally paired with the pending pin bump).
   the docs swept; the port is complete, with the parked list — the 3.6.x
   TBD rebaseline, the pin bump, the installer switch — as future
   adjudications).
+
+## D-80
+
+**Decided:** The btap Ruby gems will be RETIRED in favour of the Python
+implementation — freeze first, delete later — and the verification chain is
+rebuilt now so that it no longer depends on the gems (2026-08-28). The
+permanent constraint shaping everything: openstudio-standards is Ruby, so
+the oracle side of any comparison always runs Ruby — as pinned
+infrastructure (`legacy_pin/` plus `verification/oracle/`), never as
+product. The full phase plan (R1–R6), the durable review of record, and the
+acceptance criteria live in
+[d80_retirement_plan_review.md](d80_retirement_plan_review.md); this entry
+records the architecture and the rules that outlive the phases.
+
+**The python-prep / ruby-probe architecture (R1).** Leg C — Python vs the
+pinned oracle (D-78) — becomes a first-class LIVE gate with three moving
+parts under durable ownership in `verification/oracle/`:
+
+- **A committed, implementation-independent request manifest**
+  (`request_manifest.json`). Python must never define BOTH the question and
+  the expected answer, so the probe inventory — the 86 schedule names, the
+  92 costing candidate records, the recursive shape of every golden group,
+  and the goldens pytest file list with its expected collected count —
+  is a committed artifact, immutable except by adjudicated update. Every
+  list path in the recursive inventory declares its comparison mode
+  (`ordered` / `keyed` / `set`), so lengths-only checks neither freeze
+  incidental oracle iteration order nor hide a real ordering contract.
+- **A gem-free Ruby exporter** (`export_goldens.rb`) that runs the oracle
+  probes under the pin. Any preparation chain that historically contained a
+  btap-gem call moved wholly to Python (`python/scripts/oracle_prep.py`
+  builds the prep `.osm`s, each with a composition contract and full
+  provenance — commit, dirty state, script/manifest/seed SHA-256s, and the
+  OpenStudio identity as sdk_version AND build_sha); SDK-only prep stays in
+  the exporter. OpenStudio identity skew between prep and export is a hard
+  failure (`BTAP_ORACLE_ALLOW_VERSION_SKEW=1` is the explicit rebaseline
+  override). Publication is atomic, completeness-gated, and exact-set
+  checked: every group validates against the request-manifest inventory in
+  a temporary sibling directory before a backup-swap promotion, so a
+  partial or shape-drifted export can never land.
+- **The dual live assertion** (`live_leg_c.sh`, parity job): one run proves
+  BOTH Python ≡ live oracle (the goldens tests against the fresh export,
+  with ZERO skips asserted — pass count must equal the manifest's collected
+  count) AND committed goldens ≡ live oracle (`compare_goldens.py` —
+  checksums only catch hand-edits, never staleness). Everything is exact
+  except the tbd_rsi subtree, absorbed at 1e-6 for the prep-model `.osm`
+  round trip. The historical tbd_rsi WWR wall stays the first outdoor wall
+  in SDK ITERATION ORDER (Surface 8 on the seed) — preserving the
+  established probe input is what makes the migration diff meaningful, and
+  any move to sorted selection is its own adjudicated golden change.
+
+**The bootstrap provenance rule.** The request manifest was bootstrapped
+ONCE from the then-current oracle export plus the gem data that
+historically defined the inventories (schedule names from the loads table,
+costing candidates from the costing Database) — deliberately the LAST
+gem-derived act, recorded with source hashes and commit in the manifest's
+`bootstrap_provenance` block. `dump_bootstrap_inputs.rb` and
+`bootstrap_request_manifest.py` are kept for provenance and
+re-adjudication only.
+
+**Registry authority.** The decisions registry is maintained by GENERATION,
+not dual hand-edits: the Ruby copy
+(`btap-necb/lib/btap_necb/data/decisions.json`) is authoritative through
+the Ruby support window, `python/scripts/sync_decisions_registry.py` copies
+it byte-identically to the packaged Python location, and CI demands
+equivalence. The Python registry becomes authoritative at the R3 primacy
+flip. (This repaired an existing defect: the Python copy had silently
+drifted to 78 entries, missing D-79 itself.)
+
+**What is accepted, and what stays.**
+
+- **Leg A (Ruby vs oracle) stays green until R6** — the eleven gates run
+  unchanged for as long as Ruby is a supported product; cadence may drop
+  after the R3 primacy flip, deletion may not precede R6.
+- The accepted loss remains gate 2's assembly premise (D-78) — nothing in
+  this architecture recovers it, and nothing hides it.
+- The M8 single-value live lighting gate and its Ruby probe were retired:
+  the live Leg-C run now covers that value (and every other golden group)
+  with the same tolerance discipline.
+- **Order-independence:** this workstream neither requires nor performs the
+  parked `legacy_pin/REF` bump / TBD 3.6.x rebaseline; if that adjudication
+  lands first, the goldens re-export flows through this same pipeline.
+- Rejected: retiring Leg A at the primacy flip (Ruby would ship unverified
+  while still supported); letting Python enumerate its own probe inventory
+  (self-fulfilling verification); sorted-by-name canonicalization of the
+  tbd_rsi wall as a side effect of the decoupling (it would have
+  manufactured a false migration diff — Surface 14 vs the historical
+  Surface 8).

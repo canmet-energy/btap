@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P3 gate (parity half): per-object load values match legacy
 # space_type_apply_internal_loads(set_lights: false) + schedule/thermostat applies

@@ -1,5 +1,5 @@
 require_relative 'test_helper'
-require_relative 'support/oracle_probes'
+require_relative '../../verification/oracle/oracle_probes'
 
 # P2 gate (parity half): EVERY schedule name in the vendored 2020 table builds
 # identically via the gem and via legacy model_add_schedule — default day values,

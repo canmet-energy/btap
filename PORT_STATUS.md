@@ -21,7 +21,8 @@ started**, never on gates written to fit it. Three legs (D-78):
 - **Leg B** — Python vs Ruby, by diffing both CLIs' `audit.json`/
   `report.json` on the same models (`verification/compare_runs.py`).
 - **Leg C** — Python vs **the oracle directly**, against goldens frozen from
-  the pin (`btap-necb/test/goldens/oracle/`). This is the one that matters
+  the pin (`verification/oracle/goldens/`, relocated in D-80 R1) — and,
+  in the parity job, LIVE via `verification/live_leg_c.sh`. This is the one that matters
   most: a bug faithfully ported from Ruby passes Leg A *and* Leg B, because
   both sides agree. Only comparing against the oracle's own values catches it.
 
@@ -260,6 +261,46 @@ own future adjudication — bump the Ruby triplet first, re-run Leg A,
 re-export the goldens, retire the compat branch — and pairs naturally with
 the pending `legacy_pin/REF` bump.
 
+## The D-80 retirement workstream (R1+R2 landed 2026-08-28)
+
+The port being complete, D-80 recorded the direction: **retire the Ruby gems
+— freeze first (R3), delete later (R6) — and decouple the verification
+chain from the gems now.** The phase plan, review of record
+(`btap-necb/docs/d80_retirement_plan_review.md`), and the architecture are
+in decision D-80. What R1+R2 landed:
+
+- **python-prep / ruby-probe live Leg C.** The oracle harness moved to
+  durable ownership (`verification/oracle/`), the exporter is gem-free, the
+  gem-tainted prep chains moved to `python/scripts/oracle_prep.py` (the
+  tbd_rsi WWR wall stays the historical SDK-iteration-order `Surface 8`),
+  and probe requests come from the committed, implementation-independent
+  `request_manifest.json` (recursive typed inventory; bootstrapped once —
+  the last gem-derived act). `live_leg_c.sh` in the parity job proves
+  Python ≡ live oracle AND committed goldens ≡ live oracle, zero skips.
+- **Atomic, completeness-gated export**: inventory-validated in a temp
+  sibling, exact file set, checksums, manifest last, backup-swap promote;
+  OpenStudio identity skew (sdk_version+build_sha) is a hard failure.
+- **Self-containment**: Python-owned fixture copies (drift-gated
+  byte-identical to the Ruby originals until R6) + a mechanical invariant
+  scanner (`tests/test_self_containment.py`) with a retirement-phased
+  allowlist. `generate_samples.py` gives Python its own corpus with an
+  exact slug manifest; `test_reference_rules.py` no longer reads
+  `packaging/windows`.
+- **The generator/CLI matrix** (`verification/matrix.sh`): all four
+  generator×CLI cells at tiers none+sizing; the reduced annual check runs
+  the Python CLI over both corpora. Run counts and slug sets asserted.
+- **Registry by generation**: Ruby's decisions.json is authoritative until
+  R3, synced byte-identically by `python/scripts/sync_decisions_registry.py`
+  (this repaired the silent 78-entry drift that was missing D-79).
+- The M8 single-value live lighting gate and its Ruby probe are retired
+  (superseded by the full live Leg C); the installer's stale seed staging
+  path (`Rakefile`) is fixed.
+
+**R3–R6 are documented in D-80 and each needs its own go-ahead**: R3
+primacy flip, R4 frozen scenario suite (Leg B's successor incl. failure
+paths), R5 Python Windows installer, R6 deletion (Leg A retires only
+then). Order-independent of the parked pin bump / TBD 3.6.x rebaseline.
+
 ## Working agreements that produced this
 
 These are not style preferences; each was learned by something breaking.
@@ -294,7 +335,9 @@ python/btap/_compat.py, _sdk.py                         the parity contracts
 python/tests/                                           ported suites + Leg-C gates
 python/scripts/simulate_all_systems.py                  the 97-system E+ battery
 verification/                                           the Leg-B differ, spec, corpus
-btap-necb/test/goldens/oracle/                          the Leg-C goldens (pinned)
-btap-necb/test/support/oracle_probes.rb                 the recipe behind every golden
+verification/oracle/goldens/                            the Leg-C goldens (pinned)
+verification/oracle/oracle_probes.rb                    the recipe behind every golden
+verification/oracle/request_manifest.json               the D-80 probe request manifest
+python/scripts/oracle_prep.py                           the D-80 python-prep models
 btap-necb/docs/necb_decisions.md                        D-79 (this port), D-78 (verification)
 ```

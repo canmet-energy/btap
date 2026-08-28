@@ -25,9 +25,9 @@ from __future__ import annotations
 import json
 import unittest
 
-from tests.support import REPO_ROOT, needs_sdk
+from tests.support import needs_sdk, oracle_goldens_dir
 
-GOLDENS = REPO_ROOT / "btap-necb" / "test" / "goldens" / "oracle"
+GOLDENS = oracle_goldens_dir()
 
 #: OracleProbes::Loads::PAIRS — the space types the apply golden was frozen for.
 PAIRS = [

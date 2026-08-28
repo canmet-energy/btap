@@ -33,9 +33,9 @@ import unittest
 
 from btap._compat import ruby_str
 from tests.necb.support import needs_sdk, tagged_model
-from tests.support import REPO_ROOT
+from tests.support import oracle_goldens_dir
 
-GOLDEN = REPO_ROOT / "btap-necb" / "test" / "goldens" / "oracle" / "shw.json"
+GOLDEN = oracle_goldens_dir() / "shw.json"
 
 # The exact probe inputs behind the golden keys (OracleProbes::Shw).
 EFFICIENCY_CASES = (

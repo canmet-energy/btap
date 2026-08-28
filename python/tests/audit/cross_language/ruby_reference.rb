@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# D-80: RETIRES WITH R6. This driver runs the RUBY implementation as the
+# cross-language baseline, so it lives exactly as long as the gems do; when
+# the Ruby product is deleted (R6), the test that shells out to this file
+# retires with it (its cross-language duty passes to the R4 frozen
+# scenario suite).
+
 # Cross-language M1 gate (D-79): build the SAME scripted audit scenario as
 # tests/audit/test_cross_language.py and write audit.json + audit.txt. The
 # Python test runs this against the Ruby btap-audit gem, then diffs the two

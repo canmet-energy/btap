@@ -11,14 +11,21 @@ from __future__ import annotations
 
 import os
 import unittest
+from importlib import resources
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = REPO_ROOT / "btap-modeling" / "test" / "fixtures"
-# The seed model is RUNTIME-owned now (shipped in the package and in the gem
-# under lib/); only the weather files remain test fixtures.
-FIXTURE_OSM = (REPO_ROOT / "btap-modeling" / "lib" / "btap_modeling" / "hvac"
-               / "data" / "5ZoneNoHVAC.osm")
+#: PYTHON-OWNED fixtures (D-80 R2.1). The Python verification stack no longer
+#: reaches into the gem tree for its test data: these are copies, and
+#: ``tests/test_fixture_drift.py`` pins them byte-for-byte to the Ruby
+#: originals until the gems retire at R6 (after which the Python copies are
+#: authoritative and that cross-tree assertion goes away).
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+# The seed model is RUNTIME-owned (package data, shipped in the wheel and in
+# the gem under lib/), so it resolves out of the INSTALLED package rather than
+# either tree; only the weather files and the JSON goldens are test fixtures.
+FIXTURE_OSM = Path(str(resources.files("btap.modeling.hvac") / "data"
+                       / "5ZoneNoHVAC.osm"))
 EPW = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 
@@ -110,3 +117,38 @@ def needs_tbd(cls_or_fn):
     return unittest.skip(
         "needs the pinned py-tbd engine (pip install 'btap[tbd]', or see "
         "docs/DEVELOPERS.md)")(cls_or_fn)
+
+
+def oracle_goldens_dir():
+    """The Leg-C goldens directory, with STRICT override semantics (D-80 R1):
+
+    - ``BTAP_ORACLE_GOLDENS`` unset -> the COMMITTED goldens
+      (verification/oracle/goldens — the frozen fast path).
+    - set and valid -> exactly that directory (live-Leg-C mode: a fresh
+      export from the pinned oracle).
+    - set and INVALID -> raise at import/collection time, never fall back:
+      a misspelled live-export path must not quietly test the frozen path.
+
+    ``BTAP_GOLDENS_REQUIRED=1`` additionally makes a missing/unreadable
+    committed directory a hard failure (the LEGACY_PIN_REQUIRED
+    discipline) — used by the live orchestrator so the required run can
+    never silently skip.
+    """
+    override = os.environ.get("BTAP_ORACLE_GOLDENS")
+    if override:
+        path = Path(override)
+        if not (path.is_dir() and (path / "manifest.json").is_file()):
+            raise RuntimeError(
+                f"BTAP_ORACLE_GOLDENS={override} is not a goldens directory "
+                "(missing dir or manifest.json) — refusing to fall back to "
+                "the committed goldens; fix the path or unset the override")
+        return path
+
+    committed = REPO_ROOT / "verification" / "oracle" / "goldens"
+    if os.environ.get("BTAP_GOLDENS_REQUIRED") == "1" and not (
+            committed.is_dir() and (committed / "manifest.json").is_file()):
+        raise RuntimeError(
+            f"BTAP_GOLDENS_REQUIRED=1 but {committed} is missing or has no "
+            "manifest.json — run verification/oracle/export_goldens.rb (or "
+            "the goldens dispatch) to produce them")
+    return committed
