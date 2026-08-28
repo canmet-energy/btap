@@ -350,12 +350,15 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
-      # The Python Leg-A gate (M8): Python lighting.cost vs the LIVE pinned
-      # oracle — the last suite skip that had never run anywhere, enabled
-      # here because this is the ONLY job that bundles the oracle. The
-      # job-level BUNDLE_GEMFILE + LEGACY_PIN_REQUIRED env make the gate
-      # required, not skippable.
-      - name: Python Leg-A gate (lighting costing vs the live oracle)
+      # The Python LIVE Leg-C gate (M8): Python lighting.cost vs the LIVE
+      # pinned oracle — the last suite skip that had never run anywhere,
+      # enabled here because this is the ONLY job that bundles the oracle.
+      # D-78 terminology: Leg A is RUBY vs the oracle (the eleven gates
+      # above); PYTHON vs the oracle is Leg C, whether the oracle values
+      # are frozen goldens or, as here, computed live. The job-level
+      # BUNDLE_GEMFILE + LEGACY_PIN_REQUIRED env make the gate required,
+      # not skippable.
+      - name: Python live Leg-C gate (lighting costing vs the pinned oracle)
         working-directory: python
         run: |
           apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null

@@ -77,9 +77,12 @@ The tool is plain Ruby and runs anywhere OpenStudio 3.11 does. See
 
 There is also a **Python implementation** of the same tool (`pip install`
 from [python/](python/README.md) gives you the same `btap-compliance`
-command, engine included — no Ruby, no installer). It is verified equivalent
-to this one on every model in the test corpus, but the Ruby installer above
-remains the supported product for now.
+command — no Ruby, no installer). EnergyPlus is automatically provisioned
+and version-verified on first use; on an offline or TLS-intercepted network
+supply it via `BTAP_ENERGYPLUS` (an existing install) or
+`BTAP_ENERGYPLUS_ARCHIVE` (a downloaded archive). It is verified equivalent
+to the Ruby tool on every model in the test corpus, but the Ruby installer
+above remains the supported product for now.
 
 ---
 

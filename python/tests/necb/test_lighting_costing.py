@@ -4,9 +4,11 @@ layer supplies the daylighted-area geometry btap.costing deliberately does not
 own).
 
 Port of btap-necb/test/test_lighting_costing.rb. Its last case
-(``test_legacy_parity_led_2020``) is a Leg-A gate against the LIVE pinned
-oracle and cannot run here; its Leg-C twin — the frozen ``lighting_costing``
-golden — is asserted in test_oracle_goldens_lighting.py instead (D-78).
+(``test_legacy_parity_led_2020``) is the LIVE Leg-C gate — Python vs the
+LIVE pinned oracle (M8; needs the oracle bundle, which only the parity job
+carries). Its FROZEN Leg-C twin — the ``lighting_costing`` golden — is
+asserted in test_oracle_goldens_lighting.py (D-78: Ruby-vs-oracle is Leg A;
+Python-vs-oracle is Leg C, frozen or live).
 """
 
 import unittest
@@ -120,15 +122,18 @@ class TestCosting(unittest.TestCase):
         self.assertGreater(report.lighting["daylighting_sensor_cost"], 0)
 
     def test_legacy_parity_led_2020(self):
-        """The Python Leg-A gate (enabled M8): Python lighting.cost vs the
-        LIVE pinned oracle — not the frozen golden. The oracle value comes
-        from a Ruby probe running the SAME OracleProbes recipe the Ruby
-        parity gate runs, under BUNDLE_GEMFILE=legacy_pin/Gemfile; the
-        tolerance is the Ruby gate's own (max of 0.1% and $0.05). Skips
+        """The Python LIVE Leg-C gate (enabled M8): Python lighting.cost vs
+        the LIVE pinned oracle — not the frozen golden. D-78 terminology:
+        Leg A is RUBY vs the oracle; PYTHON vs the oracle is Leg C whether
+        the oracle values are frozen or, as here, computed live (the
+        placeholder this replaced mislabeled itself Leg A). The oracle
+        value comes from a Ruby probe running the SAME OracleProbes recipe
+        the Ruby Leg-A gate runs, under BUNDLE_GEMFILE=legacy_pin/Gemfile;
+        the tolerance is that gate's own (max of 0.1% and $0.05). Skips
         where the oracle is not bundled — LEGACY_PIN_REQUIRED=1 (the same
         flag the Ruby gates use) turns that skip into a failure, and CI's
-        parity job (the one place the oracle exists) sets it. Its Leg-C
-        twin is test_oracle_goldens_lighting.py's
+        parity job (the one place the oracle exists) sets it. Its FROZEN
+        Leg-C twin is test_oracle_goldens_lighting.py's
         lighting_costing['led_2020_total'] assertion (D-78)."""
         import json
         import os

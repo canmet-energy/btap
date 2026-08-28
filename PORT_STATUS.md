@@ -56,7 +56,7 @@ data-integrity and cross-edition tests, which is the only available basis.
 Current suite: **716 passed, 1 skipped** in a fully-provisioned checkout
 (~7 min parallel; the M6 engine-backed suites run real EnergyPlus, the M7
 gates run both TBD engines, the raster test rasterizes). The one skip is
-the live-oracle Leg-A gate, which the `parity` job runs REQUIRED. Import
+the live-oracle Leg-C lighting gate, which the `parity` job runs REQUIRED. Import
 contracts: 3 kept. Ruff: clean (enforced in CI). The Ruby side is green
 throughout (matrix + verify + the 12-gate parity job).
 
@@ -80,7 +80,7 @@ names a dependency AND a required-flag, and CI supplies each dependency
 somewhere with its flag set — samples + both TBD engines + the rasterizer
 in `verify` (`BTAP_SDK/ENGINE/TBD/RASTERIZER_REQUIRED=1`, `TBD_REQUIRED=1`),
 and the live pinned oracle in `parity` (`LEGACY_PIN_REQUIRED=1`, which now
-runs the Python Leg-A lighting gate too). **There are
+runs the Python live Leg-C lighting gate too). **There are
 no stale exemptions** — when a milestone supplies a dependency, the tests
 waiting on it are ported and enabled in that same milestone.
 
@@ -164,16 +164,18 @@ it when someone wants to.
 
 The three items from the post-M7 postponed-work sweep, all landed:
 
-1. **The Leg-A lighting-costing gate now RUNS.** The placeholder skip (the
-   one test that had never run anywhere) is a real gate: a Ruby probe
-   computes the LIVE pinned oracle's LED/NECB2020 lighting total through
-   the SAME OracleProbes recipe the Ruby parity gate uses, and Python's
-   `lighting.cost` must match within the Ruby gate's own tolerance
-   (max of 0.1% and $0.05). Availability gates on `bundle check` (the Ruby
-   e2e suite's own test); `LEGACY_PIN_REQUIRED=1` turns absence into
-   failure, and the `parity` job — the only place the oracle exists — runs
-   it required. Python now compares against the oracle LIVE (Leg A), not
-   only through frozen goldens (Leg C).
+1. **The live-oracle lighting-costing gate now RUNS — and it is a LIVE
+   LEG-C gate** (Python vs the oracle; the placeholder it replaced
+   mislabeled itself "Leg A", which D-78 reserves for RUBY vs the oracle —
+   caught by review). The one test that had never run anywhere is real: a
+   Ruby probe computes the LIVE pinned oracle's LED/NECB2020 lighting
+   total through the SAME OracleProbes recipe the Ruby Leg-A gate uses,
+   and Python's `lighting.cost` must match within that gate's own
+   tolerance (max of 0.1% and $0.05). Availability gates on `bundle check`
+   (the Ruby e2e suite's own test); `LEGACY_PIN_REQUIRED=1` turns absence
+   into failure, and the `parity` job — the only place the oracle exists —
+   runs it required. Leg C now compares against the oracle both FROZEN
+   (the goldens) and LIVE.
 2. **The floor-plan raster test runs in verify** — `librsvg2-bin` is
    installed there, and a new `BTAP_RASTERIZER_REQUIRED=1` keeps it from
    ever going vacuous (same discipline as the other REQUIRED flags).

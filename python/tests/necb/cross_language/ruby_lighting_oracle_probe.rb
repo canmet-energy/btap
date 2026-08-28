@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# The Ruby half of the PYTHON Leg-A lighting-costing gate (M8): compute the
-# LIVE pinned oracle's lighting total for the LED/NECB2020 costed fixture —
-# the same OracleProbes recipe the Ruby parity gate
-# (btap-necb/test/test_lighting_costing.rb#test_legacy_parity_led_2020) runs
-# — and write it as JSON for the Python test to compare against.
+# The oracle half of the PYTHON LIVE LEG-C lighting-costing gate (M8):
+# compute the LIVE pinned oracle's lighting total for the LED/NECB2020
+# costed fixture — the same OracleProbes recipe the Ruby Leg-A gate
+# (btap-necb/test/test_lighting_costing.rb#test_legacy_parity_led_2020)
+# runs — and write it as JSON for the Python test to compare against.
+# (D-78: Ruby-vs-oracle is Leg A; Python-vs-oracle is Leg C, frozen OR live.)
 #
 # Needs the oracle bundle:
 #   BUNDLE_GEMFILE=legacy_pin/Gemfile bundle exec ruby ruby_lighting_oracle_probe.rb OUT.json
