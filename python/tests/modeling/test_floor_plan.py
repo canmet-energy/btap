@@ -416,6 +416,11 @@ class TestFloorPlan(unittest.TestCase):
         from btap.modeling.geometry import plan as plan_mod
 
         if plan_mod.rasterizer() is None:
+            # M8: verify installs librsvg2-bin and sets the flag, so this can
+            # never go green-but-vacuous there; elsewhere it names the tool.
+            if os.environ.get("BTAP_RASTERIZER_REQUIRED") == "1":
+                self.fail("BTAP_RASTERIZER_REQUIRED=1 but no SVG rasterizer "
+                          "is on PATH (rsvg-convert / cairosvg / magick)")
             self.skipTest("no SVG rasterizer on PATH (rsvg-convert / cairosvg / magick)")
 
         with tempfile.TemporaryDirectory() as tmp:

@@ -4,10 +4,10 @@ test_local_run.rb, plus the M2 decisive gate: the same model run by the RUBY
 gem (via the openstudio CLI) and by this port must produce equivalent
 results under the Leg-B differ rules.
 
-The Ruby annual test built an HVAC system via btap-modeling; that gem is not
-ported yet (M3), so the annual runs here use the bare fixture (thermostats,
-no systems — EnergyPlus free-floats the zones and the parse surface is
-identical). The HVAC-carrying annual comparison arrives with M3."""
+The plain-Python annual tests use the bare fixture (thermostats, no
+systems — EnergyPlus free-floats the zones and the parse surface is
+identical); the cross-language class below carries a REAL HVAC system built
+by each language's own btap-modeling port (added when M3 landed it)."""
 
 import importlib.util
 import json

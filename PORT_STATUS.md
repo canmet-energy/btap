@@ -1,9 +1,10 @@
 # Ruby → Python port: status and handoff
 
-**As of 2026-08-28.** Milestones M0–M7 are done (M0–M6 merged; M7 on branch
-`python-m7-tbd`). **Only M8 (closeout) remains.** The governing decision is
-**D-79** (`btap-necb/docs/necb_decisions.md`); the verification architecture
-it plugs into is **D-78**.
+**As of 2026-08-28.** Milestones M0–M8 are ALL done (M0–M7 merged; M8 on
+branch `python-m8-closeout`). **The port is COMPLETE.** The governing
+decision is **D-79** (`btap-necb/docs/necb_decisions.md`); the verification
+architecture it plugs into is **D-78**. What remains is the PARKED list —
+deliberate future decisions, not port work.
 
 This file is the durable record. If you are an agent picking this up with no
 prior context, read this, then D-79, then D-78, then `python/README.md`.
@@ -52,10 +53,12 @@ data-integrity and cross-edition tests, which is the only available basis.
 | **M6** | the umbrella (`compliance`, `eui_archetypes`, `tiers`, the renderer, the CLI) | **The Leg-B corpus convergence**: Ruby CLI vs Python CLI over the whole corpus, every pair EQUIVALENT under the Leg-B rules — 18/18 at tier `none`, 3/3 at `sizing`, 2/2 at `annual --quick`. Plus: the renderer's chart primitive reproduces the Ruby suite's `paired_bars.svg` golden **byte-identically** (now consumed as a cross-language gate) |
 | **M7** | thermal bridging (NECB 3.1.1.7) via **native py-tbd**, Option A | Direct Ruby-vs-Python `TBD.process` parity on the fixture (surfaces/edges/**warnings byte-identical**, numerics 1e-9); the frozen `tbd_rsi` Leg-C golden (1e-6, key-set both ways); the uprate/derate gate incl. the infeasible-wall refusal; the post-reference-rebuild target-retention gate; an assembled Leg-B compliance case with `efficient (BETBG)` EQUIVALENT cross-language; engine identity asserted; wheel installs and processes from the `[tbd]` extra |
 
-Current suite: **715 passed, 2 skipped**, ~6 min parallel (the M6
-engine-backed suites run real EnergyPlus; the M7 gates run both TBD
-engines). Import contracts: 3 kept. Ruff: clean (enforced in CI). The Ruby
-side is green throughout (matrix + verify + the 12-gate parity job).
+Current suite: **716 passed, 1 skipped** in a fully-provisioned checkout
+(~7 min parallel; the M6 engine-backed suites run real EnergyPlus, the M7
+gates run both TBD engines, the raster test rasterizes). The one skip is
+the live-oracle Leg-C lighting gate, which the `parity` job runs REQUIRED. Import
+contracts: 3 kept. Ruff: clean (enforced in CI). The Ruby side is green
+throughout (matrix + verify + the 12-gate parity job).
 
 Three gates make the claims above continuously enforced rather than
 manually observed — a review found that gap and it is now closed:
@@ -72,13 +75,12 @@ manually observed — a review found that gap and it is now closed:
 - **Ruff**, enforced with a ruleset this codebase can honestly hold (see
   `pyproject.toml` for why `UP` and `E501` are deliberately out).
 
-The two remaining skips each name a real reason: one needs an SVG
-rasterizer on PATH, one is a Leg-A gate needing the live pinned oracle (its
-Leg-C twin is named in the skip message). The formerly-M7 TBD skips are
-ENABLED (M7 landed); the M6 sample-dependent tests and the M7
-cross-language TBD gates skip only where their dependency is absent, and
-CI's `verify` job supplies every one of them (samples generated, both tbd
-engines installed, `BTAP_TBD_REQUIRED=1`). **There are
+As of M8 there are **zero unconditional skips**: every remaining skip
+names a dependency AND a required-flag, and CI supplies each dependency
+somewhere with its flag set — samples + both TBD engines + the rasterizer
+in `verify` (`BTAP_SDK/ENGINE/TBD/RASTERIZER_REQUIRED=1`, `TBD_REQUIRED=1`),
+and the live pinned oracle in `parity` (`LEGACY_PIN_REQUIRED=1`, which now
+runs the Python live Leg-C lighting gate too). **There are
 no stale exemptions** — when a milestone supplies a dependency, the tests
 waiting on it are ported and enabled in that same milestone.
 
@@ -158,29 +160,37 @@ Named by review (2026-08-28) as the principal residual M6 risk; a
 deliberate one-off full-year convergence run is the cheapest way to retire
 it when someone wants to.
 
-### What remains
+### M8 — closeout, DONE (2026-08-28)
 
-**M8** — closeout: the docs/README sweep and any final CI polish. (D-79 was
-originally assigned to M8 but was written early, in M5's documentation
-pass; the M6 and M7 records were appended to it as they landed.)
+The three items from the post-M7 postponed-work sweep, all landed:
 
-Concrete M8 items, from the post-M7 postponed-work sweep (2026-08-28):
+1. **The live-oracle lighting-costing gate now RUNS — and it is a LIVE
+   LEG-C gate** (Python vs the oracle; the placeholder it replaced
+   mislabeled itself "Leg A", which D-78 reserves for RUBY vs the oracle —
+   caught by review). The one test that had never run anywhere is real: a
+   Ruby probe computes the LIVE pinned oracle's LED/NECB2020 lighting
+   total through the SAME OracleProbes recipe the Ruby Leg-A gate uses,
+   and Python's `lighting.cost` must match within that gate's own
+   tolerance (max of 0.1% and $0.05). Availability gates on `bundle check`
+   (the Ruby e2e suite's own test); `LEGACY_PIN_REQUIRED=1` turns absence
+   into failure, and the `parity` job — the only place the oracle exists —
+   runs it required. Leg C now compares against the oracle both FROZEN
+   (the goldens) and LIVE.
+2. **The floor-plan raster test runs in verify** — `librsvg2-bin` is
+   installed there, and a new `BTAP_RASTERIZER_REQUIRED=1` keeps it from
+   ever going vacuous (same discipline as the other REQUIRED flags).
+3. **The three stale milestone-tense comments are fixed** (test_bar,
+   test_local_run, test_lighting_costing_smoke — doc rot only).
 
-1. **Retire the Leg-A lighting-costing skip.** The one test that has never
-   run anywhere: `tests/necb/test_lighting_costing.py`'s Leg-A gate needs
-   the LIVE pinned oracle (`BUNDLE_GEMFILE=legacy_pin/Gemfile`), which only
-   the `parity` job bundles — and parity does not run pytest. Wire one
-   targeted pytest invocation into the parity job so the skip retires (its
-   Leg-C twin already covers the value, so this closes redundancy, not a
-   coverage hole).
-2. **Retire the SVG-rasterizer skip.** `tests/modeling/test_floor_plan.py`
-   skips without a rasterizer on PATH; `rsvg-convert` is one apt install in
-   the container jobs.
-3. **Sweep the stale milestone-tense comments.** Three found:
-   `tests/modeling/test_bar.py` still says "skipped until M5 lands" above a
-   test that runs; `tests/simulation/test_local_run.py` and
-   `tests/costing/test_lighting_costing_smoke.py` carry pre-M5 phrasing in
-   their docstrings. Doc rot only — no behavior.
+Plus the README closeout: the building-engineer README now tells a
+non-Windows reader the Python implementation exists (`pip install`, same
+`btap-compliance` command, engine included), while the Ruby installer
+remains the supported product — the installer/distribution switch stays a
+deliberate, separate decision.
+
+With M8, the Python suite carries **zero unconditional skips**: every skip
+names a dependency and a flag, and CI supplies every dependency somewhere
+with its flag set.
 
 ### M7, as it actually went (2026-08-28)
 

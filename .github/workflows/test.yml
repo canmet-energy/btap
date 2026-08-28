@@ -256,7 +256,10 @@ jobs:
         working-directory: python
         run: |
           gem install $(ruby ../legacy_pin/tbd_triplet.rb) --no-document
-          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
+          # librsvg2-bin: the floor-plan raster test needs an SVG rasterizer
+          # on PATH; supplied here (M8) so it RUNS instead of skipping, and
+          # BTAP_RASTERIZER_REQUIRED below keeps it from ever going vacuous.
+          apt-get update -qq && apt-get install -y -qq python3-venv librsvg2-bin > /dev/null
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q pytest pytest-xdist
           # py-tbd itself with --no-deps: its openstudio requirement would
@@ -278,7 +281,8 @@ jobs:
           # manual run someone did once.
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 TBD_REQUIRED=1 FULL_MATRIX=1 \
+          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 TBD_REQUIRED=1 \
+          BTAP_RASTERIZER_REQUIRED=1 FULL_MATRIX=1 \
             .ci-venv/bin/pytest -n auto -q tests/
       # The M6 decisive acceptance, continuously enforced: the Ruby CLI and
       # the PYTHON CLI over the same corpus, every pair diffed under the
@@ -346,6 +350,22 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
+      # The Python LIVE Leg-C gate (M8): Python lighting.cost vs the LIVE
+      # pinned oracle — the last suite skip that had never run anywhere,
+      # enabled here because this is the ONLY job that bundles the oracle.
+      # D-78 terminology: Leg A is RUBY vs the oracle (the eleven gates
+      # above); PYTHON vs the oracle is Leg C, whether the oracle values
+      # are frozen goldens or, as here, computed live. The job-level
+      # BUNDLE_GEMFILE + LEGACY_PIN_REQUIRED env make the gate required,
+      # not skippable.
+      - name: Python live Leg-C gate (lighting costing vs the pinned oracle)
+        working-directory: python
+        run: |
+          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
+          python3 -m venv .parity-venv
+          .parity-venv/bin/pip install -q pytest
+          PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
+            .parity-venv/bin/pytest -q "tests/necb/test_lighting_costing.py::TestCosting::test_legacy_parity_led_2020"
       # Leg-B at the ANNUAL tier (M6): --simulate annual --quick on two
       # models, Ruby CLI vs Python CLI, every pair diffed. The full
       # determination arithmetic — unmet hours, the 8.4.1.2.(2)-(4) verdict

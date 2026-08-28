@@ -31,7 +31,8 @@ SPACE_TYPE = "Office enclosed > 25 m2"
 def tagged_model():
     """The fixture with every space type carrying the standards tags the
     lighting_sets lookup keys on (what BtapNECB::Loads.assign_space_types
-    produces; set directly here because btap.necb arrives with M5)."""
+    produces; set directly with the SDK so this stays a COSTING-layer unit
+    test — the real necb-built path is covered by tests/necb/test_lighting_costing.py)."""
     model = load_fixture()
     for space in model.getSpaces():
         space_type = space.spaceType().get()
