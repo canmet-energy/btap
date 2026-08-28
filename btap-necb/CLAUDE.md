@@ -8,6 +8,16 @@ allowed to run EnergyPlus** (pure SDK + `openstudio` CLI — no measures, no
 openstudio-standards). One clone carries both reference transforms; ONE
 AuditLog spans everything.
 
+## The Python twin (btap.necb)
+
+This gem is fully mirrored by `python/btap/necb/` (the port is complete —
+D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
+here is a change to BOTH implementations**: land it Ruby-first, port it, and
+keep the Leg-B gates green — audit `action`/`article`/`ruling` strings are
+compared VERBATIM cross-language, so even wording is load-bearing. A defect
+found on either side is fixed on both or flagged in D-79, never silently on
+one.
+
 ## Pipeline (`Compliance.performance_compliance`)
 
 clone → on-ramp → **space-type pre-flight** (`validate_space_types!`: every

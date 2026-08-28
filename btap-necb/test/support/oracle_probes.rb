@@ -6,8 +6,8 @@
 #
 # Three-way verification (D-78): Leg A = these probes compared live against
 # the gem (the parity gates); Leg C = these probes' output frozen to
-# test/goldens/oracle/*.json under the pin, consumed by the future Python
-# port directly — so a bug faithfully ported from Ruby still fails.
+# test/goldens/oracle/*.json under the pin, consumed by the Python port
+# directly — so a bug faithfully ported from Ruby still fails.
 #
 # Contract: every probe returns PLAIN JSON-ROUNDTRIPPABLE data — string keys,
 # floats/strings/booleans/nil/arrays only — because the same value must

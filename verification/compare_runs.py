@@ -6,7 +6,7 @@ audit.json + report.json under the normalization/tolerance rules of spec.json.
 
 Exit 0: equivalent. Exit 1: differences (each printed as a path). Exit 2: usage.
 
-Written in Python deliberately — the future port owns this tool, and it works
+Written in Python deliberately — the (now-complete) port owns this tool, and it works
 today against two Ruby runs (the self-test), later Ruby-vs-Python. Stdlib only.
 
 Rules (all data-driven from spec.json):
