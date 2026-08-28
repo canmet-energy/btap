@@ -119,11 +119,71 @@ class TestCosting(unittest.TestCase):
         report = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
         self.assertGreater(report.lighting["daylighting_sensor_cost"], 0)
 
-    @unittest.skip("Leg-A gate: needs the LIVE pinned oracle (BUNDLE_GEMFILE=legacy_pin/Gemfile, "
-                   "Ruby). Its Leg-C twin is test_oracle_goldens_lighting.py's "
-                   "lighting_costing['led_2020_total'] assertion (D-78)")
     def test_legacy_parity_led_2020(self):
-        self.fail("unreachable — see test_oracle_goldens_lighting.py")
+        """The Python Leg-A gate (enabled M8): Python lighting.cost vs the
+        LIVE pinned oracle — not the frozen golden. The oracle value comes
+        from a Ruby probe running the SAME OracleProbes recipe the Ruby
+        parity gate runs, under BUNDLE_GEMFILE=legacy_pin/Gemfile; the
+        tolerance is the Ruby gate's own (max of 0.1% and $0.05). Skips
+        where the oracle is not bundled — LEGACY_PIN_REQUIRED=1 (the same
+        flag the Ruby gates use) turns that skip into a failure, and CI's
+        parity job (the one place the oracle exists) sets it. Its Leg-C
+        twin is test_oracle_goldens_lighting.py's
+        lighting_costing['led_2020_total'] assertion (D-78)."""
+        import json
+        import os
+        import subprocess
+        import tempfile
+        from pathlib import Path
+
+        from btap.necb import lighting
+        from tests.support import REPO_ROOT
+
+        probe = (Path(__file__).parent / "cross_language"
+                 / "ruby_lighting_oracle_probe.rb")
+        env = dict(os.environ)
+        env.setdefault("BUNDLE_GEMFILE", str(REPO_ROOT / "legacy_pin"
+                                             / "Gemfile"))
+        # `bundle check` is the availability gate — the same one the Ruby
+        # e2e suite uses: an oracle that is pinned but not checked out fails
+        # it loudly ("not yet checked out"), and `bundle exec` would die in
+        # gem_prelude before the probe even ran.
+        check = subprocess.run(["bundle", "check"], capture_output=True,
+                               text=True, env=env, cwd=str(REPO_ROOT))
+        if check.returncode != 0:
+            msg = ("legacy oracle not bundled — run under "
+                   "BUNDLE_GEMFILE=legacy_pin/Gemfile after bundle install")
+            if os.environ.get("LEGACY_PIN_REQUIRED") == "1":
+                self.fail(msg)
+            self.skipTest(msg)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "oracle.json"
+            proc = subprocess.run(
+                ["bundle", "exec", "ruby", str(probe), str(out)],
+                capture_output=True, text=True, env=env,
+                cwd=str(REPO_ROOT))
+            if proc.returncode == 3:
+                msg = ("legacy oracle bundle present but the probe could not "
+                       "load it")
+                if os.environ.get("LEGACY_PIN_REQUIRED") == "1":
+                    self.fail(msg)
+                self.skipTest(msg)
+            self.assertEqual(0, proc.returncode,
+                             f"oracle probe failed: {proc.stderr[-2000:]}")
+            legacy_total = json.loads(
+                out.read_text(encoding="utf-8"))["led_2020_total"]
+
+        # NECB2020 template => the legacy coster forces LED
+        report = lighting.cost(costed_fixture_model(lights_type="LED"),
+                               vintage="2020", city=CITY,
+                               province_state=PROVINCE)
+        self.assertGreater(legacy_total, 0, "non-vacuous: the oracle costed")
+        self.assertAlmostEqual(
+            legacy_total, report.total,
+            delta=max(abs(legacy_total) * 0.001, 0.05),
+            msg="fixture-costing dollar parity vs the LIVE oracle "
+                "cost_audit_lighting (LED/NECB2020 path)")
 
 
 if __name__ == "__main__":

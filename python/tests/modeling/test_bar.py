@@ -101,10 +101,10 @@ class TestBar(unittest.TestCase):
         with self.assertRaises(TypeError):
             modeling.bar(space_type_ratios=RATIOS, storeyz=2)
 
-    # The Ruby test hard-fails (flunk) if the btap-necb gem goes missing rather
-    # than skipping — here the whole test is skipped until M5 lands the btap.necb
-    # port; unskipping it (and fixing the anticipated btap.necb spellings below)
-    # is part of that milestone.
+    # The Ruby test hard-fails (flunk) if the btap-necb gem goes missing
+    # rather than skipping; here btap.necb is a sibling subpackage of the
+    # same distribution, so the composition simply runs (it was skipped
+    # until M5 landed the necb port, and unskipped in that milestone).
     def test_full_family_composition_from_bar(self):
         import json
 

@@ -75,6 +75,12 @@ Building the installer yourself is covered in
 The tool is plain Ruby and runs anywhere OpenStudio 3.11 does. See
 [docs/DEVELOPERS.md](docs/DEVELOPERS.md) for a source checkout.
 
+There is also a **Python implementation** of the same tool (`pip install`
+from [python/](python/README.md) gives you the same `btap-compliance`
+command, engine included — no Ruby, no installer). It is verified equivalent
+to this one on every model in the test corpus, but the Ruby installer above
+remains the supported product for now.
+
 ---
 
 ## Running a check

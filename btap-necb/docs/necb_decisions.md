@@ -4387,4 +4387,9 @@ retire the compat branch — naturally paired with the pending pin bump).
   extended 2026-08-28 (M6: the umbrella pipeline, renderer, CLI, and the
   Leg-B cross-language corpus convergence); extended 2026-08-28 (M7:
   native py-tbd on the `tbd-3.5.2-compat` baseline, Option A — phylroy
-  chose the option, per Sol's review).
+  chose the option, per Sol's review); CLOSED 2026-08-28 (M8: the last
+  never-run gate — Python vs the LIVE oracle for lighting costing — wired
+  into the parity job, the rasterizer supplied and flagged in verify, and
+  the docs swept; the port is complete, with the parked list — the 3.6.x
+  TBD rebaseline, the pin bump, the installer switch — as future
+  adjudications).
