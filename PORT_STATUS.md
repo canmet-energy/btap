@@ -208,6 +208,25 @@ wall the btap fixture has (3.5.2 refuses; 3.6.0 partially uprates).
   requests thermal bridging, so that case, not a corpus re-run, is the M7
   evidence.
 
+**The M7 review (Sol, 2026-08-28) found six issues; all dispositioned in
+`dbcf74e`.** The one that mattered most existed identically in Ruby and was
+fixed RUBY-FIRST: TBD reports invalid input by LOGGING fatal/error and
+returning a PARTIAL result, and both languages' `apply` narrated that as
+'assemblies uprated' (reproduced both sides: invalid PSI set → status 5,
+30 surfaces returned, decision emitted). Both now check fatal/error after
+capturing logs and RAISE before any decision can be recorded, pinned by
+real-engine invalid-PSI tests on both sides. Also from the review: a broken
+py-tbd install (failed transitive import) now propagates instead of taking
+the benign 'not available' branch (Ruby's bare `rescue LoadError` had the
+same relabeling — fixed first, on `LoadError#path`); osut/oslg are pinned
+EXACTLY in the compat branch's metadata (pin `bfb23e68`) and asserted in
+the engine-identity test; engine operations run under a module lock
+(process-safe AND thread-safe); the assembled Leg-B test uses production
+`compare_file` so `strip_keys` applies; and the two-flags split
+(`BTAP_TBD_REQUIRED` = Python engine, `TBD_REQUIRED` = Ruby gem — the
+family's existing flag, not a new name) had already landed when CI caught
+the conflation on the first dispatch.
+
 **Parked deliberately:** the family-wide rebaseline onto TBD 3.6.x is its
 own future adjudication — bump the Ruby triplet first, re-run Leg A,
 re-export the goldens, retire the compat branch — and pairs naturally with
