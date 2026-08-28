@@ -223,15 +223,26 @@ hazards the next one inherits, and the working agreements. Read it before
 touching `python/`. Developer setup is in
 [docs/DEVELOPERS.md](docs/DEVELOPERS.md#the-python-port-python-d-79).
 
-M0–M6 are done (audit, simulation + the EnergyPlus provisioner, modeling,
-costing, the five necb rule domains, and the umbrella: pipeline, renderer,
-the `btap-compliance` console script, and the Leg-B corpus convergence —
-Ruby CLI vs Python CLI equivalent over the whole corpus at the `none`,
-`sizing` and `annual --quick` tiers). **M7 (the TBD bridge) and M8
-(closeout) remain.** Ruby is FROZEN except bugfixes while the port runs: it
-is the shipping product and the Leg-B baseline, so a behaviour change lands
-Ruby-first or not at all, and a Ruby defect found by porting is flagged and
-ported AS-IS rather than quietly fixed on one side.
+**The port is COMPLETE and merged (M0–M8, PRs #5–#12, 2026-08-28).** The
+whole surface is ported — audit, simulation + the EnergyPlus provisioner,
+modeling, costing, the five necb rule domains, the umbrella (pipeline,
+renderer, `btap-compliance` console script), and thermal bridging — and
+verified: Leg B holds Ruby-CLI-vs-Python-CLI equivalence over the whole
+corpus at the `none`, `sizing` and `annual --quick` tiers; Leg C closes
+against the oracle both frozen (the goldens) and LIVE (the parity job's
+lighting gate). The Python suite has ZERO unconditional skips — every skip
+names a dependency and a REQUIRED flag, and CI supplies each somewhere with
+its flag set.
+
+Two rules OUTLIVE the port. (1) Ruby remains the shipping product and the
+Leg-B baseline: a behaviour change lands Ruby-first or not at all, and a
+Ruby defect found on either side is fixed on BOTH or flagged, never
+silently on one. (2) **Thermal bridging is pinned to py-tbd's
+`tbd-3.5.2-compat` branch by commit SHA** — the revision verified against
+the frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle triplet. Never bump it to
+py-tbd main casually: main ports upstream 3.6.0, whose uprate physics
+differ (~43% on a wall); the family-wide 3.6.x rebaseline is a deliberate
+future event (see Open work).
 
 ## Open work
 
@@ -242,7 +253,13 @@ ported AS-IS rather than quietly fixed on one side.
 - **The fork is 2 commits ahead of the pin** (`rake legacy:whatsnew`): #2134 adds
   a NECB footprint aspect-ratio option touching `btap/geometry.rb`, and #2136
   changes the costing sheets and `necb_2011.rb`. Absorbing means **bumping the
-  pin and re-running the gates**, never copying code across.
+  pin and re-running the gates** — which since D-78/D-79 also means
+  re-exporting the Leg-C goldens — never copying code across.
+- **The TBD 3.6.x rebaseline** (pairs naturally with the pin bump): bump the
+  Ruby triplet (tbd/osut/topolys) first, re-run Leg A, re-export the
+  goldens, then retire py-tbd's `tbd-3.5.2-compat` branch and repoint the
+  Python `[tbd]` pin at main. One adjudicated event, never a casual
+  dependency upgrade — the two lines are ~43% apart on the same wall.
 - **The LLM proposed-building workflow** (geometry → loads → constructions →
   HVAC). The one real physics gap: the envelope domain cannot build an opaque
   construction from nothing — zero `DefaultConstructionSet` usage family-wide, and

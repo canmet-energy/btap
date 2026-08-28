@@ -1,8 +1,8 @@
 # Ruby → Python port: status and handoff
 
-**As of 2026-08-28.** Milestones M0–M8 are ALL done (M0–M7 merged; M8 on
-branch `python-m8-closeout`). **The port is COMPLETE.** The governing
-decision is **D-79** (`btap-necb/docs/necb_decisions.md`); the verification
+**As of 2026-08-28.** Milestones M0–M8 are ALL MERGED (PRs #5–#12; final
+merge `a9a59ed`). **The port is COMPLETE.** The governing decision is
+**D-79** (`btap-necb/docs/necb_decisions.md`); the verification
 architecture it plugs into is **D-78**. What remains is the PARKED list —
 deliberate future decisions, not port work.
 
