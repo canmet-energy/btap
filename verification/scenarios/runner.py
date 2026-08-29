@@ -297,6 +297,12 @@ def verify_baselines(scenario, manifest):
         elif sha256(path) != digest:
             problems.append(f"{scenario['id']}: baseline {name} does not "
                             "match its manifest sha256 — hand-edited?")
+    if base.is_dir():
+        extras = {p.name for p in base.iterdir() if p.is_file()} - set(declared)
+        if extras:
+            problems.append(f"{scenario['id']}: undeclared file(s) in the "
+                            f"baseline dir: {sorted(extras)} — frozen "
+                            "directories are exact sets, like live run dirs")
     return problems
 
 

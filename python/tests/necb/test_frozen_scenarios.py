@@ -63,6 +63,24 @@ class TestFrozenScenarios(unittest.TestCase):
                          "verification/spec.json changed after the freeze — "
                          "an adjudicated re-freeze is required, never a "
                          "silent rules change under frozen baselines")
+        # The interpreter machinery is pinned (review High): the code that
+        # executes, normalizes, and compares frozen baselines must be the
+        # code that froze them — a change here is a behaviour change and
+        # demands an adjudicated re-freeze, never a silent reinterpretation.
+        machinery = {
+            "freezer_sha256": SCENARIOS_DIR / "freeze.py",
+            "defs_sha256": SCENARIOS_DIR / "scenario_defs.py",
+            "runner_sha256": SCENARIOS_DIR / "runner.py",
+            "gate_sha256": Path(__file__),
+        }
+        for key, path in machinery.items():
+            self.assertEqual(
+                m["provenance"].get(key), self.runner.sha256(path),
+                f"{path.name} changed after the freeze ({key}) — the frozen "
+                "baselines' INTERPRETER moved under them; re-run "
+                "verification/scenarios/freeze.py (adjudicated) so the "
+                "machinery and the baselines are pinned together")
+
         ids = [s["id"] for s in m["scenarios"]]
         self.assertEqual(len(ids), len(set(ids)), "duplicate scenario ids")
         by_lane = {}
@@ -75,19 +93,35 @@ class TestFrozenScenarios(unittest.TestCase):
             problems.extend(self.runner.verify_baselines(s, m))
         self.assertEqual([], problems, "\n".join(problems))
         import subprocess
-        ancestor = subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
-             m["provenance"]["commit"], "HEAD"],
-            capture_output=True, check=False)
-        # 0 = ancestor; 1 = DEFINITIVELY not an ancestor (fail); 128 = git
-        # cannot see the object — CI shallow clones (fetch-depth 1) cannot
-        # prove ancestry either way, and an indeterminate answer must not
-        # fail the gate the way a definitive "no" does.
-        self.assertNotEqual(1, ancestor.returncode,
-                            f"manifest provenance commit "
-                            f"{m['provenance']['commit'][:12]} is NOT an "
-                            "ancestor of HEAD — these baselines came from "
-                            "another line of history")
+        commit = m["provenance"]["commit"]
+
+        def is_ancestor():
+            return subprocess.run(
+                ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
+                 commit, "HEAD"], capture_output=True, check=False).returncode
+
+        rc = is_ancestor()
+        if rc == 128:
+            # Shallow CI clone: the object is unreachable. FETCH it and the
+            # local history so ancestry is PROVEN, not shrugged at (review
+            # Medium: the common CI path must not routinely skip this).
+            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
+                            "--unshallow"], capture_output=True, check=False)
+            subprocess.run(["git", "-C", str(REPO_ROOT), "fetch", "--quiet",
+                            "origin", commit], capture_output=True,
+                           check=False)
+            rc = is_ancestor()
+        if rc == 1:
+            self.fail(f"manifest provenance commit {commit[:12]} is NOT an "
+                      "ancestor of HEAD — these baselines came from another "
+                      "line of history")
+        if rc != 0:
+            msg = (f"cannot PROVE provenance commit {commit[:12]} is an "
+                   "ancestor of HEAD even after fetching (git exit "
+                   f"{rc}) — unknown must fail in required mode")
+            if REQUIRED:
+                self.fail(msg)
+            self.skipTest(msg)
 
     def test_lane_scenarios(self):
         """Every scenario in the selected lane(s), and EXACTLY that many."""

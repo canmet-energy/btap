@@ -31,6 +31,7 @@ EXTERNAL attestation (PR body + D-82) — never written here.
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -139,18 +140,31 @@ def ruby_api_seal(sc, ctx_root, py_run, spec, cr):
 
 
 def tb_non_vacuity(run_dir, side):
+    """STRUCTURED assertions (post-merge review: substring checks could be
+    satisfied by coverage text alone) — the decision-level entry with a
+    positive derated count, the 3.1.1.7 article on it, and the specific
+    infeasible-uprate warning, on BOTH sealed sides."""
     problems = []
     audit = json.loads((run_dir / "audit.json").read_text(encoding="utf-8"))
     entries = audit if isinstance(audit, list) else audit.get("entries", [])
-    text = json.dumps(audit)
-    if not any(e.get("step") == "thermal_bridging" for e in entries):
-        problems.append(f"TB seal ({side}): no thermal_bridging decision")
-    if "3.1.1.7" not in text:
-        problems.append(f"TB seal ({side}): 3.1.1.7 never cited")
-    if "derat" not in text:
-        problems.append(f"TB seal ({side}): no derated surface evidence")
-    if "uprate" not in text:
-        problems.append(f"TB seal ({side}): no uprate/infeasible-uprate trace")
+    tb = [e for e in entries if e.get("step") == "thermal_bridging"]
+    decisions = [e for e in tb if e.get("level") == "decision"]
+    if not decisions:
+        problems.append(f"TB seal ({side}): no DECISION-level "
+                        "thermal_bridging entry")
+    else:
+        d = decisions[0]
+        derated = (d.get("inputs") or {}).get("surfaces_derated")
+        if not (isinstance(derated, (int, float)) and derated > 0):
+            problems.append(f"TB seal ({side}): surfaces_derated is "
+                            f"{derated!r}, expected > 0")
+        if "3.1.1.7" not in str(d.get("article", "")):
+            problems.append(f"TB seal ({side}): the decision's article "
+                            "does not cite 3.1.1.7")
+    if not any(e.get("level") == "warning"
+               and "Unable to uprate" in str(e.get("action", ""))
+               for e in tb):
+        problems.append(f"TB seal ({side}): no 'Unable to uprate' warning")
     return problems
 
 
@@ -257,8 +271,15 @@ def main():
         "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
         "provenance": {
             "commit": git("rev-parse", "HEAD"), "dirty": dirty,
+            # The INTERPRETER MACHINERY is pinned too (post-merge review
+            # High): a change to what executes/normalizes/compares frozen
+            # baselines is a behaviour change and demands a re-freeze.
             "freezer_sha256": runner.sha256(__file__),
             "defs_sha256": runner.sha256(HERE / "scenario_defs.py"),
+            "runner_sha256": runner.sha256(HERE / "runner.py"),
+            "gate_sha256": runner.sha256(
+                runner.PYTHON_ROOT / "tests" / "necb"
+                / "test_frozen_scenarios.py"),
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
@@ -280,11 +301,29 @@ def main():
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
 
-    # atomic promote
-    if runner.BASELINES.exists():
-        shutil.rmtree(runner.BASELINES)
-    shutil.move(str(baselines), str(runner.BASELINES))
-    shutil.move(str(staging / "manifest.json"), str(runner.MANIFEST))
+    # atomic promote via backup-swap (the export_goldens pattern): the
+    # previous valid baselines must survive a failed promotion.
+    backup_b = Path(str(runner.BASELINES) + f".backup.{os.getpid()}")
+    backup_m = Path(str(runner.MANIFEST) + f".backup.{os.getpid()}")
+    moved_b = moved_m = False
+    try:
+        if runner.BASELINES.exists():
+            shutil.move(str(runner.BASELINES), str(backup_b))
+            moved_b = True
+        if runner.MANIFEST.exists():
+            shutil.move(str(runner.MANIFEST), str(backup_m))
+            moved_m = True
+        shutil.move(str(baselines), str(runner.BASELINES))
+        shutil.move(str(staging / "manifest.json"), str(runner.MANIFEST))
+    except BaseException:
+        if moved_b and not runner.BASELINES.exists():
+            shutil.move(str(backup_b), str(runner.BASELINES))
+        if moved_m and not runner.MANIFEST.exists():
+            shutil.move(str(backup_m), str(runner.MANIFEST))
+        raise
+    for backup in (backup_b, backup_m):
+        if backup.exists():
+            (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
     print(f"frozen {len(frozen)} scenarios "
           f"({counts}), seal {seal_tally}; manifest written")
 
