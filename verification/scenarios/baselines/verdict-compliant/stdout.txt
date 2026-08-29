@@ -1,0 +1,14 @@
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed              2,725            3.4        800.0
+Reference             3,025            3.8        800.0
+Margin                300.0   9.9% under target   Tier 1
+Unmet hours  heating 0.8 / 24.8 h    cooling 13.5 / 0.0 h
+------------------------------------------------------------------
+
+  VERDICT: COMPLIANT   (NECB 2020, Division B, Article 8.4.1.2)
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json

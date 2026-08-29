@@ -1,0 +1,3 @@
+ERROR: the PROPOSED (input) model failed its sizing simulation — the input file is not simulate-able as given. BTAP_ENERGYPLUS='/nonexistent-energyplus' is neither an energyplus binary nor an EnergyPlus install directory containing one. Point it at the executable (or its directory), or unset it to use the managed engine.
+
+A partial audit trail was written to <RUN_DIR>/audit.txt

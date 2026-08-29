@@ -1,0 +1,1433 @@
+{
+ "version": 1,
+ "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
+ "provenance": {
+  "commit": "49902f3ffab4fd1ee50f1dcc55c26ab67b89a9bc",
+  "dirty": false,
+  "freezer_sha256": "3392815f7d1b40ca28a1427a67554f9c2f5e360e92e25f93a7651859d024e4f5",
+  "defs_sha256": "b90255b23accbb29e52ed769e6425effe3dc15835ad021f0ca24e509c0842ca0",
+  "openstudio_cli": "3.11.0+241b8abb4d",
+  "ruby": "ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux]",
+  "seal": {
+   "ruby": 29,
+   "ruby-api": 2,
+   "python-only": 4
+  },
+  "attestation_note": "the validating CI run id is EXTERNAL evidence (PR body + D-82), never recorded here \u2014 writing it back would invalidate the very run as head evidence"
+ },
+ "corpus": {
+  "generator": "python",
+  "sample_manifest_sha256": "951f023ef88a5e53a53b655317e2d44344aeeafe30e7f68fd0dd33a4b9074ac8"
+ },
+ "counts": {
+  "python": 30,
+  "verify": 3,
+  "parity": 2
+ },
+ "scenarios": [
+  {
+   "id": "corpus-none-01-baseboard-gas",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/01-baseboard-gas.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
+   }
+  },
+  {
+   "id": "corpus-none-02-psz-gas-dx",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/02-psz-gas-dx.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "08b8765dd75114361a87bcfb809b9c67beb7dd7aa6899ea30f8bca56438994ae",
+    "audit.txt": "e950a0467baece934cc2fe0871e480975958c9eb9eac895747b09a456b1ed3ea",
+    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "08dc6aa41063d4c1e26e13a0161a6f3c5716135bbb17980b81970a49f9263889"
+   }
+  },
+  {
+   "id": "corpus-none-03-vav-reheat-chiller",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/03-vav-reheat-chiller.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "748ff42dcc878d10221bb5135d64c5753a03deee0e8ff2eab9fda9af8c5af782",
+    "audit.txt": "39b1179ff64774877b32612bbfe2a487b047cb847f43ff22ee2199626951c247",
+    "report.json": "a8e09eda6b7384fc0ca9455804c0014e2890213c04fd57484a36219ad54a6fd2",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "da7cc2a9b5cf66a1b7e11940f29cea6de93d4e0df67acf6ec55598dde68154be"
+   }
+  },
+  {
+   "id": "corpus-none-04-fancoil-chiller",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/04-fancoil-chiller.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "694d4541b289f6f5c6ff30fd492f5aa691ef134d908f22ef3a763f4e3300bca4",
+    "audit.txt": "dcbfc9171056950218e328ed5dbfc8cbd13068ea0ae7b19d3644fbd50816106d",
+    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "855cca0335e684397194a0644998fc4ade3da1b6e8f3471a3d749a4ea069a6cb"
+   }
+  },
+  {
+   "id": "corpus-none-05-ptac-electric",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/05-ptac-electric.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "bec78604df9ac063b98766f74cb52971ea303cd2247155e710a7060327a364b0",
+    "audit.txt": "6b5bc84cb59a91625fafbb09cc9d2c22ead9968ed86cedeedbb63809b8781dd8",
+    "report.json": "96d308e2cf9a10a972cc829f8bf3436bcf0df0357e9dca726249535cb8767718",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "cede0a4576b0db8f05ae05b541caf5620111e32307771fc11d3a1ebbbb61fc1f"
+   }
+  },
+  {
+   "id": "corpus-none-06-unit-heaters-gas",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/06-unit-heaters-gas.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "dc86b4f31e47dd3a1653bd1fa904245166420818cb289f82bbce432b12855f4d",
+    "audit.txt": "87d39f3e8e5ea4762d3a5ac7efe90121fff0539e51e930f33a2db539b436ea9d",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "a3ea88ad758dc3c0cecc4e93e7d7a7b2d113997ca5e125da2ef4737891ccde4a"
+   }
+  },
+  {
+   "id": "corpus-none-07-furnace-forced-air",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/07-furnace-forced-air.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "d0a7f20a6772b6e29d90ef4af6f1d16ec3e90947cc30a64e04ac24e45a4552ee",
+    "audit.txt": "22d2d8959c4a35d0df631ba0e3b385ab12ee0371f539af8dccbb0df3598fffb7",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "a3ea88ad758dc3c0cecc4e93e7d7a7b2d113997ca5e125da2ef4737891ccde4a"
+   }
+  },
+  {
+   "id": "corpus-none-08-vrf",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/08-vrf.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "4b384a1710e7625d19f197b34388a21ecf06bd4d24637ebd9bf234190a9f8c69",
+    "audit.txt": "4c88a8c2245346dd0734a947661cef89c8e3826462bad9057a0373c2b50274e8",
+    "report.json": "992307b506442215c96fdd2d70eab50775a0fd5cd4313c0aa756c18648a5aa03",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "a5bd92b5d4fe1726aba857e395b7a00eb6a28a6d173699768dc7aae90215eaa0"
+   }
+  },
+  {
+   "id": "corpus-none-09-water-source-hp",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/09-water-source-hp.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "47d7338d9cd949fac5cdd6908fe4b31022aca6202f6006dcdce3dc00c69a2956",
+    "audit.txt": "69a2a4adfbab65450254722764dabb0aff4131fa7cc18d31811241dc5f4fcf2e",
+    "report.json": "96d308e2cf9a10a972cc829f8bf3436bcf0df0357e9dca726249535cb8767718",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "33ae32e32df6e9023ffc3591f891c5af3905b44f6b71889958ffcccdf9dcd0b7"
+   }
+  },
+  {
+   "id": "corpus-none-10-ashp-pthp",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/10-ashp-pthp.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "a8dd304098ba5370f0fd189cebb97089240253faac1a2ba4338daa54f34fad16",
+    "audit.txt": "b04f60472db24225136df6fa40435a28f6d2621cb6f2df3f18ac4220774899ea",
+    "report.json": "cf865a6ae54247a201d3a439978811a10f8b8559ec36cf961e9ca4623373b4f0",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "bfdc5db5c9470fadbaecdb3d3cb596321b57affd8850e4c7eabb250ee0afd547"
+   }
+  },
+  {
+   "id": "corpus-none-11-staged-boilers-gas-lead",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/11-staged-boilers-gas-lead.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "72cc43c1e35a84fbed8ea389803137e001559dc560c4ebd5260f6ae2cdcd1d6d",
+    "audit.txt": "a71d4369e7cbd2743e20884c11c400079aee78e10eda0a79e5742b30749688fe",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
+   }
+  },
+  {
+   "id": "corpus-none-12-staged-boilers-electric-lead",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/12-staged-boilers-electric-lead.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "2289a7ad4cb2af109d2ac466de51556b78e8c313cc52ac1f03a399615c42cb96",
+    "audit.txt": "a000bc4400d1e1d370b8add53d5ad84a2e9364ffdb85111a3354a51ca8e8ff81",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
+   }
+  },
+  {
+   "id": "corpus-none-13-district-heating",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/13-district-heating.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "6b3e05376e09abb1d698fb75ccef4775b18bf29797def0f54ceaa5cf5edb5dae",
+    "audit.txt": "8207bfd15e576fa0c6cf50f6980d490689d2fd3f6861d8b476ee5530495e99fa",
+    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "e0e5b8b76a3da7671c4ced998a57d38dd21b9553ed05aaf110dad0789c6d1637"
+   }
+  },
+  {
+   "id": "corpus-none-14-general-2storey",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/14-general-2storey.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
+   }
+  },
+  {
+   "id": "corpus-none-15-general-3storey",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/15-general-3storey.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
+    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
+   }
+  },
+  {
+   "id": "corpus-none-16-ashp-electric-supp-hw-baseboard",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/16-ashp-electric-supp-hw-baseboard.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "fee73326ed1bb0f19753287c4e180b626bc40cebc194da3c9bbf68269aa90b1c",
+    "audit.txt": "fd43d10a277fad74d1cb48a701bc96fe9bbf93869502d3d3e39d8255c42ce155",
+    "report.json": "767cb78d2ab36a8aacf3170d32d7f37a8a7e87fb1f7a9c65d126d7f0a2de75e9",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "81c7543c7ca3e971e4cbdc891fed18387cdec4c5e946b00bbacd4fa5ac901aa7"
+   }
+  },
+  {
+   "id": "corpus-none-5zone-onramp",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "568c0e2b69f089b863e3024707e421ae73c4150f07238aac3e3ac6769004c1d8",
+    "audit.txt": "2b2cc8b83b845df599e0f4699ab288bd216e135817fb7fc0eb967ef34e3b02c3",
+    "report.json": "6484a7a8fc41e76f7cdacbabccf101193f2bfd4a05a3b6e6f9d570da9ebb1433",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "b69339ec524ae595745db9bfcfacff50cb163c040dfdf2b935231c4bc5291cb7"
+   }
+  },
+  {
+   "id": "corpus-sizing-01-baseboard-gas",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/01-baseboard-gas.osm",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "9d1e3e3de4fe3f0ceb5c36f4a37e054585233e722df5429f5abf73b9f44cb5ee",
+    "audit.txt": "528f7d72a81acfc949edf59ee513270e8aade17d3e8618339ae10d8c2ab91337",
+    "report.json": "8e39fd908400858527e144680f33a1e9669da238659200d4e884e3618471b585",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "ec33c566e936b99f4fbda59253ec16f069eda9d81c8ab6e2b16a32d297cd09d3"
+   }
+  },
+  {
+   "id": "corpus-sizing-02-psz-gas-dx",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/02-psz-gas-dx.osm",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "a3ed9b9c135327c6ca7fdbcd05f46007cbbe413e40738db907b1dd3cb5df222b",
+    "audit.txt": "6a1d245f9563b0a4824e6db768558a34e4eb1a421acaa9c2719bef240f9752f3",
+    "report.json": "86fdd4e5c654dee1cd82d97eb281c48ddbb657527c48e0a1393bdbf45ff25f2f",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "82bfaaabd1e6f0bb899a2a3a526a68a03ac896f82b8256eaef4c94e114994628"
+   }
+  },
+  {
+   "id": "corpus-sizing-09-water-source-hp",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/09-water-source-hp.osm",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "ec60f80b283e1a3d378f65956aa6a27272e5b7df457ad7742e92d4d62b44fdaf",
+    "audit.txt": "e6eed53558c1ddf6f070896f98ed592188b0ad29769f5bb31cf6d098b92b6c30",
+    "report.json": "b89a9ad2a9072fcffa0d80750111228b6136f16dd7b76330ec79372a1ece8aac",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "6ddb2f7f1c4b59d5f70f84dd6f46b7e4ff001a0526a011b889c90c0b284b4678"
+   }
+  },
+  {
+   "id": "corpus-annual-01-baseboard-gas",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "argv": [
+    "<CORPUS>/01-baseboard-gas.osm",
+    "--simulate",
+    "annual",
+    "--quick",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "68a86dd862eb2c27be9a052ff79619cdc9ddd995e0ba38b28751931f200558b2",
+    "audit.txt": "6f8621a8d563691efa90f9f9e33577ab4b447b2c45008bcc6a0efbc0172232b1",
+    "report.json": "def2773cb2a06090d051a359c6c1cb99448aa0e7137a52d341f965210bbfe4ca",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "27eb367911f34e0bf1e87f4034bd9f22741639475d20583c910b7c9845747407"
+   }
+  },
+  {
+   "id": "corpus-annual-02-psz-gas-dx",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "argv": [
+    "<CORPUS>/02-psz-gas-dx.osm",
+    "--simulate",
+    "annual",
+    "--quick",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.json": "0da4aee9153f10203dd9619ede0a3aa77f90bbd532a786c9c7d681775fdc0e2e",
+    "audit.txt": "7237b6971573df4cf71272d72bd6c7f6ff62f69cecfe21c68579b1f9d70e8c8a",
+    "report.json": "b42b61f0bb0654134a1e30c54adedbce197bb2689c81a299ba5c45d845ea1ffa",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "513bd21a870184060c6ba05d32c02b29828b1d4b0548caea2689299df042c5f8"
+   }
+  },
+  {
+   "id": "api-thermal-bridging",
+   "lane": "python",
+   "kind": "api",
+   "replaces": [
+    "B9"
+   ],
+   "api_call": {
+    "vintage": "2020",
+    "simulate": "none",
+    "hdd": 3890,
+    "building": {
+     "storeys": 1
+    },
+    "thermal_bridging": "efficient (BETBG)"
+   },
+   "env": {},
+   "expect_exit": null,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "ruby-api:ruby_tbd_compliance.rb",
+   "baseline_sha256": {
+    "audit.json": "8bb16a1ec8465d2c4d3a8c2207ec30e5b7a549ef17586ff8ff92c72f2bcf0e86",
+    "audit.txt": "274d4a782633fff9fd7c5d072d9d0149e1a3f054b961235cb171a94b2b847847",
+    "report.json": "4139c75a75fb259ccd928643834894cb94b170ad45ec9d4c397e7a49be44a46b"
+   }
+  },
+  {
+   "id": "audit-unit",
+   "lane": "python",
+   "kind": "audit-unit",
+   "replaces": [
+    "B5",
+    "B6"
+   ],
+   "env": {},
+   "expect_exit": null,
+   "files": [
+    "audit.json"
+   ],
+   "text_files": {
+    "audit.txt": "exact"
+   },
+   "streams": {},
+   "seal": "ruby-api:audit ruby_reference.rb",
+   "baseline_sha256": {
+    "audit.json": "0c3b67d73c551a4c3bbce95678baaed5619f0783179443ee274843621db8fb6e",
+    "audit.txt": "adcdc3643964de8b6a3f770fd907957858858e28e154639b9af4eb42b617e7c0"
+   }
+  },
+  {
+   "id": "usage-unknown-flag",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "--nope"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "e7e70af7efdf7e2ce42029e6023b45adffa246a706290c7a01632642c40b04d5",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "usage-no-model",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "--simulate",
+    "none"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "36ce3dad6174dad391f51b74e44a8926a578550c969d7d3418a24d33db386c07",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "usage-missing-model-file",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<ROOT>/nonexistent-model.osm",
+    "--simulate",
+    "none"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "7a8ded9f19fe686f89f935ce945f1bb1ffdeff68c5d00a2ebad9ee1747a76655",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "usage-missing-epw",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "sizing",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "4e21d320d0c8b0b82fd8ef269706918e9472d3fadf9911d49dddc26de30ae001",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "usage-missing-ddy",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<LONE_EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "fa1edfe7cf7f0bfded5f597951f22c47edc80975404068cc0d175e6063f4b234",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "usage-unknown-city",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "none",
+    "--city",
+    "atlantis",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2"
+   ],
+   "env": {},
+   "expect_exit": 2,
+   "files": [],
+   "text_files": {},
+   "no_run_dir": true,
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "stderr.txt": "f8cd8def3446546134699c4bc0c598450c2873b8190d0f458d23c193aa0f1437",
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  },
+  {
+   "id": "preflight-untagged-model",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 3,
+   "files": [],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "expected_run_files": [
+    "audit.json",
+    "audit.txt",
+    "report.json"
+   ],
+   "byte_asserts": [
+    {
+     "file": "report.json",
+     "equals": "{}"
+    }
+   ],
+   "fragments": {
+    "stderr": {
+     "required": [
+      "REJECTED before any simulation",
+      "A partial audit trail was written to"
+     ],
+     "forbidden": []
+    },
+    "audit.txt": {
+     "required": [
+      "ABORTED"
+     ],
+     "forbidden": []
+    }
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "ruby",
+   "baseline_sha256": {
+    "audit.txt": "a18dc4be15e636f1c6709e8e8df05a87cef2261ce26bb903efad8568070eb2de",
+    "stderr.txt": "b3e180ddad79ce620d5d856fd7295ec863c46561a8fa49c3c1f4621248771ee2",
+    "stdout.txt": "7d42964aa4b6f46855636c46df90a75fff601e212928ee989b9ba971a4e3245e"
+   }
+  },
+  {
+   "id": "simulation-bad-engine",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {
+    "BTAP_ENERGYPLUS": "/nonexistent-energyplus"
+   },
+   "expect_exit": 4,
+   "files": [],
+   "text_files": {},
+   "expected_run_files": [
+    "audit.json",
+    "audit.txt",
+    "report.json"
+   ],
+   "fragments": {
+    "stderr": {
+     "required": [
+      "EnergyPlus"
+     ],
+     "forbidden": []
+    }
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:the Ruby CLI runs EnergyPlus through the openstudio CLI and does not honour BTAP_ENERGYPLUS, so no mirrored argv reproduces this trigger",
+   "baseline_sha256": {
+    "stderr.txt": "0c9341b306e3fed904fb5149be270620362bd1712447bd783bc10f25c2ea4918",
+    "stdout.txt": "b5bb490bcfb168db785c7277bd288d3caf1bf6480d83374c33700b6ae1ec2569"
+   }
+  },
+  {
+   "id": "internal-dead-remote",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<SEED>",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--backend",
+    "remote",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--space-type",
+    "Space Function/Office enclosed > 25 m2",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {
+    "HBIX_SIM_ENDPOINT": "http://127.0.0.1:1",
+    "HBIX_API_KEY": "scenario-dummy"
+   },
+   "expect_exit": 5,
+   "timeout_s": 30,
+   "files": [],
+   "text_files": {},
+   "fragments": {
+    "stderr": {
+     "required": [
+      "ERROR:"
+     ],
+     "forbidden": [
+      "EnergyPlus"
+     ]
+    }
+   },
+   "streams": {
+    "stdout": "fragments",
+    "stderr": "fragments"
+   },
+   "seal": "python-only:the Ruby remote backend's failure text and retry behaviour are environment-shaped; the exit-CODE classification parity is pinned by both exit maps being byte-comparable",
+   "baseline_sha256": {}
+  },
+  {
+   "id": "verdict-compliant",
+   "lane": "python",
+   "kind": "verdict-unit",
+   "replaces": [],
+   "compliant": true,
+   "env": {},
+   "expect_exit": 0,
+   "files": [],
+   "text_files": {},
+   "streams": {
+    "stdout": "exact"
+   },
+   "seal": "python-only:synthetic result construction is implementation-internal; rendering equivalence was held by Leg B at the freeze commit",
+   "baseline_sha256": {
+    "stdout.txt": "ac439367dafd02ea94474f5d6d405119aa4c6b202cb7accd2d76489a6b0c3e25"
+   }
+  },
+  {
+   "id": "verdict-not-compliant",
+   "lane": "python",
+   "kind": "verdict-unit",
+   "replaces": [],
+   "compliant": false,
+   "env": {},
+   "expect_exit": 1,
+   "files": [],
+   "text_files": {},
+   "streams": {
+    "stdout": "exact"
+   },
+   "seal": "python-only:synthetic result construction is implementation-internal; rendering equivalence was held by Leg B at the freeze commit",
+   "baseline_sha256": {
+    "stdout.txt": "1e410c2429769eb5c81435dd2369353bdf52d392b311453fdda7a03d30b4a6b6"
+   }
+  }
+ ],
+ "uncovered": [
+  {
+   "branch": "8.4.1.2.(5) capacity-iteration FAILURE path",
+   "why": "nothing of it is frozen: the failure sub-branches (failed bump, stall detection, post-bump nonconvergence, cap exhaustion) AND the zero-iteration warning all require a real annual run engineered to fail unmet hours; no CLI flag exposes max_capacity_iterations",
+   "witness": "the converged/empty path only \u2014 the annual scenarios freeze capacity_iterations: []; the failure branches remain covered ONLY by existing unit tests",
+   "option": "a future API-level scenario (parity lane) is a named OPTION, not a witness; nothing is frozen unless it appears in this manifest"
+  },
+  {
+   "branch": "full-year end-to-end determination (exits 0/1 through a real annual run)",
+   "why": "a 40-90 minute scenario; live Leg B's annual tier only ever ran --quick (exit 6), so this matches Leg B's own scope",
+   "witness": "the verdict-unit scenarios freeze both determination renderings and exit codes at unit level",
+   "option": "a dispatch-only full-year scenario remains possible if a later phase demands it"
+  }
+ ]
+}

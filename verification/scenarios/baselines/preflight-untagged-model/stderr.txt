@@ -1,0 +1,11 @@
+
+ERROR: the model was REJECTED before any simulation ran.
+
+pre-flight FAILED: 1 space type(s) do not resolve against the NECB 2020 space-type catalog, so the reference building cannot be generated correctly (unmatched types silently keep the proposed's lighting/loads, waiving the allowances):
+  'ASHRAE 189.1-2009 ClimateZone 4-8 SmallOffice' [nil, nil] (5 space(s)) — untagged: run the loads on-ramp (necb_loads/assign_space_types) or set standardsBuildingType + standardsSpaceType to NECB catalog names
+
+Fix: tag each space type with standardsBuildingType + standardsSpaceType
+from the NECB catalog, or re-run with the on-ramp, e.g.
+  --space-type "Space Function/Office enclosed > 25 m2"
+
+A partial audit trail was written to <RUN_DIR>/audit.txt

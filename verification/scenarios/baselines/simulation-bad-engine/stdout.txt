@@ -1,0 +1,4 @@
+[utilities.idf.WorkspaceObject] <0> Object of type 'OS:StandardsInformation:Material', points to an object named {c153e719-1dbd-4eeb-976d-73d92bfd184f} from field 1, but that object cannot be located.
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
+[openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
