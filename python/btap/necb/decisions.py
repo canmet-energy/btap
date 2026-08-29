@@ -13,8 +13,10 @@ Entry: {'id', 'title', 'kind', 'summary', 'articles'}
         'data'            — manifest / vendored-data / verification only
         'process'         — how the project works, not what the code does
 
-The Ruby gem's test_decisions_registry.rb enforces both drift directions;
-this port consumes the same vendored decisions.json.
+This package's data/decisions.json is the CANONICAL registry since R3
+(D-81); the Ruby gem's copy is generated from it. tests/necb/test_decisions_registry.py
+enforces the citation invariants on this side; the Ruby gem's
+test_decisions_registry.rb keeps enforcing them there until R6.
 """
 
 from __future__ import annotations

@@ -96,9 +96,9 @@ ALLOWLIST = {
     "python/scripts/sync_decisions_registry.py": {
         "refs": ["btap-necb"],
         "retires": "R6",
-        "why": ("copies the AUTHORITATIVE Ruby decisions registry into the "
-                "package; at R6 the Python copy becomes authoritative and the "
-                "script (and its gate) go with the gems"),
+        "why": ("GENERATES the Ruby gem's copy of the canonical Python "
+                "registry (direction reversed at R3, D-81); the write "
+                "target and the script retire with the gem tree at R6"),
     },
     "python/scripts/simulate_all_systems.py": {
         "refs": ["btap-modeling", "btap-necb", "btap-audit"],
@@ -133,9 +133,10 @@ ALLOWLIST = {
     "python/tests/necb/test_decisions_registry_sync.py": {
         "refs": ["btap-necb"],
         "retires": "R6",
-        "why": ("asserts the packaged decisions.json is byte-identical to the "
-                "Ruby registry that owns it — the drift gate that caught D-79; "
-                "retires with the registry's Ruby authorship"),
+        "why": ("asserts the generated Ruby copy is byte-identical to the "
+                "canonical Python registry and that the doc under "
+                "btap-necb/docs mirrors it; both references die when the "
+                "gem tree and the doc move at R6"),
     },
     "python/tests/test_inventory_validation.py": {
         "refs": ["verification/"],

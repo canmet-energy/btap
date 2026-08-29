@@ -6,6 +6,10 @@
 # without scrolling past D-60. The block between the BEGIN/END markers is
 # owned by this script; test_decisions_registry.rb fails if it drifts.
 #
+# Reads the GENERATED Ruby copy of the canonical Python registry (R3, D-81);
+# byte identity is CI-enforced on every PR, so these are the canonical bytes.
+# Do not repoint this at the Python file — the generator moves with the doc at R6.
+#
 #   ruby scripts/generate_decisions_toc.rb          # rewrite in place
 #   ruby scripts/generate_decisions_toc.rb --check  # exit 1 on drift (no write)
 
