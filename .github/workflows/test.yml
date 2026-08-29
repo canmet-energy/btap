@@ -138,6 +138,16 @@ jobs:
           # pytest run; missing baselines are a FAILURE, never a skip.
           BTAP_SCENARIOS_REQUIRED: '1'
         run: pytest -n auto -q tests/
+      # D-82: the dormant Leg-B test files must keep IMPORTING (an
+      # import/collection canary only — behavioral rot until R6 deletion
+      # is accepted and adjudicated in D-82; BTAP_LEGB=1 reactivates).
+      - name: Dormant Leg-B files still collect (import canary)
+        working-directory: python
+        run: |
+          pytest -q --collect-only -p no:cacheprovider \
+            tests/audit/test_cross_language.py \
+            tests/simulation/test_local_run.py \
+            tests/necb/test_envelope_thermal_bridging.py > /dev/null
       # Distribution integrity. The suites above run against the CHECKOUT,
       # where every data file exists because the repo exists; a wheel is a
       # different artifact. This builds one, installs it into a clean venv,
@@ -308,9 +318,9 @@ jobs:
       # 3-model subset through real EnergyPlus on BOTH backends. The annual
       # --quick tier lives in the dispatch-only parity job (it is the
       # expensive one, like everything else there).
-      # D-80 R4 PR-1 COEXISTENCE: the frozen verify-lane scenarios run
-      # ALONGSIDE the live Leg-B matrix below; the switch (removing the
-      # matrix) is PR-2, after this suite proves itself on a real run.
+      # D-80 R4 (D-82): the frozen verify-lane scenarios REPLACED the live
+      # Leg-B generator-CLI matrix here — the drivers are dormant
+      # (BTAP_LEGB=1 reactivates for archaeology), deleted at R6.
       - name: Frozen scenarios (verify lane)
         working-directory: python
         run: |
@@ -318,16 +328,6 @@ jobs:
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 \
             .ci-venv/bin/pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
-      - name: Leg-B / D-80 generator-CLI matrix (all four cells, none + sizing)
-        run: |
-          # The 2x2 (D-80 R2): sample generator x compliance CLI. Subsumes
-          # the former shared-corpus CLI-parity step — CLI parity on each
-          # corpus AND generator equivalence per CLI, at both tiers.
-          PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            bash verification/matrix.sh /tmp/matrix-none
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            TIER=sizing bash verification/matrix.sh /tmp/matrix-sizing
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
@@ -396,38 +396,6 @@ jobs:
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
           BTAP_PYTHON="$PWD/python/.parity-venv/bin/python" \
             bash verification/live_leg_c.sh /tmp/live-leg-c
-      # Leg-B at the ANNUAL tier (M6): --simulate annual --quick on two
-      # models, Ruby CLI vs Python CLI, every pair diffed. The full
-      # determination arithmetic — unmet hours, the 8.4.1.2.(2)-(4) verdict
-      # entries, the tier — flows through both languages and must be
-      # equivalent. It lives here (dispatch-only) because each side runs four
-      # EnergyPlus simulations per model; the none+sizing tiers run on every
-      # main build in verify. Uses the PLAIN ruby CLI (not the pin bundle) —
-      # BUNDLE_GEMFILE is scoped to the oracle steps above.
-      # D-80 R4 PR-1 COEXISTENCE: the frozen annual scenarios run beside
-      # the live annual Leg-B gate below until the PR-2 switch.
-      - name: Frozen scenarios (parity lane)
-        working-directory: python
-        env:
-          BUNDLE_GEMFILE: ''
-        run: |
-          PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
-            .parity-venv/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
-      - name: Leg-B cross-language corpus, annual tier
-        env:
-          BUNDLE_GEMFILE: ''
-        run: |
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            TIER=annual CLI_B=python bash verification/selftest.sh /tmp/legb-annual
-          # D-80 R2 reduced annual generator check: the Python CLI over BOTH
-          # generated corpora (a generator can change schedules, loads, or
-          # fuels that only ANNUAL energy distinguishes).
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          PYTHON_CLI=$(command -v python3) PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-            TIER=annual bash verification/matrix.sh /tmp/matrix-annual
       # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
       # is how goldens are (re)generated — dispatch with export_goldens=true,
       # download the artifact into verification/oracle/goldens/, commit. Run

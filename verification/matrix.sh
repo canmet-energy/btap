@@ -14,6 +14,15 @@
 # generators — the shared-corpus Ruby-vs-Python annual gate stays in
 # selftest.sh (TIER=annual CLI_B=python).
 set -euo pipefail
+# D-80 R4 (D-82): DORMANT — replaced by the frozen scenario suite
+# (verification/scenarios/). BTAP_LEGB=1 runs it anyway; deleted at R6.
+if [ "${BTAP_LEGB:-}" != "1" ]; then
+  echo "DORMANT since R4 (D-82): live Leg B was replaced by the frozen" >&2
+  echo "scenario suite — see verification/scenarios/ and" >&2
+  echo "python/tests/necb/test_frozen_scenarios.py. BTAP_LEGB=1 overrides." >&2
+  exit 2
+fi
+
 HERE="$(cd "$(dirname "$0")" && pwd)"
 WORK="${1:-$(mktemp -d)}"
 TIER="${TIER:-none}"

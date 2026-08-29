@@ -9,10 +9,11 @@ goldens consumed (frozen AND live), and the Leg-B corpus diff holding the
 Ruby and Python `btap-compliance` CLIs equivalent at the `none`, `sizing`
 and `annual --quick` tiers.
 
-Since R3 (D-81) **this implementation is primary and canonical**. The Ruby
-gems have no users and serve as the frozen verification baseline; behaviour
-changes land here first, with the Ruby backport in the same PR, until R4's
-verification handoff completes.
+Since R3 (D-81) **this implementation is primary and canonical**, and
+since the R4 handoff (D-82) it is the only one that changes: Ruby
+backports have stopped. Behaviour changes land here with a re-frozen
+scenario baseline in the same PR (`verification/scenarios/freeze.py`);
+the frozen suite — not a live Ruby comparison — is the regression net.
 
 ```bash
 cd python && python3 -m unittest discover tests   # stdlib-only, no install needed (serial)

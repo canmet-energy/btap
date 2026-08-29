@@ -195,9 +195,17 @@ shw (1).
   corpora). `run_corpus.rb --samples-gen ruby|python` picks the generator;
   the slug set and run counts are asserted against
   `python/scripts/sample_manifest.json` either way.
-- **Leg B differ**: `python3 verification/compare_runs.py RUN_A RUN_B`
-  (rules in `verification/spec.json`); `bash verification/selftest.sh`
-  runs the corpus twice through the Ruby CLI and proves zero-diff.
+- **Leg B's successor — the frozen scenario suite (R4, D-82)**: 35
+  Ruby-sealed baselines under `verification/scenarios/`, run by
+  `python/tests/necb/test_frozen_scenarios.py` in three lanes (python:
+  every PR, engine-free; verify: sizing; parity: annual). Re-freeze with
+  `verification/scenarios/freeze.py` (clean tree) whenever behaviour
+  intentionally changes. The old live Leg-B drivers (`selftest.sh`,
+  `matrix.sh`, `run_corpus.rb`) and the three cross-language test
+  classes are DORMANT — `BTAP_LEGB=1` reactivates them for archaeology
+  until R6 deletes them. `compare_runs.py` + `spec.json` remain the
+  shared comparison rules (the spec's sha256 is pinned in the scenario
+  manifest).
 
 
 ## The Python port (`python/`, D-79)
@@ -206,10 +214,12 @@ A second implementation lives in `python/` — one pip distribution, `btap`,
 with five subpackages mirroring the gems. The port is COMPLETE (M0–M8,
 2026-08-28), verified against the gates above; `PORT_STATUS.md` at the repo
 root is the full record of what landed and what each milestone was gated
-on. Standing rule since R3 (D-81): the two implementations move TOGETHER,
-Python first — a behaviour change lands in `python/` with its Ruby backport
-in the SAME PR (Ruby is the Leg-B baseline, so it must be green at every
-commit), or not at all.
+on. Standing rule since the R4 handoff (D-82): behaviour changes are
+PYTHON-ONLY — Ruby backports stopped when the frozen scenario suite
+replaced live Leg B. An intentional behaviour change re-runs
+`verification/scenarios/freeze.py` (clean tree) and commits the
+re-frozen baselines with the change; the dormant Leg-B drivers remain
+behind `BTAP_LEGB=1` for archaeology until R6.
 
 ```bash
 cd python

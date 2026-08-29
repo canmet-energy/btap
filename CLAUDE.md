@@ -246,12 +246,15 @@ lighting gate). The Python suite has ZERO unconditional skips — every skip
 names a dependency and a REQUIRED flag, and CI supplies each somewhere with
 its flag set.
 
-Two rules OUTLIVE the port. (1) **Python is the primary implementation**
-(R3, D-81): the Ruby gems have ZERO users and are kept green SOLELY as the
-verification baseline, so a behaviour change lands Python-first WITH its
-Ruby backport in the SAME PR — Leg B green at every commit — until R4's
-verification handoff completes; a defect found on either side is fixed on
-BOTH or flagged, never silently on one. (2) **Thermal bridging is pinned
+Two rules OUTLIVE the port. (1) **Python is the primary implementation
+and, since the R4 handoff (D-82), the ONLY one that changes**: Ruby
+backports have STOPPED — behaviour changes are Python-only, and every
+intentional behaviour change re-runs `verification/scenarios/freeze.py`
+on a clean tree and commits the re-frozen baselines WITH the change
+(python-only:post-handoff seal). The Ruby gems are frozen verification
+infrastructure: Leg A's oracle bridge until R6, their suites run in CI
+only to prove the frozen code still passes, and the dormant Leg-B
+drivers/tests sit behind `BTAP_LEGB=1` until R6 deletes them. (2) **Thermal bridging is pinned
 to py-tbd's `tbd-3.5.2-compat` branch by commit SHA** — the revision
 verified against the frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle triplet.
 Never bump it to py-tbd main casually: main ports upstream 3.6.0, whose

@@ -319,10 +319,11 @@ bump / TBD 3.6.x rebaseline.
   there is no support window and nothing to deprecate. Ruby's only remaining
   role is VERIFICATION: the Leg-B cross-language baseline until R4 freezes
   its successor, and Leg A's bridge to the pinned oracle until R6.
-- **Same-PR backports.** A behaviour change lands Python-first with its Ruby
-  backport in the SAME PR, keeping Leg B green at every commit. Backports
-  stop only when R4's verification handoff completes — scenario suite frozen
-  and validated, Leg-B gates removed from required CI, drivers dormant.
+- **Same-PR backports (ENDED at R4/D-82).** Through the R3–R4 window a
+  behaviour change landed Python-first with its Ruby backport in the same
+  PR, keeping Leg B green at every commit. The R4 handoff completed the
+  contract — scenario suite frozen, sealed, and validated in coexistence;
+  Leg-B gates out of required CI; drivers dormant — and backports stopped.
 - **The README was reframed** for the building engineer: the Python
   implementation is the tool, installed from source (the repository is
   private, so cloning needs access; EnergyPlus is provisioned on first use).
@@ -330,8 +331,12 @@ bump / TBD 3.6.x rebaseline.
   installer, now described as the frozen Ruby implementation — the native
   Python one is R5.
 
-**R4 should follow promptly**: every PR carries a Ruby backport until its
-handoff completes, and that is the cost R3 deliberately accepted.
+**R4 landed 2026-08-29 (D-82)**: the frozen scenario suite (35 scenarios,
+Ruby-sealed at freeze, its own interpreter machinery hash-pinned)
+replaced live Leg B; the drivers and three cross-language classes are
+dormant behind `BTAP_LEGB=1` with the surface pinned; B8 TBD engine
+parity stays active until R6; **Ruby backports stopped at the D-82
+merge**. Remaining: R5 (Python installer), R6 (deletion).
 
 ## Working agreements that produced this
 
@@ -341,11 +346,11 @@ These are not style preferences; each was learned by something breaking.
    as-is, never quietly corrected — a fix that lands only on the Python side
    makes Leg B lie. Two such defects are flagged in D-79. The one exception
    was adjudicated explicitly and deleted from *both* sides.
-2. **Ruby stays frozen except bugfixes and same-PR backports.** It has no
-   users; it is kept green solely as the Leg-B baseline (until R4's
-   verification handoff) and Leg A's bridge to the pinned oracle (until R6).
-   Behaviour changes land Python-first with the Ruby backport in the SAME PR
-   (R3, D-81), so Leg B is green at every commit.
+2. **Ruby is fully frozen (R4, D-82).** It has no users and no longer
+   receives backports; it is Leg A's bridge to the pinned oracle until R6,
+   its suites run only to prove the frozen code still passes, and its
+   Leg-B machinery is dormant behind BTAP_LEGB=1. Behaviour changes are
+   Python-only, each with a re-frozen scenario baseline in the same PR.
 3. **Use the `_compat` helpers.** `ruby_round`, `ruby_div`, `opt`/`opt_or`,
    `sorted_by_name`, `NullAudit`, `esc`/`ruby_str`, and `_sdk`'s
    `ensure_sdk_hashable`. Each exists because the naive Python translation

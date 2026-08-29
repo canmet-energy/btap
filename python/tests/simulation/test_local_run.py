@@ -103,6 +103,16 @@ class TestCrossLanguageSimulation(unittest.TestCase):
     same model — energies equal (both pre-round with the same semantics),
     unmet hours within the Leg-B spec tolerance."""
 
+    @classmethod
+    def setUpClass(cls):
+        import os as _os
+        if _os.environ.get("BTAP_LEGB") != "1":
+            raise unittest.SkipTest(
+                "DORMANT since R4 (D-82): replaced by frozen scenario "
+                "corpus-annual-* (engine energies) — BTAP_LEGB=1 reactivates; deleted at R6")
+        super().setUpClass()
+
+
     def test_ruby_and_python_results_are_equivalent(self):
         from btap._compat import ruby_str  # noqa: F401  (import proves _compat loads SDK-free)
 

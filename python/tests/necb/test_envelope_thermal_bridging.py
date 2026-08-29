@@ -337,6 +337,16 @@ class TestThermalBridgingLegB(unittest.TestCase):
     transforms, TBD pass included) and diffs audit.json/report.json under
     the Leg-B rules."""
 
+    @classmethod
+    def setUpClass(cls):
+        import os as _os
+        if _os.environ.get("BTAP_LEGB") != "1":
+            raise unittest.SkipTest(
+                "DORMANT since R4 (D-82): replaced by frozen scenario "
+                "api-thermal-bridging — BTAP_LEGB=1 reactivates; deleted at R6")
+        super().setUpClass()
+
+
     COMPLIANCE_PROBE = (Path(__file__).parent / 'cross_language'
                         / 'ruby_tbd_compliance.rb')
 

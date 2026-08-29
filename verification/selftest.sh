@@ -10,6 +10,15 @@
 #   CLI_B=python (M6) pass B uses the PYTHON CLI — the Leg-B cross-language
 #                convergence gate: Ruby vs Python over the whole corpus.
 set -euo pipefail
+# D-80 R4 (D-82): DORMANT — replaced by the frozen scenario suite
+# (verification/scenarios/). BTAP_LEGB=1 runs it anyway; deleted at R6.
+if [ "${BTAP_LEGB:-}" != "1" ]; then
+  echo "DORMANT since R4 (D-82): live Leg B was replaced by the frozen" >&2
+  echo "scenario suite — see verification/scenarios/ and" >&2
+  echo "python/tests/necb/test_frozen_scenarios.py. BTAP_LEGB=1 overrides." >&2
+  exit 2
+fi
+
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$HERE")"
 WORK="${1:-$(mktemp -d)}"

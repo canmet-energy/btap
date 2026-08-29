@@ -57,6 +57,9 @@ PATTERNS = (
 #:   ``N/A-label``       the gem NAME as human-readable text (a report footer),
 #:                       not a path into another tree. Nothing to retire.
 #:   ``N/A-scanner``     this file, which must spell the patterns out.
+#:   ``R4-dormant``      a live Leg-B gate made DORMANT by the R4 handoff
+#:                       (D-82): the file and its refs stay on disk behind
+#:                       BTAP_LEGB=1 until R6 deletes them.
 #:   ``R2.2-pending``    owned by a sibling D-80 task, not by R2.1.
 #:   ``TODO-review``     a real dependency with no retirement rationale yet.
 ALLOWLIST = {
@@ -115,20 +118,24 @@ ALLOWLIST = {
     },
     "python/tests/audit/test_cross_language.py": {
         "refs": ["btap-audit", "verification/"],
-        "retires": "R6",
-        "why": "Leg-B AuditLog equivalence: runs the gem and the shared differ",
+        "retires": "R4-dormant",
+        "why": ("Leg-B AuditLog equivalence — DORMANT since R4 (D-82), "
+                "replaced by the frozen audit-unit scenario; BTAP_LEGB=1 "
+                "reactivates; deleted at R6"),
     },
     "python/tests/simulation/test_local_run.py": {
         "refs": ["verification/"],
-        "retires": "R1-adjudicated",
-        "why": "Leg-B run comparison through verification/compare_runs.py",
+        "retires": "R4-dormant",
+        "why": ("its cross-language class is DORMANT since R4 (D-82) — the "
+                "frozen annual scenarios carry the engine-energy duty; the "
+                "file's local-run tests stay live; refs die at R6"),
     },
     "python/tests/necb/test_envelope_thermal_bridging.py": {
         "refs": ["legacy_pin", "verification/"],
         "retires": "R6",
         "why": ("the TBD skip message names legacy_pin/tbd_triplet.rb (the "
-                "pinned 3.5.2 triplet) and the Leg-B comparison uses the "
-                "shared differ"),
+                "pinned 3.5.2 triplet); B8 engine parity stays ACTIVE until "
+                "R6, while the Leg-B pipeline class is R4-dormant (D-82)"),
     },
     "python/tests/necb/test_decisions_registry_sync.py": {
         "refs": ["btap-necb"],
@@ -320,3 +327,42 @@ class TestSelfContainment(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+DORMANT_MARKER = "DORMANT since R4 (D-82)"
+#: The ADJUDICATED dormant surface (D-82): exactly these test classes and
+#: driver scripts. Growing this set is a new adjudication, not a tag.
+DORMANT_TEST_FILES = 3   # audit cross-language, simulation cross-language, TB Leg-B
+DORMANT_DRIVERS = 3      # run_corpus.rb, selftest.sh, matrix.sh
+
+
+def test_dormant_surface_is_pinned():
+    """Reporting distinguishes dependency skips, dormant Leg-B skips, and
+    failures; this pins the dormant class so the retirement exemption
+    cannot quietly broaden (D-82)."""
+    tests = 0
+    for rel in ("tests/audit/test_cross_language.py",
+                "tests/simulation/test_local_run.py",
+                "tests/necb/test_envelope_thermal_bridging.py"):
+        if DORMANT_MARKER in (REPO_ROOT / "python" / rel).read_text(encoding="utf-8"):
+            tests += 1
+    assert tests == DORMANT_TEST_FILES, (
+        f"{tests} dormant-marked test files, pinned {DORMANT_TEST_FILES}")
+    drivers = sum(
+        1 for rel in ("verification/run_corpus.rb", "verification/selftest.sh",
+                      "verification/matrix.sh")
+        if DORMANT_MARKER in (REPO_ROOT / rel).read_text(encoding="utf-8"))
+    assert drivers == DORMANT_DRIVERS, (
+        f"{drivers} dormant-marked drivers, pinned {DORMANT_DRIVERS}")
+    # and NOTHING else carries the marker (the broadening guard)
+    stray = []
+    for path in sorted((REPO_ROOT / "python" / "tests").rglob("*.py")):
+        rel = str(path.relative_to(REPO_ROOT / "python"))
+        if rel in ("tests/audit/test_cross_language.py",
+                   "tests/simulation/test_local_run.py",
+                   "tests/necb/test_envelope_thermal_bridging.py",
+                   "tests/test_self_containment.py"):
+            continue
+        if DORMANT_MARKER in path.read_text(encoding="utf-8"):
+            stray.append(rel)
+    assert not stray, f"unadjudicated dormant markers: {stray}"

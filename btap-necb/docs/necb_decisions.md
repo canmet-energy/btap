@@ -116,6 +116,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-79** — The Ruby to Python port: milestone order, the _compat parity contracts, and two forced divergences _(process)_
 - **D-80** — Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path _(process)_
 - **D-81** — The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff _(process)_
+- **D-82** — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop _(process)_
 
 <!-- TOC END -->
 
@@ -4561,3 +4562,67 @@ successor id format and update the regexes, TOC sorting, registry tests,
 and report parsing TOGETHER, in both implementations — the ceiling is
 recorded WITH its transition rule so it defines a path, not just a
 problem.
+
+## D-82
+
+**Decided:** The R4 verification handoff is COMPLETE (2026-08-29). The
+frozen scenario suite (`verification/scenarios/` +
+`python/tests/necb/test_frozen_scenarios.py`) replaces the live
+Ruby-vs-Python Leg-B gates, which are now DORMANT; **Ruby backports stop
+at this decision's merge** — behaviour changes are Python-only from here.
+
+**What replaced what.** 35 frozen scenarios (python 30 / verify 3 /
+parity 2) replaced gates B1–B7 and B9: the none+sizing generator/CLI
+matrix, the annual selftest and reduced matrix, the audit and simulation
+cross-language gates, and the thermal-bridging pipeline case. **B8 —
+TBD.process engine parity — stays ACTIVE until R6**: it guards the pinned
+py-tbd ≡ Ruby-tbd equivalence, not the pipeline, and costs no backports.
+
+**The seal, stated precisely.** At freeze time, 29 scenarios were sealed
+by mirrored-argv Ruby CLI runs comparing exit codes plus
+audit.json/report.json under the spec rules — exactly what live Leg B
+proved, no more: pipeline `audit.txt` is frozen Python-side WITHOUT Ruby
+byte equality (nested hashes render language-idiomatically, which is why
+Leg B never compared it). Two Ruby API seals: thermal bridging (via the
+`ruby_tbd_compliance` driver, with structured non-vacuity — a
+decision-level entry with `surfaces_derated > 0`, the 3.1.1.7 article,
+the literal "Unable to uprate" warning — on BOTH sides), and the
+audit-unit scenario, which ALONE carries B6's audit-text byte contract.
+Four python-only seals are recorded with reasons. "Sealed against Ruby"
+is a freeze-moment statement, never a standing property: post-handoff
+re-freezes are `python-only:post-handoff`.
+
+**The suite polices itself.** The manifest pins the freezer, scenario
+definitions, runner, and gate by sha256 and the integrity test verifies
+all four at runtime — the interpreter of the frozen baselines cannot
+move under them without an adjudicated re-freeze. Provenance ancestry is
+PROVEN in CI (shallow clones fetch history; unknown fails in required
+mode). Baselines are canonical stripped form; re-freezes promote by
+backup-swap with restore-on-failure proven by fault injection at every
+step (the control caught a real torn-state bug before this decision).
+
+**The dormant skip — an adjudicated third skip category.** Beside
+dependency skips and failures: a dormant gate names its replacement
+scenario, the reactivation flag (`BTAP_LEGB=1`), and its deletion
+milestone (R6). CI deliberately does not set the flag. Behavioural rot
+until R6 is ACCEPTED, bounded only by an import/collection canary. The
+dormant surface is PINNED — three test classes, three drivers
+(`run_corpus.rb`, `selftest.sh`, `matrix.sh`, each refusing by default
+with a message naming the replacement) — and a test asserts the pin so
+the exemption cannot quietly broaden.
+
+**The corpus generator ruling.** `generate_samples.py` is the sole
+generator; its durable witness is the slug-manifest contract plus the
+frozen outputs themselves (generator equivalence retired WITH Leg B).
+
+**Declared-uncovered, honestly:** the 8.4.1.2.(5) capacity-iteration
+FAILURE branch — nothing of it is frozen; unit tests only — and the
+full-year end-to-end determination (the verdict-unit scenarios freeze
+exits 0/1 at unit level; live Leg B's annual tier only ever ran
+`--quick`, so nothing was lost).
+
+**Attestation:** PR-1's coexistence dispatch (run 33271516644 at
+`b7ffe4a`) showed all three frozen lanes green BESIDE every live Leg-B
+gate on one run. The PR-2 handoff run remains external evidence in its
+PR record — never written back here, which would invalidate the very run
+as head evidence.
