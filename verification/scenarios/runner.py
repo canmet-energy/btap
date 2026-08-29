@@ -54,6 +54,9 @@ def python_exe():
 #: comes from the scenario's authored env. HBIX_* is deliberately absent.
 ENV_ALLOWLIST = ("PATH", "HOME", "TMPDIR", "BTAP_ENERGYPLUS",
                  "BTAP_ENERGYPLUS_ARCHIVE", "SYSTEMROOT",
+                 # relocatable interpreters (actions/setup-python's
+                 # tool-cache build) find their shared libpython via this
+                 "LD_LIBRARY_PATH",
                  # the Ruby side of the freeze-time seal loads the SDK via
                  # these; harmless for Python subprocesses
                  "RUBYLIB", "GEM_HOME", "GEM_PATH")

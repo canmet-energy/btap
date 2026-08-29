@@ -145,6 +145,13 @@ ALLOWLIST = {
                 "verification/oracle — verification/ consumption is permitted "
                 "by the invariant"),
     },
+    "python/tests/necb/test_frozen_scenarios.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("the R4 frozen-scenario gate — Leg B's successor — runs the "
+                "manifest under verification/scenarios/; verification/ "
+                "consumption is permitted by the invariant permanently"),
+    },
     "python/tests/test_request_manifest.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
