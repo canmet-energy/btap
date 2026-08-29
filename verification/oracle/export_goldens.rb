@@ -99,7 +99,9 @@ if version_skew && ENV['BTAP_ORACLE_ALLOW_VERSION_SKEW'] != '1'
 end
 
 # DURABLE verification-owned inputs (D-80: live Leg C must outlive the gem
-# trees — R6 deletes them). Byte-identity with the gem originals is
+# trees — R6 deletes them). The weather TRIO travels together: the oracle's
+# get_necb_hdd18 derives the .stat path from the EPW's directory, so
+# fixtures/ must also hold the .stat even though nothing names it here. Byte-identity with the gem originals is
 # drift-gated until R6 by python/tests/test_fixture_drift.py; at R6 these
 # copies become authoritative.
 FIXTURE = File.join(__dir__, 'fixtures/5ZoneNoHVAC.osm')

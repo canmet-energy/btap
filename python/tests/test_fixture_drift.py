@@ -75,6 +75,10 @@ VERIFICATION_COPIES = {
         GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
     _ORACLE_FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy":
         GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
+    # The .stat travels with the trio: the oracle's get_necb_hdd18 derives
+    # its path from the EPW's directory (live Leg C failed without it).
+    _ORACLE_FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.stat":
+        GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.stat",
 }
 
 
@@ -163,6 +167,10 @@ class TestFixtureDrift(unittest.TestCase):
 
     def test_oracle_fixture_ddy(self):
         mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".ddy")
+        self._check_absolute(mine, VERIFICATION_COPIES[mine])
+
+    def test_oracle_fixture_stat(self):
+        mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".stat")
         self._check_absolute(mine, VERIFICATION_COPIES[mine])
 
 
