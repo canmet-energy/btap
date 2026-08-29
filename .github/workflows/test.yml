@@ -286,7 +286,7 @@ jobs:
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 TBD_REQUIRED=1 \
-          BTAP_RASTERIZER_REQUIRED=1 FULL_MATRIX=1 \
+          BTAP_RASTERIZER_REQUIRED=1 BTAP_SAMPLES_REQUIRED=1 FULL_MATRIX=1 \
             .ci-venv/bin/pytest -n auto -q tests/
       # The M6 decisive acceptance, continuously enforced: the Ruby CLI and
       # the PYTHON CLI over the same corpus, every pair diffed under the

@@ -61,9 +61,16 @@ module OracleInventory
       errors
     when 'keyed'
       fields = skeleton['key']
-      have = value.to_h { |item| [key_of(item, fields), item] }
-      want = skeleton['items']
       errors = []
+      have = {}
+      value.each do |item|
+        key = key_of(item, fields)
+        # Silently collapsing duplicates would let a malformed oracle result
+        # overwrite one entry with another and still validate — a false-green.
+        errors << "#{path}: duplicate item #{key.inspect} (key #{fields})" if have.key?(key)
+        have[key] = item
+      end
+      want = skeleton['items']
       (want.keys - have.keys).sort.each { |k| errors << "#{path}: missing item #{k.inspect} (key #{fields})" }
       (have.keys - want.keys).sort.each { |k| errors << "#{path}: unexpected item #{k.inspect} (key #{fields})" }
       (want.keys & have.keys).sort.each { |k| errors.concat(validate(have[k], want[k], "#{path}[#{k}]")) }

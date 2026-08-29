@@ -137,6 +137,13 @@ ALLOWLIST = {
                 "Ruby registry that owns it — the drift gate that caught D-79; "
                 "retires with the registry's Ruby authorship"),
     },
+    "python/tests/test_inventory_validation.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("negative tests for the permanent D-80 inventory validator in "
+                "verification/oracle — verification/ consumption is permitted "
+                "by the invariant"),
+    },
     "python/tests/test_request_manifest.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",

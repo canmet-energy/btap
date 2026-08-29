@@ -53761,13 +53761,14 @@
   "note": "schedule_names and costing_candidates were derived ONCE from the gem data (the last gem-derived act); golden_inventory from the committed goldens exported at the pinned oracle.",
   "commit": "9ad977f09357ceffb13a0482d4be8f5fecfabaaa",
   "source_hashes": {
-   "btap-necb/lib/btap_necb/data/decisions.json": "a47e2972761d56bc5f48c815119fd432573c07d1b935319f86796807040cf616",
-   "btap-necb/lib/btap_necb/data/eui_targets_2025.json": "e805c7a068db98077c6ce782dbc43f4d9918ca6ccfc5e758467aabd267bf7b41",
-   "btap-necb/lib/btap_necb/data/ghg_factors_2025.json": "feb064c470bd394e8b2e253f9822a0baa2e46676e76bbd0829aa9ff5a444fe00",
-   "btap-necb/lib/btap_necb/data/necb_rules_2020.json": "e46ff8dce55d77170f1d49d1c561ea50901475eeb1f227b7f1d6c2ebc385211b",
-   "btap-necb/lib/btap_necb/data/necb_rules_2025.json": "6251fcad1f555813f5628a124110ba75b32e16e5836fb5f1b7f69022dd369df5"
+   "btap-necb/lib/btap_necb/loads/data/schedules_2020.json": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47",
+   "btap-costing/lib/btap_costing/data/envelope/constructions.json": "5ee24ee0723ecc6aaf67fe0b151fc85f0fc3805560bd6ab469e00bb2a2500b60",
+   "btap-costing/lib/btap_costing/data/envelope/materials_glazing.csv": "9a811e2648b22c24fa7a8664aea502173165a8435ed0ad9e9246ddcb553d3ba2",
+   "btap-costing/lib/btap_costing/data/envelope/materials_opaque.csv": "14eb8a61ac7bdb073755ea15fb8f536bd1501c00cab64e42e46ac34468bc2152",
+   "btap-costing/lib/btap_costing/data/envelope/thermal_bridging.csv": "a0ba27b8e7135e76228bb81e2fe893d9f081db582693651dd9b14e008031bb43"
   },
   "goldens_manifest_sha256": "1a2b03c23db37370b971be9fec107c7b545c644f8fd7072ae2c929b56e115690",
-  "review": "btap-necb/docs/d80_retirement_plan_review.md"
+  "review": "btap-necb/docs/d80_retirement_plan_review.md",
+  "provenance_corrected": "2026-08-28, adjudicated manifest-only update (Sol post-merge finding 3): the first bootstrap hashed btap-necb/data and a nonexistent btap-costing/data; source_hashes now name the ACTUAL sources \u2014 the loads schedules table and the envelope constructions catalog. schedule_names, costing_candidates, and golden_inventory are byte-unchanged (verified against a re-dump at 9ac7ee571be1)."
  }
 }
