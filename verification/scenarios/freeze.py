@@ -40,8 +40,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import runner
-import scenario_defs
+import runner  # noqa: E402
+import scenario_defs  # noqa: E402
 
 REPO_ROOT = runner.REPO_ROOT
 RUBY_CLI = REPO_ROOT / "btap-necb" / "exe" / "btap-compliance.rb"

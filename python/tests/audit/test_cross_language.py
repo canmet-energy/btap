@@ -78,6 +78,16 @@ def load_compare_runs():
 @unittest.skipUnless(shutil.which("ruby") and RUBY_GEM.exists() and COMPARE_RUNS.exists(),
                      "needs ruby + the sibling btap-audit gem + the Leg-B differ (monorepo layout)")
 class TestCrossLanguageAudit(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        import os as _os
+        if _os.environ.get("BTAP_LEGB") != "1":
+            raise unittest.SkipTest(
+                "DORMANT since R4 (D-82): replaced by frozen scenario "
+                "audit-unit — BTAP_LEGB=1 reactivates; deleted at R6")
+        super().setUpClass()
+
     def test_python_and_ruby_outputs_are_equivalent(self):
         with tempfile.TemporaryDirectory() as tmp:
             ruby_dir = Path(tmp) / "ruby"

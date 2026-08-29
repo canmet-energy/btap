@@ -24,6 +24,17 @@
 # --simulate none (fast; full reference-transform + rules coverage); tier
 # `sizing` runs a subset through real E+ sizing (needs the openstudio CLI —
 # or, for the Python side, the provisioned engine).
+# D-80 R4 (D-82): DORMANT since the verification handoff — the frozen
+# scenario suite (verification/scenarios/ + python/tests/necb/
+# test_frozen_scenarios.py) replaced the live Ruby-vs-Python Leg-B gates.
+# Kept for regression archaeology until R6 deletion; BTAP_LEGB=1 runs it.
+unless ENV['BTAP_LEGB'] == '1'
+  abort('DORMANT since R4 (D-82): live Leg B was replaced by the frozen ' \
+        'scenario suite — see verification/scenarios/ and ' \
+        'python/tests/necb/test_frozen_scenarios.py. Set BTAP_LEGB=1 to ' \
+        'run this dormant driver anyway (deleted at R6).')
+end
+
 require 'fileutils'
 require 'rbconfig'
 

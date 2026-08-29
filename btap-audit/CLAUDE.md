@@ -13,11 +13,11 @@ change *here* costs, which the README does not say.
 
 This gem is fully mirrored by `python/btap/audit/` (the port is complete —
 D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
-here is a change to BOTH implementations**: land it Python-first, backport it
-here in the same PR, and keep the Leg-B gates green — audit
-`action`/`article`/`ruling` strings are compared VERBATIM cross-language, so
-even wording is load-bearing. A defect found on either side is fixed on both
-or flagged in D-79, never silently on one.
+here is now PYTHON-ONLY (D-82: the R4 handoff stopped Ruby backports)**:
+this gem is FROZEN verification infrastructure — do not change its
+behaviour. The Python twin changes with a re-frozen scenario baseline in
+the same PR; the dormant cross-language gates sit behind `BTAP_LEGB=1`
+until R6 deletes this tree.
 
 ## Blast radius — read before editing `log.rb`
 
