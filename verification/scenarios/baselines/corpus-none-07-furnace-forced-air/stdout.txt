@@ -1,0 +1,52 @@
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Supply Air Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Supply Air Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Supply Air Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Supply Air Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Supply Air Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Stage 2 Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Flow Rate'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed                  -              -            -
+------------------------------------------------------------------
+
+  VERDICT: NO DETERMINATION (simulate: none)
+  Run with --simulate annual for an 8.4.1.2 determination.
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  60 warning(s) recorded - see audit.txt

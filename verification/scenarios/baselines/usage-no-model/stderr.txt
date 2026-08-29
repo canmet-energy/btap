@@ -1,0 +1,45 @@
+ERROR: no model given.
+usage: btap-compliance MODEL.osm --epw FILE [options]
+
+NECB Part 8 performance-path compliance: runs the proposed and reference
+buildings and reports the 8.4.1.2 determination.
+
+options:
+  --epw PATH            weather file (required unless --simulate none)
+  --ddy PATH            design-day file (default: the .ddy beside --epw)
+  --hdd N               heating degree-days (default: from the EPW site)
+  --city NAME           bundled/cached city instead of --epw (--list-cities to
+                        see them)
+  --list-cities         list the weather files this install carries
+  -o DIR, --out DIR     run directory (default: ./necb_run_<model>)
+  --vintage {2020,2025}
+                        NECB vintage: 2020 or 2025 (default 2020)
+  --storeys N           above-ground storey count override
+  --simulate {annual,sizing,none}
+                        annual (default), sizing, or none
+  --quick               one-week run period - NOT a code determination
+  --backend {local,remote}
+                        local (default) or remote
+  --no-report           skip the HTML report
+  --json                machine-readable output on stdout
+  --quiet               no progress ticker
+
+space types - required when the model is not already NECB-tagged:
+  --space-type SPEC     "BuildingType/SpaceType" applied to every floor-area
+                        space
+  --space-type-map FILE
+                        JSON {"space name": ["BuildingType","SpaceType"]}
+  --shw-fuel FUEL       service-water fuel, e.g. NaturalGas
+  --hvac-system NAME    proposed HVAC from the catalog
+
+costing - priced tables are not shipped; point at your own:
+  --costs-csv PATH      licensed unit-cost table
+
+report header:
+  --project VALUE
+  --address VALUE
+  --permit VALUE
+  --prepared-by VALUE
+  --por VALUE
+  --date VALUE
+

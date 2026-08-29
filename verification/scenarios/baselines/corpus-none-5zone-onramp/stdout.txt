@@ -1,0 +1,14 @@
+[utilities.idf.WorkspaceObject] <0> Object of type 'OS:StandardsInformation:Material', points to an object named {c153e719-1dbd-4eeb-976d-73d92bfd184f} from field 1, but that object cannot be located.
+
+------------------------------------------------------------------
+                   site kWh      kWh/m2/yr      area m2
+Proposed                  -              -            -
+------------------------------------------------------------------
+
+  VERDICT: NO DETERMINATION (simulate: none)
+  Run with --simulate annual for an 8.4.1.2 determination.
+------------------------------------------------------------------
+
+  Audit    <RUN_DIR>/audit.txt
+  Data     <RUN_DIR>/report.json
+  52 warning(s) recorded - see audit.txt

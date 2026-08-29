@@ -1,0 +1,1 @@
+ERROR: model not found: <ROOT>/nonexistent-model.osm

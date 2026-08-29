@@ -1,0 +1,11 @@
+[info    ] load          model loaded — 1,000 m² floor area, climate 4200 HDD·°C | building: input model | inputs: path=model.osm, spaces=5
+[decision] characterize  zones grouped into one thermal block | building: proposed building | target: Thermal Zone 1 | inputs: zones=Zone A/Zone B, floor_area_m2=123.456, conditioned=true | value: System 6 | per 8.4.4.8.(1) | ruling D-14
+[warning ] efficiency    boiler efficiency UNKNOWN | building: proposed building | inputs: kw=25.0, fuel=gas | evidence: OS:Boiler 'B1'
+[decision] build         reference system operates on the proposed operating schedule | building: reference building | per 8.4.4.7.(1) | ruling D-14 D-21
+[info    ] rules         infiltration sentinel | building: proposed building | value: 1.5e-05
+[decision] verdict       proposed does not exceed the reference | value: true
+[info    ] verdict       margin below threshold | value: 0
+[info    ] verdict       eui supplement computed
+[info    ] coverage      System selection — implemented: Table 8.4.4.7.-A | inputs: status=implemented, decisions_citing=1, code=hvac/reference.rb#assign | per 8.4.4.7.
+[warning ] coverage      Staged heating — partial. Applied: two stages. Gaps: modulating burners | inputs: status=partial, decisions_citing=0 | per 8.4.4.9.
+[info    ] coverage      Modeller inputs — partial, modeller scope. Applied: schedules read from the model. Modeller's responsibility: occupancy assumptions | inputs: status=partial, decisions_citing=0, gap_owner=modeller | per 8.4.1.1. (HVAC)

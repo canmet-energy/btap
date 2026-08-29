@@ -1,0 +1,2 @@
+ERROR: ddy not found: <SCRATCH>/lone/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy
+       a design-day file is required; pass --ddy explicitly if it is not beside the .epw
