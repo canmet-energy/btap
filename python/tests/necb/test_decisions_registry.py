@@ -18,6 +18,14 @@ cited-id inventory), and it must sit on the shared audit surface
 (``.decision(...)``/``.info(...)``/``.warn(...)``) so an unrelated API
 reusing the keyword name cannot masquerade as audit evidence.
 
+The audit-surface check is deliberately SYNTACTIC: any attribute call
+named decision/info/warn counts — the scanner enforces the project's
+audit-call convention, it does not resolve receiver types (a stdlib-only
+test cannot, and Leg B verifies the actual audit output anyway). An
+expanded keyword dictionary (``**{"ruling": ...}``) on an audit-surface
+call is REFUSED outright: the AST sees it as an anonymous keyword that
+would bypass grammar, resolution, and the inventory.
+
 No SDK import — bare-runner safe, like the sync gate beside it.
 """
 
@@ -47,19 +55,25 @@ def _citation_sites():
     """[(path, line, method_name, value_node)] for every ``ruling=``
     keyword on any ``ast.Call`` under python/btap."""
     sites = []
+    star_kwargs = []
     for path in sorted((PYTHON_ROOT / "btap").rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
+            method = (node.func.attr if isinstance(node.func, ast.Attribute)
+                      else getattr(node.func, "id", None))
             for keyword in node.keywords:
+                if keyword.arg is None and method in AUDIT_METHODS:
+                    # **kwargs expansion on the audit surface could smuggle a
+                    # ruling past every gate — refused, not ignored.
+                    star_kwargs.append(
+                        (path.relative_to(PYTHON_ROOT), keyword.value.lineno, method))
                 if keyword.arg != "ruling":
                     continue
-                method = (node.func.attr if isinstance(node.func, ast.Attribute)
-                          else getattr(node.func, "id", None))
                 sites.append((path.relative_to(PYTHON_ROOT), keyword.value.lineno,
                               method, keyword.value))
-    return sites
+    return sites, star_kwargs
 
 
 def _cited_ids(sites):
@@ -73,8 +87,15 @@ def _cited_ids(sites):
 class TestRuntimeCitations(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.sites = _citation_sites()
+        cls.sites, cls.star_kwargs = _citation_sites()
         cls.decisions = _registry()
+
+    def test_no_kwargs_expansion_on_the_audit_surface(self):
+        problems = [f"{path}:{line} — **kwargs expansion on .{method}(): a "
+                    "dict could smuggle a ruling past grammar, resolution, "
+                    "and the inventory; pass keywords explicitly"
+                    for path, line, method in self.star_kwargs]
+        self.assertEqual([], problems, "\n".join(problems))
 
     def test_scan_is_not_vacuous(self):
         # 135 sites at R3; a broken walker must not go green-silent.

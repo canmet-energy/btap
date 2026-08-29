@@ -78,6 +78,9 @@ class TestDecisionsRegistry < Minitest::Test
     # an existing decision, not decisions of their own
     doc_ids = File.read(DOC).scan(/^## (D-\d{2})\b/).flatten
     refute_empty doc_ids, 'no decision headings found — is the doc path right?'
+    assert_equal doc_ids.length, doc_ids.uniq.length,
+                 "duplicate ## D-XX headings in the doc: " +
+                 doc_ids.tally.select { |_, n| n > 1 }.keys.inspect
     assert_empty doc_ids - Decisions.ids, 'decision(s) in the doc are missing from decisions.json' \
       ' — edit the canonical python/btap/necb/data/decisions.json, then python3 python/scripts/sync_decisions_registry.py'
     # D-44 documents this feature itself and must also be in the doc
