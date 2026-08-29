@@ -98,3 +98,11 @@ python/dist/
 /packaging/windows/samples/
 python/tests/generated/
 python/.parity-venv/
+
+# D-80 R4: the frozen scenario baselines COMMIT the very filenames ignored
+# above (audit.json/audit.txt/report.json are unanchored patterns, so
+# without these negations a freeze would be silently untracked — the
+# tracked-after-freeze negative control guards this).
+!verification/scenarios/baselines/**/audit.json
+!verification/scenarios/baselines/**/audit.txt
+!verification/scenarios/baselines/**/report.json
