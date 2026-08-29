@@ -77,11 +77,17 @@ class TestFrozenScenarios(unittest.TestCase):
         import subprocess
         ancestor = subprocess.run(
             ["git", "-C", str(REPO_ROOT), "merge-base", "--is-ancestor",
-             m["provenance"]["commit"], "HEAD"], check=False)
-        self.assertEqual(0, ancestor.returncode,
-                         f"manifest provenance commit "
-                         f"{m['provenance']['commit'][:12]} is not an "
-                         "ancestor of HEAD")
+             m["provenance"]["commit"], "HEAD"],
+            capture_output=True, check=False)
+        # 0 = ancestor; 1 = DEFINITIVELY not an ancestor (fail); 128 = git
+        # cannot see the object — CI shallow clones (fetch-depth 1) cannot
+        # prove ancestry either way, and an indeterminate answer must not
+        # fail the gate the way a definitive "no" does.
+        self.assertNotEqual(1, ancestor.returncode,
+                            f"manifest provenance commit "
+                            f"{m['provenance']['commit'][:12]} is NOT an "
+                            "ancestor of HEAD — these baselines came from "
+                            "another line of history")
 
     def test_lane_scenarios(self):
         """Every scenario in the selected lane(s), and EXACTLY that many."""

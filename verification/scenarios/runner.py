@@ -97,7 +97,7 @@ def ensure_corpus(scratch):
             [python_exe(), str(PYTHON_ROOT / "scripts" / "generate_samples.py"),
              str(corpus)],
             capture_output=True, text=True,
-            env={**_base_env(), "PYTHONPATH": str(PYTHON_ROOT)},
+            env=build_env({}, {}),  # prepends inherited PYTHONPATH (CI SDK)
             check=False)
         if proc.returncode != 0:
             raise RuntimeError(f"sample generation failed:\n{proc.stderr[-2000:]}")
