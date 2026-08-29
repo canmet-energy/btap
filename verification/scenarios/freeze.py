@@ -168,6 +168,45 @@ def tb_non_vacuity(run_dir, side):
     return problems
 
 
+def promote(staged_baselines, staged_manifest, dest_baselines,
+            dest_manifest, mover=shutil.move):
+    """Backup-swap promotion (the export_goldens pattern): the previous
+    valid baselines+manifest survive ANY failed step — verified by a
+    negative control that injects a mover failure mid-promotion.
+    ``mover`` is injectable for exactly that control; production always
+    uses shutil.move."""
+    backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
+    backup_m = Path(str(dest_manifest) + f".backup.{os.getpid()}")
+    moved_b = moved_m = False
+    try:
+        if dest_baselines.exists():
+            mover(str(dest_baselines), str(backup_b))
+            moved_b = True
+        if dest_manifest.exists():
+            mover(str(dest_manifest), str(backup_m))
+            moved_m = True
+        mover(str(staged_baselines), str(dest_baselines))
+        mover(str(staged_manifest), str(dest_manifest))
+    except BaseException:
+        # FULL rollback to the previous consistent state: a partial
+        # promotion (new baselines in, old manifest still current — the
+        # torn state the negative control reproduces) is rolled BACK, not
+        # left standing. Whatever now occupies a dest that has a backup is
+        # the unpromoted newcomer; remove it and restore the backup.
+        if moved_b and backup_b.exists():
+            if dest_baselines.exists():
+                shutil.rmtree(str(dest_baselines))
+            shutil.move(str(backup_b), str(dest_baselines))
+        if moved_m and backup_m.exists():
+            if dest_manifest.exists():
+                os.remove(str(dest_manifest))
+            shutil.move(str(backup_m), str(dest_manifest))
+        raise
+    for backup in (backup_b, backup_m):
+        if backup.exists():
+            (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
@@ -321,29 +360,8 @@ def main():
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
 
-    # atomic promote via backup-swap (the export_goldens pattern): the
-    # previous valid baselines must survive a failed promotion.
-    backup_b = Path(str(runner.BASELINES) + f".backup.{os.getpid()}")
-    backup_m = Path(str(runner.MANIFEST) + f".backup.{os.getpid()}")
-    moved_b = moved_m = False
-    try:
-        if runner.BASELINES.exists():
-            shutil.move(str(runner.BASELINES), str(backup_b))
-            moved_b = True
-        if runner.MANIFEST.exists():
-            shutil.move(str(runner.MANIFEST), str(backup_m))
-            moved_m = True
-        shutil.move(str(baselines), str(runner.BASELINES))
-        shutil.move(str(staging / "manifest.json"), str(runner.MANIFEST))
-    except BaseException:
-        if moved_b and not runner.BASELINES.exists():
-            shutil.move(str(backup_b), str(runner.BASELINES))
-        if moved_m and not runner.MANIFEST.exists():
-            shutil.move(str(backup_m), str(runner.MANIFEST))
-        raise
-    for backup in (backup_b, backup_m):
-        if backup.exists():
-            (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
+    promote(baselines, staging / "manifest.json",
+            runner.BASELINES, runner.MANIFEST)
     print(f"frozen {len(frozen)} scenarios "
           f"({counts}), seal {seal_tally}; manifest written")
 
