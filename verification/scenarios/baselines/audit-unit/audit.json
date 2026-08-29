@@ -1,106 +1,106 @@
 [
-  {
-    "step": "load",
-    "action": "model loaded — 1,000 m² floor area, climate 4200 HDD·°C",
-    "inputs": {
-      "path": "model.osm",
-      "spaces": 5
-    },
-    "building": "input model",
-    "level": "info"
+ {
+  "step": "load",
+  "action": "model loaded \u2014 1,000 m\u00b2 floor area, climate 4200 HDD\u00b7\u00b0C",
+  "inputs": {
+   "path": "model.osm",
+   "spaces": 5
   },
-  {
-    "step": "characterize",
-    "target": "Thermal Zone 1",
-    "action": "zones grouped into one thermal block",
-    "inputs": {
-      "zones": [
-        "Zone A",
-        "Zone B"
-      ],
-      "floor_area_m2": 123.456,
-      "conditioned": true
-    },
-    "value": "System 6",
-    "article": "8.4.4.8.(1)",
-    "ruling": "D-14",
-    "building": "proposed building",
-    "level": "decision"
+  "building": "input model",
+  "level": "info"
+ },
+ {
+  "step": "characterize",
+  "target": "Thermal Zone 1",
+  "action": "zones grouped into one thermal block",
+  "inputs": {
+   "zones": [
+    "Zone A",
+    "Zone B"
+   ],
+   "floor_area_m2": 123.456,
+   "conditioned": true
   },
-  {
-    "step": "efficiency",
-    "action": "boiler efficiency UNKNOWN",
-    "inputs": {
-      "kw": 25.0,
-      "fuel": "gas"
-    },
-    "evidence": "OS:Boiler 'B1'",
-    "building": "proposed building",
-    "level": "warning"
+  "value": "System 6",
+  "article": "8.4.4.8.(1)",
+  "ruling": "D-14",
+  "building": "proposed building",
+  "level": "decision"
+ },
+ {
+  "step": "efficiency",
+  "action": "boiler efficiency UNKNOWN",
+  "inputs": {
+   "kw": 25.0,
+   "fuel": "gas"
   },
-  {
-    "step": "build",
-    "action": "reference system operates on the proposed operating schedule",
-    "article": "8.4.4.7.(1)",
-    "ruling": "D-14 D-21",
-    "building": "reference building",
-    "level": "decision"
+  "evidence": "OS:Boiler 'B1'",
+  "building": "proposed building",
+  "level": "warning"
+ },
+ {
+  "step": "build",
+  "action": "reference system operates on the proposed operating schedule",
+  "article": "8.4.4.7.(1)",
+  "ruling": "D-14 D-21",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
+  "action": "infiltration sentinel",
+  "value": 1.5e-05,
+  "building": "proposed building",
+  "level": "info"
+ },
+ {
+  "step": "verdict",
+  "action": "proposed does not exceed the reference",
+  "value": true,
+  "level": "decision"
+ },
+ {
+  "step": "verdict",
+  "action": "margin below threshold",
+  "value": 0,
+  "level": "info"
+ },
+ {
+  "step": "verdict",
+  "action": "eui supplement computed",
+  "value": false,
+  "level": "info"
+ },
+ {
+  "step": "coverage",
+  "action": "System selection \u2014 implemented: Table 8.4.4.7.-A",
+  "inputs": {
+   "status": "implemented",
+   "decisions_citing": 1,
+   "code": "hvac/reference.rb#assign"
   },
-  {
-    "step": "rules",
-    "action": "infiltration sentinel",
-    "value": 1.5e-05,
-    "building": "proposed building",
-    "level": "info"
+  "article": "8.4.4.7.",
+  "level": "info"
+ },
+ {
+  "step": "coverage",
+  "action": "Staged heating \u2014 partial. Applied: two stages. Gaps: modulating burners",
+  "inputs": {
+   "status": "partial",
+   "decisions_citing": 0
   },
-  {
-    "step": "verdict",
-    "action": "proposed does not exceed the reference",
-    "value": true,
-    "level": "decision"
+  "article": "8.4.4.9.",
+  "level": "warning"
+ },
+ {
+  "step": "coverage",
+  "action": "Modeller inputs \u2014 partial, modeller scope. Applied: schedules read from the model. Modeller's responsibility: occupancy assumptions",
+  "inputs": {
+   "status": "partial",
+   "decisions_citing": 0,
+   "gap_owner": "modeller"
   },
-  {
-    "step": "verdict",
-    "action": "margin below threshold",
-    "value": 0,
-    "level": "info"
-  },
-  {
-    "step": "verdict",
-    "action": "eui supplement computed",
-    "value": false,
-    "level": "info"
-  },
-  {
-    "step": "coverage",
-    "action": "System selection — implemented: Table 8.4.4.7.-A",
-    "inputs": {
-      "status": "implemented",
-      "decisions_citing": 1,
-      "code": "hvac/reference.rb#assign"
-    },
-    "article": "8.4.4.7.",
-    "level": "info"
-  },
-  {
-    "step": "coverage",
-    "action": "Staged heating — partial. Applied: two stages. Gaps: modulating burners",
-    "inputs": {
-      "status": "partial",
-      "decisions_citing": 0
-    },
-    "article": "8.4.4.9.",
-    "level": "warning"
-  },
-  {
-    "step": "coverage",
-    "action": "Modeller inputs — partial, modeller scope. Applied: schedules read from the model. Modeller's responsibility: occupancy assumptions",
-    "inputs": {
-      "status": "partial",
-      "decisions_citing": 0,
-      "gap_owner": "modeller"
-    },
-    "article": "8.4.1.1. (HVAC)",
-    "level": "info"
-  }
+  "article": "8.4.1.1. (HVAC)",
+  "level": "info"
+ }
 ]
