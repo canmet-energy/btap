@@ -53758,7 +53758,7 @@
   "collected": 23
  },
  "bootstrap_provenance": {
-  "note": "schedule_names and costing_candidates were derived ONCE from the gem data (the last gem-derived act); golden_inventory from the committed goldens exported at the pinned oracle.",
+  "note": "schedule_names and costing_candidates were derived ONCE from the gem data (the last gem-derived act); golden_inventory from the committed goldens exported at the pinned oracle. source_hashes is a HISTORICAL record of that one-time bootstrap \u2014 deliberately NOT compared against current gem data by any test: the request inventory is independently frozen here, and current-source drift is irrelevant to it. A legitimate inventory change is an adjudicated manifest update, not a re-bootstrap.",
   "commit": "9ad977f09357ceffb13a0482d4be8f5fecfabaaa",
   "source_hashes": {
    "btap-necb/lib/btap_necb/loads/data/schedules_2020.json": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47",

@@ -152,7 +152,7 @@ ALLOWLIST = {
     },
     # --- this gate ---------------------------------------------------------
     "python/tests/test_fixture_drift.py": {
-        "refs": ["btap-modeling", "btap-necb"],
+        "refs": ["btap-modeling", "btap-necb", "verification/"],
         "retires": "R6",
         "why": ("pins the Python-owned fixture copies to the Ruby originals "
                 "(btap-modeling fixtures + btap-necb's paired_bars.svg "

@@ -4451,7 +4451,11 @@ costing candidates from the costing Database) — deliberately the LAST
 gem-derived act, recorded with source hashes and commit in the manifest's
 `bootstrap_provenance` block. `dump_bootstrap_inputs.rb` and
 `bootstrap_request_manifest.py` are kept for provenance and
-re-adjudication only.
+re-adjudication only. The recorded source hashes are a HISTORICAL record
+of that one act — no test compares them against current gem data, and
+none should: the request inventory is independently frozen, so
+current-source drift is irrelevant to it, and a legitimate inventory
+change is an adjudicated manifest update, never a re-bootstrap.
 
 **Registry authority.** The decisions registry is maintained by GENERATION,
 not dual hand-edits: the Ruby copy
