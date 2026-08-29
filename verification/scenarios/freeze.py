@@ -31,6 +31,7 @@ EXTERNAL attestation (PR body + D-82) — never written here.
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -139,19 +140,71 @@ def ruby_api_seal(sc, ctx_root, py_run, spec, cr):
 
 
 def tb_non_vacuity(run_dir, side):
+    """STRUCTURED assertions (post-merge review: substring checks could be
+    satisfied by coverage text alone) — the decision-level entry with a
+    positive derated count, the 3.1.1.7 article on it, and the specific
+    infeasible-uprate warning, on BOTH sealed sides."""
     problems = []
     audit = json.loads((run_dir / "audit.json").read_text(encoding="utf-8"))
     entries = audit if isinstance(audit, list) else audit.get("entries", [])
-    text = json.dumps(audit)
-    if not any(e.get("step") == "thermal_bridging" for e in entries):
-        problems.append(f"TB seal ({side}): no thermal_bridging decision")
-    if "3.1.1.7" not in text:
-        problems.append(f"TB seal ({side}): 3.1.1.7 never cited")
-    if "derat" not in text:
-        problems.append(f"TB seal ({side}): no derated surface evidence")
-    if "uprate" not in text:
-        problems.append(f"TB seal ({side}): no uprate/infeasible-uprate trace")
+    tb = [e for e in entries if e.get("step") == "thermal_bridging"]
+    decisions = [e for e in tb if e.get("level") == "decision"]
+    if not decisions:
+        problems.append(f"TB seal ({side}): no DECISION-level "
+                        "thermal_bridging entry")
+    else:
+        d = decisions[0]
+        derated = (d.get("inputs") or {}).get("surfaces_derated")
+        if not (isinstance(derated, (int, float)) and derated > 0):
+            problems.append(f"TB seal ({side}): surfaces_derated is "
+                            f"{derated!r}, expected > 0")
+        if "3.1.1.7" not in str(d.get("article", "")):
+            problems.append(f"TB seal ({side}): the decision's article "
+                            "does not cite 3.1.1.7")
+    if not any(e.get("level") == "warning"
+               and "Unable to uprate" in str(e.get("action", ""))
+               for e in tb):
+        problems.append(f"TB seal ({side}): no 'Unable to uprate' warning")
     return problems
+
+
+def promote(staged_baselines, staged_manifest, dest_baselines,
+            dest_manifest, mover=shutil.move):
+    """Backup-swap promotion (the export_goldens pattern): the previous
+    valid baselines+manifest survive ANY failed step — verified by a
+    negative control that injects a mover failure mid-promotion.
+    ``mover`` is injectable for exactly that control; production always
+    uses shutil.move."""
+    backup_b = Path(str(dest_baselines) + f".backup.{os.getpid()}")
+    backup_m = Path(str(dest_manifest) + f".backup.{os.getpid()}")
+    moved_b = moved_m = False
+    try:
+        if dest_baselines.exists():
+            mover(str(dest_baselines), str(backup_b))
+            moved_b = True
+        if dest_manifest.exists():
+            mover(str(dest_manifest), str(backup_m))
+            moved_m = True
+        mover(str(staged_baselines), str(dest_baselines))
+        mover(str(staged_manifest), str(dest_manifest))
+    except BaseException:
+        # FULL rollback to the previous consistent state: a partial
+        # promotion (new baselines in, old manifest still current — the
+        # torn state the negative control reproduces) is rolled BACK, not
+        # left standing. Whatever now occupies a dest that has a backup is
+        # the unpromoted newcomer; remove it and restore the backup.
+        if moved_b and backup_b.exists():
+            if dest_baselines.exists():
+                shutil.rmtree(str(dest_baselines))
+            shutil.move(str(backup_b), str(dest_baselines))
+        if moved_m and backup_m.exists():
+            if dest_manifest.exists():
+                os.remove(str(dest_manifest))
+            shutil.move(str(backup_m), str(dest_manifest))
+        raise
+    for backup in (backup_b, backup_m):
+        if backup.exists():
+            (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
 
 
 def main():
@@ -239,7 +292,27 @@ def main():
         dest = baselines / sc["id"]
         dest.mkdir(parents=True)
         hashes = {}
-        for name in [*sc.get("files", []), *sc.get("text_files", {})]:
+
+        def strip_keys(node, keys):
+            if isinstance(node, dict):
+                return {k: strip_keys(v, keys) for k, v in node.items()
+                        if k not in keys}
+            if isinstance(node, list):
+                return [strip_keys(v, keys) for v in node]
+            return node
+
+        for name in sc.get("files", []):
+            # Store the CANONICAL form: spec strip_keys applied at freeze
+            # time, so machine-local paths (run_dir) never enter the
+            # committed baselines and re-freezes are byte-stable when
+            # nothing real changed. compare_runs strips both sides at
+            # compare time, so comparison semantics are unchanged.
+            data = json.loads((Path(run1.run_dir) / name)
+                              .read_text(encoding="utf-8"))
+            (dest / name).write_text(
+                json.dumps(strip_keys(data, set(spec.get("strip_keys", []))),
+                           indent=1) + "\n", encoding="utf-8")
+        for name in sc.get("text_files", {}):
             shutil.copyfile(Path(run1.run_dir) / name, dest / name)
         for stream, mode in sc.get("streams", {}).items():
             if mode == "exact":
@@ -257,8 +330,15 @@ def main():
         "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
         "provenance": {
             "commit": git("rev-parse", "HEAD"), "dirty": dirty,
+            # The INTERPRETER MACHINERY is pinned too (post-merge review
+            # High): a change to what executes/normalizes/compares frozen
+            # baselines is a behaviour change and demands a re-freeze.
             "freezer_sha256": runner.sha256(__file__),
             "defs_sha256": runner.sha256(HERE / "scenario_defs.py"),
+            "runner_sha256": runner.sha256(HERE / "runner.py"),
+            "gate_sha256": runner.sha256(
+                runner.PYTHON_ROOT / "tests" / "necb"
+                / "test_frozen_scenarios.py"),
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
@@ -280,11 +360,8 @@ def main():
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
 
-    # atomic promote
-    if runner.BASELINES.exists():
-        shutil.rmtree(runner.BASELINES)
-    shutil.move(str(baselines), str(runner.BASELINES))
-    shutil.move(str(staging / "manifest.json"), str(runner.MANIFEST))
+    promote(baselines, staging / "manifest.json",
+            runner.BASELINES, runner.MANIFEST)
     print(f"frozen {len(frozen)} scenarios "
           f"({counts}), seal {seal_tally}; manifest written")
 

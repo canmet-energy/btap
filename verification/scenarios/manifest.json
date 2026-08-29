@@ -2,10 +2,12 @@
  "version": 1,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "49902f3ffab4fd1ee50f1dcc55c26ab67b89a9bc",
+  "commit": "b47bd1eea63197c0af99a74048592b7fb1e8fdf5",
   "dirty": false,
-  "freezer_sha256": "3392815f7d1b40ca28a1427a67554f9c2f5e360e92e25f93a7651859d024e4f5",
+  "freezer_sha256": "de2bf6e1d2bc168910b65f1af45ea7f533a3919a22a0d812e8aab73959b84d6e",
   "defs_sha256": "b90255b23accbb29e52ed769e6425effe3dc15835ad021f0ca24e509c0842ca0",
+  "runner_sha256": "e72d050dca444af741acfeac61c1590135007e5eac8dfa4b2ed831a91dfe5753",
+  "gate_sha256": "738fb875dad5d4b23f0577aa8505c9d7d271b7dbd45b2c2b46c17093e1eed3f8",
   "openstudio_cli": "3.11.0+241b8abb4d",
   "ruby": "ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux]",
   "seal": {
@@ -61,9 +63,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.json": "6c968c77e1669858082a03f1d94fc6118246da20902873ef354f546f081ce7d9",
     "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
    }
@@ -104,9 +106,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "08b8765dd75114361a87bcfb809b9c67beb7dd7aa6899ea30f8bca56438994ae",
+    "audit.json": "dffd0323b0b86c2f4eca6267ff91a85270eadd4b87624a91c42cbd2d80da069a",
     "audit.txt": "e950a0467baece934cc2fe0871e480975958c9eb9eac895747b09a456b1ed3ea",
-    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "report.json": "052417eba11a71e66bc9e1d613505d643671f2a39651f382993551e04394920e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "08dc6aa41063d4c1e26e13a0161a6f3c5716135bbb17980b81970a49f9263889"
    }
@@ -147,9 +149,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "748ff42dcc878d10221bb5135d64c5753a03deee0e8ff2eab9fda9af8c5af782",
+    "audit.json": "69003812a26d0c13f7174f5a6c4b32306e61bf335c20e46cb0f74cd02c7e424e",
     "audit.txt": "39b1179ff64774877b32612bbfe2a487b047cb847f43ff22ee2199626951c247",
-    "report.json": "a8e09eda6b7384fc0ca9455804c0014e2890213c04fd57484a36219ad54a6fd2",
+    "report.json": "d71e202385ef0db0c50fba919aa084fe3471e7c7035ea75f7ce82b8f13254acd",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "da7cc2a9b5cf66a1b7e11940f29cea6de93d4e0df67acf6ec55598dde68154be"
    }
@@ -190,9 +192,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "694d4541b289f6f5c6ff30fd492f5aa691ef134d908f22ef3a763f4e3300bca4",
+    "audit.json": "fa97a094c1f209c58c8650088922f04891a5f1f802869d364cdf4421d7582bd9",
     "audit.txt": "dcbfc9171056950218e328ed5dbfc8cbd13068ea0ae7b19d3644fbd50816106d",
-    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "report.json": "052417eba11a71e66bc9e1d613505d643671f2a39651f382993551e04394920e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "855cca0335e684397194a0644998fc4ade3da1b6e8f3471a3d749a4ea069a6cb"
    }
@@ -233,9 +235,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "bec78604df9ac063b98766f74cb52971ea303cd2247155e710a7060327a364b0",
+    "audit.json": "e0cc03f2cf327dcdf6ab53f54f0a0796830a13254eb069275b590e4afba2ee18",
     "audit.txt": "6b5bc84cb59a91625fafbb09cc9d2c22ead9968ed86cedeedbb63809b8781dd8",
-    "report.json": "96d308e2cf9a10a972cc829f8bf3436bcf0df0357e9dca726249535cb8767718",
+    "report.json": "dd3d810a594f42c712831cf814086c59ad960653c22dc7e2fc6ab23cc2316f2c",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "cede0a4576b0db8f05ae05b541caf5620111e32307771fc11d3a1ebbbb61fc1f"
    }
@@ -276,9 +278,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "dc86b4f31e47dd3a1653bd1fa904245166420818cb289f82bbce432b12855f4d",
+    "audit.json": "00f185d8084757025c6a8acb7a6e50e7b8e14f4cd6e2ab1af1b4322792ca7f47",
     "audit.txt": "87d39f3e8e5ea4762d3a5ac7efe90121fff0539e51e930f33a2db539b436ea9d",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "a3ea88ad758dc3c0cecc4e93e7d7a7b2d113997ca5e125da2ef4737891ccde4a"
    }
@@ -319,9 +321,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "d0a7f20a6772b6e29d90ef4af6f1d16ec3e90947cc30a64e04ac24e45a4552ee",
+    "audit.json": "377546f7faa04dfc6e5d36088ee691323b8ec086c92dcb771d9429edc6ac556f",
     "audit.txt": "22d2d8959c4a35d0df631ba0e3b385ab12ee0371f539af8dccbb0df3598fffb7",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "a3ea88ad758dc3c0cecc4e93e7d7a7b2d113997ca5e125da2ef4737891ccde4a"
    }
@@ -362,9 +364,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "4b384a1710e7625d19f197b34388a21ecf06bd4d24637ebd9bf234190a9f8c69",
+    "audit.json": "65283dcb44097da10d4e5e26b897d58101ed9ce12fc8ab16400ba468f4215b39",
     "audit.txt": "4c88a8c2245346dd0734a947661cef89c8e3826462bad9057a0373c2b50274e8",
-    "report.json": "992307b506442215c96fdd2d70eab50775a0fd5cd4313c0aa756c18648a5aa03",
+    "report.json": "5557ff412cb912258ef93a76a122053e2b7a7a533043e4442d54c4bcb72e3447",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "a5bd92b5d4fe1726aba857e395b7a00eb6a28a6d173699768dc7aae90215eaa0"
    }
@@ -405,9 +407,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "47d7338d9cd949fac5cdd6908fe4b31022aca6202f6006dcdce3dc00c69a2956",
+    "audit.json": "56cf7376f0d875c3d598d0fce3ffa6674391069f5e5ef92498228c8f220b54f4",
     "audit.txt": "69a2a4adfbab65450254722764dabb0aff4131fa7cc18d31811241dc5f4fcf2e",
-    "report.json": "96d308e2cf9a10a972cc829f8bf3436bcf0df0357e9dca726249535cb8767718",
+    "report.json": "dd3d810a594f42c712831cf814086c59ad960653c22dc7e2fc6ab23cc2316f2c",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "33ae32e32df6e9023ffc3591f891c5af3905b44f6b71889958ffcccdf9dcd0b7"
    }
@@ -448,9 +450,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "a8dd304098ba5370f0fd189cebb97089240253faac1a2ba4338daa54f34fad16",
+    "audit.json": "30346c7890afbd01692f95d2127a6f080b432db194fb87ee09e5464ebab31f20",
     "audit.txt": "b04f60472db24225136df6fa40435a28f6d2621cb6f2df3f18ac4220774899ea",
-    "report.json": "cf865a6ae54247a201d3a439978811a10f8b8559ec36cf961e9ca4623373b4f0",
+    "report.json": "dead9f48449dcd94181e4d2938acf41068c14b76dc35c376d9ce125a3a29365e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "bfdc5db5c9470fadbaecdb3d3cb596321b57affd8850e4c7eabb250ee0afd547"
    }
@@ -491,9 +493,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "72cc43c1e35a84fbed8ea389803137e001559dc560c4ebd5260f6ae2cdcd1d6d",
+    "audit.json": "1dd5f60ac849f8b445766beb84dc6d2a9783714012d453c21644258586293ecc",
     "audit.txt": "a71d4369e7cbd2743e20884c11c400079aee78e10eda0a79e5742b30749688fe",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
    }
@@ -534,9 +536,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "2289a7ad4cb2af109d2ac466de51556b78e8c313cc52ac1f03a399615c42cb96",
+    "audit.json": "630a2630bedf31d8d3df541366db395073bf64eab0d07c3ab4d7f2217ce19cf2",
     "audit.txt": "a000bc4400d1e1d370b8add53d5ad84a2e9364ffdb85111a3354a51ca8e8ff81",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
    }
@@ -577,9 +579,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "6b3e05376e09abb1d698fb75ccef4775b18bf29797def0f54ceaa5cf5edb5dae",
+    "audit.json": "d9777bde72db71fb7a07aba4f866c7d29ed3a3021305fd6a150b434fef4d201a",
     "audit.txt": "8207bfd15e576fa0c6cf50f6980d490689d2fd3f6861d8b476ee5530495e99fa",
-    "report.json": "b5a6d16479c0b4e873da3d4d3d74f67212e15b63eae79cc4a9c64159f7af5a2f",
+    "report.json": "052417eba11a71e66bc9e1d613505d643671f2a39651f382993551e04394920e",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "e0e5b8b76a3da7671c4ced998a57d38dd21b9553ed05aaf110dad0789c6d1637"
    }
@@ -620,9 +622,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.json": "6c968c77e1669858082a03f1d94fc6118246da20902873ef354f546f081ce7d9",
     "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
    }
@@ -663,9 +665,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "a62f54410eff452cc805a3f17fca19a740bfc929c5950c2ac379ea849ea2f980",
+    "audit.json": "6c968c77e1669858082a03f1d94fc6118246da20902873ef354f546f081ce7d9",
     "audit.txt": "22d7607fd2bbbc041a68c33457c50c46330d7bcfacca5b8d5d6bc474b58699a0",
-    "report.json": "e11479e2efe5391b87359fa58b99d4a2da01e79321ffe8812c5c024b03141e3b",
+    "report.json": "5155a2294b9b4cbdcf6cc0b7cd117c1d1c0bf17cb7824f262ea41ffde412860f",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "228a2ba5b48cfe6319350a0245e32a70139fd426d55c8238dc0f8ec365f368d7"
    }
@@ -706,9 +708,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "fee73326ed1bb0f19753287c4e180b626bc40cebc194da3c9bbf68269aa90b1c",
+    "audit.json": "00df9ff2a8d13565e9b9dc783328a7d4c9693c932c317948c3f96916bdb4d1da",
     "audit.txt": "fd43d10a277fad74d1cb48a701bc96fe9bbf93869502d3d3e39d8255c42ce155",
-    "report.json": "767cb78d2ab36a8aacf3170d32d7f37a8a7e87fb1f7a9c65d126d7f0a2de75e9",
+    "report.json": "6c3b787e0e623244e0596df67f50723c14a21e15eac3d183b5420eacd745327d",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "81c7543c7ca3e971e4cbdc891fed18387cdec4c5e946b00bbacd4fa5ac901aa7"
    }
@@ -751,9 +753,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "568c0e2b69f089b863e3024707e421ae73c4150f07238aac3e3ac6769004c1d8",
+    "audit.json": "c808da3373b32c363c2f12d9c04dc57e68446c1395d8ec13a740aff6af765e8c",
     "audit.txt": "2b2cc8b83b845df599e0f4699ab288bd216e135817fb7fc0eb967ef34e3b02c3",
-    "report.json": "6484a7a8fc41e76f7cdacbabccf101193f2bfd4a05a3b6e6f9d570da9ebb1433",
+    "report.json": "c19ea06e7ac91e2a7ad516acbd0e2bb240dc11b2bb761e256991c701406c9caa",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "b69339ec524ae595745db9bfcfacff50cb163c040dfdf2b935231c4bc5291cb7"
    }
@@ -796,9 +798,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "9d1e3e3de4fe3f0ceb5c36f4a37e054585233e722df5429f5abf73b9f44cb5ee",
+    "audit.json": "5b409270b6ab21841715ff325095ed6eb971b8e7fd70ec29d8561eba062dfa30",
     "audit.txt": "528f7d72a81acfc949edf59ee513270e8aade17d3e8618339ae10d8c2ab91337",
-    "report.json": "8e39fd908400858527e144680f33a1e9669da238659200d4e884e3618471b585",
+    "report.json": "2770670bf370c2e799d575f4d79bff551889e44feebb153c050e787fe4f2277b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ec33c566e936b99f4fbda59253ec16f069eda9d81c8ab6e2b16a32d297cd09d3"
    }
@@ -841,9 +843,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "a3ed9b9c135327c6ca7fdbcd05f46007cbbe413e40738db907b1dd3cb5df222b",
+    "audit.json": "536b9db6feebd2cb98c9bc473fec5f799f993661f3d7f2524151f5dbb79eec38",
     "audit.txt": "6a1d245f9563b0a4824e6db768558a34e4eb1a421acaa9c2719bef240f9752f3",
-    "report.json": "86fdd4e5c654dee1cd82d97eb281c48ddbb657527c48e0a1393bdbf45ff25f2f",
+    "report.json": "397ba2ade6755d48ff68a166868040d1c3dc6d93ee37428dd3ab4b9199fc930b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "82bfaaabd1e6f0bb899a2a3a526a68a03ac896f82b8256eaef4c94e114994628"
    }
@@ -886,9 +888,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "ec60f80b283e1a3d378f65956aa6a27272e5b7df457ad7742e92d4d62b44fdaf",
+    "audit.json": "e5032abefe7d77a2afe284b6cdcb06d3ef9b13561d88689c05d6ed5c0e0c91de",
     "audit.txt": "e6eed53558c1ddf6f070896f98ed592188b0ad29769f5bb31cf6d098b92b6c30",
-    "report.json": "b89a9ad2a9072fcffa0d80750111228b6136f16dd7b76330ec79372a1ece8aac",
+    "report.json": "9f73f03c08a1f2a009bd73f1282565644f673650318f26bdc48c6d3cd5cc0f7b",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "6ddb2f7f1c4b59d5f70f84dd6f46b7e4ff001a0526a011b889c90c0b284b4678"
    }
@@ -933,9 +935,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "68a86dd862eb2c27be9a052ff79619cdc9ddd995e0ba38b28751931f200558b2",
+    "audit.json": "37b5f2e5d5e892563c345315898062b92af0a26d9284cc9e2cab1e9fb6d0bd14",
     "audit.txt": "6f8621a8d563691efa90f9f9e33577ab4b447b2c45008bcc6a0efbc0172232b1",
-    "report.json": "def2773cb2a06090d051a359c6c1cb99448aa0e7137a52d341f965210bbfe4ca",
+    "report.json": "484ab861e446b301c42350d4f67402b6317be128045c3290dfd9fc5888a10320",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "27eb367911f34e0bf1e87f4034bd9f22741639475d20583c910b7c9845747407"
    }
@@ -980,9 +982,9 @@
    },
    "seal": "ruby",
    "baseline_sha256": {
-    "audit.json": "0da4aee9153f10203dd9619ede0a3aa77f90bbd532a786c9c7d681775fdc0e2e",
+    "audit.json": "9d614504b5713720d9c4a2407897ddcd8de98bb5172f5174637e9c01f97b087b",
     "audit.txt": "7237b6971573df4cf71272d72bd6c7f6ff62f69cecfe21c68579b1f9d70e8c8a",
-    "report.json": "b42b61f0bb0654134a1e30c54adedbce197bb2689c81a299ba5c45d845ea1ffa",
+    "report.json": "dced0a019c1d0b4f583c0c8496da88a9ffd1652f15ba18c3b4b685d3c0fc8563",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "513bd21a870184060c6ba05d32c02b29828b1d4b0548caea2689299df042c5f8"
    }
@@ -1015,9 +1017,9 @@
    "streams": {},
    "seal": "ruby-api:ruby_tbd_compliance.rb",
    "baseline_sha256": {
-    "audit.json": "8bb16a1ec8465d2c4d3a8c2207ec30e5b7a549ef17586ff8ff92c72f2bcf0e86",
+    "audit.json": "3c4aab362e8a13e1498c54b18d9fd329ab607afc4315df50fdec66d0b869929b",
     "audit.txt": "274d4a782633fff9fd7c5d072d9d0149e1a3f054b961235cb171a94b2b847847",
-    "report.json": "4139c75a75fb259ccd928643834894cb94b170ad45ec9d4c397e7a49be44a46b"
+    "report.json": "d9d4a1daef2676cd3555600348afe87c80f37a321f013fc00e438c8ab4936030"
    }
   },
   {
@@ -1039,7 +1041,7 @@
    "streams": {},
    "seal": "ruby-api:audit ruby_reference.rb",
    "baseline_sha256": {
-    "audit.json": "0c3b67d73c551a4c3bbce95678baaed5619f0783179443ee274843621db8fb6e",
+    "audit.json": "5e4fdbe79c2e6f1c14e52133a5700c2af80c7f54f80308ca1382f27bca02e4d4",
     "audit.txt": "adcdc3643964de8b6a3f770fd907957858858e28e154639b9af4eb42b617e7c0"
    }
   },
