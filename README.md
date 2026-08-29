@@ -39,7 +39,8 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 | If you want to… | Go to |
 |---|---|
-| install it on Windows | [Installing](#installing-on-windows) |
+| install it | [Installing](#installing) |
+| install it on Windows | [Installing on Windows](#installing-on-windows) |
 | run your first check | [Running a check](#running-a-check) |
 | understand what it decided and why | [Reading the results](#reading-the-results) |
 | know which code articles are covered | [What is implemented](#what-is-implemented) |
@@ -49,9 +50,36 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 ---
 
+## Installing
+
+The tool is the **Python implementation**, installed from source:
+
+```bash
+git clone https://github.com/canmet-energy/btap-gems.git
+cd btap-gems/python
+python -m pip install '.[tbd]'
+```
+
+That gives you the `btap-compliance` command. Four things worth knowing:
+
+- The repository is **private**, so cloning it requires access. There is no
+  published package to install by name.
+- You need **Python 3.11 or newer**. The OpenStudio SDK arrives as an ordinary
+  dependency, so you do not install OpenStudio yourself.
+- **EnergyPlus is automatically provisioned and version-verified on first
+  use**; on an offline or TLS-intercepted network supply it via
+  `BTAP_ENERGYPLUS` (an existing install) or `BTAP_ENERGYPLUS_ARCHIVE` (a
+  downloaded archive).
+- `[tbd]` adds thermal-bridging support (Article 3.1.1.7). Without it the run
+  still works and says so loudly in the audit, rather than quietly leaving
+  bridging out.
+
 ## Installing on Windows
 
-Download `btap-compliance-setup-<version>.exe` and run it.
+Download `btap-compliance-setup-<version>.exe` and run it. This is the one
+packaged installer today, and it installs the **frozen Ruby implementation** —
+verified equivalent to the Python implementation on every model in the test
+corpus. A native Python Windows installer is planned.
 
 That is the whole prerequisite list. The installer carries its own copy of
 **OpenStudio 3.11.0 and EnergyPlus 25.2.0**, so you do not need to install
@@ -68,21 +96,9 @@ Then open **NECB Compliance (console)** from the Start menu and type
 example.
 
 Building the installer yourself is covered in
-[packaging/windows/README.md](packaging/windows/README.md).
-
-### Not on Windows?
-
-The tool is plain Ruby and runs anywhere OpenStudio 3.11 does. See
-[docs/DEVELOPERS.md](docs/DEVELOPERS.md) for a source checkout.
-
-There is also a **Python implementation** of the same tool (`pip install`
-from [python/](python/README.md) gives you the same `btap-compliance`
-command — no Ruby, no installer). EnergyPlus is automatically provisioned
-and version-verified on first use; on an offline or TLS-intercepted network
-supply it via `BTAP_ENERGYPLUS` (an existing install) or
-`BTAP_ENERGYPLUS_ARCHIVE` (a downloaded archive). It is verified equivalent
-to the Ruby tool on every model in the test corpus, but the Ruby installer
-above remains the supported product for now.
+[packaging/windows/README.md](packaging/windows/README.md); the Ruby tool also
+runs from a source checkout anywhere OpenStudio 3.11 does — see
+[docs/DEVELOPERS.md](docs/DEVELOPERS.md).
 
 ---
 
@@ -93,7 +109,8 @@ btap-compliance MODEL.osm --city toronto
 ```
 
 `--city` uses the weather files that ship with the installer;
-`btap-compliance --list-cities` shows them. To use your own weather, pass
+`btap-compliance --list-cities` shows what your install carries, which for a
+source install may be nothing. To use your own weather, pass
 `--epw path\to\file.epw` — a matching `.ddy` must sit beside it, because the
 sizing runs need design days.
 
@@ -266,8 +283,10 @@ Each is described in `samples\README.txt` with the article it exercises.
 
 The tool is assembled from nine standalone Ruby gems. Most users never need to
 know this; it matters if you want to use one part on its own — say, NECB space
-types without the compliance run. (The [Python implementation](python/) mirrors
-the five core gems as subpackages of one `btap` distribution.)
+types without the compliance run. The [Python implementation](python/) mirrors
+the five core gems as subpackages of one `btap` distribution, and is now the
+primary implementation — the gems are held frozen as the verification baseline
+it is checked against.
 
 | Gem | One line |
 |---|---|

@@ -9,8 +9,10 @@ goldens consumed (frozen AND live), and the Leg-B corpus diff holding the
 Ruby and Python `btap-compliance` CLIs equivalent at the `none`, `sizing`
 and `annual --quick` tiers.
 
-The Ruby gems remain the shipping product and the Leg-B baseline; behaviour
-changes land Ruby-first or not at all.
+Since R3 (D-81) **this implementation is primary and canonical**. The Ruby
+gems have no users and serve as the frozen verification baseline; behaviour
+changes land here first, with the Ruby backport in the same PR, until R4's
+verification handoff completes.
 
 ```bash
 cd python && python3 -m unittest discover tests   # stdlib-only, no install needed (serial)

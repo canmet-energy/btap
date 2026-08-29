@@ -70,6 +70,14 @@ jobs:
           git diff --exit-code -- btap-necb/docs/NECB_GEM_COVERAGE.md \
                                   btap-necb/docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
+      # The decisions registry is CANONICAL on the Python side since R3 (D-81);
+      # the Ruby gem's copy is GENERATED from it. Stdlib-only, every PR.
+      - name: "Decisions registry: generation direction + citations"
+        run: |
+          python3 python/scripts/sync_decisions_registry.py --check
+          cd python && python3 -m unittest \
+            tests.necb.test_decisions_registry_sync \
+            tests.necb.test_decisions_registry
 
   # The Python port (D-79): unittest over python/ — the ported subpackages'
   # suites plus the audit cross-language gate (Python AuditLog vs the Ruby
@@ -223,6 +231,7 @@ jobs:
     container: nrel/openstudio:3.11.0
     steps:
       - uses: actions/checkout@v4
+      # Doc/TOC/citation duties on the Ruby side; the generation DIRECTION is a lint-job gate.
       - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
         run: cd btap-necb && ruby test/test_decisions_registry.rb
       - name: rake necb:verify

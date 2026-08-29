@@ -12,11 +12,11 @@ AuditLog spans everything.
 
 This gem is fully mirrored by `python/btap/necb/` (the port is complete —
 D-79; `PORT_STATUS.md` at the repo root is the record). **A behaviour change
-here is a change to BOTH implementations**: land it Ruby-first, port it, and
-keep the Leg-B gates green — audit `action`/`article`/`ruling` strings are
-compared VERBATIM cross-language, so even wording is load-bearing. A defect
-found on either side is fixed on both or flagged in D-79, never silently on
-one.
+here is a change to BOTH implementations**: land it Python-first, backport it
+here in the same PR, and keep the Leg-B gates green — audit
+`action`/`article`/`ruling` strings are compared VERBATIM cross-language, so
+even wording is load-bearing. A defect found on either side is fixed on both
+or flagged in D-79, never silently on one.
 
 ## Pipeline (`Compliance.performance_compliance`)
 
@@ -93,8 +93,14 @@ the adjudicated decision(s) governing the code path, so a report reader learns
   runtime / runtime_unwired / data / process). Summaries are PARAPHRASE and
   self-contained — the report links to nothing, so the summary IS the
   explanation.
+- **`data/decisions.json` is GENERATED — never hand-edit it.** Since R3
+  (D-81) the canonical registry is `python/btap/necb/data/decisions.json`;
+  edit that plus the `## D-XX` section in `docs/necb_decisions.md`, then run
+  `python3 python/scripts/sync_decisions_registry.py` to regenerate this copy
+  and `scripts/generate_decisions_toc.rb` for the TOC.
 - **Adding a `## D-XX` heading means adding a registry entry**, and a
-  `kind: runtime` entry must be cited by ≥1 `ruling:` tag.
+  `kind: runtime` entry must be cited by ≥1 `ruling:` tag — in BOTH
+  implementations while both exist.
   `test/test_decisions_registry.rb` enforces both directions (and that every
   family gem's `AuditLog` resolves to the shared `BtapAudit::AuditLog`).
 - `report/sections.rb#rulings_appendix` renders the decisions that FIRED in the

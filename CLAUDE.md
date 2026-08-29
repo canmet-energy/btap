@@ -117,15 +117,21 @@ note warns about. `gap_owner: "modeller"` is only for requirements no model
 change can ever satisfy (D-76); a rule the software could implement stays a
 warning.
 
-**Adding a `## D-XX` heading means adding a `decisions.json` entry**, and the
-doc's id-ordered TOC is generated. The drift test is hard in both directions:
+**Adding a `## D-XX` heading means adding a `decisions.json` entry** — the
+CANONICAL one, `python/btap/necb/data/decisions.json` (R3, D-81). The Ruby
+copy at `btap-necb/lib/btap_necb/data/decisions.json` is GENERATED from it;
+never hand-edit that copy. The doc section is hand-authored, its id-ordered
+TOC generated. The drift tests are hard in both directions:
 ```bash
-ruby btap-necb/scripts/generate_decisions_toc.rb         # after adding a decision
+python3 python/scripts/sync_decisions_registry.py   # canonical → generated Ruby copy
+ruby btap-necb/scripts/generate_decisions_toc.rb    # after adding a decision
+cd python && python3 -m unittest tests.necb.test_decisions_registry_sync tests.necb.test_decisions_registry
 cd btap-necb && ruby test/test_decisions_registry.rb
 ```
-A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in some gem's
-`lib/`; entries that are not cited must NOT be `runtime` (use `process`,
-`data`, or `runtime_unwired`).
+A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in BOTH
+implementations (a gem's `lib/` AND `python/btap`) while both exist; entries
+that are not cited must NOT be `runtime` (use `process`, `data`, or
+`runtime_unwired`).
 
 **`spec.files` excludes `test/` in every gemspec.** So
 `btap-modeling/lib/btap_modeling/hvac/catalog_report.rb`'s `FIXTURE` constant is
@@ -198,7 +204,9 @@ every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
   matrix parallelizes across gems, this parallelizes within one. The envelope
   leg installs the pinned tbd triplet first and asserts the ACTIVATED versions
   equal the lock.
-- **`verify`** — decisions-registry drift + `rake necb:verify`, same container.
+- **`verify`** — decisions-registry drift + `rake necb:verify`, same container,
+  and the registry generation direction (canonical Python → generated Ruby copy)
+  is checked in `lint` on every PR.
 - **`parity`** — the eleven gates with `LEGACY_PIN_REQUIRED=1`, cached on
   `legacy_pin/REF` because it clones the ~4.6 GB fork.
 
@@ -238,15 +246,17 @@ lighting gate). The Python suite has ZERO unconditional skips — every skip
 names a dependency and a REQUIRED flag, and CI supplies each somewhere with
 its flag set.
 
-Two rules OUTLIVE the port. (1) Ruby remains the shipping product and the
-Leg-B baseline: a behaviour change lands Ruby-first or not at all, and a
-Ruby defect found on either side is fixed on BOTH or flagged, never
-silently on one. (2) **Thermal bridging is pinned to py-tbd's
-`tbd-3.5.2-compat` branch by commit SHA** — the revision verified against
-the frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle triplet. Never bump it to
-py-tbd main casually: main ports upstream 3.6.0, whose uprate physics
-differ (~43% on a wall); the family-wide 3.6.x rebaseline is a deliberate
-future event (see Open work).
+Two rules OUTLIVE the port. (1) **Python is the primary implementation**
+(R3, D-81): the Ruby gems have ZERO users and are kept green SOLELY as the
+verification baseline, so a behaviour change lands Python-first WITH its
+Ruby backport in the SAME PR — Leg B green at every commit — until R4's
+verification handoff completes; a defect found on either side is fixed on
+BOTH or flagged, never silently on one. (2) **Thermal bridging is pinned
+to py-tbd's `tbd-3.5.2-compat` branch by commit SHA** — the revision
+verified against the frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle triplet.
+Never bump it to py-tbd main casually: main ports upstream 3.6.0, whose
+uprate physics differ (~43% on a wall); the family-wide 3.6.x rebaseline
+is a deliberate future event (see Open work).
 
 ## Open work
 

@@ -206,9 +206,10 @@ A second implementation lives in `python/` — one pip distribution, `btap`,
 with five subpackages mirroring the gems. The port is COMPLETE (M0–M8,
 2026-08-28), verified against the gates above; `PORT_STATUS.md` at the repo
 root is the full record of what landed and what each milestone was gated
-on. Standing rule: the two implementations move TOGETHER — a behaviour
-change lands Ruby-first (Ruby is the Leg-B baseline), then its Python twin,
-or not at all.
+on. Standing rule since R3 (D-81): the two implementations move TOGETHER,
+Python first — a behaviour change lands in `python/` with its Ruby backport
+in the SAME PR (Ruby is the Leg-B baseline, so it must be green at every
+commit), or not at all.
 
 ```bash
 cd python
