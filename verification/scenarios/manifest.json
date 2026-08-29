@@ -2,10 +2,12 @@
  "version": 1,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "49902f3ffab4fd1ee50f1dcc55c26ab67b89a9bc",
+  "commit": "a66da04d15ff619e7b485f71aa8bec29b35c01ca",
   "dirty": false,
-  "freezer_sha256": "3392815f7d1b40ca28a1427a67554f9c2f5e360e92e25f93a7651859d024e4f5",
+  "freezer_sha256": "25da924a3969d7def557e2f7e4ef791a21471f7b18368b8fddf49bcab6a1f835",
   "defs_sha256": "b90255b23accbb29e52ed769e6425effe3dc15835ad021f0ca24e509c0842ca0",
+  "runner_sha256": "e72d050dca444af741acfeac61c1590135007e5eac8dfa4b2ed831a91dfe5753",
+  "gate_sha256": "738fb875dad5d4b23f0577aa8505c9d7d271b7dbd45b2c2b46c17093e1eed3f8",
   "openstudio_cli": "3.11.0+241b8abb4d",
   "ruby": "ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux]",
   "seal": {
@@ -935,7 +937,7 @@
    "baseline_sha256": {
     "audit.json": "68a86dd862eb2c27be9a052ff79619cdc9ddd995e0ba38b28751931f200558b2",
     "audit.txt": "6f8621a8d563691efa90f9f9e33577ab4b447b2c45008bcc6a0efbc0172232b1",
-    "report.json": "def2773cb2a06090d051a359c6c1cb99448aa0e7137a52d341f965210bbfe4ca",
+    "report.json": "79300f5b6f7aa38a308afda59370813ae55b149ce21d16ab578f33a999ffd8c1",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "27eb367911f34e0bf1e87f4034bd9f22741639475d20583c910b7c9845747407"
    }
@@ -982,7 +984,7 @@
    "baseline_sha256": {
     "audit.json": "0da4aee9153f10203dd9619ede0a3aa77f90bbd532a786c9c7d681775fdc0e2e",
     "audit.txt": "7237b6971573df4cf71272d72bd6c7f6ff62f69cecfe21c68579b1f9d70e8c8a",
-    "report.json": "b42b61f0bb0654134a1e30c54adedbce197bb2689c81a299ba5c45d845ea1ffa",
+    "report.json": "52e22a6366e0901a5658143df65567235ce526ce9ffd66ccb6f37d0ee84e246a",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "513bd21a870184060c6ba05d32c02b29828b1d4b0548caea2689299df042c5f8"
    }

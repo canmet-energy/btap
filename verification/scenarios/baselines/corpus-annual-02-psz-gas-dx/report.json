@@ -47,7 +47,7 @@
         "cooling": 0.0
       }
     },
-    "run_dir": "/tmp/freeze-8avo81_p/runs/corpus-annual-02-psz-gas-dx-a/proposed_annual/run"
+    "run_dir": "/tmp/freeze-mbjok6l5/runs/corpus-annual-02-psz-gas-dx-a/proposed_annual/run"
   },
   "reference": {
     "clean_run": true,
@@ -93,7 +93,7 @@
         "cooling": 0.0
       }
     },
-    "run_dir": "/tmp/freeze-8avo81_p/runs/corpus-annual-02-psz-gas-dx-a/reference_annual/run"
+    "run_dir": "/tmp/freeze-mbjok6l5/runs/corpus-annual-02-psz-gas-dx-a/reference_annual/run"
   },
   "capacity_iterations": [],
   "percent_of_target": 131.6,

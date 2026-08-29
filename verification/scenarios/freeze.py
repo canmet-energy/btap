@@ -253,7 +253,27 @@ def main():
         dest = baselines / sc["id"]
         dest.mkdir(parents=True)
         hashes = {}
-        for name in [*sc.get("files", []), *sc.get("text_files", {})]:
+
+        def strip_keys(node, keys):
+            if isinstance(node, dict):
+                return {k: strip_keys(v, keys) for k, v in node.items()
+                        if k not in keys}
+            if isinstance(node, list):
+                return [strip_keys(v, keys) for v in node]
+            return node
+
+        for name in sc.get("files", []):
+            # Store the CANONICAL form: spec strip_keys applied at freeze
+            # time, so machine-local paths (run_dir) never enter the
+            # committed baselines and re-freezes are byte-stable when
+            # nothing real changed. compare_runs strips both sides at
+            # compare time, so comparison semantics are unchanged.
+            data = json.loads((Path(run1.run_dir) / name)
+                              .read_text(encoding="utf-8"))
+            (dest / name).write_text(
+                json.dumps(strip_keys(data, set(spec.get("strip_keys", []))),
+                           indent=1) + "\n", encoding="utf-8")
+        for name in sc.get("text_files", {}):
             shutil.copyfile(Path(run1.run_dir) / name, dest / name)
         for stream, mode in sc.get("streams", {}).items():
             if mode == "exact":
