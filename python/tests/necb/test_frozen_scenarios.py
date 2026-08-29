@@ -123,6 +123,23 @@ class TestFrozenScenarios(unittest.TestCase):
                 self.fail(msg)
             self.skipTest(msg)
 
+    def test_ci_wires_every_lane(self):
+        """Every lane the manifest declares must have a CI executor — the
+        exact silent failure this guards against happened: a step-removal
+        edit swallowed the parity-lane step and CI stayed green while two
+        frozen scenarios went inactive. The python lane rides the default
+        (no env var); every other lane must appear as an explicit
+        BTAP_SCENARIO_LANES=<lane> in the workflow."""
+        workflow = (REPO_ROOT / ".github" / "workflows" / "test.yml"
+                    ).read_text(encoding="utf-8")
+        missing = [lane for lane in self.manifest["counts"]
+                   if lane != "python"
+                   and f"BTAP_SCENARIO_LANES={lane}" not in workflow]
+        self.assertEqual([], missing,
+                         f"manifest lane(s) {missing} have NO executor step "
+                         "in .github/workflows/test.yml — their frozen "
+                         "scenarios are silently inactive in CI")
+
     def test_lane_scenarios(self):
         """Every scenario in the selected lane(s), and EXACTLY that many."""
         selected = [s for s in self.manifest["scenarios"]

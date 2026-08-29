@@ -396,6 +396,20 @@ jobs:
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
           BTAP_PYTHON="$PWD/python/.parity-venv/bin/python" \
             bash verification/live_leg_c.sh /tmp/live-leg-c
+      # D-80 R4 (D-82): the frozen ANNUAL scenarios are the parity job's
+      # pipeline gate (they replaced the live annual Leg-B steps). This
+      # step was accidentally swallowed by the PR-2 step-removal edit —
+      # the post-merge review caught the two annual scenarios inactive;
+      # test_ci_wires_every_lane now pins each lane to a CI executor.
+      - name: Frozen scenarios (parity lane)
+        working-directory: python
+        env:
+          BUNDLE_GEMFILE: ''
+        run: |
+          PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
+            .parity-venv/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
       # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
       # is how goldens are (re)generated — dispatch with export_goldens=true,
       # download the artifact into verification/oracle/goldens/, commit. Run
