@@ -61,7 +61,7 @@ else
                     out: File::NULL, err: File::NULL)
            end
   gen_ok or abort("sample generation (#{SAMPLES_GEN}) failed")
-  File.write(GEN_MARKER, "#{SAMPLES_GEN}\n")
+  generated_this_run = true
 end
 
 # The exact-corpus contract (D-80 R2): the generated slug set must equal the
@@ -75,6 +75,11 @@ unless actual_slugs == EXPECTED_SLUGS
         "  missing: #{(EXPECTED_SLUGS - actual_slugs).inspect}\n" \
         "  extra:   #{(actual_slugs - EXPECTED_SLUGS).inspect}")
 end
+# Stamp only AFTER the exact-set contract holds: a generator that exits 0
+# with an incomplete corpus leaves the directory UNSTAMPED, so the next run
+# refuses it with the delete-and-regenerate message instead of repeatedly
+# reusing a stamped-but-invalid corpus.
+File.write(GEN_MARKER, "#{SAMPLES_GEN}\n") if defined?(generated_this_run) && generated_this_run
 
 # The shared fixture weather trio (epw/ddy/stat beside each other) — the
 # simulating tiers need it; the committed corpus args carried no --epw, so

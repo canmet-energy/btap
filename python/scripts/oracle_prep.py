@@ -30,7 +30,6 @@ import hashlib
 import json
 import subprocess
 import sys
-from importlib import resources
 from pathlib import Path
 
 PYTHON_ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +55,11 @@ def git(*args):
 
 
 def seed_path():
-    return str(resources.files("btap.modeling.hvac") / "data" / "5ZoneNoHVAC.osm")
+    """The DURABLE verification-owned seed (D-80: live Leg C outlives the
+    gem trees). Byte-identity with the gem and package copies is drift-gated
+    until R6; the exporter binds on this same file's hash."""
+    return str(REPO_ROOT / "verification" / "oracle" / "fixtures"
+               / "5ZoneNoHVAC.osm")
 
 
 def first_outdoor_wall_sdk_order(model):
@@ -136,7 +139,7 @@ def build_daylighting_controls(out_dir):
             f"iteration order = {wall_name!r}",
         ],
         "operation_gates": [
-            "python/tests/necb/test_loads_apply.py (assign_space_types)",
+            "python/tests/necb/test_loads_apply_loads.py (assign_space_types)",
         ],
         "oracle_operation": "std daylighting-controls placement "
                             "(lighting_daylighting.controls_on_fixture)",
@@ -159,7 +162,7 @@ def build_lighting_costing(out_dir):
             "Building.setStandardsTemplate('NECB2020')",
         ],
         "operation_gates": [
-            "python/tests/necb/test_loads_apply.py (assign_space_types)",
+            "python/tests/necb/test_loads_apply_loads.py (assign_space_types)",
             "python/tests/necb/test_oracle_goldens_lighting.py (apply_lights LED)",
         ],
         "oracle_operation": "BTAP lighting coster total at ONTARIO/TORONTO "
@@ -177,7 +180,7 @@ def build_shw(out_dir):
             "> 25 m2, vintage='2020')",
         ],
         "operation_gates": [
-            "python/tests/necb/test_loads_apply.py (assign_space_types)",
+            "python/tests/necb/test_loads_apply_loads.py (assign_space_types)",
         ],
         "oracle_operation": "legacy SWH demand census (shw.swh)",
         "signature": signature(model),
@@ -234,7 +237,7 @@ def main(argv=None):
             "oracle_prep_sha256": sha256(__file__),
             "request_manifest_sha256": sha256(request_manifest),
             "seed_sha256": sha256(seed_path()),
-            "seed": "btap.modeling.hvac data 5ZoneNoHVAC.osm",
+            "seed": "verification/oracle/fixtures/5ZoneNoHVAC.osm",
             "openstudio": {
                 "sdk_version": openstudio.openStudioVersion(),
                 "build_sha": openstudio.openStudioVersionBuildSHA(),

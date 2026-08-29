@@ -59,6 +59,17 @@ abort('the pinned oracle is not bundled — run under BUNDLE_GEMFILE=legacy_pin/
 coster = OracleProbes::Access.coster
 abort('the BTAP costing oracle failed to load') if coster == :unavailable
 
+# ---- prep manifest schema: fail with the field name, not NoMethodError ---
+prov = PREP_MANIFEST['provenance']
+abort('prep_manifest.json has no provenance block — re-run python/scripts/oracle_prep.py') unless prov.is_a?(Hash)
+%w[request_manifest_sha256 oracle_prep_sha256 seed_sha256 openstudio commit dirty].each do |field|
+  next if prov.key?(field)
+
+  abort("prep_manifest.json provenance is missing #{field.inspect} — the prep directory " \
+        'was built by an older/foreign oracle_prep.py; re-run python/scripts/oracle_prep.py.')
+end
+abort('prep_manifest.json has no models block — re-run python/scripts/oracle_prep.py') unless PREP_MANIFEST['models'].is_a?(Hash)
+
 # ---- provenance binding: the prep must come from THESE inputs ------------
 # The prep manifest records what oracle_prep.py ran against; a stale prep
 # directory paired with a newer request manifest (or a changed prep script,
@@ -68,9 +79,9 @@ abort('the BTAP costing oracle failed to load') if coster == :unavailable
 {
   'request_manifest_sha256' => File.join(__dir__, 'request_manifest.json'),
   'oracle_prep_sha256' => File.join(ROOT, 'python/scripts/oracle_prep.py'),
-  'seed_sha256' => File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm')
+  'seed_sha256' => File.join(__dir__, 'fixtures/5ZoneNoHVAC.osm')
 }.each do |field, current_path|
-  recorded = PREP_MANIFEST['provenance'][field]
+  recorded = prov[field]
   current = Digest::SHA256.hexdigest(File.read(current_path, encoding: 'BINARY'))
   next if recorded == current
 
@@ -87,9 +98,15 @@ if version_skew && ENV['BTAP_ORACLE_ALLOW_VERSION_SKEW'] != '1'
         'BTAP_ORACLE_ALLOW_VERSION_SKEW=1 (an explicit rebaseline decision) to proceed.')
 end
 
-FIXTURE = File.join(ROOT, 'btap-modeling/lib/btap_modeling/hvac/data/5ZoneNoHVAC.osm')
-EPW = File.join(ROOT, 'btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
-DDY = File.join(ROOT, 'btap-modeling/test/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
+# DURABLE verification-owned inputs (D-80: live Leg C must outlive the gem
+# trees — R6 deletes them). The weather TRIO travels together: the oracle's
+# get_necb_hdd18 derives the .stat path from the EPW's directory, so
+# fixtures/ must also hold the .stat even though nothing names it here. Byte-identity with the gem originals is
+# drift-gated until R6 by python/tests/test_fixture_drift.py; at R6 these
+# copies become authoritative.
+FIXTURE = File.join(__dir__, 'fixtures/5ZoneNoHVAC.osm')
+EPW = File.join(__dir__, 'fixtures/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw')
+DDY = File.join(__dir__, 'fixtures/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy')
 
 def load_osm(path)
   model = OpenStudio::Model::Model.load(OpenStudio::Path.new(path))

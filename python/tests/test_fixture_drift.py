@@ -62,6 +62,25 @@ OTHER_ORIGINALS = {
     / "paired_bars.svg",
 }
 
+#: The DURABLE verification-owned oracle inputs (D-80: live Leg C must
+#: outlive the gem trees, so the exporter reads verification/oracle/fixtures
+#: — these copies become authoritative at R6). {absolute copy: absolute
+#: gem-tree original}, drift-gated like everything else until then.
+_ORACLE_FIXTURES = REPO_ROOT / "verification" / "oracle" / "fixtures"
+_GEM_HVAC_DATA = (REPO_ROOT / "btap-modeling" / "lib" / "btap_modeling"
+                  / "hvac" / "data")
+VERIFICATION_COPIES = {
+    _ORACLE_FIXTURES / "5ZoneNoHVAC.osm": _GEM_HVAC_DATA / "5ZoneNoHVAC.osm",
+    _ORACLE_FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw":
+        GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
+    _ORACLE_FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy":
+        GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
+    # The .stat travels with the trio: the oracle's get_necb_hdd18 derives
+    # its path from the EPW's directory (live Leg C failed without it).
+    _ORACLE_FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.stat":
+        GEM_FIXTURES / "weather" / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.stat",
+}
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -120,6 +139,39 @@ class TestFixtureDrift(unittest.TestCase):
 
     def test_paired_bars_svg(self):
         self._check("paired_bars.svg")
+
+    def _check_absolute(self, mine: Path, theirs: Path):
+        self.assertTrue(mine.is_file(),
+                        f"the verification-owned copy is missing: {mine}\n{POLICY}")
+        self.assertTrue(
+            theirs.is_file(),
+            f"the Ruby original is gone: {theirs}\n"
+            "If the gems have retired (D-80 R6), remove this assertion and "
+            "promote the verification copies to authoritative.")
+        self.assertEqual(sha256(theirs), sha256(mine),
+                         f"fixture drift: {mine.name}\n  ruby   : {theirs}\n"
+                         f"  verification: {mine}\n{POLICY}")
+
+    def test_oracle_fixture_seed(self):
+        mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".osm")
+        self._check_absolute(mine, VERIFICATION_COPIES[mine])
+        # The PACKAGE copy must match too — three copies, one content.
+        from importlib import resources
+        pkg = resources.files("btap.modeling.hvac") / "data" / "5ZoneNoHVAC.osm"
+        self.assertEqual(sha256(mine), sha256(Path(str(pkg))),
+                         "the packaged seed diverged from the verification copy")
+
+    def test_oracle_fixture_epw(self):
+        mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".epw")
+        self._check_absolute(mine, VERIFICATION_COPIES[mine])
+
+    def test_oracle_fixture_ddy(self):
+        mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".ddy")
+        self._check_absolute(mine, VERIFICATION_COPIES[mine])
+
+    def test_oracle_fixture_stat(self):
+        mine = next(k for k in VERIFICATION_COPIES if k.suffix == ".stat")
+        self._check_absolute(mine, VERIFICATION_COPIES[mine])
 
 
 if __name__ == "__main__":

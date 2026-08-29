@@ -118,3 +118,20 @@ def test_python_vendored_costing_candidates_cover_the_manifest():
             problems.append(f"{candidate['key']}: type/id_layers diverge from "
                             "the manifest's bootstrap record")
     assert not problems, "\n".join(problems)
+
+
+def test_oracle_prep_cites_only_real_gates():
+    """Every python/tests path cited in oracle_prep.py's composition
+    contracts must exist — the contracts are the evidence that
+    Python-prepared oracle inputs are independently verified, and a
+    nonexistent cited gate is evidence pointing at nothing (post-merge
+    review round 2, finding 2)."""
+    import re
+
+    source = (REPO_ROOT / "python" / "scripts" / "oracle_prep.py").read_text(
+        encoding="utf-8")
+    cited = set(re.findall(r"python/tests/[\w/]+\.py", source))
+    assert cited, "no cited gates found — the contract format changed?"
+    missing = [c for c in sorted(cited)
+               if not (REPO_ROOT / "python" / c.removeprefix("python/")).is_file()]
+    assert not missing, f"composition contracts cite nonexistent gates: {missing}"
