@@ -72,9 +72,10 @@ jobs:
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
       # The decisions registry is CANONICAL on the Python side since R3 (D-81);
       # the Ruby gem's copy is GENERATED from it. Stdlib-only, every PR.
-      - name: "Decisions registry: generation direction + citations"
+      - name: "Decisions registry: generation direction + citations + TOC"
         run: |
           python3 python/scripts/sync_decisions_registry.py --check
+          ruby btap-necb/scripts/generate_decisions_toc.rb --check
           cd python && python3 -m unittest \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_registry

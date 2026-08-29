@@ -52,7 +52,13 @@ class TestDecisionsRegistrySync(unittest.TestCase):
         registry_ids = {entry["id"] for entry in data["decisions"]}
 
         doc_text = DECISIONS_DOC.read_text(encoding="utf-8")
-        heading_ids = set(HEADING_PATTERN.findall(doc_text))
+        heading_list = HEADING_PATTERN.findall(doc_text)
+        self.assertEqual(
+            len(heading_list), len(set(heading_list)),
+            "duplicate ## D-XX headings in btap-necb/docs/necb_decisions.md: "
+            f"{sorted(h for h in set(heading_list) if heading_list.count(h) > 1)}"
+            " — a set comparison alone would collapse them silently")
+        heading_ids = set(heading_list)
 
         missing_headings = registry_ids - heading_ids
         self.assertEqual(
