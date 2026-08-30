@@ -198,6 +198,15 @@ def run_checks() -> int:
                 assert err.is_file() and "EnergyPlus Completed Successfully" in (
                     err.read_text(encoding="utf-8", errors="replace")), (
                     f"installed-pair {name} did not complete EnergyPlus successfully")
+            # The download rung must NOT have been the engine source: the
+            # isolated cache stays EMPTY, proving the companion (already
+            # asserted venv-resident) supplied EnergyPlus — no provisioning
+            # occurred (review of the merged gate: closes the theoretical
+            # absent-companion-falls-to-download false-green).
+            provisioned = list((tmp / "cache").rglob("energyplus*"))
+            assert not provisioned, (
+                f"the isolated cache contains a provisioned engine "
+                f"({provisioned[:2]}) — the run did NOT use the companion")
             print(f"installed-pair sizing used btap from {Path(btap.__file__).parent}")
             print("installed-pair sizing used companion from "
                   f"{Path(btap_energyplus.__file__).parent}")
