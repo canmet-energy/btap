@@ -20,6 +20,7 @@ explicitly rather than assumed.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import tempfile
@@ -125,6 +126,86 @@ def run_checks() -> int:
         assert derated > 0, "tbd.process derated nothing on the seed model"
     check("the pinned py-tbd engine installs and processes (M7)", tbd_engine_operates)
 
+    def companion_engine_resolves():
+        # R5 (D-83): where the wheelhouse supplied the companion, the
+        # installed btap wheel must resolve to the installed companion's
+        # binary with no engine-resolution overrides.
+        if not os.environ.get("BTAP_COMPANION_WHEELHOUSE"):
+            return
+        import btap_energyplus  # noqa: I001
+        from btap.simulation import engine
+
+        companion_installed = Path(btap_energyplus.__file__).resolve()
+        if REPO_ROOT in companion_installed.parents:
+            raise AssertionError(
+                f"the SOURCE TREE shadowed the companion wheel ({companion_installed})")
+        print(f"btap-energyplus imported from: {companion_installed.parent}")
+
+        os.environ.pop("BTAP_ENERGYPLUS", None)
+        os.environ.pop("BTAP_ENERGYPLUS_ARCHIVE", None)
+        engine._reset_memo()
+        resolved = engine.ensure_energyplus()
+        expected = btap_energyplus.binary_path()
+        assert str(resolved) == str(expected), (
+            f"engine resolved {resolved}, not the companion {expected}")
+    check("the companion engine resolves with no engine overrides (R5)",
+          companion_engine_resolves)
+
+    def installed_pair_sizes():
+        # The release premise, exercised as users receive it: installed btap
+        # drives the installed companion from outside the checkout. Inputs may
+        # be fixtures; neither implementation is allowed to resolve from it.
+        if not os.environ.get("BTAP_COMPANION_WHEELHOUSE"):
+            return
+        import btap_energyplus
+
+        venv_root = Path(sys.prefix).resolve()
+        for package, module_path in (
+                ("btap", Path(btap.__file__).resolve()),
+                ("btap-energyplus", Path(btap_energyplus.__file__).resolve())):
+            if not module_path.is_relative_to(venv_root):
+                raise AssertionError(
+                    f"{package} imported from {module_path}, outside scratch venv {venv_root}")
+        exe = Path(sys.executable).parent / "btap-compliance"
+        with tempfile.TemporaryDirectory(prefix="btap-installed-sizing-") as tmp:
+            tmp = Path(tmp)
+            run_dir = tmp / "run"
+            env = {**os.environ, "XDG_CACHE_HOME": str(tmp / "cache")}
+            for name in ("PYTHONPATH", "BTAP_ENERGYPLUS", "BTAP_ENERGYPLUS_ARCHIVE",
+                         "BTAP_COMPANION_WHEELHOUSE"):
+                env.pop(name, None)
+            proc = subprocess.run(
+                [str(exe),
+                 str(modeling.hvac.catalog_report.FIXTURE),
+                 "--simulate", "sizing",
+                 "--epw", str(PYTHON_ROOT / "tests/fixtures/weather/"
+                               "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"),
+                 "--hdd", "3890", "--storeys", "1", "--no-report", "--quiet",
+                 "--space-type", "Space Function/Office enclosed > 25 m2",
+                 "-o", str(run_dir)],
+                cwd=str(tmp), env=env, capture_output=True, text=True, timeout=1200)
+            assert proc.returncode == 6, (
+                f"installed-pair sizing exited {proc.returncode}, expected 6 "
+                f"(no determination): {proc.stderr[-1200:]}")
+            assert (run_dir / "audit.json").is_file(), (
+                "installed-pair sizing produced no audit.json")
+            for name in ("proposed_sizing", "reference_sizing"):
+                energyplus_run = run_dir / name / "run"
+                sql = energyplus_run / "eplusout.sql"
+                err = energyplus_run / "eplusout.err"
+                assert sql.is_file() and sql.stat().st_size > 0, (
+                    f"installed-pair {name} produced no non-empty eplusout.sql")
+                assert err.is_file() and "EnergyPlus Completed Successfully" in (
+                    err.read_text(encoding="utf-8", errors="replace")), (
+                    f"installed-pair {name} did not complete EnergyPlus successfully")
+            print(f"installed-pair sizing used btap from {Path(btap.__file__).parent}")
+            print("installed-pair sizing used companion from "
+                  f"{Path(btap_energyplus.__file__).parent}")
+            print("installed-pair REAL sizing completed with isolated cache "
+                "and no engine-resolution overrides")
+    check("installed btap + installed companion complete real sizing (R5)",
+          installed_pair_sizes)
+
     def console_script_answers():
         # M6: the wheel declares the btap-compliance entry point. It must be
         # on the venv's bin path and --help must exit 0 — a broken entry
@@ -171,8 +252,50 @@ def main(argv) -> int:
         # DISTRIBUTION, not just the checkout: a broken git pin, missing
         # package data or import-resolution failure in the optional extra is
         # invisible to every source-tree test.
-        subprocess.run([str(pip), "install", "-q", "openstudio~=3.11.0",
-                        f"{wheel}[tbd]"], check=True)
+        # The companion hard dep (R5, D-83) resolves from a LOCAL
+        # wheelhouse (BTAP_COMPANION_WHEELHOUSE): CI builds+caches the
+        # linux companion wheel; without it, on a supported platform, the
+        # install MUST fail (H-6, exercised below in isolated-index form).
+        wheelhouse = os.environ.get("BTAP_COMPANION_WHEELHOUSE")
+        find_links = ["--find-links", wheelhouse] if wheelhouse else []
+        if wheelhouse:
+            # H-6, done HONESTLY (review round 4: an empty index fails for
+            # every dependency, proving nothing about the companion). Build
+            # a wheelhouse holding btap + EVERY dependency EXCEPT the
+            # companion; the failure must NAME the companion requirement.
+            with tempfile.TemporaryDirectory(prefix="h6-") as deps_dir:
+                subprocess.run(
+                    [str(pip), "download", "-q", "-d", deps_dir,
+                     "openstudio~=3.11.0"], check=True)
+                h6 = subprocess.run(
+                    [str(pip), "install", "--dry-run", "--no-index",
+                     "--find-links", deps_dir, str(wheel)],
+                    capture_output=True, text=True)
+                blame = (h6.stdout + h6.stderr)
+                if h6.returncode == 0:
+                    print("H-6 FAILED: btap resolved without the companion")
+                    return 1
+                if "btap-energyplus" not in blame:
+                    print("H-6 FAILED: resolution failed but did NOT name "
+                          f"btap-energyplus:\n{blame[-800:]}")
+                    return 1
+                print("H-6 ok: with every dep present EXCEPT the companion, "
+                      "resolution fails NAMING btap-energyplus")
+        # py-tbd from its released tag until the PyPI publication lands
+        # (the tag carries exactly version 3.5.2, satisfying the ==3.5.2
+        # pin in pyproject's [tbd] extra).
+        # py-topolys FIRST from its tag (version 0.1.0 satisfies
+        # py-tbd's ==0.1.0 metadata pin before the PyPI publication).
+        subprocess.run(
+            [str(pip), "install", "-q",
+             "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"],
+            check=True)
+        subprocess.run(
+            [str(pip), "install", "-q",
+             "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"],
+            check=True)
+        subprocess.run([str(pip), "install", "-q", *find_links,
+                        "openstudio~=3.11.0", f"{wheel}[tbd]"], check=True)
 
         # CWD outside the repo: a local btap/ must not be importable.
         print(f"running checks from {work_dir} (outside the checkout)\n")

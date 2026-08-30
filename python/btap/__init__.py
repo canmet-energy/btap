@@ -6,4 +6,4 @@ Import subpackages directly (``from btap.audit import AuditLog``); this root
 deliberately imports none of them, so ``import btap`` never pulls the SDK.
 """
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.2.0"
