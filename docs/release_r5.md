@@ -17,7 +17,12 @@ On BOTH pypi.org and test.pypi.org (same steps each):
 Add each as a *pending trusted publisher* (Account → Publishing).
 Distribution names: PyPI's similarity check blocked `btap` and `py-tbd`
 (bta / pytbd / tbd exist), so the published names are `canmet-btap`
-and `canmet-tbd`; the import names (`btap`, `tbd`) are unchanged. In
+and `canmet-tbd`; the import names (`btap`, `tbd`) are unchanged.
+PyPI caps PENDING publishers at 3 per account (per index); a pending
+entry is consumed when the project's first upload creates it. Sequence:
+register py-topolys + btap-energyplus + canmet-tbd; publish py-topolys
+(frees a slot on each index); then register canmet-btap; then publish
+the rest in order. In
 each GitHub repo: Settings → Environments → create `pypi` WITH a
 required-reviewer protection rule (the promotion approval); `testpypi`
 unprotected. File the PyPI file-size-limit request for `btap-energyplus`
