@@ -38,8 +38,19 @@ aws codebuild create-webhook --project-name necb-ci \
 ```
 
 and verify the hook is back on the repo (`gh api repos/<owner>/<repo>/hooks`).
-A GitHub-side repo RENAME alone is harmless — the hook lives on the repo and
-survives; it is the CodeBuild-side source update that kills it.
+A GitHub-side repo RENAME is NOT harmless, and the note that used to sit
+here saying so was wrong (paid for at the btap-gems → btap rename,
+2026-08-30). The GitHub hook does survive — `gh api repos/<owner>/<repo>/hooks`
+still lists it — but CodeBuild matches the incoming event against the
+project's SOURCE URL, which still names the old repo, so every job queues
+forever with no error anywhere. Symptom: `gh run list` shows runs stuck at
+`queued` while `lint` (a bare GitHub runner) passes. After a rename, update
+the project source AND re-create the webhook, in that order.
+
+On a PUBLIC repo none of this is needed: GitHub-hosted minutes are free, so
+deleting the `CI_RUNNER` variable reverts every job to `ubuntu-latest`
+(`gh variable delete CI_RUNNER`) — which is what this repo does since it
+went public.
 
 ## What runs where afterwards
 
