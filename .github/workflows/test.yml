@@ -154,13 +154,29 @@ jobs:
         with:
           path: packaging/pypi/energyplus/dist
           key: companion-linux-${{ steps.companion.outputs.key }}
-      - name: Build the companion if not cached
+      - name: Build (or digest-verify) the companion
         run: |
-          ls packaging/pypi/energyplus/dist/*.whl 2>/dev/null || \
+          # A restored cache is only trusted after DIGEST verification of
+          # the exact expected filename (review round 4: `ls *.whl` would
+          # accept partial, stale, or foreign contents). On any mismatch
+          # the cache dir is purged and the build runs fresh — with its
+          # patchelf, ELF-closure, auditwheel, and venv-sizing gates.
+          pip install -q patchelf auditwheel build
+          EXPECT="btap_energyplus-25.2.0.1-py3-none-manylinux_2_35_x86_64.whl"
+          D=packaging/pypi/energyplus/dist
+          if [ -f "$D/$EXPECT" ] && [ -f "$D/DIGESTS.json" ] && \
+             python3 -c "
+          import hashlib, json, sys
+          m = json.load(open('$D/DIGESTS.json'))
+          h = hashlib.sha256(open('$D/$EXPECT','rb').read()).hexdigest()
+          sys.exit(0 if m.get('$EXPECT') == h else 1)"; then
+            echo "cache hit: $EXPECT digest-verified"
+          else
+            rm -rf "$D"
             python3 packaging/pypi/energyplus/build_wheel.py \
-              --platform linux --iteration 1 \
-              --outdir packaging/pypi/energyplus/dist
-          echo "BTAP_COMPANION_WHEELHOUSE=$PWD/packaging/pypi/energyplus/dist" >> "$GITHUB_ENV"
+              --platform linux --iteration 1 --outdir "$D"
+          fi
+          echo "BTAP_COMPANION_WHEELHOUSE=$PWD/$D" >> "$GITHUB_ENV"
       - name: Python suites (SDK required, engine tests skip here)
         working-directory: python
         env:

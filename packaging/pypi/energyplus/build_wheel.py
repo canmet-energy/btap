@@ -35,6 +35,7 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -67,7 +68,7 @@ PLATFORMS = {
                 "binary": "energyplus.exe", "libpython_glob": "python3*.dll"},
 }
 KEEP_REQUIRED = {
-    "linux": ["energyplus", "libenergyplusapi.so*", "libpython*",
+    "linux": ["energyplus", "libenergyplusapi.so*", "libeplus-python*",
               "Energy+.idd", "Energy+.schema.epJSON", "ExpandObjects"],
     "windows": ["energyplus.exe", "energyplusapi.dll", "python3*.dll",
                 "Energy+.idd", "Energy+.schema.epJSON", "ExpandObjects.exe",
@@ -121,16 +122,93 @@ def extract(archive, workdir):
     return roots[0].parent
 
 
-def verify_linkage(eplus_root):
-    """Abort if the libpython-is-NEEDED assumption ever flips (Linux)."""
-    binary = eplus_root / "energyplus"
-    if not binary.exists():
-        return  # windows payload on a linux host — PE check runs in CI
-    out = subprocess.run(["ldd", str(binary)], capture_output=True,
-                         text=True, check=False).stdout
-    if "libpython" not in out:
-        die("energyplus no longer links libpython — the prune assumptions "
-            "must be re-adjudicated, not silently changed")
+MANYLINUX_ALLOWLIST = {
+    "libc.so.6", "libm.so.6", "libdl.so.2", "libpthread.so.0", "librt.so.1",
+    "libgcc_s.so.1", "libstdc++.so.6", "ld-linux-x86-64.so.2", "libutil.so.1",
+    "libcrypt.so.1", "libnsl.so.1", "libX11.so.6", "libXext.so.6",
+    "libXrender.so.1", "libICE.so.6", "libSM.so.6", "libGL.so.1",
+    "libgobject-2.0.so.0", "libgthread-2.0.so.0", "libglib-2.0.so.0",
+    "libz.so.1", "libexpat.so.1",
+}
+
+
+def patch_libpython(eplus_root):
+    """Rename the bundled libpython and patch DT_NEEDED (linux only).
+
+    PEP 600 forbids manylinux wheels from linking libpythonX.Y — the
+    policy targets HOST-python dependence, but EnergyPlus links its own
+    BUNDLED copy (for the PythonPlugin API btap never uses). Renaming
+    the bundled file and patching the two NEEDED entries makes the
+    non-dependence on host python explicit and mechanical; auditwheel
+    then certifies the manylinux tag (verified empirically: the patched
+    binary runs and `auditwheel show` grades manylinux_2_35_x86_64).
+    """
+    libs = list(eplus_root.glob("libpython*.so*"))
+    real = [p for p in libs if not p.is_symlink()]
+    if not real:
+        return None
+    src = real[0]
+    renamed = src.with_name(src.name.replace("libpython", "libeplus-python"))
+    shutil.move(src, renamed)
+    for stale in [p for p in libs if p.is_symlink()]:
+        stale.unlink()
+    venv_patchelf = Path(sys.executable).parent / "patchelf"
+    patchelf = (str(venv_patchelf) if venv_patchelf.exists()
+                else shutil.which("patchelf")) or die(
+        "patchelf is required to build the linux companion (pip install "
+        "patchelf)")
+    for target in ("energyplus-*", "libenergyplusapi.so*"):
+        for f in eplus_root.glob(target):
+            if f.is_symlink() or not f.is_file():
+                continue
+            subprocess.run([patchelf, "--replace-needed", src.name,
+                            renamed.name, str(f)], check=True)
+    return {"renamed": src.name, "to": renamed.name,
+            "patched": ["energyplus", "libenergyplusapi"]}
+
+
+def elf_closure(eplus_root):
+    """RECURSIVE dependency closure over every shipped ELF: each NEEDED
+    entry must resolve INSIDE the payload or be on the manylinux
+    allowlist. ldd failures, 'not found', and host-only resolution all
+    abort — a one-machine green must never stand in for closure."""
+    payload_names = {f.name for f in eplus_root.iterdir() if f.is_file()}
+    problems = []
+    elves = [f for f in eplus_root.iterdir() if f.is_file()
+             and (f.suffix in ("", ".so") or ".so." in f.name)
+             and f.read_bytes()[:4] == b"\x7fELF"]
+    if not elves:
+        die("no ELF files found in the payload — wrong tree?")
+    for elf in elves:
+        out = subprocess.run(["readelf", "-d", str(elf)],
+                             capture_output=True, text=True, check=False)
+        if out.returncode != 0:
+            problems.append(f"{elf.name}: readelf failed")
+            continue
+        needed = re.findall(r"\(NEEDED\)\s+Shared library: \[([^\]]+)\]",
+                            out.stdout)
+        runpath = re.findall(r"\((?:RUNPATH|RPATH)\)[^\[]*\[([^\]]+)\]",
+                            out.stdout)
+        for lib in needed:
+            if lib in payload_names:
+                if not runpath or "$ORIGIN" not in runpath[0]:
+                    problems.append(
+                        f"{elf.name}: needs bundled {lib} but has no "
+                        f"$ORIGIN RUNPATH ({runpath})")
+            elif lib in MANYLINUX_ALLOWLIST:
+                pass
+            elif lib.startswith("libpython"):
+                problems.append(
+                    f"{elf.name}: still links HOST {lib} — the patchelf "
+                    "step failed")
+            else:
+                problems.append(
+                    f"{elf.name}: non-allowlisted external {lib} — would "
+                    "resolve from the build host, not the wheel")
+    if problems:
+        die("ELF closure failed:\n  " + "\n  ".join(problems[:20]))
+    print(f"ELF closure ok: {len(elves)} shipped ELFs, every NEEDED "
+          "resolved in-payload (with $ORIGIN) or allowlisted")
 
 
 def prune(eplus_root):
@@ -244,10 +322,15 @@ def build_platform(plat, version, outdir, workdir):
     cfg = PLATFORMS[plat]
     asset = download_verified(cfg["asset_key"], workdir)
     eplus_root = extract(asset, workdir / plat)
-    verify_linkage(eplus_root)
     removed = prune(eplus_root)
+    patch_note = None
+    if plat == "linux":
+        patch_note = patch_libpython(eplus_root)
+        elf_closure(eplus_root)
     assert_keep(eplus_root, plat)
     prov = provenance(plat, asset, removed, eplus_root, version)
+    if patch_note:
+        prov["libpython_patch"] = patch_note
     tmp, final_name = wheel_bytes(cfg, version, eplus_root, prov)
     outdir.mkdir(parents=True, exist_ok=True)
     dest = outdir / final_name
@@ -255,7 +338,67 @@ def build_platform(plat, version, outdir, workdir):
     mb = dest.stat().st_size / (1 << 20)
     print(f"built {dest.name} ({mb:.1f} MB)"
           + ("  ⚠ >=95 MB — PyPI size-exemption territory" if mb >= 95 else ""))
+    if plat == "linux":
+        audit_wheel_gate(dest, cfg["wheel_tag"])
     return dest
+
+
+def audit_wheel_gate(wheel, baked_tag):
+    """The tag is EARNED: `auditwheel show` on the COMPLETED wheel must
+    grade exactly the platform tag baked into the filename."""
+    out = subprocess.run([sys.executable, "-m", "auditwheel", "show",
+                          str(wheel)], capture_output=True, text=True,
+                         check=False)
+    if out.returncode != 0:
+        die(f"auditwheel show failed:\n{out.stderr[-800:]}")
+    expected = baked_tag.split("py3-none-")[-1]
+    m = re.search(r'consistent with the following platform tag: "([^"]+)"',
+                  out.stdout)
+    grade = m.group(1) if m else "UNPARSEABLE"
+    if grade != expected:
+        die(f"auditwheel grades this wheel {grade!r}, but the filename "
+            f"claims {expected!r} — a mislabeled tag must never ship")
+    print(f"auditwheel gate ok: grade {grade} == baked tag")
+
+
+def validate_linux_wheel(wheel):
+    """The documented build-side validation, IMPLEMENTED: scratch venv,
+    cache isolated, BTAP_ENERGYPLUS cleared — ensure_energyplus() must
+    return the companion binary and a REAL sizing simulation must
+    produce EnergyPlus outputs."""
+    import os
+    with tempfile.TemporaryDirectory(prefix="companion-validate-") as tmp:
+        tmp = Path(tmp)
+        venv = tmp / "venv"
+        subprocess.run([sys.executable, "-m", "venv", str(venv)], check=True)
+        pip = venv / "bin" / "pip"
+        py = venv / "bin" / "python"
+        subprocess.run([str(pip), "install", "-q", str(wheel),
+                        "openstudio~=3.11.0"], check=True)
+        env = {**os.environ,
+               "PYTHONPATH": str(REPO_ROOT / "python"),
+               "XDG_CACHE_HOME": str(tmp / "cache")}  # cache isolated
+        env.pop("BTAP_ENERGYPLUS", None)
+        run_dir = tmp / "sizing"
+        proc = subprocess.run(
+            [str(py), "-m", "btap.necb.cli",
+             str(REPO_ROOT / "verification/oracle/fixtures/5ZoneNoHVAC.osm"),
+             "--simulate", "sizing",
+             "--epw", str(REPO_ROOT / "python/tests/fixtures/weather/"
+                          "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"),
+             "--hdd", "3890", "--storeys", "1", "--no-report", "--quiet",
+             "--space-type", "Space Function/Office enclosed > 25 m2",
+             "-o", str(run_dir)],
+            capture_output=True, text=True, env=env, timeout=1200,
+            check=False)
+        if proc.returncode != 6:
+            die(f"companion-only sizing run exited {proc.returncode}, "
+                f"expected 6 (no determination):\n{proc.stderr[-1200:]}")
+        for expected in ("proposed_sizing", "reference_sizing", "audit.json"):
+            if not (run_dir / expected).exists():
+                die(f"companion-only sizing run produced no {expected}")
+        print("build-side validation ok: companion-only REAL sizing run "
+              "(proposed+reference) with isolated cache and no env vars")
 
 
 def main():
@@ -264,6 +407,9 @@ def main():
                     default="all")
     ap.add_argument("--iteration", type=int, default=1)
     ap.add_argument("--outdir", default=str(HERE / "dist"))
+    ap.add_argument("--skip-validation", action="store_true",
+                    help="skip the scratch-venv sizing validation (CI cache "
+                         "restores are digest-verified instead)")
     ap.add_argument("--workdir", default=None,
                     help="cache dir for downloaded assets (default: temp)")
     args = ap.parse_args()
@@ -276,6 +422,10 @@ def main():
 
     plats = ["linux", "windows"] if args.platform == "all" else [args.platform]
     wheels = [build_platform(p, version, outdir, workdir) for p in plats]
+    if not args.skip_validation:
+        for w in wheels:
+            if "manylinux" in w.name:
+                validate_linux_wheel(w)
     manifest = {w.name: sha256(w) for w in wheels}
     (outdir / "DIGESTS.json").write_text(json.dumps(manifest, indent=1) + "\n",
                                          encoding="utf-8")

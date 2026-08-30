@@ -197,16 +197,28 @@ def main(argv) -> int:
         wheelhouse = os.environ.get("BTAP_COMPANION_WHEELHOUSE")
         find_links = ["--find-links", wheelhouse] if wheelhouse else []
         if wheelhouse:
-            with tempfile.TemporaryDirectory() as empty:
+            # H-6, done HONESTLY (review round 4: an empty index fails for
+            # every dependency, proving nothing about the companion). Build
+            # a wheelhouse holding btap + EVERY dependency EXCEPT the
+            # companion; the failure must NAME the companion requirement.
+            with tempfile.TemporaryDirectory(prefix="h6-") as deps_dir:
+                subprocess.run(
+                    [str(pip), "download", "-q", "-d", deps_dir,
+                     "openstudio~=3.11.0"], check=True)
                 h6 = subprocess.run(
-                    [str(pip), "install", "-q", "--no-index",
-                     "--find-links", empty, str(wheel)],
+                    [str(pip), "install", "--dry-run", "--no-index",
+                     "--find-links", deps_dir, str(wheel)],
                     capture_output=True, text=True)
+                blame = (h6.stdout + h6.stderr)
                 if h6.returncode == 0:
-                    print("H-6 FAILED: btap installed with no companion")
+                    print("H-6 FAILED: btap resolved without the companion")
                     return 1
-                print("H-6 ok: no-companion isolated install fails "
-                      "resolution")
+                if "btap-energyplus" not in blame:
+                    print("H-6 FAILED: resolution failed but did NOT name "
+                          f"btap-energyplus:\n{blame[-800:]}")
+                    return 1
+                print("H-6 ok: with every dep present EXCEPT the companion, "
+                      "resolution fails NAMING btap-energyplus")
         # py-tbd from its released tag until the PyPI publication lands
         # (the tag carries exactly version 3.5.2, satisfying the ==3.5.2
         # pin in pyproject's [tbd] extra).

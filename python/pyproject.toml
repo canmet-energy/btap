@@ -14,7 +14,9 @@ license = { text = "LGPL-3.0-or-later" }
 # btap-energyplus (R5, D-83): the pinned EnergyPlus engine as package
 # data — a HARD platform-marked EXACT pin, so `pip install btap` needs no
 # engine thought on the supported platforms (Windows x86-64; glibc-2.35+
-# Linux x86-64 — the auditwheel-audited floor). Exact (==25.2.0.1, never
+# Linux x86-64 — the floor the companion's build-time auditwheel gate
+# enforces on every build; see packaging/pypi/energyplus). Exact
+# (==25.2.0.1, never
 # .*): a companion repackaging REQUIRES a corresponding btap release.
 # Other platforms skip the marker and fall to the provisioner's
 # override/archive/download rungs.
