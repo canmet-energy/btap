@@ -241,6 +241,13 @@ jobs:
       TBD_REQUIRED: '1'
     steps:
       - uses: actions/checkout@v4
+      # The container runs as root while the workspace belongs to the runner
+      # user, so git refuses the tree ("dubious ownership", exit 128) — which
+      # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
+      # self-containment scanner's `git ls-files` die, not git itself. Harmless
+      # where the UIDs already match.
+      - name: Trust the workspace (container UID != workspace owner)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       # tbd/osut/topolys are the envelope domain's third-party runtime deps. They
       # are declared in the gemspec, but these suites run under plain `ruby` (not
       # `bundle exec`), so gemspec dependencies are never resolved — they have to
@@ -293,6 +300,13 @@ jobs:
     container: nrel/openstudio:3.11.0
     steps:
       - uses: actions/checkout@v4
+      # The container runs as root while the workspace belongs to the runner
+      # user, so git refuses the tree ("dubious ownership", exit 128) — which
+      # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
+      # self-containment scanner's `git ls-files` die, not git itself. Harmless
+      # where the UIDs already match.
+      - name: Trust the workspace (container UID != workspace owner)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       # Doc/TOC/citation duties on the Ruby side; the generation DIRECTION is a lint-job gate.
       - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
         run: cd btap-necb && ruby test/test_decisions_registry.rb
@@ -394,6 +408,13 @@ jobs:
       BUNDLE_GEMFILE: ${{ github.workspace }}/legacy_pin/Gemfile
     steps:
       - uses: actions/checkout@v4
+      # The container runs as root while the workspace belongs to the runner
+      # user, so git refuses the tree ("dubious ownership", exit 128) — which
+      # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
+      # self-containment scanner's `git ls-files` die, not git itself. Harmless
+      # where the UIDs already match.
+      - name: Trust the workspace (container UID != workspace owner)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Cache the pinned oracle
         uses: actions/cache@v4
         with:
