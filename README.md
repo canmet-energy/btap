@@ -55,8 +55,8 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 The tool is the **Python implementation**, installed from source:
 
 ```bash
-git clone https://github.com/canmet-energy/btap-gems.git
-cd btap-gems/python
+git clone https://github.com/canmet-energy/btap.git
+cd btap/python
 python -m pip install '.[tbd]'
 ```
 

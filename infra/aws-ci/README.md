@@ -30,7 +30,7 @@ in either direction.
 `aws codebuild update-project --source …` silently drops the project's
 webhook — every subsequent CI job then queues forever, because nothing
 delivers `WORKFLOW_JOB_QUEUED` any more (paid for once, at the
-openstudio-necb-gems → btap-gems rename). After ANY source change, always:
+openstudio-necb-gems → btap-gems rename; btap-gems → btap (2026-08-30) left CodeBuild's source on the redirecting old URL — fix source + re-create the webhook together). After ANY source change, always:
 
 ```bash
 aws codebuild create-webhook --project-name necb-ci \

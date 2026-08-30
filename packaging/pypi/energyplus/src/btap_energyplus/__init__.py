@@ -1,6 +1,6 @@
 """btap-energyplus — the pinned EnergyPlus engine as a per-platform wheel.
 
-The companion package of ``btap`` (canmet-energy/btap-gems, decision
+The companion package of ``btap`` (canmet-energy/btap, decision
 D-83): carries the pinned EnergyPlus release as package data so
 ``pip install btap`` needs no engine thought at all. Built by
 ``packaging/pypi/energyplus/build_wheel.py`` from the sha256-verified

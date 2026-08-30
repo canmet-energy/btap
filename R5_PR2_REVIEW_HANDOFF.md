@@ -112,7 +112,7 @@ Live Leg C: 23/23 tests, 0 skips
 
 PR #26 was merged:
 
-- PR: <https://github.com/canmet-energy/btap-gems/pull/26>
+- PR: <https://github.com/canmet-energy/btap/pull/26>
 - Validated head: `18efb578f5e60e620722eb2a8d3df2916de3b0f7`
 - Merge commit: `6f7638edccafe1426897ba0e900d95a3a3a6d889`
 - Merged: 2026-08-30 16:28 UTC

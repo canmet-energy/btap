@@ -86,7 +86,7 @@ Both repos are PUBLIC; this account has admin. Already pushed:
 test.pypi.org: add pending trusted publishers for `py-topolys`
 (canmet-energy/py-topolys, publish.yml, env pypi/testpypi), `py-tbd`
 (canmet-energy/py-tbd, same), `btap` + `btap-energyplus`
-(canmet-energy/btap-gems, publish.yml — lands with PR-3). In each GitHub
+(canmet-energy/btap, publish.yml — lands with PR-3). In each GitHub
 repo: Settings → Environments → create `pypi` WITH required-reviewer
 protection (the promotion approval gate). File the PyPI size-limit
 request for `btap-energyplus` (156.4 MB Linux wheel) at

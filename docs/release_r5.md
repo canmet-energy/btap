@@ -11,8 +11,8 @@ On BOTH pypi.org and test.pypi.org (same steps each):
 |---|---|---|---|
 | py-topolys | canmet-energy/py-topolys | publish.yml | pypi / testpypi |
 | py-tbd | canmet-energy/py-tbd | publish.yml | pypi / testpypi |
-| btap | canmet-energy/btap-gems | publish.yml | pypi / testpypi |
-| btap-energyplus | canmet-energy/btap-gems | publish.yml | pypi / testpypi |
+| btap | canmet-energy/btap | publish.yml | pypi / testpypi |
+| btap-energyplus | canmet-energy/btap | publish.yml | pypi / testpypi |
 
 Add each as a *pending trusted publisher* (Account → Publishing). In
 each GitHub repo: Settings → Environments → create `pypi` WITH a
