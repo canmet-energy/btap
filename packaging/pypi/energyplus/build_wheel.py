@@ -362,10 +362,8 @@ def audit_wheel_gate(wheel, baked_tag):
 
 
 def validate_linux_wheel(wheel):
-    """The documented build-side validation, IMPLEMENTED: scratch venv,
-    cache isolated, BTAP_ENERGYPLUS cleared — ensure_energyplus() must
-    return the companion binary and a REAL sizing simulation must
-    produce EnergyPlus outputs."""
+    """Validate the companion against source btap before wheel smoke later
+    validates the installed btap + installed companion distribution pair."""
     import os
     with tempfile.TemporaryDirectory(prefix="companion-validate-") as tmp:
         tmp = Path(tmp)
@@ -392,13 +390,13 @@ def validate_linux_wheel(wheel):
             capture_output=True, text=True, env=env, timeout=1200,
             check=False)
         if proc.returncode != 6:
-            die(f"companion-only sizing run exited {proc.returncode}, "
+            die(f"source-btap companion sizing run exited {proc.returncode}, "
                 f"expected 6 (no determination):\n{proc.stderr[-1200:]}")
         for expected in ("proposed_sizing", "reference_sizing", "audit.json"):
             if not (run_dir / expected).exists():
-                die(f"companion-only sizing run produced no {expected}")
-        print("build-side validation ok: companion-only REAL sizing run "
-              "(proposed+reference) with isolated cache and no env vars")
+                die(f"source-btap companion sizing run produced no {expected}")
+        print("build-side validation ok: source btap + installed companion "
+              "REAL sizing run (proposed+reference), isolated cache")
 
 
 def main():
