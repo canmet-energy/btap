@@ -6,12 +6,18 @@ somewhere. This module answers `ensure_energyplus() -> Path` (the energyplus
 executable), resolving in order:
 
 1. ``BTAP_ENERGYPLUS`` — explicit escape hatch: the binary itself or an
-   EnergyPlus install directory. Verified, never blindly trusted.
-2. The btap cache (``~/.cache/btap/energyplus/<version>`` on Linux, the
+   EnergyPlus install directory. Verified, never blindly trusted; set-but-
+   invalid RAISES rather than falling through.
+2. The ``btap-energyplus`` COMPANION package (R5, D-83) — on supported
+   platforms a hard dependency carrying the pinned engine as package
+   data. FAIL-CLOSED once importable: genuine absence is the only
+   fall-through; a broken, mismatched, or unrunnable companion raises.
+   Outranks the cache deliberately (the cache rung is unverified).
+3. The btap cache (``~/.cache/btap/energyplus/<version>`` on Linux, the
    platform-conventional cache dir elsewhere) from an earlier provision.
-3. ``BTAP_ENERGYPLUS_ARCHIVE`` — a locally supplied release archive
+4. ``BTAP_ENERGYPLUS_ARCHIVE`` — a locally supplied release archive
    (the TLS-intercepted-network side-load), sha256-verified against the pin.
-4. Download from the official NREL GitHub release, sha256-verified.
+5. Download from the official NREL GitHub release, sha256-verified.
 
 The version is LOCKED to the wheel's own IDD generation (openstudio 3.11 <=>
 EnergyPlus 25.2): a resolved binary whose reported version disagrees with
@@ -99,8 +105,22 @@ def _companion_binary(version: str) -> "Path | None":
     """
     try:
         import btap_energyplus
-    except ImportError:
-        return None
+    except ModuleNotFoundError as exc:
+        if exc.name == "btap_energyplus":
+            return None  # genuinely absent — the optional-platform case
+        # A submodule failed to import: the package IS installed and IS
+        # broken — corruption must not masquerade as absence.
+        raise EngineError(
+            "the btap-energyplus companion package is installed but broken "
+            f"(missing {exc.name}) — reinstall it (pip install "
+            "--force-reinstall btap-energyplus)"
+        ) from exc
+    except ImportError as exc:
+        raise EngineError(
+            "the btap-energyplus companion package is installed but failed "
+            f"to import ({exc}) — reinstall it (pip install "
+            "--force-reinstall btap-energyplus)"
+        ) from exc
 
     try:
         companion_version = btap_energyplus.ENERGYPLUS_VERSION

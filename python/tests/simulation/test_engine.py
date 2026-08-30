@@ -211,3 +211,18 @@ class TestCompanionResolution(EngineTestCase):
         with self.assertRaises(engine.EngineError) as ctx:
             engine.ensure_energyplus()
         self.assertIn("btap-energyplus companion", str(ctx.exception))
+
+    def test_broken_submodule_import_raises_not_absent(self):
+        # Sol's PR-1 follow-up control: a companion whose __init__ fails
+        # importing its own submodule is INSTALLED AND BROKEN — the broad
+        # except ImportError used to misread it as absent and fall through.
+        pkg = Path(self.tmp.name) / "site" / "btap_energyplus"
+        pkg.mkdir(parents=True)
+        (pkg / "__init__.py").write_text(
+            "import btap_energyplus.payload\n", encoding="utf-8")
+        sys.path.insert(0, str(pkg.parent))
+        self.addCleanup(sys.path.remove, str(pkg.parent))
+        self.addCleanup(sys.modules.pop, "btap_energyplus", None)
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine._companion_binary(engine.PINNED_VERSION)
+        self.assertIn("btap_energyplus.payload", str(ctx.exception))
