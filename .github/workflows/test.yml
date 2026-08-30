@@ -3,9 +3,9 @@ name: test
 on:
   push:
     branches: [main, develop]
-    paths-ignore: ['**.md', 'docs/**', 'packaging/**']
+    paths-ignore: ['**.md', 'docs/**']
   pull_request:
-    paths-ignore: ['**.md', 'docs/**', 'packaging/**']
+    paths-ignore: ['**.md', 'docs/**']
   workflow_dispatch:
     inputs:
       export_goldens:
@@ -113,7 +113,12 @@ jobs:
       # extra; installed here the same way so the pin is the single source.
       - name: Install the pinned py-tbd engine (the [tbd] extra)
         working-directory: python
-        run: pip install -q "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['optional-dependencies']['tbd'][0])")"
+        # py-tbd from its released v3.5.2 tag (exactly the version the
+        # pyproject ==3.5.2 pin names) until the PyPI publication lands;
+        # the release checklist flips this to the plain PyPI install.
+        run: |
+          pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
+          pip install -q "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
       # The D-77 dependency arrows as an enforced contract, not a convention:
       # necb -> costing -> modeling -> audit, simulation beside, and audit
       # SDK-free (the property the bare-runner audit suite depends on). It
@@ -129,6 +134,33 @@ jobs:
       - name: Ruff (the lint policy in pyproject is enforced, not decorative)
         working-directory: python
         run: ruff check .
+      # R5 (D-83): the linux companion wheel, built once and cached by
+      # (builder+template+engine hash) — wheel_smoke's hard-dep resolution
+      # and the H-6 control need a local wheelhouse (the companion is not
+      # on PyPI until the release checklist's publication step).
+      - name: Companion cache key
+        id: companion
+        run: |
+          KEY=$(python3 -c "
+          import hashlib
+          h = hashlib.sha256()
+          for f in ['packaging/pypi/energyplus/build_wheel.py',
+                    'packaging/pypi/energyplus/src/btap_energyplus/__init__.py',
+                    'python/btap/simulation/engine.py']:
+              h.update(open(f,'rb').read())
+          print(h.hexdigest()[:16])")
+          echo "key=$KEY" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: packaging/pypi/energyplus/dist
+          key: companion-linux-${{ steps.companion.outputs.key }}
+      - name: Build the companion if not cached
+        run: |
+          ls packaging/pypi/energyplus/dist/*.whl 2>/dev/null || \
+            python3 packaging/pypi/energyplus/build_wheel.py \
+              --platform linux --iteration 1 \
+              --outdir packaging/pypi/energyplus/dist
+          echo "BTAP_COMPANION_WHEELHOUSE=$PWD/packaging/pypi/energyplus/dist" >> "$GITHUB_ENV"
       - name: Python suites (SDK required, engine tests skip here)
         working-directory: python
         env:
@@ -295,8 +327,8 @@ jobs:
           # Every other dep is pure Python; the py-topolys SHA mirrors the
           # pin inside py-tbd's own pyproject.
           .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
-            "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@364703051cb27fbe6a686f9764a996389bd0ad73"
-          .ci-venv/bin/pip install -q --no-deps "$(python3 -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['optional-dependencies']['tbd'][0])")"
+            "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
+          .ci-venv/bin/pip install -q --no-deps "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
       - name: Python suites, everything required (cross-language gates included)
         working-directory: python
         run: |

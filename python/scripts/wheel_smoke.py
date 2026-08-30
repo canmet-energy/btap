@@ -20,6 +20,7 @@ explicitly rather than assumed.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import tempfile
@@ -125,6 +126,24 @@ def run_checks() -> int:
         assert derated > 0, "tbd.process derated nothing on the seed model"
     check("the pinned py-tbd engine installs and processes (M7)", tbd_engine_operates)
 
+    def companion_engine_resolves():
+        # R5 (D-83): where the wheelhouse supplied the companion, the
+        # engine must resolve to ITS binary with NO env vars — the goal
+        # sentence, executed inside the wheel gate.
+        if not os.environ.get("BTAP_COMPANION_WHEELHOUSE"):
+            return
+        os.environ.pop("BTAP_ENERGYPLUS", None)
+        import btap_energyplus  # noqa: I001
+        from btap.simulation import engine
+
+        engine._reset_memo()
+        resolved = engine.ensure_energyplus()
+        expected = btap_energyplus.binary_path()
+        assert str(resolved) == str(expected), (
+            f"engine resolved {resolved}, not the companion {expected}")
+    check("the companion engine resolves with no env vars (R5)",
+          companion_engine_resolves)
+
     def console_script_answers():
         # M6: the wheel declares the btap-compliance entry point. It must be
         # on the venv's bin path and --help must exit 0 — a broken entry
@@ -171,8 +190,38 @@ def main(argv) -> int:
         # DISTRIBUTION, not just the checkout: a broken git pin, missing
         # package data or import-resolution failure in the optional extra is
         # invisible to every source-tree test.
-        subprocess.run([str(pip), "install", "-q", "openstudio~=3.11.0",
-                        f"{wheel}[tbd]"], check=True)
+        # The companion hard dep (R5, D-83) resolves from a LOCAL
+        # wheelhouse (BTAP_COMPANION_WHEELHOUSE): CI builds+caches the
+        # linux companion wheel; without it, on a supported platform, the
+        # install MUST fail (H-6, exercised below in isolated-index form).
+        wheelhouse = os.environ.get("BTAP_COMPANION_WHEELHOUSE")
+        find_links = ["--find-links", wheelhouse] if wheelhouse else []
+        if wheelhouse:
+            with tempfile.TemporaryDirectory() as empty:
+                h6 = subprocess.run(
+                    [str(pip), "install", "-q", "--no-index",
+                     "--find-links", empty, str(wheel)],
+                    capture_output=True, text=True)
+                if h6.returncode == 0:
+                    print("H-6 FAILED: btap installed with no companion")
+                    return 1
+                print("H-6 ok: no-companion isolated install fails "
+                      "resolution")
+        # py-tbd from its released tag until the PyPI publication lands
+        # (the tag carries exactly version 3.5.2, satisfying the ==3.5.2
+        # pin in pyproject's [tbd] extra).
+        # py-topolys FIRST from its tag (version 0.1.0 satisfies
+        # py-tbd's ==0.1.0 metadata pin before the PyPI publication).
+        subprocess.run(
+            [str(pip), "install", "-q",
+             "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"],
+            check=True)
+        subprocess.run(
+            [str(pip), "install", "-q",
+             "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"],
+            check=True)
+        subprocess.run([str(pip), "install", "-q", *find_links,
+                        "openstudio~=3.11.0", f"{wheel}[tbd]"], check=True)
 
         # CWD outside the repo: a local btap/ must not be importable.
         print(f"running checks from {work_dir} (outside the checkout)\n")
