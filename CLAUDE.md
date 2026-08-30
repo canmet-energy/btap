@@ -227,7 +227,7 @@ does not have to guess (locally, 45 files drop from ~10 min to ~150 s).
 
 ## The Python port (D-79)
 
-A second implementation lives in `python/` — one pip distribution, `btap`,
+A second implementation lives in `python/` — one pip distribution, `canmet-btap` (import `btap`; PyPI blocked the bare name),
 with five subpackages mirroring the gems, ported milestone by milestone
 against the D-78 verification. **`PORT_STATUS.md` at the repo root is the
 handoff document**: what has landed, what each milestone was gated on, the

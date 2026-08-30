@@ -82,9 +82,9 @@ jobs:
         run: |
           python3 -m venv /tmp/v && . /tmp/v/bin/activate
           pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          pip install -q "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
+          pip install -q "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
           pip install -q --find-links dist/ "openstudio~=3.11.0" \
-            "$(ls dist/btap-*.whl)[tbd]"
+            "$(ls dist/canmet_btap-*.whl)[tbd]"
           export XDG_CACHE_HOME=/tmp/isolated-cache
           unset BTAP_ENERGYPLUS BTAP_ENERGYPLUS_ARCHIVE PYTHONPATH
           cd /tmp
@@ -120,9 +120,9 @@ jobs:
         run: |
           python -m venv /tmp/v
           /tmp/v/Scripts/pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          /tmp/v/Scripts/pip install -q "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
+          /tmp/v/Scripts/pip install -q "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
           /tmp/v/Scripts/pip install -q --find-links dist/ "openstudio~=3.11.0" \
-            "$(ls dist/btap-*.whl)[tbd]"
+            "$(ls dist/canmet_btap-*.whl)[tbd]"
           export LOCALAPPDATA=$(cygpath -w /tmp/isolated-cache)
           unset BTAP_ENERGYPLUS BTAP_ENERGYPLUS_ARCHIVE PYTHONPATH
           cd /tmp
@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/btap
+      url: https://test.pypi.org/p/canmet-btap
     permissions:
       id-token: write
     steps:
@@ -154,8 +154,8 @@ jobs:
         run: |
           cd dist && sha256sum -c SHA256SUMS && rm SHA256SUMS && cd ..
           # REFUSE btap while its published deps are unresolvable
-          pip index versions py-tbd 2>/dev/null | grep -q "3.5.2" \
-            || { echo "py-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
+          pip index versions canmet-tbd 2>/dev/null | grep -q "3.5.2" \
+            || { echo "canmet-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
           pip index versions py-topolys 2>/dev/null | grep -q "0.1.0" \
             || { echo "py-topolys 0.1.0 is not on PyPI — publish upstream first"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
@@ -175,7 +175,7 @@ jobs:
           # upstream publish workflows use.
           python3 -m venv /tmp/v && . /tmp/v/bin/activate
           pip install -q --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ "btap[tbd]==0.2.0"
+            --extra-index-url https://pypi.org/simple/ "canmet-btap[tbd]==0.2.0"
           python3 - <<'PY'
           import btap, btap_energyplus
           print("btap", btap.__version__, "| companion",
@@ -189,7 +189,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/btap
+      url: https://pypi.org/p/canmet-btap
     permissions:
       id-token: write
     steps:
