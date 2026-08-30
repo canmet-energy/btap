@@ -5,6 +5,7 @@ is tested with local files."""
 
 import os
 import stat
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -124,3 +125,89 @@ class TestPins(EngineTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FakeCompanion:
+    """A stand-in btap_energyplus module injected via sys.modules."""
+
+    def __init__(self, version, binary):
+        self.ENERGYPLUS_VERSION = version
+        self.BUILD_SHA = "fake"
+        self._binary = binary
+
+    def binary_path(self):
+        if isinstance(self._binary, Exception):
+            raise self._binary
+        return self._binary
+
+
+class TestCompanionResolution(EngineTestCase):
+    """The R5 companion rung (D-83): fail-closed once the package imports;
+    only genuine ABSENCE falls through. Each control mirrors one way a
+    corrupted or mismatched companion could otherwise hide behind the
+    stale cache or a network download."""
+
+    def install_fake(self, module):
+        sys.modules["btap_energyplus"] = module
+        self.addCleanup(sys.modules.pop, "btap_energyplus", None)
+
+    def test_companion_resolves_before_the_cache(self):
+        # H-1: a stale/wrong cache must LOSE to the shipped companion.
+        cache = engine.cache_dir(engine.PINNED_VERSION)
+        cache.mkdir(parents=True, exist_ok=True)
+        stale = cache / "energyplus"
+        if not stale.exists():
+            stale.write_text("#!/bin/sh\necho 'EnergyPlus, Version 9.9.9'\n")
+            stale.chmod(0o755)
+            self.addCleanup(stale.unlink)
+        good = self.fake_binary(f"EnergyPlus, Version {engine.PINNED_VERSION}-abc")
+        self.install_fake(FakeCompanion(engine.PINNED_VERSION, good))
+        self.assertEqual(good, engine.ensure_energyplus())
+
+    def test_bad_override_raises_even_with_companion_present(self):
+        # H-2: the frozen exit-4 scenario's premise — BTAP_ENERGYPLUS
+        # set-but-bad NEVER falls through, companion or no companion.
+        good = self.fake_binary(f"EnergyPlus, Version {engine.PINNED_VERSION}-abc")
+        self.install_fake(FakeCompanion(engine.PINNED_VERSION, good))
+        os.environ["BTAP_ENERGYPLUS"] = "/nonexistent-energyplus"
+        self.addCleanup(os.environ.pop, "BTAP_ENERGYPLUS", None)
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine.ensure_energyplus()
+        self.assertIn("BTAP_ENERGYPLUS", str(ctx.exception))
+
+    def test_absent_companion_falls_through(self):
+        # Genuine absence (optional platforms) is the ONLY fall-through.
+        self.assertIsNone(engine._companion_binary(engine.PINNED_VERSION))
+
+    def test_broken_import_raises(self):
+        class Exploding:
+            @property
+            def ENERGYPLUS_VERSION(self):
+                raise RuntimeError("data file missing")
+        self.install_fake(Exploding())
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine._companion_binary(engine.PINNED_VERSION)
+        self.assertIn("broken", str(ctx.exception))
+
+    def test_wrong_metadata_raises(self):
+        good = self.fake_binary("EnergyPlus, Version 9.1.0-xyz")
+        self.install_fake(FakeCompanion("9.1.0", good))
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine._companion_binary(engine.PINNED_VERSION)
+        self.assertIn("9.1.0", str(ctx.exception))
+
+    def test_missing_binary_raises(self):
+        self.install_fake(FakeCompanion(engine.PINNED_VERSION,
+                                        Path(self.tmp.name) / "nope"))
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine._companion_binary(engine.PINNED_VERSION)
+        self.assertIn("no such", str(ctx.exception))
+
+    def test_unrunnable_companion_binary_raises(self):
+        # A lying binary is caught by _verify_version at the
+        # ensure_energyplus level — never a silent fall-through.
+        liar = self.fake_binary("EnergyPlus, Version 9.1.0-xyz")
+        self.install_fake(FakeCompanion(engine.PINNED_VERSION, liar))
+        with self.assertRaises(engine.EngineError) as ctx:
+            engine.ensure_energyplus()
+        self.assertIn("btap-energyplus companion", str(ctx.exception))
