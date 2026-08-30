@@ -118,7 +118,7 @@ jobs:
         # the release checklist flips this to the plain PyPI install.
         run: |
           pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          pip install -q "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
+          pip install -q "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
       # The D-77 dependency arrows as an enforced contract, not a convention:
       # necb -> costing -> modeling -> audit, simulation beside, and audit
       # SDK-free (the property the bare-runner audit suite depends on). It
@@ -344,7 +344,7 @@ jobs:
           # pin inside py-tbd's own pyproject.
           .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
             "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          .ci-venv/bin/pip install -q --no-deps "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
+          .ci-venv/bin/pip install -q --no-deps "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
       - name: Python suites, everything required (cross-language gates included)
         working-directory: python
         run: |

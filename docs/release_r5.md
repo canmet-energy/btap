@@ -1,6 +1,6 @@
 # The R5 release checklist (D-83)
 
-The ordered, auditable path from here to `pip install btap[tbd]` on PyPI
+The ordered, auditable path from here to `pip install canmet-btap[tbd]` on PyPI
 and the v0.2.0 Python Windows installer. Owner of each step in CAPS.
 
 ## 0. Trusted-publisher setup — USER, one-time, web UI
@@ -10,11 +10,14 @@ On BOTH pypi.org and test.pypi.org (same steps each):
 | Project | Repo | Workflow | Environment |
 |---|---|---|---|
 | py-topolys | canmet-energy/py-topolys | publish.yml | pypi / testpypi |
-| py-tbd | canmet-energy/py-tbd | publish.yml | pypi / testpypi |
-| btap | canmet-energy/btap | publish.yml | pypi / testpypi |
+| canmet-tbd | canmet-energy/py-tbd | publish.yml | pypi / testpypi |
+| canmet-btap | canmet-energy/btap | publish.yml | pypi / testpypi |
 | btap-energyplus | canmet-energy/btap | publish.yml | pypi / testpypi |
 
-Add each as a *pending trusted publisher* (Account → Publishing). In
+Add each as a *pending trusted publisher* (Account → Publishing).
+Distribution names: PyPI's similarity check blocked `btap` and `py-tbd`
+(bta / pytbd / tbd exist), so the published names are `canmet-btap`
+and `canmet-tbd`; the import names (`btap`, `tbd`) are unchanged. In
 each GitHub repo: Settings → Environments → create `pypi` WITH a
 required-reviewer protection rule (the promotion approval); `testpypi`
 unprotected. File the PyPI file-size-limit request for `btap-energyplus`
@@ -52,7 +55,7 @@ project exists (first TestPyPI upload creates it).
 
 Replace the interim tag-sourced installs with plain index installs:
 - `.github/workflows/test.yml`: the two py-topolys/py-tbd git-tag
-  installs → `pip install "py-tbd==3.5.2"` (resolves py-topolys==0.1.0
+  installs → `pip install "canmet-tbd==3.5.2"` (resolves py-topolys==0.1.0
   transitively from PyPI).
 - `python/scripts/wheel_smoke.py`: drop the two tag-install lines (the
   `[tbd]` extra resolves from PyPI).
@@ -75,13 +78,13 @@ deletes).
 
 ## 5. PR-5 — docs + THE RELEASE
 
-README: `pip install btap[tbd]` as the product; the promise scoped to
+README: `pip install canmet-btap[tbd]` as the product; the promise scoped to
 "Windows x86-64 and glibc-2.35+ Linux x86-64"; musl/older glibc fails
 resolution BY DESIGN with the tested escape procedure; macOS = the
 NREL-download rung. Then: tag `v0.2.0` (= `btap.__version__` = iss
 AppVersion); release.yml ships `btap-compliance-setup-0.2.0.exe`;
 acceptance = clean Windows machine + the ubuntu:22.04 (glibc-2.35
-floor) container, `pip install btap[tbd]`, sizing + annual runs with
+floor) container, `pip install canmet-btap[tbd]`, sizing + annual runs with
 NO env vars — the goal sentence, executed and logged here.
 
 ## Provenance sentences (copy into release notes)

@@ -301,7 +301,7 @@ def main(argv) -> int:
             check=True)
         subprocess.run(
             [str(pip), "install", "-q",
-             "py-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"],
+             "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"],
             check=True)
         subprocess.run([str(pip), "install", "-q", *find_links,
                         "openstudio~=3.11.0", f"{wheel}[tbd]"], check=True)
