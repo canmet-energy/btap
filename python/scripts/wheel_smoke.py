@@ -176,7 +176,7 @@ def run_checks() -> int:
                 env.pop(name, None)
             proc = subprocess.run(
                 [str(exe),
-                 str(REPO_ROOT / "verification/oracle/fixtures/5ZoneNoHVAC.osm"),
+                 str(modeling.hvac.catalog_report.FIXTURE),
                  "--simulate", "sizing",
                  "--epw", str(PYTHON_ROOT / "tests/fixtures/weather/"
                                "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"),
