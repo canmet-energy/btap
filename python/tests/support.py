@@ -56,6 +56,11 @@ def engine_available() -> bool:
     if CONTAINER_ENERGYPLUS.is_file():
         os.environ.setdefault("BTAP_ENERGYPLUS", str(CONTAINER_ENERGYPLUS))
         return True
+    try:  # the btap-energyplus companion (R5, D-83) counts as available
+        import btap_energyplus  # noqa: F401
+        return True
+    except ImportError:
+        pass
     return engine._binary_in(engine.cache_dir(engine.PINNED_VERSION)) is not None
 
 

@@ -86,6 +86,46 @@ def wheel_energyplus_version() -> str:
         return PINNED_VERSION
 
 
+def _companion_binary(version: str) -> "Path | None":
+    """The btap-energyplus COMPANION package's engine (R5, D-83): on
+    supported platforms it is a hard dependency carrying the pinned E+ as
+    package data, so `pip install btap` needs no engine thought at all.
+
+    FAIL-CLOSED once present: only a genuine top-level ImportError (the
+    optional-platform case — macOS, unsupported Linux) falls through to
+    the later rungs. Once the package imports, ANY defect raises — a
+    broken companion is a corrupted install and must never hide behind a
+    stale cache or a network download.
+    """
+    try:
+        import btap_energyplus
+    except ImportError:
+        return None
+
+    try:
+        companion_version = btap_energyplus.ENERGYPLUS_VERSION
+        binary = Path(btap_energyplus.binary_path())
+    except Exception as exc:  # nested import/data failure = corruption
+        raise EngineError(
+            "the btap-energyplus companion package is installed but broken "
+            f"({exc.__class__.__name__}: {exc}) — reinstall it (pip install "
+            "--force-reinstall btap-energyplus)"
+        ) from exc
+    if companion_version != version:
+        raise EngineError(
+            f"the btap-energyplus companion carries EnergyPlus "
+            f"{companion_version}, but this btap release pins {version} — "
+            "upgrade the matching companion release (a repackaging always "
+            "ships with a corresponding btap release)"
+        )
+    if not binary.is_file():
+        raise EngineError(
+            f"the btap-energyplus companion names {binary} but no such "
+            "binary exists — the install is corrupted; reinstall it"
+        )
+    return binary
+
+
 def ensure_energyplus() -> Path:
     """Resolve (provisioning if necessary) a verified EnergyPlus binary of
     the pinned version. Memoized per process."""
@@ -112,6 +152,14 @@ def ensure_energyplus() -> Path:
         _verify_version(binary, version, source="BTAP_ENERGYPLUS")
         _resolved = binary
         return binary
+
+    # The companion outranks the cache: the cache rung below returns
+    # UNVERIFIED, and the pip-hash-verified companion is the shipped truth.
+    companion = _companion_binary(version)
+    if companion is not None:
+        _verify_version(companion, version, source="btap-energyplus companion")
+        _resolved = companion
+        return companion
 
     cached = _binary_in(cache_dir(version))
     if cached is not None:
@@ -192,8 +240,10 @@ def _pinned_asset(version: str) -> tuple[str, str]:
     )
     if key not in _ASSETS:
         raise EngineError(
-            f"no pinned EnergyPlus {version} build for platform {key}. Install EnergyPlus "
-            f"{version} yourself and set BTAP_ENERGYPLUS to its location."
+            f"no pinned EnergyPlus {version} build for platform {key}. On Windows x86-64 "
+            "and supported Linux x86-64, `pip install btap` ships the engine as the "
+            f"btap-energyplus companion; on this platform install EnergyPlus {version} "
+            "yourself and set BTAP_ENERGYPLUS to its location."
         )
     return _ASSETS[key]
 

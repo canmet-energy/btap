@@ -117,6 +117,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-80** — Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path _(process)_
 - **D-81** — The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff _(process)_
 - **D-82** — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop _(process)_
+- **D-83** — R5 distribution: full PyPI publication, the btap-energyplus companion wheel, and the Python Windows installer succeeding the Ruby one _(process)_
 
 <!-- TOC END -->
 
@@ -4626,3 +4627,73 @@ exits 0/1 at unit level; live Leg B's annual tier only ever ran
 gate on one run. The PR-2 handoff run remains external evidence in its
 PR record — never written back here, which would invalidate the very run
 as head evidence.
+
+## D-83
+
+**Decided:** R5's distribution architecture (2026-08-30). The zero-thought
+goal — `pip install btap[tbd]` on Windows x86-64 or supported glibc-based
+Linux x86-64 installs *everything*, EnergyPlus included, and simulations
+run locally with no user setup — is delivered by a per-platform
+**`btap-energyplus` companion wheel**, full PyPI publication with singular
+ownership, and a Python Windows installer that succeeds the Ruby one.
+
+**The companion.** py3-none-win_amd64 plus a manylinux wheel whose tag is
+EARNED — an `auditwheel` PEP 600 compliance audit with recursive ELF
+closure, validated inside the oldest-claimed manylinux container — never
+derived from a symbol scan. The NREL asset is sha256-verified BEFORE
+pruning; the prune-list is `python_lib/` + `pyenergyplus/` only
+(libpython is a verified NEEDED dependency of the `energyplus` binary and
+ships); exec bits ride in the wheel's external attributes with a runtime
+chmod backstop; `PROVENANCE.json` records source hashes, prune/keep
+manifests, licenses, and modifications. btap pins the companion HARD,
+platform-marked, and EXACT (`btap-energyplus==25.2.0.1`) — a repackaging
+requires a corresponding btap release; the runtime version cross-check is
+defense in depth, never identity.
+
+**Engine resolution** (the behaviour change): version gate →
+`BTAP_ENERGYPLUS` (raises on bad — the frozen exit-4 scenario's premise,
+now unit-pinned) → the companion (**fail-closed once imported**: absence
+on optional platforms is the only fall-through; any post-import defect
+raises) → the unverified cache → the archive rung → the NREL download.
+**The mandatory clean-tree re-freeze accompanied this change** per
+D-82's unconditional contract, its identical-output result recorded as
+the proof of non-regression; the original Ruby seals remain the
+freeze-time origin seal until R6.
+
+**Publication ownership is singular.** py-topolys 0.1.0 (exactly the
+D-79 pinned SHA) and py-tbd 3.5.2 ("the pinned implementation tree plus
+one mechanically constrained metadata-only commit", diff-proven against
+`bfb23e6`) are built, rehearsed on TestPyPI, and published each from its
+OWN repository. This repository publishes only the companion and btap —
+in ONE workflow run per release: build once as immutable artifacts,
+digest-manifested, validated per platform (Linux: ELF closure + a real
+sizing run in the floor container; Windows: PE closure + a real sizing
+run on the exact digest), TestPyPI upload, TestPyPI-alone install on
+both platforms, then PyPI promotion from the SAME run artifacts behind a
+protected-environment approval. Production never re-invokes a builder.
+
+**The installer.** Embedded CPython 3.12 (the openstudio Windows wheel
+is cp312 and rpds-py agrees — the minor is pinned twice over) plus a
+PRE-INSTALLED site-packages tree staged by cross-platform pip on Linux;
+it replaces the Ruby installer as the v-tag artifact; versions unify
+(tag = `btap.__version__` = iss AppVersion); the Ruby `windows:*` rake
+tasks go dormant behind `BTAP_RUBY_INSTALLER=1` — extending D-82's
+dormancy category to packaging, deleted at R6. The installer newly ships
+the placeholder costing CSVs, deliberately: the PRICED_CSVS exclusion
+protects licensed RS-Means values, which are runtime-injected and never
+committed — one artifact behavior beats two. A generated third-party
+license inventory gates every release; the LGPL source obligation is met
+by the shipped `.py` sources plus a written source offer under human
+legal review.
+
+**Scoped honestly:** on musl or older-glibc Linux, `pip install btap`
+fails resolution BY DESIGN — documented, with a tested,
+metadata-generated escape procedure (never a bare `--no-deps`).
+
+**Rejected:** an `[engine]` extra (pip has no default extras — it fails
+the goal on exactly its target population); `.postN` companion
+versioning (a prune change is functional); a wildcard companion pin;
+setup-time pip on the user's machine; download-only distribution (the
+first-run surprise plus the TLS-intercept failure the archive rung
+exists for); a frozen-scenario installer lane (it would edit the pinned
+gate for zero seal value).
