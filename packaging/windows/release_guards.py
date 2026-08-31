@@ -57,7 +57,8 @@ def main() -> int:
                 "python/Lib/site-packages/btap",
                 "python/Lib/site-packages/openstudio",
                 "python/Lib/site-packages/canmet_energyplus",
-                "btap-compliance.cmd", "LICENSE",
+                "bin/btap-compliance.cmd", "LICENSE",
+                "samples/run-demo.cmd", "samples/5ZoneNoHVAC.osm",
                 "THIRD-PARTY-NOTICES.txt", "PROVENANCE.json", "weather"):
         if not (stage / rel).exists():
             fail(problems, f"staged tree is missing {rel}")

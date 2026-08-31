@@ -237,16 +237,24 @@ def main() -> int:
     weather_src = REPO_ROOT / "python" / "tests" / "fixtures" / "weather"
     shutil.copytree(weather_src, stage / "weather")
 
-    for name in ("btap-compliance.cmd", "README-windows.txt"):
-        src = HERE / name
-        if src.is_file():
-            shutil.copy2(src, stage / name)
+    # The LAYOUT is load-bearing: the iss Start-menu shortcut puts {app}\bin
+    # on PATH, run-demo.cmd calls ..\bin\btap-compliance.cmd, and the
+    # launcher derives BTAP_HOME from its own directory's parent. Keep it
+    # identical to the Ruby installer this succeeds.
+    (stage / "bin").mkdir()
+    shutil.copy2(HERE / "btap-compliance.cmd", stage / "bin" / "btap-compliance.cmd")
+    shutil.copy2(HERE / "README-windows.txt", stage / "README-windows.txt")
     # The installer's own licence page (iss LicenseFile) and the LGPL text
     # this project ships under.
     shutil.copy2(REPO_ROOT / "LICENSE", stage / "LICENSE")
+
     samples = HERE / "samples"
     if samples.is_dir():
         shutil.copytree(samples, stage / "samples")
+    shutil.copy2(HERE / "run-demo.cmd", stage / "samples" / "run-demo.cmd")
+    # The demo model run-demo.cmd names.
+    shutil.copy2(REPO_ROOT / "verification" / "oracle" / "fixtures" / "5ZoneNoHVAC.osm",
+                 stage / "samples" / "5ZoneNoHVAC.osm")
 
     dists = distributions(site_packages)
     write_inventory(dists, stage)

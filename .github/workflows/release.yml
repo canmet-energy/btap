@@ -17,45 +17,70 @@ env:
   LC_ALL: C.UTF-8
 
 jobs:
-  # Staging needs the OpenStudio SDK (generate_samples.rb requires
-  # 'openstudio'), so it runs in the same container as the test matrix. The
-  # ISCC compile needs apt + the i386 architecture, which the container job
-  # cannot have — hence two jobs, handing over a TARRED tree because
-  # upload-artifact drops the exec bit on exe/btap-compliance.rb.
+  # Since R5 (D-83) the payload is a pre-installed Python site-packages tree,
+  # so staging needs NO OpenStudio container and no Windows machine: every
+  # dependency publishes a wheel, and pip's cross-platform flags resolve the
+  # win_amd64 set from a bare Linux runner. The nrel container is gone.
   stage:
-    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
-    container: nrel/openstudio:3.11.0
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: fetch the Windows OpenStudio 3.11.0
-        # The same tarball packaging/windows/README.md documents: NREL ships
-        # it alongside the .exe installer and it unpacks cleanly on Linux.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: build the canmet-btap wheel
         run: |
-          # -o, not -O: -O names the file by the URL's percent-encoded basename
-          # (%2B stays literal), and the tar below looks for the '+' spelling.
-          curl -sSL -o 'OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz' https://github.com/NREL/OpenStudio/releases/download/v3.11.0/OpenStudio-3.11.0%2B241b8abb4d-Windows.tar.gz
-          tar xzf 'OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz'
-      - name: stage the payload tree
-        run: rake windows:stage OPENSTUDIO_WINDOWS="$PWD/OpenStudio-3.11.0+241b8abb4d-Windows"
+          pip install -q build
+          python3 -m build --wheel --outdir python/dist python/
+      - name: stage the Windows payload
+        run: |
+          V=$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)
+          echo "staging version $V"
+          python3 packaging/windows/stage_python.py --version "$V"
+      - name: release guards
+        run: |
+          V=$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)
+          python3 packaging/windows/release_guards.py --version "$V"
+      - name: installer smoke (structure)
+        run: python3 packaging/windows/installer_smoke.py
       - name: tar the staged tree
+        # upload-artifact drops the exec bit; a tar preserves the tree exactly.
         run: tar czf stage.tar.gz -C packaging/windows stage
       - uses: actions/upload-artifact@v4
         with:
           name: stage
           path: stage.tar.gz
-          retention-days: 1
+          retention-days: 7
+          if-no-files-found: error
 
-  package:
+  # The payload is Windows binaries, so only a Windows runner can prove it
+  # RUNS. This is the H-9 control: the tree is copied out of the checkout
+  # first, because running it in place would let a relative path resolve
+  # against the repository and prove nothing about what a recipient gets.
+  smoke-windows:
     needs: stage
-    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: stage
       - name: unpack the staged tree
-        # rm after: the release task's clean-tree guard rightly counts the
-        # downloaded artifact as dirt.
+        shell: bash
+        run: tar xzf stage.tar.gz -C packaging/windows && rm stage.tar.gz
+      - name: installer smoke (executed, checkout absent)
+        shell: bash
+        run: python packaging/windows/installer_smoke.py --full
+
+  installer:
+    needs: [stage, smoke-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: stage
+      - name: unpack the staged tree
         run: tar xzf stage.tar.gz -C packaging/windows && rm stage.tar.gz
       - name: compile the installer (containerized ISCC)
         # Three rehearsals proved apt wine is a moving target here: 22.04's
@@ -63,33 +88,26 @@ jobs:
         # dies loading kernel32 in a headless prefix. The amake/innosetup
         # image wraps a known-good ISCC-under-wine; ISCC resolves the .iss's
         # relative paths against the .iss directory, so a repo-root mount is
-        # all it needs. The rake task remains the local path
-        # (.devcontainer/setup.sh --wine).
+        # all it needs.
         run: |
-          # The image's ISCC runs as uid 1000; the checkout is root-owned on
-          # CodeBuild, so pre-open the packaging tree and create Output/ or
-          # ISCC dies with "File access denied".
           mkdir -p packaging/windows/Output
           sudo chmod -R a+rwX packaging/windows
           docker run --rm -v "$PWD:/work" amake/innosetup:latest packaging/windows/btap-compliance.iss
           ls -la packaging/windows/Output/
-      - name: install ruby for the release task
-        run: |
-          command -v ruby >/dev/null && command -v rake >/dev/null || {
-            sudo apt-get update -qq
-            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ruby rake
-          }
       - name: publish (tag push) or rehearse (dispatch, DRY_RUN)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          command -v gh >/dev/null || {
-            curl -sSL -o /tmp/gh.tgz https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_linux_amd64.tar.gz
-            sudo tar xzf /tmp/gh.tgz -C /usr/local/bin --strip-components=2 gh_2.63.2_linux_amd64/bin/gh
-          }
+          V=$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)
+          EXE="packaging/windows/Output/btap-compliance-setup-$V.exe"
+          test -f "$EXE" || { echo "no installer at $EXE"; exit 1; }
+          echo "built $(basename "$EXE") ($(du -h "$EXE" | cut -f1))"
           if [ "${{ github.event_name }}" = push ]; then
-            rake "windows:release[${GITHUB_REF_NAME}]"
+            TAG="${GITHUB_REF_NAME}"
+            test "$TAG" = "v$V" || {
+              echo "tag $TAG does not match the iss AppVersion v$V"; exit 1; }
+            gh release create "$TAG" "$EXE" --title "$TAG" --generate-notes \
+              || gh release upload "$TAG" "$EXE" --clobber
           else
-            TAG="v$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)"
-            DRY_RUN=1 rake "windows:release[$TAG]"
+            echo "DRY RUN: would publish $EXE as release v$V"
           fi
