@@ -51,6 +51,17 @@ jobs:
       - name: Digest manifest (the identity every later stage re-verifies)
         run: |
           cd dist && sha256sum * | tee SHA256SUMS
+      # The publish action uploads EVERY file in dist/, so a stray
+      # manifest (DIGESTS.json from the companion builder, SHA256SUMS
+      # from the step above) is a publish-time failure that no
+      # build-only rehearsal reaches. Assert the upload set here.
+      - name: The upload set is exactly the four distributions
+        run: |
+          cd dist
+          got=$(ls -1 *.whl *.tar.gz | sort | tr '\n' ' ')
+          echo "would upload: $got"
+          test "$(ls -1 *.whl *.tar.gz | wc -l)" -eq 4 \
+            || { echo "expected 4 distribution files, got $got"; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: distributions
@@ -152,7 +163,13 @@ jobs:
           path: dist/
       - name: Digest re-verification + dependency refusal gate
         run: |
-          cd dist && sha256sum -c SHA256SUMS && rm SHA256SUMS && cd ..
+          cd dist && sha256sum -c SHA256SUMS
+          # dist/ must contain ONLY distributions — the action uploads
+          # whatever it finds, and twine rejects the manifests by format.
+          rm -f SHA256SUMS DIGESTS.json
+          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
+          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
+          cd ..
           # REFUSE btap while its published deps are unresolvable
           pip index versions canmet-tbd 2>/dev/null | grep -q "3.5.2" \
             || { echo "canmet-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
@@ -198,5 +215,11 @@ jobs:
           name: distributions
           path: dist/
       - name: Digest re-verification (the SAME bytes the rehearsal proved)
-        run: cd dist && sha256sum -c SHA256SUMS && rm SHA256SUMS
+        run: |
+          cd dist && sha256sum -c SHA256SUMS
+          # dist/ must contain ONLY distributions — the action uploads
+          # whatever it finds, and twine rejects the manifests by format.
+          rm -f SHA256SUMS DIGESTS.json
+          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
+          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
