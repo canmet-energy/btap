@@ -95,7 +95,7 @@ Replace the interim tag-sourced installs with plain index installs:
 - `python/scripts/wheel_smoke.py`: drop the two tag-install lines (the
   `[tbd]` extra resolves from PyPI).
 - Optionally drop the companion build+cache step once
-  `btap-energyplus==25.2.0.1` is on PyPI (wheel_smoke can then resolve
+  `btap-energyplus==25.2.0.2` is on PyPI (wheel_smoke can then resolve
   it from the index; keeping the wheelhouse build exercises the builder
   — decide in review).
 

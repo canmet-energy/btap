@@ -57,7 +57,16 @@ from btap.simulation.engine import (
 )
 
 DIST_NAME = "btap_energyplus"
-PRUNE = ("python_lib", "pyenergyplus")
+#: Pruned wholesale. python_lib/pyenergyplus are the PythonPlugin runtime
+#: (btap drives E+ as a subprocess). The other three are the reason the wheel
+#: fits PyPI at all: Documentation is 49 MB of PDFs, ExampleFiles 28 MB of
+#: sample models, PreProcess 23 MB of auxiliary tools (IDFVersionUpdater
+#: alone is 19.5 MB) — none of them reachable from a simulation run. The
+#: ONE preprocessor btap invokes, ExpandObjects (`-x`), sits at the payload
+#: root and is on the keep-list. DataSets/MacroDataSets/WeatherData/
+#: PostProcess stay: small, and an input file may reference them.
+PRUNE = ("python_lib", "pyenergyplus",
+         "Documentation", "ExampleFiles", "PreProcess")
 #: Tags: the Linux tag is asserted against `auditwheel show` in CI.
 PLATFORMS = {
     "linux": {"asset_key": ("linux", "x86_64"),

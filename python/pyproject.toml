@@ -16,13 +16,13 @@ license = { text = "LGPL-3.0-or-later" }
 # engine thought on the supported platforms (Windows x86-64; glibc-2.35+
 # Linux x86-64 — the floor the companion's build-time auditwheel gate
 # enforces on every build; see packaging/pypi/energyplus). Exact
-# (==25.2.0.1, never
+# (==25.2.0.2, never
 # .*): a companion repackaging REQUIRES a corresponding btap release.
 # Other platforms skip the marker and fall to the provisioner's
 # override/archive/download rungs.
 dependencies = [
   "openstudio~=3.11.0",
-  "btap-energyplus==25.2.0.1 ; sys_platform == 'win32' or (sys_platform == 'linux' and platform_machine == 'x86_64')",
+  "btap-energyplus==25.2.0.2 ; sys_platform == 'win32' or (sys_platform == 'linux' and platform_machine == 'x86_64')",
 ]
 
 # NECB 3.1.1.7 thermal bridging (M7, D-79 Option A): py-tbd's

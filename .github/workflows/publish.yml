@@ -45,7 +45,7 @@ jobs:
         run: |
           pip install -q build patchelf auditwheel
           python3 packaging/pypi/energyplus/build_wheel.py \
-            --platform all --iteration 1 --outdir dist/ --skip-validation
+            --platform all --iteration 2 --outdir dist/ --skip-validation
           python3 -m build --outdir dist/ python/
           ls -la dist/
       - name: Digest manifest (the identity every later stage re-verifies)

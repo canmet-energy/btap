@@ -63,7 +63,7 @@ verification, keep-list assertion, PROVENANCE.json, exec bits via
 external_attr, DIGESTS.json, auditwheel gate, scratch-venv companion-only
 sizing validation); the `btap_energyplus` package template (runtime
 chmod backstop in `binary_path()`); pyproject 0.2.0 with the HARD
-platform-marked EXACT pin `btap-energyplus==25.2.0.1` and
+platform-marked EXACT pin `btap-energyplus==25.2.0.2` and
 `[tbd] = ["py-tbd==3.5.2"]`; wheel_smoke wheelhouse support + honest
 H-6 + companion-resolution check; test.yml companion build+cache with
 digest-verified restores, tag-sourced tbd-chain installs (interim),

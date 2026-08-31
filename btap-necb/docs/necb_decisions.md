@@ -4641,13 +4641,20 @@ ownership, and a Python Windows installer that succeeds the Ruby one.
 EARNED — an `auditwheel` PEP 600 compliance audit with recursive ELF
 closure, validated inside the oldest-claimed manylinux container — never
 derived from a symbol scan. The NREL asset is sha256-verified BEFORE
-pruning; the prune-list is `python_lib/` + `pyenergyplus/` only
-(libpython is a verified NEEDED dependency of the `energyplus` binary and
-ships); exec bits ride in the wheel's external attributes with a runtime
-chmod backstop; `PROVENANCE.json` records source hashes, prune/keep
-manifests, licenses, and modifications. btap pins the companion HARD,
-platform-marked, and EXACT (`btap-energyplus==25.2.0.1`) — a repackaging
-requires a corresponding btap release; the runtime version cross-check is
+pruning; the prune-list is `python_lib/` + `pyenergyplus/` +
+`Documentation/` + `ExampleFiles/` + `PreProcess/` (libpython is a
+verified NEEDED dependency of the `energyplus` binary and ships, but 49 MB
+of PDFs, 28 MB of sample models and 23 MB of auxiliary tools are not
+reachable from a simulation run — and the unpruned 164 MB wheel was
+REFUSED by PyPI, whose per-file cap is 100 MB; pruned it is 63 MB and
+needs no exemption. `ExpandObjects`, the one preprocessor btap invokes
+via `-x`, sits at the payload root and is keep-listed, as are the
+datasets an input file may reference); exec bits ride in the wheel's
+external attributes with a runtime chmod backstop; `PROVENANCE.json`
+records source hashes, prune/keep manifests, licenses, and modifications.
+btap pins the companion HARD, platform-marked, and EXACT
+(`btap-energyplus==25.2.0.2`) — a repackaging requires a corresponding
+btap release, as the 25.2.0.1 → 25.2.0.2 prune change did; the runtime version cross-check is
 defense in depth, never identity.
 
 **Engine resolution** (the behaviour change): version gate →

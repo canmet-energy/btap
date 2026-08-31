@@ -162,7 +162,7 @@ jobs:
           # the cache dir is purged and the build runs fresh — with its
           # patchelf, ELF-closure, auditwheel, and venv-sizing gates.
           pip install -q patchelf auditwheel build
-          EXPECT="btap_energyplus-25.2.0.1-py3-none-manylinux_2_35_x86_64.whl"
+          EXPECT="btap_energyplus-25.2.0.2-py3-none-manylinux_2_35_x86_64.whl"
           D=packaging/pypi/energyplus/dist
           if [ -f "$D/$EXPECT" ] && [ -f "$D/DIGESTS.json" ] && \
              python3 -c "
@@ -174,7 +174,7 @@ jobs:
           else
             rm -rf "$D"
             python3 packaging/pypi/energyplus/build_wheel.py \
-              --platform linux --iteration 1 --outdir "$D"
+              --platform linux --iteration 2 --outdir "$D"
           fi
           echo "BTAP_COMPANION_WHEELHOUSE=$PWD/$D" >> "$GITHUB_ENV"
       - name: Python suites (SDK required, engine tests skip here)
