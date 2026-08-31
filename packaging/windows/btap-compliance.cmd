@@ -1,30 +1,29 @@
 @echo off
 rem NECB compliance CLI launcher.
 rem
-rem OpenStudio ships INSIDE this install, so there is nothing to detect: no
-rem registry probe, no PATH search, no version gate. That also means we cannot
-rem collide with any OpenStudio the user already has, and we always run the
-rem exact 3.11.0 build the gems are pinned against.
+rem Python, OpenStudio and EnergyPlus all ship INSIDE this install, so there is
+rem nothing to detect: no registry probe, no PATH search, no version gate, and
+rem no way to collide with anything the user already has.
 rem
-rem openstudio.exe carries its own Ruby 3.2.2 and its own EnergyPlus, so no
-rem Ruby and no E+ need to be installed either.
+rem The runtime is CPython's embeddable distribution. It is a real python.exe,
+rem which matters — the report renderer spawns sys.executable.
 setlocal
 chcp 65001 >nul 2>&1
 
 set "BTAP_HOME=%~dp0.."
 
-rem The escape hatch, for developers pointing at another build.
-if not defined OPENSTUDIO_CLI set "OPENSTUDIO_CLI=%BTAP_HOME%\openstudio\bin\openstudio.exe"
+rem The escape hatch, for developers pointing at another interpreter.
+if not defined BTAP_PYTHON set "BTAP_PYTHON=%BTAP_HOME%\python\python.exe"
 
-if not exist "%OPENSTUDIO_CLI%" (
-  echo ERROR: openstudio.exe not found at "%OPENSTUDIO_CLI%".
-  echo The installation looks incomplete - reinstall, or set OPENSTUDIO_CLI
-  echo to the full path of an OpenStudio 3.11 openstudio.exe.
+if not exist "%BTAP_PYTHON%" (
+  echo ERROR: python.exe not found at "%BTAP_PYTHON%".
+  echo The installation looks incomplete - reinstall, or set BTAP_PYTHON to
+  echo the full path of a CPython 3.12 python.exe with canmet-btap installed.
   exit /b 4
 )
 
-rem Flags forward through execute_ruby_script unchanged - verified. Do NOT add
-rem a "--" separator: it arrives literally in ARGV and optparse would then treat
-rem every following flag as a positional argument.
-"%OPENSTUDIO_CLI%" execute_ruby_script "%BTAP_HOME%\gems\btap-necb\exe\btap-compliance.rb" %*
+rem `-m`, not a console script: pip --target writes POSIX script shims that do
+rem not work under the embeddable runtime, so they are removed at stage time.
+rem Flags forward unchanged; do NOT add a "--" separator.
+"%BTAP_PYTHON%" -m btap.necb.cli %*
 exit /b %ERRORLEVEL%
