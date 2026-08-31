@@ -27,12 +27,29 @@ name"). btap-energyplus holds the "(Any)" entry, so canmet-btap must name
 its environment explicitly — `pypi` on pypi.org, `testpypi` on
 test.pypi.org, matching the job each upload runs in. Both still match at
 upload time ("(Any)" matches everything).
-A trusted-publishing token is scoped to ONE project, so each
-distribution needs its own upload invocation ("OIDC scoped token is not
-valid for project"). publish.yml uploads the companion first, then the
-library, from the same run's artifacts — one run, two exchanges, same
-bytes. The companion leads so a size-cap refusal cannot leave the
-library on the index without its engine. Sequence:
+A trusted-publishing exchange mints a token for ONE project, chosen by
+matching the run's OIDC claims — so two publishers from the same
+repo+workflow MUST differ by environment, and each upload needs its own
+environment AND its own job (environments are per-job). With one
+publisher at "(Any)" the exchange resolves to the other and the
+companion upload dies with "OIDC scoped token is not valid for project".
+publish.yml therefore has four publish jobs:
+
+| job | environment | project |
+|---|---|---|
+| publish-testpypi-companion | `testpypi-companion` | btap-energyplus |
+| publish-testpypi-library | `testpypi` | canmet-btap |
+| publish-pypi-companion | `pypi-companion` (protected) | btap-energyplus |
+| publish-pypi-library | `pypi` (protected) | canmet-btap |
+
+All four consume the SAME run artifacts and re-verify digests first, so
+the same-bytes chain holds. The companion leads so a size-cap refusal
+cannot leave the library on the index without its engine. Production
+therefore takes TWO approvals, companion then library.
+
+REGISTER btap-energyplus WITH THESE EXPLICIT ENVIRONMENTS —
+`testpypi-companion` on test.pypi.org and `pypi-companion` on pypi.org.
+"(Any)" cannot work: it always matches, so it is always ambiguous. Sequence:
 register py-topolys + btap-energyplus + canmet-tbd; publish py-topolys
 (frees a slot on each index); then register canmet-btap; then publish
 the rest in order. In

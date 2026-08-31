@@ -147,9 +147,43 @@ jobs:
           grep -q "EnergyPlus Completed Successfully" /tmp/sizing/reference_sizing/run/eplusout.err
           echo "windows installed-pair sizing ok (companion-supplied engine)"
 
-  publish-testpypi:
+  # A trusted-publishing exchange mints a token for ONE project, chosen by
+  # matching the run's OIDC claims against the registered publishers. Two
+  # publishers from the same repo+workflow are only distinguishable by
+  # ENVIRONMENT, so each upload gets its own environment and its own job —
+  # otherwise the exchange resolves to whichever publisher matches first and
+  # the other upload dies with "OIDC scoped token is not valid for project".
+  # Companion first: a size-cap refusal must not leave the library on the
+  # index without the engine it hard-depends on.
+  publish-testpypi-companion:
     if: inputs.mode == 'publish'
     needs: [validate-linux, validate-windows]
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi-companion
+      url: https://test.pypi.org/p/btap-energyplus
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - name: Digest re-verification, then keep ONLY the companion
+        run: |
+          cd dist && sha256sum -c SHA256SUMS && cd ..
+          mkdir -p upload
+          mv dist/btap_energyplus-* upload/
+          test "$(ls -1 upload | wc -l)" -eq 2 \
+            || { echo "expected 2 companion wheels, got $(ls upload)"; exit 1; }
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: upload
+
+  publish-testpypi-library:
+    if: inputs.mode == 'publish'
+    needs: publish-testpypi-companion
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -161,46 +195,26 @@ jobs:
         with:
           name: distributions
           path: dist/
-      - name: Digest re-verification + dependency refusal gate
+      - name: Digest re-verification + dependency refusal gate, then keep ONLY the library
         run: |
-          cd dist && sha256sum -c SHA256SUMS
-          # dist/ must contain ONLY distributions — the action uploads
-          # whatever it finds, and twine rejects the manifests by format.
-          rm -f SHA256SUMS DIGESTS.json
-          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
-          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
-          cd ..
-          # REFUSE btap while its published deps are unresolvable
+          cd dist && sha256sum -c SHA256SUMS && cd ..
+          # REFUSE the library while its published deps are unresolvable
           pip index versions canmet-tbd 2>/dev/null | grep -q "3.5.2" \
             || { echo "canmet-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
           pip index versions py-topolys 2>/dev/null | grep -q "0.1.0" \
             || { echo "py-topolys 0.1.0 is not on PyPI — publish upstream first"; exit 1; }
-      # Trusted publishing mints a token scoped to ONE project, so a single
-      # upload step cannot carry both distributions ("OIDC scoped token is
-      # not valid for project"). Two invocations, one exchange each; the
-      # artifacts are still this run's, so the same-bytes chain is intact.
-      # The companion goes FIRST: if it is refused (file-size cap), the
-      # library never lands on the index without the engine it depends on.
-      - name: Split the upload set by project
-        run: |
-          mkdir -p upload/companion upload/library
-          mv dist/btap_energyplus-* upload/companion/
-          mv dist/canmet_btap-*     upload/library/
-          left=$(ls -A dist || true)
-          test -z "$left" || { echo "unsorted files in dist/: $left"; exit 1; }
-          test -n "$(ls -A upload/companion)" && test -n "$(ls -A upload/library)"
+          mkdir -p upload
+          mv dist/canmet_btap-* upload/
+          test "$(ls -1 upload | wc -l)" -eq 2 \
+            || { echo "expected wheel + sdist, got $(ls upload)"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          packages-dir: upload/companion
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: upload/library
+          packages-dir: upload
 
   verify-testpypi:
     if: inputs.mode == 'publish'
-    needs: publish-testpypi
+    needs: publish-testpypi-library
     runs-on: ubuntu-latest
     steps:
       - name: Canmet packages from TestPyPI alone; third-party from PyPI
@@ -219,9 +233,32 @@ jobs:
           assert btap.__version__ == "0.2.0"
           PY
 
-  publish-pypi:
+  publish-pypi-companion:
     if: inputs.mode == 'publish'
     needs: verify-testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi-companion
+      url: https://pypi.org/p/btap-energyplus
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+      - name: Digest re-verification (the SAME bytes the rehearsal proved)
+        run: |
+          cd dist && sha256sum -c SHA256SUMS && cd ..
+          mkdir -p upload && mv dist/btap_energyplus-* upload/
+          test "$(ls -1 upload | wc -l)" -eq 2 || { echo "expected 2 wheels"; exit 1; }
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: upload
+
+  publish-pypi-library:
+    if: inputs.mode == 'publish'
+    needs: publish-pypi-companion
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -235,23 +272,9 @@ jobs:
           path: dist/
       - name: Digest re-verification (the SAME bytes the rehearsal proved)
         run: |
-          cd dist && sha256sum -c SHA256SUMS
-          # dist/ must contain ONLY distributions — the action uploads
-          # whatever it finds, and twine rejects the manifests by format.
-          rm -f SHA256SUMS DIGESTS.json
-          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
-          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
-      # Project-scoped tokens again: one exchange per project, companion first.
-      - name: Split the upload set by project
-        run: |
-          mkdir -p upload/companion upload/library
-          mv dist/btap_energyplus-* upload/companion/
-          mv dist/canmet_btap-*     upload/library/
-          left=$(ls -A dist || true)
-          test -z "$left" || { echo "unsorted files in dist/: $left"; exit 1; }
+          cd dist && sha256sum -c SHA256SUMS && cd ..
+          mkdir -p upload && mv dist/canmet_btap-* upload/
+          test "$(ls -1 upload | wc -l)" -eq 2 || { echo "expected wheel + sdist"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: upload/companion
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: upload/library
+          packages-dir: upload
