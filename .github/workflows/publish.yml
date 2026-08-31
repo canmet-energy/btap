@@ -175,9 +175,28 @@ jobs:
             || { echo "canmet-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
           pip index versions py-topolys 2>/dev/null | grep -q "0.1.0" \
             || { echo "py-topolys 0.1.0 is not on PyPI — publish upstream first"; exit 1; }
+      # Trusted publishing mints a token scoped to ONE project, so a single
+      # upload step cannot carry both distributions ("OIDC scoped token is
+      # not valid for project"). Two invocations, one exchange each; the
+      # artifacts are still this run's, so the same-bytes chain is intact.
+      # The companion goes FIRST: if it is refused (file-size cap), the
+      # library never lands on the index without the engine it depends on.
+      - name: Split the upload set by project
+        run: |
+          mkdir -p upload/companion upload/library
+          mv dist/btap_energyplus-* upload/companion/
+          mv dist/canmet_btap-*     upload/library/
+          left=$(ls -A dist || true)
+          test -z "$left" || { echo "unsorted files in dist/: $left"; exit 1; }
+          test -n "$(ls -A upload/companion)" && test -n "$(ls -A upload/library)"
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          packages-dir: upload/companion
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: upload/library
 
   verify-testpypi:
     if: inputs.mode == 'publish'
@@ -222,4 +241,17 @@ jobs:
           rm -f SHA256SUMS DIGESTS.json
           extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
           test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
+      # Project-scoped tokens again: one exchange per project, companion first.
+      - name: Split the upload set by project
+        run: |
+          mkdir -p upload/companion upload/library
+          mv dist/btap_energyplus-* upload/companion/
+          mv dist/canmet_btap-*     upload/library/
+          left=$(ls -A dist || true)
+          test -z "$left" || { echo "unsorted files in dist/: $left"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: upload/companion
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: upload/library
