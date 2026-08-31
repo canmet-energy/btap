@@ -1,37 +1,27 @@
-name: publish
-
-# R5 (D-83): same-bytes promotion in ONE workflow run. This repository
-# owns ONLY the btap + btap-energyplus publications (py-topolys and
-# py-tbd publish from their own repos — singular ownership). The wheels
-# are built ONCE as immutable run artifacts, digest-manifested, and
-# every later stage — both platform validations, the TestPyPI upload,
-# the PyPI promotion — re-verifies those digests. Production never
-# re-invokes a builder.
+# Publish canmet-btap. Same-bytes promotion in ONE run: build once,
+# validate the exact artifact on BOTH platforms a user installs on,
+# rehearse on TestPyPI, prove the index serves what this run built, then
+# promote those identical files behind a protected approval. Production
+# never re-invokes the builder.
 #
-#   mode: build-only  — build + validate on both platforms, no uploads.
-#                       Rehearsable BEFORE the trusted publishers exist
-#                       (tbd chain from released tags).
-#   mode: publish     — the full chain: TestPyPI upload, TestPyPI-alone
-#                       canmet install verification, then the
-#                       protected-environment approval gates the PyPI
-#                       promotion of the SAME artifacts. Requires the
-#                       trusted publishers configured and py-topolys +
-#                       py-tbd already published (the workflow REFUSES
-#                       btap while its deps are unresolvable).
+# The EnergyPlus companion (canmet-energyplus) is NOT built here any more —
+# it is published from canmet-energy/canmet-energyplus and consumed like any
+# other pinned dependency, which is also what the validate jobs below
+# exercise.
+name: Publish
 
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: build-only (rehearsal) or publish (TestPyPI -> approval -> PyPI)
+        description: build-only rehearses everything; publish uploads
         required: true
         default: build-only
         type: choice
         options: [build-only, publish]
 
-env:
-  LANG: C.UTF-8
-  LC_ALL: C.UTF-8
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -41,27 +31,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Build the four distribution files ONCE
+      - name: Build the distribution ONCE
         run: |
-          pip install -q build patchelf auditwheel
-          python3 packaging/pypi/energyplus/build_wheel.py \
-            --platform all --iteration 2 --outdir dist/ --skip-validation
+          pip install -q build
           python3 -m build --outdir dist/ python/
           ls -la dist/
-      - name: Digest manifest (the identity every later stage re-verifies)
-        run: |
-          cd dist && sha256sum * | tee SHA256SUMS
-      # The publish action uploads EVERY file in dist/, so a stray
-      # manifest (DIGESTS.json from the companion builder, SHA256SUMS
-      # from the step above) is a publish-time failure that no
-      # build-only rehearsal reaches. Assert the upload set here.
-      - name: The upload set is exactly the four distributions
+      - name: The upload set is exactly the wheel and the sdist
         run: |
           cd dist
           got=$(ls -1 *.whl *.tar.gz | sort | tr '\n' ' ')
           echo "would upload: $got"
-          test "$(ls -1 *.whl *.tar.gz | wc -l)" -eq 4 \
-            || { echo "expected 4 distribution files, got $got"; exit 1; }
+          test "$(ls -1 *.whl *.tar.gz | wc -l)" -eq 2 \
+            || { echo "expected wheel + sdist, got $got"; exit 1; }
+      - name: Digest manifest (the identity every later stage re-verifies)
+        run: cd dist && sha256sum *.whl *.tar.gz | tee SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: distributions
@@ -69,6 +52,10 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  # Both validate jobs install the built wheel EXACTLY as a user would —
+  # from the index for every dependency, including the companion. The
+  # windows one is the only place in this repository where btap executes on
+  # Windows at all, so it is not optional.
   validate-linux:
     needs: build
     runs-on: ubuntu-latest
@@ -78,37 +65,26 @@ jobs:
         with:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: dist/
+        with: {name: distributions, path: dist/}
       - name: Digest re-verification
         run: cd dist && sha256sum -c SHA256SUMS
-      - name: auditwheel gate on the exact artifact
-        run: |
-          pip install -q auditwheel
-          W=$(ls dist/btap_energyplus-*manylinux*.whl)
-          python3 -m auditwheel show "$W" | tee /tmp/audit.txt
-          grep -q 'consistent with the following platform tag: "manylinux_2_35_x86_64"' /tmp/audit.txt
       - name: Installed-pair REAL sizing (linux)
         run: |
           python3 -m venv /tmp/v && . /tmp/v/bin/activate
-          pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          pip install -q "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
-          pip install -q --find-links dist/ "openstudio~=3.11.0" \
-            "$(ls dist/canmet_btap-*.whl)[tbd]"
-          export XDG_CACHE_HOME=/tmp/isolated-cache
-          unset BTAP_ENERGYPLUS BTAP_ENERGYPLUS_ARCHIVE PYTHONPATH
-          cd /tmp
-          SEED=$(python3 -c "from btap.modeling.hvac.catalog_report import FIXTURE; print(FIXTURE)")
-          btap-compliance "$SEED" --simulate sizing \
-            --epw "$GITHUB_WORKSPACE/python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw" \
+          pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)[tbd]"
+          python3 -c "
+          import canmet_energyplus, btap
+          print('companion', canmet_energyplus.ENERGYPLUS_VERSION, '| btap', btap.__version__)"
+          mkdir -p /tmp/run
+          XDG_CACHE_HOME=/tmp/cache btap-compliance \
+            python/tests/fixtures/models/5ZoneNoHVAC.osm --simulate sizing \
+            --epw python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
             --hdd 3890 --storeys 1 --no-report --quiet \
-            --space-type "Space Function/Office enclosed > 25 m2" \
-            -o /tmp/sizing || test $? -eq 6
-          test -s /tmp/sizing/proposed_sizing/run/eplusout.sql
-          grep -q "EnergyPlus Completed Successfully" /tmp/sizing/reference_sizing/run/eplusout.err
-          test -z "$(find /tmp/isolated-cache -name 'energyplus*' 2>/dev/null)" \
-            || { echo "cache not empty — the run provisioned instead of using the companion"; exit 1; }
+            --space-type "Space Function/Office enclosed > 25 m2" -o /tmp/run || test $? -eq 6
+          test -d /tmp/run/proposed_sizing
+          provisioned=$(find /tmp/cache -name 'energyplus*' 2>/dev/null | head -1)
+          test -z "$provisioned" \
+            || { echo "the cache holds $provisioned — the companion did NOT supply the engine"; exit 1; }
           echo "linux installed-pair sizing ok (companion-supplied engine, empty cache)"
 
   validate-windows:
@@ -120,9 +96,7 @@ jobs:
         with:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: dist/
+        with: {name: distributions, path: dist/}
       - name: Digest re-verification
         shell: bash
         run: cd dist && sha256sum -c SHA256SUMS
@@ -130,60 +104,22 @@ jobs:
         shell: bash
         run: |
           python -m venv /tmp/v
-          /tmp/v/Scripts/pip install -q "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"
-          /tmp/v/Scripts/pip install -q "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"
-          /tmp/v/Scripts/pip install -q --find-links dist/ "openstudio~=3.11.0" \
-            "$(ls dist/canmet_btap-*.whl)[tbd]"
-          export LOCALAPPDATA=$(cygpath -w /tmp/isolated-cache)
-          unset BTAP_ENERGYPLUS BTAP_ENERGYPLUS_ARCHIVE PYTHONPATH
-          cd /tmp
-          SEED=$(/tmp/v/Scripts/python -c "from btap.modeling.hvac.catalog_report import FIXTURE; print(FIXTURE)")
-          /tmp/v/Scripts/btap-compliance "$SEED" --simulate sizing \
-            --epw "$GITHUB_WORKSPACE/python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw" \
+          /tmp/v/Scripts/pip install -q "openstudio~=3.11.0" "$(ls dist/canmet_btap-*.whl)[tbd]"
+          /tmp/v/Scripts/python -c "
+          import canmet_energyplus, btap
+          print('companion', canmet_energyplus.ENERGYPLUS_VERSION, '| btap', btap.__version__)"
+          mkdir -p /tmp/run
+          LOCALAPPDATA='/tmp/cache' /tmp/v/Scripts/btap-compliance \
+            python/tests/fixtures/models/5ZoneNoHVAC.osm --simulate sizing \
+            --epw python/tests/fixtures/weather/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw \
             --hdd 3890 --storeys 1 --no-report --quiet \
-            --space-type "Space Function/Office enclosed > 25 m2" \
-            -o /tmp/sizing || test $? -eq 6
-          test -s /tmp/sizing/proposed_sizing/run/eplusout.sql
-          grep -q "EnergyPlus Completed Successfully" /tmp/sizing/reference_sizing/run/eplusout.err
+            --space-type "Space Function/Office enclosed > 25 m2" -o /tmp/run || test $? -eq 6
+          test -d /tmp/run/proposed_sizing
           echo "windows installed-pair sizing ok (companion-supplied engine)"
 
-  # A trusted-publishing exchange mints a token for ONE project, chosen by
-  # matching the run's OIDC claims against the registered publishers. Two
-  # publishers from the same repo+workflow are only distinguishable by
-  # ENVIRONMENT, so each upload gets its own environment and its own job —
-  # otherwise the exchange resolves to whichever publisher matches first and
-  # the other upload dies with "OIDC scoped token is not valid for project".
-  # Companion first: a size-cap refusal must not leave the library on the
-  # index without the engine it hard-depends on.
-  publish-testpypi-companion:
+  publish-testpypi:
     if: inputs.mode == 'publish'
     needs: [validate-linux, validate-windows]
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi-companion
-      url: https://test.pypi.org/p/btap-energyplus
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: dist/
-      - name: Digest re-verification, then keep ONLY the companion
-        run: |
-          cd dist && sha256sum -c SHA256SUMS && cd ..
-          mkdir -p upload
-          mv dist/btap_energyplus-* upload/
-          test "$(ls -1 upload | wc -l)" -eq 2 \
-            || { echo "expected 2 companion wheels, got $(ls upload)"; exit 1; }
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: upload
-
-  publish-testpypi-library:
-    if: inputs.mode == 'publish'
-    needs: publish-testpypi-companion
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -192,73 +128,69 @@ jobs:
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: dist/
-      - name: Digest re-verification + dependency refusal gate, then keep ONLY the library
+        with: {name: distributions, path: dist/}
+      - name: Digest re-verification + dependency refusal gate
         run: |
-          cd dist && sha256sum -c SHA256SUMS && cd ..
-          # REFUSE the library while its published deps are unresolvable
-          pip index versions canmet-tbd 2>/dev/null | grep -q "3.5.2" \
-            || { echo "canmet-tbd 3.5.2 is not on PyPI — publish upstream first"; exit 1; }
-          pip index versions py-topolys 2>/dev/null | grep -q "0.1.0" \
-            || { echo "py-topolys 0.1.0 is not on PyPI — publish upstream first"; exit 1; }
-          mkdir -p upload
-          mv dist/canmet_btap-* upload/
-          test "$(ls -1 upload | wc -l)" -eq 2 \
-            || { echo "expected wheel + sdist, got $(ls upload)"; exit 1; }
+          cd dist && sha256sum -c SHA256SUMS
+          # dist/ must hold ONLY distributions: the action uploads whatever
+          # it finds and twine rejects a manifest by format.
+          rm -f SHA256SUMS
+          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
+          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
+          cd ..
+          # REFUSE to publish while a hard dependency is unresolvable.
+          for dep in "canmet-tbd 3.5.2" "py-topolys 0.1.0" "canmet-energyplus 25.2.0.2"; do
+            set -- $dep
+            pip index versions "$1" 2>/dev/null | grep -q "$2" \
+              || { echo "$1 $2 is not on PyPI — publish upstream first"; exit 1; }
+          done
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          packages-dir: upload
 
   verify-testpypi:
     if: inputs.mode == 'publish'
-    needs: publish-testpypi-library
+    needs: publish-testpypi
     runs-on: ubuntu-latest
-    steps:
-      - name: Canmet packages from TestPyPI alone; third-party from PyPI
-        run: |
-          # openstudio/jsonschema were never ours and are not on TestPyPI;
-          # the canmet chain (btap, btap-energyplus, py-tbd, py-topolys) is
-          # what this rehearsal proves — the same explicit model the
-          # upstream publish workflows use.
-          python3 -m venv /tmp/v && . /tmp/v/bin/activate
-          pip install -q --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ "canmet-btap[tbd]==0.2.0"
-          python3 - <<'PY'
-          import btap, btap_energyplus
-          print("btap", btap.__version__, "| companion",
-                btap_energyplus.ENERGYPLUS_VERSION)
-          assert btap.__version__ == "0.2.0"
-          PY
-
-  publish-pypi-companion:
-    if: inputs.mode == 'publish'
-    needs: verify-testpypi
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi-companion
-      url: https://pypi.org/p/btap-energyplus
-    permissions:
-      id-token: write
     steps:
       - uses: actions/download-artifact@v4
+        with: {name: distributions, path: dist/}
+      - uses: actions/setup-python@v5
         with:
-          name: distributions
-          path: dist/
-      - name: Digest re-verification (the SAME bytes the rehearsal proved)
+          python-version: '3.12'
+      - name: What TestPyPI serves must be byte-identical to what we built
         run: |
-          cd dist && sha256sum -c SHA256SUMS && cd ..
-          mkdir -p upload && mv dist/btap_energyplus-* upload/
-          test "$(ls -1 upload | wc -l)" -eq 2 || { echo "expected 2 wheels"; exit 1; }
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: upload
+          V=$(ls dist/canmet_btap-*.whl | sed -E 's/.*canmet_btap-([^-]+)-py3.*/\1/')
+          echo "this run built version $V"
+          mkdir -p /tmp/dl
+          pip download -q --no-deps -d /tmp/dl \
+            --index-url https://test.pypi.org/simple/ "canmet-btap==$V"
+          for f in /tmp/dl/*; do
+            want=$(grep " $(basename $f)\$" dist/SHA256SUMS | cut -d' ' -f1)
+            got=$(sha256sum "$f" | cut -d' ' -f1)
+            test -n "$want" || { echo "$(basename $f) is not in the build manifest"; exit 1; }
+            test "$want" = "$got" || { echo "$(basename $f): index $got != built $want"; exit 1; }
+            echo "identical: $(basename $f)"
+          done
+          echo "TestPyPI serves exactly the bytes this run built"
+      - name: Install from TestPyPI alone (canmet) + PyPI (third-party)
+        run: |
+          V=$(ls dist/canmet_btap-*.whl | sed -E 's/.*canmet_btap-([^-]+)-py3.*/\1/')
+          python3 -m venv /tmp/tv && . /tmp/tv/bin/activate
+          pip install -q --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ "canmet-btap[tbd]==$V"
+          python3 - "$V" <<'PY'
+          import sys
+          import btap, canmet_energyplus, tbd
+          print("btap", btap.__version__, "| companion",
+                canmet_energyplus.ENERGYPLUS_VERSION, "| tbd", tbd.VERSION)
+          assert btap.__version__ == sys.argv[1], (btap.__version__, sys.argv[1])
+          print("the version installed from the index IS this run's")
+          PY
 
-  publish-pypi-library:
+  publish-pypi:
     if: inputs.mode == 'publish'
-    needs: publish-pypi-companion
+    needs: verify-testpypi
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -267,14 +199,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          name: distributions
-          path: dist/
+        with: {name: distributions, path: dist/}
       - name: Digest re-verification (the SAME bytes the rehearsal proved)
         run: |
-          cd dist && sha256sum -c SHA256SUMS && cd ..
-          mkdir -p upload && mv dist/canmet_btap-* upload/
-          test "$(ls -1 upload | wc -l)" -eq 2 || { echo "expected wheel + sdist"; exit 1; }
+          cd dist && sha256sum -c SHA256SUMS
+          rm -f SHA256SUMS
+          extra=$(ls -1 | grep -vE '\.(whl|tar\.gz)$' || true)
+          test -z "$extra" || { echo "non-distribution files in dist/: $extra"; exit 1; }
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: upload

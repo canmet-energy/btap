@@ -56,7 +56,7 @@ def engine_available() -> bool:
     if CONTAINER_ENERGYPLUS.is_file():
         os.environ.setdefault("BTAP_ENERGYPLUS", str(CONTAINER_ENERGYPLUS))
         return True
-    # The btap-energyplus companion (R5, D-83): delegate to the engine's
+    # The canmet-energyplus companion (R5, D-83): delegate to the engine's
     # own fail-closed probe. A BROKEN installed companion returns True —
     # available-but-corrupted must surface as the loud EngineError in the
     # actual test, never hide behind the cache probe below.
