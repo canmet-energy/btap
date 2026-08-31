@@ -185,6 +185,7 @@ def run_checks() -> int:
         from importlib.metadata import version as dist_version
 
         import canmet_energyplus
+
         from btap.simulation import engine
 
         assert canmet_energyplus.ENERGYPLUS_VERSION == engine.PINNED_VERSION, (
