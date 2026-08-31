@@ -1,6 +1,6 @@
 ; Inno Setup script for the NECB Compliance CLI.
 ;
-; Build:  rake windows:stage OPENSTUDIO_WINDOWS=<unpacked windows sdk>
+; Build:  python3 packaging/windows/stage_python.py --version <v>
 ;         iscc packaging\windows\btap-compliance.iss
 ;
 ; Installs PER-USER and needs NO administrator rights: no UAC prompt, and it
@@ -9,12 +9,15 @@
 ; because the payload is self-contained — nothing goes to system32, nothing
 ; registers a service, nothing touches HKLM.
 ;
-; The payload carries its own OpenStudio, so this installer does NOT probe for
-; one, gate on its version, or touch PATH or the registry. Everything it needs
-; is under {app}.
+; The payload carries its own CPython, OpenStudio and EnergyPlus, so this
+; installer does NOT probe for any of them, gate on versions, or touch PATH or
+; the registry. Everything it needs is under {app}. Since R5 (D-83) the payload
+; is a pre-installed Python site-packages tree rather than Ruby gems: the bytes
+; are staged deterministically on the build host, so nothing resolves, compiles
+; or downloads on the user's machine.
 
 #define AppName    "BTAP Compliance"
-#define AppVersion "0.2.0"
+#define AppVersion "0.2.1"
 
 [Setup]
 AppName={#AppName}
@@ -22,10 +25,10 @@ AppVersion={#AppVersion}
 AppPublisher=CanmetENERGY, Natural Resources Canada
 DefaultDirName={autopf}\{#AppName}
 OutputBaseFilename=btap-compliance-setup-{#AppVersion}
-LicenseFile=stage\LICENSE-gems.txt
+LicenseFile=stage\LICENSE
 Compression=lzma2/max
 SolidCompression=yes
-; The bundled OpenStudio is 64-bit only.
+; The bundled OpenStudio, EnergyPlus and CPython are 64-bit only.
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ; No elevation. With `lowest`, {autopf} resolves to {localappdata}\Programs
@@ -59,4 +62,5 @@ Filename: "{app}\samples\run-demo.cmd"; Description: "Run the sample compliance 
 
 [UninstallDelete]
 ; Only what we generate; a user's --out directories are theirs and are left.
-Type: filesandordirs; Name: "{app}\gems"
+; `python` replaces the gems tree of the Ruby installer this succeeds.
+Type: filesandordirs; Name: "{app}\python"

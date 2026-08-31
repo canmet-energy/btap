@@ -247,6 +247,31 @@ end
 # Linux dev container is the Linux build, and the installer needs the Windows
 # one. That has to be fetched and unpacked separately (see OPENSTUDIO_WINDOWS).
 namespace :windows do
+  # DORMANT since R5 (D-83). These tasks build the RUBY installer — OpenStudio
+  # plus the five gem trees — which the Python installer succeeds:
+  # `python3 packaging/windows/stage_python.py` stages embedded CPython and a
+  # pre-installed site-packages tree instead, and release.yml drives it.
+  #
+  # They abort rather than being deleted because the Ruby side stays frozen
+  # verification infrastructure until R6. The guard is here, not merely in a
+  # comment, so a v-tag can never accidentally ship the superseded artifact:
+  # both paths write the same stage/ directory and the same Output/*.exe name,
+  # so "whichever ran last wins" was a real way to publish the wrong thing.
+  def self.dormant!(task)
+    return if ENV['BTAP_RUBY_INSTALLER'] == '1'
+
+    abort <<~MSG
+      rake windows:#{task} is DORMANT since R5 (D-83).
+
+      The installer is now Python, staged by:
+        python3 packaging/windows/stage_python.py --version <v>
+      and built by .github/workflows/release.yml.
+
+      For archaeology only: BTAP_RUBY_INSTALLER=1 rake windows:#{task}
+      (deleted at R6).
+    MSG
+  end
+
   # Absolute from the start: the copy loop joins this with the repo root, and an
   # absolute STAGE_DIR joined onto a root yields a mangled in-repo path.
   STAGE = File.expand_path(ENV.fetch('STAGE_DIR', 'packaging/windows/stage'))
@@ -259,6 +284,7 @@ namespace :windows do
 
   desc 'Stage the Windows payload tree (STAGE_DIR=, OPENSTUDIO_WINDOWS=<unpacked win SDK>)'
   task :stage do
+    dormant!('stage')
     require 'fileutils'
     FileUtils.rm_rf(STAGE)
     FileUtils.mkdir_p("#{STAGE}/gems")
@@ -340,6 +366,7 @@ namespace :windows do
   end
   desc 'Compile the staged tree into setup.exe via Inno Setup under wine'
   task :installer do
+    dormant!('installer')
     iss = 'packaging/windows/btap-compliance.iss'
     abort("stage first: rake windows:stage (no #{STAGE})") unless Dir.exist?(STAGE)
 
@@ -373,6 +400,7 @@ namespace :windows do
   # secret to manage and nothing to put in the environment.
   desc 'Publish the built installer as a GitHub release (rake windows:release[v0.1.0] [DRY_RUN=1])'
   task :release, [:tag] do |_t, args|
+    dormant!('release')
     tag = args[:tag] or abort('usage: rake windows:release[v0.1.0]')
     # DRY_RUN runs every guard and prints exactly what WOULD be published,
     # without creating a tag, a release or an upload. It exists because the

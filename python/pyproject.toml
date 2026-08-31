@@ -1,5 +1,7 @@
 [build-system]
-requires = ["setuptools>=68"]
+# >=77 for the SPDX `license` string + `license-files`, which is
+# what actually puts the LICENSE into the built wheel.
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +10,11 @@ version = "0.2.1"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "LGPL-3.0-or-later" }
+license = "LGPL-3.0-or-later"
+# The wheel must CARRY the licence, not merely name it: the Windows
+# installer redistributes this package, and a metadata field is a
+# claim while a shipped notice is what satisfies the obligation.
+license-files = ["LICENSE"]
 # The SDK: same SWIG layer as the Ruby gems, published on PyPI by NREL.
 # btap.audit needs none of it; simulation/modeling/costing/necb do.
 # canmet-energyplus (R5, D-83): the pinned EnergyPlus engine as package
