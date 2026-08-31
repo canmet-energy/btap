@@ -248,9 +248,20 @@ def main() -> int:
     # this project ships under.
     shutil.copy2(REPO_ROOT / "LICENSE", stage / "LICENSE")
 
+    # The sample models are GENERATED (and gitignored), so a fresh checkout
+    # has none. Demand them rather than skipping quietly: a silent skip here
+    # produced an installer whose Start-menu "Sample compliance run" pointed
+    # at nothing, and the failure surfaced three lines later as a confusing
+    # copy error into a directory that was never created.
     samples = HERE / "samples"
-    if samples.is_dir():
-        shutil.copytree(samples, stage / "samples")
+    models = sorted(samples.glob("*.osm")) if samples.is_dir() else []
+    if not models:
+        die(f"no sample models in {samples.relative_to(REPO_ROOT)}. Generate "
+            "them first:\n  python3 python/scripts/generate_samples.py "
+            f"{samples.relative_to(REPO_ROOT)}\n(needs the openstudio SDK "
+            "importable)")
+    shutil.copytree(samples, stage / "samples")
+    print(f"samples: {len(models)} generated model(s)")
     shutil.copy2(HERE / "run-demo.cmd", stage / "samples" / "run-demo.cmd")
     # The demo model run-demo.cmd names.
     shutil.copy2(REPO_ROOT / "verification" / "oracle" / "fixtures" / "5ZoneNoHVAC.osm",

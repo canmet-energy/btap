@@ -32,6 +32,13 @@ jobs:
         run: |
           pip install -q build
           python3 -m build --wheel --outdir python/dist python/
+      - name: generate the sample models
+        # Gitignored and generated, not committed — they need the SDK, which
+        # is a pip install on linux now that nothing here uses the container.
+        run: |
+          pip install -q "openstudio~=3.11.0"
+          python3 python/scripts/generate_samples.py packaging/windows/samples
+          ls packaging/windows/samples | head -3
       - name: stage the Windows payload
         run: |
           V=$(sed -n 's/#define AppVersion *"\(.*\)"/\1/p' packaging/windows/btap-compliance.iss)
