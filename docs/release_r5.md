@@ -19,7 +19,15 @@ Distribution names: PyPI's similarity check blocked `btap` and `py-tbd`
 (bta / pytbd / tbd exist), so the published names are `canmet-btap`
 and `canmet-tbd`; the import names (`btap`, `tbd`) are unchanged.
 PyPI caps PENDING publishers at 3 per account (per index); a pending
-entry is consumed when the project's first upload creates it. Sequence:
+entry is consumed when the project's first upload creates it.
+TWO PENDING PUBLISHERS FROM ONE REPO NEED DIFFERENT ENVIRONMENTS: PyPI
+refuses a second pending entry whose (owner, repo, workflow, environment)
+tuple already exists ("already been registered for a different project
+name"). btap-energyplus holds the "(Any)" entry, so canmet-btap must name
+its environment explicitly — `pypi` on pypi.org, `testpypi` on
+test.pypi.org, matching the job each upload runs in. Both still match at
+upload time ("(Any)" matches everything), so the two distributions keep
+publishing from ONE job in ONE run. Sequence:
 register py-topolys + btap-energyplus + canmet-tbd; publish py-topolys
 (frees a slot on each index); then register canmet-btap; then publish
 the rest in order. In
