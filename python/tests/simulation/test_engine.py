@@ -33,7 +33,7 @@ class EngineTestCase(unittest.TestCase):
 class TestOverrideResolution(EngineTestCase):
     @unittest.skipUnless(CONTAINER_ENERGYPLUS.is_file(),
                          "needs the container's bundled EnergyPlus")
-    def test_btap_energyplus_override_resolves_and_verifies(self):
+    def test_canmet_energyplus_override_resolves_and_verifies(self):
         with mock.patch.dict(os.environ, {"BTAP_ENERGYPLUS": str(CONTAINER_ENERGYPLUS)}):
             binary = engine.ensure_energyplus()
         self.assertEqual(CONTAINER_ENERGYPLUS, binary)
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
 
 class FakeCompanion:
-    """A stand-in btap_energyplus module injected via sys.modules."""
+    """A stand-in canmet_energyplus module injected via sys.modules."""
 
     def __init__(self, version, binary):
         self.ENERGYPLUS_VERSION = version
@@ -148,8 +148,8 @@ class TestCompanionResolution(EngineTestCase):
     stale cache or a network download."""
 
     def install_fake(self, module):
-        sys.modules["btap_energyplus"] = module
-        self.addCleanup(sys.modules.pop, "btap_energyplus", None)
+        sys.modules["canmet_energyplus"] = module
+        self.addCleanup(sys.modules.pop, "canmet_energyplus", None)
 
     def test_companion_resolves_before_the_cache(self):
         # H-1: a stale/wrong cache must LOSE to the shipped companion.
@@ -210,19 +210,19 @@ class TestCompanionResolution(EngineTestCase):
         self.install_fake(FakeCompanion(engine.PINNED_VERSION, liar))
         with self.assertRaises(engine.EngineError) as ctx:
             engine.ensure_energyplus()
-        self.assertIn("btap-energyplus companion", str(ctx.exception))
+        self.assertIn("canmet-energyplus companion", str(ctx.exception))
 
     def test_broken_submodule_import_raises_not_absent(self):
         # Sol's PR-1 follow-up control: a companion whose __init__ fails
         # importing its own submodule is INSTALLED AND BROKEN — the broad
         # except ImportError used to misread it as absent and fall through.
-        pkg = Path(self.tmp.name) / "site" / "btap_energyplus"
+        pkg = Path(self.tmp.name) / "site" / "canmet_energyplus"
         pkg.mkdir(parents=True)
         (pkg / "__init__.py").write_text(
-            "import btap_energyplus.payload\n", encoding="utf-8")
+            "import canmet_energyplus.payload\n", encoding="utf-8")
         sys.path.insert(0, str(pkg.parent))
         self.addCleanup(sys.path.remove, str(pkg.parent))
-        self.addCleanup(sys.modules.pop, "btap_energyplus", None)
+        self.addCleanup(sys.modules.pop, "canmet_energyplus", None)
         with self.assertRaises(engine.EngineError) as ctx:
             engine._companion_binary(engine.PINNED_VERSION)
-        self.assertIn("btap_energyplus.payload", str(ctx.exception))
+        self.assertIn("canmet_energyplus.payload", str(ctx.exception))

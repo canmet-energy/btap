@@ -117,7 +117,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-80** — Retiring the Ruby gems: the python-prep / ruby-probe live Leg C, the request manifest, and the freeze-first retirement path _(process)_
 - **D-81** — The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff _(process)_
 - **D-82** — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop _(process)_
-- **D-83** — R5 distribution: full PyPI publication, the btap-energyplus companion wheel, and the Python Windows installer succeeding the Ruby one _(process)_
+- **D-83** — R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one _(process)_
 
 <!-- TOC END -->
 
@@ -4631,11 +4631,25 @@ as head evidence.
 ## D-83
 
 **Decided:** R5's distribution architecture (2026-08-30). The zero-thought
-goal — `pip install btap[tbd]` on Windows x86-64 or supported glibc-based
-Linux x86-64 installs *everything*, EnergyPlus included, and simulations
-run locally with no user setup — is delivered by a per-platform
-**`btap-energyplus` companion wheel**, full PyPI publication with singular
+goal — `pip install canmet-btap[tbd]` on Windows x86-64 or supported
+glibc-based Linux x86-64 installs *everything*, EnergyPlus included, and
+simulations run locally with no user setup — is delivered by a per-platform
+**`canmet-energyplus` engine wheel**, full PyPI publication with singular
 ownership, and a Python Windows installer that succeeds the Ruby one.
+
+**The engine wheel lives in its OWN repository** (`canmet-energy/canmet-energyplus`).
+It began inside this one as `btap-energyplus`, and publication proved that
+wrong: a trusted-publishing exchange mints a token for ONE project and
+resolves the run's claims against every registered publisher, so two
+projects sharing a repository and workflow forced distinct environments,
+four publish jobs, and a registration collision — none of which exists with
+one project per repository, as py-topolys and canmet-tbd each demonstrated
+the same afternoon. The org-scoped name also stops framing a general-purpose
+artifact as one consumer's accessory: no working EnergyPlus wheel existed on
+PyPI before this, and the same package can carry further platforms (an
+aarch64 Linux build is a matrix entry, NREL already publishing that asset)
+once their numerical results are adjudicated against the x86-64 baselines.
+PyPI has no rename, so this was settled before the first upload.
 
 **The companion.** py3-none-win_amd64 plus a manylinux wheel whose tag is
 EARNED — an `auditwheel` PEP 600 compliance audit with recursive ELF
@@ -4653,7 +4667,7 @@ datasets an input file may reference); exec bits ride in the wheel's
 external attributes with a runtime chmod backstop; `PROVENANCE.json`
 records source hashes, prune/keep manifests, licenses, and modifications.
 btap pins the companion HARD, platform-marked, and EXACT
-(`btap-energyplus==25.2.0.2`) — a repackaging requires a corresponding
+(`canmet-energyplus==25.2.0.2`) — a repackaging requires a corresponding
 btap release, as the 25.2.0.1 → 25.2.0.2 prune change did; the runtime version cross-check is
 defense in depth, never identity.
 

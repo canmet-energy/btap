@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import platform
 import subprocess
 import sys
 import tempfile
@@ -28,6 +29,20 @@ from pathlib import Path
 
 PYTHON_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = PYTHON_ROOT.parent
+
+
+def companion_expected() -> bool:
+    """Is canmet-energyplus a hard dependency on THIS platform?
+
+    Computed from the platform, mirroring the marker in pyproject.toml —
+    never from "did the import work", because gating a check on the thing it
+    is testing is how a check silently becomes a no-op. (The companion checks
+    below used to return early unless BTAP_COMPANION_WHEELHOUSE was set, which
+    printed "ok" for work never done once the wheelhouse went away.)
+    """
+    return (sys.platform == "win32"
+            or (sys.platform.startswith("linux")
+                and platform.machine() == "x86_64"))
 
 
 def run_checks() -> int:
@@ -126,43 +141,94 @@ def run_checks() -> int:
         assert derated > 0, "tbd.process derated nothing on the seed model"
     check("the pinned py-tbd engine installs and processes (M7)", tbd_engine_operates)
 
+    print(f"companion expected on this platform: {companion_expected()} "
+          f"({sys.platform}/{platform.machine()})")
+
     def companion_engine_resolves():
-        # R5 (D-83): where the wheelhouse supplied the companion, the
-        # installed btap wheel must resolve to the installed companion's
-        # binary with no engine-resolution overrides.
-        if not os.environ.get("BTAP_COMPANION_WHEELHOUSE"):
+        # R5 (D-83): the installed btap wheel must resolve to the installed
+        # companion's binary with no engine-resolution overrides.
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
             return
-        import btap_energyplus  # noqa: I001
+        import canmet_energyplus  # noqa: I001
         from btap.simulation import engine
 
-        companion_installed = Path(btap_energyplus.__file__).resolve()
+        companion_installed = Path(canmet_energyplus.__file__).resolve()
         if REPO_ROOT in companion_installed.parents:
             raise AssertionError(
                 f"the SOURCE TREE shadowed the companion wheel ({companion_installed})")
-        print(f"btap-energyplus imported from: {companion_installed.parent}")
+        print(f"canmet-energyplus imported from: {companion_installed.parent}")
 
         os.environ.pop("BTAP_ENERGYPLUS", None)
         os.environ.pop("BTAP_ENERGYPLUS_ARCHIVE", None)
         engine._reset_memo()
         resolved = engine.ensure_energyplus()
-        expected = btap_energyplus.binary_path()
+        expected = canmet_energyplus.binary_path()
         assert str(resolved) == str(expected), (
             f"engine resolved {resolved}, not the companion {expected}")
     check("the companion engine resolves with no engine overrides (R5)",
           companion_engine_resolves)
 
+    def companion_authority_agrees():
+        # Two repositories now carry EnergyPlus identity: canmet-energyplus
+        # owns which upstream build is REPACKAGED, btap owns the version it
+        # is compatible with plus the assets its download rung fetches for
+        # platforms the wheel does not cover. That duplication is deliberate,
+        # so it has to be CHECKED — engine._verify_version compares only the
+        # version string and would not notice a different asset or build.
+        # This is the only environment in btap's CI with a genuinely
+        # installed companion, so the check belongs here and nowhere else.
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
+            return
+        import json
+        from importlib.metadata import version as dist_version
+
+        import canmet_energyplus
+
+        from btap.simulation import engine
+
+        assert canmet_energyplus.ENERGYPLUS_VERSION == engine.PINNED_VERSION, (
+            f"companion carries E+ {canmet_energyplus.ENERGYPLUS_VERSION}, "
+            f"btap pins {engine.PINNED_VERSION}")
+        assert canmet_energyplus.BUILD_SHA == engine._BUILD_SHA, (
+            f"companion built from {canmet_energyplus.BUILD_SHA}, "
+            f"btap pins {engine._BUILD_SHA}")
+
+        # The distribution version is metadata, NOT ENERGYPLUS_VERSION (which
+        # is the three-part engine version by design).
+        installed_dist = dist_version("canmet-energyplus")
+        print(f"    canmet-energyplus {installed_dist}, engine "
+              f"{canmet_energyplus.ENERGYPLUS_VERSION}, build "
+              f"{canmet_energyplus.BUILD_SHA}")
+
+        prov = json.loads(
+            (Path(canmet_energyplus.__file__).parent / "PROVENANCE.json")
+            .read_text(encoding="utf-8"))
+        key = ("windows", "amd64") if sys.platform == "win32" else ("linux", "x86_64")
+        _, btap_digest = engine._ASSETS[key]
+        companion_digest = prov["source_asset"]["sha256"]
+        assert companion_digest == btap_digest, (
+            f"the companion repackaged an asset btap does not know: "
+            f"{companion_digest} != {btap_digest}")
+        print(f"    both repositories name the same upstream asset "
+              f"({companion_digest[:16]}…)")
+    check("the two repositories agree on the EnergyPlus identity (R5)",
+          companion_authority_agrees)
+
     def installed_pair_sizes():
         # The release premise, exercised as users receive it: installed btap
         # drives the installed companion from outside the checkout. Inputs may
         # be fixtures; neither implementation is allowed to resolve from it.
-        if not os.environ.get("BTAP_COMPANION_WHEELHOUSE"):
+        if not companion_expected():
+            print("    (skipped: the marker excludes this platform)")
             return
-        import btap_energyplus
+        import canmet_energyplus
 
         venv_root = Path(sys.prefix).resolve()
         for package, module_path in (
                 ("btap", Path(btap.__file__).resolve()),
-                ("btap-energyplus", Path(btap_energyplus.__file__).resolve())):
+                ("canmet-energyplus", Path(canmet_energyplus.__file__).resolve())):
             if not module_path.is_relative_to(venv_root):
                 raise AssertionError(
                     f"{package} imported from {module_path}, outside scratch venv {venv_root}")
@@ -209,7 +275,7 @@ def run_checks() -> int:
                 f"({provisioned[:2]}) — the run did NOT use the companion")
             print(f"installed-pair sizing used btap from {Path(btap.__file__).parent}")
             print("installed-pair sizing used companion from "
-                  f"{Path(btap_energyplus.__file__).parent}")
+                  f"{Path(canmet_energyplus.__file__).parent}")
             print("installed-pair REAL sizing completed with isolated cache "
                 "and no engine-resolution overrides")
     check("installed btap + installed companion complete real sizing (R5)",
@@ -261,17 +327,19 @@ def main(argv) -> int:
         # DISTRIBUTION, not just the checkout: a broken git pin, missing
         # package data or import-resolution failure in the optional extra is
         # invisible to every source-tree test.
-        # The companion hard dep (R5, D-83) resolves from a LOCAL
-        # wheelhouse (BTAP_COMPANION_WHEELHOUSE): CI builds+caches the
-        # linux companion wheel; without it, on a supported platform, the
-        # install MUST fail (H-6, exercised below in isolated-index form).
-        wheelhouse = os.environ.get("BTAP_COMPANION_WHEELHOUSE")
-        find_links = ["--find-links", wheelhouse] if wheelhouse else []
-        if wheelhouse:
-            # H-6, done HONESTLY (review round 4: an empty index fails for
-            # every dependency, proving nothing about the companion). Build
-            # a wheelhouse holding btap + EVERY dependency EXCEPT the
-            # companion; the failure must NAME the companion requirement.
+        # The companion hard dep (R5, D-83) resolves from PyPI like any
+        # other dependency now that canmet-energyplus is published from its
+        # own repository; H-6 below proves the dependency is real by
+        # withholding ONLY that package from an isolated index.
+        # H-6, done HONESTLY (review round 4: an empty index fails for
+        # every dependency, proving nothing about the companion). Build a
+        # wheelhouse holding EVERY dependency EXCEPT the companion; the
+        # failure must NAME the companion requirement. This no longer needs
+        # a locally built companion — the dependency now comes from PyPI
+        # like any other — but it DOES need the platform guard: where the
+        # marker excludes the companion, resolution legitimately succeeds
+        # and asserting failure would be a false alarm.
+        if companion_expected():
             with tempfile.TemporaryDirectory(prefix="h6-") as deps_dir:
                 subprocess.run(
                     [str(pip), "download", "-q", "-d", deps_dir,
@@ -284,26 +352,19 @@ def main(argv) -> int:
                 if h6.returncode == 0:
                     print("H-6 FAILED: btap resolved without the companion")
                     return 1
-                if "btap-energyplus" not in blame:
+                if "canmet-energyplus" not in blame:
                     print("H-6 FAILED: resolution failed but did NOT name "
-                          f"btap-energyplus:\n{blame[-800:]}")
+                          f"canmet-energyplus:\n{blame[-800:]}")
                     return 1
                 print("H-6 ok: with every dep present EXCEPT the companion, "
-                      "resolution fails NAMING btap-energyplus")
-        # py-tbd from its released tag until the PyPI publication lands
-        # (the tag carries exactly version 3.5.2, satisfying the ==3.5.2
-        # pin in pyproject's [tbd] extra).
-        # py-topolys FIRST from its tag (version 0.1.0 satisfies
-        # py-tbd's ==0.1.0 metadata pin before the PyPI publication).
-        subprocess.run(
-            [str(pip), "install", "-q",
-             "py-topolys @ git+https://github.com/canmet-energy/py-topolys.git@v0.1.0"],
-            check=True)
-        subprocess.run(
-            [str(pip), "install", "-q",
-             "canmet-tbd @ git+https://github.com/canmet-energy/py-tbd.git@v3.5.2"],
-            check=True)
-        subprocess.run([str(pip), "install", "-q", *find_links,
+                      "resolution fails NAMING canmet-energyplus")
+        else:
+            print("H-6 skipped: the marker excludes the companion here")
+        # Everything resolves from PyPI now — canmet-tbd 3.5.2 (which pins
+        # py-topolys==0.1.0 transitively) and canmet-energyplus 25.2.0.2 are
+        # published, so this install is EXACTLY what a user's `pip install
+        # canmet-btap[tbd]` does. The tag-sourced interim installs are gone.
+        subprocess.run([str(pip), "install", "-q",
                         "openstudio~=3.11.0", f"{wheel}[tbd]"], check=True)
 
         # CWD outside the repo: a local btap/ must not be importable.

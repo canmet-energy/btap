@@ -8,7 +8,7 @@ executable), resolving in order:
 1. ``BTAP_ENERGYPLUS`` — explicit escape hatch: the binary itself or an
    EnergyPlus install directory. Verified, never blindly trusted; set-but-
    invalid RAISES rather than falling through.
-2. The ``btap-energyplus`` COMPANION package (R5, D-83) — on supported
+2. The ``canmet-energyplus`` COMPANION package (R5, D-83) — on supported
    platforms a hard dependency carrying the pinned engine as package
    data. FAIL-CLOSED once importable: genuine absence is the only
    fall-through; a broken, mismatched, or unrunnable companion raises.
@@ -93,7 +93,7 @@ def wheel_energyplus_version() -> str:
 
 
 def _companion_binary(version: str) -> "Path | None":
-    """The btap-energyplus COMPANION package's engine (R5, D-83): on
+    """The canmet-energyplus COMPANION package's engine (R5, D-83): on
     supported platforms it is a hard dependency carrying the pinned E+ as
     package data, so `pip install btap` needs no engine thought at all.
 
@@ -104,43 +104,43 @@ def _companion_binary(version: str) -> "Path | None":
     stale cache or a network download.
     """
     try:
-        import btap_energyplus
+        import canmet_energyplus
     except ModuleNotFoundError as exc:
-        if exc.name == "btap_energyplus":
+        if exc.name == "canmet_energyplus":
             return None  # genuinely absent — the optional-platform case
         # A submodule failed to import: the package IS installed and IS
         # broken — corruption must not masquerade as absence.
         raise EngineError(
-            "the btap-energyplus companion package is installed but broken "
+            "the canmet-energyplus companion package is installed but broken "
             f"(missing {exc.name}) — reinstall it (pip install "
-            "--force-reinstall btap-energyplus)"
+            "--force-reinstall canmet-energyplus)"
         ) from exc
     except ImportError as exc:
         raise EngineError(
-            "the btap-energyplus companion package is installed but failed "
+            "the canmet-energyplus companion package is installed but failed "
             f"to import ({exc}) — reinstall it (pip install "
-            "--force-reinstall btap-energyplus)"
+            "--force-reinstall canmet-energyplus)"
         ) from exc
 
     try:
-        companion_version = btap_energyplus.ENERGYPLUS_VERSION
-        binary = Path(btap_energyplus.binary_path())
+        companion_version = canmet_energyplus.ENERGYPLUS_VERSION
+        binary = Path(canmet_energyplus.binary_path())
     except Exception as exc:  # nested import/data failure = corruption
         raise EngineError(
-            "the btap-energyplus companion package is installed but broken "
+            "the canmet-energyplus companion package is installed but broken "
             f"({exc.__class__.__name__}: {exc}) — reinstall it (pip install "
-            "--force-reinstall btap-energyplus)"
+            "--force-reinstall canmet-energyplus)"
         ) from exc
     if companion_version != version:
         raise EngineError(
-            f"the btap-energyplus companion carries EnergyPlus "
+            f"the canmet-energyplus companion carries EnergyPlus "
             f"{companion_version}, but this btap release pins {version} — "
             "upgrade the matching companion release (a repackaging always "
             "ships with a corresponding btap release)"
         )
     if not binary.is_file():
         raise EngineError(
-            f"the btap-energyplus companion names {binary} but no such "
+            f"the canmet-energyplus companion names {binary} but no such "
             "binary exists — the install is corrupted; reinstall it"
         )
     return binary
@@ -177,7 +177,7 @@ def ensure_energyplus() -> Path:
     # UNVERIFIED, and the pip-hash-verified companion is the shipped truth.
     companion = _companion_binary(version)
     if companion is not None:
-        _verify_version(companion, version, source="btap-energyplus companion")
+        _verify_version(companion, version, source="canmet-energyplus companion")
         _resolved = companion
         return companion
 
@@ -262,7 +262,7 @@ def _pinned_asset(version: str) -> tuple[str, str]:
         raise EngineError(
             f"no pinned EnergyPlus {version} build for platform {key}. On Windows x86-64 "
             "and supported Linux x86-64, `pip install btap` ships the engine as the "
-            f"btap-energyplus companion; on this platform install EnergyPlus {version} "
+            f"canmet-energyplus companion; on this platform install EnergyPlus {version} "
             "yourself and set BTAP_ENERGYPLUS to its location."
         )
     return _ASSETS[key]

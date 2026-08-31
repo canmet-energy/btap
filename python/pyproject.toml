@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the import stays `btap`
-version = "0.2.0"
+version = "0.2.1"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "LGPL-3.0-or-later" }
 # The SDK: same SWIG layer as the Ruby gems, published on PyPI by NREL.
 # btap.audit needs none of it; simulation/modeling/costing/necb do.
-# btap-energyplus (R5, D-83): the pinned EnergyPlus engine as package
+# canmet-energyplus (R5, D-83): the pinned EnergyPlus engine as package
 # data — a HARD platform-marked EXACT pin, so `pip install btap` needs no
 # engine thought on the supported platforms (Windows x86-64; glibc-2.35+
 # Linux x86-64 — the floor the companion's build-time auditwheel gate
@@ -22,7 +22,7 @@ license = { text = "LGPL-3.0-or-later" }
 # override/archive/download rungs.
 dependencies = [
   "openstudio~=3.11.0",
-  "btap-energyplus==25.2.0.2 ; sys_platform == 'win32' or (sys_platform == 'linux' and platform_machine == 'x86_64')",
+  "canmet-energyplus==25.2.0.2 ; sys_platform == 'win32' or (sys_platform == 'linux' and platform_machine == 'x86_64')",
 ]
 
 # NECB 3.1.1.7 thermal bridging (M7, D-79 Option A): py-tbd's
