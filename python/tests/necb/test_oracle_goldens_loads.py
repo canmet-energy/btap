@@ -150,7 +150,13 @@ class TestOracleGoldensLoads(unittest.TestCase):
 
     def test_merged_tables_equal_the_vendored_data(self):
         """test_loads_data_integrity.rb#test_structural_equality_vs_legacy_merged_tables,
-        against the FROZEN merged runtime tables instead of the live oracle."""
+        against the FROZEN merged runtime tables instead of the live oracle.
+
+        The 22 storage-room receptacle fields are the one adjudicated divergence:
+        the oracle transposes the < 5 m2 and >= 5 m2 Table A-8.4.3.2.(2)-B
+        values. Pin both sides of that correction before comparing everything
+        else exactly.
+        """
         from btap.necb import loads
         expected = golden('loads_merged_tables')
         self.assertEqual({'space_types', 'schedules'}, set(expected))
@@ -166,8 +172,29 @@ class TestOracleGoldensLoads(unittest.TestCase):
             self.assertEqual(set(oracle_row), set(row))
         for oracle_row, row in zip(expected['schedules'], schedules, strict=True):
             self.assertEqual(set(oracle_row), set(row))
-        self.assertEqual(expected['space_types'], space_types,
-                         'vendored space types == legacy MERGED runtime table')
+        normalized_oracle = []
+        corrected = 0
+        for oracle_row, row in zip(expected['space_types'], space_types, strict=True):
+            oracle_row = dict(oracle_row)
+            name = row['space_type']
+            if name.startswith('Storage room < 5 m2-sch-'):
+                self.assertEqual(0.0929368029739777,
+                                 oracle_row['electric_equipment_per_area'])
+                self.assertEqual(0.0, row['electric_equipment_per_area'])
+                oracle_row['electric_equipment_per_area'] = 0.0
+                corrected += 1
+            elif name.startswith('Storage room >= 5 m2-sch-'):
+                self.assertEqual(0.0, oracle_row['electric_equipment_per_area'])
+                self.assertEqual(0.0929368029739777,
+                                 row['electric_equipment_per_area'])
+                oracle_row['electric_equipment_per_area'] = 0.0929368029739777
+                corrected += 1
+            normalized_oracle.append(oracle_row)
+        self.assertEqual(22, corrected,
+                         'accepted oracle divergence is exactly 11 schedule variants per class')
+        self.assertEqual(normalized_oracle, space_types,
+                         'vendored space types equal the oracle except the adjudicated '
+                         'storage-receptacle correction')
         self.assertEqual(expected['schedules'], schedules,
                          'vendored schedules == legacy MERGED runtime table')
 
