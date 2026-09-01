@@ -37,12 +37,15 @@ from tests import support
 REPO_ROOT = Path(__file__).resolve().parents[3]
 GEN_SCRIPT = REPO_ROOT / "verification" / "oracle" / "gen_legacy_archetype.rb"
 PIN_GEMFILE = REPO_ROOT / "legacy_pin" / "Gemfile"
+PIN_REF = REPO_ROOT / "legacy_pin" / "REF"
 FIXTURES = REPO_ROOT / "python" / "tests" / "fixtures" / "weather"
 EPW = FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw"
 DDY = FIXTURES / "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy"
 
 TEMPLATE = "NECB2020"
 BUILDING_TYPE = "SmallOffice"
+PRIMARY_HEATING_FUEL = "Electricity"
+ECM_SYSTEM_NAME = "NECB_Default"
 #: Generation takes about a minute, so the .osm is cached under the system
 #: temp dir keyed by a hash of the RECIPE — script bytes plus parameters — so
 #: editing the generator invalidates it and nothing silently reuses a model
@@ -50,11 +53,41 @@ BUILDING_TYPE = "SmallOffice"
 CACHE_DIR = Path(tempfile.gettempdir()) / "btap_necb_legacy_archetype_e2e_py"
 
 
-def _recipe_key() -> str:
+def _generation_arguments(output: str, sizing: str) -> list[str]:
+    return [output, sizing, TEMPLATE, BUILDING_TYPE, EPW.name,
+            PRIMARY_HEATING_FUEL, ECM_SYSTEM_NAME]
+
+
+def _recipe(*, pin_ref: bytes | None = None,
+            epw: bytes | None = None) -> dict[str, object]:
+    arguments = _generation_arguments("<OUTPUT_OSM>", "<SIZING_DIR>")
+    return {
+        "legacy_ref": (pin_ref if pin_ref is not None else PIN_REF.read_bytes()
+                       ).decode("utf-8").strip(),
+        "generator_sha256": hashlib.sha256(GEN_SCRIPT.read_bytes()).hexdigest(),
+        "epw": EPW.name,
+        "epw_sha256": hashlib.sha256(
+            epw if epw is not None else EPW.read_bytes()).hexdigest(),
+        "arguments": arguments,
+    }
+
+
+def _recipe_key(**overrides) -> str:
     h = hashlib.sha256()
-    h.update(GEN_SCRIPT.read_bytes())
-    h.update(f"{TEMPLATE}|{BUILDING_TYPE}".encode())
+    h.update(json.dumps(_recipe(**overrides), sort_keys=True,
+                        separators=(",", ":")).encode("utf-8"))
     return h.hexdigest()[:16]
+
+
+def _oracle_attestation() -> dict[str, str]:
+    return {
+        "legacy_ref": PIN_REF.read_text(encoding="utf-8").strip(),
+        "template": TEMPLATE,
+        "building_type": BUILDING_TYPE,
+        "epw": EPW.name,
+        "primary_heating_fuel": PRIMARY_HEATING_FUEL,
+        "ecm_system_name": ECM_SYSTEM_NAME,
+    }
 
 
 def _pin_available() -> bool:
@@ -72,7 +105,10 @@ def _generate() -> Path:
     """Phase 1, once per recipe: the ORACLE builds the archetype."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     osm = CACHE_DIR / f"legacy_{TEMPLATE.lower()}_{BUILDING_TYPE.lower()}_{_recipe_key()}.osm"
-    if osm.is_file() and osm.stat().st_size > 0:
+    sidecar = osm.with_suffix(".json")
+    if (osm.is_file() and osm.stat().st_size > 0 and sidecar.is_file()
+            and json.loads(sidecar.read_text(encoding="utf-8"))
+            == _oracle_attestation()):
         return osm
 
     with tempfile.TemporaryDirectory(prefix="necb-legacy-gen-") as tmp:
@@ -83,8 +119,8 @@ def _generate() -> Path:
         # pin at a local checkout keeps that resolution instead of re-cloning
         # the ~4.6 GB fork in this child process.
         proc = subprocess.run(
-            ["bundle", "exec", "ruby", str(GEN_SCRIPT), str(osm), str(sizing),
-             TEMPLATE, BUILDING_TYPE, EPW.name],
+            ["bundle", "exec", "ruby", str(GEN_SCRIPT),
+             *_generation_arguments(str(osm), str(sizing))],
             env=env, cwd=str(REPO_ROOT), capture_output=True, text=True,
             timeout=1800)
         if proc.returncode != 0 or not osm.is_file() or osm.stat().st_size == 0:
@@ -92,7 +128,21 @@ def _generate() -> Path:
                 f"phase 1 ({TEMPLATE} {BUILDING_TYPE} generation) FAILED "
                 f"(exit {proc.returncode})\n"
                 f"--- last 6000 chars ---\n{(proc.stdout + proc.stderr)[-6000:]}")
+        if (not sidecar.is_file()
+                or json.loads(sidecar.read_text(encoding="utf-8"))
+                != _oracle_attestation()):
+            raise AssertionError("phase 1 wrote no valid oracle revision attestation")
     return osm
+
+
+class TestLegacyArchetypeRecipe(unittest.TestCase):
+    def test_cache_key_changes_with_pin(self):
+        self.assertNotEqual(_recipe_key(pin_ref=b"first\n"),
+                            _recipe_key(pin_ref=b"second\n"))
+
+    def test_cache_key_changes_with_epw_content(self):
+        self.assertNotEqual(_recipe_key(epw=b"first"),
+                            _recipe_key(epw=b"second"))
 
 
 @unittest.skipUnless(support.HAVE_SDK, "needs the OpenStudio SDK")
@@ -164,19 +214,20 @@ class TestLegacyArchetypeE2E(unittest.TestCase):
         # legacy generator emits Foundation surfaces; the association and the
         # layer materials must both survive the pipeline, because EnergyPlus
         # fatals on a Kiva construction built from massless layers.
-        foundations = [s for s in model.getSurfaces()
+        reference_model = result.reference_model
+        foundations = [s for s in reference_model.getSurfaces()
                        if s.outsideBoundaryCondition() == "Foundation"]
         self.assertTrue(foundations,
-                        "the pinned SmallOffice exercises real Kiva Foundation surfaces")
+                        "the Python reference retains real Kiva Foundation surfaces")
         for surface in foundations:
             self.assertTrue(surface.adjacentFoundation().is_initialized(),
                             f"{surface.nameString()} retains its Kiva foundation")
             construction = surface.construction()
-            if not construction.is_initialized():
-                continue
+            self.assertTrue(construction.is_initialized(),
+                            f"{surface.nameString()} retains its construction")
             layered = construction.get().to_LayeredConstruction()
-            if not layered.is_initialized():
-                continue
+            self.assertTrue(layered.is_initialized(),
+                            f"{surface.nameString()} construction remains layered")
             for layer in layered.get().layers():
                 self.assertTrue(
                     layer.to_StandardOpaqueMaterial().is_initialized(),

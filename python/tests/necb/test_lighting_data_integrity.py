@@ -30,7 +30,7 @@ class TestDataIntegrity(unittest.TestCase):
                        or "enclosed" in ("" if r["space_type"] is None else str(r["space_type"]))),
                       None)
         self.assertIsNotNone(office)
-        with_controls = sum(1 for r in rows if r["controls_4_2_2_1"] != "")
+        with_controls = sum(1 for r in rows if r["controls_4_2_2_1"])
         self.assertGreater(with_controls, 80, "the 2025 4.2.2.1 control matrix is vendored")
 
     def test_2025_building_type_table(self):

@@ -82,6 +82,41 @@ ALLOWLIST = {
                 "weather dir are tried first, so an installed wheel never "
                 "reaches it"),
     },
+    "python/scripts/fetch_necb_8_4_text.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": ("the output default stays on the legacy cache during the "
+                "output-preserving port; PR-A3 moves it into package data"),
+    },
+    "python/scripts/generate_decisions_toc.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": ("byte-parity mode targets the decision document at its current "
+                "home; PR-A3 moves the document and switches the default"),
+    },
+    "python/scripts/generate_necb_8_4_coverage.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": ("legacy-input mode is required for the final byte comparison; "
+                "PR-A3 switches source, manifests, caches and output to Python"),
+    },
+    "python/scripts/generate_necb_gem_coverage.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": ("legacy manifest and document paths remain authoritative only "
+                "through the final Ruby attestation"),
+    },
+    "python/scripts/legacy_whatsnew.py": {
+        "refs": ["legacy_pin"],
+        "retires": "R6-oracle-boundary",
+        "why": "reports fork movement relative to the permanent oracle pin",
+    },
+    "python/scripts/necb_archetype_sweep.py": {
+        "refs": ["legacy_pin", "verification/"],
+        "retires": "R6-oracle-boundary",
+        "why": ("the surviving sweep asks the pinned oracle generator under "
+                "verification/ to produce proposed archetypes"),
+    },
     # --- developer scripts -------------------------------------------------
     "python/scripts/generate_samples.py": {
         "refs": ["btap-modeling"],
@@ -137,6 +172,18 @@ ALLOWLIST = {
                 "pinned 3.5.2 triplet); B8 engine parity stays ACTIVE until "
                 "R6, while the Leg-B pipeline class is R4-dormant (D-82)"),
     },
+    "python/tests/necb/test_legacy_archetype_e2e.py": {
+        "refs": ["legacy_pin", "verification/"],
+        "retires": "R6-oracle-boundary",
+        "why": ("the surviving whole-building gate consumes the pinned oracle "
+                "generator, not the retiring product gems"),
+    },
+    "python/tests/necb/test_oracle_goldens_current.py": {
+        "refs": ["legacy_pin", "verification/"],
+        "retires": "R6-oracle-boundary",
+        "why": ("the surviving currency gate ties committed Leg-C goldens to "
+                "the permanent oracle pin and request manifest"),
+    },
     "python/tests/necb/test_decisions_registry_sync.py": {
         "refs": ["btap-necb"],
         "retires": "R6",
@@ -164,6 +211,21 @@ ALLOWLIST = {
         "retires": "R1-adjudicated",
         "why": ("proves the D-80 request manifest under verification/oracle is "
                 "internally live (no orphaned golden groups)"),
+    },
+    "python/tests/test_generate_necb_8_4_coverage.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": "proves PR-A2 byte identity against the pre-move generated HTML",
+    },
+    "python/tests/test_generate_necb_gem_coverage.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3",
+        "why": "proves PR-A2 byte identity against the pre-move generated Markdown",
+    },
+    "python/tests/test_verification_disposition.py": {
+        "refs": ["verification/"],
+        "retires": "R6-oracle-boundary",
+        "why": "enforces the permanent file-by-file verification disposition record",
     },
     # --- this gate ---------------------------------------------------------
     "python/tests/test_fixture_drift.py": {

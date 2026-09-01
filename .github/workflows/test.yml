@@ -40,7 +40,7 @@ jobs:
         with:
           ruby-version: '3.2.2'
       - name: Rule-key orphan lint
-        run: ruby btap-necb/scripts/necb_orphan_keys.rb
+        run: python3 python/scripts/necb_orphan_keys.py
       # btap-audit is the one gem with no SDK dependency at all (json +
       # minitest). The decisions-registry drift test looks SDK-free but is not:
       # it `require`s every gem's facade to prove their AuditLog resolves to the
@@ -59,14 +59,14 @@ jobs:
       # showing as a gap. Regenerate and demand a clean tree — same contract the
       # decisions registry gets, in the direction a doc can silently rot.
       #
-      # Both generators are pure Ruby (json + date), so they belong here rather
-      # than in the container. They are deterministic ONLY because BRANCH is a
-      # literal — do not restore `git rev-parse` in generate_necb_8_4_coverage.rb
+      # Both generators are stdlib-only Python, so they belong here rather than
+      # in the container. They are deterministic ONLY because the branch is a
+      # literal — do not restore `git rev-parse` in generate_necb_8_4_coverage.py
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          ruby btap-necb/scripts/generate_necb_gem_coverage.rb
-          ruby btap-necb/scripts/generate_necb_8_4_coverage.rb
+          python3 python/scripts/generate_necb_gem_coverage.py
+          python3 python/scripts/generate_necb_8_4_coverage.py
           git diff --exit-code -- btap-necb/docs/NECB_GEM_COVERAGE.md \
                                   btap-necb/docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
@@ -75,7 +75,7 @@ jobs:
       - name: "Decisions registry: generation direction + citations + TOC"
         run: |
           python3 python/scripts/sync_decisions_registry.py --check
-          ruby btap-necb/scripts/generate_decisions_toc.rb --check
+          python3 python/scripts/generate_decisions_toc.py --check
           cd python && python3 -m unittest \
             tests.necb.test_decisions_registry_sync \
             tests.necb.test_decisions_registry
@@ -267,7 +267,7 @@ jobs:
       - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
         run: cd btap-necb && ruby test/test_decisions_registry.rb
       - name: rake necb:verify
-        run: rake necb:verify
+        run: PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" rake necb:verify
       # The Python port's FULL suite, in the one place that has everything at
       # once: ruby + the openstudio CLI (the Ruby gems' backend, one half of
       # every cross-language gate) + the bundled EnergyPlus (the engine the

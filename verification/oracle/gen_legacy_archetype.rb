@@ -16,11 +16,16 @@
 # Phase 1 so the Ruby gate and the Python successor generate byte-identical
 # inputs from one implementation and cannot drift.
 
+require 'bundler'
+require 'json'
+
 output_osm = ARGV[0] or raise 'usage: gen_legacy_archetype.rb <output_osm> <sizing_run_dir> [template] [building_type] [epw]'
 sizing_run_dir = ARGV[1] or raise 'usage: gen_legacy_archetype.rb <output_osm> <sizing_run_dir> [template] [building_type] [epw]'
 template = ARGV[2] || 'NECB2020'
 building_type = ARGV[3] || 'SmallOffice'
 epw = ARGV[4] || 'CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw'
+primary_heating_fuel = ARGV[5] || 'Electricity'
+ecm_system_name = ARGV[6] || 'NECB_Default'
 
 # Resolved by bundler from legacy_pin/Gemfile — the PINNED oracle revision.
 require 'openstudio-standards'
@@ -29,6 +34,8 @@ std = Standard.build(template)
 model = std.model_create_prototype_model(
   template: template,
   building_type: building_type,
+  primary_heating_fuel: primary_heating_fuel,
+  ecm_system_name: ecm_system_name,
   epw_file: epw,
   sizing_run_dir: sizing_run_dir
 )
@@ -39,4 +46,19 @@ if model.nil? || model.is_a?(FalseClass)
 end
 
 model.save(OpenStudio::Path.new(output_osm), true)
+source = Bundler.locked_gems.sources.find do |candidate|
+  candidate.respond_to?(:name) && candidate.name == 'openstudio-standards'
+end
+revision = source&.respond_to?(:revision) && source.revision
+raise 'cannot attest the locked openstudio-standards revision' if revision.to_s.empty?
+
+sidecar = output_osm.sub(/\.osm\z/, '.json')
+File.write(sidecar, JSON.pretty_generate(
+  'legacy_ref' => revision,
+  'template' => template,
+  'building_type' => building_type,
+  'epw' => epw,
+  'primary_heating_fuel' => primary_heating_fuel,
+  'ecm_system_name' => ecm_system_name
+) + "\n")
 puts "OK osm=#{output_osm} template=#{template} building_type=#{building_type}"

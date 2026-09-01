@@ -70,7 +70,7 @@ end
 namespace :legacy do
   desc 'What has changed in the legacy fork since our pinned oracle (BRANCH=nrcan, LEGACY_FORK=/path for speed)'
   task :whatsnew do
-    abort('legacy:whatsnew failed') unless system(RbConfig.ruby, 'btap-necb/scripts/legacy_whatsnew.rb')
+    abort('legacy:whatsnew failed') unless system('python3', 'python/scripts/legacy_whatsnew.py')
   end
 
   desc 'Show the pinned oracle revision'
@@ -89,8 +89,8 @@ end
 namespace :necb do
   desc 'Lint: every rule key in a NECB ruleset JSON is read by that gem lib/'
   task :orphan_keys do
-    # Pure Ruby, no OpenStudio SDK — safe on any CI node.
-    abort('necb:orphan_keys failed') unless system(RbConfig.ruby, 'btap-necb/scripts/necb_orphan_keys.rb')
+    # Pure Python, no OpenStudio SDK — safe on any CI node.
+    abort('necb:orphan_keys failed') unless system('python3', 'python/scripts/necb_orphan_keys.py')
   end
 
   desc 'Hostile-outcome tests: reference transforms must overwrite non-compliant proposed values'
@@ -112,15 +112,15 @@ namespace :necb do
     # needs codes-MCP access and is NOT run here — CI regenerates from the
     # committed cache. Pass run evidence via NECB_AUDIT_JSONS=dir1:dir2
     # (directories containing audit.json + report.json from real runs).
-    abort('necb:coverage_doc failed') unless system(RbConfig.ruby, 'btap-necb/scripts/generate_necb_gem_coverage.rb') &&
-                                             system(RbConfig.ruby, 'btap-necb/scripts/generate_necb_8_4_coverage.rb')
+    abort('necb:coverage_doc failed') unless system('python3', 'python/scripts/generate_necb_gem_coverage.py') &&
+                         system('python3', 'python/scripts/generate_necb_8_4_coverage.py')
   end
 
   desc 'Verify as-applied part-load curves against NECB 2025 Subsection 8.4.6 coefficients'
   task :curves do
     # SDK only, no CLI (components are hard-sized). Compares MODEL curves under
     # the documented transforms (FHeatPLC = PLR/eff, degF->degC surfaces).
-    abort('necb:curves failed') unless system(RbConfig.ruby, 'btap-necb/scripts/necb_8_4_6_curve_probe.rb')
+    abort('necb:curves failed') unless system('python3', 'python/scripts/necb_8_4_6_curve_probe.py')
   end
 
   desc 'All NECB rule-verification checks (runs every check, then reports)'
@@ -129,8 +129,8 @@ namespace :necb do
     # chaining aborts at the first failure, which hides the rest of the work
     # list. This is a "what still needs doing" report, so run everything.
     results = {
-      'orphan_keys' => system(RbConfig.ruby, 'btap-necb/scripts/necb_orphan_keys.rb'),
-      'curves_8_4_6' => system(RbConfig.ruby, 'btap-necb/scripts/necb_8_4_6_curve_probe.rb'),
+      'orphan_keys' => system('python3', 'python/scripts/necb_orphan_keys.py'),
+      'curves_8_4_6' => system('python3', 'python/scripts/necb_8_4_6_curve_probe.py'),
       # .map(&:...).all? — NOT .all? { }, which short-circuits on the first
       # failing gem and hides the remaining work.
       'hostile' => !HOSTILE_TESTS.empty? && HOSTILE_TESTS.map do |test|

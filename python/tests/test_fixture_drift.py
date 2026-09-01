@@ -60,6 +60,16 @@ COPIES = (
 OTHER_ORIGINALS = {
     "paired_bars.svg": REPO_ROOT / "btap-necb" / "test" / "goldens"
     / "paired_bars.svg",
+    **{
+        f"variant_mockups/{name}": REPO_ROOT / "btap-necb" / "test"
+        / "fixtures" / "variant_mockups" / name
+        for name in (
+            "hp_office.osm", "kitchen_hood.osm", "manifest.json",
+            "purchased_energy.osm", "res_copy.osm", "res_hp.osm",
+            "res_ttw.osm", "sys2_museum.osm", "sys5_refrigerated.osm",
+            "sys5_unheated.osm",
+        )
+    },
 }
 
 #: The DURABLE verification-owned oracle inputs (D-80: live Leg C must
@@ -139,6 +149,12 @@ class TestFixtureDrift(unittest.TestCase):
 
     def test_paired_bars_svg(self):
         self._check("paired_bars.svg")
+
+    def test_variant_mockups(self):
+        for relative in sorted(path for path in OTHER_ORIGINALS
+                               if path.startswith("variant_mockups/")):
+            with self.subTest(relative=relative):
+                self._check(relative)
 
     def _check_absolute(self, mine: Path, theirs: Path):
         self.assertTrue(mine.is_file(),
