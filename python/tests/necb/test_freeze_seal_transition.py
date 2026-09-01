@@ -5,6 +5,7 @@ import json
 import sys
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
 
 from tests.support import REPO_ROOT
 
@@ -68,6 +69,14 @@ class TestFreezeSealTransition(unittest.TestCase):
         transitioned["retired_seal"] = "unknown"
         with self.assertRaisesRegex(ValueError, "invalid retired_seal"):
             freeze.seal_accounting(sample)
+
+    def test_thermal_bridging_requires_the_pinned_engine(self):
+        sample = [{"api_call": {"thermal_bridging": "efficient (BETBG)"}}]
+        with patch.dict("sys.modules", {"tbd": None}):
+            with self.assertRaisesRegex(ValueError, "FREEZER interpreter"):
+                freeze.check_required_python_engines(sample)
+
+        freeze.check_required_python_engines(sample)
 
 
 if __name__ == "__main__":

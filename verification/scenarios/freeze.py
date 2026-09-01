@@ -107,6 +107,24 @@ def seal_accounting(scenarios):
     return active, retired, attestation
 
 
+def check_required_python_engines(scenarios):
+    if not any(scenario.get("api_call", {}).get("thermal_bridging")
+               for scenario in scenarios):
+        return
+    try:
+        import tbd
+        from btap.necb.envelope import thermal_bridging
+    except ImportError as error:
+        raise ValueError(
+            "thermal-bridging scenario requires the pinned tbd engine in the "
+            "FREEZER interpreter; run python/.venv/bin/python "
+            "verification/scenarios/freeze.py") from error
+    if tbd.VERSION != thermal_bridging.PINNED_TBD_VERSION:
+        raise ValueError(
+            f"thermal-bridging scenario loaded tbd {tbd.VERSION}, expected "
+            f"{thermal_bridging.PINNED_TBD_VERSION}")
+
+
 def normalized_streams(sc, run):
     return {stream: runner.normalize(getattr(run, stream),
                                      run.run_dir or "<none>", run.scratch)
@@ -262,6 +280,7 @@ def main():
     check_env_hygiene(scenarios)
     try:
         active_seals, retired_seals, final_attestation = seal_accounting(scenarios)
+        check_required_python_engines(scenarios)
     except ValueError as error:
         die(str(error))
 
