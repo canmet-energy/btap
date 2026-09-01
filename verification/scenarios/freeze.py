@@ -49,6 +49,10 @@ RUBY_TBD_DRIVER = (REPO_ROOT / "python" / "tests" / "necb" / "cross_language"
                    / "ruby_tbd_compliance.rb")
 RUBY_AUDIT_DRIVER = (REPO_ROOT / "python" / "tests" / "audit"
                      / "cross_language" / "ruby_reference.rb")
+TRANSITION_FIELDS = (
+    "retired_seal", "last_cross_language_commit", "last_cross_language_run_id",
+    "last_cross_language_run_url", "seal_transition_reason",
+)
 
 
 def die(msg):
@@ -67,6 +71,40 @@ def check_env_hygiene(scenarios):
             if secretish and not str(value).startswith("scenario-"):
                 die(f"{s['id']}: env var {name} must carry a "
                     "'scenario-' prefixed dummy, never a real value")
+
+
+def seal_accounting(scenarios):
+    active = {"python-only:post-handoff": 0, "python-only": 0}
+    retired = {"ruby": 0, "ruby-api": 0}
+    attestation = None
+    for scenario in scenarios:
+        seal = scenario["seal"]
+        if seal == "python-only:post-handoff":
+            missing = [field for field in TRANSITION_FIELDS if not scenario.get(field)]
+            if missing:
+                raise ValueError(f"{scenario['id']}: transition metadata missing {missing}")
+            retired_seal = scenario["retired_seal"]
+            if retired_seal == "ruby":
+                retired["ruby"] += 1
+            elif retired_seal.startswith("ruby-api:"):
+                retired["ruby-api"] += 1
+            else:
+                raise ValueError(
+                    f"{scenario['id']}: invalid retired_seal {retired_seal!r}")
+            active["python-only:post-handoff"] += 1
+            current = {
+                "commit": scenario["last_cross_language_commit"],
+                "run_id": scenario["last_cross_language_run_id"],
+                "run_url": scenario["last_cross_language_run_url"],
+            }
+            if attestation is not None and current != attestation:
+                raise ValueError("post-handoff scenarios disagree on final attestation")
+            attestation = current
+        elif seal.startswith("python-only:"):
+            active["python-only"] += 1
+        else:
+            raise ValueError(f"{scenario['id']}: active product-Ruby seal {seal!r}")
+    return active, retired, attestation
 
 
 def normalized_streams(sc, run):
@@ -222,6 +260,10 @@ def main():
                        .read_text(encoding="utf-8"))["samples"]
     scenarios = scenario_defs.all_scenarios(slugs)
     check_env_hygiene(scenarios)
+    try:
+        active_seals, retired_seals, final_attestation = seal_accounting(scenarios)
+    except ValueError as error:
+        die(str(error))
 
     cr = runner.load_compare_runs()
     spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
@@ -233,7 +275,6 @@ def main():
 
     staging = Path(tempfile.mkdtemp(prefix="freeze-out-"))
     baselines = staging / "baselines"
-    seal_tally = {"ruby": 0, "ruby-api": 0, "python-only": 0}
     frozen = []
 
     for sc in scenarios:
@@ -263,21 +304,6 @@ def main():
         if probe:
             die(f"{sc['id']}: live-run contract failed pre-freeze:\n"
                 + "\n".join(probe))
-
-        seal = sc["seal"]
-        if seal == "ruby":
-            problems = ruby_cli_seal(sc, work, run1, spec, cr)
-            seal_tally["ruby"] += 1
-        elif seal.startswith("ruby-api:"):
-            problems = ruby_api_seal(sc, work, run1, spec, cr)
-            seal_tally["ruby-api"] += 1
-        else:
-            problems, _ = [], seal_tally.__setitem__(
-                "python-only", seal_tally["python-only"] + 1)
-        if problems:
-            die(f"{sc['id']}: THE RUBY SEAL FAILED — the two implementations "
-                "disagree at freeze time; this is a Leg-B finding, not a "
-                "freeze problem:\n" + "\n".join(problems[:20]))
 
         # non-vacuity for annual energies
         if sc["id"].startswith("corpus-annual"):
@@ -326,7 +352,7 @@ def main():
     for sc in frozen:
         counts[sc["lane"]] = counts.get(sc["lane"], 0) + 1
     manifest = {
-        "version": 1,
+        "version": 2,
         "spec_sha256": runner.sha256(REPO_ROOT / "verification" / "spec.json"),
         "provenance": {
             "commit": git("rev-parse", "HEAD"), "dirty": dirty,
@@ -342,13 +368,12 @@ def main():
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
-            "ruby": subprocess.run(["ruby", "-v"], capture_output=True,
-                                   text=True, check=False).stdout.strip(),
-            "seal": seal_tally,
-            "attestation_note": "the validating CI run id is EXTERNAL "
-                                "evidence (PR body + D-82), never recorded "
-                                "here — writing it back would invalidate "
-                                "the very run as head evidence",
+            "active_seals": active_seals,
+            "retired_seals": retired_seals,
+            "final_cross_language_attestation": final_attestation,
+            "attestation_note": "the final cross-language CI run validates "
+                                "its own ancestor commit; its immutable run "
+                                "identity is retained after product-Ruby retirement",
         },
         "corpus": {"generator": "python",
                    "sample_manifest_sha256": runner.sha256(
@@ -363,7 +388,8 @@ def main():
     promote(baselines, staging / "manifest.json",
             runner.BASELINES, runner.MANIFEST)
     print(f"frozen {len(frozen)} scenarios "
-          f"({counts}), seal {seal_tally}; manifest written")
+            f"({counts}), active seals {active_seals}, "
+            f"retired seals {retired_seals}; manifest written")
 
 
 if __name__ == "__main__":

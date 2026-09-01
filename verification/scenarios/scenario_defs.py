@@ -16,6 +16,15 @@ Lanes: python (every PR; engine-free), verify (sizing; container+engine),
 parity (annual --quick; dispatch cadence).
 """
 
+LAST_CROSS_LANGUAGE_COMMIT = "85ab14352677093e24038d933cf1071e5b03431a"
+LAST_CROSS_LANGUAGE_RUN_ID = 33544573991
+LAST_CROSS_LANGUAGE_RUN_URL = (
+    "https://github.com/canmet-energy/btap/actions/runs/33544573991"
+)
+POST_HANDOFF_REASON = (
+    "Ruby product retired by D-84 after the final Ruby/Leg A attestation"
+)
+
 # The corpus tiers mirror verification/run_corpus.rb's recipe exactly —
 # same base args, same subsets — so the frozen baselines describe the
 # same runs Leg B compared.
@@ -202,4 +211,16 @@ UNCOVERED = [
 
 
 def all_scenarios(slugs):
-    return corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS + VERDICT_SCENARIOS
+    scenarios = corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS + VERDICT_SCENARIOS
+    for scenario in scenarios:
+        seal = scenario["seal"]
+        if seal == "ruby" or seal.startswith("ruby-api:"):
+            scenario.update({
+                "seal": "python-only:post-handoff",
+                "retired_seal": seal,
+                "last_cross_language_commit": LAST_CROSS_LANGUAGE_COMMIT,
+                "last_cross_language_run_id": LAST_CROSS_LANGUAGE_RUN_ID,
+                "last_cross_language_run_url": LAST_CROSS_LANGUAGE_RUN_URL,
+                "seal_transition_reason": POST_HANDOFF_REASON,
+            })
+    return scenarios
