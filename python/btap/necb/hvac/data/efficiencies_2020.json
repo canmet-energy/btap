@@ -8,7 +8,7 @@
       "5.2.12.1",
       "5.2.12.2"
     ],
-    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 (D-59): unitary_acs = Table 5.2.12.1.-A exact; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps >= 19 kW = Table -A exact, < 19 kW = Table -B SPVAC EER 11 (documented interpretation); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The heat_rejection family is VESTIGIAL for the reference path - never read by apply_efficiencies; the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the vendored NECB reference part-load curves."
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. VERIFIED against the printed NECB 2020 tables via MCP 2026-08-02 and corrected under D-59: unitary_acs and heat_pumps = Table 5.2.12.1.-A exact, including SEER 15 for heat pumps below 19 kW; PTAC rows = Table -G exact (formula coefficient 0.3058/kBtu-h = printed 1.0435/kW unit-converted); heat_pumps_heating = Table -A exact; boilers = Table -N exact; furnaces = Table -O exact (strict-side row choices documented); chillers = Table -K PATH B full-load COPc exact. The heat_rejection family is VESTIGIAL for the reference path - never read by apply_efficiencies; the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.4.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the vendored NECB reference part-load curves."
   },
   "boilers": [
     {
@@ -1096,8 +1096,8 @@
       "maximum_capacity": 65000.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_seasonal_efficiency": null,
-      "minimum_full_load_efficiency": 11.0,
+      "minimum_seasonal_efficiency": 15.0,
+      "minimum_full_load_efficiency": null,
       "minimum_iplv": null,
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
@@ -1107,7 +1107,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-B"
+      "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -1118,8 +1118,8 @@
       "maximum_capacity": 65000.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_seasonal_efficiency": null,
-      "minimum_full_load_efficiency": 11.0,
+      "minimum_seasonal_efficiency": 15.0,
+      "minimum_full_load_efficiency": null,
       "minimum_iplv": null,
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
@@ -1129,7 +1129,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-B"
+      "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -1140,8 +1140,8 @@
       "maximum_capacity": 65000.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_seasonal_efficiency": null,
-      "minimum_full_load_efficiency": 11.0,
+      "minimum_seasonal_efficiency": 15.0,
+      "minimum_full_load_efficiency": null,
       "minimum_iplv": null,
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
@@ -1151,7 +1151,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-B"
+      "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -1162,8 +1162,8 @@
       "maximum_capacity": 65000.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
-      "minimum_seasonal_efficiency": null,
-      "minimum_full_load_efficiency": 11.0,
+      "minimum_seasonal_efficiency": 15.0,
+      "minimum_full_load_efficiency": null,
       "minimum_iplv": null,
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
@@ -1173,7 +1173,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-B"
+      "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",

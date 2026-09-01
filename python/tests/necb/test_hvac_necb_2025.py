@@ -2,9 +2,8 @@
 from Subsection 8.4.4 to 8.4.5 (verified via the codes MCP edition diff). Selections
 must be identical across vintages while citations carry the 2025 article numbers.
 Efficiencies are native 2025 (efficiencies_2025.json, transcribed from Tables
-5.2.12.1.-K/-N/-O/-A): chillers/boilers/furnaces/unitary-AC ladder verified identical
-to 2020; the two real changes are HP cooling <19 kW EER 11.0 -> SEER 15 and
-split-system HP heating HSPF 7.4 -> 7.8."""
+5.2.12.1.-K/-N/-O/-A): chillers/boilers/furnaces/unitary-AC/HP cooling ladders are
+verified identical to 2020; the real change is split-system HP heating HSPF 7.4 -> 7.8."""
 
 from __future__ import annotations
 
@@ -97,9 +96,8 @@ class TestNecb2025(unittest.TestCase):
             self.assertEqual(v, vintage)
             self.assertIsNone(reason)
 
-    # The two REAL 2025 efficiency changes (everything else verified identical to 2020):
-    # HP cooling < 19 kW: EER 11.0 (2020) -> SEER 15 (2025 Table 5.2.12.1.-A merged class)
-    def test_2025_small_heat_pump_cooling_is_seer_15(self):
+    # Table 5.2.12.1.-A specifies SEER 15 for the small HP cooling class in both editions.
+    def test_small_heat_pump_cooling_is_seer_15_in_both_editions(self):
         cops = {}
         for vintage in ('2020', '2025'):
             model = load_fixture()
@@ -115,9 +113,8 @@ class TestNecb2025(unittest.TestCase):
             coil = sorted_by_name(model.getCoilCoolingDXSingleSpeeds())[0]
             value = coil.ratedCOP()
             cops[vintage] = value.get() if hasattr(value, 'is_initialized') else value
-        # 2020: eer_to_cop_no_fan(11.0) = ((11*0.29307)+0.12)/0.88 ~= 3.800
-        self.assertAlmostEqual(3.800, cops['2020'], delta=0.01)
-        # 2025: seer_to_cop_no_fan(15) = -0.0076*225 + 0.3796*15 = 3.984
+        # seer_to_cop_no_fan(15) = -0.0076*225 + 0.3796*15 = 3.984
+        self.assertAlmostEqual(3.984, cops['2020'], delta=0.01)
         self.assertAlmostEqual(3.984, cops['2025'], delta=0.01)
         # heating side unchanged: 7.4 HSPF (Single Package) both vintages
 

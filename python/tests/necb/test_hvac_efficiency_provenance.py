@@ -111,6 +111,16 @@ class TestEfficiencyProvenance(unittest.TestCase):
         self.assertEqual([3.2, 3.3], cops,
                          'printed COPh 3.30 (19-40 kW) and 3.20 (>= 40 kW) at 8.3 C')
 
+    def test_small_heat_pump_cooling_is_table_a_seer_15(self):
+        small = [row for row in DATA['heat_pumps']
+                 if float(row['minimum_capacity']) == 0]
+        self.assertEqual(4, len(small))
+        self.assertTrue(all(row.get('minimum_seasonal_efficiency') == 15.0
+                            and row.get('minimum_full_load_efficiency') is None
+                            for row in small),
+                        'printed 2020 Table 5.2.12.1-A: small air-cooled heat pumps '
+                        'are SEER 15, not Table-B SPVAC EER 11')
+
     # The heat_rejection family cites ASHRAE 90.1 and is VESTIGIAL for the
     # reference path: apply_efficiencies never reads it (the tower fan comes from
     # Table 5.2.12.2 via _apply_tower_rules, D-26). Pin the vestigiality so a
@@ -164,8 +174,7 @@ class TestEfficiencyProvenance(unittest.TestCase):
         self.assertEqual([2.05, 2.25], low_temp,
                          'printed -8.3 C COPh vendored informationally')
 
-    # 2025 small-HP cooling takes the printed -A reading (SEER 15), unlike
-    # 2020's legacy -B reading (EER 11) — a documented cross-edition difference.
+    # Both editions' Table -A small-HP cooling class is SEER 15.
     def test_2025_small_heat_pump_cooling_is_seer_15(self):
         small = [r for r in DATA_2025['heat_pumps']
                  if float(r['minimum_capacity']) == 0

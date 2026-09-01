@@ -10,7 +10,7 @@
     ],
     "verification": {
       "unitary_acs": "Table -A 2025: large EER ladder identical to 2020 (verified printed); SEER2 single-phase rows (14.3) added verbatim - INERT for the engine (subcategory \"(single-phase)\" never matches the Single Package lookup).",
-      "heat_pumps": "Table -A 2025 small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions; the 2025 file takes that -A reading (SEER 15) while the 2020 file keeps legacy parity with the -B SPVAC EER 11 reading (D-59 finding 2) - a documented cross-edition interpretation difference, near-inert (shared-unit RTUs size >= 19 kW). Large ladder identical.",
+      "heat_pumps": "Table -A small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions, and both files now take that explicit class reading (D-59). The large ladder is identical.",
       "heat_pumps_heating": "Table -A 2025: split-system small HSPF 7.4 -> 7.8 (printed, verified); single-package stays 7.4; COPh 3.3/3.2 ladder identical; low-temp COPh 2.25/2.05 vendored informationally (unread by the engine - the -8.3 C behaviour comes from the reference curves).",
       "ptac_pthp": "Table -G 2025 is IDENTICAL to 2020 -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9). The earlier claim that \"Table -C changed moderately\" was the corrupted-extraction artifact; the carried-over coefficients are CORRECT for 2025 and the engine DOES apply them (verified in fleet audits).",
       "chillers": "Table -K 2025 is byte-identical to 2020 -K (verified printed): Path B COPc ladder unchanged.",
@@ -2159,7 +2159,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2180,7 +2180,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2201,7 +2201,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2222,7 +2222,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",

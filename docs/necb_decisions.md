@@ -2024,7 +2024,7 @@ against the corrected extraction [RAN `get_table` on 2025
 | Boilers (-N) / Furnaces (-O) | identical (2025 moves the three-phase furnace option to ≤66 kW; vendored strict-side picks unaffected) |
 | Tower (5.2.12.2) | same 10 rows both editions (2020's "20 rows" was extraction doubling); axial direct-contact ≤ 0.013 kW/kW — `apply_tower_rules`' constant correct for both |
 | Unitary/HP (-A) | genuine 2025 changes verified: split-system small HSPF 7.4→**7.8** ✓; SEER2 single-phase rows (14.3) vendored and INERT (subcategory never matches the lookup) ✓; low-temp COPh 2.25/2.05 vendored informationally (unread — the −8.3 °C behaviour comes from the reference curves) |
-| Small-HP cooling | cross-edition interpretation difference documented: 2025 file takes the printed -A reading (SEER 15); 2020 file keeps legacy's -B SPVAC reading (EER 11, D-59 finding 2). Both near-inert (shared-unit RTUs size ≥ 19 kW, where both editions match exactly) |
+| Small-HP cooling | both editions use the explicit Table -A class for air conditioners and heat pumps below 19 kW: SEER 15 (D-59 correction) |
 | `dx_cooling_cop` field coverage | reads every 2025 field variant incl. `minimum_seasonal_efficiency` and SEER2/EER2 — the 2025 rows apply cleanly [READ efficiency.rb:1100-1116] |
 | Selection (8.4.5.7.-A) | **verbatim 2020's 8.4.4.7.-A** (printed); vendored 2025 selection rules differ only in table-number strings; the 97-system matrix under vintage '2025' produces IDENTICAL assignments (system/action/energy_type) to the adjudicated 2020 golden |
 
@@ -2048,24 +2048,24 @@ reference path applies [RAN `get_table` on 5.2.12.1.-A/-B/-G/-H/-I/-K/-M/-N/-O/-
 |---|---|---|
 | unitary_acs (RTU DX) | -A | EXACT — bins (19/40/70/223 kW ↔ Btu/h) + EER/SEER ladder |
 | PTAC (TTW reference) | -G | EXACT — formula coefficient 0.3058/kBtu·h = printed 1.0435/kW ÷ 3.412 |
-| heat_pumps cooling | -A (≥19 kW), -B (<19) | ≥19 EXACT; <19 = -B SPVAC EER 11 (interpretation, below) |
+| heat_pumps cooling | -A | EXACT after correcting the small class to its explicit SEER 15 requirement |
 | heat_pumps_heating | -A | EXACT — HSPF 7.4; COPh 3.30/3.20 at 8.3 °C |
 | boilers | -N | EXACT — gas AFUE 90/Et 90/Ec 90; oil 86/87/88; electric 100% |
 | furnaces | -O | EXACT within strict-side row choices (AFUE 95% ≤66 kW; Et 81% above) |
 | chillers | **-K PATH B** | EXACT — every kW/ton = 3.51685/printed COPc (4.513/4.694/5.177/5.633/6.018 PD; 5.065/5.544/5.917/6.018 centrifugal; 2.866 air-cooled) |
 | heat_rejection | (none) | VESTIGIAL — 90.1-sourced rows never read; tower fan from Table 5.2.12.2 + 8.4.4.11.(2)-(3) cells (apply_tower_rules, D-26) |
 
-**Findings — all documentation, no value defects:**
+**Findings:**
 
 1. **The chiller family carried NO provenance** ("capacity in ton, kW/ton") —
    it is Table -K **Path B** exactly. The path election is now documented:
    Path B full-load COPc with the vendored NECB reference part-load curves
    standing in for Path B's IPLV side (E+ models full-load COP + curves, not
    IPLV). Notes rewritten on all 20 rows.
-2. **Small-HP cooling (<19 kW) = EER 11.0 from Table -B (SPVAC)**, not -A's
-   SEER 15. Lenient-side interpretation, faithful to its cited cell, and
-   nearly inert: the NECB shared-unit reference RTU almost always sizes into
-   the ≥19 kW bins, which match -A exactly. Kept, documented.
+2. **Small-HP cooling (<19 kW) = SEER 15 from Table -A.** The former Table-B
+  SPVAC EER 11 choice was a legacy-parity mistake: Table -A explicitly names
+  air conditioners and heat pumps in this capacity class. Corrected in PR-C
+  and pinned by direct data and model-level conformance tests.
 3. **heat_rejection is 90.1-vintage data AND unread by the reference path** —
    pinned as vestigial by test (a future consumer must face the provenance
    deliberately).
@@ -2073,8 +2073,8 @@ reference path applies [RAN `get_table` on 5.2.12.1.-A/-B/-G/-H/-I/-K/-M/-N/-O/-
    reference builds PTAC + baseboard).
 5. IEER/IPLV/SCOP columns are not modeled anywhere — full-load + curves is
    the modeling idiom (the curve story of D-03/D-13).
-6. **2025's unitary/HP families DIFFER from 2020's** — the 2025-edition pass
-   is open follow-on work.
+6. **2025's split-system small-HP heating differs from 2020** (HSPF 7.8 versus
+  7.4); the cooling ladder is shared after the small-bin correction.
 
 **Pinned:** `openstudio-hvac/test/test_efficiency_provenance.rb` (6 runs,
 37 assertions) — each assertion states the printed value and the conversion,
