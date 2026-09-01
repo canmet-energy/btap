@@ -407,6 +407,20 @@ jobs:
           exit $status
       - name: Pinned NECB2020 SmallOffice whole-building gate
         run: cd btap-necb && bundle exec ruby test/test_legacy_archetype_e2e.rb
+      # The R6 SUCCESSOR, running BESIDE the Ruby gate until the gems are
+      # deleted — the same coexistence proof PR-1 used for Leg B. Phase 1 is
+      # the identical oracle script, so the two cannot drift; only the
+      # pipeline differs (Python here, the gem there). When R6 deletes the
+      # gems, the line above goes and this one stays.
+      - name: Pinned NECB2020 SmallOffice whole-building gate (python successor)
+        run: |
+          python3 -m venv python/.archetype-venv
+          python/.archetype-venv/bin/pip install -q pytest
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          LEGACY_PIN_REQUIRED=1 \
+            python/.archetype-venv/bin/python -m pytest -q \
+              python/tests/necb/test_legacy_archetype_e2e.py
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
       # freshness comparison, then the five goldens test files against the
