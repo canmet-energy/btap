@@ -12,9 +12,9 @@
 # Why not openstudio-standards archetypes, which would be more realistic:
 #   * they need the pinned oracle checked out (a ~4.6 GB clone) to generate, so
 #     nobody could regenerate these from a fresh checkout; and
-#   * the legacy archetypes' Kiva OS:Foundation objects currently hit an
-#     EnergyPlus fatal in the reference sizing run (see CLAUDE.md / Open work).
-#     Shipping demo files that crash would be worse than shipping simple ones.
+#   * they are expensive generated acceptance fixtures, not compact examples
+#     suitable for every installed distribution. The pinned SmallOffice Kiva
+#     whole-building gate lives in test/test_legacy_archetype_e2e.rb.
 #
 # Why not wizard geometry, which would be prettier: wizard output carries NO
 # constructions, and the envelope domain cannot build an opaque construction

@@ -236,8 +236,9 @@ ruby test/test_report_html.rb         # whole-document renders + 2025 E2E
 E+ tests skip without the CLI; annual tests use week runs (~1 min each).
 Fixtures shared from `../btap-modeling/test/fixtures`.
 
-`test_legacy_archetype_e2e.rb` generates/caches the 17-building legacy
-archetype fleet against the legacy NECB implementation. It now runs under the
+`test_legacy_archetype_e2e.rb` generates/caches one pinned NECB2020 SmallOffice
+whole-building gate. The 17-building fleet lives in
+`scripts/necb_archetype_sweep.rb`. The test runs under the
 PINNED oracle (`BUNDLE_GEMFILE=../legacy_pin/Gemfile`), like every sibling
 `*_parity.rb` suite — the gated "move it onto legacy_pin" phase was forced by
 the gem extraction, since the in-tree `lib/openstudio-standards` it used to

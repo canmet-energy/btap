@@ -405,6 +405,8 @@ jobs:
             echo "::endgroup::"
           done
           exit $status
+      - name: Pinned NECB2020 SmallOffice whole-building gate
+        run: cd btap-necb && bundle exec ruby test/test_legacy_archetype_e2e.rb
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
       # freshness comparison, then the five goldens test files against the
