@@ -310,7 +310,8 @@
    "purchased_cooling": {
     "article": "8.4.5.6.(2)",
     "text": "one air-cooled electric chiller ... shall be used to represent the purchased energy equipment",
-    "chiller_source": "air_cooled"
+        "chiller_source": "air_cooled",
+        "reference_cop": 2.802
    }
   }
  },

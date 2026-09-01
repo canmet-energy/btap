@@ -399,6 +399,7 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
         pc = selection['special_rules']['purchased_cooling']
         merged = dict(assignment.config or {})
         merged['chw_source'] = pc['chiller_source']
+        merged['purchased_cooling_reference_cop'] = pc['reference_cop']
         assignment.config = merged
         assignment.articles.append(pc['article'])
         audit.decision('selection', 'purchased cooling energy -> represented by air-cooled electric chiller',
@@ -537,6 +538,7 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
                        article='Table 8.4.4.7.-B Note (3)', ruling='D-28')
     assignments = [m[1] for m in merged]
 
+    purchased_cooling_chillers = []
     for assignment in assignments:
         if assignment.action == 'copy_proposed':
             audit.info('build', 'proposed system retained in reference (residential rule)',
@@ -545,8 +547,18 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
             continue
 
         zones = [zones_by_name[n] for n in assignment.zones]
+        existing_chillers = {str(chiller.handle())
+                             for chiller in reference.getChillerElectricEIRs()}
         result = modeling.replace_system(reference, assignment.catalog_name, zones,
                                          config=assignment.config)
+        purchased_cooling_cop = (assignment.config or {}).get(
+            'purchased_cooling_reference_cop')
+        if purchased_cooling_cop is not None:
+            purchased_cooling_chillers.extend(
+                (chiller, purchased_cooling_cop)
+                for chiller in reference.getChillerElectricEIRs()
+                if str(chiller.handle()) not in existing_chillers
+            )
         audit.decision('build', 'reference system built', target=','.join(assignment.zones),
                        inputs={'system': assignment.reference_system, 'action': assignment.action},
                        value=assignment.catalog_name,
@@ -565,6 +577,11 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
     _purge_orphaned_ems(reference, audit)
     _apply_oversizing_caps(model, reference, ruleset, audit)
     _efficiency.apply(reference, vintage=vintage, audit=audit)
+    for chiller, cop in purchased_cooling_chillers:
+        chiller.setReferenceCOP(cop)
+        audit.decision('efficiency', 'purchased-cooling reference chiller COP applied',
+                       target=chiller.nameString(), value=f'COP {cop}',
+                       article='Table 8.4.3.5')
     _emit_article_coverage(ruleset, audit)
 
     return ReferenceResult(model=reference, assignments=assignments, audit=audit)

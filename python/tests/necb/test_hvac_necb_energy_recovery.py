@@ -251,8 +251,13 @@ class TestNecbEnergyRecovery(unittest.TestCase):
         chillers = result.model.getChillerElectricEIRs()
         self.assertTrue(len(chillers))
         self.assertTrue(all(c.condenserType() == 'AirCooled' for c in chillers))
+        self.assertTrue(all(abs(c.referenceCOP() - 2.802) < 0.001 for c in chillers),
+                'Table 8.4.3.5: purchased-cooling reference chiller COP is 2.802')
         self.assertTrue(any('air-cooled electric chiller' in e['action']
                             for e in result.audit.entries))
+        self.assertTrue(any(e['action'] == 'purchased-cooling reference chiller COP applied'
+                    and e.get('article') == 'Table 8.4.3.5'
+                    for e in result.audit.entries))
 
 
 if __name__ == '__main__':
