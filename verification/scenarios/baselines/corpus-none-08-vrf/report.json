@@ -32,6 +32,7 @@
   "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
   "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
   "staged DX heating capacity unavailable (model not sized?) \u2014 not set",
+  "VRF cooling or heating capacity unavailable (model not sized?) \u2014 Table-I minimums not set",
   "CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
   "CoilHeatingDXMultiSpeed_ashp 2: staged cooling capacity unavailable \u2014 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first)",
