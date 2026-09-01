@@ -30,6 +30,7 @@
 # Cache keys include fuel/loc/ecm(/vintage), so variants coexist.
 
 require 'fileutils'
+require 'etc'
 require 'json'
 require 'openstudio'
 
@@ -155,14 +156,72 @@ rescue StandardError => e
 end
 
 RESULT_TAG = ENV.fetch('SWEEP_MODE', 'sizing') == 'full' ? "_full#{RUN_SUFFIX}" : RUN_SUFFIX
-pids = TYPES.to_h do |type|
-  [Process.fork do
-    result = sweep_one(type)
-    File.write(File.join(CACHE_DIR, "result_#{type}#{RESULT_TAG}.json"), JSON.generate(result))
-    exit!(result[:verdict] == 'PASS' ? 0 : 1)
-  end, type]
+
+# Forking ALL the buildings at once does not make them finish sooner: each
+# EnergyPlus run is single-threaded, so N processes on M cores just timeshare,
+# and the whole fleet lands at the same wall-clock while every run competes for
+# RAM. A full-annual archetype needs on the order of a gigabyte; 15 at once on
+# a 16 GB runner is how a sweep gets OOM-killed at hour three, after the
+# expensive part is done. Bound the pool instead: same wall-clock when the
+# fleet exceeds the cores, far less risk, and the AWS 8-vCPU gain becomes
+# predictable rather than accidental.
+#
+# Bounded on BOTH axes, because they bind on different machines: a CI runner is
+# core-poor (4 cores / 16 GB) while a dev box can be core-rich and memory-poor
+# (48 cores / 31 GB), where a core-only bound would start 48 EnergyPlus runs on
+# 31 GB. MEM_PER_WORKER_GB is a deliberately conservative allowance for a
+# full-annual archetype, not a measurement — SWEEP_WORKERS overrides both.
+MEM_PER_WORKER_GB = 1.5
+
+def detected_memory_gb
+  kb = File.read('/proc/meminfo')[/MemTotal:\s+(\d+)/, 1]
+  kb ? kb.to_i / 1_048_576.0 : nil
+rescue StandardError
+  nil
 end
-pids.each_key { |pid| Process.wait(pid) }
+
+WORKERS = if ENV['SWEEP_WORKERS']
+            [ENV['SWEEP_WORKERS'].to_i, 1].max
+          else
+            mem = detected_memory_gb
+            by_memory = mem ? (mem / MEM_PER_WORKER_GB).floor : Etc.nprocessors
+            [[Etc.nprocessors, by_memory].min, 1].max
+          end
+
+# Longest FIRST, so the tail of the sweep is not one Hospital finishing alone
+# while every other core idles. A scheduling hint only — it can never change a
+# result, and an unlisted type simply sorts last. Ranks follow the D-70 note
+# above: the capacity-iterated chains dominate, then the large archetypes.
+COST_HINT = {
+  'Hospital' => 100, 'Outpatient' => 90,
+  'LargeHotel' => 60, 'LargeOffice' => 55, 'SecondarySchool' => 50,
+  'PrimarySchool' => 40, 'MediumOffice' => 35, 'HighriseApartment' => 30,
+  'MidriseApartment' => 25, 'SmallHotel' => 25, 'LowriseApartment' => 20,
+  'RetailStripmall' => 15, 'RetailStandalone' => 12, 'SmallOffice' => 10,
+  'FullServiceRestaurant' => 8, 'QuickServiceRestaurant' => 6, 'Warehouse' => 5
+}.freeze
+
+queue = TYPES.sort_by { |type| [-COST_HINT.fetch(type, 0), type] }
+mem_gb = detected_memory_gb
+puts format('running %<n>d building(s) %<w>d at a time (%<c>d cores, %<m>s; SWEEP_WORKERS overrides)',
+            n: TYPES.size, w: WORKERS, c: Etc.nprocessors,
+            m: mem_gb ? format('%.0f GB RAM, %.1f GB budgeted per run', mem_gb, MEM_PER_WORKER_GB) : 'memory unknown')
+running = {}
+until queue.empty? && running.empty?
+  while running.size < WORKERS && !queue.empty?
+    type = queue.shift
+    pid = Process.fork do
+      result = sweep_one(type)
+      File.write(File.join(CACHE_DIR, "result_#{type}#{RESULT_TAG}.json"), JSON.generate(result))
+      exit!(result[:verdict] == 'PASS' ? 0 : 1)
+    end
+    running[pid] = type
+    puts "  started #{type} (#{running.size}/#{WORKERS} busy, #{queue.size} queued)"
+  end
+  pid, _status = Process.wait2
+  finished = running.delete(pid)
+  puts "  finished #{finished}" if finished
+end
 results = TYPES.map { |t| JSON.parse(File.read(File.join(CACHE_DIR, "result_#{t}#{RESULT_TAG}.json")), symbolize_names: true) }
 
 puts
