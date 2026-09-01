@@ -10,6 +10,8 @@ and diagram bundles are str-keyed throughout, D-79)."""
 
 from __future__ import annotations
 
+import re
+
 from btap._compat import ruby_round, ruby_str
 from btap.necb import decisions as Decisions
 from btap.necb.report import charts as Charts
@@ -246,21 +248,70 @@ def floor_plans(ctx):
 
 # -- checklist -----------------------------------------------------
 
+def _selected_vintage_coverage_text(text, vintage):
+    """Keep user-facing application detail, omitting compatibility history."""
+    selected = str(vintage or "")
+    text = str(text)
+    if selected:
+        text = text.replace("the 2020/2025 code", f"NECB {selected}")
+        text = text.replace("the 2025/2020 code", f"NECB {selected}")
+        text = re.sub(r"\s*\(D-57, placement: :necb2020, the default\)",
+                      " (D-57)", text)
+    text = re.sub(r"\s*The legacy NECB 2011 rule.*?(?=\. Gaps:|$)", "", text)
+    text = text.replace(".. Gaps:", ". Gaps:")
+    return text.strip()
+
+
+def _checklist_statement_html(statement, *, vintage=None, coverage=False):
+    """Give long coverage determinations a summary / applied / gaps hierarchy."""
+    text = (_selected_vintage_coverage_text(statement, vintage)
+            if coverage else str(statement))
+    applied_marker = " Applied: "
+    gaps_marker = " Gaps: "
+    if applied_marker not in text:
+        return f'<div class="checklist-statement">{Html.esc(text)}</div>'
+
+    summary, detail = text.split(applied_marker, 1)
+    applied, separator, gaps = detail.partition(gaps_marker)
+    body = (f'<div class="checklist-summary">{Html.esc(summary)}</div>'
+            '<div class="checklist-detail"><span>Applied</span> '
+            f'{Html.esc(applied)}</div>')
+    if separator:
+        body += ('<div class="checklist-detail checklist-gaps"><span>Gaps</span> '
+                 f'{Html.esc(gaps)}</div>')
+    return f'<div class="checklist-statement">{body}</div>'
+
+
+def _checklist_article(article):
+    """Display the governing citation without cross-edition provenance notes."""
+    return re.sub(r"\s*\(Table verified identical \d{4}/\d{4}\)\s*$", "",
+                  str(article))
+
+
 def checklist(ctx):
     rows = ctx["checklist_rows"]
     if not rows:
         return Html.section("checklist", "Compliance checklist",
                             "<p>No audited compliance decisions recorded.</p>")
 
-    table_rows = [
-        [Html.raw(Html.glyph(row.glyph)),
-         Html.raw(f'<a href="#audit-{row.audit_index}">'
-                  f"{Html.esc(row.article if row.article else '—')}</a>"),
-         Html.raw(Html.building_chip(row.building)),
-         row.statement, row.measured if row.measured is not None else "—"]
-        for row in rows]
-    body = Html.table(["", "Article", "Applies to", "Requirement / determination",
-                       "Measured values"], table_rows)
+    table_rows = []
+    vintage = (ctx.get("report") or {}).get("vintage")
+    for row in rows:
+        determination = _checklist_statement_html(
+            row.statement, vintage=vintage, coverage=row.coverage)
+        if row.measured is not None:
+            determination += (
+                '<div class="checklist-evidence"><span>Evidence</span> '
+                f'{Html.esc(row.measured)}</div>')
+        table_rows.append([
+            Html.raw(Html.glyph(row.glyph)),
+            Html.raw(f'<a href="#audit-{row.audit_index}">'
+                     f"{Html.esc(_checklist_article(row.article) if row.article else '—')}</a>"),
+            Html.raw(Html.building_chip(row.building)),
+            Html.raw(determination),
+        ])
+    body = Html.table(["", "Article", "Applies to", "Requirement / determination"],
+                      table_rows, css="checklist")
     body += (
         f'<p class="meta">{Html.glyph("pass")} complies &nbsp; '
         f'{Html.glyph("fail")} does not comply &nbsp;\n          '
@@ -588,7 +639,12 @@ def coverage_appendix(ctx):
             rows.append([Html.raw(Html.glyph(glyph_kind)), status_text,
                          str(e.get("article") or ""), str(e.get("action") or ""),
                          Html.raw(f'<a href="#audit-{i}">entry {i}</a>')])
-        body += ("<h3>Article coverage notes</h3>"
+        body += ("<h3>Technical implementation notes</h3>"
+             "<p class=\"meta\">The Article column identifies the governing "
+             "requirement for this report's selected NECB edition. These "
+             "technical notes preserve implementation history and may compare "
+             "other editions; those references are context, not additional "
+             "requirements applied to this building.</p>"
                  + Html.table(["", "Status", "Article", "Scope note", "Audit"], rows))
     if warnings:
         rows = []
