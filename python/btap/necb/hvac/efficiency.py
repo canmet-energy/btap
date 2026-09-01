@@ -5,7 +5,7 @@ data/efficiencies_<vintage>.json (NECB Table 5.2.12.1 values + performance curve
 
 Covered components: hot-water boilers (incl. NECB primary/secondary staging),
 electric chillers (incl. 2100 kW split + cooling-tower sizing rules), single-speed
-DX cooling and heating coils, gas heating coils, VAV fan power curves (8.4.4.17)
+DX cooling and heating coils, VRF outdoor units, gas heating coils, VAV fan power curves (8.4.4.17)
 and hydronic pump power (8.4.4.14: Table curves + proposed W/(L/s) transfer when
 a proposed model is supplied). Reference-model fans get their explicit 8.4.4.18
 static pressure/efficiency values in the reference transform; motor-table
@@ -109,6 +109,8 @@ def apply(model, vintage='2020', audit=None, proposed=None):
         _apply_gas_coil(c, tables, audit)
     for c in sorted_by_name(model.getCoilHeatingGasMultiStages()):
         _apply_gas_multi(c, tables, audit, totals.get(str(c.handle())))
+    for unit in sorted_by_name(model.getAirConditionerVariableRefrigerantFlows()):
+        _apply_vrf(unit, tables, requested_vintage, audit)
     for f in sorted_by_name(model.getFanVariableVolumes()):
         _apply_fan_power_curve(f, vintage, audit)
     _apply_pump_rules(model, requested_vintage, plant_rules.get('hydronic_pumps'), audit,
@@ -130,6 +132,76 @@ def apply(model, vintage='2020', audit=None, proposed=None):
                        'gas_coils': len(model.getCoilHeatingGass()),
                        'gas_coils_staged': len(model.getCoilHeatingGasMultiStages())})
     return True
+
+
+def _vrf_row(rows, capacity_w):
+    capacity_kw = capacity_w / 1000.0
+    return next((row for row in rows
+                 if capacity_kw >= row['minimum_capacity_kw']
+                 and (row['maximum_capacity_kw'] is None
+                      or capacity_kw < row['maximum_capacity_kw'])), None)
+
+
+def _apply_vrf(unit, tables, vintage, audit):
+    """Apply the air-source heat-pump rows of Table 5.2.12.1.-I.
+
+    OpenStudio's classic VRF object distinguishes only AirCooled, WaterCooled,
+    and EvaporativelyCooled condensers. It cannot identify the table's water,
+    groundwater, and ground-source classes, so those paths warn instead of
+    guessing. Seasonal and full-load ratings are converted using the same
+    no-fan formulas as the other DX equipment tables.
+    """
+    article = f'NECB {vintage} Table 5.2.12.1.-I'
+    if unit.condenserType() != 'AirCooled':
+        return audit.warn(
+            'efficiency',
+            'VRF source type cannot be distinguished as water, groundwater, or ground source '
+            'from the OpenStudio condenser type — minimum efficiency not set',
+            target=unit.nameString(), inputs={'condenser_type': unit.condenserType()},
+            article=article)
+
+    cooling_w = (optional_f(unit.grossRatedTotalCoolingCapacity())
+                 or optional_f(unit.autosizedGrossRatedTotalCoolingCapacity()))
+    heating_w = (optional_f(unit.grossRatedHeatingCapacity())
+                 or optional_f(unit.autosizedGrossRatedHeatingCapacity()))
+    if cooling_w is None or heating_w is None:
+        return audit.warn(
+            'efficiency', 'VRF cooling or heating capacity unavailable (model not sized?) — '
+                          'Table-I minimums not set',
+            target=unit.nameString(),
+            inputs={'cooling_capacity_available': cooling_w is not None,
+                    'heating_capacity_available': heating_w is not None},
+            article=article)
+
+    rows = tables['vrf_air_source_heat_pumps']
+    cooling_row = _vrf_row(rows, cooling_w)
+    heating_row = _vrf_row(rows, heating_w)
+    if cooling_row is None or heating_row is None:
+        return audit.warn('efficiency', 'no VRF Table-I row found — minimums not set',
+                          target=unit.nameString(), article=article)
+
+    if cooling_row.get('minimum_seer') is not None:
+        cooling_cop = seer_to_cop_no_fan(cooling_row['minimum_seer'])
+        cooling_label = f"SEER {cooling_row['minimum_seer']}"
+    else:
+        cooling_cop = eer_to_cop_no_fan(cooling_row['minimum_eer'], cooling_w)
+        cooling_label = f"EER {cooling_row['minimum_eer']}"
+    if heating_row.get('minimum_hspf') is not None:
+        heating_cop = hspf_to_cop_no_fan(heating_row['minimum_hspf'])
+        heating_label = f"HSPF {heating_row['minimum_hspf']}"
+    else:
+        heating_cop = heating_row['minimum_heating_cop']
+        heating_label = f'COP {heating_cop}'
+
+    unit.setGrossRatedCoolingCOP(max(unit.grossRatedCoolingCOP(), cooling_cop))
+    unit.setRatedHeatingCOP(max(unit.ratedHeatingCOP(), heating_cop))
+    return audit.decision(
+        'efficiency', 'VRF minimum efficiency applied', target=unit.nameString(),
+        inputs={'cooling_capacity_kw': ruby_round(cooling_w / 1000.0, 1),
+                'heating_capacity_kw': ruby_round(heating_w / 1000.0, 1)},
+        value=f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)}); '
+              f'heating {heating_label}',
+        article=article)
 
 
 # ---------------- 8.4.4.9.(7) / 8.4.4.10.(8) staged heating and cooling ----------------

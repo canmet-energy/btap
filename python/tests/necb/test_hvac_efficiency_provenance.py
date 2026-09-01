@@ -121,6 +121,24 @@ class TestEfficiencyProvenance(unittest.TestCase):
                         'printed 2020 Table 5.2.12.1-A: small air-cooled heat pumps '
                         'are SEER 15, not Table-B SPVAC EER 11')
 
+    def test_vrf_air_source_heat_pump_ladder_is_table_i(self):
+        expected = [
+            (0.0, 19.0, 15.0, None, 7.8, None),
+            (19.0, 40.0, None, 10.8, None, 3.3),
+            (40.0, 70.0, None, 10.4, None, 3.2),
+            (70.0, None, None, 9.3, None, 3.2),
+        ]
+
+        def signature(row):
+            return (row['minimum_capacity_kw'], row['maximum_capacity_kw'],
+                    row.get('minimum_seer'), row.get('minimum_eer'),
+                    row.get('minimum_hspf'), row.get('minimum_heating_cop'))
+
+        self.assertEqual(expected,
+                         [signature(row) for row in DATA['vrf_air_source_heat_pumps']])
+        self.assertEqual(expected,
+                         [signature(row) for row in DATA_2025['vrf_air_source_heat_pumps']])
+
     # The heat_rejection family cites ASHRAE 90.1 and is VESTIGIAL for the
     # reference path: apply_efficiencies never reads it (the tower fan comes from
     # Table 5.2.12.2 via _apply_tower_rules, D-26). Pin the vestigiality so a

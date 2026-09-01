@@ -115,6 +115,52 @@ class TestNecbEfficiency(unittest.TestCase):
         hvac.apply_efficiencies(model, vintage='2020', audit=audit)
         self.assertTrue(any('not sized' in w['action'] for w in audit.warnings))
 
+    def test_air_source_vrf_uses_table_i_minimums_and_audits(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedHeatingCapacity(20_000.0)
+        unit.setGrossRatedCoolingCOP(1.0)
+        unit.setRatedHeatingCOP(1.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(10.8, 20_000.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        self.assertAlmostEqual(3.30, unit.ratedHeatingCOP(), delta=1e-6)
+        self.assertTrue(any(entry['action'] == 'VRF minimum efficiency applied'
+                            and entry.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            for entry in audit.entries))
+
+    def test_small_vrf_uses_table_i_seasonal_minimums(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        unit.setGrossRatedTotalCoolingCapacity(12_000.0)
+        unit.setGrossRatedHeatingCapacity(12_000.0)
+        unit.setGrossRatedCoolingCOP(1.0)
+        unit.setRatedHeatingCOP(1.0)
+
+        hvac.apply_efficiencies(model, vintage='2020')
+
+        self.assertAlmostEqual(hvac.efficiency.seer_to_cop_no_fan(15.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        self.assertAlmostEqual(hvac.efficiency.hspf_to_cop_no_fan(7.8),
+                               unit.ratedHeatingCOP(), delta=1e-6)
+
+    def test_unsized_vrf_warns_with_table_i_citation(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        audit = AuditLog()
+
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertTrue(any('VRF cooling or heating capacity unavailable' in warning['action']
+                            and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            for warning in audit.warnings))
+
 
 if __name__ == '__main__':
     unittest.main()

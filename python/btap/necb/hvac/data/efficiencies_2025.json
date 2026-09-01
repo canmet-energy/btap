@@ -20,6 +20,12 @@
       "selection_8_4_5_7_A": "Table 8.4.5.7.-A 2025 is VERBATIM 8.4.4.7.-A 2020 (verified printed); the vendored 2025 selection rules differ from 2020 only in table-number strings; the 97-system matrix run under vintage 2025 produces identical assignments (D-60)."
     }
   },
+  "vrf_air_source_heat_pumps": [
+    {"minimum_capacity_kw": 0.0, "maximum_capacity_kw": 19.0, "minimum_seer": 15.0, "minimum_hspf": 7.8},
+    {"minimum_capacity_kw": 19.0, "maximum_capacity_kw": 40.0, "minimum_eer": 10.8, "minimum_heating_cop": 3.3},
+    {"minimum_capacity_kw": 40.0, "maximum_capacity_kw": 70.0, "minimum_eer": 10.4, "minimum_heating_cop": 3.2},
+    {"minimum_capacity_kw": 70.0, "maximum_capacity_kw": null, "minimum_eer": 9.3, "minimum_heating_cop": 3.2}
+  ],
   "boilers": [
     {
       "fluid_type": "Hot Water",
