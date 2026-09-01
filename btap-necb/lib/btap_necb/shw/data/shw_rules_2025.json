@@ -1,6 +1,6 @@
 {
  "solar_pool_minimums": {
-  "article": "Table 6.2.2.1 (solar thermal + pool heater rows; printed values recovered by hbix's table audit 2026-08-02 - the extraction LOST these sections in both editions, services/codes/docs/table-audit-necb-2020-2025.md)",
+  "article": "Table 6.2.2.1 (solar thermal + pool heater rows; printed values recovered by hbix's table audit 2026-08-02 - the extraction had LOST these sections when the values were vendored, so they were taken from hbix's page audit (services/codes/docs/table-audit-necb-2020-2025.md); re-checked 2026-09-01, the service now returns both sections and all five printed minimums MATCH the vendored values exactly)",
   "pool_gas_thermal_efficiency": 0.82,
   "pool_oil_thermal_efficiency": 0.78,
   "pool_heat_pump_cop": 4.0,
@@ -141,7 +141,7 @@
     "title": "Service water heater performance (Table 6.2.2.1)",
     "status": "partial",
     "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented",
-    "gaps": "pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered — the extraction LOST the solar/pool sections in both editions and the Volume of Tank column in all 27 rows, so the D-41 MCP cross-check could not see them; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
+    "gaps": "pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered — the extraction had LOST the solar/pool sections and the Volume of Tank column when D-41 ran its cross-check, so it could not see them; re-checked 2026-09-01, both sections are back and the column is present (the table now returns 57 rows, not 27) and the vendored minimums agree exactly; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
     "code": [
      "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_efficiency",
      "btap-necb/lib/btap_necb/shw/efficiency.rb#part_load_curve"

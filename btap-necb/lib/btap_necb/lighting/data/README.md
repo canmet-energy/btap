@@ -12,9 +12,10 @@
   columns (`... for Sidelighting [see 4.2.2.1.(10)]` / `... for Toplighting
   [see 4.2.2.1.(13)]`), keyed by the 105 NECB **space-function catalog names**
   rather than by table row, so the 4.2.2.1.(10)/(13) gate is a direct lookup.
-  Four-state per column: `required` / `not_required` / `not_applicable` /
-  `unknown`. **D-57.** See "The Table 4.2.1.6 extraction problem" below — do not
-  regenerate this file from a single MCP call.
+  FIVE-state per column: `required` / `not_required` / `not_applicable` /
+  `not_listed` / `unknown`. **D-57.** See "Table 4.2.1.6 control data" below;
+  since the 2026-07-30 upstream fix a single corrected MCP call is exactly what
+  generates it.
 - `lighting_rules_<vintage>.json` — provenance, sensor-schedule threshold
   (8.6 W/m²), dwelling-unit LPD (8.4.4.5.(2)), the LED atrium equations
   (legacy `space_height` NameError defect documented and fixed), and the
@@ -30,50 +31,52 @@ normalized name — 162 exact matches, **zero LPD differences**, atrium bins
 aliases the 2020 LPD data (`data_vintage_alias`), while the 2025 control matrix
 and both 2025 tables ship as native data.
 
-## The Table 4.2.1.6 extraction problem (read before touching the control data)
+## Table 4.2.1.6 control data — how it was vendored, and what is still unknown
 
-**Both** MCP extractions of Table 4.2.1.6 are partly corrupted, and they are
-corrupted **differently**. Neither may be vendored blind.
+The two daylight-control columns were re-read **2026-07-30** from the corrected
+upstream extraction and are now VERIFIED: the table's nine control columns agree
+exactly between the 2020 and 2025 editions, 0 differing cells of 909, asserted
+at generation time. The 2025-primary / 2020-corroborating conflict machinery
+that used to live here is GONE, and so are the four conflicting rows it existed
+for (`Classroom/Lecture hall/Training room other`, `Health care facility
+physical therapy room`, `Manufacturing facility low bay area`, `Museum general
+exhibition area`) — all four resolved.
 
-- The **2020** extraction is the worse one. Its `Space Category` column *lags*
-  the row it belongs to, so rows read like `Classroom/lecture hall/training room
-  | Computer/Server room`, and it drops whole rows' worth of control marks: it
-  carries `Manual` = X on only **57 of 103** rows, where 4.2.2.1.(3) makes that
-  column apply to *every* space type listed in the table. It reports 40 X in
-  each daylight column.
-- The **2025** extraction keeps `Space Category` correct per row and carries
-  `Manual` = X on **85 of 105** rows. It reports 67 sidelighting / 64
-  toplighting X.
-- Aligned by leaf name + LPD, the two disagree on **38 of 91** matched rows.
+> Historical note: before that fix BOTH extractions were partly corrupted, and
+> differently — the 2020 one lagged its `Space Category` column and carried
+> `Manual` = X on only 57 of 103 rows. The reasoning is preserved in
+> `necb_decisions.md` under D-57 and its 2026-07-30 amendment. Do not resurrect
+> the workaround: it now REMOVES verified data.
 
-Therefore: 2025 is the primary source; 2020 is used **only to corroborate, never
-to negate**. An X in 2020 where 2025 is blank is a **CONFLICT** (state
-`unknown`), not an absence. An empty cell is never read as "not required" on one
-extraction's word alone.
+Cell semantics: `X` → required; `-` → not_required; a BLANK appears only on the
+four rows carrying a Note that defers the space type elsewhere, and those keep
+their curated state. Some cells are genuine cross-references, not flags, and are
+stated as such: `Storage garage interior` → Article 4.2.2.2. (which has its
+*own* daylight rule in Sentence (4)); `Guest room` → Sentence 4.2.2.6.(2);
+`medical supply room` → the Storage Room rows under Common Space Types.
 
-Some cells are genuine cross-references, not flags, and are stated as such:
-`Storage garage interior` → Article 4.2.2.2. (which has its *own* daylight rule
-in Sentence (4)); `Guest room` → Sentence 4.2.2.6.(2); `medical supply room` →
-the Storage Room rows under Common Space Types.
+Mapping validation: each catalog name was mapped by hand to a table row, then
+every hard mapping was checked by comparing the catalog's `lighting_per_area`
+(W/ft² × 10.7639) against the row's LPD (W/m²) — **102 of 102 agree** within
+0.06 W/m² / 1%.
 
-Mapping validation: each of the 105 catalog names was mapped by hand to a table
-row, then every hard mapping was checked by comparing the catalog's
-`lighting_per_area` (W/ft² × 10.7639) against the row's LPD (W/m²) — **102 of
-102 agree** within 0.06 W/m² / 1%.
+**What remains unknown is STRUCTURAL, not an extraction limit.** Five names in
+the file's `residue` array have no row in Table 4.2.1.6 at all: the
+`- undefined -` sentinel, both `Dwelling units` rows, `Audience seating area
+permanent - convention centre`, and `WholeBuilding` (building-type method —
+4.2.2.1.(2) ties the control requirement to the space-by-space types the tag
+does not identify). The dwelling-unit rows resolve from the code text itself
+(state `not_listed`: 4.2.2.1.(10)/(13) reach only spaces requiring the control
+"in accordance with Table 4.2.1.6."). The other three WARN loudly at runtime and
+take the documented conservative default (`required` — photocontrols in the
+*reference* lower its lighting energy and so tighten the target, which cannot
+hand a non-conforming building a pass). `unknown_control_requirement:
+'not_required'` flips it, still warning.
 
-Residue (published in the file's own `residue` array, and asserted by
-`test_daylighting_necb2020.rb`): 4 names with no table row (`- undefined -`,
-both `Dwelling units` rows, `Audience seating area permanent - convention
-centre`), `WholeBuilding` (building-type method — 4.2.2.1.(2) ties the control
-requirement to the space-by-space types the tag does not identify), and 4 rows
-whose columns CONFLICT between extractions (`Classroom/Lecture hall/Training
-room other` toplighting; `Health care facility physical therapy room`
-sidelighting; `Manufacturing facility low bay area` toplighting; `Museum general
-exhibition area` both). Every one of these WARNS loudly at runtime and takes the
-documented conservative default (`required` — photocontrols in the *reference*
-lower its lighting energy and so tighten the target, which cannot hand a
-non-conforming building a pass). `unknown_control_requirement: :not_required`
-flips it, still warning.
+**Caution for anyone re-vendoring:** this file consumes only the two daylight
+columns, which are pure X/-/blank. The table's OTHER seven control columns carry
+`A` and `B` marks that Note (1) defines as at-least-one-of-group requirements —
+a consumer that keeps only `X` silently drops them.
 
 Interior LPDs for 2020 live in the openstudio-loads gem's space-type records
 (`lighting_per_area` W/ft² + fractions + `occ_sense`/`rel_absence_occ`/
