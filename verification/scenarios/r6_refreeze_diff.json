@@ -1,0 +1,48 @@
+{
+ "schema_version": 1,
+ "before_ref": "cbce093",
+ "after_commit": "243cedbcd5b6a63ff0c981293236391740b68a27",
+ "baseline_files_checked": 134,
+ "evidence_files_changed": 46,
+ "evidence_scenarios_changed": 23,
+ "changed_scenarios": [
+  "api-thermal-bridging",
+  "corpus-annual-01-baseboard-gas",
+  "corpus-annual-02-psz-gas-dx",
+  "corpus-none-01-baseboard-gas",
+  "corpus-none-02-psz-gas-dx",
+  "corpus-none-03-vav-reheat-chiller",
+  "corpus-none-04-fancoil-chiller",
+  "corpus-none-05-ptac-electric",
+  "corpus-none-06-unit-heaters-gas",
+  "corpus-none-07-furnace-forced-air",
+  "corpus-none-08-vrf",
+  "corpus-none-09-water-source-hp",
+  "corpus-none-10-ashp-pthp",
+  "corpus-none-11-staged-boilers-gas-lead",
+  "corpus-none-12-staged-boilers-electric-lead",
+  "corpus-none-13-district-heating",
+  "corpus-none-14-general-2storey",
+  "corpus-none-15-general-3storey",
+  "corpus-none-16-ashp-electric-supp-hw-baseboard",
+  "corpus-none-5zone-onramp",
+  "corpus-sizing-01-baseboard-gas",
+  "corpus-sizing-02-psz-gas-dx",
+  "corpus-sizing-09-water-source-hp"
+ ],
+ "transitioned_seals": 31,
+ "active_seals": {
+  "python-only:post-handoff": 31,
+  "python-only": 4
+ },
+ "retired_seals": {
+  "ruby": 29,
+  "ruby-api": 2
+ },
+ "final_cross_language_attestation": {
+  "commit": "85ab14352677093e24038d933cf1071e5b03431a",
+  "run_id": 33544573991,
+  "run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991"
+ },
+ "unexpected_changes": []
+}
