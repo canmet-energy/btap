@@ -139,6 +139,20 @@ class TestEfficiencyProvenance(unittest.TestCase):
         self.assertEqual(expected,
                          [signature(row) for row in DATA_2025['vrf_air_source_heat_pumps']])
 
+    def test_heat_pump_upper_bin_starts_at_136481_in_both_editions(self):
+        for edition, dataset in (('2020', DATA), ('2025', DATA_2025)):
+            for subcategory in ('Single Package', 'Split System'):
+                for heating_type in ('Electric Resistance or None', 'All Other'):
+                    upper_boundaries = [float(row['minimum_capacity'])
+                                        for row in dataset['heat_pumps']
+                                        if row['subcategory'] == subcategory
+                                        and row['heating_type'] == heating_type
+                                        and float(row['minimum_capacity']) > 136480.0]
+                    self.assertEqual(
+                        136481.0, min(upper_boundaries),
+                        f'{edition} {subcategory}/{heating_type}: the upper bin follows '
+                        'the 136480 Btu/h maximum without the 136841 transcription typo')
+
     # The heat_rejection family cites ASHRAE 90.1 and is VESTIGIAL for the
     # reference path: apply_efficiencies never reads it (the tower fan comes from
     # Table 5.2.12.2 via _apply_tower_rules, D-26). Pin the vestigiality so a
