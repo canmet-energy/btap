@@ -414,6 +414,7 @@ jobs:
       # gems, the line above goes and this one stays.
       - name: Pinned NECB2020 SmallOffice whole-building gate (python successor)
         run: |
+          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
           python3 -m venv python/.archetype-venv
           python/.archetype-venv/bin/pip install -q pytest
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
@@ -431,7 +432,6 @@ jobs:
       # frozen or, as here, live.
       - name: Live Leg C (python-prep / ruby-probe, all golden groups)
         run: |
-          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
           python3 -m venv python/.parity-venv
           python/.parity-venv/bin/pip install -q pytest
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
