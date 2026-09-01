@@ -182,9 +182,9 @@ point is still written.
 
 Coverage is generated from the code, not hand-maintained:
 
-- **[NECB_GEM_COVERAGE.md](btap-necb/docs/NECB_GEM_COVERAGE.md)** — every
+- **[NECB_GEM_COVERAGE.md](docs/NECB_GEM_COVERAGE.md)** — every
   article each gem declares, with its status and its gaps.
-- **[NECB_8_4_COVERAGE.html](btap-necb/docs/NECB_8_4_COVERAGE.html)** —
+- **[NECB_8_4_COVERAGE.html](docs/NECB_8_4_COVERAGE.html)** —
   Section 8.4 article by article, down to sentence and clause text, showing
   where each is applied in the code. One collapsible part per edition, each in
   its own article numbering — 2020's 8.4.4 is the reference building where
@@ -222,7 +222,7 @@ usefully, for each partial article's specific gap.
 
 Where the code needs interpreting, the interpretation is written down rather than
 buried in the source. **75 decisions** are recorded in
-**[necb_decisions.md](btap-necb/docs/necb_decisions.md)** — 40 of them
+**[necb_decisions.md](docs/necb_decisions.md)** — 40 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -299,7 +299,7 @@ it is checked against.
 | [btap-simulation](btap-simulation) | the EnergyPlus runner (local, or the HBIX remote backend) |
 
 Each gem's README is its API guide.
-[btap-necb/docs/README.md](btap-necb/docs/README.md) explains the
+[docs/README.md](docs/README.md) explains the
 decision registers.
 
 ---

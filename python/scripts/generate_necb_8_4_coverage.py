@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Generate the article-by-article NECB Section 8.4 coverage document.
-
-PR-A2 deliberately defaults to ``legacy-ruby`` inputs: Ruby source and the
-Ruby manifests remain authoritative for byte identity until PR-A3.
-"""
+"""Generate the article-by-article NECB Section 8.4 coverage document."""
 
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import re
@@ -16,11 +13,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT = REPO_ROOT / "btap-necb" / "docs" / "NECB_8_4_COVERAGE.html"
-DEFAULT_CACHE_2020 = REPO_ROOT / "btap-necb" / "data" / "necb_8_4_articles_2020.json"
-DEFAULT_CACHE_2025 = REPO_ROOT / "btap-necb" / "data" / "necb_8_4_articles_2025.json"
-DEFAULT_DISPOSITION = REPO_ROOT / "btap-necb" / "scripts" / "necb_8_4_disposition.json"
+DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_8_4_COVERAGE.html"
+DEFAULT_COVERAGE_DATA = REPO_ROOT / "python" / "btap" / "necb" / "data" / "coverage"
+DEFAULT_CACHE_2020 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2020.json"
+DEFAULT_CACHE_2025 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2025.json"
+DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
+PYTHON_INPUT_MODE = "python"
 LEGACY_INPUT_MODE = "legacy-ruby"
+DEFAULT_INPUT_MODE = PYTHON_INPUT_MODE
 REPO_URL = "https://github.com/canmet-energy/openstudio-necb-gems"
 
 SUBSECTIONS = {
@@ -72,10 +72,10 @@ class Inputs:
     disposition: Path = DEFAULT_DISPOSITION
     audit_dirs: tuple[Path, ...] = ()
     branch: str = "main"
-    input_mode: str = LEGACY_INPUT_MODE
+    input_mode: str = DEFAULT_INPUT_MODE
 
     def __post_init__(self):
-        if self.input_mode != LEGACY_INPUT_MODE:
+        if self.input_mode not in {PYTHON_INPUT_MODE, LEGACY_INPUT_MODE}:
             raise ValueError(f"unsupported input mode: {self.input_mode}")
 
     @property
@@ -124,7 +124,30 @@ def classify_call(lines: list[str], index: int) -> str:
     return "cited"
 
 
+def python_citation_value(node: ast.expr) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if not isinstance(node, ast.JoinedStr):
+        return None
+    parts = []
+    for value in node.values:
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            parts.append(value.value)
+        elif isinstance(value, ast.FormattedValue) and isinstance(value.value, ast.Name):
+            parts.append(f"{{{value.value.id}}}")
+    return "".join(parts)
+
+
+def python_call_kind(call: ast.Call) -> str:
+    name = call.func.attr if isinstance(call.func, ast.Attribute) else ""
+    return "warn" if name in {"warn", "warning"} else "cited"
+
+
 def domain_for(relative: str) -> str:
+    if relative.startswith("python/btap/necb/"):
+        remainder = relative.removeprefix("python/btap/necb/")
+        segment = remainder.split("/", 1)[0]
+        return segment if segment in DOMAIN_SUBDIRS else "necb"
     segment = relative.split("/", 1)[0]
     match = re.match(r"openstudio-([a-z]+)$", segment)
     if match:
@@ -161,26 +184,63 @@ class CoverageGenerator:
 
     def _scan_citations(self) -> list[dict]:
         citations = []
-        for path in legacy_paths(self.inputs.source_root, "lib/**/*.rb"):
-            relative = path.relative_to(self.inputs.source_root).as_posix()
-            gem_name = domain_for(relative)
-            lines = path.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
-            for index, line in enumerate(lines):
-                match = re.search(r"article:\s*[\"']([^\"']+)[\"']", line)
-                if match is None:
-                    continue
-                raw = match.group(1).replace("#{prefix}", "PREFIX")
-                tokens = re.findall(r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw)
-                if tokens:
-                    citations.append({
-                        "gem": gem_name,
-                        "file": relative,
-                        "line": index + 1,
-                        "kind": classify_call(lines, index),
-                        "tokens": tokens,
-                    })
+        if self.inputs.input_mode == PYTHON_INPUT_MODE:
+            paths = sorted(self.inputs.source_root.glob("python/btap/necb/**/*.py"))
+            for path in paths:
+                relative = path.relative_to(self.inputs.source_root).as_posix()
+                gem_name = domain_for(relative)
+                tree = ast.parse(
+                    path.read_text(encoding="utf-8"), filename=str(path)
+                )
+                for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+                    for keyword in call.keywords:
+                        if keyword.arg != "article":
+                            continue
+                        raw = python_citation_value(keyword.value)
+                        if raw is None:
+                            continue
+                        raw = raw.replace("{prefix}", "PREFIX")
+                        tokens = re.findall(
+                            r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw
+                        )
+                        if tokens:
+                            citations.append({
+                                "gem": gem_name,
+                                "file": relative,
+                                "line": keyword.value.lineno,
+                                "kind": python_call_kind(call),
+                                "tokens": tokens,
+                            })
+        else:
+            paths = legacy_paths(self.inputs.source_root, "lib/**/*.rb")
+            article_pattern = re.compile(r"article:\s*[\"']([^\"']+)[\"']")
+            prefix_expression = "#{prefix}"
+            for path in paths:
+                relative = path.relative_to(self.inputs.source_root).as_posix()
+                gem_name = domain_for(relative)
+                lines = path.read_text(
+                    encoding="utf-8", errors="replace"
+                ).splitlines(keepends=True)
+                for index, line in enumerate(lines):
+                    match = article_pattern.search(line)
+                    if match is None:
+                        continue
+                    raw = match.group(1).replace(prefix_expression, "PREFIX")
+                    tokens = re.findall(
+                        r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw
+                    )
+                    if tokens:
+                        citations.append({
+                            "gem": gem_name,
+                            "file": relative,
+                            "line": index + 1,
+                            "kind": classify_call(lines, index),
+                            "tokens": tokens,
+                        })
         if not citations:
-            raise ValueError("RAW_CITATIONS is empty — the openstudio-*/lib glob went stale")
+            raise ValueError(
+                f"RAW_CITATIONS is empty — the {self.inputs.input_mode} source glob went stale"
+            )
         return citations
 
     def citations_for(self, vintage: str, articles: dict) -> dict[str, list[dict]]:
@@ -207,8 +267,14 @@ class CoverageGenerator:
 
     def declarations_for(self, vintage: str) -> dict[str, list[dict]]:
         declarations: dict[str, list[dict]] = defaultdict(list)
-        suffix = f"lib/**/data/*_rules_{vintage}.json"
-        for path in legacy_paths(self.inputs.manifest_root, suffix):
+        if self.inputs.input_mode == PYTHON_INPUT_MODE:
+            paths = sorted(
+                self.inputs.manifest_root.glob(f"python/btap/**/*_rules_{vintage}.json")
+            )
+        else:
+            suffix = f"lib/**/data/*_rules_{vintage}.json"
+            paths = legacy_paths(self.inputs.manifest_root, suffix)
+        for path in paths:
             data = json.loads(path.read_text(encoding="utf-8"))
             entries = data.get("article_coverage", {}).get("articles")
             if entries is None:
@@ -374,8 +440,9 @@ class CoverageGenerator:
                 f'  <td class="how">{esc(how)}{gap_html}{self.code_cell(group[0])}</td>\n'
                 "</tr>\n"
             )
+        owner_heading = "Python domain" if self.inputs.input_mode == PYTHON_INPUT_MODE else "Gem"
         table = (
-            '<table class="inner"><thead><tr><th>Declared at</th><th>Gem</th><th>Status</th>'
+            f'<table class="inner"><thead><tr><th>Declared at</th><th>{owner_heading}</th><th>Status</th>'
             f'<th>How / gaps · code</th></tr></thead><tbody>{"".join(rows)}</tbody></table>'
         )
         if implementing and delegations:
@@ -418,13 +485,18 @@ class CoverageGenerator:
             '<span class="pill warn" title="not yet reviewed by a human">DRAFT</span>'
             if disposition.get("draft") else ""
         )
+        reviewer = str(disposition["reviewer"])
+        if self.inputs.input_mode == LEGACY_INPUT_MODE:
+            reviewer = reviewer.replace(
+                "docs/necb_decisions.md", "btap-necb/docs/necb_decisions.md"
+            )
         return (
             f'<div class="dispo{" conflict" if conflict else ""}">\n'
             f"  {conflict_text}\n"
             f'  <span class="pill {css}">{esc(label)}{target_text}</span>\n'
             f"  {draft}\n"
             f'  <span class="how">{esc(disposition["rationale"])}</span>\n'
-            f'  <div class="dim">Reviewer: {esc(disposition["reviewer"])}</div>\n'
+            f'  <div class="dim">Reviewer: {esc(reviewer)}</div>\n'
             "</div>\n"
         )
 
@@ -623,7 +695,10 @@ class CoverageGenerator:
         retrieved_2025 = json.loads(
             self.inputs.cache_2025.read_text(encoding="utf-8")
         )["provenance"]["retrieved"]
-        html = HTML_TEMPLATE.format(
+        template = HTML_TEMPLATE
+        if self.inputs.input_mode == PYTHON_INPUT_MODE:
+            template = python_template(HTML_TEMPLATE)
+        html = template.format(
             run_note=esc(run_note),
             count_2020=len(parts["2020"]["articles"]),
             count_2025=len(parts["2025"]["articles"]),
@@ -749,6 +824,46 @@ HTML_TEMPLATE = """  <!-- Generated by btap-necb/scripts/generate_necb_8_4_cover
 """
 
 
+def python_template(template: str) -> str:
+    replacements = {
+        "btap-necb/scripts/generate_necb_8_4_coverage.rb": (
+            "python/scripts/generate_necb_8_4_coverage.py"
+        ),
+        "`rake necb:coverage_doc` regenerates": (
+            "`python3 python/scripts/generate_necb_8_4_coverage.py` regenerates"
+        ),
+        "the <code>openstudio-*</code> gem family": "the Python <code>btap</code> package",
+        "named gem / gap": "named Python domain / gap",
+        "the gem's self-declared": "the Python domain's self-declared",
+        "the gem <i>asserts</i>": "the Python domain <i>asserts</i>",
+        "each gem's own data JSON": "the Python package's data JSON",
+        "<code>btap-necb .../envelope_rules_*.json</code>": (
+            "<code>python/btap/necb/envelope/data/envelope_rules_*.json</code>"
+        ),
+        "<code>btap-necb .../space_types_*.json</code>": (
+            "<code>python/btap/necb/loads/data/space_types_*.json</code>"
+        ),
+        "<code>btap-necb .../shw_rules_*.json</code>": (
+            "<code>python/btap/necb/shw/data/shw_rules_*.json</code>"
+        ),
+        "<code>btap-necb .../efficiencies_*.json</code>": (
+            "<code>python/btap/necb/hvac/data/efficiencies_*.json</code>"
+        ),
+        "(<code>rake necb:coverage_doc</code> to regenerate)": (
+            "(<code>python3 python/scripts/generate_necb_8_4_coverage.py</code> to regenerate)"
+        ),
+        "<code>scripts/fetch_necb_8_4_text.rb</code>": (
+            "<code>python/scripts/fetch_necb_8_4_text.py</code>"
+        ),
+        "<code>btap-necb/docs/necb_rule_verification.md</code>": (
+            "<code>docs/necb_rule_verification.md</code>"
+        ),
+    }
+    for old, new in replacements.items():
+        template = template.replace(old, new)
+    return template
+
+
 def generate(inputs: Inputs, output: Path) -> tuple[CoverageGenerator, dict[str, dict]]:
     generator = CoverageGenerator(inputs)
     html, parts = generator.render()
@@ -758,7 +873,11 @@ def generate(inputs: Inputs, output: Path) -> tuple[CoverageGenerator, dict[str,
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input-mode", choices=[LEGACY_INPUT_MODE], default=LEGACY_INPUT_MODE)
+    parser.add_argument(
+        "--input-mode",
+        choices=[PYTHON_INPUT_MODE, LEGACY_INPUT_MODE],
+        default=DEFAULT_INPUT_MODE,
+    )
     parser.add_argument("--source-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--manifest-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--cache-2020", type=Path, default=DEFAULT_CACHE_2020)

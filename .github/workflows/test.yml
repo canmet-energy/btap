@@ -67,8 +67,8 @@ jobs:
         run: |
           python3 python/scripts/generate_necb_gem_coverage.py
           python3 python/scripts/generate_necb_8_4_coverage.py
-          git diff --exit-code -- btap-necb/docs/NECB_GEM_COVERAGE.md \
-                                  btap-necb/docs/NECB_8_4_COVERAGE.html \
+          git diff --exit-code -- docs/NECB_GEM_COVERAGE.md \
+                                  docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
       # The decisions registry is CANONICAL on the Python side since R3 (D-81);
       # the Ruby gem's copy is GENERATED from it. Stdlib-only, every PR.

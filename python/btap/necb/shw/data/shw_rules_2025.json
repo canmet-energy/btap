@@ -143,8 +143,8 @@
     "how": "electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented",
     "gaps": "pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered — the extraction had LOST the solar/pool sections and the Volume of Tank column when D-41 ran its cross-check, so it could not see them; re-checked 2026-09-01, both sections are back and the column is present (the table now returns 57 rows, not 27) and the vendored minimums agree exactly; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
     "code": [
-     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_efficiency",
-     "btap-necb/lib/btap_necb/shw/efficiency.rb#part_load_curve"
+     "python/btap/necb/shw/efficiency.py#apply_efficiency",
+     "python/btap/necb/shw/efficiency.py#part_load_curve"
     ]
    },
    {
@@ -160,7 +160,7 @@
     "status": "implemented",
     "how": "the storage tank is built with an automatic setpoint: a constant ScheduleRuleset at the sizing max temperature is installed as BOTH the loop SetpointManagerScheduled and the WaterHeaterMixed setpointTemperatureSchedule, with a 2 C deadband and Cycle control, so the tank is temperature-controlled and the setpoint is adjustable by editing one schedule",
     "code": [
-     "btap-necb/lib/btap_necb/shw/demand.rb#build_loop"
+     "python/btap/necb/shw/demand.py#_build_loop"
     ]
    },
    {
@@ -176,7 +176,7 @@
     "status": "implemented",
     "how": "CHECKED against the sized demand: the fraction of total design flow whose target temperature exceeds 60 C is computed from the per-space demand before auto_size collapses it to one max_temp_c. Below 50% the sentence requires separate booster heaters for the hot portions, and a single-water-heater model is a SHOUTED finding; at or above 50%, or with no load above 60 C, the determination is audited as met or vacuous",
     "code": [
-     "btap-necb/lib/btap_necb/shw/prescriptive.rb#check_booster_heaters"
+     "python/btap/necb/shw/prescriptive.py#check_booster_heaters"
     ]
    },
    {
@@ -193,7 +193,7 @@
     "how": "pool-heater minimum efficiencies ARE applied when a SwimmingPoolIndoor is present in the model (gas Et 82% / oil 78% / heat-pump COP 4.0, D-63, apply-when-present)",
     "gaps": "the 6.2.7.1. shutoff device and pump/heater time switches are installed controls with no model object; 6.2.7.2. covers govern heated OUTDOOR pools and tubs, and EnergyPlus models INDOOR pools only, so that sentence is permanently outside model scope",
     "code": [
-     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_solar_pool_minimums"
+     "python/btap/necb/shw/efficiency.py#apply_solar_pool_minimums"
     ]
    },
    {
@@ -202,8 +202,8 @@
     "status": "implemented",
     "how": "per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (loads-domain data)",
     "code": [
-     "btap-necb/lib/btap_necb/shw/demand.rb#apply_shw",
-     "btap-necb/lib/btap_necb/shw/demand.rb#add_water_use"
+     "python/btap/necb/shw/demand.py#apply_shw",
+     "python/btap/necb/shw/demand.py#_add_water_use"
     ]
    },
    {
@@ -212,7 +212,7 @@
     "status": "satisfied_by_clone",
     "how": "the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel",
     "code": [
-     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
+     "python/btap/necb/shw/reference.py#reference_shw"
     ]
    },
    {
@@ -221,8 +221,8 @@
     "status": "implemented",
     "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction",
     "code": [
-     "btap-necb/lib/btap_necb/shw/demand.rb#wrap_heat_pump",
-     "btap-necb/lib/btap_necb/shw/efficiency.rb#apply_heat_pump_efficiency"
+     "python/btap/necb/shw/demand.py#_wrap_heat_pump",
+     "python/btap/necb/shw/efficiency.py#apply_heat_pump_efficiency"
     ]
    },
    {
@@ -232,7 +232,7 @@
     "how": "(3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically — trivially matching the (4)(a) ratio (Note A-8.4.5.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.6.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.6.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater — there is no electric counterpart in 8.4.6 to apply.",
     "gaps": "REFINED after machine-verification (D-41) and D-53: (3)/(4)/(6)/(7)/(8) are satisfied by clone and (5) is closed for every article-eligible heater. Remaining: (9) circulation-pump consolidation is satisfied BY CONSTRUCTION for models this gem authors — necb/demand.rb builds exactly ONE PumpConstantSpeed per service water loop, so there is never a set of pumps to consolidate. It is unverified only for a FOREIGN proposed that arrives with several pumps on one SHW loop; such a model is cloned as-is, keeping identical W/(L/s) (energy-equivalent, topology differs). No consolidation pass is implemented because it would be unreachable code on every model this toolchain produces.",
     "code": [
-     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
+     "python/btap/necb/shw/reference.py#reference_shw"
     ]
    },
    {
@@ -241,7 +241,7 @@
     "status": "implemented",
     "how": "Service water heating accounted per the prescriptive Section 6.2 requirements via the reference SHW transform (8.4.5.20.) and heater efficiency application — the realization of 8.4.1.1.(1) for the SWH slice.",
     "code": [
-     "btap-necb/lib/btap_necb/shw/demand.rb#apply_shw"
+     "python/btap/necb/shw/demand.py#apply_shw"
     ]
    },
    {
@@ -250,7 +250,7 @@
     "status": "implemented",
     "how": "SWH loads accounted from NECB space-use demand data (per-space peak flows + schedules aggregated to the building system); EnergyPlus computes the resulting energy.",
     "code": [
-     "btap-necb/lib/btap_necb/shw/demand.rb#add_water_use"
+     "python/btap/necb/shw/demand.py#_add_water_use"
     ]
    }
   ]

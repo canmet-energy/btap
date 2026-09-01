@@ -2,9 +2,10 @@
 
 Adjudicated interpretations and product decisions for the `openstudio-*` NECB
 gem family. Machine-checkable coverage lives elsewhere — article dispositions in
-`openstudio-necb/scripts/necb_8_4_disposition.json`, per-gem `article_coverage` manifests, the
+`python/btap/necb/data/coverage/necb_8_4_disposition.json`, per-domain
+`article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
-`openstudio-necb/docs/necb_rule_verification.md`. **This file records the judgement calls**: the
+`docs/necb_rule_verification.md`. **This file records the judgement calls**: the
 code-interpretation and design decisions a reviewer cannot re-derive from the
 code alone, who made them, and why. Newest last. Add an entry whenever an
 interpretation of code text is adopted, a deviation is accepted, or a
@@ -19,7 +20,7 @@ the canonical Python JSON; (2) author the `## D-XX` section here — the prose
 stays HAND-AUTHORED, never generated, and the tests enforce id-set equality
 between doc and registry, not title/summary agreement; (3) run
 `python3 python/scripts/sync_decisions_registry.py` to generate the Ruby copy;
-(4) `ruby btap-necb/scripts/generate_decisions_toc.rb`; (5) run the Python
+(4) `python3 python/scripts/generate_decisions_toc.py`; (5) run the Python
 registry/citation tests; (6) run `test/test_decisions_registry.rb`. Both
 sides fail the build in both drift directions, and a `kind: "runtime"` entry
 must be cited by at least one ruling tag in BOTH implementations. Registry summaries are PARAPHRASE — never NECB text
@@ -118,6 +119,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-81** — The R3 primacy flip: the Python implementation is canonical and primary; the Ruby registry copy is generated; same-PR backports continue only until R4's verification handoff _(process)_
 - **D-82** — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop _(process)_
 - **D-83** — R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one _(process)_
+- **D-84** — R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives _(process)_
 
 <!-- TOC END -->
 
@@ -128,7 +130,7 @@ audit are drained and archived — see `docs/README.md`.
 - **Who/when:** phylroy, 2026-07-22.
 - **Why:** NRCan is the Crown; NECB copyright is the Government of Canada's.
 - **Evidence:** `NECB_8_4_COVERAGE.html` renders full clause text; cache in
-  `data/necb_8_4_articles_2025.json`. Commit `09c011740`.
+  `python/btap/necb/data/coverage/necb_8_4_articles_2025.json`. Commit `09c011740`.
 
 ## D-02 — Unresolvable space types are a hard error (BREAKING)
 
@@ -218,12 +220,13 @@ audit are drained and archived — see `docs/README.md`.
   because the single-speed fan cycles. Applies to the **performance path only**
   (8.4.6.1 scopes curves to the reference building; the EUI path has none).
 - **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb` (tower section, in
-  `rake necb:verify`); `openstudio-necb/scripts/necb_8_4_disposition.json` 8.4.6.6.
+  `rake necb:verify`); `python/btap/necb/data/coverage/necb_8_4_disposition.json`
+  8.4.6.6.
 
 ## D-08 — Batch sign-off of the remaining 19 article dispositions
 
 - **Decision:** all 19 remaining draft dispositions in
-  `openstudio-necb/scripts/necb_8_4_disposition.json` signed off in four groups:
+  `python/btap/necb/data/coverage/necb_8_4_disposition.json` signed off in four groups:
   - **A. Probe-evidenced `covered_by` (7):** 8.4.6.1, 8.4.6.2, 8.4.6.3,
     8.4.6.4, 8.4.6.5, 8.4.6.7, 8.4.6.9 — each rationale carries its numeric
     result from `rake necb:curves`, which re-verifies on every run.
@@ -237,7 +240,7 @@ audit are drained and archived — see `docs/README.md`.
 - **Why:** a disposition is a claim of *responsibility*, not correctness — the
   deliberate weaker claim. Group D remains publicly documented as uncovered;
   implementing any of those articles later is separate, evidence-backed work.
-- **Evidence:** `openstudio-necb/scripts/necb_8_4_disposition.json` (no `draft` entries
+- **Evidence:** `python/btap/necb/data/coverage/necb_8_4_disposition.json` (no `draft` entries
   remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
 
 ## D-09 — Umbrella manifest emits at runtime; warnings split from modeller scope notes
@@ -4718,3 +4721,39 @@ setup-time pip on the user's machine; download-only distribution (the
 first-run surprise plus the TLS-intercept failure the archive rung
 exists for); a frozen-scenario installer lane (it would edit the pinned
 gate for zero seal value).
+
+## D-84
+
+**Decided:** R6 retires the five `btap-*` Ruby gems. Python is the sole
+product implementation. This does not retire Ruby itself: `legacy_pin/` and
+the Ruby probes under `verification/oracle/` remain the pinned
+`openstudio-standards` oracle used by live Leg C, the whole-building archetype
+gate, and thermal-bridging verification.
+
+**Final cross-language attestation:** commit
+`85ab14352677093e24038d933cf1071e5b03431a`, GitHub Actions run
+`33544573991`. The explicit Ruby parity list completed 45 runs and 629
+assertions; the Ruby SmallOffice gate completed 3 runs and 62 assertions;
+the Python successor passed 4 tests; live Leg C passed 23/23; frozen parity
+scenarios passed; lint, Python, verify, and every gem matrix job passed.
+Parity reported zero skips. That immutable run is the final authority for
+Ruby/Python coexistence; no post-retirement re-freeze pretends to recreate it.
+
+**Scenario seals:** 31 active seals become
+`python-only:post-handoff`. Each retains its original `retired_seal` (29
+Ruby CLI and 2 Ruby API), the attested commit, run id, run URL, and retirement
+reason. The four scenarios that were already Python-only keep their historical
+classification. Active product-Ruby seals are forbidden after this decision.
+
+**Evidence and records:** all 313 coverage `code` pointers now resolve to
+Python definitions (87 unique owners across 12 manifests and 241 entries).
+The durable decision/audit/coverage records move to `docs/`; generated
+coverage becomes Python-authoritative. NECB 2020 and 2025 Section 8.4 caches
+ship under `btap.necb.data.coverage` for versioned offline reference. Their
+Crown attribution states explicitly that NECB text is not licensed under the
+LGPL that applies to the package source.
+
+**Deletion boundary:** the five gem directories and the explicitly classified
+gem-dependent verification drivers retire only after the post-handoff freeze
+is committed and validated. The oracle pin, oracle probes, goldens, request
+manifest, and frozen scenario machinery survive.

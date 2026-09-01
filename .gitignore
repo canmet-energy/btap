@@ -50,6 +50,8 @@ Gemfile.lock
 # Test + run output
 output/
 coverage/
+!python/btap/necb/data/coverage/
+!python/btap/necb/data/coverage/**
 /tmp/
 run/
 *.osw

@@ -14,7 +14,8 @@
     "verification/oracle/oracle_probes.rb",
     "verification/oracle/request_manifest.json",
     "verification/r6_disposition.json",
-    "verification/spec.json"
+    "verification/spec.json",
+    "verification/scenarios/validate_r6_refreeze.py"
    ],
    "prefixes": [
     "verification/oracle/fixtures/",

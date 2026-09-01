@@ -1,5 +1,5 @@
 {
- "_doc": "D-80 oracle request manifest \u2014 the implementation-independent statement of every oracle probe request and the recursive shape of its answer. Immutable except by ADJUDICATED update (see btap-necb/docs/necb_decisions.md D-80).",
+ "_doc": "D-80 oracle request manifest \u2014 the implementation-independent statement of every oracle probe request and the recursive shape of its answer. Immutable except by ADJUDICATED update (see docs/necb_decisions.md D-80).",
  "schedule_names": [
   "NECB-*-Electric-Equipment",
   "NECB-*-FAN",
@@ -53768,7 +53768,7 @@
    "btap-costing/lib/btap_costing/data/envelope/thermal_bridging.csv": "a0ba27b8e7135e76228bb81e2fe893d9f081db582693651dd9b14e008031bb43"
   },
   "goldens_manifest_sha256": "1a2b03c23db37370b971be9fec107c7b545c644f8fd7072ae2c929b56e115690",
-  "review": "btap-necb/docs/d80_retirement_plan_review.md",
+    "review": "docs/d80_retirement_plan_review.md",
   "provenance_corrected": "2026-08-28, adjudicated manifest-only update (Sol post-merge finding 3): the first bootstrap hashed btap-necb/data and a nonexistent btap-costing/data; source_hashes now name the ACTUAL sources \u2014 the loads schedules table and the envelope constructions catalog. schedule_names, costing_candidates, and golden_inventory are byte-unchanged (verified against a re-dump at 9ac7ee571be1)."
  }
 }

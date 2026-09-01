@@ -51,6 +51,7 @@ tbd = ["canmet-tbd==3.5.2"]
 
 [project.scripts]
 btap-compliance = "btap.necb.cli:main"
+btap-necb-coverage = "btap.necb.coverage:main"
 
 [tool.setuptools.packages.find]
 include = ["btap*"]

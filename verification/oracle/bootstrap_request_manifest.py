@@ -72,7 +72,7 @@ def main():
         "_doc": "D-80 oracle request manifest — the implementation-independent "
                 "statement of every oracle probe request and the recursive shape "
                 "of its answer. Immutable except by ADJUDICATED update "
-                "(see btap-necb/docs/necb_decisions.md D-80).",
+            "(see docs/necb_decisions.md D-80).",
         "schedule_names": inputs["schedule_names"],
         "costing_candidates": inputs["costing_candidates"],
         "golden_groups": GROUPS,
@@ -86,7 +86,7 @@ def main():
             "source_hashes": inputs["source_hashes"],
             "goldens_manifest_sha256": hashlib.sha256(
                 (GOLDENS / "manifest.json").read_bytes()).hexdigest(),
-            "review": "btap-necb/docs/d80_retirement_plan_review.md",
+            "review": "docs/d80_retirement_plan_review.md",
         },
     }
     out = HERE / "request_manifest.json"

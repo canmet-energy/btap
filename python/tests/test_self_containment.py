@@ -82,17 +82,11 @@ ALLOWLIST = {
                 "weather dir are tried first, so an installed wheel never "
                 "reaches it"),
     },
-    "python/scripts/fetch_necb_8_4_text.py": {
+    "python/btap/necb/coverage.py": {
         "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": ("the output default stays on the legacy cache during the "
-                "output-preserving port; PR-A3 moves it into package data"),
-    },
-    "python/scripts/generate_decisions_toc.py": {
-        "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": ("byte-parity mode targets the decision document at its current "
-                "home; PR-A3 moves the document and switches the default"),
+        "retires": "N/A-label",
+        "why": ("btap-necb-coverage is the installed console-script name, not "
+                "a reference to the retiring btap-necb directory"),
     },
     "python/scripts/generate_necb_8_4_coverage.py": {
         "refs": ["btap-necb"],
@@ -100,11 +94,11 @@ ALLOWLIST = {
         "why": ("legacy-input mode is required for the final byte comparison; "
                 "PR-A3 switches source, manifests, caches and output to Python"),
     },
-    "python/scripts/generate_necb_gem_coverage.py": {
+    "python/scripts/wheel_smoke.py": {
         "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": ("legacy manifest and document paths remain authoritative only "
-                "through the final Ruby attestation"),
+        "retires": "N/A-label",
+        "why": ("btap-necb-coverage is the installed console-script name, not "
+                "a reference to the retiring btap-necb directory"),
     },
     "python/scripts/legacy_whatsnew.py": {
         "refs": ["legacy_pin"],
@@ -188,9 +182,9 @@ ALLOWLIST = {
         "refs": ["btap-necb"],
         "retires": "R6",
         "why": ("asserts the generated Ruby copy is byte-identical to the "
-                "canonical Python registry and that the doc under "
-                "btap-necb/docs mirrors it; both references die when the "
-                "gem tree and the doc move at R6"),
+                "canonical Python registry; only the Ruby-copy assertion "
+                "retires with the gem tree at R6, while the root-doc "
+                "registry and TOC contracts survive"),
     },
     "python/tests/test_inventory_validation.py": {
         "refs": ["verification/"],
@@ -206,21 +200,28 @@ ALLOWLIST = {
                 "manifest under verification/scenarios/; verification/ "
                 "consumption is permitted by the invariant permanently"),
     },
+    "python/tests/necb/test_freeze_seal_transition.py": {
+        "refs": ["verification/"],
+        "retires": "R6-oracle-boundary",
+        "why": ("negative-controls the post-handoff seal schema in the "
+                "permanent scenario freezer"),
+    },
     "python/tests/test_request_manifest.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
         "why": ("proves the D-80 request manifest under verification/oracle is "
                 "internally live (no orphaned golden groups)"),
     },
-    "python/tests/test_generate_necb_8_4_coverage.py": {
-        "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": "proves PR-A2 byte identity against the pre-move generated HTML",
-    },
     "python/tests/test_generate_necb_gem_coverage.py": {
         "refs": ["btap-necb"],
         "retires": "PR-A3",
         "why": "proves PR-A2 byte identity against the pre-move generated Markdown",
+    },
+    "python/tests/test_generate_necb_8_4_coverage.py": {
+        "refs": ["btap-necb"],
+        "retires": "PR-A3-history",
+        "why": ("proves explicit legacy-input mode still reproduces the "
+                "pre-divergence HTML bytes at checkpoint cbce093"),
     },
     "python/tests/test_verification_disposition.py": {
         "refs": ["verification/"],

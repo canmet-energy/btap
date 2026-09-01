@@ -85,7 +85,7 @@ end
 # --- NECB gem-family rule verification -------------------------------------
 # Checks that declared NECB rules actually DO something, rather than trusting
 # the `article_coverage` manifests' prose. See
-# btap-necb/docs/necb_rule_verification.md for what each check proves.
+# docs/necb_rule_verification.md for what each check proves.
 namespace :necb do
   desc 'Lint: every rule key in a NECB ruleset JSON is read by that gem lib/'
   task :orphan_keys do
@@ -108,9 +108,10 @@ namespace :necb do
 
   desc 'Regenerate NECB_8_4_COVERAGE.html (+ NECB_GEM_COVERAGE.md) from manifests, citations and the cached 8.4 text'
   task :coverage_doc do
-    # Pure Ruby, no SDK. Text cache refresh (btap-necb/scripts/fetch_necb_8_4_text.rb)
+    # Pure Python, no SDK. Text cache refresh (python/scripts/fetch_necb_8_4_text.py)
     # needs codes-MCP access and is NOT run here — CI regenerates from the
-    # committed cache. Pass run evidence via NECB_AUDIT_JSONS=dir1:dir2
+    # committed python/btap/necb/data/coverage cache. Pass run evidence via
+    # NECB_AUDIT_JSONS=dir1:dir2
     # (directories containing audit.json + report.json from real runs).
     abort('necb:coverage_doc failed') unless system('python3', 'python/scripts/generate_necb_gem_coverage.py') &&
                          system('python3', 'python/scripts/generate_necb_8_4_coverage.py')

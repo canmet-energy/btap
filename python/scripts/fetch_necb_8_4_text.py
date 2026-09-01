@@ -3,7 +3,8 @@
 
 Fetches every NECB Section 8.4 article for ONE edition (EDITION=2025 default,
 EDITION=2020 supported), parses each into a sentence/clause tree with STRICT
-sanity checks, and caches the result to ``data/necb_8_4_articles_2025.json``
+sanity checks, and caches the result to
+``btap/necb/data/coverage/necb_8_4_articles_2025.json``
 for the coverage-document generator (which must run in CI without MCP access).
 
   python3 scripts/fetch_necb_8_4_text.py
@@ -20,7 +21,7 @@ guessed tree. Requirement text under the wrong article number is the worst
 outcome available in a compliance document; a patchy tree is not.
 
 Python port (PR-A2): maintains exact Ruby parity on parse logic, cache schema,
-and output paths. The JSON is deterministic (sorted keys, pretty-print) so
+and output content. The JSON is deterministic (sorted keys, pretty-print) so
 a frozen Ruby cache and a regenerated Python cache diff cleanly on CONTENT
 changes only, not on key order or whitespace.
 """
@@ -251,7 +252,8 @@ def main():
     parser.add_argument(
         "--out",
         type=Path,
-        help="Output path (default: btap-necb/data/necb_8_4_articles_<edition>.json)"
+        help=("Output path (default: python/btap/necb/data/coverage/"
+              "necb_8_4_articles_<edition>.json)")
     )
     args = parser.parse_args()
 
@@ -261,8 +263,8 @@ def main():
     if args.out:
         out_path = args.out
     else:
-        # Match Ruby original: btap-necb/data/necb_8_4_articles_2025.json
-        out_path = REPO_ROOT / "btap-necb" / "data" / f"necb_8_4_articles_{edition}.json"
+        out_path = (PYTHON_ROOT / "btap" / "necb" / "data" / "coverage" /
+                    f"necb_8_4_articles_{edition}.json")
 
     client = MCPClient("codes")
 

@@ -21,7 +21,7 @@ Every gem in this repository obeys the same rules:
 - **Two citation axes.** `article:` cites the code that mandates a value;
   `ruling:` cites the adjudicated decision that says how we read it. Every id
   must exist in
-  [btap-necb/docs/necb_decisions.md](../btap-necb/docs/necb_decisions.md)
+  [necb_decisions.md](necb_decisions.md)
   and its machine-readable mirror; a drift test enforces both directions.
 - **Audit text convention:** violations are SHOUTED, passes are lowercase — the
   report's checklist classifier is deliberately case-sensitive about this.

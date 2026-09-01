@@ -29,7 +29,7 @@
     "status": "implemented",
     "how": "space-function method via NECB space-type records; building-type method via the vendored 2025 4.2.1.5 table",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_lights"
+     "python/btap/necb/lighting/apply_lights.py#apply_lights"
     ]
    },
    {
@@ -38,7 +38,7 @@
     "status": "implemented",
     "how": "2025 table vendored (lpd_building_types_2025.json)",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type"
+     "python/btap/necb/lighting/apply_lights.py#_apply_to_space_type"
     ]
    },
    {
@@ -47,7 +47,7 @@
     "status": "implemented",
     "how": "2025 table transcribed in full and verified value-identical to the 2020 space-type records (162 joined rows, 0 deltas)",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type"
+     "python/btap/necb/lighting/apply_lights.py#_apply_to_space_type"
     ]
    },
    {
@@ -57,8 +57,8 @@
     "how": "modeled as the NECB2015-lineage lighting-schedule synthesis (hourly x (1 - rel_absence_occ x occ_sense - personal_control) when occupancy < rel_absence_occ) for space types with LPD > 8.6 W/m2, using the Table 4.3.2.10 factors carried in the space-type data",
     "gaps": "control HARDWARE (sensors) is not modeled as objects; area-threshold occupancy-sensor space-type cloning is 2011-only machinery (no-op in 2015+, out of scope); renumbered from the former bogus 4.2.2.2. citation (4.2.2.2. is \"Lighting Controls in Storage Garages\" in NECB 2020/2025, not occupancy controls)",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#wire_lighting_schedule",
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#synthesize_sensor_ruleset"
+     "python/btap/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+     "python/btap/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
     ]
    },
    {
@@ -68,7 +68,7 @@
     "how": "(1) zone area is CHECKED against the 360 m2 limit and an oversized zone is a shouted finding (re-zoning to satisfy a lighting rule would silently change the thermal results, so it is not done for you); (2) a >=30% unoccupied reduction is applied by schedule modulation — the 4.2.2.1.(16)-(23) convention, and note the general occupancy path CANNOT serve this since it is gated on LPD > 8.6 W/m2 while both garage records sit at 1.5-1.9 W/m2, and the Table 4.3.2.10 factors would give only 26.8%; (4) luminaire power within 6.1 m of a >=40% net-opening perimeter wall is derived as LPD x band area (the 4.2.2.1 convention) and a zone daylighting control is added above 150 W. Table 4.2.1.6. defers 'Storage garage interior' here rather than to 4.2.2.1.(10)/(13), so garages are correctly excluded from the ordinary photocontrol rule",
     "gaps": "(3) covered vehicle ENTRANCES AND EXITS cannot be identified from geometry or space type — no model attribute distinguishes an entrance bay from a parking bay — so the 50% sunset-to-sunrise reduction is applied only when the modeller names those spaces, and is declared otherwise; its night window is a fixed schedule approximation rather than true astronomical sunset. (5) the daylight-transition-zone and ramp-without-parking exemptions are likewise not detectable, so the determinations are applied to every garage space and an exempt space must be excluded by the reviewer. (2)'s 20-minute detection delay is recorded in the audit but not modelled: an hourly ScheduleRuleset cannot express it",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/storage_garage.rb#apply"
+     "python/btap/necb/lighting/storage_garage/__init__.py#apply"
     ]
    },
    {
@@ -78,9 +78,9 @@
     "how": "the per-space-function control matrix is vendored (controls_4_2_2_1); daylighting photocontrol REQUIREMENT now follows the 2020/2025 code (D-57, placement: :necb2020, the default): Table 4.2.1.6.'s sidelighting/toplighting column gates each space type (daylighting_controls_4_2_1_6.json), then 4.2.2.1.(10) tests general-lighting INPUT POWER inside the primary sidelighted areas (>=150 W) or primary + secondary (>=300 W) and 4.2.2.1.(13) tests it inside the daylighted areas under skylights (>=150 W), the two INDEPENDENT. With a uniform space-level LPD that power is exactly LPD x daylighted_area. Exceptions honoured: (12)(a) obstruction ratio >=2 from ShadingSurfaces, (12)(b) glazing <2 m2, (12)(c) retail, (15)(b) skylight VT <0.4, (15)(c) >55 degN with <200 W. Daylighted AREAS per 4.2.2.3./4.2.2.5. with polygon UNION and NECB's primary > toplit > secondary precedence (DaylightedAreas), so overlaps are not double-counted. Sensors: Stepped x3 = 67%/33%/off per 4.2.2.1.(11)(a)(i)/(14)(a)(i), zone fraction = daylighted share of the zone floor area (not 1.0), space-type illuminance set-points, per-sensor costing BOM. The legacy NECB 2011 rule is still reachable as placement: :necb2011 (defects preserved and audited: any-single-criterion exception, skylight-only zero area, 2011-era office name) so the legacy parity gate stays callable",
     "gaps": "4.2.2.1.(15)(a) (>1 500 h/yr of blocked direct sun) needs an annual solar-obstruction study and is NOT evaluated — a WARNING every run; not applying an exception is the strict direction. 4.2.2.4. ROOF MONITORS are not a distinguishable object in an OpenStudio model, so toplighted area covers skylights only. The vertical-obstruction bounds in 4.2.2.3.(3)(b)/(4)(b)/(8)(b) and 4.2.2.5.(2)(c) are honoured only at the space enclosure (areas are clipped to the floor); obstructions inside a space are not in the model. 4.2.2.1.(11)(b)'s independent control of the secondary band is modelled as ONE zone control covering the combined daylighted fraction, not two. 3 catalog space types have NO ROW in Table 4.2.1.6 at all — the '- undefined -' sentinel, the legacy-only 'Audience seating area permanent - convention centre', and 'WholeBuilding' (whose LPD comes from the building-type method of Table 4.2.1.5, which identifies no 4.2.1.6 row) — so neither column can be read for them and each takes a documented conservative default with a LOUD warning. Dwelling units also have no row, but there the code answers it: 4.2.2.1.(10)/(13) reach only spaces requiring the control in accordance with Table 4.2.1.6., so they do not apply. All of this is structural, not an extraction limit: the table's nine control columns were re-read 2026-07-30 after the upstream fix and agree exactly between the 2020 and 2025 editions (0 differing cells of 909); the residue is enumerated in daylighting_controls_4_2_1_6.json",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/daylight_control_requirement.rb#evaluate",
-     "btap-necb/lib/btap_necb/lighting/daylighted_areas.rb#areas",
-     "btap-necb/lib/btap_necb/lighting/daylighting.rb#add_controls"
+     "python/btap/necb/lighting/daylight_control_requirement.py#evaluate",
+     "python/btap/necb/lighting/daylighted_areas.py#areas",
+     "python/btap/necb/lighting/daylighting.py#add_controls"
     ]
    },
    {
@@ -89,8 +89,8 @@
     "status": "implemented",
     "how": "allowance calculator over the vendored Tables 4.2.3.1.-A..-E (2025 verified essentially unchanged, Table -D similarity 0.978) + ExteriorLights creation",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/exterior.rb#allowance",
-     "btap-necb/lib/btap_necb/lighting/exterior.rb#apply_exterior_lights"
+     "python/btap/necb/lighting/exterior.py#allowance",
+     "python/btap/necb/lighting/exterior.py#apply_exterior_lights"
     ]
    },
    {
@@ -99,7 +99,7 @@
     "status": "implemented",
     "how": "space-type keys drive the sensor-schedule synthesis",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#synthesize_sensor_ruleset"
+     "python/btap/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
     ]
    },
    {
@@ -108,8 +108,8 @@
     "status": "implemented",
     "how": "apply_lights sets the allowance LPD from the space-type records",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type",
-     "btap-necb/lib/btap_necb/lighting/reference.rb#reference_lighting"
+     "python/btap/necb/lighting/apply_lights.py#_apply_to_space_type",
+     "python/btap/necb/lighting/reference.py#reference_lighting"
     ]
    },
    {
@@ -118,7 +118,7 @@
     "status": "implemented",
     "how": "reference_lighting overrides dwelling space types to 5 W/m2",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/reference.rb#apply_dwelling_rule"
+     "python/btap/necb/lighting/reference.py#_apply_dwelling_rule"
     ]
    },
    {
@@ -128,8 +128,8 @@
     "how": "applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier — interpretation consistent with legacy NECB2015+",
     "gaps": "strict reading multiplies installed power by Focc x Fpers",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#wire_lighting_schedule",
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#synthesize_sensor_ruleset"
+     "python/btap/necb/lighting/apply_lights.py#_wire_lighting_schedule",
+     "python/btap/necb/lighting/apply_lights.py#_synthesize_sensor_ruleset"
     ]
    },
    {
@@ -138,7 +138,7 @@
     "status": "implemented",
     "how": "fractions come from the same space-type records for both models",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type"
+     "python/btap/necb/lighting/apply_lights.py#_apply_to_space_type"
     ]
    },
    {
@@ -148,7 +148,7 @@
     "how": "reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available); WHERE 4.2.2 requires photocontrols is decided by the 2020/2025 rule 4.2.2.1.(10)-(15) as of D-57 — before that it was the NECB 2011 criteria, which are conjunctive and so placed NO photocontrols on window-only spaces (L-26) [D-51 D-57]",
     "gaps": "sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/reference_daylighting.rb#apply"
+     "python/btap/necb/lighting/reference_daylighting.py#apply"
     ]
    },
    {
@@ -157,8 +157,8 @@
     "status": "implemented",
     "how": "Interior lighting accounted per the prescriptive Section 4.2 requirements via the reference lighting allowance (8.4.5.5.) — the realization of 8.4.1.1.(1) for the lighting slice. Unresolvable space types hard-fail rather than silently keeping the proposed LPD.",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_lights",
-     "btap-necb/lib/btap_necb/lighting/reference.rb#reference_lighting"
+     "python/btap/necb/lighting/apply_lights.py#apply_lights",
+     "python/btap/necb/lighting/reference.py#reference_lighting"
     ]
    }
   ]

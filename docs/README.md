@@ -5,11 +5,11 @@ Two registers are **live**:
 - **D — decisions** (`necb_decisions.md`): the judgement calls a reviewer
   cannot re-derive from the code — code interpretations, accepted deviations,
   product-shaping choices. Mirrored machine-readably in
-  `../lib/btap_necb/data/decisions.json` and surfaced **at runtime**: code
+  `../python/btap/necb/data/decisions.json` and surfaced **at runtime**: code
   paths tag their audit entries with `ruling: 'D-XX'`, and the AHJ report's
   "Decisions and assumptions applied" appendix lists the ones that fired in the
   run. Adding a `## D-XX` heading without a registry entry fails
-  `test/test_decisions_registry.rb`.
+  `python/tests/necb/test_decisions_registry_sync.py`.
 - **L — legacy findings** (`legacy_findings.md`): defects and divergences found
   in the legacy openstudio-standards lineage, with filing status.
 

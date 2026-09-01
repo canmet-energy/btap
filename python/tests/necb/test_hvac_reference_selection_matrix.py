@@ -8,7 +8,7 @@ names, forcing the structural detector foreign models hit).
 
 The golden was adjudicated 2026-08-02 against Table 8.4.4.7.-A fetched from the
 codes MCP (all 12 category rules match the printed table) plus the 8.4.4.13
-heat-pump rules; see D-58 in btap-necb/docs/necb_decisions.md.
+heat-pump rules; see D-58 in docs/necb_decisions.md.
 
 Default run: a representative subset (every family + every special-rule shape),
 ~2 min. FULL_MATRIX=1 runs all 97 (~7 min). The golden is NEVER regenerated

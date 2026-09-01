@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -22,7 +24,8 @@ REPO_ROOT = PYTHON_ROOT.parent
 RUBY_REGISTRY = REPO_ROOT / "btap-necb" / "lib" / "btap_necb" / "data" / "decisions.json"
 PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "necb" / "data" / "decisions.json"
 SYNC_SCRIPT = PYTHON_ROOT / "scripts" / "sync_decisions_registry.py"
-DECISIONS_DOC = REPO_ROOT / "btap-necb" / "docs" / "necb_decisions.md"
+TOC_SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions_toc.py"
+DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 
 ID_PATTERN = re.compile(r"^D-\d{2}$")
 HEADING_PATTERN = re.compile(r"^## (D-\d{2})\b", re.MULTILINE)
@@ -55,7 +58,7 @@ class TestDecisionsRegistrySync(unittest.TestCase):
         heading_list = HEADING_PATTERN.findall(doc_text)
         self.assertEqual(
             len(heading_list), len(set(heading_list)),
-            "duplicate ## D-XX headings in btap-necb/docs/necb_decisions.md: "
+            "duplicate ## D-XX headings in docs/necb_decisions.md: "
             f"{sorted(h for h in set(heading_list) if heading_list.count(h) > 1)}"
             " — a set comparison alone would collapse them silently")
         heading_ids = set(heading_list)
@@ -64,7 +67,7 @@ class TestDecisionsRegistrySync(unittest.TestCase):
         self.assertEqual(
             missing_headings, set(),
             f"decision(s) in the canonical registry have no ## heading in "
-            f"btap-necb/docs/necb_decisions.md: {sorted(missing_headings)} — "
+            f"docs/necb_decisions.md: {sorted(missing_headings)} — "
             f"author the doc section, then regenerate the TOC")
 
         missing_entries = heading_ids - registry_ids
@@ -75,6 +78,16 @@ class TestDecisionsRegistrySync(unittest.TestCase):
             f"python/btap/necb/data/decisions.json (the canonical "
             f"registry), then run python3 "
             f"python/scripts/sync_decisions_registry.py")
+
+    def test_doc_toc_matches_the_canonical_registry(self):
+        result = subprocess.run(
+            [sys.executable, str(TOC_SCRIPT), "--check", "--doc", str(DECISIONS_DOC)],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":
