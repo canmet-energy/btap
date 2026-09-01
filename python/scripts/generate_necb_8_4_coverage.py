@@ -19,7 +19,6 @@ DEFAULT_CACHE_2020 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2020.json"
 DEFAULT_CACHE_2025 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2025.json"
 DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
 PYTHON_INPUT_MODE = "python"
-LEGACY_INPUT_MODE = "legacy-ruby"
 DEFAULT_INPUT_MODE = PYTHON_INPUT_MODE
 REPO_URL = "https://github.com/canmet-energy/openstudio-necb-gems"
 
@@ -75,7 +74,7 @@ class Inputs:
     input_mode: str = DEFAULT_INPUT_MODE
 
     def __post_init__(self):
-        if self.input_mode not in {PYTHON_INPUT_MODE, LEGACY_INPUT_MODE}:
+        if self.input_mode != PYTHON_INPUT_MODE:
             raise ValueError(f"unsupported input mode: {self.input_mode}")
 
     @property
@@ -115,15 +114,6 @@ def article_sort_key(article: str) -> list[int]:
     return [int(value) for value in re.findall(r"\d+", article)]
 
 
-def classify_call(lines: list[str], index: int) -> str:
-    for position in range(index, max(index - 6, 0) - 1, -1):
-        if re.search(r"(?:audit&?\.|\.)\s*warn\s*\(", lines[position]):
-            return "warn"
-        if re.search(r"(?:audit&?\.|\.)\s*(?:decision|info)\s*\(", lines[position]):
-            return "cited"
-    return "cited"
-
-
 def python_citation_value(node: ast.expr) -> str | None:
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value
@@ -148,16 +138,6 @@ def domain_for(relative: str) -> str:
         remainder = relative.removeprefix("python/btap/necb/")
         segment = remainder.split("/", 1)[0]
         return segment if segment in DOMAIN_SUBDIRS else "necb"
-    segment = relative.split("/", 1)[0]
-    match = re.match(r"openstudio-([a-z]+)$", segment)
-    if match:
-        return match.group(1)
-    if segment == "btap-necb":
-        match = re.search(r"btap_necb/(" + "|".join(DOMAIN_SUBDIRS) + r")/", relative)
-        return match.group(1) if match else "necb"
-    match = re.match(r"btap-([a-z]+)$", segment)
-    if match:
-        return match.group(1)
     raise ValueError(f"cannot attribute {relative} to a domain — teach domain_for")
 
 
@@ -166,11 +146,6 @@ def manifest_domain(path: Path) -> str:
     if match is None:
         raise ValueError(f"cannot derive manifest domain from {path}")
     return MANIFEST_DOMAINS.get(match.group(1), match.group(1))
-
-
-def legacy_paths(root: Path, suffix: str) -> list[Path]:
-    patterns = (f"openstudio-*/{suffix}", f"btap-*/{suffix}")
-    return sorted(path for pattern in patterns for path in root.glob(pattern))
 
 
 class CoverageGenerator:
@@ -184,48 +159,19 @@ class CoverageGenerator:
 
     def _scan_citations(self) -> list[dict]:
         citations = []
-        if self.inputs.input_mode == PYTHON_INPUT_MODE:
-            paths = sorted(self.inputs.source_root.glob("python/btap/necb/**/*.py"))
-            for path in paths:
-                relative = path.relative_to(self.inputs.source_root).as_posix()
-                gem_name = domain_for(relative)
-                tree = ast.parse(
-                    path.read_text(encoding="utf-8"), filename=str(path)
-                )
-                for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
-                    for keyword in call.keywords:
-                        if keyword.arg != "article":
-                            continue
-                        raw = python_citation_value(keyword.value)
-                        if raw is None:
-                            continue
-                        raw = raw.replace("{prefix}", "PREFIX")
-                        tokens = re.findall(
-                            r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw
-                        )
-                        if tokens:
-                            citations.append({
-                                "gem": gem_name,
-                                "file": relative,
-                                "line": keyword.value.lineno,
-                                "kind": python_call_kind(call),
-                                "tokens": tokens,
-                            })
-        else:
-            paths = legacy_paths(self.inputs.source_root, "lib/**/*.rb")
-            article_pattern = re.compile(r"article:\s*[\"']([^\"']+)[\"']")
-            prefix_expression = "#{prefix}"
-            for path in paths:
-                relative = path.relative_to(self.inputs.source_root).as_posix()
-                gem_name = domain_for(relative)
-                lines = path.read_text(
-                    encoding="utf-8", errors="replace"
-                ).splitlines(keepends=True)
-                for index, line in enumerate(lines):
-                    match = article_pattern.search(line)
-                    if match is None:
+        paths = sorted(self.inputs.source_root.glob("python/btap/necb/**/*.py"))
+        for path in paths:
+            relative = path.relative_to(self.inputs.source_root).as_posix()
+            gem_name = domain_for(relative)
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+                for keyword in call.keywords:
+                    if keyword.arg != "article":
                         continue
-                    raw = match.group(1).replace(prefix_expression, "PREFIX")
+                    raw = python_citation_value(keyword.value)
+                    if raw is None:
+                        continue
+                    raw = raw.replace("{prefix}", "PREFIX")
                     tokens = re.findall(
                         r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?", raw
                     )
@@ -233,8 +179,8 @@ class CoverageGenerator:
                         citations.append({
                             "gem": gem_name,
                             "file": relative,
-                            "line": index + 1,
-                            "kind": classify_call(lines, index),
+                            "line": keyword.value.lineno,
+                            "kind": python_call_kind(call),
                             "tokens": tokens,
                         })
         if not citations:
@@ -267,13 +213,9 @@ class CoverageGenerator:
 
     def declarations_for(self, vintage: str) -> dict[str, list[dict]]:
         declarations: dict[str, list[dict]] = defaultdict(list)
-        if self.inputs.input_mode == PYTHON_INPUT_MODE:
-            paths = sorted(
-                self.inputs.manifest_root.glob(f"python/btap/**/*_rules_{vintage}.json")
-            )
-        else:
-            suffix = f"lib/**/data/*_rules_{vintage}.json"
-            paths = legacy_paths(self.inputs.manifest_root, suffix)
+        paths = sorted(
+            self.inputs.manifest_root.glob(f"python/btap/**/*_rules_{vintage}.json")
+        )
         for path in paths:
             data = json.loads(path.read_text(encoding="utf-8"))
             entries = data.get("article_coverage", {}).get("articles")
@@ -486,10 +428,6 @@ class CoverageGenerator:
             if disposition.get("draft") else ""
         )
         reviewer = str(disposition["reviewer"])
-        if self.inputs.input_mode == LEGACY_INPUT_MODE:
-            reviewer = reviewer.replace(
-                "docs/necb_decisions.md", "btap-necb/docs/necb_decisions.md"
-            )
         return (
             f'<div class="dispo{" conflict" if conflict else ""}">\n'
             f"  {conflict_text}\n"
@@ -695,10 +633,7 @@ class CoverageGenerator:
         retrieved_2025 = json.loads(
             self.inputs.cache_2025.read_text(encoding="utf-8")
         )["provenance"]["retrieved"]
-        template = HTML_TEMPLATE
-        if self.inputs.input_mode == PYTHON_INPUT_MODE:
-            template = python_template(HTML_TEMPLATE)
-        html = template.format(
+        html = HTML_TEMPLATE.format(
             run_note=esc(run_note),
             count_2020=len(parts["2020"]["articles"]),
             count_2025=len(parts["2025"]["articles"]),
@@ -712,8 +647,8 @@ class CoverageGenerator:
         return html, parts
 
 
-HTML_TEMPLATE = """  <!-- Generated by btap-necb/scripts/generate_necb_8_4_coverage.rb — do not
-       edit by hand; `rake necb:coverage_doc` regenerates. (A comment before
+HTML_TEMPLATE = """  <!-- Generated by python/scripts/generate_necb_8_4_coverage.py — do not
+    edit by hand; `python3 python/scripts/generate_necb_8_4_coverage.py` regenerates. (A comment before
        the doctype is legal HTML5 and does not trigger quirks mode.) -->
   <!doctype html>
   <html lang="en"><head><meta charset="utf-8">
@@ -779,30 +714,30 @@ HTML_TEMPLATE = """  <!-- Generated by btap-necb/scripts/generate_necb_8_4_cover
 </style></head><body>
 
   <h1>NECB Section 8.4 — Performance Path coverage</h1>
-  <p class="lede">How the <code>openstudio-*</code> gem family covers Section 8.4 of the National Energy Code of
+    <p class="lede">How the Python <code>btap</code> package covers Section 8.4 of the National Energy Code of
   Canada for Buildings — one collapsible part per edition, each walking its own subsections under its own
   article numbers. Every article of both editions renders with its full requirement text, so coverage cannot
   be overstated by omission. {run_note}</p>
 
   <div class="caveat"><b>How to read the evidence — weakest to strongest.</b>
   <ul>
-    <li><b>Disposition</b> — a curated claim of <i>responsibility</i> (engine / modeller / named gem / gap), not
+    <li><b>Disposition</b> — a curated claim of <i>responsibility</i> (engine / modeller / named Python domain / gap), not
         of correctness. Draft dispositions are unreviewed.</li>
     <li><b>"Cited at" links</b> — the article number appears on an audit log call in that source line. A citation
         proves the log line exists, <em>nothing more</em>; citations sitting on <em>warnings</em> often announce
         the rule is <em>not</em> applied and are badged accordingly. Absence of a citation is not evidence of
         non-implementation either.</li>
-    <li><b>Manifest status</b> — the gem's self-declared <code>article_coverage</code>. "Implemented" here means
-        the gem <i>asserts</i> it applies the rule; two real defects have been found inside articles declared
+    <li><b>Manifest status</b> — the Python domain's self-declared <code>article_coverage</code>. "Implemented" here means
+        the Python domain <i>asserts</i> it applies the rule; two real defects have been found inside articles declared
         implemented. Independent behavioural verification is <code>rake necb:verify</code>
-        (see <code>btap-necb/docs/necb_rule_verification.md</code>).</li>
+        (see <code>docs/necb_rule_verification.md</code>).</li>
     <li><b>"Observed in run"</b> — the article was cited at runtime in a named real pipeline run: the citing code
         demonstrably executed in at least one scenario. Still not proof of correct values.</li>
   </ul>
-  <b>Prescriptive values</b> (U-values, LPDs, efficiencies) are governed by each gem's own data JSON — the number
-  the software actually applies and the thing to audit: <code>btap-necb .../envelope_rules_*.json</code>,
-  <code>btap-necb .../space_types_*.json</code>, <code>btap-necb .../shw_rules_*.json</code>,
-  <code>btap-necb .../efficiencies_*.json</code>. The official code wording is available through the
+    <b>Prescriptive values</b> (U-values, LPDs, efficiencies) are governed by the Python package's data JSON — the number
+    the software actually applies and the thing to audit: <code>python/btap/necb/envelope/data/envelope_rules_*.json</code>,
+    <code>python/btap/necb/loads/data/space_types_*.json</code>, <code>python/btap/necb/shw/data/shw_rules_*.json</code>,
+    <code>python/btap/necb/hvac/data/efficiencies_*.json</code>. The official code wording is available through the
   building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human reference only.</div>
 
   <p class="lede"><b>Jump to:</b> <a href="#v2020">NECB 2020</a> ({count_2020} articles,
@@ -813,55 +748,15 @@ HTML_TEMPLATE = """  <!-- Generated by btap-necb/scripts/generate_necb_8_4_cover
   {part_2020}
   {part_2025}
 
-  <footer>Generated by <code>btap-necb/scripts/generate_necb_8_4_coverage.rb</code> — do not edit by hand
-  (<code>rake necb:coverage_doc</code> to regenerate).
+    <footer>Generated by <code>python/scripts/generate_necb_8_4_coverage.py</code> — do not edit by hand
+    (<code>python3 python/scripts/generate_necb_8_4_coverage.py</code> to regenerate).
   Requirement text: NECB 2020 and 2025 Division B via the building-codes MCP
   (2020 retrieved {retrieved_2020},
   2025 retrieved {retrieved_2025})
   (Crown copyright — reproduction authorized as Government of Canada work); parse safety checks in
-  <code>scripts/fetch_necb_8_4_text.rb</code>. Source links resolve against <code>{branch}</code> of {repo}.</footer>
+  <code>python/scripts/fetch_necb_8_4_text.py</code>. Source links resolve against <code>{branch}</code> of {repo}.</footer>
   </body></html>
 """
-
-
-def python_template(template: str) -> str:
-    replacements = {
-        "btap-necb/scripts/generate_necb_8_4_coverage.rb": (
-            "python/scripts/generate_necb_8_4_coverage.py"
-        ),
-        "`rake necb:coverage_doc` regenerates": (
-            "`python3 python/scripts/generate_necb_8_4_coverage.py` regenerates"
-        ),
-        "the <code>openstudio-*</code> gem family": "the Python <code>btap</code> package",
-        "named gem / gap": "named Python domain / gap",
-        "the gem's self-declared": "the Python domain's self-declared",
-        "the gem <i>asserts</i>": "the Python domain <i>asserts</i>",
-        "each gem's own data JSON": "the Python package's data JSON",
-        "<code>btap-necb .../envelope_rules_*.json</code>": (
-            "<code>python/btap/necb/envelope/data/envelope_rules_*.json</code>"
-        ),
-        "<code>btap-necb .../space_types_*.json</code>": (
-            "<code>python/btap/necb/loads/data/space_types_*.json</code>"
-        ),
-        "<code>btap-necb .../shw_rules_*.json</code>": (
-            "<code>python/btap/necb/shw/data/shw_rules_*.json</code>"
-        ),
-        "<code>btap-necb .../efficiencies_*.json</code>": (
-            "<code>python/btap/necb/hvac/data/efficiencies_*.json</code>"
-        ),
-        "(<code>rake necb:coverage_doc</code> to regenerate)": (
-            "(<code>python3 python/scripts/generate_necb_8_4_coverage.py</code> to regenerate)"
-        ),
-        "<code>scripts/fetch_necb_8_4_text.rb</code>": (
-            "<code>python/scripts/fetch_necb_8_4_text.py</code>"
-        ),
-        "<code>btap-necb/docs/necb_rule_verification.md</code>": (
-            "<code>docs/necb_rule_verification.md</code>"
-        ),
-    }
-    for old, new in replacements.items():
-        template = template.replace(old, new)
-    return template
 
 
 def generate(inputs: Inputs, output: Path) -> tuple[CoverageGenerator, dict[str, dict]]:
@@ -875,7 +770,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input-mode",
-        choices=[PYTHON_INPUT_MODE, LEGACY_INPUT_MODE],
+        choices=[PYTHON_INPUT_MODE],
         default=DEFAULT_INPUT_MODE,
     )
     parser.add_argument("--source-root", type=Path, default=REPO_ROOT)

@@ -11,11 +11,12 @@ OUTCOMES = {"survive", "archive", "port", "delete"}
 
 
 def _inventory() -> list[str]:
-    return subprocess.run(
+    files = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard",
          "verification"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=True,
     ).stdout.splitlines()
+    return [path for path in files if (REPO_ROOT / path).is_file()]
 
 
 class TestVerificationDisposition(unittest.TestCase):

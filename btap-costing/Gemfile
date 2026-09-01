@@ -1,5 +1,0 @@
-source 'https://rubygems.org'
-gemspec
-
-gem 'btap-audit', path: '../btap-audit'
-gem 'btap-modeling', path: '../btap-modeling'

@@ -9,19 +9,12 @@ systems — EnergyPlus free-floats the zones and the parse surface is
 identical); the cross-language class below carries a REAL HVAC system built
 by each language's own btap-modeling port (added when M3 landed it)."""
 
-import importlib.util
-import json
-import shutil
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 from btap.simulation import run, runner
-from tests.support import DDY, EPW, REPO_ROOT, load_fixture, needs_engine
-
-RUBY_SCRIPT = Path(__file__).parent / "cross_language" / "ruby_reference.rb"
-COMPARE_RUNS = REPO_ROOT / "verification" / "compare_runs.py"
+from tests.support import DDY, EPW, load_fixture, needs_engine
 
 
 def week():
@@ -92,74 +85,6 @@ class TestLocalRun(unittest.TestCase):
         self.assertTrue((Path(out_dir) / "eplusout.sql").is_file(), "no SQL — the path split")
         self.assertTrue(runner.is_clean_run(out_dir))
         self.assertTrue((Path(target) / "cli.log").is_file(), "cli.log landed outside the run dir")
-
-
-@needs_engine
-@unittest.skipUnless(shutil.which("ruby") and shutil.which("openstudio"),
-                     "the cross-language gate needs ruby + the openstudio CLI "
-                     "(the Ruby gem's backend)")
-class TestCrossLanguageSimulation(unittest.TestCase):
-    """The M2 acceptance: Ruby CLI pipeline vs Python engine pipeline on the
-    same model — energies equal (both pre-round with the same semantics),
-    unmet hours within the Leg-B spec tolerance."""
-
-    @classmethod
-    def setUpClass(cls):
-        import os as _os
-        if _os.environ.get("BTAP_LEGB") != "1":
-            raise unittest.SkipTest(
-                "DORMANT since R4 (D-82): replaced by frozen scenario "
-                "corpus-annual-* (engine energies) — BTAP_LEGB=1 reactivates; deleted at R6")
-        super().setUpClass()
-
-
-    def test_ruby_and_python_results_are_equivalent(self):
-        from btap._compat import ruby_str  # noqa: F401  (import proves _compat loads SDK-free)
-
-        with tempfile.TemporaryDirectory() as tmp:
-            ruby_dir = Path(tmp) / "ruby"
-            proc = subprocess.run(["ruby", str(RUBY_SCRIPT), str(ruby_dir)],
-                                  capture_output=True, text=True)
-            self.assertEqual(0, proc.returncode, f"ruby reference failed: {proc.stderr[-2000:]}")
-            ruby_results = json.loads((ruby_dir / "results.json").read_text())
-
-            sizing = run(load_fixture(), run_dir=str(Path(tmp) / "py" / "sizing"),
-                         weather={"epw": str(EPW), "ddy": str(DDY)}, sizing_only=True)
-            # The annual leg carries a real HVAC system, built by EACH
-            # language's own btap-modeling port — MUST mirror the ruby
-            # reference script's system and zone ordering.
-            import btap.modeling as modeling
-            from btap._compat import sorted_by_name
-            annual_model = load_fixture()
-            modeling.build_system(annual_model, "Baseboard gas boiler",
-                                  sorted_by_name(annual_model.getThermalZones()))
-            annual = run(annual_model, run_dir=str(Path(tmp) / "py" / "annual"),
-                         weather={"epw": str(EPW), "ddy": str(DDY)}, run_period=week())
-            py_results = {"sizing": {"clean": sizing.is_clean()},
-                          "annual": {"clean": annual.is_clean(), "energy": annual.energy,
-                                     "unmet_occupied_hours": annual.unmet_hours}}
-
-            spec_module = self._load_compare_runs()
-            spec = spec_module.load_spec(REPO_ROOT / "verification" / "spec.json")
-            diffs = []
-            spec_module.diff(ruby_results, json.loads(json.dumps(py_results)), spec,
-                             "results", diffs)
-            self.assertEqual([], diffs,
-                             "Ruby-vs-Python simulation results differ under the Leg-B rules:\n"
-                             + "\n".join(diffs))
-            # non-vacuous: both ran cleanly, and the gas-heated January week
-            # produced real heating energy for the equality to bite on
-            self.assertTrue(ruby_results["annual"]["clean"])
-            self.assertGreater(ruby_results["annual"]["energy"]["total_site_kwh"], 0)
-            self.assertGreater(ruby_results["annual"]["energy"]["end_uses_kwh"]["heating"], 0)
-
-    @staticmethod
-    def _load_compare_runs():
-        spec = importlib.util.spec_from_file_location("compare_runs", COMPARE_RUNS)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return module
-
 
 if __name__ == "__main__":
     unittest.main()

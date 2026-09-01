@@ -1,7 +1,6 @@
 """Byte contract for the Python NECB gem-coverage generator."""
 
 import importlib.util
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,19 +14,16 @@ SPEC.loader.exec_module(coverage)
 
 
 class TestGenerateNecbGemCoverage(unittest.TestCase):
-    def test_legacy_inputs_generate_committed_bytes(self):
-        historical = subprocess.run(
-            ["git", "show", "cbce093:btap-necb/docs/NECB_GEM_COVERAGE.md"],
-            cwd=REPO_ROOT, capture_output=True, check=True).stdout
+    def test_python_inputs_generate_committed_bytes(self):
+        committed = REPO_ROOT / "docs" / "NECB_GEM_COVERAGE.md"
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "NECB_GEM_COVERAGE.md"
             result = coverage.main([
-                "--input-mode", "legacy-ruby",
                 "--manifest-root", str(REPO_ROOT),
                 "--output", str(output),
             ])
             self.assertEqual(0, result)
-            self.assertEqual(historical, output.read_bytes())
+            self.assertEqual(committed.read_bytes(), output.read_bytes())
 
     def test_collection_is_non_vacuous_and_covers_both_vintages(self):
         records = coverage.collect_records(REPO_ROOT)
@@ -44,13 +40,10 @@ class TestGenerateNecbGemCoverage(unittest.TestCase):
         self.assertTrue(refs)
         self.assertTrue(all(str(ref).startswith("python/btap/") for ref in refs))
 
-    def test_default_is_python_and_legacy_cannot_become_default(self):
-        self.assertEqual("python", coverage.DEFAULT_INPUT_MODE)
-        self.assertNotEqual(coverage.LEGACY_INPUT_MODE, coverage.DEFAULT_INPUT_MODE)
+    def test_python_is_the_only_input_authority(self):
         self.assertEqual(REPO_ROOT / "docs" / "NECB_GEM_COVERAGE.md", coverage.DEFAULT_OUTPUT)
         rendered = coverage.render(coverage.collect_records(REPO_ROOT))
         self.assertIn("python/scripts/generate_necb_gem_coverage.py", rendered)
-        self.assertNotIn("btap-necb/scripts/generate_necb_gem_coverage.rb", rendered)
         self.assertNotRegex(rendered, r"btap-[^/]+/lib/")
 
     def test_stale_manifest_root_fails_loudly(self):

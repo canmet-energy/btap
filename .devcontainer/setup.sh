@@ -1,12 +1,10 @@
 #!/bin/bash
-# Post-create setup for the NECB gem family devcontainer.
+# Post-create setup for the canmet-btap devcontainer.
 #
-# Deliberately small. The gems are SDK-only and their tests run with plain
-# `ruby test/test_XX.rb` against the image's OpenStudio — there is no root
-# Gemfile to install, and each gem's own Gemfile exists for `bundle exec`, not
-# for running the suites. So this script verifies the toolchain, handles the
-# NRCan certificate case, and tells you what to run. It does NOT clone the
-# multi-gigabyte legacy oracle; that is opt-in (see the end).
+# The product is Python; Ruby and Bundler remain only for the pinned external
+# oracle. This script verifies both toolchains, handles the NRCan certificate
+# case, and tells you what to run. It does NOT clone the multi-gigabyte legacy
+# oracle; that remains opt-in.
 
 set -u
 
@@ -45,7 +43,7 @@ done
 
 echo ""
 echo "═══════════════════════════════════════════════════════════════════"
-echo "  NECB gem family — devcontainer setup"
+echo "  canmet-btap — devcontainer setup"
 echo "═══════════════════════════════════════════════════════════════════"
 
 # ---------------------------------------------------------------------------
@@ -109,18 +107,12 @@ if command -v certctl >/dev/null 2>&1; then
 fi
 
 # ---------------------------------------------------------------------------
-# The tbd/osut/topolys TRIPLET — btap-necb (envelope domain)'s third-party runtime deps.
+# The tbd/osut/topolys triplet belongs only to the surviving Ruby oracle.
 #
-# It is declared in btap-necb.gemspec, but the suites run under plain
-# `ruby`, not `bundle exec`, so nothing enforces gemspec dependencies. The gem
-# was therefore absent from this container and from CI, and
-# test_uprate_derate_meets_effective_targets — the only test proving the NECB
-# 3.1.1.7 uprate/derate math hits the effective-U targets — skipped in both
-# while the suite summary stayed green. Install it here so the gate is real;
-# CI sets TBD_REQUIRED=1 so a missing tbd fails instead of skipping.
-#
-# AFTER the certificates, because it downloads. Non-fatal: without tbd the gems
-# still work, they just warn that 3.1.1.7 is unaccounted and that one test skips.
+# Product Python installs canmet-tbd through the [tbd] extra. The locked Ruby
+# triplet remains necessary when comparing thermal-bridging behavior with the
+# pinned openstudio-standards oracle. Install it after certificates because it
+# downloads; failure is non-fatal for ordinary Python development.
 # ---------------------------------------------------------------------------
 echo ""
 TRIPLET="$(ruby "$REPO_ROOT/legacy_pin/tbd_triplet.rb" 2>/dev/null)"
@@ -147,8 +139,7 @@ else
   else
     echo "   ⚠️  install failed (offline or blocked) — install manually later:"
     echo "      gem install $TRIPLET --user-install"
-    echo "      without it, btap-necb (envelope domain) warns that NECB 3.1.1.7 is unaccounted"
-    echo "      and test_thermal_bridging.rb skips its uprate/derate case"
+    echo "      without it, Ruby-oracle thermal-bridging comparisons cannot run"
   fi
   if ruby -e "require 'tbd'" >/dev/null 2>&1 &&
      [ "$(ruby -e "require 'tbd'; puts %w[topolys osut tbd].map { |g| \"#{g}:#{Gem.loaded_specs[g]&.version}\" }.join(' ')" 2>/dev/null)" != "$TRIPLET" ]; then
@@ -167,7 +158,7 @@ fi
 #
 # Ubuntu 24.04 universe carries gh, so no third-party apt repo is needed.
 # Non-fatal: gh is for dispatching the parity workflow and reading PR checks,
-# not for building or testing the gems.
+# not for building or testing the Python product.
 # ---------------------------------------------------------------------------
 echo ""
 if command -v gh >/dev/null 2>&1; then
@@ -200,7 +191,7 @@ if [ "$INSTALL_CLAUDE" = true ]; then
       echo "   ✅ $( "$HOME/.local/bin/claude" --version 2>/dev/null | head -1 || echo 'installed')"
     else
       # Non-fatal: a container without Claude Code is still a working dev
-      # environment for these gems.
+      # environment for the Python product.
       echo "   ⚠️  install failed (offline or blocked) — install manually later:"
       echo "      curl -fsSL https://claude.ai/install.sh | bash"
     fi
@@ -217,7 +208,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# MCP servers. .mcp.json stays GITIGNORED (family rule: never stage it), so the
+# MCP servers. .mcp.json stays GITIGNORED (project rule: never stage it), so the
 # tracked artifact is .mcp.json.example and we install it here. Claude Code
 # expands ${VAR} in url/headers, so even the installed file holds no secret —
 # the key comes from HBIX_API_KEY in the environment.
@@ -290,7 +281,7 @@ if [ "$INSTALL_WINE" = true ]; then
     fi
   fi
   if [ -f "$WINEPREFIX/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe" ]; then
-    echo "   ✅ ISCC ready — rake windows:installer"
+    echo "   ✅ ISCC ready"
   else
     echo "   ⚠️  Inno Setup did not install; build the installer on Windows instead"
   fi
@@ -321,7 +312,7 @@ EOF
 fi
 
 # ---------------------------------------------------------------------------
-# Toolchain. These are the versions the gems target; a mismatch is worth
+# Toolchain. These are the versions the product and oracle target; a mismatch is worth
 # knowing about immediately rather than three test failures later.
 # ---------------------------------------------------------------------------
 echo ""
@@ -332,7 +323,7 @@ printf '   bundler      %s\n' "$(bundle -v 2>/dev/null | awk '{print $3}' || ech
 if ruby -e "require 'openstudio'" >/dev/null 2>&1; then
   printf '   openstudio   %s (SDK bindings OK)\n' "$(ruby -e "require 'openstudio'; print OpenStudio.openStudioVersion" 2>/dev/null)"
 else
-  echo "   ❌ openstudio SDK bindings NOT loadable — every gem suite will fail"
+  echo "   ⚠️  Ruby OpenStudio bindings unavailable — oracle comparisons cannot run"
 fi
 
 if command -v openstudio >/dev/null 2>&1; then
@@ -345,7 +336,7 @@ fi
 # LANG is load-bearing; see devcontainer.json.
 case "${LANG:-}" in
   *UTF-8|*utf8) printf '   locale       %s\n' "$LANG" ;;
-  *) echo "   ⚠️  LANG='${LANG:-unset}' is not UTF-8 — File.read of gem output will raise" ;;
+  *) echo "   ⚠️  LANG='${LANG:-unset}' is not UTF-8 — generated document reads may fail" ;;
 esac
 
 if command -v claude >/dev/null 2>&1; then
@@ -357,10 +348,11 @@ fi
 echo ""
 echo "📋 Next steps:"
 cat <<'STEPS'
-   Run one gem's suite         cd btap-modeling && ruby test/test_catalog.rb
-   Cross-gem rule verification rake necb:verify
-   List the gems               rake gems
-   What has the fork done?     rake legacy:whatsnew
+  Run the Python suite        cd python && python3 -m unittest discover tests
+  Rule-key verification       python3 python/scripts/necb_orphan_keys.py
+  Regenerate coverage docs    python3 python/scripts/generate_necb_gem_coverage.py
+                     python3 python/scripts/generate_necb_8_4_coverage.py
+  What has the fork done?     python3 python/scripts/legacy_whatsnew.py
 
    Legacy-parity gates need the PINNED oracle, which is a multi-gigabyte clone
    and therefore NOT installed automatically:
@@ -374,11 +366,8 @@ cat <<'STEPS'
      LEGACY_PIN_REMOTE=/path/to/openstudio-standards \
        BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install
 
-   Then, always with LEGACY_PIN_REQUIRED=1 — a skipped parity gate is a
-   green-but-vacuous gate:
-
-     cd btap-necb && LEGACY_PIN_REQUIRED=1 \
-       BUNDLE_GEMFILE=../legacy_pin/Gemfile bundle exec ruby test/test_apply_parity.rb
+   Then run the Python-vs-oracle checks with LEGACY_PIN_REQUIRED=1 — a missing
+   oracle must fail rather than skip. See legacy_pin/README.md for commands.
 
    MCP servers: .mcp.json was installed from .mcp.json.example above (codes,
    geocoding, weather, building-stock, modelling, simulation). It holds NO key —
@@ -390,11 +379,11 @@ cat <<'STEPS'
    ~/.bashrc auto-loads that file (with `set -a`, so it is EXPORTED). To load it
    into the shell you are already in:  set -a && source .env && set +a
 
-   The two Ruby scripts that hit these servers directly read HBIX_API_KEY too,
+   The two Python maintainer clients read HBIX_API_KEY too,
    so the one key covers them:
 
-     btap-necb/scripts/fetch_necb_8_4_text.rb
-     btap-modeling/scripts/building_stock.rb
+     python/scripts/fetch_necb_8_4_text.py
+     python/scripts/building_stock.py
 
    HBIX_MCP_BASE_URL is the only other knob — it repoints all six servers at
    once, for the scripts and .mcp.json alike. There are no per-server overrides.

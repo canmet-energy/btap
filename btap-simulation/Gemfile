@@ -1,7 +1,0 @@
-source 'https://rubygems.org'
-
-gemspec
-
-# Test tooling (this gemspec declares no development dependencies).
-gem 'minitest', '~> 5.0'
-gem 'rake', '~> 13.0'

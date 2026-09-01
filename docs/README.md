@@ -1,4 +1,4 @@
-# btap-necb docs — which register is which
+# canmet-btap docs — which register is which
 
 Two registers are **live**:
 
@@ -28,8 +28,10 @@ editing:
 **GENERATED — never edit by hand** (each carries a do-not-edit header, and
 the CI lint job regenerates both and fails on any diff):
 - `NECB_8_4_COVERAGE.html` and `NECB_GEM_COVERAGE.md` — the coverage
-  documents, rebuilt by `rake necb:coverage_doc` from the rules manifests,
-  the `article:` citation scan, and the cached 8.4 article text.
+  documents, rebuilt by `python3 python/scripts/generate_necb_gem_coverage.py`
+  and `python3 python/scripts/generate_necb_8_4_coverage.py` from the Python
+  rules manifests, the `article` citation scan, and cached 8.4 article text.
+  The `GEM` filename is retained as part of the evidence history.
 
 **AUTHORED reference:**
 - `necb_rule_verification.md` — the evidence-tier rules the coverage claims
@@ -50,9 +52,9 @@ the CI lint job regenerates both and fails on any diff):
 `necb_decisions.md`); the consolidated fleet baseline there is reviewed, not
 just swept.
 
-## Family glossary (the house dialect, defined once)
+## Project glossary (the house dialect, defined once)
 
-Terms that recur across the five gems' code, docs and decision register:
+Terms that recur across the five Python subpackages, docs and decision register:
 
 - **on-ramp** — the `necb_loads:` option: apply NECB space types, loads,
   lighting and (optionally) SHW/HVAC to bare geometry *before* the compliance
@@ -77,7 +79,7 @@ Terms that recur across the five gems' code, docs and decision register:
   reference generation.
 - **archetype (two senses)** — (1) the NECB 2025 8.4.4 *building archetypes*
   (Table 8.4.4.1 EUI targets; implemented in
-  `lib/btap_necb/eui_archetypes.rb`); (2) the project's 17 legacy NECB
+  `python/btap/necb/eui_archetypes.py`); (2) the project's 17 legacy NECB
   prototype buildings used as the validation fleet (the "fleet"). Reading code
   or docs, check which sense is live.
 - **fleet** — the 17 legacy NECB archetype buildings used for sweep

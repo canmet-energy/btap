@@ -37,14 +37,9 @@
    "reason": "No active verification-owned behavior awaits a port; the frozen scenario suite already succeeded the dormant Leg-B drivers."
   },
   "delete": {
-   "paths": [
-    "verification/matrix.sh",
-    "verification/oracle/dump_bootstrap_inputs.rb",
-    "verification/run_corpus.rb",
-    "verification/selftest.sh"
-   ],
+    "paths": [],
    "prefixes": [],
-   "reason": "These dormant or bootstrap-only drivers require the retiring btap gem product tree."
+    "reason": "All files classified for deletion were removed by D-84; this empty set is intentional and guarded by survivor coverage."
   }
  }
 }

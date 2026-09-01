@@ -1,13 +1,4 @@
-"""Decision-registry sync gate: the generated Ruby copy of decisions.json
-must be byte-identical to the canonical Python registry, always produced by
-``python/scripts/sync_decisions_registry.py`` and never hand-edited.
-
-This is what caught the D-79 drift: the Python copy was a one-time hand
-export that fell behind the (then-canonical) Ruby registry by one entry (78
-vs 79) with nothing to notice. The canonical/generated direction reversed at
-R3 (D-81): the Python registry is now canonical and the Ruby copy is
-generated from it. No SDK import — must run on a bare runner.
-"""
+"""Canonical Python decision-registry, document, and TOC drift gates."""
 
 from __future__ import annotations
 
@@ -21,9 +12,7 @@ from pathlib import Path
 PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = PYTHON_ROOT.parent
 
-RUBY_REGISTRY = REPO_ROOT / "btap-necb" / "lib" / "btap_necb" / "data" / "decisions.json"
 PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "necb" / "data" / "decisions.json"
-SYNC_SCRIPT = PYTHON_ROOT / "scripts" / "sync_decisions_registry.py"
 TOC_SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions_toc.py"
 DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 
@@ -32,14 +21,6 @@ HEADING_PATTERN = re.compile(r"^## (D-\d{2})\b", re.MULTILINE)
 
 
 class TestDecisionsRegistrySync(unittest.TestCase):
-    def test_generated_ruby_copy_is_byte_identical_to_canonical_python_registry(self):
-        ruby_bytes = RUBY_REGISTRY.read_bytes()
-        python_bytes = PYTHON_REGISTRY.read_bytes()
-        self.assertEqual(
-            ruby_bytes, python_bytes,
-            f"the GENERATED {RUBY_REGISTRY} has drifted from the canonical "
-            f"{PYTHON_REGISTRY}. Fix: python3 {SYNC_SCRIPT}")
-
     def test_decision_ids_are_unique_and_well_formed(self):
         with open(PYTHON_REGISTRY, encoding="utf-8") as handle:
             data = json.load(handle)
@@ -75,9 +56,7 @@ class TestDecisionsRegistrySync(unittest.TestCase):
             missing_entries, set(),
             f"## heading(s) in the doc have no canonical registry entry: "
             f"{sorted(missing_entries)} — add the entry to "
-            f"python/btap/necb/data/decisions.json (the canonical "
-            f"registry), then run python3 "
-            f"python/scripts/sync_decisions_registry.py")
+            f"python/btap/necb/data/decisions.json (the canonical registry)")
 
     def test_doc_toc_matches_the_canonical_registry(self):
         result = subprocess.run(

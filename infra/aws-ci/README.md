@@ -21,9 +21,10 @@ stored inside a variable are never re-expanded by GitHub, so a variable
 holding `${{ github.run_id }}` delivers that literal text and CodeBuild 400s
 every queued job.
 
-The workflow reads `vars.CI_RUNNER` for the container matrix, `verify` and
-`parity`; unset it and everything reverts to `ubuntu-latest`. No workflow edit
-in either direction.
+The workflow reads `vars.CI_RUNNER` for `python`, `verify`, and `parity`;
+`lint` stays on a bare GitHub-hosted runner. Unset the variable and the other
+three jobs revert to `ubuntu-latest`. No workflow edit is needed in either
+direction.
 
 ## Changing the project's source DETACHES the webhook
 
@@ -57,23 +58,16 @@ went public.
 | job | runner | GitHub minutes |
 |---|---|---|
 | lint (every PR push) | GitHub bare runner | ~20 s |
-| test matrix + verify (main / dispatch) | CodeBuild | **0** |
+| python + verify (main / dispatch) | CodeBuild | **0** |
 | parity (dispatch) | CodeBuild | **0** |
 
 AWS cost is per-minute with zero idle — order of $0.25–0.50 per full run on
 `BUILD_GENERAL1_LARGE` (verify against current ca-central-1 pricing). The
-8-vCPU instance actually exploits `rake test:gem`'s file-parallelism, which
-GitHub's 2-core runners never could.
+8-vCPU instance is useful to pytest-xdist in the Python and verify jobs.
 
 ## Phase 2 — faster image pulls
 
 `setup.sh` mirrors `nrel/openstudio:3.11.0` into ECR (same region). Point the
 workflow's `container:` at the ECR URI it prints to cut the multi-GB Docker Hub
 pull to a same-region fetch, and to stop depending on Docker Hub rate limits.
-
-## Also worth doing on this account
-
-An on-demand **Windows EC2 instance** is the missing piece for validating the
-Windows installer on real Windows — the thing Wine cannot do (the embedded Ruby
-dies on `unexpected ucrtbase.dll`). One `t3.large` Windows box, started for the
-checklist in `packaging/windows/README.md`, stopped after.
+The mirror is optional; CI continues to work directly from Docker Hub without it.

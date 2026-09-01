@@ -74,25 +74,11 @@ ALLOWLIST = {
         "retires": "N/A-label",
         "why": "the compliance report's footer credits the btap family by name",
     },
-    "python/btap/necb/cli.py": {
-        "refs": ["btap-modeling"],
-        "retires": "R6",
-        "why": ("the bundled-weather search's LAST development fallback is the "
-                "gem checkout's fixture weather; BTAP_HOME and the wheel's own "
-                "weather dir are tried first, so an installed wheel never "
-                "reaches it"),
-    },
     "python/btap/necb/coverage.py": {
         "refs": ["btap-necb"],
         "retires": "N/A-label",
         "why": ("btap-necb-coverage is the installed console-script name, not "
                 "a reference to the retiring btap-necb directory"),
-    },
-    "python/scripts/generate_necb_8_4_coverage.py": {
-        "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": ("legacy-input mode is required for the final byte comparison; "
-                "PR-A3 switches source, manifests, caches and output to Python"),
     },
     "python/scripts/wheel_smoke.py": {
         "refs": ["btap-necb"],
@@ -112,59 +98,17 @@ ALLOWLIST = {
                 "verification/ to produce proposed archetypes"),
     },
     # --- developer scripts -------------------------------------------------
-    "python/scripts/generate_samples.py": {
-        "refs": ["btap-modeling"],
-        "retires": "R6",
-        "why": ("the simulated-system status gate resolves PYTHON-FIRST and "
-                "falls back to the gem copy of system_simulation_status.json; "
-                "the fallback is dead the moment the gem tree is"),
-    },
     "python/scripts/oracle_prep.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
         "why": ("builds the Leg-C oracle request manifest under "
                 "verification/oracle — the shared harness, not a gem tree"),
     },
-    "python/scripts/sync_decisions_registry.py": {
-        "refs": ["btap-necb"],
-        "retires": "R6",
-        "why": ("GENERATES the Ruby gem's copy of the canonical Python "
-                "registry (direction reversed at R3, D-81); the write "
-                "target and the script retire with the gem tree at R6"),
-    },
-    "python/scripts/simulate_all_systems.py": {
-        "refs": ["btap-modeling", "btap-necb", "btap-audit"],
-        "retires": "R6",
-        "why": ("the 97-system Ruby-vs-Python sweep: it drives the gems in a "
-                "child ruby and --check compares against the committed Ruby "
-                "verdict"),
-    },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
     "python/tests/support.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",
         "why": "oracle_goldens_dir() resolves the committed Leg-C goldens",
-    },
-    "python/tests/audit/test_cross_language.py": {
-        "refs": ["btap-audit", "verification/"],
-        "retires": "R4-dormant",
-        "why": ("Leg-B AuditLog equivalence — DORMANT since R4 (D-82), "
-                "replaced by the frozen audit-unit scenario; BTAP_LEGB=1 "
-                "reactivates; deleted at R6"),
-    },
-    "python/tests/simulation/test_local_run.py": {
-        "refs": ["verification/"],
-        "retires": "R4-dormant",
-        "why": ("its cross-language class is DORMANT since R4 (D-82) — the "
-                "frozen annual scenarios carry the engine-energy duty; the "
-                "file's local-run tests stay live; refs die at R6"),
-    },
-    "python/tests/necb/test_envelope_thermal_bridging.py": {
-        "refs": ["legacy_pin", "verification/"],
-        "retires": "R6",
-        "why": ("the TBD skip message names legacy_pin/tbd_triplet.rb (the "
-                "pinned 3.5.2 triplet); B8 engine parity stays ACTIVE until "
-                "R6, while the Leg-B pipeline class is R4-dormant (D-82)"),
     },
     "python/tests/necb/test_legacy_archetype_e2e.py": {
         "refs": ["legacy_pin", "verification/"],
@@ -177,14 +121,6 @@ ALLOWLIST = {
         "retires": "R6-oracle-boundary",
         "why": ("the surviving currency gate ties committed Leg-C goldens to "
                 "the permanent oracle pin and request manifest"),
-    },
-    "python/tests/necb/test_decisions_registry_sync.py": {
-        "refs": ["btap-necb"],
-        "retires": "R6",
-        "why": ("asserts the generated Ruby copy is byte-identical to the "
-                "canonical Python registry; only the Ruby-copy assertion "
-                "retires with the gem tree at R6, while the root-doc "
-                "registry and TOC contracts survive"),
     },
     "python/tests/test_inventory_validation.py": {
         "refs": ["verification/"],
@@ -212,30 +148,12 @@ ALLOWLIST = {
         "why": ("proves the D-80 request manifest under verification/oracle is "
                 "internally live (no orphaned golden groups)"),
     },
-    "python/tests/test_generate_necb_gem_coverage.py": {
-        "refs": ["btap-necb"],
-        "retires": "PR-A3",
-        "why": "proves PR-A2 byte identity against the pre-move generated Markdown",
-    },
-    "python/tests/test_generate_necb_8_4_coverage.py": {
-        "refs": ["btap-necb"],
-        "retires": "PR-A3-history",
-        "why": ("proves explicit legacy-input mode still reproduces the "
-                "pre-divergence HTML bytes at checkpoint cbce093"),
-    },
     "python/tests/test_verification_disposition.py": {
         "refs": ["verification/"],
         "retires": "R6-oracle-boundary",
         "why": "enforces the permanent file-by-file verification disposition record",
     },
     # --- this gate ---------------------------------------------------------
-    "python/tests/test_fixture_drift.py": {
-        "refs": ["btap-modeling", "btap-necb", "verification/"],
-        "retires": "R6",
-        "why": ("pins the Python-owned fixture copies to the Ruby originals "
-                "(btap-modeling fixtures + btap-necb's paired_bars.svg "
-                "golden); the whole file is deleted when the gems retire"),
-    },
     "python/tests/test_self_containment.py": {
         "refs": list(PATTERNS),
         "retires": "N/A-scanner",
@@ -390,42 +308,3 @@ class TestSelfContainment(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-DORMANT_MARKER = "DORMANT since R4 (D-82)"
-#: The ADJUDICATED dormant surface (D-82): exactly these test classes and
-#: driver scripts. Growing this set is a new adjudication, not a tag.
-DORMANT_TEST_FILES = 3   # audit cross-language, simulation cross-language, TB Leg-B
-DORMANT_DRIVERS = 3      # run_corpus.rb, selftest.sh, matrix.sh
-
-
-def test_dormant_surface_is_pinned():
-    """Reporting distinguishes dependency skips, dormant Leg-B skips, and
-    failures; this pins the dormant class so the retirement exemption
-    cannot quietly broaden (D-82)."""
-    tests = 0
-    for rel in ("tests/audit/test_cross_language.py",
-                "tests/simulation/test_local_run.py",
-                "tests/necb/test_envelope_thermal_bridging.py"):
-        if DORMANT_MARKER in (REPO_ROOT / "python" / rel).read_text(encoding="utf-8"):
-            tests += 1
-    assert tests == DORMANT_TEST_FILES, (
-        f"{tests} dormant-marked test files, pinned {DORMANT_TEST_FILES}")
-    drivers = sum(
-        1 for rel in ("verification/run_corpus.rb", "verification/selftest.sh",
-                      "verification/matrix.sh")
-        if DORMANT_MARKER in (REPO_ROOT / rel).read_text(encoding="utf-8"))
-    assert drivers == DORMANT_DRIVERS, (
-        f"{drivers} dormant-marked drivers, pinned {DORMANT_DRIVERS}")
-    # and NOTHING else carries the marker (the broadening guard)
-    stray = []
-    for path in sorted((REPO_ROOT / "python" / "tests").rglob("*.py")):
-        rel = str(path.relative_to(REPO_ROOT / "python"))
-        if rel in ("tests/audit/test_cross_language.py",
-                   "tests/simulation/test_local_run.py",
-                   "tests/necb/test_envelope_thermal_bridging.py",
-                   "tests/test_self_containment.py"):
-            continue
-        if DORMANT_MARKER in path.read_text(encoding="utf-8"):
-            stray.append(rel)
-    assert not stray, f"unadjudicated dormant markers: {stray}"

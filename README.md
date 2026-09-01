@@ -97,9 +97,6 @@ Then open **NECB Compliance (console)** from the Start menu and type
 `btap-compliance --help`, or double-click `samples\run-demo.cmd` for a worked
 example.
 
-Building the installer yourself is covered in
-[packaging/windows/README.md](packaging/windows/README.md).
-
 ---
 
 ## Running a check
@@ -183,7 +180,8 @@ point is still written.
 Coverage is generated from the code, not hand-maintained:
 
 - **[NECB_GEM_COVERAGE.md](docs/NECB_GEM_COVERAGE.md)** — every
-  article each gem declares, with its status and its gaps.
+  article each rule domain declares, with its status and its gaps. The filename
+  is retained for continuity with the pre-R6 evidence record.
 - **[NECB_8_4_COVERAGE.html](docs/NECB_8_4_COVERAGE.html)** —
   Section 8.4 article by article, down to sentence and clause text, showing
   where each is applied in the code. One collapsible part per edition, each in
@@ -200,7 +198,7 @@ article numbering):
 | Partial (warns every run) | 27 | 28 |
 | Not implemented (warns every run) | 4 | 4 |
 | Satisfied by construction (clone) | 3 | 3 |
-| Host / other-gem scope | 12 | 12 |
+| Host / other-package scope | 12 | 12 |
 | Field / document verification (modeller scope, does not warn) | 10 | 10 |
 | **Total entries** | **119** | **122** |
 
@@ -221,7 +219,7 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **75 decisions** are recorded in
+buried in the source. **84 decisions** are recorded in
 **[necb_decisions.md](docs/necb_decisions.md)** — 40 of them
 active at runtime, tagging the audit entries they govern.
 
@@ -232,7 +230,7 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 75.
+affected this building, not all 84.
 
 ---
 
@@ -281,31 +279,29 @@ Each is described in `samples\README.txt` with the article it exercises.
 
 ---
 
-## The nine gems
+## Architecture
 
-The tool is assembled from nine standalone Ruby gems. Most users never need to
-know this; it matters if you want to use one part on its own — say, NECB space
-types without the compliance run. The [Python implementation](python/) mirrors
-the five core gems as subpackages of one `btap` distribution, and is now the
-primary implementation — the gems are held frozen as the verification baseline
-it is checked against.
+The product is one Python distribution, `canmet-btap` (import package `btap`),
+with five subpackages and one-way dependencies:
 
-| Gem | One line |
+| Subpackage | Responsibility |
 |---|---|
-| [btap-audit](btap-audit) | the shared AuditLog + article-coverage emitter every other gem writes to |
-| [btap-modeling](btap-modeling) | model AUTHORING, no NECB anywhere: seven shape wizards, the bar-by-shape engine, measured footprints, the 97-system HVAC topology catalog and builders, constructions, the surface census |
-| [btap-costing](btap-costing) | capital costing (HVAC, envelope, lighting, SHW) and the licensed-data seam — placeholder tables vendored, real RS-Means values injected at runtime, never redistributed |
-| [btap-necb](btap-necb) | **the code-compliance layer**: every NECB rule (loads, lighting, SHW, HVAC selection + efficiencies, envelope), the coverage manifests, the 8.4.1.2 determination, one audit, the AHJ report, and the `btap-compliance` CLI |
-| [btap-simulation](btap-simulation) | the EnergyPlus runner (local, or the HBIX remote backend) |
+| `btap.audit` | shared audit log and article-coverage evidence; SDK-free |
+| `btap.modeling` | generic OpenStudio model authoring, geometry, constructions, and HVAC topology builders |
+| `btap.costing` | capital costing and the licensed-data boundary; priced data is runtime-injected, never redistributed |
+| `btap.necb` | NECB rules, reference-building pipeline, determination, coverage, report, and CLI |
+| `btap.simulation` | local EnergyPlus execution and the HBIX remote backend |
 
-Each gem's README is its API guide.
-[docs/README.md](docs/README.md) explains the
-decision registers.
+The former product Ruby gems were retired by D-84. Ruby remains only in
+`legacy_pin/` and `verification/oracle/` to run the pinned
+`openstudio-standards` oracle; it is verification infrastructure, not a second
+product implementation. [docs/README.md](docs/README.md) explains the decision
+and evidence registers.
 
 ---
 
 ## Working on the code
 
-See **[docs/DEVELOPERS.md](docs/DEVELOPERS.md)** — the family contract,
-requirements, the devcontainer, MCP configuration, the test suites, and the
-legacy-parity gates.
+See **[docs/DEVELOPERS.md](docs/DEVELOPERS.md)** — the package contract,
+requirements, devcontainer, MCP configuration, test suites, frozen scenarios,
+and live-oracle gates.

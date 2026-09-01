@@ -1,297 +1,159 @@
-# CLAUDE.md — the btap gem family (repository root)
+# CLAUDE.md — canmet-btap repository guide
 
-Five standalone, SDK-only, **LGPL-3.0-or-later** Ruby gems, sliced by NATURE
-(D-77): `btap-audit` (evidence), `btap-simulation` (execution),
-`btap-modeling` (generic model authoring — no NECB anywhere), `btap-costing`
-(the licensed-data seam), and `btap-necb` (every NECB 2020/2025 Part 8 rule,
-the coverage manifests, the determination, the `btap-compliance` CLI). [README.md](README.md) is written for the
-BUILDING ENGINEER — install, run, read the verdict, and what is not implemented;
-the contributor material (family contract, devcontainer, MCP, test suites,
-parity gates) lives in [docs/DEVELOPERS.md](docs/DEVELOPERS.md). Do not put
-developer setup back in the README; **every gem carries its own `CLAUDE.md`** with
-architecture, facade and traps — read that one before working inside a gem.
-This file covers what is true across the family, plus how this repository came
-to exist.
+This repository contains one product implementation: the Python distribution
+`canmet-btap` (import `btap`), licensed **LGPL-3.0-or-later**. It has five
+subpackages: `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`,
+and `btap.necb`. The former `btap-*` Ruby gems retired at R6 under D-84.
 
-## Family contract (every gem obeys it)
+Ruby still has one deliberate role. `legacy_pin/` bundles the pinned
+`openstudio-standards` revision, and the Ruby files in `verification/oracle/`
+probe that external oracle. They are verification infrastructure, not product
+code. Do not translate their Ruby mechanically or delete them as "leftover"
+product Ruby.
 
-- **Pure OpenStudio SDK.** No `openstudio-standards`, no measures, no BTAP.
-- **Never simulates.** Only the umbrella (`btap-necb`) runs EnergyPlus.
-- **One AuditLog schema** —
-  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
-  levels `:decision | :info | :warning`. **Warnings are never silent.** The class
-  lives in `btap-audit`; every other gem's `audit_log.rb` is a three-line
-  alias. Change the schema THERE, never as a local copy.
-- **Two citation axes.** `article:` cites the code that mandates a value;
-  `ruling:` cites the adjudicated decision saying how we read it. `ruling:` is a
-  TOP-LEVEL kwarg, single-quoted, on ONE line, never nested inside `inputs:`.
-- **Audit text convention:** violations SHOUTED, passes lowercase — the report's
-  checklist classifier is deliberately case-SENSITIVE.
-- **Vintages 2020 + 2025 only.** 2011–2017 backfills are user-deferred.
-- Dependency flow is ONE-WAY: `btap-necb` → `btap-costing` → `btap-modeling`
-  → `btap-audit`, with `btap-simulation` beside; the umbrella runs E+ via it.
-  Ruby modules are FLAT `Btap*` (`BtapNECB`, …). **`BTAP::*` is forbidden** —
-  the oracle's `module BTAP` is live in-process in ten parity gates (D-77).
+[README.md](README.md) is for building engineers. Contributor setup and test
+lanes live in [docs/DEVELOPERS.md](docs/DEVELOPERS.md). `PORT_STATUS.md` and the
+audit/decision documents are historical records; keep their period wording
+unless a moved link itself is wrong.
+
+## Package contract
+
+- **Pure OpenStudio SDK.** Product code does not depend on
+  `openstudio-standards`, measures, or legacy BTAP.
+- **One distribution, five subpackages.** Dependency direction is
+  `btap.necb` → `btap.costing` → `btap.modeling` → `btap.audit`, with
+  `btap.simulation` beside and depending only on audit. Import-linter enforces
+  this D-77 contract.
+- **One AuditLog schema:**
+  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
+  Levels are `decision`, `info`, and `warning`; warnings are never silent.
+- **Two citation axes.** `article` cites the code requirement; `ruling` cites
+  the adjudicated D-XX interpretation. Keep `ruling` top-level, never nested in
+  `inputs`.
+- **Audit text is case-sensitive.** Violations are SHOUTED and passes are
+  lowercase because the report checklist classifier relies on that distinction.
+- **NECB 2020 and 2025 only.** Do not imply support for 2011–2017.
+- **Python is authoritative.** Behaviour changes are Python-only and require a
+  clean-tree frozen-scenario re-freeze in the same change when outputs move.
 
 ## Commands
 
 ```bash
-cd btap-modeling && ruby test/test_catalog.rb     # a gem suite: plain ruby, no bundler
-rake gems                                          # the five gems + versions
-rake necb:verify                                   # orphan keys + 8.4.6 curves + hostile-outcome
-rake necb:coverage_doc                             # regenerate coverage documents
-rake legacy:pin                                    # the pinned oracle revision
-rake legacy:whatsnew                               # what the fork has done since the pin
+cd python
+python3 -m venv .venv
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pytest -n auto -q tests/
+.venv/bin/lint-imports
+.venv/bin/ruff check .
+
+# Repository tools, from the repository root
+python3 python/scripts/necb_orphan_keys.py
+python3 python/scripts/generate_necb_gem_coverage.py
+python3 python/scripts/generate_necb_8_4_coverage.py
+python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/legacy_whatsnew.py
 ```
 
-Tests run with **plain `ruby`**, not `bundle exec`. The per-gem Gemfiles exist so
-`bundle exec` and `gem build` work; they are not how the suites run.
+The zero-install serial fallback is `cd python && python3 -m unittest discover
+tests`. Full SDK, EnergyPlus, rasterizer, sample, and thermal-bridging coverage
+runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
-## How this repository came to be (2026-08-16)
+## Decisions and coverage
 
-Extracted from the `NatLabRockies/openstudio-standards` fork with
-`git filter-repo`, keeping the nine gem dirs plus `legacy_pin/`. History
-preserved: 9,403 → 199 commits, `.git` 4.61 GiB → 4.7 MB. The branch was renamed
-`phylroy_dnd` → `main`. **The originals still exist in the fork** — removing them
-is pending (see Open work).
+`python/btap/necb/data/decisions.json` is canonical. The authored document is
+`docs/necb_decisions.md`; its TOC is generated. Adding a `## D-XX` heading means
+adding the registry entry, and vice versa. A `kind: runtime` entry must be cited
+by product Python source.
 
-The gems' relative-path requires (`../btap-<sibling>`), the shared test
-fixtures in `btap-modeling/test/fixtures`, and all the doc cross-links depend
-on this **flat sibling layout**. Do not nest the gems in a subdirectory or rename
-their directories without fixing every one of them.
-
-## Traps — all of these were paid for once
-
-**The locale is load-bearing.** Without a UTF-8 locale Ruby's default external
-encoding is US-ASCII, and `File.read` of anything the gems emit (`plan_svg.rb`
-writes em dashes and `m²`; `necb_decisions.md` is full of them) raises
-`invalid byte sequence in US-ASCII`. It took out three gems on CI's first run.
-The devcontainer and the CI workflow both force `LANG`/`LC_ALL`; do not remove
-them. Read a generated file with an explicit `encoding: 'UTF-8'`.
-
-**`Gem::MissingSpecError` descends from `LoadError`, NOT `StandardError`.** A
-bare `rescue StandardError` around `Gem::Specification.find_by_name` does not
-catch it. Name it (`rescue Gem::LoadError, StandardError`) — see
-`btap-costing/lib/btap_costing/envelope/database.rb`.
-
-**The Leg-C oracle goldens follow legacy_pin/REF.** Bumping the pin without
-re-exporting `verification/oracle/goldens/` fails the parity job's
-currency meta-test loudly (D-78). Export happens IN CI (the pin bundle
-lives there): dispatch `test.yml` with `export_goldens=true` and commit the
-artifact. The exporter is GEM-FREE (D-80 python-prep / ruby-probe): prep
-models come from `python/scripts/oracle_prep.py`, probe requests from the
-committed `verification/oracle/request_manifest.json` — immutable except by
-adjudicated update. Never hand-edit a golden — the manifest checksums are
-asserted.
-
-**The legacy oracle is ONE SHA, not a branch, and not a git remote.**
-`legacy_pin/REF` is the whole tie to openstudio-standards. Nothing here points at
-the fork's history, so `git log` cannot answer "has upstream moved?" — use
-`rake legacy:whatsnew`.
-
-**The lock records a REMOTE and bundler compares it.** `legacy_pin/Gemfile.lock`
-commits the canonical fork URL. Setting `LEGACY_PIN_REMOTE` to a local checkout
-(much faster, offline) makes them disagree until you `bundle install` once; until
-then `bundle check` reports "not yet checked out". `test_legacy_archetype_e2e.rb`
-gates on exactly that and therefore SKIPS. It skips loudly and never reports a
-false pass. Use the same `LEGACY_PIN_REMOTE` for install and for every run.
-
-**A skipped parity gate is a green-but-vacuous gate.** Always run them with
-`LEGACY_PIN_REQUIRED=1`, which turns "oracle not bundled" from a skip into a
-failure. There are **eleven** gates: envelope 4, loads 3, lighting 3, shw 1 —
-and three of them are NOT named `*_parity.rb` (both `test_data_integrity.rb`,
-lighting's `test_costing.rb`), so a glob misses them. CI lists them explicitly.
-
-**`test_decisions_registry.rb` is not SDK-free** despite reading like a pure
-doc/JSON drift check — it `require`s every gem's facade. It needs the container,
-not a bare runner.
-
-**Coverage is declared at the depth the evidence supports.** An entry's
-`article` string carries its depth (`"8.4.5.9."` = whole article,
-`"8.4.5.9.(5)"` = one sentence). The formerly-partial articles are per-sentence
-(54 hvac entries per vintage, not 22; loads 9, not 7; umbrella 15/12) and tests
-pin per-sentence ids — so **match coverage articles by PREFIX, never exact
-string**. Do NOT split a uniformly-implemented article: that restates one claim
-N times without sentence evidence, the exact fabrication the 8.4 HTML's depth
-note warns about. `gap_owner: "modeller"` is only for requirements no model
-change can ever satisfy (D-76); a rule the software could implement stays a
-warning.
-
-**Adding a `## D-XX` heading means adding a `decisions.json` entry** — the
-CANONICAL one, `python/btap/necb/data/decisions.json` (R3, D-81). The Ruby
-copy at `btap-necb/lib/btap_necb/data/decisions.json` is GENERATED from it;
-never hand-edit that copy. The doc section is hand-authored, its id-ordered
-TOC generated. The drift tests are hard in both directions:
 ```bash
-python3 python/scripts/sync_decisions_registry.py   # canonical → generated Ruby copy
-ruby btap-necb/scripts/generate_decisions_toc.rb    # after adding a decision
-cd python && python3 -m unittest tests.necb.test_decisions_registry_sync tests.necb.test_decisions_registry
-cd btap-necb && ruby test/test_decisions_registry.rb
+python3 python/scripts/generate_decisions_toc.py --check
+cd python && python3 -m unittest \
+  tests.necb.test_decisions_registry_sync \
+  tests.necb.test_decisions_registry
 ```
-A `kind: runtime` entry must be cited by ≥1 `ruling:` literal in BOTH
-implementations (a gem's `lib/` AND `python/btap`) while both exist; entries
-that are not cited must NOT be `runtime` (use `process`, `data`, or
-`runtime_unwired`).
 
-**`spec.files` excludes `test/` in every gemspec.** So
-`btap-modeling/lib/btap_modeling/hvac/catalog_report.rb`'s `FIXTURE` constant is
-already broken in a *packaged* gem. Pre-existing, not extraction fallout.
+Coverage is declared at the depth the evidence supports. Match article ids by
+prefix when a whole article can be split into sentence-level entries. Do not
+split a uniformly implemented article merely to inflate coverage. Use
+`gap_owner: "modeller"` only when no model change can satisfy the requirement.
+Generated coverage documents live in `docs/`; regenerate both and review their
+diffs rather than hand-editing them.
 
-**All costing lives in btap-costing, and the priced pair is its shared
-`data/` copy.** The old cross-gem CSV resolution is DEAD — priced values
-resolve explicit-arg → `BTAP_COSTING_DIR` (`OPENSTUDIO_COSTING_DIR` still
-honoured) → the gem's own placeholder tables. Real RS-Means values are
-runtime-injected only and never committed or staged into the installer.
+The Section 8.4 caches live under `python/btap/necb/data/coverage/` and ship in
+the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
+ordinary runtime remains offline.
 
-**The tbd triplet is pinned by `legacy_pin/Gemfile.lock`, not by any gemspec
-constraint.** The suites run under plain `ruby`, so gemspec dependencies are
-never resolved — tbd was absent from the devcontainer AND from CI, and the one
-test proving the NECB 3.1.1.7 uprate/derate math skipped in both while the
-summary line stayed green. The version is not a detail: tbd 3.5.2 / osut 0.8.2
-and tbd 3.6.0 / osut 0.9.1 land 43% apart on the same wall, and BOTH pass the
-unit test — only a parity comparison ever catches it. `ruby
-legacy_pin/tbd_triplet.rb` prints the three in dependency order (topolys, osut,
-tbd — resolving tbd first pulls the newest osut and defeats the pin) as valid
-`gem install` arguments. `TBD_REQUIRED=1` turns the skip into a failure.
+## Verification
 
-**One MCP key, and `set -a` is load-bearing.** `HBIX_API_KEY` covers all six
-NRCan MCP servers and both Ruby scripts that call them directly;
-`HBIX_MCP_BASE_URL` repoints all six at once. There is deliberately no
-per-server alias for either. The key lives in a gitignored `.env` (template:
-`.env.example`) that `~/.bashrc` auto-loads. A plain `source .env` sets the
-variables without EXPORTING them, so Claude Code — a child process — expands
-`${HBIX_API_KEY}` in `.mcp.json` to nothing and all six servers send an empty
-`X-API-Key`. That surfaces as an opaque 403, never as a missing-key message.
-The two scripts expand `${VAR}` placeholders themselves and treat an
-unresolvable one as absent, so they fail into the message that names what to set.
+The post-R6 verification model has two independent parts:
 
-**The devcontainer takes its CAs from the HOST, not off the network.**
-`initializeCommand` runs on the host before the container exists and copies
-`/usr/local/share/ca-certificates/*.crt` into `.devcontainer/certs/`
-(gitignored, bind-mounted in). The routine it replaced cloned a certificate repo
-*from GitHub* in order to make GitHub verifiable — circular, and on a
-TLS-intercepting network the clone is precisely what fails, after which it
-degraded silently into a container that could verify nothing. `gh` has no
-`--insecure` escape hatch (unlike git's `http.sslVerify=false`), so certs are a
-prerequisite for it, not an ordering preference.
+- `verification/scenarios/` holds 35 frozen Python pipeline scenarios across
+  `python`, `verify`, and `parity` lanes. Intentional output changes use
+  `verification/scenarios/freeze.py` on a clean tree and commit the baseline
+  changes with the code.
+- `legacy_pin/` plus `verification/oracle/` compare Python against the live,
+  pinned legacy oracle. Leg C uses Python-prepared models and Ruby probes;
+  committed goldens remain under `verification/oracle/goldens/`.
 
-## The command-line tool
+`legacy_pin/REF` is the sole oracle revision. A pin bump requires a complete
+golden re-export and attribution of every changed comparison. Never hand-edit a
+golden. `LEGACY_PIN_REQUIRED=1` is mandatory for local parity work so a missing
+bundle fails instead of skipping. See [legacy_pin/README.md](legacy_pin/README.md).
 
-`btap-necb/exe/btap-compliance.rb` (logic in `lib/btap_necb/cli.rb`)
-turns the whole pipeline into one command: `.osm` in, EUIs + verdict + HTML
-report out. `packaging/windows/` builds a Windows installer that bundles its own
-OpenStudio, so the recipient installs one thing; `rake windows:stage` assembles
-the payload from each gemspec's own `spec.files`.
-
-The bundled-OpenStudio decision is why the launcher has no CLI detection, no
-version gate and no PATH edit — and it removes version skew, which used to fail
-opaquely ~20 minutes into a run.
+The final cross-language attestation is immutable: commit
+`85ab14352677093e24038d933cf1071e5b03431a`, GitHub Actions run
+`33544573991`. It recorded 45 Ruby parity runs / 629 assertions, the Ruby
+SmallOffice gate at 3 runs / 62 assertions, 4 Python successor tests, live Leg C
+23/23, frozen parity scenarios, all four current CI jobs and every then-existing
+gem matrix job, with zero parity skips. D-84 is the authority for the retirement
+boundary; post-R6 freezes do not recreate cross-language evidence.
 
 ## CI
 
-`.github/workflows/test.yml`, four jobs — plus `release.yml`, which on a `v*`
-tag push builds the Windows installer (stage in the SDK container, ISCC under
-wine on the bare runner) and publishes it via `rake windows:release`;
-dispatching it by hand rehearses the whole build but stops at `DRY_RUN`. Triggers are `push` to main/develop,
-every `pull_request`, and `workflow_dispatch` — there is no `schedule:`:
+`.github/workflows/test.yml` has four jobs:
 
-- **`lint`** — bare runner, Ruby 3.2.2, no SDK. Orphan-key lint, the SDK-free
-  `btap-audit` suite, and the coverage-doc gate: it regenerates both
-  generated documents and demands a clean tree.
-- **`test`** — matrix of the eight SDK gems in `nrel/openstudio:3.11.0`,
-  `fail-fast: false`, `TBD_REQUIRED=1`. Each leg runs `rake test:gem[<gem>]`,
-  which forks the gem's files rather than running them one at a time — the
-  matrix parallelizes across gems, this parallelizes within one. The envelope
-  leg installs the pinned tbd triplet first and asserts the ACTIVATED versions
-  equal the lock.
-- **`verify`** — decisions-registry drift + `rake necb:verify`, same container,
-  and the registry generation direction (canonical Python → generated Ruby copy)
-  is checked in `lint` on every PR.
-- **`parity`** — the eleven gates with `LEGACY_PIN_REQUIRED=1`, cached on
-  `legacy_pin/REF` because it clones the ~4.6 GB fork.
+- **`lint`**: stdlib-oriented Python checks, coverage pointers/doc drift, and
+  the decisions registry.
+- **`python`**: import contracts, Ruff, the Python suite, and installed-wheel
+  smoke on a bare runner.
+- **`verify`**: the full SDK/EnergyPlus Python suite, rule verification, and
+  sizing-lane frozen scenarios in `nrel/openstudio:3.11.0`.
+- **`parity`**: dispatch-only live-oracle checks, whole-building archetype gate,
+  and annual frozen scenarios. It is also where oracle goldens are exported.
 
-All four have run green. Parity was verified non-vacuous: 42 runs, 562
-assertions, 0 skips — identical to local.
+There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
+moves. Documentation-only pushes are path-ignored by the workflow, so run local
+doc checks before merging documentation changes.
 
-**`parity` is `workflow_dispatch` ONLY — nothing runs it on a timer.** Its `if:`
-also names `schedule`, but `on:` declares no `schedule:` trigger, so that half
-never fires. Dispatch it by hand whenever you bump `legacy_pin/REF`; that is the
-only moment the oracle can move under you.
+## Traps
 
-Costs are why parity is not on every push: a run was ~24 runner-minutes (~30
-with parity) against the org's Team-plan allowance, and the biggest leg
-was 9–11 of them — more than the other seven gem suites combined. The repo is
-private, so those minutes are billed. `rake test:gem` cuts that leg; how much
-depends on the runner's core count, which the job now prints so the next person
-does not have to guess (locally, 45 files drop from ~10 min to ~150 s).
+**The locale is load-bearing.** Generated documents contain UTF-8. CI and the
+devcontainer force a UTF-8 locale; preserve it and use explicit UTF-8 when a
+tool reads generated text.
 
-## The Python port (D-79)
+**The Bundler remote is part of the lock.** If `LEGACY_PIN_REMOTE` points to a
+local checkout, run `bundle install` with that value and keep using it. A
+different remote makes `bundle check` report the source as not checked out.
 
-A second implementation lives in `python/` — one pip distribution, `canmet-btap` (import `btap`; PyPI blocked the bare name),
-with five subpackages mirroring the gems, ported milestone by milestone
-against the D-78 verification. **`PORT_STATUS.md` at the repo root is the
-handoff document**: what has landed, what each milestone was gated on, the
-hazards the next one inherits, and the working agreements. Read it before
-touching `python/`. Developer setup is in
-[docs/DEVELOPERS.md](docs/DEVELOPERS.md#the-python-port-python-d-79).
+**Thermal bridging has two distinct pins.** Product Python uses
+`canmet-tbd==3.5.2`. The oracle bundle retains its Ruby tbd/osut/topolys triplet.
+Upstream 3.6.x changes the physics by roughly 43% on the same wall, so upgrading
+either side is an adjudicated rebaseline, never routine dependency maintenance.
 
-**The port is COMPLETE and merged (M0–M8, PRs #5–#12, 2026-08-28).** The
-whole surface is ported — audit, simulation + the EnergyPlus provisioner,
-modeling, costing, the five necb rule domains, the umbrella (pipeline,
-renderer, `btap-compliance` console script), and thermal bridging — and
-verified: Leg B holds Ruby-CLI-vs-Python-CLI equivalence over the whole
-corpus at the `none`, `sizing` and `annual --quick` tiers; Leg C closes
-against the oracle both frozen (the goldens) and LIVE (the parity job's
-lighting gate). The Python suite has ZERO unconditional skips — every skip
-names a dependency and a REQUIRED flag, and CI supplies each somewhere with
-its flag set.
+**One MCP key, exported.** `HBIX_API_KEY` covers all six NRCan MCP servers and
+the two Python maintainers' scripts, `python/scripts/building_stock.py` and
+`python/scripts/fetch_necb_8_4_text.py`. `HBIX_MCP_BASE_URL` repoints all six.
+Use `set -a && source .env && set +a`; plain `source` does not export variables
+for child processes such as Claude Code.
 
-Two rules OUTLIVE the port. (1) **Python is the primary implementation
-and, since the R4 handoff (D-82), the ONLY one that changes**: Ruby
-backports have STOPPED — behaviour changes are Python-only, and every
-intentional behaviour change re-runs `verification/scenarios/freeze.py`
-on a clean tree and commits the re-frozen baselines WITH the change
-(python-only:post-handoff seal). The Ruby gems are frozen verification
-infrastructure: Leg A's oracle bridge until R6, their suites run in CI
-only to prove the frozen code still passes, and the dormant Leg-B
-drivers/tests sit behind `BTAP_LEGB=1` until R6 deletes them. (2) **Thermal bridging is pinned
-to py-tbd's `tbd-3.5.2-compat` branch by commit SHA** — the revision
-verified against the frozen Ruby TBD 3.5.2 / OSut 0.8.2 oracle triplet.
-Never bump it to py-tbd main casually: main ports upstream 3.6.0, whose
-uprate physics differ (~43% on a wall); the family-wide 3.6.x rebaseline
-is a deliberate future event (see Open work).
+**Corporate CAs come from the host.** The devcontainer stages trusted host CAs
+before network downloads. Do not replace that with a network bootstrap that
+needs working TLS in order to establish working TLS.
 
-## Open work
+## History
 
-- **Retire the originals in the fork.** Remove the nine dirs + `legacy_pin/` from
-  `NatLabRockies/openstudio-standards` and rewrite its `README.md:13-36` to point
-  here. Keep the fork's `origin/nrcan` branch forever — it holds the pinned
-  oracle `f01da13a6`.
-- **The fork is 2 commits ahead of the pin** (`rake legacy:whatsnew`): #2134 adds
-  a NECB footprint aspect-ratio option touching `btap/geometry.rb`, and #2136
-  changes the costing sheets and `necb_2011.rb`. Absorbing means **bumping the
-  pin and re-running the gates** — which since D-78/D-79 also means
-  re-exporting the Leg-C goldens — never copying code across.
-- **The TBD 3.6.x rebaseline** (pairs naturally with the pin bump): bump the
-  Ruby triplet (tbd/osut/topolys) first, re-run Leg A, re-export the
-  goldens, then retire py-tbd's `tbd-3.5.2-compat` branch and repoint the
-  Python `[tbd]` pin at main. One adjudicated event, never a casual
-  dependency upgrade — the two lines are ~43% apart on the same wall.
-- **The LLM proposed-building workflow** (geometry → loads → constructions →
-  HVAC). The one real physics gap: the envelope domain cannot build an opaque
-  construction from nothing — zero `DefaultConstructionSet` usage family-wide, and
-  `opaque_at_conductance` requires a base to deep-copy. Wizard geometry has no
-  constructions, so `apply_prescriptive` silently skips everything. The test-only
-  `seed_constructions` helper in `btap-modeling/test/test_bar.rb` is the
-  placeholder to replace. Ordering constraint (D-75): thermostats come from
-  the loads domain's `apply_loads` and gate the whole envelope pass via
-  `Geometry.conditioned?`.
-- **`NatLabRockies/openstudio-mcp`** (Python MCP server, ~150 tools) covers
-  generic OpenStudio authoring but has **zero NECB content**, and its
-  constructions skill is surface-at-a-time primitives that do not close the gap
-  above. Licences do not mix — these gems are LGPL, that project is BSD-3-style —
-  so the decision is to integrate at the **tool boundary, never the source
-  boundary**: a thin `skills/necb/` package shelling out to these gems, not a
-  fork. Do not copy gem source into it.
-- Repository is **private**; the `LICENSE` preamble makes GitHub report
-  `NOASSERTION` even though all nine gemspecs declare `LGPL-3.0-or-later`.
+The code was extracted from the `NatLabRockies/openstudio-standards` fork on
+2026-08-16 and ported to Python under D-79. D-82 made Python the only changing
+implementation; D-84 retired the five product Ruby gems at R6 while retaining
+the external-oracle bridge. `PORT_STATUS.md` is the completed port record, not
+the current architecture guide.

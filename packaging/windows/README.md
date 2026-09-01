@@ -1,44 +1,35 @@
 # Building the Windows installer
 
 **CI builds and publishes this automatically**: pushing a `v*` tag runs
-`.github/workflows/release.yml`, which stages in the SDK container, compiles
-under wine on a bare runner, and attaches the exe to a GitHub release via
-`rake windows:release` — same task, same guards as below, plus a tag ↔
-`.iss AppVersion` match. Dispatching the workflow by hand
+`.github/workflows/release.yml`, which builds the wheel, stages the Windows
+CPython payload on Linux, executes it on a Windows runner, compiles with
+containerized Inno Setup, and attaches the exe to a GitHub release. Dispatching the workflow by hand
 (`gh workflow run release.yml`) is the rehearsal: the identical build, but the
-publish step stops at `DRY_RUN`.
+publish step only reports what it would upload.
 
-The manual path — two steps, both runnable from the Linux devcontainer. Only
-the second needs wine, and only the *testing* needs an actual Windows machine.
+The manual Linux path mirrors the workflow:
 
 ```bash
-# 1. assemble the payload (~790 MB with OpenStudio, ~8 MB without)
-curl -LO https://github.com/NREL/OpenStudio/releases/download/v3.11.0/OpenStudio-3.11.0%2B241b8abb4d-Windows.tar.gz
-tar xzf OpenStudio-3.11.0+241b8abb4d-Windows.tar.gz
-rake windows:stage OPENSTUDIO_WINDOWS=$PWD/OpenStudio-3.11.0+241b8abb4d-Windows
-
-# 2. compile it
-bash .devcontainer/setup.sh --wine     # once: wine + Inno Setup 6
-rake windows:installer                 # -> packaging/windows/Output/*.exe
+python3 -m build --wheel --outdir python/dist python/
+python3 python/scripts/generate_samples.py packaging/windows/samples
+python3 packaging/windows/stage_python.py --version 0.2.1
+python3 packaging/windows/release_guards.py --version 0.2.1
+python3 packaging/windows/installer_smoke.py
+mkdir -p packaging/windows/Output
+docker run --rm -v "$PWD:/work" amake/innosetup:latest \
+  packaging/windows/btap-compliance.iss
 ```
 
 ## Why it is built this way
 
-**OpenStudio is bundled, not a prerequisite.** The recipient installs one
-thing. That also deletes the CLI detection, the version gate and the PATH
-handling from the launcher, and removes version skew — a user on OpenStudio 3.9
-would otherwise fail ~20 minutes into a run with an opaque engine error, because
-neither OpenStudio nor EnergyPlus translates backward.
+**CPython and all wheels are bundled, not prerequisites.** The recipient
+installs one thing. OpenStudio and EnergyPlus arrive as pinned Python wheel
+dependencies inside the staged `site-packages` tree.
 
-**The Windows payload is assembled on Linux.** NREL publishes a
-`...-Windows.tar.gz` alongside the `.exe` installer, and it unpacks cleanly on
-Linux — `bin/openstudio.exe` is a normal PE32+ x86-64 binary. Nothing needs a
-Windows machine to *stage*.
-
-**`Python/`, `include/`, `Radiance/` and `Examples/` are dropped** (218 MB of
-1000). The gems are Ruby-only and reference no Radiance. `Perl/` is kept because
-EnergyPlus ships it. `OPENSTUDIO_FULL=1` stages the whole tree if anything
-misbehaves.
+**The Windows payload is assembled on Linux.** Cross-platform pip resolves the
+complete `win_amd64` wheel set into the official CPython 3.12 embeddable
+runtime. Nothing is compiled on the user's machine. A Windows runner executes
+the staged CLI before the installer is allowed to publish.
 
 **Per-user install, no admin.** `PrivilegesRequired=lowest` means no UAC prompt
 and it works where the user cannot elevate; `{autopf}` then resolves to
@@ -46,24 +37,18 @@ and it works where the user cannot elevate; `{autopf}` then resolves to
 machine-wide install from the dialog.
 
 **The priced costing tables are excluded** — `--costs-csv` injects a licensed
-one. A test in `openstudio-necb/test/test_cli.rb` renames them aside and runs
-the CLI to prove the compliance path never needs them.
+one. Placeholder schemas remain available for the costing machinery.
 
-## Wine notes (each cost time to establish)
+## Compiler image
 
-- **Inno Setup 6's `ISCC.exe` is 32-bit** (`PE32, Intel 80386`), so it needs
-  `wine32:i386` and the i386 architecture enabled.
-- **Inno Setup 7 has a native x64 build** that would avoid multiarch entirely,
-  but it refuses to install under wine 9 — "This program does not support the
-  version of Windows your computer is running" — at every Windows version wine
-  can be made to report, including win11 (10.0.22000). Do not spend time on it.
-- **wine needs a display even for a silent install.** `xvfb-run -a` supplies
-  one; without it wine dies with "X connection broken".
+CI uses `amake/innosetup:latest`, which wraps a known-good ISCC-under-wine
+environment. Local compilation should use the same image so host Wine versions
+cannot change the installer bytes or fail on a different Inno Setup runtime.
 
 ## What still requires real Windows
 
-Wine compiles the installer; it does not validate it. Before shipping, run
-through the checklist in the repository plan on an actual Windows machine:
+CI executes the staged tree on Windows before compiling the installer. Release
+acceptance should still cover installation behavior on a clean Windows VM:
 a clean VM with no OpenStudio, a VM that already has a *different* OpenStudio,
 install paths containing spaces, the report rendering non-ASCII glyphs
 correctly, exit codes, and uninstall.
