@@ -11,7 +11,7 @@ plus a complete audit trail of every decision it made and the code article
 behind each one.
 
 ```
-btap-compliance my-building.osm --city toronto
+btap-compliance my-building.osm --epw toronto.epw
 ```
 
 ```
@@ -52,38 +52,40 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 ## Installing
 
-The tool is the **Python implementation**, installed from source:
-
 ```bash
-git clone https://github.com/canmet-energy/btap.git
-cd btap/python
-python -m pip install '.[tbd]'
+pip install "canmet-btap[tbd]"
 ```
 
-That gives you the `btap-compliance` command. Four things worth knowing:
+That gives you the `btap-compliance` command, and on Windows or Linux
+**EnergyPlus comes with it** — there is nothing else to install, no separate
+download, and no first-run surprise.
 
-- The repository is **private**, so cloning it requires access. There is no
-  published package to install by name.
-- You need **Python 3.11 or newer**. The OpenStudio SDK arrives as an ordinary
-  dependency, so you do not install OpenStudio yourself.
-- **EnergyPlus is automatically provisioned and version-verified on first
-  use**; on an offline or TLS-intercepted network supply it via
-  `BTAP_ENERGYPLUS` (an existing install) or `BTAP_ENERGYPLUS_ARCHIVE` (a
-  downloaded archive).
+- You need **Python 3.11 or newer**. The OpenStudio SDK and the EnergyPlus
+  engine both arrive as ordinary dependencies.
+- **The engine is included on Windows x86-64 and Linux x86-64 (glibc 2.35 or
+  newer)** — that is Ubuntu 22.04 and later, RHEL 9 and later, and anything
+  comparable. It is the exact EnergyPlus build this tool is verified against,
+  shipped as the [`canmet-energyplus`](https://pypi.org/project/canmet-energyplus/)
+  wheel.
+- **On macOS, and on musl or older-glibc Linux**, the engine is downloaded and
+  version-verified on first use instead. If that machine is offline or behind
+  a TLS-intercepting proxy, point at an engine you already have with
+  `BTAP_ENERGYPLUS`, or at a downloaded archive with `BTAP_ENERGYPLUS_ARCHIVE`.
 - `[tbd]` adds thermal-bridging support (Article 3.1.1.7). Without it the run
   still works and says so loudly in the audit, rather than quietly leaving
   bridging out.
 
+Prefer to work from source? `git clone https://github.com/canmet-energy/btap.git`
+then `cd btap/python && pip install '.[tbd]'`.
+
 ## Installing on Windows
 
-Download `btap-compliance-setup-<version>.exe` and run it. This is the one
-packaged installer today, and it installs the **frozen Ruby implementation** —
-verified equivalent to the Python implementation on every model in the test
-corpus. A native Python Windows installer is planned.
+Not a Python user? Download `btap-compliance-setup-<version>.exe` from the
+[releases page](https://github.com/canmet-energy/btap/releases) and run it. You
+need nothing else on the machine — not Python, not OpenStudio, not EnergyPlus.
 
-That is the whole prerequisite list. The installer carries its own copy of
-**OpenStudio 3.11.0 and EnergyPlus 25.2.0**, so you do not need to install
-either, and it will not disturb any OpenStudio you already have.
+The installer carries its own **Python 3.12, OpenStudio 3.11.0 and EnergyPlus
+25.2.0**, so it cannot disturb anything you already have.
 
 - It installs **per user** and needs **no administrator rights**, so there is no
   UAC prompt and it works on a locked-down machine.
@@ -96,23 +98,23 @@ Then open **NECB Compliance (console)** from the Start menu and type
 example.
 
 Building the installer yourself is covered in
-[packaging/windows/README.md](packaging/windows/README.md); the Ruby tool also
-runs from a source checkout anywhere OpenStudio 3.11 does — see
-[docs/DEVELOPERS.md](docs/DEVELOPERS.md).
+[packaging/windows/README.md](packaging/windows/README.md).
 
 ---
 
 ## Running a check
 
-```bat
-btap-compliance MODEL.osm --city toronto
+```bash
+btap-compliance MODEL.osm --epw weather.epw
 ```
 
-`--city` uses the weather files that ship with the installer;
-`btap-compliance --list-cities` shows what your install carries, which for a
-source install may be nothing. To use your own weather, pass
-`--epw path\to\file.epw` — a matching `.ddy` must sit beside it, because the
-sizing runs need design days.
+Pass the weather explicitly with `--epw path/to/file.epw`. A matching `.ddy`
+must sit beside it, because the sizing runs need design days. Canadian CWEC
+files come from [climate.onebuilding.org](https://climate.onebuilding.org).
+
+`--city toronto` is a shortcut for weather that ships **with the Windows
+installer**; `btap-compliance --list-cities` shows what your install carries.
+A `pip install` carries none, so use `--epw` there.
 
 **Expect it to take 40–90 minutes.** A determination is four EnergyPlus
 simulations — proposed sizing, proposed annual, reference sizing, reference
