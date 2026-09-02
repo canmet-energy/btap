@@ -31,8 +31,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install fast-lane test runner
@@ -86,8 +86,8 @@ jobs:
     # the point of this job is a bare environment that installs the wheel.
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'   # the project floor; local dev may be newer
           cache: pip
@@ -144,7 +144,7 @@ jobs:
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # The container runs as root while the workspace belongs to the runner
       # user, so git refuses the tree ("dubious ownership", exit 128) — which
       # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
@@ -226,15 +226,19 @@ jobs:
   #
   # Cloning the fork is the expensive part, so the bundle is cached on
   # legacy_pin/REF + Gemfile.lock. Not run on every push.
+  # Dispatch-only, and the condition says exactly that: this workflow declares
+  # no schedule trigger, so an `|| github.event_name == 'schedule'` clause here
+  # would be text that can never be true — and dead condition text is how a
+  # reader comes to believe parity runs on a timer when nothing runs it.
   parity:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     container: nrel/openstudio:3.11.0
     env:
       LEGACY_PIN_REQUIRED: '1'
       BUNDLE_GEMFILE: ${{ github.workspace }}/legacy_pin/Gemfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # The container runs as root while the workspace belongs to the runner
       # user, so git refuses the tree ("dubious ownership", exit 128) — which
       # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
@@ -243,7 +247,7 @@ jobs:
       - name: Trust the workspace (container UID != workspace owner)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Cache the pinned oracle
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: vendor/bundle
           key: legacy-pin-${{ hashFiles('legacy_pin/REF', 'legacy_pin/Gemfile.lock') }}
@@ -298,7 +302,7 @@ jobs:
           python3 python/scripts/oracle_prep.py --out /tmp/oracle-prep --canonical
           bundle exec ruby verification/oracle/export_goldens.rb \
             --prep /tmp/oracle-prep --out verification/oracle/goldens
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: inputs.export_goldens
         with:
           name: oracle-goldens
