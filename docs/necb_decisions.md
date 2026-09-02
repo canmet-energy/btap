@@ -4760,10 +4760,18 @@ manifest, and frozen scenario machinery survive.
 
 **Decided:** Classic OpenStudio air-cooled VRF equipment selects its Table
 5.2.12.1.-I class from attached terminal coils: an attached VRF DX heating coil
-means air-source heat pump; no attached VRF heating coil means air conditioner.
-Cooling and heating capacities are evaluated independently, so cooling-only
-equipment receives the higher air-conditioner cooling minimum and a missing
-heating capacity cannot suppress cooling conformance.
+means air-source heat pump; a terminal with no VRF heating coil means air
+conditioner. Cooling and heating capacities are evaluated independently, so
+cooling-only equipment receives the higher air-conditioner cooling minimum and a
+missing heating capacity cannot suppress cooling conformance.
+
+An outdoor unit serving NO terminals is INDETERMINATE and warns rather than
+being read as an air conditioner. The classic VRF object carries no
+heating/cooling-only field of its own, so terminals are the only evidence of
+class, and the reference transform strips them when it replaces a proposed VRF
+system. Guessing there would apply the cooling-only rows to a heat pump and drop
+its heating minimum with no audit line at all — the same "never guess, never
+silent" rule the condenser type already follows.
 
 Selected VRF code minimums are assigned exactly, matching the boiler, chiller
 and ordinary DX efficiency appliers. A better proposed or builder COP is not

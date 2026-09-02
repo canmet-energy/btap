@@ -142,13 +142,27 @@ def _vrf_row(rows, capacity_w):
                       or capacity_kw < row['maximum_capacity_kw'])), None)
 
 
-def _vrf_is_heat_pump(unit):
-    for terminal in unit.terminals():
+def _vrf_class(unit):
+    """The Table-I equipment class, from MODEL EVIDENCE only.
+
+    None means the model carries no evidence either way: the classic VRF
+    outdoor unit has no heating/cooling-only field of its own, so a unit
+    serving NO terminals says nothing about its class. That is not a
+    hypothetical — the reference transform strips the terminals when it
+    replaces a proposed VRF system, leaving the outdoor unit behind. Reading
+    that silence as 'air conditioner' would apply the cooling-only rows to a
+    heat pump AND drop its heating minimum without a word, so the caller
+    warns instead (the same 'never guess' rule the condenser type follows).
+    """
+    terminals = unit.terminals()
+    if not terminals:
+        return None
+    for terminal in terminals:
         heating = terminal.heatingCoil()
         if (heating.is_initialized()
                 and heating.get().to_CoilHeatingDXVariableRefrigerantFlow().is_initialized()):
-            return True
-    return False
+            return 'heat_pump'
+    return 'air_conditioner'
 
 
 def _apply_vrf(unit, tables, vintage, audit):
@@ -158,7 +172,8 @@ def _apply_vrf(unit, tables, vintage, audit):
     and EvaporativelyCooled condensers. It cannot identify the table's water,
     groundwater, and ground-source classes, so those paths warn instead of
     guessing. An attached VRF DX heating coil selects the heat-pump class;
-    cooling-only terminals select the air-conditioner class. Code minimums are
+    cooling-only terminals select the air-conditioner class; an outdoor unit
+    serving no terminals at all is INDETERMINATE and warns. Code minimums are
     assigned exactly, consistently with the other equipment appliers.
     """
     article = f'NECB {vintage} Table 5.2.12.1.-I'
@@ -170,11 +185,20 @@ def _apply_vrf(unit, tables, vintage, audit):
             target=unit.nameString(), inputs={'condenser_type': unit.condenserType()},
             article=article)
 
+    equipment_class = _vrf_class(unit)
+    if equipment_class is None:
+        return audit.warn(
+            'efficiency',
+            'VRF outdoor unit serves no terminals — Table-I equipment class indeterminate, '
+            'minimums not set',
+            target=unit.nameString(), inputs={'terminals': 0},
+            article=article, ruling='D-85')
+
     cooling_w = (optional_f(unit.grossRatedTotalCoolingCapacity())
                  or optional_f(unit.autosizedGrossRatedTotalCoolingCapacity()))
     heating_w = (optional_f(unit.grossRatedHeatingCapacity())
                  or optional_f(unit.autosizedGrossRatedHeatingCapacity()))
-    heat_pump = _vrf_is_heat_pump(unit)
+    heat_pump = equipment_class == 'heat_pump'
     rows = tables['vrf_air_source_heat_pumps' if heat_pump else 'vrf_air_conditioners']
     applied = []
 
@@ -182,7 +206,7 @@ def _apply_vrf(unit, tables, vintage, audit):
     if cooling_row is None:
         audit.warn('efficiency', 'VRF cooling capacity unavailable (model not sized?) — '
                                  'Table-I cooling minimum not set',
-                   target=unit.nameString(), inputs={'equipment_class': 'heat_pump' if heat_pump else 'air_conditioner'},
+                   target=unit.nameString(), inputs={'equipment_class': equipment_class},
                    article=article, ruling='D-85')
     else:
         if cooling_row.get('minimum_seer') is not None:
@@ -199,7 +223,7 @@ def _apply_vrf(unit, tables, vintage, audit):
         if heating_row is None:
             audit.warn('efficiency', 'VRF heating capacity unavailable (model not sized?) — '
                                      'Table-I heating minimum not set',
-                       target=unit.nameString(), inputs={'equipment_class': 'heat_pump'},
+                       target=unit.nameString(), inputs={'equipment_class': equipment_class},
                        article=article, ruling='D-85')
         else:
             if heating_row.get('minimum_hspf') is not None:
@@ -215,7 +239,7 @@ def _apply_vrf(unit, tables, vintage, audit):
         return None
     return audit.decision(
         'efficiency', 'VRF minimum efficiency applied', target=unit.nameString(),
-        inputs={'equipment_class': 'heat_pump' if heat_pump else 'air_conditioner',
+        inputs={'equipment_class': equipment_class,
                 'cooling_capacity_kw': (ruby_round(cooling_w / 1000.0, 1)
                                         if cooling_w is not None else None),
                 'heating_capacity_kw': (ruby_round(heating_w / 1000.0, 1)
