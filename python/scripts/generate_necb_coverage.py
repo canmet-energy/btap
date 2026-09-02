@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_GEM_COVERAGE.md"
+DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_COVERAGE.md"
 MANIFEST_DOMAINS = {"reference": "hvac", "necb": "necb"}
 STATUS_GROUPS = (
     ("implemented", "Implemented"),
@@ -97,8 +97,8 @@ def notes(row: dict) -> str:
 
 
 def render(records: list[dict]) -> str:
-    generator = "python/scripts/generate_necb_gem_coverage.py"
-    regenerate = "python3 python/scripts/generate_necb_gem_coverage.py"
+    generator = "python/scripts/generate_necb_coverage.py"
+    regenerate = "python3 python/scripts/generate_necb_coverage.py"
     title = "NECB coverage across the Python btap package"
     owner = "Python domain"
     source_heading = "Python domain"

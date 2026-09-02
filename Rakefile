@@ -26,7 +26,7 @@ namespace :necb do
   desc 'Regenerate the committed NECB coverage documents from Python inputs'
   task :coverage_doc do
     abort('necb:coverage_doc failed') unless
-      system(PYTHON, 'python/scripts/generate_necb_gem_coverage.py') &&
+      system(PYTHON, 'python/scripts/generate_necb_coverage.py') &&
       system(PYTHON, 'python/scripts/generate_necb_8_4_coverage.py')
   end
 

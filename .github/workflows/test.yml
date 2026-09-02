@@ -44,7 +44,7 @@ jobs:
       # before anything pays for the container.
       - name: Coverage code refs resolve
         run: cd python && pytest -q tests/test_coverage_code_refs.py
-      # NECB_GEM_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
+      # NECB_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
       # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
       # made the committed copies track the manifests, so they drifted: an
       # article promoted partial -> implemented (8.4.4.12 economizers, D-62) kept
@@ -57,9 +57,9 @@ jobs:
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          python3 python/scripts/generate_necb_gem_coverage.py
+          python3 python/scripts/generate_necb_coverage.py
           python3 python/scripts/generate_necb_8_4_coverage.py
-          git diff --exit-code -- docs/NECB_GEM_COVERAGE.md \
+          git diff --exit-code -- docs/NECB_COVERAGE.md \
                                   docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
       # The Python registry is canonical after R6. Run its document, TOC, id,

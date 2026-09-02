@@ -27,11 +27,13 @@ editing:
 
 **GENERATED — never edit by hand** (each carries a do-not-edit header, and
 the CI lint job regenerates both and fails on any diff):
-- `NECB_8_4_COVERAGE.html` and `NECB_GEM_COVERAGE.md` — the coverage
-  documents, rebuilt by `python3 python/scripts/generate_necb_gem_coverage.py`
+- `NECB_8_4_COVERAGE.html` and `NECB_COVERAGE.md` — the coverage
+  documents, rebuilt by `python3 python/scripts/generate_necb_coverage.py`
   and `python3 python/scripts/generate_necb_8_4_coverage.py` from the Python
   rules manifests, the `article` citation scan, and cached 8.4 article text.
-  The `GEM` filename is retained as part of the evidence history.
+  (Both were named `NECB_GEM_COVERAGE` until R6; the gems they were named for
+  no longer exist, and the file carries no evidence pointers, so the rename
+  cost nothing.)
 
 **AUTHORED reference:**
 - `necb_rule_verification.md` — the evidence-tier rules the coverage claims
