@@ -5,7 +5,64 @@
 **Branch:** `python-d80-r5-pr5-docs`
 **Base before the R6 implementation sequence:** `23205f1201b67fc7539e6f6e99ab7531e2aeb505^`
 **Retirement authority:** D-84 in `docs/necb_decisions.md`
-**Status when this handoff was written:** implementation pushed; final R6/PR-C workflow green; this handoff itself is not yet committed.
+**Status:** CLOSED at `bb28cf6`. Two review rounds, all findings resolved,
+full four-job dispatch green — see "Review closure" below.
+
+## Review closure
+
+Two rounds, both findings-first, both against a running system rather than
+the diff alone.
+
+**Round 1** (target `532d097`) found one blocking defect, four medium and
+seven low/residual items — resolved in `c01a8ed`, summarised under "Opus
+review resolution" below.
+
+**Round 2** (target `c01a8ed`) verified those repairs by re-running the
+original probes, and found two more:
+
+- **`_vrf_class` could not see what it was classifying.** The class was
+  inferred from `unit.terminals()`, but the reference transform strips
+  them, so EVERY VRF in a reference model answered "air conditioner" —
+  cooling-only rows applied to a heat pump, and the heating minimum
+  skipped with no audit line, because both sat behind one flag. The
+  frozen `corpus-none-08-vrf` baseline had recorded exactly that.
+  `c5e8010` made the class require evidence and warn without it; `c0f12ba`
+  removed the cause, so the reference no longer carries a VRF outdoor unit
+  serving no zone. D-85 records both halves.
+- **`_apply_chiller` had dropped the applied COP from its audit value.**
+  The value and the model-name suffix shared one string and the name's
+  compact `57tons 1.2kW/ton` form won. The COP is the determination an AHJ
+  reads; the two are now separate (`c0f12ba`).
+
+Round 2 also fixed a test-isolation defect that made the documented local
+command unreliable: `tests/support.py` sets `BTAP_ENERGYPLUS` process-wide,
+so under `-n auto` the override rung answered for the companion rung under
+test. Two engine tests failed in parallel and passed serially.
+
+**Closing evidence** — dispatch run
+[`33587044533`](https://github.com/canmet-energy/btap/actions/runs/33587044533),
+head `bb28cf6`, all four jobs success at STEP level, not merely rollup:
+live Leg C `23/23 tests, 0 skips` with `LEGACY_PIN_REQUIRED=1` and
+`fresh export ≡ committed goldens across 11 groups`; the pinned SmallOffice
+whole-building gate `4 passed`; verify and parity frozen lanes; installed-wheel
+smoke. Locally: 863 passed, verify 3/3, parity 2/2, Ruff clean, import
+contracts 3 kept / 0 broken.
+
+Do NOT read acceptance from this branch's `pull_request` run
+(`33587040725`): its `verify` and `parity` jobs are SKIPPED by design.
+
+**One thing left unexplained.** Two files deleted by `efb37cf` —
+`python/tests/test_fixture_drift.py` and
+`btap-necb/lib/btap_necb/data/decisions.json` — reappeared in the working
+tree at 03:06 on 2026-09-02, byte-identical to their `efb37cf^` versions,
+alongside 73 tracked files whose mtimes were rewritten with content
+matching HEAD. HEAD never moved (no `checkout:` reflog entry, no stash),
+which is the signature of a pathspec-scoped `git checkout <commit> -- …`
+or `git restore --source=…`: that form leaves no audit trail and does not
+delete files absent from the target. The actor could not be identified.
+Nothing shipped from that state — the push was made from a verified clean
+tree — but a `git add -A` from whatever did it would silently reverse the
+R6 deletion.
 
 ## Opus review resolution
 

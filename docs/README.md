@@ -44,9 +44,10 @@ the CI lint job regenerates both and fails on any diff):
 - `d80_retirement_plan_review.md` — durable review and execution checklist for
   D-80 Rev 4: live Leg C, verification self-sufficiency, and staged Ruby-gem
   retirement.
-- `R6_REVIEW_HANDOFF.md` — implementation-completion handoff for independent
-  review: commit boundaries, invariants, intentional oracle divergences,
-  validation evidence, residual risks, and suggested review commands.
+- `R6_REVIEW_HANDOFF.md` — the R6 review record, CLOSED at `bb28cf6`: commit
+  boundaries, invariants, intentional oracle divergences, both review rounds
+  and how each finding was resolved, the closing four-job dispatch evidence,
+  and the one unexplained working-tree event.
 
 ## Review debt: none
 
