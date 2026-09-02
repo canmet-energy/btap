@@ -930,12 +930,12 @@
  {
   "step": "efficiency",
   "target": "VRF Outdoor Unit",
-  "action": "VRF cooling or heating capacity unavailable (model not sized?) \u2014 Table-I minimums not set",
+  "action": "VRF outdoor unit serves no terminals \u2014 Table-I equipment class indeterminate, minimums not set",
   "inputs": {
-   "cooling_capacity_available": false,
-   "heating_capacity_available": false
+   "terminals": 0
   },
   "article": "NECB 2020 Table 5.2.12.1.-I",
+  "ruling": "D-85",
   "building": "reference building",
   "level": "warning"
  },

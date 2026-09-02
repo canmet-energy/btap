@@ -37,8 +37,6 @@
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Heating Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Heating Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Heating Capacity'.
-[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Rated Total Cooling Capacity (gross)'.
-[openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Rated Total Heating Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 1 Gross Rated Total Cooling Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 1 Gross Rated Total Cooling Capacity'.

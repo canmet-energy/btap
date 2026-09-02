@@ -2,7 +2,7 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "6781a648b17a0c5d5b342206e5310026c09e4dd6",
+  "commit": "c5e80101a1e8f6ed550d5db00c621921d60466b8",
   "dirty": false,
   "freezer_sha256": "b1c4c9c1d620e240f0c707f2eb778038209f3ae7f7d04c2e1afcbad1176fc5c2",
   "defs_sha256": "a76eaf0c0ca3a669a996b74017dc753b488c1731b23be815cfb0ad425cb5fccf",
@@ -411,11 +411,11 @@
    "last_cross_language_run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
    "seal_transition_reason": "Ruby product retired by D-84 after the final Ruby/Leg A attestation",
    "baseline_sha256": {
-    "audit.json": "ad02ffb07cb9bb884519895de07c4ef9a3fdc030ddf641e0db849a342a9a7e1b",
-    "audit.txt": "11a9cacb8ae4d1b62a092e3e5adb4d204a91378e44399ca604a7a0628c693380",
-    "report.json": "86455d22135ad7fae1cf2a44a972eea7eefde570d19c9d1d00977568f113fa8f",
+    "audit.json": "77676b76df3cb3925359d59dcbbd561928a3452c43cc5a0720427a2118314d87",
+    "audit.txt": "23f296b6f6b5a46c1074ce4227a9114d37a5590bf4fd1421adfbe6a0968d7fc9",
+    "report.json": "e3c73f23de8fd45f08198556a38d2ec0f520aef35570d0484bbcca58885dea08",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout.txt": "f501547b06da04a22535d31f72a5c37fa1a37fce500dbf20c461819c2b069a5f"
+    "stdout.txt": "e720eb806d1b68f0194dacc908c356517a6e5568aa6d7e32e7f2c2a16bfd9101"
    }
   },
   {
