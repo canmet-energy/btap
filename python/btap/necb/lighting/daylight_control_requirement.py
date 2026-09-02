@@ -67,16 +67,22 @@ def table():
     """Table 4.2.1.6.'s two daylight-control columns, mapped to the NECB
     space-function catalog names. Five states per column:
       required       — the column carries 'X'
-      not_required   — blank or a dash in BOTH the 2020 and 2025 extractions
+      not_required   — the column carries a dash (the two editions agree)
       not_applicable — the table refers the space type to a DIFFERENT article
                        (4.2.2.2. storage garages, 4.2.2.6.(2) guest rooms)
       not_listed     — the space type has no row at all, and (10)/(13) reach
                        only spaces requiring the control "in accordance with
                        Table 4.2.1.6." (dwelling units)
-      unknown        — the two extractions CONFLICT, or the cell holds
-                       header/footnote text. Never decided silently
-    The file's own provenance block says why 'unknown' has to exist: BOTH MCP
-    extractions of Table 4.2.1.6 are corrupted, and differently."""
+      unknown        — the space type has NO ROW in Table 4.2.1.6, so neither
+                       column can be read for it. Never decided silently
+    'unknown' is STRUCTURAL, not an extraction defect. The table's nine control
+    columns were re-read 2026-07-30 after the upstream extraction fix and agree
+    exactly between the 2020 and 2025 editions (0 differing cells of 909), so
+    the earlier conflict machinery — 2025 primary, 2020 corroborating — is gone
+    from the data file. What remains unknown is three catalog entries that the
+    printed table genuinely does not list: the '- undefined -' sentinel, the
+    legacy-only convention-centre seating type, and WholeBuilding (whose LPD
+    comes from the building-type method of Table 4.2.1.5)."""
     global _table_cache
     if _table_cache is None:
         path = _lighting.DATA_DIR / 'daylighting_controls_4_2_1_6.json'

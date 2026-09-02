@@ -136,3 +136,48 @@ class TestAuditFixes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@needs_sdk
+class TestOrphanedVrfOutdoorUnit(unittest.TestCase):
+    """A proposed VRF outdoor unit does not survive into the reference.
+
+    replace_system takes the zone terminals; the outdoor unit is neither zone
+    equipment nor on a loop, so it used to stay behind serving nothing — and
+    with the terminals went the only evidence of its Table 5.2.12.1.-I class,
+    which the efficiency pass then read as 'air conditioner' (D-85).
+    """
+
+    def build(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        self.assertTrue(model.getAirConditionerVariableRefrigerantFlows(),
+                        'the PROPOSED model really carries a VRF outdoor unit')
+        audit = AuditLog()
+        result = hvac.reference_hvac(
+            model, vintage='2020',
+            building={'storeys': 1,
+                      'zone_types': {z.nameString(): 'Office - enclosed'
+                                     for z in model.getThermalZones()}},
+            audit=audit)
+        return model, result, audit
+
+    def test_orphan_is_removed_and_the_removal_is_recorded(self):
+        proposed, result, audit = self.build()
+        self.assertEqual([], list(result.model.getAirConditionerVariableRefrigerantFlows()),
+                         'no VRF outdoor unit serving nothing survives into the reference')
+        self.assertEqual([], list(result.model.getZoneHVACTerminalUnitVariableRefrigerantFlows()))
+        entry = next(e for e in audit.entries
+                     if e['action'] == 'proposed VRF outdoor unit serves no reference zone — removed')
+        self.assertEqual('D-85', entry['ruling'])
+        self.assertEqual(0, entry['inputs']['terminals'])
+        self.assertTrue(proposed.getAirConditionerVariableRefrigerantFlows(),
+                        'the PROPOSED model is not touched — only the reference clone')
+
+    def test_the_efficiency_pass_never_classifies_a_terminal_less_unit(self):
+        """The bug this replaces: the pass reported equipment_class=air_conditioner
+        for a unit whose proposed terminals all carry VRF DX heating coils."""
+        _proposed, _result, audit = self.build()
+        self.assertFalse([e for e in audit.entries
+                          if (e.get('inputs') or {}).get('equipment_class')],
+                         'nothing is left for the Table-I classifier to guess about')

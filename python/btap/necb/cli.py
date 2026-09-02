@@ -611,14 +611,12 @@ class Weather:
         """Where to look for bundled weather, most authoritative first.
         BTAP_HOME is what a launcher actually sets; the checkout paths serve
         development (an installed wheel bundles no weather)."""
-        root = Path(__file__).resolve().parents[3]
+        python_root = Path(__file__).resolve().parents[2]
         candidates = []
         home = os.environ.get("BTAP_HOME") or os.environ.get("NECB_HOME")
         if home:
             candidates.append(os.path.join(home, "weather"))
-        candidates.append(str(root / "weather"))
-        candidates.append(str(root / "btap-modeling" / "test" / "fixtures"
-                              / "weather"))
+        candidates.append(str(python_root / "tests" / "fixtures" / "weather"))
         return candidates
 
     @staticmethod

@@ -1,276 +1,204 @@
-# Developing the NECB gem family
+# Developing canmet-btap
 
-Everything a contributor needs. If you only want to **run** a compliance check,
-start at the [README](../README.md) instead — this file assumes you are changing
-the gems, not using them.
+This guide is for contributors changing the product. To run a compliance check,
+start with the [user README](../README.md).
 
-The family map and the per-gem API guides are in the
-[README](../README.md#the-nine-gems).
+R6 (D-84) retired the five product Ruby gems. The repository now ships one
+Python distribution, `canmet-btap`, whose import package has five subpackages:
+`btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`, and
+`btap.necb`. Ruby remains only for the pinned external oracle in `legacy_pin/`
+and `verification/oracle/`.
 
-## The family contract
+## Contract
 
-Every gem in this repository obeys the same rules:
-
-- **Pure OpenStudio SDK.** No `openstudio-standards`, no measures, no BTAP.
-- **Never simulates.** Only the umbrella (`btap-necb`) runs EnergyPlus.
-- **One AuditLog schema** —
-  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`,
-  levels `:decision | :info | :warning`. **Warnings are never silent.** The class
-  lives in `btap-audit`; every other gem's `audit_log.rb` is a three-line
-  alias of it.
-- **Two citation axes.** `article:` cites the code that mandates a value;
-  `ruling:` cites the adjudicated decision that says how we read it. Every id
-  must exist in
-  [btap-necb/docs/necb_decisions.md](../btap-necb/docs/necb_decisions.md)
-  and its machine-readable mirror; a drift test enforces both directions.
-- **Audit text convention:** violations are SHOUTED, passes are lowercase — the
-  report's checklist classifier is deliberately case-sensitive about this.
-- **Article-coverage manifests.** Each vintage ruleset JSON declares what it
-  implements; partial and not-implemented entries warn on every run.
-- **Vintages 2020 and 2025 only.** 2011–2017 backfills are deferred.
+- Product code uses the OpenStudio SDK directly, not `openstudio-standards` or
+  measures.
+- Import direction is `necb` → `costing` → `modeling` → `audit`, with
+  `simulation` beside and depending only on `audit`. Import-linter enforces it.
+- `btap.audit` is SDK-free and owns the shared audit schema:
+  `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
+- `article` cites a code requirement; `ruling` cites a D-XX interpretation.
+  Warnings are never silent. Violations are uppercase and passes lowercase
+  because report classification is case-sensitive.
+- Rules target NECB 2020 and 2025 only. Article-coverage manifests state every
+  partial or missing sentence and emit the corresponding warning.
+- Python is authoritative. Intentional output changes include a clean-tree
+  frozen-scenario re-freeze and reviewed baseline diff in the same change.
 
 ## Requirements
 
-- Ruby 3.2.2
-- OpenStudio SDK 3.11.0 (`require 'openstudio'` must succeed; the SDK is
-  deliberately not declared as a gem dependency)
-- The `openstudio` CLI, for the tests that run EnergyPlus
-- **A UTF-8 locale.** Without one, Ruby's default external encoding is US-ASCII
-  and `File.read` of anything the gems emit — `plan_svg.rb` writes em dashes and
-  `m²`, the decisions doc is full of them — raises
-  `invalid byte sequence in US-ASCII`.
+- Python 3.11 or newer
+- OpenStudio SDK 3.11.0
+- EnergyPlus 25.2.0 for simulation tests
+- A UTF-8 locale
+- Ruby 3.2 and Bundler only when running the surviving legacy oracle
 
 ### Devcontainer
 
-`.devcontainer/` provides all of the above: Ubuntu 24.04, Ruby 3.2.2,
-OpenStudio 3.11.0, EnergyPlus 25.2.0, and `LANG=en_US.UTF-8`, on the
-`canmet/os_sdk_container:3.11.0` image. Open the repo in VS Code and reopen in
-the container. `postCreate` installs NRCan certificates when it detects that
-network, installs **Claude Code**, installs `.mcp.json` from the template,
-verifies the toolchain, and prints the common commands.
+The devcontainer provides Ubuntu 24.04, OpenStudio 3.11.0, EnergyPlus 25.2.0,
+Python, Ruby/Bundler for the oracle, and a UTF-8 locale. It installs staged host
+certificates before network downloads, copies `.mcp.json.example` to the
+gitignored `.mcp.json`, and leaves the multi-gigabyte oracle clone opt-in.
 
 ```bash
-bash .devcontainer/setup.sh --no-claude   # skip the Claude Code install
-bash .devcontainer/setup.sh --serena      # also add uv + the Serena MCP server
+bash .devcontainer/setup.sh --no-claude
+bash .devcontainer/setup.sh --serena
 ```
 
-It deliberately does **not** clone the legacy oracle — that is gigabytes, so it
-stays opt-in.
+### Python environment
+
+```bash
+cd python
+python3 -m venv .venv
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+```
+
+`[tbd]` installs the exact `canmet-tbd==3.5.2` thermal-bridging line. Do not
+casually move it to upstream 3.6.x: the uprate physics differ materially and
+require an adjudicated rebaseline.
 
 ### MCP servers
 
-`.mcp.json.example` is tracked; `.mcp.json` is **not** (the family rule is never
-to stage it). Setup copies the template, which carries **no key** — Claude Code
-expands `${VAR}` in `url` and `headers`, so the secret stays in your
-environment.
-
-The key lives in a gitignored `.env`, using the same variable name and the same
-loading mechanism as [canmet-energy/bluesky](https://github.com/canmet-energy/bluesky),
-so one `.env` works in both repositories:
+`.mcp.json.example` is tracked and `.mcp.json` is gitignored. The template holds
+no secret; Claude Code expands `HBIX_API_KEY` from the environment. One key
+covers codes, geocoding, weather, building-stock, modelling, and simulation.
+`HBIX_MCP_BASE_URL` is the only URL override and repoints all six together.
 
 ```bash
 cp .env.example .env
 chmod 600 .env
-$EDITOR .env        # set HBIX_API_KEY
-```
-
-`.devcontainer/setup.sh` appends an auto-load block to `~/.bashrc`, so a **new
-terminal** has the key exported. To load it into the shell you are already in:
-
-```bash
+$EDITOR .env
 set -a && source .env && set +a
 ```
 
-The `set -a` is load-bearing. A plain `source .env` sets shell variables without
-**exporting** them, so Claude Code — a child process — expands `${HBIX_API_KEY}`
-to nothing and all six servers send an empty `X-API-Key`. That surfaces as an
-opaque 403, not as a missing-key message.
+`set -a` is required in an existing shell because plain `source` does not
+export values to child processes. The two Python maintainers' clients use the
+same variables and also support a missing `.mcp.json`:
 
-**One key, one name.** `HBIX_API_KEY` covers all six MCP servers (codes,
-geocoding, weather, building-stock, modelling, simulation) and both Ruby scripts
-that call them directly — those scripts expand the `${VAR}` placeholders in
-`.mcp.json` themselves and abort with a clear message when the key is
-unresolvable. There is deliberately no per-server key alias, because the servers
-do not take different keys.
+```bash
+python3 python/scripts/fetch_necb_8_4_text.py
+python3 python/scripts/building_stock.py --help
+```
 
-`HBIX_MCP_BASE_URL` is the only other knob: it repoints all six servers at
-once — for the Ruby scripts and for `.mcp.json` alike — at a staging or local
-stack. There are no per-server overrides for the URL either; the scripts append
-their own `/<server>/mcp` path. That also keeps a missing `.mcp.json` a
-supported configuration without hardcoding a host in the scripts.
+CI uses mocked protocol tests and never requires live HBIX.
 
 ## Testing
 
-Each gem is self-contained:
-
-```bash
-cd btap-modeling && ruby test/test_catalog.rb
-```
-
-Cross-gem rule verification runs from the repository root:
-
-```bash
-rake necb:verify        # orphan-key lint + 8.4.6 curve probe + hostile-outcome tests
-rake necb:coverage_doc  # regenerate the coverage documents
-```
-
-### Legacy-parity gates
-
-The parity suites compare against a **pinned revision** of the NECB/BTAP
-implementation in the `NatLabRockies/openstudio-standards` fork. See
-[legacy_pin/README.md](../legacy_pin/README.md) for the pinning mechanism and the
-bump workflow.
-
-The tie to that fork is `legacy_pin/REF` — **one commit SHA, not a branch and
-not a git remote**. Nothing in this repository points at the fork's history, so
-"has upstream moved?" cannot be answered by `git log` here. Ask instead:
-
-```bash
-rake legacy:pin                                        # what we are pinned to
-rake legacy:whatsnew                                   # what has landed since, on nrcan
-LEGACY_FORK=/path/to/openstudio-standards rake legacy:whatsnew   # instant, offline
-BRANCH=develop rake legacy:whatsnew                    # a different fork branch
-```
-
-`legacy:whatsnew` lists the commits between the pin and the fork branch and
-groups every changed path by the gem that should care, so you can judge what is
-worth absorbing. Absorbing means **bumping the pin and re-running the gates** —
-never copying code across. With no local checkout it fetches a blobless mirror
-under `tmp/` (first run only; GitHub honours the blob filter, a local `file://` path does not — prefer `LEGACY_FORK`).
-
-Install the oracle once (it defaults to cloning the fork from GitHub — a
-multi-gigabyte, one-time cost):
-
-```bash
-BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install
-```
-
-If you already have the fork checked out locally, point at it instead — bundler
-git-clones from the path, which is far faster and works offline. Use the **same**
-`LEGACY_PIN_REMOTE` for install and for every run: it is part of the resolved
-lockfile, so changing it re-resolves and re-clones.
-
-```bash
-cd btap-necb
-LEGACY_PIN_REQUIRED=1 \
-LEGACY_PIN_REMOTE=/path/to/openstudio-standards \
-BUNDLE_GEMFILE=../legacy_pin/Gemfile \
-  bundle exec ruby test/test_apply_parity.rb
-```
-
-`LEGACY_PIN_REQUIRED=1` turns "oracle not bundled" from a skip into a failure —
-CI and verification runs should always set it, because a skipped parity gate is a
-green-but-vacuous gate. All eleven gates live in `btap-necb/test/`,
-prefixed by their source domain: envelope (4), loads (3), lighting (3) and
-shw (1).
-
-## Three-way verification (D-78)
-
-```
-            Leg A (the eleven gates)
-  oracle ◄──────────────────────────► Ruby gems
-    │  Leg C: frozen goldens              │  Leg B: dual-CLI run diffs
-    ▼  (verification/oracle/goldens/,     ▼  (verification/compare_runs.py)
-  goldens ◄──────────────────────────── the Python port
-```
-
-- **Leg C goldens**: exported from the PINNED oracle by the gem-free
-  `verification/oracle/export_goldens.rb` via the same probe code the gates
-  run (`verification/oracle/oracle_probes.rb`), against prep models built
-  by `python/scripts/oracle_prep.py` and probe requests from the committed
-  `verification/oracle/request_manifest.json` (D-80 python-prep /
-  ruby-probe). Regenerate whenever `legacy_pin/REF` bumps: dispatch
-  `test.yml` with `export_goldens=true`, download the `oracle-goldens`
-  artifact into `verification/oracle/goldens/`, commit.
-  `test_oracle_goldens_current.rb` fails the parity job until you do.
-- **LIVE Leg C** (D-80): the parity job runs `verification/live_leg_c.sh` —
-  Python prep → fresh oracle export → `compare_goldens.py` (committed ≡
-  live) → the five goldens pytest files against the FRESH export with zero
-  skips asserted. Locally it needs the pin bundle; the committed-goldens
-  fast path (`pytest tests/necb tests/costing`) needs nothing extra.
-- **The generator/CLI matrix** (D-80 R2): `bash verification/matrix.sh` runs
-  sample-generator (ruby|python) × CLI (ruby|python) — all four cells at
-  tiers `none`/`sizing` (CLI parity per corpus AND generator equivalence
-  per CLI); `TIER=annual` is the reduced check (Python CLI over both
-  corpora). `run_corpus.rb --samples-gen ruby|python` picks the generator;
-  the slug set and run counts are asserted against
-  `python/scripts/sample_manifest.json` either way.
-- **Leg B's successor — the frozen scenario suite (R4, D-82)**: 35
-  Ruby-sealed baselines under `verification/scenarios/`, run by
-  `python/tests/necb/test_frozen_scenarios.py` in three lanes (python:
-  every PR, engine-free; verify: sizing; parity: annual). Re-freeze with
-  `verification/scenarios/freeze.py` (clean tree) whenever behaviour
-  intentionally changes. The old live Leg-B drivers (`selftest.sh`,
-  `matrix.sh`, `run_corpus.rb`) and the three cross-language test
-  classes are DORMANT — `BTAP_LEGB=1` reactivates them for archaeology
-  until R6 deletes them. `compare_runs.py` + `spec.json` remain the
-  shared comparison rules (the spec's sha256 is pinned in the scenario
-  manifest).
-
-
-## The Python port (`python/`, D-79)
-
-A second implementation lives in `python/` — one pip distribution, `btap`,
-with five subpackages mirroring the gems. The port is COMPLETE (M0–M8,
-2026-08-28), verified against the gates above; `PORT_STATUS.md` at the repo
-root is the full record of what landed and what each milestone was gated
-on. Standing rule since the R4 handoff (D-82): behaviour changes are
-PYTHON-ONLY — Ruby backports stopped when the frozen scenario suite
-replaced live Leg B. An intentional behaviour change re-runs
-`verification/scenarios/freeze.py` (clean tree) and commits the
-re-frozen baselines with the change; the dormant Leg-B drivers remain
-behind `BTAP_LEGB=1` for archaeology until R6.
+Fast local suite:
 
 ```bash
 cd python
-python3 -m venv .venv && .venv/bin/pip install 'openstudio~=3.11.0' pytest pytest-xdist import-linter
-.venv/bin/pytest -n auto tests/     # the whole suite, parallel (~2.5 min)
-.venv/bin/lint-imports              # the D-77 arrows + audit stays SDK-free
-python3 -m unittest discover tests  # zero-install fallback, serial
+.venv/bin/pytest -n auto -q tests/
+.venv/bin/lint-imports
+.venv/bin/ruff check .
 ```
 
-Cross-cutting Ruby-vs-Python semantics are solved once in `btap/_compat.py`
-(stdlib-only, so `btap.audit` keeps running on a runner with no OpenStudio)
-and `btap/_sdk.py`. **Use those helpers rather than the raw Python
-equivalents** — `ruby_round` (half away from zero, not banker's),
-`ruby_div` (Ruby float division never raises), `opt`/`opt_or`,
-`sorted_by_name`, `NullAudit`. Each exists because the naive translation
-changes results silently; D-79 records why.
-
-EnergyPlus comes from `btap.simulation.engine`, which provisions a pinned,
-sha256-verified build (`BTAP_ENERGYPLUS` overrides it;
-`BTAP_ENERGYPLUS_ARCHIVE` side-loads on a TLS-intercepting network). The
-wheel carries the SDK and the ForwardTranslator but no engine; the umbrella
-CLI ships as the `btap-compliance` console script (M6), and
-`python -m btap.necb.cli` is the no-install spelling.
-
-The Leg-B cross-language gate (M6): `CLI_B=python bash
-verification/selftest.sh` runs the Ruby and Python CLIs over the same corpus
-and diffs every pair's `audit.json`/`report.json` under the rules in
-`verification/spec.json`; `TIER=sizing|annual` climbs into real EnergyPlus.
-CI runs `none`+`sizing` in the `verify` job and `annual` in the
-dispatch-only `parity` job.
-
-Thermal bridging (M7, D-79 Option A) uses **py-tbd** — the native Python
-port of rd2/tbd — pinned to its `tbd-3.5.2-compat` branch, the revision
-verified against the SAME Ruby TBD 3.5.2 / OSut 0.8.2 baseline the parity
-oracle is frozen on (py-tbd main ports 3.6.0, a physically different
-uprate):
+Serial zero-install fallback:
 
 ```bash
-cd python && .venv/bin/pip install '.[tbd]'   # the SHA-pinned engine
-BTAP_TBD_REQUIRED=1 .venv/bin/pytest tests/necb/test_envelope_thermal_bridging.py
+cd python && python3 -m unittest discover tests
 ```
 
-The suite asserts the engine identity (`tbd.VERSION`/`UPSTREAM_SHA`), and
-the Ruby-vs-Python TBD gates additionally need the pinned Ruby triplet
-(`gem install $(ruby legacy_pin/tbd_triplet.rb)`). `BTAP_TBD_REQUIRED=1`
-turns absence into failure — CI's `verify` job supplies both engines.
+Repository checks from the root:
 
+```bash
+python3 python/scripts/necb_orphan_keys.py
+python3 python/scripts/necb_8_4_6_curve_probe.py
+python3 python/scripts/generate_necb_gem_coverage.py
+python3 python/scripts/generate_necb_8_4_coverage.py
+python3 python/scripts/generate_decisions_toc.py --check
+cd python && python3 scripts/wheel_smoke.py
+```
 
-## History
+The `verify` CI job is the authoritative full-runtime lane: SDK, EnergyPlus,
+rasterizer, sample corpus, thermal bridging, all 97 HVAC systems, and sizing
+frozen scenarios are required rather than skipped.
 
-These gems were developed inside a fork of
-[openstudio-standards](https://github.com/NatLabRockies/openstudio-standards)
-between July and August 2026 and extracted here with their full history intact.
-The fork remains the source of the pinned parity oracle.
+## Decisions and generated docs
+
+The canonical registry is `python/btap/necb/data/decisions.json`; the authored
+record is [necb_decisions.md](necb_decisions.md). The registry tests enforce
+unique ordered ids, document/registry agreement, generated TOC agreement, and
+runtime citations. Regenerate the TOC with
+`python3 python/scripts/generate_decisions_toc.py`; use `--check` in gates.
+
+The two generated coverage documents are
+[NECB_GEM_COVERAGE.md](NECB_GEM_COVERAGE.md) and
+[NECB_8_4_COVERAGE.html](NECB_8_4_COVERAGE.html). Their retained filenames are
+part of the evidence history; their inputs and code pointers are Python-owned
+after R6. Do not edit either output by hand.
+
+Section 8.4 source caches ship under `python/btap/necb/data/coverage/` for
+offline, versioned use. Refresh them only as a maintainer operation with
+`python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
+diff.
+
+## Frozen scenarios
+
+`verification/scenarios/` contains 35 scenarios in three lanes:
+
+- `python`: engine-free, every Python-suite run
+- `verify`: sizing, in the OpenStudio container
+- `parity`: annual, in the dispatch-only parity job
+
+When a deliberate behaviour change affects output, run
+`verification/scenarios/freeze.py` from a clean tree and commit the resulting
+baselines and provenance with the change. The 31 scenarios that once had live
+Ruby seals are now `python-only:post-handoff` and retain their retired seal plus
+the final attestation identity. Four scenarios were already Python-only.
+
+## Pinned oracle
+
+`legacy_pin/REF` pins one full `openstudio-standards` SHA. Python-prepared models
+and the Ruby probes in `verification/oracle/` produce live Leg-C evidence; the
+committed goldens are in `verification/oracle/goldens/`. The whole-building
+SmallOffice gate also generates its source model through this bundle.
+
+```bash
+BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install
+
+LEGACY_PIN_REQUIRED=1 \
+BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
+PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+BTAP_PYTHON="$PWD/python/.venv/bin/python" \
+  bash verification/live_leg_c.sh /tmp/live-leg-c
+```
+
+For a local fork checkout, set `LEGACY_PIN_REMOTE=/path/to/openstudio-standards`
+for both `bundle install` and every run. Bundler compares the remote with the
+lock. `LEGACY_PIN_REQUIRED=1` turns an absent oracle into failure rather than a
+vacuous skip.
+
+On a pin bump, dispatch `.github/workflows/test.yml` with
+`export_goldens=true`, download the `oracle-goldens` artifact into
+`verification/oracle/goldens/`, and commit `REF`, `Gemfile.lock`, goldens, and
+attribution together. Never hand-edit a golden. Full instructions are in
+[legacy_pin/README.md](../legacy_pin/README.md).
+
+## CI
+
+The workflow has four jobs:
+
+| Job | Role |
+|---|---|
+| `lint` | orphan keys, coverage pointers and generated docs, decisions registry |
+| `python` | import contracts, Ruff, full Python suite, installed-wheel smoke |
+| `verify` | required SDK/EnergyPlus suite, NECB checks, sizing scenarios |
+| `parity` | live pinned oracle, SmallOffice gate, annual scenarios, optional golden export |
+
+`parity` is `workflow_dispatch` only; no schedule is declared. Run it whenever
+the oracle pin changes.
+
+## D-84 attestation
+
+The final coexistence evidence is commit
+`85ab14352677093e24038d933cf1071e5b03431a`, GitHub Actions run
+`33544573991`: 45 Ruby parity runs / 629 assertions; Ruby SmallOffice 3 runs /
+62 assertions; Python successor 4 tests; live Leg C 23/23; frozen parity
+scenarios; lint, Python, verify, and every then-existing gem matrix job green;
+zero parity skips. It is immutable historical evidence, not a claim that
+product Ruby can still be run after R6.
+
+The completed port chronology remains in [PORT_STATUS.md](../PORT_STATUS.md).
+Do not rewrite that or the audit/decision records into present tense; update
+only moved links when necessary.

@@ -42,11 +42,28 @@ registered with an EXPLICIT environment rather than "(Any)".
 
 ## What remains
 
-### USER — one-time, both indexes
+**Only two items, both human.** `canmet-btap 0.2.1` is LIVE on PyPI and is
+the only release there, so every publishing step below is done; the
+trusted-publisher registration it describes was completed and is kept as
+the record of how. What is left:
 
-Register `canmet-btap`: repo `canmet-energy/btap`, workflow
+1. **Tag `v0.2.1`** — the tag does not exist. Point it at the commit that
+   produced the UPLOADED wheel, not at today's `main`: `main` has since
+   absorbed all of R6, and a tag on it would claim content the published
+   artifact does not contain.
+2. **HUMAN LEGAL REVIEW** of the installer's third-party licence
+   inventory (below) — the installer redistributes CPython, OpenStudio,
+   EnergyPlus and the tbd chain.
+
+The acceptance runs named under PR-5 were executed: the goal sentence is
+proven end to end, and `wheel_smoke.py` re-proves it on every `python` CI
+job from a clean venv outside the checkout.
+
+### USER — one-time, both indexes (DONE)
+
+Registered `canmet-btap`: repo `canmet-energy/btap`, workflow
 `publish.yml`, environment `testpypi` on test.pypi.org and `pypi` on
-pypi.org. Keep `pypi` protected by required approval.
+pypi.org, with `pypi` protected by required approval.
 
 ### PR-B (this repo) — consume the published engine
 

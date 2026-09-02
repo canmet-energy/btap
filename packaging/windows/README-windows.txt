@@ -7,8 +7,8 @@ Runs the NECB Part 8 performance path on an OpenStudio model: simulates the
 proposed building, generates and simulates the reference building, and reports
 the Article 8.4.1.2 determination with a self-contained HTML report.
 
-Nothing else needs to be installed. OpenStudio 3.11.0 ships inside this
-package, and it carries its own Ruby and its own EnergyPlus.
+Nothing else needs to be installed. The package carries CPython 3.12 and the
+pinned OpenStudio 3.11.0, EnergyPlus 25.2.0, and canmet-btap wheels.
 
 It installs PER-USER and needs no administrator rights, so there is no UAC
 prompt and it works on a locked-down machine. Everything lives under one
@@ -70,14 +70,9 @@ in this package - point --costs-csv at your own licensed table to enable it.
 
 Licences
 --------
-Two regimes, deliberately kept separate:
+The regimes are deliberately kept separate:
 
-  LICENSE-gems.txt        the nine NECB gems - LGPL-3.0-or-later.
-                          Source for these gems is included in gems\ ; that IS
-                          the source, so the LGPL source-availability
-                          obligation is satisfied by this package itself.
-
-  openstudio\LICENSE.md   OpenStudio(R) - Copyright (c) 2008-2026, Alliance for
-  openstudio\copyright.txt Energy Innovation, LLC. BSD-3-style; redistributed
-                          here unmodified. EnergyPlus ships within that tree
-                          under its own notices.
+  LICENSE                 canmet-btap source - LGPL-3.0-or-later.
+  THIRD-PARTY-NOTICES.txt CPython and every installed wheel, with the path to
+                          each redistributed licence text under
+                          python\Lib\site-packages or licenses\.

@@ -310,7 +310,8 @@
    "purchased_cooling": {
     "article": "8.4.5.6.(2)",
     "text": "one air-cooled electric chiller ... shall be used to represent the purchased energy equipment",
-    "chiller_source": "air_cooled"
+        "chiller_source": "air_cooled",
+        "reference_cop": 2.802
    }
   }
  },
@@ -646,7 +647,7 @@
     "status": "host_scope",
     "how": "Whole-building modeling basis; the HVAC slice is governed by the articles below. Envelope/lighting/SHW conformance is composed by the umbrella from the sibling domain gems.",
     "code": [
-     "btap-necb/lib/btap_necb/compliance.rb#build_reference!"
+     "python/btap/necb/compliance.py#_build_reference"
     ]
    },
    {
@@ -655,7 +656,7 @@
     "status": "satisfied_by_clone",
     "how": "The reference model is a clone of the proposed model: schedules and internal/SHW loads remain identical, as required.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#clone_model"
+     "python/btap/necb/hvac/reference.py#_clone_model"
     ]
    },
    {
@@ -664,7 +665,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
     "code": [
-     "btap-necb/lib/btap_necb/envelope/reference.rb#reference_envelope"
+     "python/btap/necb/envelope/reference.py#reference_envelope"
     ]
    },
    {
@@ -673,7 +674,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-envelope — reference_envelope applies this when composed by the umbrella.",
     "code": [
-     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_lightweight_construction"
+     "python/btap/necb/envelope/reference.py#_apply_lightweight_construction"
     ]
    },
    {
@@ -682,7 +683,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-lighting — reference_lighting sets Part 4 allowance LPDs; reference_daylighting (ON by default, D-51; placement per the 4.2.2.1.(10)-(15) rule, D-57) covers sentences (5)-(12).",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/reference.rb#reference_lighting"
+     "python/btap/necb/lighting/reference.py#reference_lighting"
     ]
    },
    {
@@ -692,8 +693,8 @@
     "how": "purchased HEATING is represented by a gas-fired modulating boiler ((1)(a)) via the energy-type election",
     "gaps": "the (1)(b) capacity-ratio adjustment is sizing-time and not enforced",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type",
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#hot_water"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type",
+     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water"
     ]
    },
    {
@@ -703,8 +704,8 @@
     "how": "purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config",
     "gaps": "the (2)(b) capacity-ratio adjustment is sizing-time and not enforced",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type",
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#chilled_water"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type",
+     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
     ]
    },
    {
@@ -713,7 +714,7 @@
     "status": "host_scope",
     "how": "purchased service water heating belongs to openstudio-shw (8.4.5.20.)",
     "code": [
-     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
+     "python/btap/necb/shw/reference.py#reference_shw"
     ]
    },
    {
@@ -723,7 +724,7 @@
     "how": "operating schedules carry over to the representing equipment by clone",
     "gaps": "priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#clone_model"
+     "python/btap/necb/hvac/reference.py#_clone_model"
     ]
    },
    {
@@ -733,8 +734,8 @@
     "how": "Category election per Table -A (space type + storeys + cooling-kW threshold), closest-type fallback per sentence (3), residential special rules (D-34: heat-pump blocks take the sentence-(4) ASHP redirect before the compatible-cooling copy; water-loop HPs fall back to the Table -A rules per D-37), HP redirect per sentence (4), and the D-39 System 5 conditional (Table -B heating 'None' honoured for cooled-but-unheated blocks; 8.4.5.1.(5) presence override keeps the changeover heating when the proposed block heats).",
     "gaps": "Sentence (2) 10%-area exclusion is a modeling choice left to the host. Table -B note (3) IS applied since D-28 (same-catalog multizone selection groups merge into whole-building systems; facade/internal/underground split inside the builder). Table -B note (1) humidification IS rebuilt since D-55 (the proposed's humidifier is recorded per thermal block before the teardown and re-created on the serving reference loop with the same energy source, autosized, and with a control taken from the proposed); mixed-category zone groups warn per (1) (T9); keyword-order category election can misfile compound names — museum exhibition areas land in Assembly via 'exhibit' (A6, awaiting adjudication).",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#select_reference_systems",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#assign"
+     "python/btap/necb/hvac/reference.py#select_reference_systems",
+     "python/btap/necb/hvac/reference.py#_assign"
     ]
    },
    {
@@ -743,7 +744,7 @@
     "status": "implemented",
     "how": "Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_oversizing_caps"
+     "python/btap/necb/hvac/reference.py#_apply_oversizing_caps"
     ]
    },
    {
@@ -752,7 +753,7 @@
     "status": "implemented",
     "how": "reference heating system selected per Table 8.4.5.7.-A and this Article",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#assign"
+     "python/btap/necb/hvac/reference.py#_assign"
     ]
    },
    {
@@ -761,7 +762,7 @@
     "status": "implemented",
     "how": "purchased energy routes to Article 8.4.5.6.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type"
     ]
    },
    {
@@ -771,8 +772,8 @@
     "how": "terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50)",
     "gaps": "systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual — audited as an approximation, not claimed",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#audit_terminal_secondary_split",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_zone_fan_rules"
+     "python/btap/necb/hvac/reference.py#_audit_terminal_secondary_split",
+     "python/btap/necb/hvac/reference.py#_apply_zone_fan_rules"
     ]
    },
    {
@@ -781,7 +782,7 @@
     "status": "implemented",
     "how": "reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g))",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type"
     ]
    },
    {
@@ -796,8 +797,8 @@
     "status": "implemented",
     "how": "hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#hot_water",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_boiler"
+     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
+     "python/btap/necb/hvac/efficiency.py#_apply_boiler"
     ]
    },
    {
@@ -807,8 +808,8 @@
     "how": "furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized",
     "gaps": "electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning — EnergyPlus multispeed objects cannot hold a fifth (D-47)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_staging",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#stage_multispeed_coil"
+     "python/btap/necb/hvac/efficiency.py#apply_staging",
+     "python/btap/necb/hvac/efficiency.py#_stage_multispeed_coil"
     ]
    },
    {
@@ -817,8 +818,8 @@
     "status": "implemented",
     "how": "heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply"
+     "python/btap/modeling/hvac/components/curves.py#build",
+     "python/btap/necb/hvac/efficiency.py#apply"
     ]
    },
    {
@@ -827,7 +828,7 @@
     "status": "implemented",
     "how": "reference cooling system selected per Table 8.4.5.7.-A and this Article",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#assign"
+     "python/btap/necb/hvac/reference.py#_assign"
     ]
    },
    {
@@ -836,7 +837,7 @@
     "status": "implemented",
     "how": "purchased energy routes to Article 8.4.5.6.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type"
     ]
    },
    {
@@ -845,7 +846,7 @@
     "status": "implemented",
     "how": "reference cooling energy type modeled identical to the proposed",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_energy_type"
+     "python/btap/necb/hvac/reference.py#_reference_energy_type"
     ]
    },
    {
@@ -860,8 +861,8 @@
     "status": "implemented",
     "how": "cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply"
+     "python/btap/modeling/hvac/components/curves.py#build",
+     "python/btap/necb/hvac/efficiency.py#apply"
     ]
    },
    {
@@ -870,8 +871,8 @@
     "status": "implemented",
     "how": "hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor — plant defaults + the efficiency pass",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#chilled_water",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_chiller"
+     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water",
+     "python/btap/necb/hvac/efficiency.py#_apply_chiller"
     ]
    },
    {
@@ -881,7 +882,7 @@
     "how": "terminal/secondary split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50)",
     "gaps": "systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#audit_terminal_secondary_split"
+     "python/btap/necb/hvac/reference.py#_audit_terminal_secondary_split"
     ]
    },
    {
@@ -891,8 +892,8 @@
     "how": "DX staging IS modelled since D-46: multispeed DX cooling inside an AirLoopHVACUnitarySystem on reference systems 3/4 and the ASHP, stage COUNT set post-sizing, efficiencies and curves binned by the top-stage capacity",
     "gaps": "zone-terminal DX stays single-speed (packaged terminal units cannot host a multispeed coil in EnergyPlus) and make-up-air tempering DX likewise (D-48); stage counts above four are CLAMPED with a shouted warning (D-47)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_staging",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_dx_cooling_multi"
+     "python/btap/necb/hvac/efficiency.py#apply_staging",
+     "python/btap/necb/hvac/efficiency.py#_apply_dx_cooling_multi"
     ]
    },
    {
@@ -901,7 +902,7 @@
     "status": "implemented",
     "how": "water-cooled systems pair to the cooling tower built per Article 8.4.5.11.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules"
     ]
    },
    {
@@ -910,7 +911,7 @@
     "status": "implemented",
     "how": "axial-fan direct-contact tower with 35/29 C water and 24 C wet-bulb design temperatures; fan power at the Table 5.2.12.2 0.013 kW/kW maximum",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules"
     ]
    },
    {
@@ -919,7 +920,7 @@
     "status": "implemented",
     "how": "a tower at or below 1750 kW is modeled with one cell",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules"
     ]
    },
    {
@@ -928,7 +929,7 @@
     "status": "implemented",
     "how": "cells = capacity / 1750 kW rounded UP (true ceiling)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules"
     ]
    },
    {
@@ -938,7 +939,7 @@
     "how": "pump modeled with constant-power coefficients",
     "gaps": "the hardware object is variable-speed; the constant-speed pump ruling is pending (T-list)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_pump_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_pump_rules"
     ]
    },
    {
@@ -948,7 +949,7 @@
     "how": "pumping flow comes from plant autosizing",
     "gaps": "the sentence’s specific flow-rate criteria are not individually evaluated against the sized value",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_pump_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_pump_rules"
     ]
    },
    {
@@ -958,7 +959,7 @@
     "how": "cell fan set to maintain 29 C outlet water",
     "gaps": "cycling control relies on the CoolingTowerSingleSpeed default capacity control rather than an explicit cycling model",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules"
     ]
    },
    {
@@ -968,8 +969,8 @@
     "how": "tower part-load behaviour comes from the shared Subsection 8.4.6 curve machinery",
     "gaps": "the tower coefficients are not individually verified by the curves probe",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_tower_rules",
-     "btap-modeling/lib/btap_modeling/hvac/components/curves.rb#build"
+     "python/btap/necb/hvac/efficiency.py#_apply_tower_rules",
+     "python/btap/modeling/hvac/components/curves.py#build"
     ]
    },
    {
@@ -978,8 +979,8 @@
     "status": "implemented",
     "how": "air economizers (Table -12 -> 5.2.2.8) applied to reference systems 1/3/4/6 + HP with mechanical cooling: DifferentialEnthalpy control, up to 100% OA. DX staging clauses 5.2.2.8.(4)-(5) enforced since D-62: economizer systems' staged cooling gets a stage-count FLOOR so the lowest stage is <= 25% of capacity at >= 70 kW and <= 50% at > 25 kW (economizer_dx_staging rules; sentence (6)'s OA-reduction permission is not exercised - stage flows are floored at the minimum-OA fraction per D-46). Systems 2/5 get the 5.2.2.9 WATER-side economizer since D-56: a HeatExchangerFluidToFluid between the condenser and chilled-water loops, UA and both design flows autosized at sizing factor 1.0 (sized for the loop's full design cooling load), CoolingSetpointModulated onto the loop design exit temperature, plus the condenser setpoint reset to the outdoor wet-bulb + tower approach without which the tower stays at 29 C and the economizer is inert. The 5.2.2.9 capability is INTEGRATED and measured: 100% of the chilled-water load in every hour at outdoor wet-bulb 7 C or lower, partial share above the band; sentence (1) binds because the reference rejects heat evaporatively, (2) declared inapplicable; air-cooled/purchased chilled water warns (no evaporatively-cooled fluid).",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_economizers",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#economizer_stage_floor"
+     "python/btap/necb/hvac/reference.py#_apply_economizers",
+     "python/btap/necb/hvac/efficiency.py#_economizer_stage_floor"
     ]
    },
    {
@@ -988,8 +989,8 @@
     "status": "implemented",
     "how": "a water-LOOP heat pump (internal loop; auxiliary boiler/tower allowed) KEEPS its Table 8.4.5.7.-A selection per the printed split (D-37, Note A-8.4.5.13)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#heat_pump_redirects?",
-     "btap-modeling/lib/btap_modeling/hvac/classify.rb#plant_facts"
+     "python/btap/necb/hvac/reference.py#_heat_pump_redirects",
+     "python/btap/modeling/hvac/classify.py#_plant_facts"
     ]
    },
    {
@@ -999,10 +1000,10 @@
     "how": "air-, water- and ground-SOURCE heat pumps redirect to the Table 8.4.5.13. packaged rooftop ASHP, source classified from the HP’s source plant loop with no-evidence detections keeping the conservative redirect; -10 C heating cutoff applied ((2)(d)); cooling sized at the peak load without oversizing ((2)(b), D-52); the (2)(g) auxiliary-fuel election runs on annual data with the 33% proviso",
     "gaps": "(2)(c)’s -8.3 C point evaluates to 47.8% on the vendored legacy CAP_FT curve against the code’s 50% (known approximation, D-52 review); on simulate: :sizing/:none the (2)(g) election cannot run and the structural 8.4.5.9.(4) proxy elects, audited as such",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_heat_pump_limits",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#heat_pump_aux_energy_type",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_oversizing_caps",
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#align_heat_pump_heating_capacity"
+     "python/btap/necb/hvac/reference.py#_apply_heat_pump_limits",
+     "python/btap/necb/hvac/reference.py#heat_pump_aux_energy_type",
+     "python/btap/necb/hvac/reference.py#_apply_oversizing_caps",
+     "python/btap/necb/hvac/efficiency.py#_align_heat_pump_heating_capacity"
     ]
    },
    {
@@ -1012,7 +1013,7 @@
     "how": "Table 8.4.5.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) — unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.5.1.(2) makes Part 5 a ceiling for the reference).",
     "gaps": "(6) 5.2.12.1 pump-energy-inclusive secondary-system adjustment is not implemented; (2)'s combined peak transfers as W/(L/s) INTENSITY (x reference flow), not absolute watts — reference flows legitimately differ from proposed.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_pump_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_pump_rules"
     ]
    },
    {
@@ -1022,8 +1023,8 @@
     "how": "spaces and their DesignSpecificationOutdoorAir are retained by the clone; rebuilt reference systems draw the same peak OA specifications",
     "gaps": "the identity holds only for DSOA-driven proposeds — hard-set proposed minimum-OA controller values draw a runtime warning (T7)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#clone_model",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
+     "python/btap/necb/hvac/reference.py#_clone_model",
+     "python/btap/necb/hvac/reference.py#reference_hvac"
     ]
    },
    {
@@ -1033,8 +1034,8 @@
     "how": "DCV strategies ARE copied since D-54: each proposed air loop’s demand-controlled-ventilation flag and outdoor-air method are recorded per thermal block before teardown and re-applied to the rebuilt reference controller",
     "gaps": "peak-rate outdoor-air methods (ZoneSum, 62.1 VRP) are deliberately NOT copied because they determine the peak rate sentence (1) governs; where a reference system merges blocks of which only some carry DCV, the single controller applies the strategy to all and warns",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_dcv",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#audit_dcv_caveats"
+     "python/btap/necb/hvac/reference.py#_apply_dcv",
+     "python/btap/necb/hvac/reference.py#_audit_dcv_caveats"
     ]
    },
    {
@@ -1050,7 +1051,7 @@
     "status": "implemented",
     "how": "throttling range is identical by construction: both buildings use ideal thermostat control on cloned schedules (8.4.3.2) — there is no throttling knob that could differ",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#clone_model"
+     "python/btap/necb/hvac/reference.py#_clone_model"
     ]
    },
    {
@@ -1059,8 +1060,8 @@
     "status": "implemented",
     "how": "VAV fan power-vs-flow curves from Table -17 applied in the (post-sizing) efficiency pass, row selected by rated power per sentences (3)-(5); the below-D floor is approximated by the E+ minimum-flow-fraction clamp (equals E within table rounding)",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/efficiency.rb#apply_fan_power_curve",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_fan_rules"
+     "python/btap/necb/hvac/efficiency.py#_apply_fan_power_curve",
+     "python/btap/necb/hvac/reference.py#_apply_fan_rules"
     ]
    },
    {
@@ -1070,7 +1071,7 @@
     "how": "secondary-system supply airflow is the sum of the block airflows via zone-level sizing",
     "gaps": "the determination is sizing-time; the sentence’s arithmetic is not re-verified against the sized result",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_zone_fan_rules"
+     "python/btap/necb/hvac/reference.py#_apply_zone_fan_rules"
     ]
    },
    {
@@ -1080,7 +1081,7 @@
     "how": "block supply airflow comes from zone sizing",
     "gaps": "the greater-of criteria at the 21/11 C supply-air deltas are not explicitly enforced",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_zone_fan_rules"
+     "python/btap/necb/hvac/reference.py#_apply_zone_fan_rules"
     ]
    },
    {
@@ -1089,7 +1090,7 @@
     "status": "implemented",
     "how": "systems 1-5 fan specs applied: supply 640 Pa at 40% combined efficiency, no return-fan spec",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_fan_rules"
+     "python/btap/necb/hvac/reference.py#_apply_fan_rules"
     ]
    },
    {
@@ -1098,7 +1099,7 @@
     "status": "implemented",
     "how": "system 6 fan specs applied: supply 1000 Pa at 55% + return 250 Pa at 30%, 13 C SAT via the catalog sizing block",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#apply_fan_rules"
+     "python/btap/necb/hvac/reference.py#_apply_fan_rules"
     ]
    },
    {
@@ -1120,7 +1121,7 @@
     "how": "Table 5.2.10.1.-A/-B airflow-threshold trigger (climate row by HDD x %OA band x continuous/non-continuous from the air loop availability schedule, >=8000 h/yr) evaluated POST-SIZING per reference air loop on sized supply/OA flows; rotary HX @ 50% effectiveness with OA-pretreat control added where required. Below-10%-OA systems are outside the Tables (NR).",
     "gaps": "Ice-plant heat-recovery rules (3) are not modeled (no ice plants in scope). Reference fans default to Always On from the topology builders, classifying most systems CONTINUOUS (Table -B: R at >=10% OA for HDD >= 3000) — wiring reference fan availability to the archetype operating schedule would flip many to non-continuous; open item, every determination audits its inputs.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/energy_recovery.rb#apply_energy_recovery"
+     "python/btap/necb/hvac/energy_recovery.py#apply_energy_recovery"
     ]
    },
    {
@@ -1129,7 +1130,7 @@
     "status": "host_scope",
     "how": "Delegated to openstudio-shw — reference_shw re-applies Part 6 minimum efficiencies.",
     "code": [
-     "btap-necb/lib/btap_necb/shw/reference.rb#reference_shw"
+     "python/btap/necb/shw/reference.py#reference_shw"
     ]
    },
    {
@@ -1138,7 +1139,7 @@
     "status": "implemented",
     "how": "HVAC components accounted per the prescriptive Section 5.2 requirements via the reference system builds (8.4.5.7.-8.4.5.19.) and the capacity-binned efficiency pass — the realization of 8.4.1.1.(1) for the HVAC slice.",
     "code": [
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
+     "python/btap/necb/hvac/reference.py#reference_hvac"
     ]
    },
    {
@@ -1148,8 +1149,8 @@
     "how": "Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies — components are constructed, not approximated by thermodynamically-similar substitutes.",
     "gaps": "(2) limited-capability effects (terminal/primary/secondary interactions) are EnergyPlus behaviour of the built systems, not separately verified.",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/builder.rb#build_system",
-     "btap-necb/lib/btap_necb/hvac/reference.rb#reference_hvac"
+     "python/btap/modeling/hvac/builder.py#build_system",
+     "python/btap/necb/hvac/reference.py#reference_hvac"
     ]
    }
   ]

@@ -140,19 +140,14 @@ def simulatable() -> set[str] | None:
     remember. All 97 pass as of the defrost-curve fix; the gate stays because
     the next regression should stop a sample, not ship one.
 
-    Resolution is PYTHON-FIRST with a fallback to the Ruby gem's copy: the port
-    is moving the shared fixtures under python/tests/fixtures/ (a sibling D-80
-    task), and until that lands the only copy is the btap-modeling one. Both
-    paths hold the same data, so either answers the same question; preferring
-    the Python copy means the port stops depending on the gem tree the moment
-    the move lands, with no edit here."""
-    for path in (PYTHON_ROOT / "tests" / "fixtures" / "system_simulation_status.json",
-                 REPO_ROOT / "btap-modeling" / "test" / "fixtures"
-                 / "system_simulation_status.json"):
-        if path.is_file():
-            rows = json.loads(path.read_text(encoding="utf-8"))
-            return {r["name"] for r in rows if r["status"] == "ok"}
-    return None
+    The Python-owned fixture is authoritative after R6. Missing data is loud:
+    returning ``None`` would silently generate every catalog system and make
+    this safety gate vacuous."""
+    path = PYTHON_ROOT / "tests" / "fixtures" / "system_simulation_status.json"
+    if not path.is_file():
+        raise FileNotFoundError(f"missing Python system status fixture: {path}")
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    return {r["name"] for r in rows if r["status"] == "ok"}
 
 
 def seed(vintage="2020"):

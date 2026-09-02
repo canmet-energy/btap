@@ -39,6 +39,7 @@ class Row:
     measured: str | None
     audit_index: int
     building: str | None = None
+    coverage: bool = False
 
 
 def rows(audit_entries):
@@ -55,7 +56,8 @@ def rows(audit_entries):
             out.append(Row(glyph="warning", article=_article(entry),
                            building=entry.get("building"),
                            statement=statement_for(entry),
-                           measured=measured_for(entry), audit_index=index))
+                           measured=measured_for(entry), audit_index=index,
+                           coverage=step == "coverage"))
         elif step == "compliance" and level == "decision":
             out.append(Row(glyph=verdict_glyph(str(entry.get("action") or "")),
                            article=_article(entry),
@@ -122,6 +124,10 @@ def statement_for(entry):
 
 def measured_for(entry):
     """Compact "measured" cell from the decision's inputs dict."""
+    if str(entry.get("step") or "") == "coverage":
+        # status/how/gaps are rendered as the determination itself. Citation
+        # counts and source paths are internal traceability, not measurements.
+        return None
     inputs = entry.get("inputs")
     if not (isinstance(inputs, dict) and inputs):
         return None

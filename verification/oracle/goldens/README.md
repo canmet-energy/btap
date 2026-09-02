@@ -13,7 +13,7 @@ with the gates' tolerance table — giving Python ≡ oracle *directly*, so a
 bug faithfully ported from Ruby fails here even when Ruby↔Python agree
 (Leg B) and Ruby↔oracle agree (Leg A).
 
-**Currency is enforced twice**: `btap-necb/test/test_oracle_goldens_current.rb`
+**Currency is enforced twice**: `python/tests/necb/test_oracle_goldens_current.py`
 asserts `manifest.legacy_ref == legacy_pin/REF`, the checksums, the exact
 file set, and the request-manifest recursive inventory; the parity job's
 `verification/live_leg_c.sh` re-exports fresh from the live oracle and

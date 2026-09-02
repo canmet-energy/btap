@@ -11,7 +11,7 @@ plus a complete audit trail of every decision it made and the code article
 behind each one.
 
 ```
-btap-compliance my-building.osm --city toronto
+btap-compliance my-building.osm --epw toronto.epw
 ```
 
 ```
@@ -52,38 +52,40 @@ Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 ## Installing
 
-The tool is the **Python implementation**, installed from source:
-
 ```bash
-git clone https://github.com/canmet-energy/btap.git
-cd btap/python
-python -m pip install '.[tbd]'
+pip install "canmet-btap[tbd]"
 ```
 
-That gives you the `btap-compliance` command. Four things worth knowing:
+That gives you the `btap-compliance` command, and on Windows or Linux
+**EnergyPlus comes with it** — there is nothing else to install, no separate
+download, and no first-run surprise.
 
-- The repository is **private**, so cloning it requires access. There is no
-  published package to install by name.
-- You need **Python 3.11 or newer**. The OpenStudio SDK arrives as an ordinary
-  dependency, so you do not install OpenStudio yourself.
-- **EnergyPlus is automatically provisioned and version-verified on first
-  use**; on an offline or TLS-intercepted network supply it via
-  `BTAP_ENERGYPLUS` (an existing install) or `BTAP_ENERGYPLUS_ARCHIVE` (a
-  downloaded archive).
+- You need **Python 3.11 or newer**. The OpenStudio SDK and the EnergyPlus
+  engine both arrive as ordinary dependencies.
+- **The engine is included on Windows x86-64 and Linux x86-64 (glibc 2.35 or
+  newer)** — that is Ubuntu 22.04 and later, RHEL 9 and later, and anything
+  comparable. It is the exact EnergyPlus build this tool is verified against,
+  shipped as the [`canmet-energyplus`](https://pypi.org/project/canmet-energyplus/)
+  wheel.
+- **On macOS, and on musl or older-glibc Linux**, the engine is downloaded and
+  version-verified on first use instead. If that machine is offline or behind
+  a TLS-intercepting proxy, point at an engine you already have with
+  `BTAP_ENERGYPLUS`, or at a downloaded archive with `BTAP_ENERGYPLUS_ARCHIVE`.
 - `[tbd]` adds thermal-bridging support (Article 3.1.1.7). Without it the run
   still works and says so loudly in the audit, rather than quietly leaving
   bridging out.
 
+Prefer to work from source? `git clone https://github.com/canmet-energy/btap.git`
+then `cd btap/python && pip install '.[tbd]'`.
+
 ## Installing on Windows
 
-Download `btap-compliance-setup-<version>.exe` and run it. This is the one
-packaged installer today, and it installs the **frozen Ruby implementation** —
-verified equivalent to the Python implementation on every model in the test
-corpus. A native Python Windows installer is planned.
+Not a Python user? Download `btap-compliance-setup-<version>.exe` from the
+[releases page](https://github.com/canmet-energy/btap/releases) and run it. You
+need nothing else on the machine — not Python, not OpenStudio, not EnergyPlus.
 
-That is the whole prerequisite list. The installer carries its own copy of
-**OpenStudio 3.11.0 and EnergyPlus 25.2.0**, so you do not need to install
-either, and it will not disturb any OpenStudio you already have.
+The installer carries its own **Python 3.12, OpenStudio 3.11.0 and EnergyPlus
+25.2.0**, so it cannot disturb anything you already have.
 
 - It installs **per user** and needs **no administrator rights**, so there is no
   UAC prompt and it works on a locked-down machine.
@@ -95,24 +97,21 @@ Then open **NECB Compliance (console)** from the Start menu and type
 `btap-compliance --help`, or double-click `samples\run-demo.cmd` for a worked
 example.
 
-Building the installer yourself is covered in
-[packaging/windows/README.md](packaging/windows/README.md); the Ruby tool also
-runs from a source checkout anywhere OpenStudio 3.11 does — see
-[docs/DEVELOPERS.md](docs/DEVELOPERS.md).
-
 ---
 
 ## Running a check
 
-```bat
-btap-compliance MODEL.osm --city toronto
+```bash
+btap-compliance MODEL.osm --epw weather.epw
 ```
 
-`--city` uses the weather files that ship with the installer;
-`btap-compliance --list-cities` shows what your install carries, which for a
-source install may be nothing. To use your own weather, pass
-`--epw path\to\file.epw` — a matching `.ddy` must sit beside it, because the
-sizing runs need design days.
+Pass the weather explicitly with `--epw path/to/file.epw`. A matching `.ddy`
+must sit beside it, because the sizing runs need design days. Canadian CWEC
+files come from [climate.onebuilding.org](https://climate.onebuilding.org).
+
+`--city toronto` is a shortcut for weather that ships **with the Windows
+installer**; `btap-compliance --list-cities` shows what your install carries.
+A `pip install` carries none, so use `--epw` there.
 
 **Expect it to take 40–90 minutes.** A determination is four EnergyPlus
 simulations — proposed sizing, proposed annual, reference sizing, reference
@@ -180,9 +179,10 @@ point is still written.
 
 Coverage is generated from the code, not hand-maintained:
 
-- **[NECB_GEM_COVERAGE.md](btap-necb/docs/NECB_GEM_COVERAGE.md)** — every
-  article each gem declares, with its status and its gaps.
-- **[NECB_8_4_COVERAGE.html](btap-necb/docs/NECB_8_4_COVERAGE.html)** —
+- **[NECB_GEM_COVERAGE.md](docs/NECB_GEM_COVERAGE.md)** — every
+  article each rule domain declares, with its status and its gaps. The filename
+  is retained for continuity with the pre-R6 evidence record.
+- **[NECB_8_4_COVERAGE.html](docs/NECB_8_4_COVERAGE.html)** —
   Section 8.4 article by article, down to sentence and clause text, showing
   where each is applied in the code. One collapsible part per edition, each in
   its own article numbering — 2020's 8.4.4 is the reference building where
@@ -198,7 +198,7 @@ article numbering):
 | Partial (warns every run) | 27 | 28 |
 | Not implemented (warns every run) | 4 | 4 |
 | Satisfied by construction (clone) | 3 | 3 |
-| Host / other-gem scope | 12 | 12 |
+| Host / other-package scope | 12 | 12 |
 | Field / document verification (modeller scope, does not warn) | 10 | 10 |
 | **Total entries** | **119** | **122** |
 
@@ -219,8 +219,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **75 decisions** are recorded in
-**[necb_decisions.md](btap-necb/docs/necb_decisions.md)** — 40 of them
+buried in the source. **84 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 40 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -230,7 +230,7 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 75.
+affected this building, not all 84.
 
 ---
 
@@ -279,31 +279,29 @@ Each is described in `samples\README.txt` with the article it exercises.
 
 ---
 
-## The nine gems
+## Architecture
 
-The tool is assembled from nine standalone Ruby gems. Most users never need to
-know this; it matters if you want to use one part on its own — say, NECB space
-types without the compliance run. The [Python implementation](python/) mirrors
-the five core gems as subpackages of one `btap` distribution, and is now the
-primary implementation — the gems are held frozen as the verification baseline
-it is checked against.
+The product is one Python distribution, `canmet-btap` (import package `btap`),
+with five subpackages and one-way dependencies:
 
-| Gem | One line |
+| Subpackage | Responsibility |
 |---|---|
-| [btap-audit](btap-audit) | the shared AuditLog + article-coverage emitter every other gem writes to |
-| [btap-modeling](btap-modeling) | model AUTHORING, no NECB anywhere: seven shape wizards, the bar-by-shape engine, measured footprints, the 97-system HVAC topology catalog and builders, constructions, the surface census |
-| [btap-costing](btap-costing) | capital costing (HVAC, envelope, lighting, SHW) and the licensed-data seam — placeholder tables vendored, real RS-Means values injected at runtime, never redistributed |
-| [btap-necb](btap-necb) | **the code-compliance layer**: every NECB rule (loads, lighting, SHW, HVAC selection + efficiencies, envelope), the coverage manifests, the 8.4.1.2 determination, one audit, the AHJ report, and the `btap-compliance` CLI |
-| [btap-simulation](btap-simulation) | the EnergyPlus runner (local, or the HBIX remote backend) |
+| `btap.audit` | shared audit log and article-coverage evidence; SDK-free |
+| `btap.modeling` | generic OpenStudio model authoring, geometry, constructions, and HVAC topology builders |
+| `btap.costing` | capital costing and the licensed-data boundary; priced data is runtime-injected, never redistributed |
+| `btap.necb` | NECB rules, reference-building pipeline, determination, coverage, report, and CLI |
+| `btap.simulation` | local EnergyPlus execution and the HBIX remote backend |
 
-Each gem's README is its API guide.
-[btap-necb/docs/README.md](btap-necb/docs/README.md) explains the
-decision registers.
+The former product Ruby gems were retired by D-84. Ruby remains only in
+`legacy_pin/` and `verification/oracle/` to run the pinned
+`openstudio-standards` oracle; it is verification infrastructure, not a second
+product implementation. [docs/README.md](docs/README.md) explains the decision
+and evidence registers.
 
 ---
 
 ## Working on the code
 
-See **[docs/DEVELOPERS.md](docs/DEVELOPERS.md)** — the family contract,
-requirements, the devcontainer, MCP configuration, the test suites, and the
-legacy-parity gates.
+See **[docs/DEVELOPERS.md](docs/DEVELOPERS.md)** — the package contract,
+requirements, devcontainer, MCP configuration, test suites, frozen scenarios,
+and live-oracle gates.

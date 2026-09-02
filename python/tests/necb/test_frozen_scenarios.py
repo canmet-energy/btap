@@ -123,6 +123,27 @@ class TestFrozenScenarios(unittest.TestCase):
                 self.fail(msg)
             self.skipTest(msg)
 
+    def test_post_handoff_seals_retain_the_final_attestation(self):
+        scenarios = self.manifest["scenarios"]
+        transitioned = [scenario for scenario in scenarios
+                        if scenario["seal"] == "python-only:post-handoff"]
+        self.assertEqual(31, len(transitioned))
+        self.assertEqual(29, sum(scenario["retired_seal"] == "ruby"
+                                 for scenario in transitioned))
+        self.assertEqual(2, sum(scenario["retired_seal"].startswith("ruby-api:")
+                                for scenario in transitioned))
+        self.assertFalse(any(scenario["seal"] == "ruby"
+                             or scenario["seal"].startswith("ruby-api:")
+                             for scenario in scenarios))
+        for scenario in transitioned:
+            self.assertEqual("85ab14352677093e24038d933cf1071e5b03431a",
+                             scenario["last_cross_language_commit"])
+            self.assertEqual(33544573991, scenario["last_cross_language_run_id"])
+            self.assertEqual(
+                "https://github.com/canmet-energy/btap/actions/runs/33544573991",
+                scenario["last_cross_language_run_url"])
+            self.assertIn("D-84", scenario["seal_transition_reason"])
+
     def test_ci_wires_every_lane(self):
         """Every lane the manifest declares must have a CI executor — the
         exact silent failure this guards against happened: a step-removal

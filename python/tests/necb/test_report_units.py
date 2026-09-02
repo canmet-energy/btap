@@ -146,6 +146,20 @@ class TestReportUnits(unittest.TestCase):
         self.assertTrue(all(isinstance(r.audit_index, int) for r in rows),
                         "every row anchors an audit entry")
 
+        html = Sections.checklist({"checklist_rows": rows,
+                       "report": {"vintage": "2025"}})
+        self.assertIn('class="checklist"', html)
+        self.assertIn('class="checklist-statement"', html)
+        self.assertIn('<span>Evidence</span>', html)
+        self.assertNotIn("Measured values</th>", html,
+                 "evidence stays visually attached to its determination")
+
+        structured = Sections._checklist_statement_html(
+            "Cooling — partial. Applied: staged DX. Gaps: terminal units.")
+        self.assertIn('class="checklist-summary"', structured)
+        self.assertIn('<span>Applied</span> staged DX.', structured)
+        self.assertIn('<span>Gaps</span> terminal units.', structured)
+
     def test_coverage_reconciliation(self):
         rows = Checklist.rows(canned_audit().entries)
         orphan = next((r for r in rows if r.article == "8.4.4.20."), None)
@@ -166,6 +180,35 @@ class TestReportUnits(unittest.TestCase):
         html = render_report(canned_result())
         self.assertIn("delegated — covered by another gem", html)
         self.assertIn("NOT covered in this run", html)
+        self.assertIn("Technical implementation notes", html)
+        self.assertIn("context, not additional requirements", html)
+
+    def test_checklist_hides_cross_edition_coverage_history(self):
+        entry = {
+            "step": "coverage", "level": "warning",
+            "article": "4.2.2.1.(10)-(15)",
+            "action": ("Interior lighting controls — daylighting — partial. "
+                       "Applied: follows the 2020/2025 code. The legacy NECB "
+                       "2011 rule remains callable. Gaps: roof monitors."),
+            "inputs": {"status": "partial"},
+        }
+        row = Checklist.rows([entry])[0]
+        self.assertIn("Applied:", row.statement)
+        self.assertIsNone(row.measured,
+                  "internal coverage metadata is not measured evidence")
+        html = Sections.checklist({"checklist_rows": [row],
+                       "report": {"vintage": "2020"}})
+        self.assertIn("<span>Applied</span> follows NECB 2020.", html)
+        self.assertIn("<span>Gaps</span> roof monitors.", html)
+        self.assertNotIn("2025", html)
+        self.assertNotIn("2011", html)
+
+        tier = Checklist.Row("na", "10.1.2.1. (Table verified identical 2020/2025)",
+                     "energy performance Tier 1 achieved", None, 4)
+        html = Sections.checklist({"checklist_rows": [tier],
+                       "report": {"vintage": "2020"}})
+        self.assertIn(">10.1.2.1.</a>", html)
+        self.assertNotIn("2025", html)
 
     def test_coverage_status_modeller_scope_note(self):
         # D-09: a partial/not_implemented coverage entry flagged gap_owner

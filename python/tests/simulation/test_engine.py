@@ -19,6 +19,16 @@ class EngineTestCase(unittest.TestCase):
     def setUp(self):
         engine._reset_memo()
         self.addCleanup(engine._reset_memo)
+        # tests/support.py setdefault()s BTAP_ENERGYPLUS process-wide when the
+        # container engine exists. Under -n auto that can land on this worker
+        # BEFORE these tests, and the override rung then answers for whichever
+        # rung is actually under test — a real failure that only appears in
+        # parallel. Every engine test starts from a CLEAN override; the ones
+        # that want one set it themselves.
+        for name in ("BTAP_ENERGYPLUS", "BTAP_ENERGYPLUS_ARCHIVE"):
+            if name in os.environ:
+                self.addCleanup(os.environ.__setitem__, name, os.environ[name])
+                del os.environ[name]
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
 
@@ -90,6 +100,7 @@ class TestArchiveSideLoad(EngineTestCase):
         archive.write_bytes(b"not the real archive")
         env = {"BTAP_ENERGYPLUS": "", "BTAP_ENERGYPLUS_ARCHIVE": str(archive)}
         with mock.patch.dict(os.environ, env), \
+               mock.patch.object(engine, "_companion_binary", return_value=None), \
              mock.patch.object(engine, "cache_dir",
                                return_value=Path(self.tmp.name) / "cache"):
             with self.assertRaises(engine.EngineError) as ctx:
@@ -101,6 +112,7 @@ class TestArchiveSideLoad(EngineTestCase):
     def test_missing_archive_is_reported(self):
         env = {"BTAP_ENERGYPLUS": "", "BTAP_ENERGYPLUS_ARCHIVE": "/nonexistent.tar.gz"}
         with mock.patch.dict(os.environ, env), \
+             mock.patch.object(engine, "_companion_binary", return_value=None), \
              mock.patch.object(engine, "cache_dir",
                                return_value=Path(self.tmp.name) / "cache"):
             with self.assertRaises(engine.EngineError) as ctx:
@@ -177,7 +189,8 @@ class TestCompanionResolution(EngineTestCase):
 
     def test_absent_companion_falls_through(self):
         # Genuine absence (optional platforms) is the ONLY fall-through.
-        self.assertIsNone(engine._companion_binary(engine.PINNED_VERSION))
+        with mock.patch.dict(sys.modules, {"canmet_energyplus": None}):
+            self.assertIsNone(engine._companion_binary(engine.PINNED_VERSION))
 
     def test_broken_import_raises(self):
         class Exploding:

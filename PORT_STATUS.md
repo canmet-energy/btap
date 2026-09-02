@@ -2,7 +2,7 @@
 
 **As of 2026-08-28.** Milestones M0–M8 are ALL MERGED (PRs #5–#12; final
 merge `a9a59ed`). **The port is COMPLETE.** The governing decision is
-**D-79** (`btap-necb/docs/necb_decisions.md`); the verification
+**D-79** (`docs/necb_decisions.md`); the verification
 architecture it plugs into is **D-78**. What remains is the PARKED list —
 deliberate future decisions, not port work.
 
@@ -266,7 +266,7 @@ the pending `legacy_pin/REF` bump.
 The port being complete, D-80 recorded the direction: **retire the Ruby gems
 — freeze first (R3), delete later (R6) — and decouple the verification
 chain from the gems now.** The phase plan, review of record
-(`btap-necb/docs/d80_retirement_plan_review.md`), and the architecture are
+(`docs/d80_retirement_plan_review.md`), and the architecture are
 in decision D-80. What R1+R2 landed:
 
 - **python-prep / ruby-probe live Leg C.** The oracle harness moved to
@@ -314,7 +314,7 @@ bump / TBD 3.6.x rebaseline.
   `python/scripts/sync_decisions_registry.py` and hand-editing it fails CI.
   The doc-mirror and `ruling:`-citation gates run on every PR, so the
   registry cannot drift in either direction while both implementations
-  exist. The doc + TOC stay under `btap-necb/docs` until R6.
+  exist. The doc + TOC moved to root `docs/` in PR-A3.
 - **Zero users, adjudicated.** The gems were never released to anyone, so
   there is no support window and nothing to deprecate. Ruby's only remaining
   role is VERIFICATION: the Leg-B cross-language baseline until R4 freezes
@@ -379,5 +379,5 @@ verification/oracle/goldens/                            the Leg-C goldens (pinne
 verification/oracle/oracle_probes.rb                    the recipe behind every golden
 verification/oracle/request_manifest.json               the D-80 probe request manifest
 python/scripts/oracle_prep.py                           the D-80 python-prep models
-btap-necb/docs/necb_decisions.md                        D-79 (this port), D-78 (verification)
+docs/necb_decisions.md                                  D-79 (this port), D-78 (verification)
 ```

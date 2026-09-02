@@ -79,6 +79,24 @@ def run_checks() -> int:
         assert len(rows) == 97, f"catalog has {len(rows)} systems, expected 97"
     check("packaged data loads (necb rules + the 97-system catalog)", data_loads)
 
+    def coverage_reference_loads():
+        from btap.necb import coverage
+
+        assert coverage.editions() == ("2020", "2025")
+        for edition, expected_count in (("2020", 52), ("2025", 57)):
+            numbers = coverage.article_numbers(edition)
+            assert len(numbers) == expected_count, (
+                f"NECB {edition} has {len(numbers)} articles, expected {expected_count}")
+            first = coverage.get_article(edition, numbers[0])
+            assert first["raw"].startswith("1)"), (
+                f"NECB {edition} first article text is unreadable")
+            assert coverage.provenance(edition)["edition"] == edition
+        notice = coverage.attribution()
+        assert "National Energy Code of Canada for Buildings" in notice
+        assert "Crown copyright" in notice
+    check("packaged NECB coverage reference is complete and attributed",
+          coverage_reference_loads)
+
     def costing_tables():
         from btap.costing.envelope.database import Database
         db = Database()
@@ -293,6 +311,18 @@ def run_checks() -> int:
         assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
         assert "--epw" in proc.stdout, "help does not document --epw"
     check("the btap-compliance console script answers --help", console_script_answers)
+
+    def coverage_console_answers():
+        exe = Path(sys.executable).parent / "btap-necb-coverage"
+        if not exe.exists():
+            raise AssertionError(f"console script not installed: {exe}")
+        proc = subprocess.run([str(exe), "--help"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
+        assert "get" in proc.stdout, "help does not document article retrieval"
+        assert "attribution" in proc.stdout, "help does not document attribution"
+    check("the btap-necb-coverage console script answers --help",
+          coverage_console_answers)
 
     if failures:
         print(f"\nWHEEL SMOKE FAILED ({len(failures)}):")

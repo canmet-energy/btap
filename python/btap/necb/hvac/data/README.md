@@ -36,9 +36,9 @@ zero-runtime-dependency contract.
 - **2025**: transcribed/verified per-table from the NECB 2025 Table 5.2.12.1 series via
   the MCP (letter map: -K chillers, -N boilers, -O furnaces, -A unitary ACs & HPs; the
   file's `provenance.verification` block records the per-table result). Verified
-  **identical** to 2020: chillers (Path B COPc, every bin), boilers, furnaces, unitary-AC
-  SEER/EER ladder. **Real 2025 changes**: HP cooling < 19 kW is SEER 15 (2020: EER 11.0 —
-  the -A class merge), split-system HP heating HSPF 7.4 → 7.8. Additions: single-phase
+  **identical** to 2020: chillers (Path B COPc, every bin), boilers, furnaces, and the
+  unitary-AC/HP cooling SEER/EER ladders. **Real 2025 change**: split-system HP heating
+  HSPF 7.4 → 7.8. Additions: single-phase
   SEER2/HSPF2 class rows (distinct subcategories, engine-neutral), COPh at −8.3 °C
   (informational), and the NEW Table 5.2.12.1.-M plant-heat-pump heating COPs by leaving
   water temperature (`plant_heat_pumps_heating`, informational). SEER2/EER2/HSPF2 convert

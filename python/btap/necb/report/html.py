@@ -135,6 +135,23 @@ th, td { border: 1px solid #bbb; padding: .3rem .5rem; text-align: left; vertica
 thead th { background: #eee; }
 table.kv { width: auto; min-width: 50%; }
 table.kv th { background: #f4f4f4; width: 14rem; font-weight: 600; }
+table.checklist { table-layout: fixed; }
+table.checklist th:nth-child(1), table.checklist td:nth-child(1) { width: 2rem; text-align: center; }
+table.checklist th:nth-child(2), table.checklist td:nth-child(2) { width: 8.5rem; }
+table.checklist th:nth-child(3), table.checklist td:nth-child(3) { width: 7.5rem; }
+table.checklist tbody tr:nth-child(even) { background: #f8f9fa; }
+table.checklist td { padding-top: .55rem; padding-bottom: .55rem; }
+.checklist-statement { font-size: .9rem; line-height: 1.45; }
+.checklist-summary { font-weight: 700; margin-bottom: .35rem; }
+.checklist-detail { margin-top: .3rem; }
+.checklist-detail span { display: inline-block; min-width: 3.8rem; color: #1f5132;
+                         font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+.checklist-gaps { margin-top: .45rem; padding-top: .4rem; border-top: 1px solid #ddd; }
+.checklist-gaps span { color: #8a4b08; }
+.checklist-evidence { color: #4b5563; font-size: .78rem; line-height: 1.4;
+                      margin-top: .35rem; padding-top: .3rem; border-top: 1px solid #ddd;
+                      overflow-wrap: anywhere; }
+.checklist-evidence span { color: #30363d; font-weight: 700; }
 .banner { border: 3px solid #111; padding: 1rem; margin: 1rem 0; display: flex;
           flex-wrap: wrap; gap: 1.2rem; align-items: center; }
 .banner .big { font-size: 1.6rem; font-weight: 700; }

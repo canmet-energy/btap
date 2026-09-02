@@ -61,6 +61,25 @@ class TestNecbEfficiency(unittest.TestCase):
                             for e in decisions),
                         f"uncited decision: {uncited.get('action') if uncited else None}")
 
+    def test_chiller_audit_states_the_cop_that_was_applied(self):
+        """The COP is the determination an AHJ reads, so it belongs in the audit
+        VALUE even though the model NAME carries only the compact kW/ton form."""
+        model = load_fixture()
+        modeling.build_system(
+            model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard',
+            sorted_zones(model))
+        for c in model.getChillerElectricEIRs():
+            c.setReferenceCapacity(200_000.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        entry = next(e for e in audit.entries if e['action'] == 'chiller efficiency applied')
+        chiller = sorted_by_name(model.getChillerElectricEIRs())[0]
+        self.assertIn(f'COP {round(chiller.referenceCOP(), 2)}', entry['value'])
+        self.assertIn('kW/ton', entry['value'])
+        self.assertRegex(chiller.nameString(), r'kW/ton$')
+
     def test_dx_and_gas_coil_and_ashp(self):
         model = load_fixture()
         modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Electric Baseboard',
@@ -114,6 +133,134 @@ class TestNecbEfficiency(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(model, vintage='2020', audit=audit)
         self.assertTrue(any('not sized' in w['action'] for w in audit.warnings))
+
+    def test_air_source_vrf_uses_table_i_minimums_and_audits(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedHeatingCapacity(20_000.0)
+        unit.setGrossRatedCoolingCOP(5.0)
+        unit.setRatedHeatingCOP(5.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(10.8, 20_000.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        self.assertAlmostEqual(3.30, unit.ratedHeatingCOP(), delta=1e-6)
+        self.assertTrue(any(entry['action'] == 'VRF minimum efficiency applied'
+                            and entry.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            and entry.get('ruling') == 'D-85'
+                            for entry in audit.entries))
+
+    @staticmethod
+    def _vrf_unit(model, *, heating):
+        """An air-cooled VRF outdoor unit serving one terminal.
+
+        heating=False removes the terminal's VRF DX heating coil, which is the
+        only way the classic SDK objects express a cooling-only VRF — the
+        4-argument terminal constructor REQUIRES a CoilHeatingDXVariableRefrigerantFlow.
+        """
+        import openstudio
+
+        unit = openstudio.model.AirConditionerVariableRefrigerantFlow(model)
+        unit.setCondenserType('AirCooled')
+        terminal = openstudio.model.ZoneHVACTerminalUnitVariableRefrigerantFlow(model)
+        unit.addTerminal(terminal)
+        if not heating:
+            terminal.heatingCoil().get().remove()
+        return unit
+
+    def test_cooling_only_vrf_uses_table_i_air_conditioner_row(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        unit = self._vrf_unit(model, heating=False)
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedCoolingCOP(5.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(11.2, 20_000.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        decision = next(entry for entry in audit.entries
+                        if entry['action'] == 'VRF minimum efficiency applied')
+        self.assertEqual('air_conditioner', decision['inputs']['equipment_class'])
+
+    def test_vrf_with_a_heating_coil_takes_the_heat_pump_rows(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        unit = self._vrf_unit(model, heating=True)
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedHeatingCapacity(20_000.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        decision = next(entry for entry in audit.entries
+                        if entry['action'] == 'VRF minimum efficiency applied')
+        self.assertEqual('heat_pump', decision['inputs']['equipment_class'])
+        # the HP row, NOT the air-conditioner row that the same capacity would hit
+        self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(10.8, 20_000.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        self.assertAlmostEqual(3.3, unit.ratedHeatingCOP(), delta=1e-9)
+
+    def test_terminal_less_vrf_is_indeterminate_and_says_so(self):
+        """The reference transform strips terminals; the class cannot then be
+        read from the model, and guessing would drop the heating minimum."""
+        import openstudio
+
+        model = openstudio.model.Model()
+        unit = openstudio.model.AirConditionerVariableRefrigerantFlow(model)
+        unit.setCondenserType('AirCooled')
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedCoolingCOP(5.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertAlmostEqual(5.0, unit.grossRatedCoolingCOP(), delta=1e-9,
+                               msg='no Table-I row may be applied without evidence of the class')
+        self.assertFalse(any(entry['action'] == 'VRF minimum efficiency applied'
+                             for entry in audit.entries))
+        warning = next(entry for entry in audit.warnings
+                       if 'serves no terminals' in entry['action'])
+        self.assertEqual('D-85', warning['ruling'])
+
+    def test_small_vrf_uses_table_i_seasonal_minimums(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        unit.setGrossRatedTotalCoolingCapacity(12_000.0)
+        unit.setGrossRatedHeatingCapacity(12_000.0)
+        unit.setGrossRatedCoolingCOP(1.0)
+        unit.setRatedHeatingCOP(1.0)
+
+        hvac.apply_efficiencies(model, vintage='2020')
+
+        self.assertAlmostEqual(hvac.efficiency.seer_to_cop_no_fan(15.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        self.assertAlmostEqual(hvac.efficiency.hspf_to_cop_no_fan(7.8),
+                               unit.ratedHeatingCOP(), delta=1e-6)
+
+    def test_unsized_vrf_warns_with_table_i_citation(self):
+        model = load_fixture()
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+        audit = AuditLog()
+
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertTrue(any('VRF cooling capacity unavailable' in warning['action']
+                            and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                    and warning.get('ruling') == 'D-85'
+                            for warning in audit.warnings))
+        self.assertTrue(any('VRF heating capacity unavailable' in warning['action']
+                    and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                    and warning.get('ruling') == 'D-85'
+                    for warning in audit.warnings))
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@
     ],
     "verification": {
       "unitary_acs": "Table -A 2025: large EER ladder identical to 2020 (verified printed); SEER2 single-phase rows (14.3) added verbatim - INERT for the engine (subcategory \"(single-phase)\" never matches the Single Package lookup).",
-      "heat_pumps": "Table -A 2025 small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions; the 2025 file takes that -A reading (SEER 15) while the 2020 file keeps legacy parity with the -B SPVAC EER 11 reading (D-59 finding 2) - a documented cross-edition interpretation difference, near-inert (shared-unit RTUs size >= 19 kW). Large ladder identical.",
+      "heat_pumps": "Table -A small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions, and both files now take that explicit class reading (D-59). The large ladder is identical.",
       "heat_pumps_heating": "Table -A 2025: split-system small HSPF 7.4 -> 7.8 (printed, verified); single-package stays 7.4; COPh 3.3/3.2 ladder identical; low-temp COPh 2.25/2.05 vendored informationally (unread by the engine - the -8.3 C behaviour comes from the reference curves).",
       "ptac_pthp": "Table -G 2025 is IDENTICAL to 2020 -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9). The earlier claim that \"Table -C changed moderately\" was the corrupted-extraction artifact; the carried-over coefficients are CORRECT for 2025 and the engine DOES apply them (verified in fleet audits).",
       "chillers": "Table -K 2025 is byte-identical to 2020 -K (verified printed): Path B COPc ladder unchanged.",
@@ -20,6 +20,54 @@
       "selection_8_4_5_7_A": "Table 8.4.5.7.-A 2025 is VERBATIM 8.4.4.7.-A 2020 (verified printed); the vendored 2025 selection rules differ from 2020 only in table-number strings; the 97-system matrix run under vintage 2025 produces identical assignments (D-60)."
     }
   },
+  "vrf_air_source_heat_pumps": [
+    {
+      "minimum_capacity_kw": 0.0,
+      "maximum_capacity_kw": 19.0,
+      "minimum_seer": 15.0,
+      "minimum_hspf": 7.8
+    },
+    {
+      "minimum_capacity_kw": 19.0,
+      "maximum_capacity_kw": 40.0,
+      "minimum_eer": 10.8,
+      "minimum_heating_cop": 3.3
+    },
+    {
+      "minimum_capacity_kw": 40.0,
+      "maximum_capacity_kw": 70.0,
+      "minimum_eer": 10.4,
+      "minimum_heating_cop": 3.2
+    },
+    {
+      "minimum_capacity_kw": 70.0,
+      "maximum_capacity_kw": null,
+      "minimum_eer": 9.3,
+      "minimum_heating_cop": 3.2
+    }
+  ],
+  "vrf_air_conditioners": [
+    {
+      "minimum_capacity_kw": 0.0,
+      "maximum_capacity_kw": 19.0,
+      "minimum_seer": 15.0
+    },
+    {
+      "minimum_capacity_kw": 19.0,
+      "maximum_capacity_kw": 40.0,
+      "minimum_eer": 11.2
+    },
+    {
+      "minimum_capacity_kw": 40.0,
+      "maximum_capacity_kw": 70.0,
+      "minimum_eer": 11.0
+    },
+    {
+      "minimum_capacity_kw": 70.0,
+      "maximum_capacity_kw": null,
+      "minimum_eer": 10.0
+    }
+  ],
   "boilers": [
     {
       "fluid_type": "Hot Water",
@@ -2159,7 +2207,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2180,7 +2228,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2201,7 +2249,7 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2222,14 +2270,14 @@
       "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A merges AC+HP classes: <19 kW HP cooling is SEER 15 (2020: EER 11.0)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
     },
     {
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Single Package",
-      "minimum_capacity": 65001.0,
+      "minimum_capacity": 65000.0,
       "maximum_capacity": 136480.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2251,7 +2299,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Single Package",
-      "minimum_capacity": 65001.0,
+      "minimum_capacity": 65000.0,
       "maximum_capacity": 136480.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2273,7 +2321,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Split System",
-      "minimum_capacity": 65001.0,
+      "minimum_capacity": 65000.0,
       "maximum_capacity": 136480.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2295,7 +2343,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Split System",
-      "minimum_capacity": 65001.0,
+      "minimum_capacity": 65000.0,
       "maximum_capacity": 136480.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2317,7 +2365,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Single Package",
-      "minimum_capacity": 136481.0,
+      "minimum_capacity": 136480.0,
       "maximum_capacity": 238840.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2339,7 +2387,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Single Package",
-      "minimum_capacity": 136481.0,
+      "minimum_capacity": 136480.0,
       "maximum_capacity": 238840.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2361,7 +2409,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Split System",
-      "minimum_capacity": 136841.0,
+      "minimum_capacity": 136480.0,
       "maximum_capacity": 238840.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2383,7 +2431,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Split System",
-      "minimum_capacity": 136841.0,
+      "minimum_capacity": 136480.0,
       "maximum_capacity": 238840.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2405,7 +2453,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Single Package",
-      "minimum_capacity": 238841.0,
+      "minimum_capacity": 238840.0,
       "maximum_capacity": 759999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2427,7 +2475,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Single Package",
-      "minimum_capacity": 238841.0,
+      "minimum_capacity": 238840.0,
       "maximum_capacity": 759999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2449,7 +2497,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Split System",
-      "minimum_capacity": 238841.0,
+      "minimum_capacity": 238840.0,
       "maximum_capacity": 759999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2471,7 +2519,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Split System",
-      "minimum_capacity": 238841.0,
+      "minimum_capacity": 238840.0,
       "maximum_capacity": 759999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2493,7 +2541,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Single Package",
-      "minimum_capacity": 760000.0,
+      "minimum_capacity": 759999.0,
       "maximum_capacity": 9999999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2515,7 +2563,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Single Package",
-      "minimum_capacity": 760000.0,
+      "minimum_capacity": 759999.0,
       "maximum_capacity": 9999999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2537,7 +2585,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "Electric Resistance or None",
       "subcategory": "Split System",
-      "minimum_capacity": 760000.0,
+      "minimum_capacity": 759999.0,
       "maximum_capacity": 9999999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2559,7 +2607,7 @@
       "cooling_type": "AirCooled",
       "heating_type": "All Other",
       "subcategory": "Split System",
-      "minimum_capacity": 760000.0,
+      "minimum_capacity": 759999.0,
       "maximum_capacity": 9999999.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2624,7 +2672,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Single Package",
-      "minimum_capacity": 64831.0,
+      "minimum_capacity": 64830.0,
       "maximum_capacity": 136485.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2647,7 +2695,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Split System",
-      "minimum_capacity": 64831.0,
+      "minimum_capacity": 64830.0,
       "maximum_capacity": 136485.0,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2670,7 +2718,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Single Package",
-      "minimum_capacity": 136486,
+      "minimum_capacity": 136485.0,
       "maximum_capacity": 238849,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2693,7 +2741,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Split System",
-      "minimum_capacity": 136486,
+      "minimum_capacity": 136485.0,
       "maximum_capacity": 238849,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2716,7 +2764,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Single Package",
-      "minimum_capacity": 238850,
+      "minimum_capacity": 238849,
       "maximum_capacity": 760907,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2739,7 +2787,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Split System",
-      "minimum_capacity": 238850,
+      "minimum_capacity": 238849,
       "maximum_capacity": 760907,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2762,7 +2810,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Single Package",
-      "minimum_capacity": 760908,
+      "minimum_capacity": 760907,
       "maximum_capacity": 9999999,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",
@@ -2785,7 +2833,7 @@
       "equipment_type": "Heat Pumps",
       "cooling_type": "AirCooled",
       "subcategory": "Split System",
-      "minimum_capacity": 760908,
+      "minimum_capacity": 760907,
       "maximum_capacity": 9999999,
       "start_date": "9/9/1919",
       "end_date": "2999-09-09T00:00:00+00:00",

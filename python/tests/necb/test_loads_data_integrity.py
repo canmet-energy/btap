@@ -111,6 +111,22 @@ class TestLoadsDataIntegrity(unittest.TestCase):
         self.assertAlmostEqual(200 / 10.7639, float(server['electric_equipment_per_area']),
                                delta=0.05)
 
+        # Storage receptacles: < 5 m2 = 0 W/m2; >= 5 m2 = 1 W/m2.
+        small_storage = [row for row in self.space_types
+                 if row['space_type'].startswith('Storage room < 5 m2-sch-')]
+        large_storage = [row for row in self.space_types
+                 if row['space_type'].startswith('Storage room >= 5 m2-sch-')]
+        self.assertEqual(11, len(small_storage))
+        self.assertEqual(11, len(large_storage))
+        self.assertEqual({0.0},
+                 {float(row['electric_equipment_per_area'])
+                  for row in small_storage},
+                 'Table A-8.4.3.2.(2)-B: storage rooms < 5 m2 have 0 W/m2')
+        self.assertTrue(all(abs(float(row['electric_equipment_per_area'])
+                                - (1.0 / 10.7639)) < 0.0001
+                            for row in large_storage),
+                        'Table A-8.4.3.2.(2)-B: storage rooms >= 5 m2 have 1 W/m2')
+
     def test_2025_aliases_2020_with_renumbered_citations(self):
         from btap.necb import loads
         rules = loads.rules('2025')

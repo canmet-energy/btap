@@ -1,6 +1,6 @@
 # MCP server configuration — holds live API keys. NEVER commit.
-# The two scripts that read it (btap-modeling/scripts/building_stock.rb,
-# btap-necb/scripts/fetch_necb_8_4_text.rb) fall back to environment
+# The two Python clients that read it (python/scripts/building_stock.py and
+# python/scripts/fetch_necb_8_4_text.py) fall back to environment
 # variables, so an absent .mcp.json is a supported configuration.
 .mcp.json
 
@@ -15,24 +15,19 @@
 # would otherwise sweep in.
 .claude/settings.local.json
 
-# Developer installation. Scoped deliberately: legacy_pin/.bundle/config IS
-# committed (it points the oracle's bundle at the shared vendor/ dir), and git
-# cannot re-include a file whose parent directory is excluded.
+# Developer installation. legacy_pin/.bundle/config is committed because it
+# points the surviving oracle bundle at the shared vendor/ directory.
 /.bundle/
-btap-*/.bundle/
 /vendor
 /.venv
 
-# Gems do not commit their lockfile — resolution is the consumer's business.
-# legacy_pin is the deliberate exception: its lock pins the parity oracle's
-# tbd/osut/topolys triplet, and a floating osut changes generated insulation
-# materials (see legacy_pin/README.md).
+# The only Bundler lock is deliberate: it pins the parity oracle's
+# openstudio-standards source and tbd/osut/topolys triplet.
 Gemfile.lock
 !legacy_pin/Gemfile.lock
 
 # Build output
 /pkg/
-*.gem
 
 # IDE files
 /.idea
@@ -41,15 +36,11 @@ Gemfile.lock
 /.VSCodeCounter
 /.serena
 
-# Rubocop / YARD output
-/.rubocop
-/.rubocop-http*
-/.yardoc
-/doc/
-
 # Test + run output
 output/
 coverage/
+!python/btap/necb/data/coverage/
+!python/btap/necb/data/coverage/**
 /tmp/
 run/
 *.osw
@@ -74,7 +65,7 @@ report.json
 # ignores the DIRECTORY so any future artifact inside it stays invisible too.
 necb_run_*/
 
-# The Python port (python/) + the verification harness's interpreter droppings
+# Python product + verification interpreter droppings
 __pycache__/
 *.pyc
 python/.venv/
@@ -90,9 +81,8 @@ python/dist/
 # never committed.
 /.devcontainer/certs/
 
-# Windows packaging build output. `rake windows:stage` assembles a COPY of the
-# five gems' lib/ trees (plus, when OPENSTUDIO_WINDOWS is set, a ~1.1 GB
-# OpenStudio) — all of it derived, none of it source.
+# Windows packaging output assembled from the Python distribution and bundled
+# runtimes. These are derived artifacts, not source.
 /packaging/windows/stage/
 /packaging/windows/Output/
 /packaging/windows/samples/

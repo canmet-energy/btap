@@ -19,39 +19,31 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# The nrel/openstudio image ships without a UTF-8 locale, so Ruby's default
-# external encoding is US-ASCII and any File.read of the gems' own output
-# (plan_svg.rb emits em dashes, 'm²' and ellipses; the decisions doc is full of
-# them) raises "invalid byte sequence in US-ASCII". This is an environment gap,
-# not a product defect — the gems write correct UTF-8 and every developer
-# machine has a UTF-8 locale. Make CI match rather than diverge from it.
+# Keep generated reports, the decisions document, and the surviving legacy
+# oracle scripts on an explicit UTF-8 locale in every lane.
 env:
   LANG: C.UTF-8
   LC_ALL: C.UTF-8
 
 jobs:
-  # Pure-Ruby checks: no OpenStudio SDK, so they run on a bare runner in seconds
-  # and fail fast before anything pays for the container.
+  # Stdlib-only Python checks run on a bare runner and fail fast before any
+  # OpenStudio SDK or EnergyPlus work.
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - uses: actions/setup-python@v5
         with:
-          ruby-version: '3.2.2'
+          python-version: '3.11'
+      - name: Install fast-lane test runner
+        run: pip install -q pytest
       - name: Rule-key orphan lint
-        run: ruby btap-necb/scripts/necb_orphan_keys.rb
-      # btap-audit is the one gem with no SDK dependency at all (json +
-      # minitest). The decisions-registry drift test looks SDK-free but is not:
-      # it `require`s every gem's facade to prove their AuditLog resolves to the
-      # shared class, so it lives in the `verify` job's container.
-      - name: AuditLog is SDK-free and fast
-        run: cd btap-audit && ruby test/test_audit.rb
+        run: python3 python/scripts/necb_orphan_keys.py
       # The coverage manifests' code refs ("where is this sentence dealt with")
-      # are pure JSON + file reads — lint them here so a rename that strands a
-      # pointer fails before anything pays for the container.
+      # are pure Python file reads. A rename that strands a pointer should fail
+      # before anything pays for the container.
       - name: Coverage code refs resolve
-        run: cd btap-necb && ruby test/test_coverage_code_refs.rb
+        run: cd python && pytest -q tests/test_coverage_code_refs.py
       # NECB_GEM_COVERAGE.md and NECB_8_4_COVERAGE.html are GENERATED from the
       # gems' article_coverage manifests, and they are what an AHJ reads. Nothing
       # made the committed copies track the manifests, so they drifted: an
@@ -59,34 +51,32 @@ jobs:
       # showing as a gap. Regenerate and demand a clean tree — same contract the
       # decisions registry gets, in the direction a doc can silently rot.
       #
-      # Both generators are pure Ruby (json + date), so they belong here rather
-      # than in the container. They are deterministic ONLY because BRANCH is a
-      # literal — do not restore `git rev-parse` in generate_necb_8_4_coverage.rb
+      # Both generators are stdlib-only Python, so they belong here rather than
+      # in the container. They are deterministic ONLY because the branch is a
+      # literal — do not restore `git rev-parse` in generate_necb_8_4_coverage.py
       # or this check fails on every branch that is not main.
       - name: Coverage docs match the manifests
         run: |
-          ruby btap-necb/scripts/generate_necb_gem_coverage.rb
-          ruby btap-necb/scripts/generate_necb_8_4_coverage.rb
-          git diff --exit-code -- btap-necb/docs/NECB_GEM_COVERAGE.md \
-                                  btap-necb/docs/NECB_8_4_COVERAGE.html \
+          python3 python/scripts/generate_necb_gem_coverage.py
+          python3 python/scripts/generate_necb_8_4_coverage.py
+          git diff --exit-code -- docs/NECB_GEM_COVERAGE.md \
+                                  docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
-      # The decisions registry is CANONICAL on the Python side since R3 (D-81);
-      # the Ruby gem's copy is GENERATED from it. Stdlib-only, every PR.
-      - name: "Decisions registry: generation direction + citations + TOC"
+      # The Python registry is canonical after R6. Run its document, TOC, id,
+      # and runtime-citation gates explicitly; the retired Ruby-copy sync test
+      # is intentionally not part of this lane.
+      - name: "Decisions registry: document + TOC + runtime citations"
         run: |
-          python3 python/scripts/sync_decisions_registry.py --check
-          ruby btap-necb/scripts/generate_decisions_toc.rb --check
+          python3 python/scripts/generate_decisions_toc.py --check
           cd python && python3 -m unittest \
-            tests.necb.test_decisions_registry_sync \
+            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_decision_ids_are_unique_and_well_formed \
+            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_doc_headings_mirror_the_canonical_registry \
+            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_doc_toc_matches_the_canonical_registry \
             tests.necb.test_decisions_registry
 
-  # The Python port (D-79): unittest over python/ — the ported subpackages'
-  # suites plus the audit cross-language gate (Python AuditLog vs the Ruby
-  # gem, diffed under verification/compare_runs.py's Leg-B rules). Bare
-  # runner, runs on every PR. The wheel is REQUIRED here so the SDK-dependent
-  # suites can never silently skip; the EnergyPlus-dependent tests DO skip on
-  # this runner (no engine, no openstudio CLI) — the `verify` job runs the
-  # whole suite with everything required, cross-language simulation included.
+  # The Python product suite on a bare runner, including import contracts,
+  # linting, the installable wheel, and the engine-free frozen scenarios. The
+  # EnergyPlus-dependent tests skip here; verify supplies the full runtime.
   python:
     # Same AWS switch as the container jobs. This job is no longer the ~40 s
     # it was at M1: the wheel gate, ruff and the full suite put it near six
@@ -102,15 +92,9 @@ jobs:
           python-version: '3.11'   # the project floor; local dev may be newer
           cache: pip
           cache-dependency-path: python/pyproject.toml
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.2'
       - name: Install the openstudio wheel + test runner
         run: pip install -q 'openstudio~=3.11.0' pytest pytest-xdist import-linter ruff build
-      # M7 (D-79 Option A): the pinned py-tbd engine — SDK-only, so its
-      # gates run on this bare runner too (the Ruby-vs-Python TBD gates need
-      # the Ruby gem and run in verify). Pinned by SHA in pyproject's [tbd]
-      # extra; installed here the same way so the pin is the single source.
+      # The Python thermal-bridging engine is required on the bare runner too.
       - name: Install the pinned py-tbd engine (the [tbd] extra)
         working-directory: python
         # py-tbd from its released v3.5.2 tag (exactly the version the
@@ -142,16 +126,6 @@ jobs:
           # pytest run; missing baselines are a FAILURE, never a skip.
           BTAP_SCENARIOS_REQUIRED: '1'
         run: pytest -n auto -q tests/
-      # D-82: the dormant Leg-B test files must keep IMPORTING (an
-      # import/collection canary only — behavioral rot until R6 deletion
-      # is accepted and adjudicated in D-82; BTAP_LEGB=1 reactivates).
-      - name: Dormant Leg-B files still collect (import canary)
-        working-directory: python
-        run: |
-          pytest -q --collect-only -p no:cacheprovider \
-            tests/audit/test_cross_language.py \
-            tests/simulation/test_local_run.py \
-            tests/necb/test_envelope_thermal_bridging.py > /dev/null
       # Distribution integrity. The suites above run against the CHECKOUT,
       # where every data file exists because the repo exists; a wheel is a
       # different artifact. This builds one, installs it into a clean venv,
@@ -162,94 +136,9 @@ jobs:
         working-directory: python
         run: python3 scripts/wheel_smoke.py
 
-  # Everything that needs `require "openstudio"`. The image carries the SDK and
-  # the openstudio CLI, so the EnergyPlus-dependent suites run rather than skip.
-  # ~24 of every run's ~26 billed minutes are this matrix + verify (the
-  # nrel/openstudio container jobs). They run on pushes to MAIN and on manual
-  # dispatch — not on every PR push, which was burning ~26 min per push against
-  # the org's shared 3000-minute allowance. PR pushes get the bare-runner lint
-  # (~20 s); run the full matrix on a PR when it matters with:
-  #   gh workflow run test.yml --ref <branch>
-  test:
-    if: github.event_name != 'pull_request'
-    # vars.CI_RUNNER unset -> GitHub-hosted (billed minutes). Set it to the
-    # CodeBuild PROJECT NAME (necb-ci) and these jobs run on the AWS account
-    # instead — ZERO GitHub-hosted minutes, same Actions UI. Deleting the
-    # variable reverts instantly; no workflow edit either way. The per-run
-    # label is composed HERE: expressions stored inside a variable are never
-    # re-expanded, so the variable must hold only the project name.
-    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
-    container: nrel/openstudio:3.11.0
-    strategy:
-      fail-fast: false
-      matrix:
-        gem:
-          - btap-costing
-          - btap-modeling
-          - btap-necb
-          - btap-simulation
-    env:
-      # btap-necb's thermal-bridging gate (ex-envelope) skips when tbd is missing, and
-      # a skipped gate is a green-but-vacuous gate — same reasoning as
-      # LEGACY_PIN_REQUIRED on the parity job. With this set, a tbd that failed to
-      # install fails the run instead of quietly reducing coverage. Harmless on
-      # the other seven legs: only test_thermal_bridging.rb reads it.
-      TBD_REQUIRED: '1'
-    steps:
-      - uses: actions/checkout@v4
-      # The container runs as root while the workspace belongs to the runner
-      # user, so git refuses the tree ("dubious ownership", exit 128) — which
-      # surfaces far from the cause: oracle_prep's `git rev-parse HEAD` and the
-      # self-containment scanner's `git ls-files` die, not git itself. Harmless
-      # where the UIDs already match.
-      - name: Trust the workspace (container UID != workspace owner)
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      # tbd/osut/topolys are the envelope domain's third-party runtime deps. They
-      # are declared in the gemspec, but these suites run under plain `ruby` (not
-      # `bundle exec`), so gemspec dependencies are never resolved — they have to
-      # be installed explicitly or NECB 3.1.1.7 goes untested.
-      #
-      # The versions come from legacy_pin/Gemfile.lock, NOT from a constraint
-      # here: the parity job runs our code and the oracle together under that
-      # lock, so this is what makes the two comparable. Floating them is not a
-      # neutral choice — osut 0.9.1 changes generated insulation conductivities,
-      # which would show up as a parity flip caused by a library upgrade rather
-      # than by our code. openstudio-standards does not solve this for us: it
-      # declares `tbd ~> 3`, never mentions osut or topolys, and commits no lock.
-      - name: Install the tbd triplet pinned by legacy_pin
-        if: matrix.gem == 'btap-necb'
-        run: |
-          gem install $(ruby legacy_pin/tbd_triplet.rb) --no-document
-          ruby -e '
-            want = `ruby legacy_pin/tbd_triplet.rb`.strip
-            require "tbd"
-            got = %w[topolys osut tbd].map { |g| "#{g}:#{Gem.loaded_specs[g]&.version}" }.join(" ")
-            abort("::error::tbd triplet is #{got}, expected #{want} (a newer gem is winning over the pin)") if got != want
-            puts "tbd triplet matches the pinned oracle: #{got}"
-          '
-      # `rake test:gem` forks the suite's files instead of running them one at a
-      # time. The matrix already parallelizes across GEMS; this parallelizes
-      # WITHIN one, which matters because btap-necb and btap-modeling are by far
-      # the longest leg and sets the wall-clock and the bill for the whole run.
-      #
-      # It excludes test_helper.rb and the *_parity.rb suites for the same
-      # reasons the loop it replaced did: the first is not a test, and the second
-      # needs the pinned oracle and is covered by the `parity` job, where it
-      # cannot pass vacuously.
-      #
-      # JOBS defaults to cores-minus-a-reserve with a floor of 2, so this is a
-      # real (if modest) win on a small hosted runner rather than a silent
-      # fallback to sequential. Output is suppressed while green and any failing
-      # file is re-run serially afterwards, so a failure reads cleanly instead of
-      # interleaved with a dozen other suites.
-      - name: ${{ matrix.gem }} suite
-        run: |
-          echo "runner: $(nproc) cores, $(free -m | awk '/Mem:/{print $2}') MB"
-          rake "test:gem[${{ matrix.gem }}]"
-
-  # Cross-gem rule verification: the reference transforms must actually
-  # overwrite non-compliant proposed values, and the as-applied part-load curves
-  # must match the code coefficients.
+  # Full Python rule verification in the OpenStudio image. EnergyPlus, the SDK,
+  # rasterizer, generated sample corpus, and thermal-bridging dependencies are
+  # all required here so dependency skips cannot pass vacuously.
   verify:
     if: github.event_name != 'pull_request'
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
@@ -263,21 +152,12 @@ jobs:
       # where the UIDs already match.
       - name: Trust the workspace (container UID != workspace owner)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      # Doc/TOC/citation duties on the Ruby side; the generation DIRECTION is a lint-job gate.
-      - name: "Decisions registry drift (doc <-> decisions.json <-> ruling: tags)"
-        run: cd btap-necb && ruby test/test_decisions_registry.rb
-      - name: rake necb:verify
-        run: rake necb:verify
-      # The Python port's FULL suite, in the one place that has everything at
-      # once: ruby + the openstudio CLI (the Ruby gems' backend, one half of
-      # every cross-language gate) + the bundled EnergyPlus (the engine the
-      # Python Local backend spawns). The REQUIRED flags turn every
-      # dependency-skip into a failure — this is the job where the
-      # cross-language gates must never go vacuous (D-79).
+      # The full Python suite runs where the SDK and bundled EnergyPlus are
+      # available. REQUIRED flags turn each supported dependency skip into a
+      # failure.
       # No wheel download here: the nrel image ships the SAME 3.11.0 Python
       # bindings at /usr/local/openstudio-3.11.0/Python (identical native lib
-      # under both languages — exactly what a cross-language parity run
-      # wants), and the bundled EnergyPlus is the engine.
+      # loaded by the image), and the bundled EnergyPlus is the engine.
       # Parallel via pytest-xdist (worker processes; the E+-touching suites
       # dominate serial wall time ~10x). The venv exists only to carry
       # pytest — the SDK still comes from the image via PYTHONPATH, so both
@@ -286,21 +166,16 @@ jobs:
       # The corpus samples are DERIVED artifacts (never committed). The
       # Python suite reads a PYTHON-generated corpus at its Python-owned
       # default location (D-80 R2: no packaging/windows read), so the
-      # sample-dependent reference-rules tests run instead of skipping (a
-      # skipped gate is green-but-vacuous). The matrix step below generates
-      # the Ruby corpus separately via run_corpus --samples-gen.
+      # sample-dependent reference-rules tests run instead of skipping.
       - name: Generate the sample corpus (Python)
         run: |
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             python3 python/scripts/generate_samples.py python/tests/generated/samples
-      # M7: BOTH engines, both pinned — the Ruby tbd triplet (the frozen
-      # oracle baseline) and py-tbd's tbd-3.5.2-compat SHA — so the direct
-      # Ruby-vs-Python TBD process-parity gate and the assembled Leg-B
-      # thermal-bridging case run here rather than skip.
-      - name: Install the pinned tbd triplet (Ruby) + py-tbd (Python)
+      # Install only the Python thermal-bridging stack. The legacy Ruby bundle
+      # is isolated to the parity job where the oracle still needs it.
+      - name: Install Python test and thermal-bridging dependencies
         working-directory: python
         run: |
-          gem install $(ruby ../legacy_pin/tbd_triplet.rb) --no-document
           # librsvg2-bin: the floor-plan raster test needs an SVG rasterizer
           # on PATH; supplied here (M8) so it RUNS instead of skipping, and
           # BTAP_RASTERIZER_REQUIRED below keeps it from ever going vacuous.
@@ -315,7 +190,11 @@ jobs:
           .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
             "py-topolys==0.1.0"
           .ci-venv/bin/pip install -q --no-deps "canmet-tbd==3.5.2"
-      - name: Python suites, everything required (cross-language gates included)
+      - name: Python NECB rule verification
+        run: |
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          BTAP_PYTHON="$PWD/python/.ci-venv/bin/python" rake necb:verify
+      - name: Python suites, everything required
         working-directory: python
         run: |
           # (.ci-venv was built in the tbd install step above — pytest,
@@ -326,19 +205,11 @@ jobs:
           # manual run someone did once.
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 TBD_REQUIRED=1 \
+          BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
           BTAP_RASTERIZER_REQUIRED=1 BTAP_SAMPLES_REQUIRED=1 FULL_MATRIX=1 \
             .ci-venv/bin/pytest -n auto -q tests/
-      # The M6 decisive acceptance, continuously enforced: the Ruby CLI and
-      # the PYTHON CLI over the same corpus, every pair diffed under the
-      # Leg-B rules (verification/spec.json). Tier none covers all 18 models
-      # (the full reference-transform + rules surface); tier sizing runs the
-      # 3-model subset through real EnergyPlus on BOTH backends. The annual
-      # --quick tier lives in the dispatch-only parity job (it is the
-      # expensive one, like everything else there).
-      # D-80 R4 (D-82): the frozen verify-lane scenarios REPLACED the live
-      # Leg-B generator-CLI matrix here — the drivers are dormant
-      # (BTAP_LEGB=1 reactivates for archaeology), deleted at R6.
+      # The verify-lane frozen scenarios preserve the adjudicated R4 behavior
+      # after retirement of the live cross-language product drivers.
       - name: Frozen scenarios (verify lane)
         working-directory: python
         run: |
@@ -378,54 +249,32 @@ jobs:
           key: legacy-pin-${{ hashFiles('legacy_pin/REF', 'legacy_pin/Gemfile.lock') }}
       - name: Bundle the oracle
         run: bundle install
-      # Listed explicitly rather than globbed *_parity.rb: three of the eleven
-      # gates (the two test_data_integrity.rb, and lighting's test_costing.rb)
-      # carry pin-dependent tests under names a glob would miss, and they would
-      # then only ever run in their skipping form.
-      - name: Parity gates
+      # Whole-building Python pipeline against the surviving pinned oracle.
+      - name: Pinned NECB2020 SmallOffice whole-building gate (Python)
         run: |
-          status=0
-          for t in \
-            btap-necb/test_envelope_lookup_parity.rb \
-            btap-necb/test_envelope_prescriptive_parity.rb \
-            btap-necb/test_envelope_costing_parity.rb \
-            btap-necb/test_envelope_data_integrity.rb \
-            btap-necb/test_loads_schedules_parity.rb \
-            btap-necb/test_loads_apply_parity.rb \
-            btap-necb/test_loads_data_integrity.rb \
-            btap-necb/test_shw_shw_parity.rb \
-            btap-necb/test_lighting_lights_parity.rb \
-            btap-necb/test_lighting_daylighting_parity.rb \
-            btap-necb/test_lighting_costing.rb \
-            btap-necb/test_oracle_goldens_current.rb \
-          ; do
-            gem_dir="${t%%/*}"; file="${t##*/}"
-            echo "::group::$t"
-            (cd "$gem_dir" && bundle exec ruby "test/$file") || status=1
-            echo "::endgroup::"
-          done
-          exit $status
+          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
+          python3 -m venv python/.archetype-venv
+          python/.archetype-venv/bin/pip install -q pytest
+          PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          LEGACY_PIN_REQUIRED=1 \
+            python/.archetype-venv/bin/python -m pytest -q \
+              python/tests/necb/test_legacy_archetype_e2e.py
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
       # freshness comparison, then the five goldens test files against the
-      # fresh export with ZERO skips asserted. This superseded the M8
-      # single-value lighting gate. It lives here because this is the ONLY
-      # job that bundles the oracle. D-78 terminology: Leg A is RUBY vs the
-      # oracle (the gates above); PYTHON vs the oracle is Leg C, whether
-      # frozen or, as here, live.
+      # fresh export with ZERO skips asserted. It lives here because this is
+      # the only job that bundles the oracle. Python vs the oracle is Leg C,
+      # whether frozen or, as here, live.
       - name: Live Leg C (python-prep / ruby-probe, all golden groups)
         run: |
-          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
           python3 -m venv python/.parity-venv
           python/.parity-venv/bin/pip install -q pytest
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
           BTAP_PYTHON="$PWD/python/.parity-venv/bin/python" \
             bash verification/live_leg_c.sh /tmp/live-leg-c
-      # D-80 R4 (D-82): the frozen ANNUAL scenarios are the parity job's
-      # pipeline gate (they replaced the live annual Leg-B steps). This
-      # step was accidentally swallowed by the PR-2 step-removal edit —
-      # the post-merge review caught the two annual scenarios inactive;
-      # test_ci_wires_every_lane now pins each lane to a CI executor.
+      # The frozen annual scenarios are the parity job's pipeline gate.
+      # test_ci_wires_every_lane pins each declared lane to a CI executor.
       - name: Frozen scenarios (parity lane)
         working-directory: python
         env:
@@ -438,9 +287,9 @@ jobs:
       # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
       # is how goldens are (re)generated — dispatch with export_goldens=true,
       # download the artifact into verification/oracle/goldens/, commit. Run
-      # it whenever legacy_pin/REF bumps; test_oracle_goldens_current.rb
-      # fails loudly until the re-exported goldens are committed. Reuses the
-      # live-Leg-C stages: --canonical prep (refuses a dirty tree), then the
+      # it whenever legacy_pin/REF bumps. The Python currentness and live Leg-C
+      # gates fail until re-exported goldens are committed. Reuses the live
+      # Leg-C stages: --canonical prep (refuses a dirty tree), then the
       # completeness-gated atomic export at the committed location.
       - name: Export the oracle goldens
         if: inputs.export_goldens

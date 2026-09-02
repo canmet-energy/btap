@@ -25,9 +25,9 @@
     "how": "occupancy and receptacle densities, thermostats and the NECB-letter schedule sets applied per space type from the NECB records (2025 values verified identical to 2020)",
     "gaps": "lighting schedules are provided by the lighting domain and SWH schedules by the shw domain — apply them after apply_loads",
     "code": [
-     "btap-necb/lib/btap_necb/loads/apply.rb#apply_loads",
-     "btap-necb/lib/btap_necb/loads/apply.rb#assign_space_types",
-     "btap-necb/lib/btap_necb/loads/schedules.rb#add"
+     "python/btap/necb/loads/apply.py#apply_loads",
+     "python/btap/necb/loads/apply.py#assign_space_types",
+     "python/btap/necb/loads/schedules.py#add"
     ]
    },
    {
@@ -37,7 +37,7 @@
     "how": "internal loads and SWH loads representative of the space functions via the space-type records; ventilation OA and space-type infiltration from the same records",
     "gaps": "illuminance levels are lighting-design data and are not modelled",
     "code": [
-     "btap-necb/lib/btap_necb/loads/apply.rb#apply_loads"
+     "python/btap/necb/loads/apply.py#apply_loads"
     ]
    },
    {
@@ -53,8 +53,8 @@
     "status": "host_scope",
     "how": "implemented in the openstudio-envelope gem; the loads pass applies only the space-type modelling infiltration",
     "code": [
-     "btap-necb/lib/btap_necb/envelope/reference.rb#apply_air_leakage_default",
-     "btap-necb/lib/btap_necb/envelope/prescriptive.rb#apply"
+     "python/btap/necb/envelope/reference.py#apply_air_leakage_default",
+     "python/btap/necb/envelope/prescriptive.py#apply"
     ]
    },
    {
@@ -63,18 +63,18 @@
     "status": "host_scope",
     "how": "fan/system operating schedules ship in the schedule sets; wiring them to systems is the openstudio-hvac / umbrella layer",
     "code": [
-     "btap-necb/lib/btap_necb/lighting/apply_lights.rb#apply_to_space_type",
-     "btap-necb/lib/btap_necb/lighting/reference.rb#apply_dwelling_rule"
+     "python/btap/necb/lighting/apply_lights.py#_apply_to_space_type",
+     "python/btap/necb/lighting/reference.py#_apply_dwelling_rule"
     ]
    },
    {
     "article": "8.4.3.5.",
     "title": "Assumed chiller performance for Part 8 calculations (Table 8.4.3.5)",
     "status": "host_scope",
-    "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body is not retrievable from the source extraction (correcting an earlier mislabel as simulation parameters)",
+    "how": "Table 8.4.3.5 = assumed chiller COP/IPLV (Scroll < 528 kW: COP 2.802/IPLV 3.664; Screw >= 528 kW: COP 2.802/IPLV 3.737) — an HVAC calculation assumption, not a loads concern; the article body was not retrievable when this was written; it IS now (re-checked 2026-09-01 via the codes MCP: all five sentences of 8.4.3.5 return complete), which corrects an earlier mislabel as simulation parameters",
     "code": [
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#hot_water",
-     "btap-modeling/lib/btap_modeling/hvac/systems/plant_loops.rb#chilled_water"
+     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
+     "python/btap/modeling/hvac/systems/plant_loops.py#chilled_water"
     ]
    },
    {
@@ -83,7 +83,7 @@
     "status": "implemented",
     "how": "Occupant, receptacle and miscellaneous loads applied from the NECB space-type data; (2) sensible/latent split and (3) schedule-driven adjustment are EnergyPlus behaviour of those inputs.",
     "code": [
-     "btap-necb/lib/btap_necb/loads/apply.rb#apply_loads"
+     "python/btap/necb/loads/apply.py#apply_loads"
     ]
    },
    {
@@ -92,7 +92,7 @@
     "status": "implemented",
     "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone. (1)(a): on the 2025 EUI path the umbrella normalizes OA to the ASHRAE 62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretation 2026-07-22; btap-necb Archetypes).",
     "code": [
-     "btap-necb/lib/btap_necb/loads/apply.rb#apply_loads"
+     "python/btap/necb/loads/apply.py#apply_loads"
     ]
    }
   ]
