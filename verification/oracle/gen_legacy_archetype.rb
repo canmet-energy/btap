@@ -46,9 +46,8 @@ if model.nil? || model.is_a?(FalseClass)
 end
 
 model.save(OpenStudio::Path.new(output_osm), true)
-source = Bundler.locked_gems.sources.find do |candidate|
-  candidate.respond_to?(:name) && candidate.name == 'openstudio-standards'
-end
+spec = Bundler.load.specs.find { |candidate| candidate.name == 'openstudio-standards' }
+source = spec&.source
 revision = source&.respond_to?(:revision) && source.revision
 raise 'cannot attest the locked openstudio-standards revision' if revision.to_s.empty?
 

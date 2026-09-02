@@ -6,6 +6,7 @@ Port of btap-necb/test/test_lighting_data_integrity.rb. SDK-free except for the
 
 import re
 import unittest
+from collections import Counter
 
 from btap.necb import lighting
 
@@ -30,8 +31,21 @@ class TestDataIntegrity(unittest.TestCase):
                        or "enclosed" in ("" if r["space_type"] is None else str(r["space_type"]))),
                       None)
         self.assertIsNotNone(office)
-        with_controls = sum(1 for r in rows if r["controls_4_2_2_1"])
-        self.assertGreater(with_controls, 80, "the 2025 4.2.2.1 control matrix is vendored")
+        controls = [row["controls_4_2_2_1"] for row in rows]
+        self.assertEqual(96, len(controls))
+        self.assertTrue(all(isinstance(control, dict) for control in controls))
+        marks = Counter(value for control in controls for value in control.values())
+        self.assertEqual(
+            {"manual", "restricted_manual_on", "restricted_partial_auto_on",
+             "auto_partial_off", "auto_full_off", "scheduled_shutoff", "bi_level",
+             "daylight_sidelighting", "daylight_toplighting"},
+            {key for control in controls for key in control})
+        self.assertEqual({"X": 297, "A": 140, "B": 155, "—": 10,
+                          "See Storage Room": 1},
+                         {mark: marks[mark] for mark in
+                          ("X", "A", "B", "—", "See Storage Room")})
+        self.assertEqual(32, len({tuple(sorted(control)) for control in controls}),
+                         "the per-space control matrix retains its requirement shapes")
 
     def test_2025_building_type_table(self):
         rows = lighting.table("lpd_building_types_2025")

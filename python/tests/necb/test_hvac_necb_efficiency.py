@@ -121,8 +121,8 @@ class TestNecbEfficiency(unittest.TestCase):
         unit = model.getAirConditionerVariableRefrigerantFlows()[0]
         unit.setGrossRatedTotalCoolingCapacity(20_000.0)
         unit.setGrossRatedHeatingCapacity(20_000.0)
-        unit.setGrossRatedCoolingCOP(1.0)
-        unit.setRatedHeatingCOP(1.0)
+        unit.setGrossRatedCoolingCOP(5.0)
+        unit.setRatedHeatingCOP(5.0)
 
         audit = AuditLog()
         hvac.apply_efficiencies(model, vintage='2020', audit=audit)
@@ -132,7 +132,27 @@ class TestNecbEfficiency(unittest.TestCase):
         self.assertAlmostEqual(3.30, unit.ratedHeatingCOP(), delta=1e-6)
         self.assertTrue(any(entry['action'] == 'VRF minimum efficiency applied'
                             and entry.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                            and entry.get('ruling') == 'D-85'
                             for entry in audit.entries))
+
+    def test_cooling_only_vrf_uses_table_i_air_conditioner_row(self):
+        import openstudio
+
+        model = openstudio.model.Model()
+        unit = openstudio.model.AirConditionerVariableRefrigerantFlow(model)
+        unit.setCondenserType('AirCooled')
+        unit.setGrossRatedTotalCoolingCapacity(20_000.0)
+        unit.setGrossRatedCoolingCOP(5.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(11.2, 20_000.0),
+                               unit.grossRatedCoolingCOP(), delta=1e-6)
+        decision = next(entry for entry in audit.entries
+                        if entry['action'] == 'VRF minimum efficiency applied')
+        self.assertEqual('air_conditioner', decision['inputs']['equipment_class'])
+        self.assertIsNone(decision['inputs']['heating_capacity_kw'])
 
     def test_small_vrf_uses_table_i_seasonal_minimums(self):
         model = load_fixture()
@@ -157,9 +177,14 @@ class TestNecbEfficiency(unittest.TestCase):
 
         hvac.apply_efficiencies(model, vintage='2020', audit=audit)
 
-        self.assertTrue(any('VRF cooling or heating capacity unavailable' in warning['action']
+        self.assertTrue(any('VRF cooling capacity unavailable' in warning['action']
                             and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                    and warning.get('ruling') == 'D-85'
                             for warning in audit.warnings))
+        self.assertTrue(any('VRF heating capacity unavailable' in warning['action']
+                    and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'
+                    and warning.get('ruling') == 'D-85'
+                    for warning in audit.warnings))
 
 
 if __name__ == '__main__':

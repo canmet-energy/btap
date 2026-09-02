@@ -89,6 +89,47 @@ class TestNecbE2ERun(unittest.TestCase):
                       if 'Primary' in b.nameString())
         self.assertAlmostEqual(0.90, boiler.nominalThermalEfficiency(), delta=1e-6)
 
+    def test_purchased_cooling_cop_survives_reference_sizing(self):
+        proposed = attach_weather(load_fixture())
+        modeling.build_system(
+            proposed, 'DOAS with fan coil district chilled water with boiler',
+            sorted_zones(proposed))
+        types = {zone.nameString(): 'Museum archives'
+                 for zone in proposed.getThermalZones()}
+        result = hvac.reference_hvac(
+            proposed, building={'storeys': 1, 'zone_types': types})
+
+        self.run_energyplus(result.model, 'purchased_cooling_reference')
+        audit = AuditLog()
+        hvac.apply_efficiencies(result.model, vintage='2020', audit=audit)
+
+        chillers = result.model.getChillerElectricEIRs()
+        self.assertTrue(chillers)
+        self.assertTrue(all(abs(chiller.referenceCOP() - 2.802) < 0.001
+                            for chiller in chillers))
+        self.assertTrue(any(entry['action'] ==
+                            'purchased-cooling reference chiller COP applied'
+                            and entry.get('article') == 'Table 8.4.3.5'
+                            for entry in audit.entries))
+
+    def test_vrf_table_i_applies_after_sizing(self):
+        model = attach_weather(load_fixture())
+        modeling.build_system(model, 'VRF', sorted_zones(model))
+
+        self.run_energyplus(model, 'vrf_sizing')
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        unit = model.getAirConditionerVariableRefrigerantFlows()[0]
+        decision = next(entry for entry in audit.entries
+                        if entry['action'] == 'VRF minimum efficiency applied')
+        self.assertEqual('heat_pump', decision['inputs']['equipment_class'])
+        self.assertEqual('D-85', decision['ruling'])
+        self.assertFalse(any('VRF' in warning['action'] and 'not sized' in warning['action']
+                             for warning in audit.warnings))
+        self.assertLess(unit.grossRatedCoolingCOP(), 4.0,
+                        'the sized builder COP is replaced by the Table-I minimum')
+
     # Air-source HP proposed -> Table 8.4.4.13 ASHP reference: a January week in
     # Toronto forces operation BELOW the -10 C compressor cutoff, so unmet hours
     # prove the supplemental heat + baseboards actually carry the load when the

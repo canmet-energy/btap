@@ -142,14 +142,24 @@ def _vrf_row(rows, capacity_w):
                       or capacity_kw < row['maximum_capacity_kw'])), None)
 
 
+def _vrf_is_heat_pump(unit):
+    for terminal in unit.terminals():
+        heating = terminal.heatingCoil()
+        if (heating.is_initialized()
+                and heating.get().to_CoilHeatingDXVariableRefrigerantFlow().is_initialized()):
+            return True
+    return False
+
+
 def _apply_vrf(unit, tables, vintage, audit):
-    """Apply the air-source heat-pump rows of Table 5.2.12.1.-I.
+    """Apply the air-cooled AC or air-source HP rows of Table 5.2.12.1.-I.
 
     OpenStudio's classic VRF object distinguishes only AirCooled, WaterCooled,
     and EvaporativelyCooled condensers. It cannot identify the table's water,
     groundwater, and ground-source classes, so those paths warn instead of
-    guessing. Seasonal and full-load ratings are converted using the same
-    no-fan formulas as the other DX equipment tables.
+    guessing. An attached VRF DX heating coil selects the heat-pump class;
+    cooling-only terminals select the air-conditioner class. Code minimums are
+    assigned exactly, consistently with the other equipment appliers.
     """
     article = f'NECB {vintage} Table 5.2.12.1.-I'
     if unit.condenserType() != 'AirCooled':
@@ -164,44 +174,53 @@ def _apply_vrf(unit, tables, vintage, audit):
                  or optional_f(unit.autosizedGrossRatedTotalCoolingCapacity()))
     heating_w = (optional_f(unit.grossRatedHeatingCapacity())
                  or optional_f(unit.autosizedGrossRatedHeatingCapacity()))
-    if cooling_w is None or heating_w is None:
-        return audit.warn(
-            'efficiency', 'VRF cooling or heating capacity unavailable (model not sized?) — '
-                          'Table-I minimums not set',
-            target=unit.nameString(),
-            inputs={'cooling_capacity_available': cooling_w is not None,
-                    'heating_capacity_available': heating_w is not None},
-            article=article)
+    heat_pump = _vrf_is_heat_pump(unit)
+    rows = tables['vrf_air_source_heat_pumps' if heat_pump else 'vrf_air_conditioners']
+    applied = []
 
-    rows = tables['vrf_air_source_heat_pumps']
-    cooling_row = _vrf_row(rows, cooling_w)
-    heating_row = _vrf_row(rows, heating_w)
-    if cooling_row is None or heating_row is None:
-        return audit.warn('efficiency', 'no VRF Table-I row found — minimums not set',
-                          target=unit.nameString(), article=article)
-
-    if cooling_row.get('minimum_seer') is not None:
-        cooling_cop = seer_to_cop_no_fan(cooling_row['minimum_seer'])
-        cooling_label = f"SEER {cooling_row['minimum_seer']}"
+    cooling_row = _vrf_row(rows, cooling_w) if cooling_w is not None else None
+    if cooling_row is None:
+        audit.warn('efficiency', 'VRF cooling capacity unavailable (model not sized?) — '
+                                 'Table-I cooling minimum not set',
+                   target=unit.nameString(), inputs={'equipment_class': 'heat_pump' if heat_pump else 'air_conditioner'},
+                   article=article, ruling='D-85')
     else:
-        cooling_cop = eer_to_cop_no_fan(cooling_row['minimum_eer'], cooling_w)
-        cooling_label = f"EER {cooling_row['minimum_eer']}"
-    if heating_row.get('minimum_hspf') is not None:
-        heating_cop = hspf_to_cop_no_fan(heating_row['minimum_hspf'])
-        heating_label = f"HSPF {heating_row['minimum_hspf']}"
-    else:
-        heating_cop = heating_row['minimum_heating_cop']
-        heating_label = f'COP {heating_cop}'
+        if cooling_row.get('minimum_seer') is not None:
+            cooling_cop = seer_to_cop_no_fan(cooling_row['minimum_seer'])
+            cooling_label = f"SEER {cooling_row['minimum_seer']}"
+        else:
+            cooling_cop = eer_to_cop_no_fan(cooling_row['minimum_eer'], cooling_w)
+            cooling_label = f"EER {cooling_row['minimum_eer']}"
+        unit.setGrossRatedCoolingCOP(cooling_cop)
+        applied.append(f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)})')
 
-    unit.setGrossRatedCoolingCOP(max(unit.grossRatedCoolingCOP(), cooling_cop))
-    unit.setRatedHeatingCOP(max(unit.ratedHeatingCOP(), heating_cop))
+    if heat_pump:
+        heating_row = _vrf_row(rows, heating_w) if heating_w is not None else None
+        if heating_row is None:
+            audit.warn('efficiency', 'VRF heating capacity unavailable (model not sized?) — '
+                                     'Table-I heating minimum not set',
+                       target=unit.nameString(), inputs={'equipment_class': 'heat_pump'},
+                       article=article, ruling='D-85')
+        else:
+            if heating_row.get('minimum_hspf') is not None:
+                heating_cop = hspf_to_cop_no_fan(heating_row['minimum_hspf'])
+                heating_label = f"HSPF {heating_row['minimum_hspf']}"
+            else:
+                heating_cop = heating_row['minimum_heating_cop']
+                heating_label = f'COP {heating_cop}'
+            unit.setRatedHeatingCOP(heating_cop)
+            applied.append(f'heating {heating_label}')
+
+    if not applied:
+        return None
     return audit.decision(
         'efficiency', 'VRF minimum efficiency applied', target=unit.nameString(),
-        inputs={'cooling_capacity_kw': ruby_round(cooling_w / 1000.0, 1),
-                'heating_capacity_kw': ruby_round(heating_w / 1000.0, 1)},
-        value=f'cooling {cooling_label} (COP {ruby_round(cooling_cop, 2)}); '
-              f'heating {heating_label}',
-        article=article)
+        inputs={'equipment_class': 'heat_pump' if heat_pump else 'air_conditioner',
+                'cooling_capacity_kw': (ruby_round(cooling_w / 1000.0, 1)
+                                        if cooling_w is not None else None),
+                'heating_capacity_kw': (ruby_round(heating_w / 1000.0, 1)
+                                        if heating_w is not None else None)},
+        value='; '.join(applied), article=article, ruling='D-85')
 
 
 # ---------------- 8.4.4.9.(7) / 8.4.4.10.(8) staged heating and cooling ----------------
@@ -1205,15 +1224,26 @@ def _apply_chiller(chiller, tables, plant, audit):
     if kw_per_ton is None:
         return audit.warn('efficiency', 'chiller row has no full-load efficiency — COP not set', target=name)
 
-    cop = kw_per_ton_to_cop(kw_per_ton)
+    purchased_cooling_cop = chiller.additionalProperties().getFeatureAsDouble(
+        'btap_purchased_cooling_reference_cop')
+    if purchased_cooling_cop.is_initialized():
+        cop = purchased_cooling_cop.get()
+        article = 'Table 8.4.3.5'
+        action = 'purchased-cooling reference chiller COP applied'
+        label = f'COP {ruby_round(cop, 3)}'
+    else:
+        cop = kw_per_ton_to_cop(kw_per_ton)
+        article = 'NECB 2020 Table 5.2.12.1 (chillers)'
+        action = 'chiller efficiency applied'
+        label = f'{ruby_round(kw_per_ton, 1)}kW/ton'
     chiller.setReferenceCOP(cop)
-    chiller.setName(f'{name} {ruby_round(tons)}tons {ruby_round(kw_per_ton, 1)}kW/ton')
-    return audit.decision('efficiency', 'chiller efficiency applied', target=name,
+    chiller.setName(f'{name} {ruby_round(tons)}tons {label}')
+    return audit.decision('efficiency', action, target=name,
                           inputs={'cooling_type': cooling_type, 'compressor': compressor,
                                   'tons': ruby_round(tons, 1)},
-                          value=f'COP {ruby_round(cop, 2)} ({ruby_round(kw_per_ton, 2)} kW/ton), '
-                                f"curves {row.get('capft')}/{row.get('eirft')}/{row.get('eirfplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (chillers)')
+                          value=f'{label}, curves '
+                                f"{row.get('capft')}/{row.get('eirft')}/{row.get('eirfplr')}",
+                          article=article)
 
 
 def _apply_tower_rules(model, audit):

@@ -259,6 +259,13 @@ class TestNecbEnergyRecovery(unittest.TestCase):
                     and e.get('article') == 'Table 8.4.3.5'
                     for e in result.audit.entries))
 
+        for chiller in chillers:
+            chiller.setReferenceCapacity(200_000.0)
+        second_pass = hvac.apply_efficiencies(result.model, vintage='2020')
+        self.assertTrue(second_pass)
+        self.assertTrue(all(abs(c.referenceCOP() - 2.802) < 0.001 for c in chillers),
+                        'the post-sizing efficiency pass must retain Table 8.4.3.5 COP 2.802')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -14,8 +14,7 @@
     "verification/oracle/oracle_probes.rb",
     "verification/oracle/request_manifest.json",
     "verification/r6_disposition.json",
-    "verification/spec.json",
-    "verification/scenarios/validate_r6_refreeze.py"
+    "verification/spec.json"
    ],
    "prefixes": [
     "verification/oracle/fixtures/",
@@ -26,7 +25,8 @@
   },
   "archive": {
    "paths": [
-    "verification/oracle/bootstrap_request_manifest.py"
+    "verification/oracle/bootstrap_request_manifest.py",
+    "verification/scenarios/validate_r6_refreeze.py"
    ],
    "prefixes": [],
    "reason": "One-time provenance tooling remains readable but is not an active CI or product workflow."
@@ -37,9 +37,14 @@
    "reason": "No active verification-owned behavior awaits a port; the frozen scenario suite already succeeded the dormant Leg-B drivers."
   },
   "delete": {
-    "paths": [],
+   "paths": [
+    "verification/matrix.sh",
+    "verification/oracle/dump_bootstrap_inputs.rb",
+    "verification/run_corpus.rb",
+    "verification/selftest.sh"
+   ],
    "prefixes": [],
-    "reason": "All files classified for deletion were removed by D-84; this empty set is intentional and guarded by survivor coverage."
+    "reason": "These gem-dependent drivers were audited for retirement and must remain absent after D-84."
   }
  }
 }

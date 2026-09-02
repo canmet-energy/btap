@@ -554,11 +554,15 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
         purchased_cooling_cop = (assignment.config or {}).get(
             'purchased_cooling_reference_cop')
         if purchased_cooling_cop is not None:
-            purchased_cooling_chillers.extend(
+            new_purchased_chillers = [
                 (chiller, purchased_cooling_cop)
                 for chiller in reference.getChillerElectricEIRs()
                 if str(chiller.handle()) not in existing_chillers
-            )
+            ]
+            purchased_cooling_chillers.extend(new_purchased_chillers)
+            for chiller, cop in new_purchased_chillers:
+                chiller.additionalProperties().setFeature(
+                    'btap_purchased_cooling_reference_cop', cop)
         audit.decision('build', 'reference system built', target=','.join(assignment.zones),
                        inputs={'system': assignment.reference_system, 'action': assignment.action},
                        value=assignment.catalog_name,

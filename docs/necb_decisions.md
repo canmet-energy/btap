@@ -13,17 +13,14 @@ product-shaping call is made.
 
 Format per entry: **what was decided / who / when / why / evidence & commit**.
 
-**Maintenance (D-44, direction reversed by D-81):** the CANONICAL registry is
-`python/btap/necb/data/decisions.json`; the Ruby gem's copy is GENERATED from
-it and never hand-edited. The full editing workflow for a decision: (1) edit
-the canonical Python JSON; (2) author the `## D-XX` section here — the prose
-stays HAND-AUTHORED, never generated, and the tests enforce id-set equality
-between doc and registry, not title/summary agreement; (3) run
-`python3 python/scripts/sync_decisions_registry.py` to generate the Ruby copy;
-(4) `python3 python/scripts/generate_decisions_toc.py`; (5) run the Python
-registry/citation tests; (6) run `test/test_decisions_registry.rb`. Both
-sides fail the build in both drift directions, and a `kind: "runtime"` entry
-must be cited by at least one ruling tag in BOTH implementations. Registry summaries are PARAPHRASE — never NECB text
+**Maintenance (D-44, D-81, D-84):** the CANONICAL registry is
+`python/btap/necb/data/decisions.json`. The full editing workflow for a
+decision: (1) edit the canonical JSON; (2) author the `## D-XX` section here —
+the prose stays HAND-AUTHORED, never generated, and tests enforce id-set
+equality between document and registry, not title/summary agreement; (3) run
+`python3 python/scripts/generate_decisions_toc.py`; (4) run the Python
+registry/citation tests. A `kind: "runtime"` entry must be cited by at least one
+Python `ruling:` tag. Registry summaries are PARAPHRASE — never NECB text
 verbatim (D-01 scopes verbatim reproduction to the generated coverage docs).
 
 **Live registers:** D (decisions, here) and L (legacy findings,
@@ -120,6 +117,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-82** — The R4 verification handoff is complete: the frozen scenario suite replaces the live Ruby-vs-Python Leg-B gates, the drivers are dormant, and Ruby backports stop _(process)_
 - **D-83** — R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one _(process)_
 - **D-84** — R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives _(process)_
+- **D-85** — VRF Table-I class selection and exact minimum assignment _(runtime)_
 
 <!-- TOC END -->
 
@@ -4757,3 +4755,23 @@ LGPL that applies to the package source.
 gem-dependent verification drivers retire only after the post-handoff freeze
 is committed and validated. The oracle pin, oracle probes, goldens, request
 manifest, and frozen scenario machinery survive.
+
+## D-85
+
+**Decided:** Classic OpenStudio air-cooled VRF equipment selects its Table
+5.2.12.1.-I class from attached terminal coils: an attached VRF DX heating coil
+means air-source heat pump; no attached VRF heating coil means air conditioner.
+Cooling and heating capacities are evaluated independently, so cooling-only
+equipment receives the higher air-conditioner cooling minimum and a missing
+heating capacity cannot suppress cooling conformance.
+
+Selected VRF code minimums are assigned exactly, matching the boiler, chiller
+and ordinary DX efficiency appliers. A better proposed or builder COP is not
+preserved in the reference minimum-efficiency pass. Non-air-cooled classic VRF
+objects warn because `condenserType` cannot distinguish the printed water,
+groundwater and ground-source classes; unsized applicable modes also warn
+rather than passing silently.
+
+**Evidence:** direct tests pin both editions' air-conditioner and air-source
+heat-pump rows, cooling-only classification, exact assignment from an initially
+better COP, independent cooling/heating handling, and article-cited warnings.

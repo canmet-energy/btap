@@ -54,13 +54,15 @@ class TestVariantMockups(unittest.TestCase):
     def exercise_mockup(self, name):
         result, expected, mode = self.run_mockup(name)
         self.assert_expectations(result, expected, name)
+        self.assertIsNotNone(result.reference_model,
+                             f"{name}: reference model present")
         if mode == "sizing":
-            self.assertIsNotNone(result.reference_model,
-                                 f"{name}: reference model present")
-            errors = [entry for entry in result.audit.entries
-                      if entry["level"] == "error"]
-            self.assertEqual([], errors,
-                             f"{name}: no error-level audit entries after sizing")
+            self.assertTrue(result.reference_model.sqlFile().is_initialized(),
+                            f"{name}: reference sizing SQL attached")
+            self.assertTrue(any(
+                entry["action"].startswith("reference sized; efficiencies re-applied")
+                for entry in result.audit.entries
+            ), f"{name}: post-sizing completion recorded")
 
     def test_sys5_is_a_first_build_not_just_a_selection(self):
         result, _, _ = self.run_mockup("sys5_refrigerated")

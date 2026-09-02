@@ -32,10 +32,11 @@ class TestVerificationDisposition(unittest.TestCase):
 
         problems = []
         for path in tracked:
-            outcomes = [
+            exact = [outcome for outcome, rules in classifications.items()
+                     if path in rules["paths"]]
+            outcomes = exact or [
                 outcome for outcome, rules in classifications.items()
-                if path in rules["paths"]
-                or any(path.startswith(prefix) for prefix in rules["prefixes"])
+                if any(path.startswith(prefix) for prefix in rules["prefixes"])
             ]
             if len(outcomes) != 1:
                 problems.append(f"{path}: outcomes={outcomes}")
@@ -47,10 +48,19 @@ class TestVerificationDisposition(unittest.TestCase):
         for outcome, rules in classifications.items():
             self.assertTrue(rules["reason"].strip(), f"{outcome} needs a reason")
             for path in rules["paths"]:
-                self.assertIn(path, tracked, f"{outcome}: stale path {path}")
+                if outcome == "delete":
+                    self.assertNotIn(path, tracked, f"{outcome}: retired path returned {path}")
+                    self.assertFalse((REPO_ROOT / path).exists(),
+                                     f"{outcome}: retired path exists {path}")
+                else:
+                    self.assertIn(path, tracked, f"{outcome}: stale path {path}")
             for prefix in rules["prefixes"]:
-                self.assertTrue(any(path.startswith(prefix) for path in tracked),
-                                f"{outcome}: stale prefix {prefix}")
+                if outcome == "delete":
+                    self.assertFalse(any(path.startswith(prefix) for path in tracked),
+                                     f"{outcome}: retired prefix returned {prefix}")
+                else:
+                    self.assertTrue(any(path.startswith(prefix) for path in tracked),
+                                    f"{outcome}: stale prefix {prefix}")
 
 
 if __name__ == "__main__":

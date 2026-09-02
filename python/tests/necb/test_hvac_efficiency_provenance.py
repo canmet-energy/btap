@@ -122,11 +122,17 @@ class TestEfficiencyProvenance(unittest.TestCase):
                         'are SEER 15, not Table-B SPVAC EER 11')
 
     def test_vrf_air_source_heat_pump_ladder_is_table_i(self):
-        expected = [
+        heat_pumps = [
             (0.0, 19.0, 15.0, None, 7.8, None),
             (19.0, 40.0, None, 10.8, None, 3.3),
             (40.0, 70.0, None, 10.4, None, 3.2),
             (70.0, None, None, 9.3, None, 3.2),
+        ]
+        air_conditioners = [
+            (0.0, 19.0, 15.0, None, None, None),
+            (19.0, 40.0, None, 11.2, None, None),
+            (40.0, 70.0, None, 11.0, None, None),
+            (70.0, None, None, 10.0, None, None),
         ]
 
         def signature(row):
@@ -134,24 +140,30 @@ class TestEfficiencyProvenance(unittest.TestCase):
                     row.get('minimum_seer'), row.get('minimum_eer'),
                     row.get('minimum_hspf'), row.get('minimum_heating_cop'))
 
-        self.assertEqual(expected,
+        self.assertEqual(heat_pumps,
                          [signature(row) for row in DATA['vrf_air_source_heat_pumps']])
-        self.assertEqual(expected,
+        self.assertEqual(heat_pumps,
                          [signature(row) for row in DATA_2025['vrf_air_source_heat_pumps']])
+        self.assertEqual(air_conditioners,
+                 [signature(row) for row in DATA['vrf_air_conditioners']])
+        self.assertEqual(air_conditioners,
+                 [signature(row) for row in DATA_2025['vrf_air_conditioners']])
 
-    def test_heat_pump_upper_bin_starts_at_136481_in_both_editions(self):
+    def test_heat_pump_capacity_ladders_have_no_boundary_gaps(self):
         for edition, dataset in (('2020', DATA), ('2025', DATA_2025)):
-            for subcategory in ('Single Package', 'Split System'):
-                for heating_type in ('Electric Resistance or None', 'All Other'):
-                    upper_boundaries = [float(row['minimum_capacity'])
-                                        for row in dataset['heat_pumps']
-                                        if row['subcategory'] == subcategory
-                                        and row['heating_type'] == heating_type
-                                        and float(row['minimum_capacity']) > 136480.0]
-                    self.assertEqual(
-                        136481.0, min(upper_boundaries),
-                        f'{edition} {subcategory}/{heating_type}: the upper bin follows '
-                        'the 136480 Btu/h maximum without the 136841 transcription typo')
+            for family in ('heat_pumps', 'heat_pumps_heating'):
+                group_keys = ('subcategory', 'heating_type') if family == 'heat_pumps' else ('subcategory',)
+                groups = {}
+                for row in dataset[family]:
+                    groups.setdefault(tuple(row.get(key) for key in group_keys), []).append(row)
+                for group, ladder in groups.items():
+                    ladder.sort(key=lambda row: float(row['minimum_capacity']))
+                    for lower, upper in zip(ladder, ladder[1:]):
+                        self.assertEqual(
+                            float(lower['maximum_capacity']),
+                            float(upper['minimum_capacity']),
+                            f'{edition} {family} {group}: strict-min/inclusive-max lookup '
+                            'requires adjacent bins to share their boundary')
 
     # The heat_rejection family cites ASHRAE 90.1 and is VESTIGIAL for the
     # reference path: apply_efficiencies never reads it (the tower fan comes from
