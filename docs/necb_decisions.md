@@ -4773,6 +4773,13 @@ system. Guessing there would apply the cooling-only rows to a heat pump and drop
 its heating minimum with no audit line at all — the same "never guess, never
 silent" rule the condenser type already follows.
 
+The reference transform no longer produces that case. `replace_system` takes
+the zone terminals but not the outdoor unit, which is neither zone equipment
+nor on a loop, so a proposed VRF used to leave a condenser serving no zones in
+the reference. The transform now removes it and records the removal. The
+indeterminate rule above remains the safety net for any other route into the
+efficiency pass.
+
 Selected VRF code minimums are assigned exactly, matching the boiler, chiller
 and ordinary DX efficiency appliers. A better proposed or builder COP is not
 preserved in the reference minimum-efficiency pass. Non-air-cooled classic VRF

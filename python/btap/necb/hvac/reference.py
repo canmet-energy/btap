@@ -579,6 +579,7 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
 
     _rebuild_humidification(reference, proposed_humidification, ruleset, vintage, audit)
     _purge_orphaned_ems(reference, audit)
+    _purge_orphaned_vrf(reference, audit)
     _apply_oversizing_caps(model, reference, ruleset, audit)
     _efficiency.apply(reference, vintage=vintage, audit=audit)
     for chiller, cop in purchased_cooling_chillers:
@@ -787,6 +788,28 @@ def _purge_orphaned_ems(model, audit):
                         f"({len(removed)}): {'; '.join(removed[:6])}{ellipsis} — "
                         'reference controls come from the reference ruleset, not proposed EMS overrides',
                article='8.4.4.1.', ruling='D-16')
+
+
+def _purge_orphaned_vrf(model, audit):
+    """A proposed VRF outdoor unit whose terminals left with the proposed HVAC.
+
+    replace_system removes the zone terminals, but the outdoor unit is neither
+    zone equipment nor on a loop, so it stays behind serving nothing. That
+    leftover is not harmless: the classic VRF object carries no
+    heating/cooling-only field of its own, so the terminals were also the only
+    evidence of its Table 5.2.12.1.-I class, and a condenser serving no zones
+    reaches EnergyPlus as dead input. The reference has no VRF system — say so
+    and remove it, rather than leaving the efficiency pass to reason about a
+    unit that serves nothing (D-85).
+    """
+    orphans = [unit for unit in sorted_by_name(model.getAirConditionerVariableRefrigerantFlows())
+               if not unit.terminals()]
+    for unit in orphans:
+        audit.info('build', 'proposed VRF outdoor unit serves no reference zone — removed',
+                   target=unit.nameString(), inputs={'terminals': 0},
+                   article='8.4.4.1.', ruling='D-85')
+        unit.remove()
+    return orphans
 
 
 def _apply_unitary_operating_schedule(loop_, chosen):

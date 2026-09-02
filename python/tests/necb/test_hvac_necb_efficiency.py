@@ -61,6 +61,25 @@ class TestNecbEfficiency(unittest.TestCase):
                             for e in decisions),
                         f"uncited decision: {uncited.get('action') if uncited else None}")
 
+    def test_chiller_audit_states_the_cop_that_was_applied(self):
+        """The COP is the determination an AHJ reads, so it belongs in the audit
+        VALUE even though the model NAME carries only the compact kW/ton form."""
+        model = load_fixture()
+        modeling.build_system(
+            model, 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard',
+            sorted_zones(model))
+        for c in model.getChillerElectricEIRs():
+            c.setReferenceCapacity(200_000.0)
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+
+        entry = next(e for e in audit.entries if e['action'] == 'chiller efficiency applied')
+        chiller = sorted_by_name(model.getChillerElectricEIRs())[0]
+        self.assertIn(f'COP {round(chiller.referenceCOP(), 2)}', entry['value'])
+        self.assertIn('kW/ton', entry['value'])
+        self.assertRegex(chiller.nameString(), r'kW/ton$')
+
     def test_dx_and_gas_coil_and_ashp(self):
         model = load_fixture()
         modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Electric Baseboard',

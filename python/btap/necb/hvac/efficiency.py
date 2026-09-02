@@ -1250,22 +1250,27 @@ def _apply_chiller(chiller, tables, plant, audit):
 
     purchased_cooling_cop = chiller.additionalProperties().getFeatureAsDouble(
         'btap_purchased_cooling_reference_cop')
+    # The NAME suffix is compact by long-standing convention; the audit VALUE
+    # must always state the COP actually applied, because that number IS the
+    # determination an AHJ reads.
     if purchased_cooling_cop.is_initialized():
         cop = purchased_cooling_cop.get()
         article = 'Table 8.4.3.5'
         action = 'purchased-cooling reference chiller COP applied'
-        label = f'COP {ruby_round(cop, 3)}'
+        name_suffix = f'COP {ruby_round(cop, 3)}'
+        applied = f'COP {ruby_round(cop, 3)}'
     else:
         cop = kw_per_ton_to_cop(kw_per_ton)
         article = 'NECB 2020 Table 5.2.12.1 (chillers)'
         action = 'chiller efficiency applied'
-        label = f'{ruby_round(kw_per_ton, 1)}kW/ton'
+        name_suffix = f'{ruby_round(kw_per_ton, 1)}kW/ton'
+        applied = f'COP {ruby_round(cop, 2)} ({ruby_round(kw_per_ton, 2)} kW/ton)'
     chiller.setReferenceCOP(cop)
-    chiller.setName(f'{name} {ruby_round(tons)}tons {label}')
+    chiller.setName(f'{name} {ruby_round(tons)}tons {name_suffix}')
     return audit.decision('efficiency', action, target=name,
                           inputs={'cooling_type': cooling_type, 'compressor': compressor,
                                   'tons': ruby_round(tons, 1)},
-                          value=f'{label}, curves '
+                          value=f'{applied}, curves '
                                 f"{row.get('capft')}/{row.get('eirft')}/{row.get('eirfplr')}",
                           article=article)
 
