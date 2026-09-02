@@ -476,7 +476,7 @@ Frozen effect: none; no frozen scenario selects these storage space types.
 
 `docs/NECB_8_4_COVERAGE.html` was regenerated after source-line movement and the
 new Table-I citation. Two consecutive generations were byte-identical and the
-committed-byte test passes. `NECB_GEM_COVERAGE.md` did not change.
+committed-byte test passes. `NECB_COVERAGE.md` did not change.
 
 ## Validation evidence
 

@@ -1,5 +1,9 @@
 # canmet-btap
 
+> This file is the **distribution's** front page — it ships as
+> `canmet-btap`'s `long_description` on PyPI, which is why it describes the
+> package rather than the repository. The repository README is one level up.
+
 `canmet-btap` is the sole product implementation after R6 (D-84). It is one
 Python distribution with five subpackages:
 

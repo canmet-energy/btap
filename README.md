@@ -1,5 +1,11 @@
 # NECB compliance for OpenStudio models
 
+> **Two READMEs, on purpose.** This one is the repository: what the tool does,
+> how to install it, and how to run it. [`python/README.md`](python/README.md)
+> is the distribution's own front page — it is `canmet-btap`'s
+> `long_description` on PyPI, so it describes the package, not the repo.
+> Contributor setup lives in [`docs/DEVELOPERS.md`](docs/DEVELOPERS.md).
+
 Check a building against the **National Energy Code of Canada for Buildings
 (NECB) 2020 or 2025, Part 8 performance path** — Article 8.4.1.2, the
 proposed-versus-reference determination.
@@ -179,7 +185,7 @@ point is still written.
 
 Coverage is generated from the code, not hand-maintained:
 
-- **[NECB_GEM_COVERAGE.md](docs/NECB_GEM_COVERAGE.md)** — every
+- **[NECB_COVERAGE.md](docs/NECB_COVERAGE.md)** — every
   article each rule domain declares, with its status and its gaps. The filename
   is retained for continuity with the pre-R6 evidence record.
 - **[NECB_8_4_COVERAGE.html](docs/NECB_8_4_COVERAGE.html)** —

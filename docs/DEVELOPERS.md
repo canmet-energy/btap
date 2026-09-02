@@ -104,7 +104,7 @@ Repository checks from the root:
 ```bash
 python3 python/scripts/necb_orphan_keys.py
 python3 python/scripts/necb_8_4_6_curve_probe.py
-python3 python/scripts/generate_necb_gem_coverage.py
+python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_decisions_toc.py --check
 cd python && python3 scripts/wheel_smoke.py
@@ -123,7 +123,7 @@ runtime citations. Regenerate the TOC with
 `python3 python/scripts/generate_decisions_toc.py`; use `--check` in gates.
 
 The two generated coverage documents are
-[NECB_GEM_COVERAGE.md](NECB_GEM_COVERAGE.md) and
+[NECB_COVERAGE.md](NECB_COVERAGE.md) and
 [NECB_8_4_COVERAGE.html](NECB_8_4_COVERAGE.html). Their retained filenames are
 part of the evidence history; their inputs and code pointers are Python-owned
 after R6. Do not edit either output by hand.

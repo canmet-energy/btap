@@ -24,8 +24,8 @@ jobs:
   stage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: build the canmet-btap wheel
@@ -53,7 +53,7 @@ jobs:
       - name: tar the staged tree
         # upload-artifact drops the exec bit; a tar preserves the tree exactly.
         run: tar czf stage.tar.gz -C packaging/windows stage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: stage
           path: stage.tar.gz
@@ -68,8 +68,8 @@ jobs:
     needs: stage
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           name: stage
       - name: unpack the staged tree
@@ -83,8 +83,8 @@ jobs:
     needs: [stage, smoke-windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           name: stage
       - name: unpack the staged tree

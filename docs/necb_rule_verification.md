@@ -8,8 +8,8 @@ rules it actually *applies*.
 Each domain gem's ruleset JSON carries an `article_coverage` manifest
 declaring every NECB article as `implemented` / `partial` /
 `not_implemented` / `satisfied_by_clone` / `host_scope`, and
-`scripts/generate_necb_gem_coverage.rb` rolls those up into
-`NECB_GEM_COVERAGE.md`.
+`scripts/generate_necb_coverage.rb` rolls those up into
+`NECB_COVERAGE.md`.
 
 That manifest is **self-declared prose**. `status: "implemented"` is justified
 only by a `how` string, and until these checks existed nothing verified that an

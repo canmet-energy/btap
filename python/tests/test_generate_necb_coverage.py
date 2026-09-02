@@ -7,17 +7,17 @@ from pathlib import Path
 
 from tests.support import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_gem_coverage.py"
-SPEC = importlib.util.spec_from_file_location("generate_necb_gem_coverage", SCRIPT)
+SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_coverage.py"
+SPEC = importlib.util.spec_from_file_location("generate_necb_coverage", SCRIPT)
 coverage = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(coverage)
 
 
 class TestGenerateNecbGemCoverage(unittest.TestCase):
     def test_python_inputs_generate_committed_bytes(self):
-        committed = REPO_ROOT / "docs" / "NECB_GEM_COVERAGE.md"
+        committed = REPO_ROOT / "docs" / "NECB_COVERAGE.md"
         with tempfile.TemporaryDirectory() as tmp:
-            output = Path(tmp) / "NECB_GEM_COVERAGE.md"
+            output = Path(tmp) / "NECB_COVERAGE.md"
             result = coverage.main([
                 "--manifest-root", str(REPO_ROOT),
                 "--output", str(output),
@@ -41,9 +41,9 @@ class TestGenerateNecbGemCoverage(unittest.TestCase):
         self.assertTrue(all(str(ref).startswith("python/btap/") for ref in refs))
 
     def test_python_is_the_only_input_authority(self):
-        self.assertEqual(REPO_ROOT / "docs" / "NECB_GEM_COVERAGE.md", coverage.DEFAULT_OUTPUT)
+        self.assertEqual(REPO_ROOT / "docs" / "NECB_COVERAGE.md", coverage.DEFAULT_OUTPUT)
         rendered = coverage.render(coverage.collect_records(REPO_ROOT))
-        self.assertIn("python/scripts/generate_necb_gem_coverage.py", rendered)
+        self.assertIn("python/scripts/generate_necb_coverage.py", rendered)
         self.assertNotRegex(rendered, r"btap-[^/]+/lib/")
 
     def test_stale_manifest_root_fails_loudly(self):
