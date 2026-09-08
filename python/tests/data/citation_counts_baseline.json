@@ -1,0 +1,170 @@
+{
+  "2020": {
+    "8.4.1.2": {
+      "cited": 7,
+      "warn": 3
+    },
+    "8.4.2.1": {
+      "warn": 1
+    },
+    "8.4.2.9": {
+      "cited": 1
+    },
+    "8.4.3.1": {
+      "warn": 1
+    },
+    "8.4.3.2": {
+      "cited": 14,
+      "warn": 1
+    },
+    "8.4.3.3": {
+      "cited": 1,
+      "warn": 1
+    },
+    "8.4.3.5": {
+      "cited": 1
+    },
+    "8.4.4.1": {
+      "cited": 5,
+      "warn": 1
+    },
+    "8.4.4.10": {
+      "cited": 3
+    },
+    "8.4.4.11": {
+      "cited": 1
+    },
+    "8.4.4.12": {
+      "cited": 4
+    },
+    "8.4.4.14": {
+      "cited": 3
+    },
+    "8.4.4.15": {
+      "warn": 1
+    },
+    "8.4.4.17": {
+      "cited": 1
+    },
+    "8.4.4.18": {
+      "cited": 1
+    },
+    "8.4.4.20": {
+      "cited": 1
+    },
+    "8.4.4.3": {
+      "cited": 8,
+      "warn": 1
+    },
+    "8.4.4.4": {
+      "cited": 1
+    },
+    "8.4.4.5": {
+      "cited": 9,
+      "warn": 2
+    },
+    "8.4.4.7": {
+      "cited": 6,
+      "warn": 5
+    },
+    "8.4.4.9": {
+      "cited": 4,
+      "warn": 1
+    }
+  },
+  "2025": {
+    "8.4.1.2": {
+      "cited": 7,
+      "warn": 3
+    },
+    "8.4.2.1": {
+      "warn": 1
+    },
+    "8.4.2.9": {
+      "cited": 1
+    },
+    "8.4.3.1": {
+      "warn": 1
+    },
+    "8.4.3.2": {
+      "cited": 14,
+      "warn": 1
+    },
+    "8.4.3.3": {
+      "cited": 1,
+      "warn": 1
+    },
+    "8.4.3.5": {
+      "cited": 1
+    },
+    "8.4.3.6": {
+      "cited": 1
+    },
+    "8.4.4.1": {
+      "cited": 6,
+      "warn": 5
+    },
+    "8.4.4.2": {
+      "cited": 4,
+      "warn": 3
+    },
+    "8.4.5.1": {
+      "cited": 5,
+      "warn": 1
+    },
+    "8.4.5.10": {
+      "cited": 3
+    },
+    "8.4.5.11": {
+      "cited": 1
+    },
+    "8.4.5.12": {
+      "cited": 4
+    },
+    "8.4.5.14": {
+      "cited": 3
+    },
+    "8.4.5.15": {
+      "warn": 1
+    },
+    "8.4.5.17": {
+      "cited": 1
+    },
+    "8.4.5.18": {
+      "cited": 1
+    },
+    "8.4.5.20": {
+      "cited": 1
+    },
+    "8.4.5.3": {
+      "cited": 8,
+      "warn": 1
+    },
+    "8.4.5.4": {
+      "cited": 1
+    },
+    "8.4.5.5": {
+      "cited": 10,
+      "warn": 3
+    },
+    "8.4.5.7": {
+      "cited": 6,
+      "warn": 5
+    },
+    "8.4.5.9": {
+      "cited": 4,
+      "warn": 1
+    }
+  },
+  "_provenance": {
+    "commit": "ac6712f2806c083af21b03739f8e86951e09b352",
+    "editions": [
+      "2020",
+      "2025"
+    ],
+    "generated_by": "python/tests/citation_counts.py:compute_citation_counts",
+    "key_shape": "{edition: {article: {kind: count}}}",
+    "kinds": "The scanner (python_call_kind in generate_necb_8_4_coverage.py) classifies each article= citation call site into exactly two kinds: 'cited' (any call other than audit.warn/audit.warning) and 'warn' (an audit.warn/audit.warning call). It does not separately distinguish 'decision' from 'info' \u2014 both fall under 'cited'. This baseline keys by the scanner's own two kinds, not the three-way decision/warning/info vocabulary used to describe the intent.",
+    "note": "Generated AFTER renaming compliance.py:320-357 local variable lighting_prefix -> prefix, which makes the article= keyword at compliance.py:346 (and its warn-branch sibling at :357) newly scanner-visible per generate_necb_8_4_coverage.py citation scanning (it only substitutes the literal interpolated name {prefix}). This baseline therefore already includes that fix's contribution to the counts; a further intentional count change must be re-baselined explicitly in the same commit, with the reason recorded here."
+  }
+}

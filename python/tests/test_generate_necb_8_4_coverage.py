@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.citation_counts import compute_citation_counts, load_baseline
 from tests.support import REPO_ROOT
 
 SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
@@ -13,6 +14,16 @@ SPEC = importlib.util.spec_from_file_location("generate_necb_8_4_coverage", SCRI
 coverage = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = coverage
 SPEC.loader.exec_module(coverage)
+
+
+def _total_citation_sites(counts: dict) -> int:
+    return sum(
+        count
+        for edition, articles in counts.items()
+        if edition != "_provenance"
+        for kinds in articles.values()
+        for count in kinds.values()
+    )
 
 
 class TestGenerateNecb84Coverage(unittest.TestCase):
@@ -34,7 +45,15 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
     def test_evidence_and_state_accounting_are_non_vacuous(self):
         generator = coverage.CoverageGenerator(coverage.Inputs())
         html, parts = generator.render()
-        self.assertGreater(len(generator.raw_citations), 50)
+        baseline_total = _total_citation_sites(load_baseline())
+        current_total = _total_citation_sites(compute_citation_counts(coverage))
+        self.assertEqual(
+            baseline_total, current_total,
+            "total runtime citation sites drifted from "
+            "tests/data/citation_counts_baseline.json — a genuine change is "
+            "re-baselined explicitly (see test_citation_no_loss.py), not "
+            "silently absorbed by a loose floor",
+        )
         for vintage, expected_articles in (("2020", 52), ("2025", 57)):
             part = parts[vintage]
             self.assertEqual(expected_articles, len(part["articles"]))
