@@ -8,8 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from btap.necb import performance_compliance
-from btap.necb import report as report_renderer
+from btap.codes import performance_compliance
+from btap.codes import report as report_renderer
 from tests.necb.support import (
     DDY,
     EPW,

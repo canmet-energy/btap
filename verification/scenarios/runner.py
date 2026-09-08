@@ -165,7 +165,7 @@ def resolve(value, ctx):
 
 def ddy_for(epw):
     """The design-day sibling of an EPW, derived exactly as the CLI derives
-    it when --ddy is absent (btap/necb/cli.py: stem + '.ddy' for a .epw,
+    it when --ddy is absent (btap/codes/cli.py: stem + '.ddy' for a .epw,
     otherwise the file itself) — so an API scenario's weather is the same
     pair a CLI scenario would have assembled."""
     stem, ext = os.path.splitext(str(epw))
@@ -235,7 +235,7 @@ def _execute_cli(scenario, run_dir, ctx, argv0=None):
     argv = [resolve(a, ctx) for a in scenario["argv"]]
     env = build_env(scenario,
                     {k: resolve(v, ctx) for k, v in scenario["env"].items()})
-    cmd = argv0 or [python_exe(), "-m", "btap.necb.cli"]
+    cmd = argv0 or [python_exe(), "-m", "btap.codes.cli"]
     proc = subprocess.run(
         [*cmd, *argv], capture_output=True, text=True, env=env,
         cwd=str(REPO_ROOT), timeout=scenario.get("timeout_s", DEFAULT_TIMEOUT_S),
@@ -338,7 +338,7 @@ def _execute_verdict_unit(scenario, run_dir):
     _sys_path_python()
     from types import SimpleNamespace
 
-    from btap.necb import cli
+    from btap.codes import cli
 
     report = {
         "annual": True, "vintage": "2020", "hdd": 3890, "tier": 1,

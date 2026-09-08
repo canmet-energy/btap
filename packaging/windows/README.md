@@ -12,8 +12,8 @@ The manual Linux path mirrors the workflow:
 ```bash
 python3 -m build --wheel --outdir python/dist python/
 python3 python/scripts/generate_samples.py packaging/windows/samples
-python3 packaging/windows/stage_python.py --version 0.2.1
-python3 packaging/windows/release_guards.py --version 0.2.1
+python3 packaging/windows/stage_python.py --version 0.3.0
+python3 packaging/windows/release_guards.py --version 0.3.0
 python3 packaging/windows/installer_smoke.py
 mkdir -p packaging/windows/Output
 docker run --rm -v "$PWD:/work" amake/innosetup:latest \

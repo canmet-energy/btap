@@ -22,7 +22,7 @@ OFFICE = ["Space Function", "Office enclosed > 25 m2"]
 
 
 def costed_fixture_model(lights_type="NECB_Default"):
-    from btap.necb import lighting, loads
+    from btap.codes.necb import lighting, loads
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
@@ -35,7 +35,7 @@ def costed_fixture_model(lights_type="NECB_Default"):
 class TestCosting(unittest.TestCase):
     def test_fixture_costing_end_to_end(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         audit = AuditLog()
         report = lighting.cost(costed_fixture_model(), vintage="2020",
@@ -52,7 +52,7 @@ class TestCosting(unittest.TestCase):
         self.assertEqual(0, sum(1 for w in report.warnings if "regional adjustment" in w))
 
     def test_zone_multiplier_scales(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         base = lighting.cost(costed_fixture_model(), vintage="2020",
                              city=CITY, province_state=PROVINCE)
@@ -64,7 +64,7 @@ class TestCosting(unittest.TestCase):
 
     def test_cfl_request_falls_back_to_led_only_2020_catalog(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         audit = AuditLog()
         cfl = lighting.cost(costed_fixture_model(lights_type="NECB_Default"),
@@ -78,7 +78,7 @@ class TestCosting(unittest.TestCase):
 
     def test_daylighting_sensors_costed(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = costed_fixture_model()
         wall = next(s for s in model.getSurfaces()
@@ -107,8 +107,8 @@ class TestCosting(unittest.TestCase):
         model carries daylighting controls and no daylighted-area provider is
         given, and ``lighting.cost`` is what supplies one (the Ruby facade's
         ``kwargs[:daylighting_areas] ||= Daylighting.costing_area_provider``)."""
+        from btap.codes.necb import lighting
         from btap.costing.lighting import report as costing
-        from btap.necb import lighting
 
         model = costed_fixture_model()
         wall = next(s for s in model.getSurfaces()

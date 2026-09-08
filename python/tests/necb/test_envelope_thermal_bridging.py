@@ -26,7 +26,7 @@ HDD = 3890
 class TestThermalBridging(unittest.TestCase):
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     def test_not_requested_warns(self):
@@ -66,7 +66,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
 
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     def test_engine_identity_matches_the_option_a_pin(self):
@@ -236,7 +236,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
         from btap.audit import AuditLog
 
         audit = AuditLog()
-        with mock.patch('btap.necb.envelope.thermal_bridging._process',
+        with mock.patch('btap.codes.necb.envelope.thermal_bridging._process',
                         side_effect=RuntimeError('forced engine failure')):
             with self.assertRaises(RuntimeError) as ctx:
                 self.n.thermal_bridging.apply(load_raw_fixture(),

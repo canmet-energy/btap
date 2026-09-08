@@ -133,8 +133,8 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
         subsurfaces without — the exact TBD.rsi(lc, filmResistance) /
         TBD.rsi(lc, 0) split the probe used), enabled with M7."""
         from btap.audit import AuditLog
+        from btap.codes.necb import envelope
         from btap.costing.envelope.quantify import GROUND_BOUNDARIES, rsi_of
-        from btap.necb import envelope
         from tests.necb.support import load_raw_fixture
 
         model = load_raw_fixture()

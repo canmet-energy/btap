@@ -87,7 +87,7 @@ def test_committed_goldens_are_exactly_the_declared_set():
 # trips only its own assertion.
 
 def test_python_vendored_schedules_cover_the_manifest():
-    from btap.necb import loads
+    from btap.codes.necb import loads
 
     manifest = load()
     vendored = {r["name"] for r in loads.table("2020", "schedules")}

@@ -4,7 +4,7 @@ fixed), parapet allowance, and the unified compliance+costing audit.
 
 Port of btap-costing/test/test_envelope_costing.rb. Divergence (noted per
 D-79): the Ruby suite costs a model with NECB prescriptive constructions
-applied (BtapNECB::Envelope.apply_prescriptive); btap.necb is not yet ported,
+applied (BtapNECB::Envelope.apply_prescriptive); btap.codes is not yet ported,
 so these tests cost the fixture's OWN constructions — every assertion kept is
 independent of which constructions are applied (geometry areas, >0 costs,
 ratio identities, audit shape). The one test that spans compliance +
@@ -84,7 +84,7 @@ class TestEnvelopeCosting(unittest.TestCase):
     def costed_model(self):
         # Ruby: load_fixture + BtapNECB::Envelope.apply_prescriptive — see the
         # module docstring for why the raw fixture (with its own constructions)
-        # stands in until btap.necb is ported.
+        # stands in until btap.codes is ported.
         return load_fixture()
 
     def test_envelope_costing_covers_all_present_surface_types(self):
@@ -239,7 +239,7 @@ class TestEnvelopeCosting(unittest.TestCase):
 
         import btap.costing.envelope as envelope
         from btap.audit import AuditLog
-        from btap.necb import envelope as necb_envelope
+        from btap.codes.necb import envelope as necb_envelope
 
         model = load_fixture()
         audit = AuditLog()

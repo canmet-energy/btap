@@ -2,7 +2,7 @@
 
 Adjudicated interpretations and product decisions for the `openstudio-*` NECB
 gem family. Machine-checkable coverage lives elsewhere — article dispositions in
-`python/btap/necb/data/coverage/necb_8_4_disposition.json`, per-domain
+`python/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
 `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
 `docs/necb_rule_verification.md`. **This file records the judgement calls**: the
@@ -14,7 +14,7 @@ product-shaping call is made.
 Format per entry: **what was decided / who / when / why / evidence & commit**.
 
 **Maintenance (D-44, D-81, D-84):** the CANONICAL registry is
-`python/btap/necb/data/decisions.json`. The full editing workflow for a
+`python/btap/codes/data/decisions.json`. The full editing workflow for a
 decision: (1) edit the canonical JSON; (2) author the `## D-XX` section here —
 the prose stays HAND-AUTHORED, never generated, and tests enforce id-set
 equality between document and registry, not title/summary agreement; (3) run
@@ -118,6 +118,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-83** — R5 distribution: full PyPI publication, the canmet-energyplus engine wheel published from its own repository, and the Python Windows installer succeeding the Ruby one _(process)_
 - **D-84** — R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives _(process)_
 - **D-85** — VRF Table-I class selection and exact minimum assignment _(runtime)_
+- **D-86** — R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition _(process)_
 
 <!-- TOC END -->
 
@@ -4790,3 +4791,58 @@ rather than passing silently.
 **Evidence:** direct tests pin both editions' air-conditioner and air-source
 heat-pump rows, cooling-only classification, exact assignment from an initially
 better COP, independent cooling/heating handling, and article-cited warnings.
+
+## D-86
+
+**Decided:** Stage 1 of the multi-edition refactor (R-B in
+`docs/NECB_MULTI_EDITION_PLAN.md`) lands as a PATH-ONLY change, 2026-09-08.
+The Python package `btap.necb` becomes `btap.codes`. `btap.codes.necb` holds
+the NECB code family — the five rule domains, the NECB rule tables, and
+`tiers.py` — while the code-family-neutral data moves up to
+`btap/codes/data/`: the decisions registry and the Section 8.4 article caches
+are not NECB-specific and should not sit under a code family's name.
+
+**The eui/tiers move rides with the rename.** The 2025-only two thirds of
+`tiers.py` go to `btap/codes/necb/editions/necb2025/`: `eui_data` and
+`eui_building_energy_target` join `eui_archetypes.py`, the EUI implementation
+that already read them, and `ghg_data`, `operational_ghg_kg` and `ghg_level`
+become `part11_ghg.py`. `tiers.py` keeps only `energy_tier`, whose
+Table 10.1.2.1 is verified identical in 2020 and 2025. These two moves ride
+together because both change only `/inputs/code[]` evidence, and the five
+eui/tiers coverage pointers are frozen at R-A — moving them in a later,
+output-identical stage would break that stage's byte-identity contract.
+Nothing here is bound by an edition registry: callers import the edition
+module by name, and the manifest binding is Stage 5.
+
+**Zero logic change.** Beyond the moves themselves the only edits are import
+lines — including the import-order reflow the new package name forces, since
+`btap.codes` sorts before `btap.costing` where `btap.necb` sorted after —
+path strings, dotted names, and documentation text. The distribution version
+becomes 0.3.0, an intentional breaking release with no consumers. The console
+script names `btap-compliance` and `btap-necb-coverage` are deliberately
+unchanged: they are user surface, not paths. The import-linter D-77 layer
+contract now reads `btap.codes` → `btap.costing` → `btap.modeling` →
+`btap.audit`, with `btap.simulation` beside it.
+
+**Accepted diff categories, and nothing else:** `/inputs/code[]` leaves in
+every evidence-bearing `audit.json`; the same path strings in normalized
+`audit.txt`; each affected `baseline_sha256`; the regenerated coverage
+documents' links; and the scenario manifest's `provenance.commit`,
+`freezer_sha256` and `runner_sha256`. The re-freeze that absorbs them is
+R-B's, run on a clean tree by the orchestrator, never by the agent that makes
+the rename.
+
+**Evidence:** a SECOND ledger,
+`python/tests/data/coverage_code_ref_mapping_r7.json`, maps all 87 unique
+coverage `code` pointers old → new with their use counts. The R6 ledger is
+never rewritten; `python/tests/test_coverage_code_refs.py` now walks the whole
+chain instead — every R7 `old` equals an R6 `new`, every R7 `new` resolves in a
+live manifest, and the R7 use counts still sum to 313. `tiers.py` drops out of
+the pointer set entirely (32 owning files become 31) because its one pointer
+followed `eui_building_energy_target` into `eui_archetypes.py`.
+`python/tests/test_no_legacy_namespace.py` is the standing gate: no active
+`btap.necb` or `btap/necb` reference survives in tracked sources, with an
+explicit allowlist naming the historical records that are deliberately never
+rewritten — `PORT_STATUS.md`, the R6 and D-80 reviews, the M6/M7 port review,
+the multi-edition plan itself, both ledgers' `old` columns, and dated wording
+inside this decision record.

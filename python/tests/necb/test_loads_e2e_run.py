@@ -45,7 +45,7 @@ def office_map(model):
 class TestE2ERun(unittest.TestCase):
     def test_bare_geometry_to_clean_energyplus_run(self):
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         from btap.simulation import run
 
         model = bare_geometry()
@@ -88,7 +88,7 @@ class TestThreeDomainComposition(unittest.TestCase):
 
         # Plain import: M5 delivered this. A guard here would let a
         # regression that removes apply_prescriptive pass as a green skip.
-        from btap.necb import envelope, loads
+        from btap.codes.necb import envelope, loads
         apply_prescriptive = envelope.apply_prescriptive
 
         model = bare_geometry()

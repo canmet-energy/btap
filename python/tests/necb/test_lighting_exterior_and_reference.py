@@ -24,7 +24,7 @@ def tagged_space_type(model, building_type, space_type):
 class TestExteriorAndReference(unittest.TestCase):
     def test_exterior_allowance_zone3(self):
         from btap.audit import AuditLog
-        from btap.necb.lighting import exterior as Exterior
+        from btap.codes.necb.lighting import exterior as Exterior
 
         audit = AuditLog()
         result = Exterior.allowance(
@@ -46,7 +46,7 @@ class TestExteriorAndReference(unittest.TestCase):
 
     def test_exterior_zone0_and_unknown_keys_warn(self):
         from btap.audit import AuditLog
-        from btap.necb.lighting import exterior as Exterior
+        from btap.codes.necb.lighting import exterior as Exterior
 
         audit = AuditLog()
         result = Exterior.allowance(
@@ -62,7 +62,7 @@ class TestExteriorAndReference(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb.lighting import exterior as Exterior
+        from btap.codes.necb.lighting import exterior as Exterior
 
         model = openstudio.model.Model()
         audit = AuditLog()
@@ -74,7 +74,7 @@ class TestExteriorAndReference(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
@@ -105,7 +105,7 @@ class TestExteriorAndReference(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
@@ -125,7 +125,7 @@ class TestExteriorAndReference(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
@@ -141,7 +141,7 @@ class TestExteriorAndReference(unittest.TestCase):
     # previously asserted warn-and-skip ("never raise") — that WAS the defect.
     def test_reference_lighting_refuses_untagged_fixture(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = load_raw_fixture()
         audit = AuditLog()
@@ -157,7 +157,7 @@ class TestExteriorAndReference(unittest.TestCase):
     # entries per call.
     def test_reference_lighting_tagged_fixture_single_coverage(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = load_raw_fixture()
         for st in model.getSpaceTypes():

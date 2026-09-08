@@ -3,7 +3,7 @@
 The shared audit machinery of the `canmet-btap` distribution (see
 [the package README](../../README.md) for the family map): **one**
 `AuditLog` class and **one** article-coverage emitter, used by
-`btap.modeling` (authoring), `btap.necb` (hvac, envelope, loads, lighting,
+`btap.modeling` (authoring), `btap.codes` (hvac, envelope, loads, lighting,
 shw, geometry and the umbrella), `btap.costing` and `btap.simulation`.
 
 No domain knowledge, no OpenStudio dependency — this is the bottom of the
@@ -35,7 +35,7 @@ at insert. `level` is `'decision' | 'info' | 'warning'`. **There is no
   Several citations join into one string with `; `.
 - **`ruling`** cites the adjudicated project DECISION that says how we read
   that code (`docs/necb_decisions.md`, mirrored machine-readably in
-  `btap/necb/data/decisions.json`). Two axes: what was done, and why we did
+  `btap/codes/data/decisions.json`). Two axes: what was done, and why we did
   it that way.
 - **`building`** is which model the entry is about (`'input model'`,
   `'proposed building'`, `'reference building'`; `None` = cross-building

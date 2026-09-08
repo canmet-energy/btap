@@ -31,7 +31,7 @@ def attach_weather(model):
 @needs_engine
 class TestE2ERun(unittest.TestCase):
     def test_prescriptive_envelope_sizes_cleanly(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         from btap.simulation import run
 
         model = attach_weather(load_raw_fixture())

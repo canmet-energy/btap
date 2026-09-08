@@ -25,5 +25,5 @@ if not exist "%BTAP_PYTHON%" (
 rem `-m`, not a console script: pip --target writes POSIX script shims that do
 rem not work under the embeddable runtime, so they are removed at stage time.
 rem Flags forward unchanged; do NOT add a "--" separator.
-"%BTAP_PYTHON%" -m btap.necb.cli %*
+"%BTAP_PYTHON%" -m btap.codes.cli %*
 exit /b %ERRORLEVEL%

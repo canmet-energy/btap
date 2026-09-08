@@ -18,7 +18,7 @@ OFFICE = ["Space Function", "Office enclosed > 25 m2"]
 
 
 def windowed_office_model():
-    from btap.necb import lighting, loads
+    from btap.codes.necb import lighting, loads
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
@@ -37,7 +37,7 @@ class TestReferenceDaylighting(unittest.TestCase):
 
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         proposed = windowed_office_model()
         control = openstudio.model.DaylightingControl(proposed)
@@ -78,7 +78,7 @@ class TestReferenceDaylighting(unittest.TestCase):
 
     def test_necb_default_placement_flows_through(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         reference = windowed_office_model()
         audit = AuditLog()
@@ -101,7 +101,7 @@ class TestReferenceDaylighting(unittest.TestCase):
 
     @needs_engine
     def test_photocontrols_reduce_lighting_energy(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
         from btap.simulation.runner import attach_weather, is_clean_run, run_energyplus
 
         lighting_gj = {}

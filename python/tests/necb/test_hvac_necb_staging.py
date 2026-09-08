@@ -16,9 +16,9 @@ import openstudio
 
 import btap.modeling as modeling
 from btap.audit import AuditLog
+from btap.codes.necb import hvac
+from btap.codes.necb.hvac import efficiency
 from btap.modeling.hvac.components import coils
-from btap.necb import hvac
-from btap.necb.hvac import efficiency
 from btap.simulation import runner
 from tests.necb.hvac_helpers import attach_weather, load_fixture, sorted_zones
 from tests.support import needs_engine, needs_sdk

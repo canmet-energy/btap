@@ -4,7 +4,7 @@ test_helper.rb the Python suites need).
 Deliberately thin: fixture paths, model loading and the skip discipline come
 straight from tests.support — this module only adds the costing-suite
 constants. The Ruby helper's ``tagged_model`` (NECB space-type tagging) and
-the EnergyPlus runners wait on the btap.necb milestone; suites that need a
+the EnergyPlus runners wait on the btap.codes milestone; suites that need a
 tagged or prescriptive-applied model must adapt or skip until then.
 """
 

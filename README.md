@@ -295,7 +295,7 @@ with five subpackages and one-way dependencies:
 | `btap.audit` | shared audit log and article-coverage evidence; SDK-free |
 | `btap.modeling` | generic OpenStudio model authoring, geometry, constructions, and HVAC topology builders |
 | `btap.costing` | capital costing and the licensed-data boundary; priced data is runtime-injected, never redistributed |
-| `btap.necb` | NECB rules, reference-building pipeline, determination, coverage, report, and CLI |
+| `btap.codes` | code families (`btap.codes.necb` — NECB 2020/2025): rules, reference-building pipeline, determination, coverage, report, and CLI |
 | `btap.simulation` | local EnergyPlus execution and the HBIX remote backend |
 
 The former product Ruby gems were retired by D-84. Ruby remains only in

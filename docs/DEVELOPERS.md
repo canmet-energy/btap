@@ -6,7 +6,7 @@ start with the [user README](../README.md).
 R6 (D-84) retired the five product Ruby gems. The repository now ships one
 Python distribution, `canmet-btap`, whose import package has five subpackages:
 `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`, and
-`btap.necb`. Ruby remains only for the pinned external oracle in `legacy_pin/`
+`btap.codes`. Ruby remains only for the pinned external oracle in `legacy_pin/`
 and `verification/oracle/`.
 
 ## Contract
@@ -116,7 +116,7 @@ frozen scenarios are required rather than skipped.
 
 ## Decisions and generated docs
 
-The canonical registry is `python/btap/necb/data/decisions.json`; the authored
+The canonical registry is `python/btap/codes/data/decisions.json`; the authored
 record is [necb_decisions.md](necb_decisions.md). The registry tests enforce
 unique ordered ids, document/registry agreement, generated TOC agreement, and
 runtime citations. Regenerate the TOC with
@@ -128,7 +128,7 @@ The two generated coverage documents are
 part of the evidence history; their inputs and code pointers are Python-owned
 after R6. Do not edit either output by hand.
 
-Section 8.4 source caches ship under `python/btap/necb/data/coverage/` for
+Section 8.4 source caches ship under `python/btap/codes/data/coverage/` for
 offline, versioned use. Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.

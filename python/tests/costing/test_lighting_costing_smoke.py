@@ -4,7 +4,7 @@ Not a port: the lighting domain's real acceptance is a btap-necb parity gate
 plus the lighting_costing Leg-C golden, both arriving with M5. Until then this
 smoke test exercises the ported database / fixture / facade layers directly:
 the fixture model tagged with a lighting_sets catalog key (set via the SDK —
-no btap.necb involved), costed twice for determinism, plus the
+no btap.codes involved), costed twice for determinism, plus the
 daylighting-areas provider contract (the RAISE that guards against silent
 under-costing) and the database lookup layer.
 """

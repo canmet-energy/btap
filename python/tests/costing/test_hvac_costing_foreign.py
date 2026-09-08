@@ -127,8 +127,8 @@ class TestCostingForeign(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
+        from btap.codes.necb import hvac as necb_hvac
         from btap.costing.hvac import report as hvac_report
-        from btap.necb import hvac as necb_hvac
 
         model = load_fixture()
         zones = sorted_by_name(model.getThermalZones())

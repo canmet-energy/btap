@@ -29,8 +29,8 @@ class TestApplyLights(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
-        from btap.necb.loads import space_types as SpaceTypes
+        from btap.codes.necb import lighting
+        from btap.codes.necb.loads import space_types as SpaceTypes
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
@@ -56,8 +56,8 @@ class TestApplyLights(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting, loads
-        from btap.necb.loads import space_types as SpaceTypes
+        from btap.codes.necb import lighting, loads
+        from btap.codes.necb.loads import space_types as SpaceTypes
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *CONFERENCE)
@@ -97,7 +97,7 @@ class TestApplyLights(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
@@ -134,8 +134,8 @@ class TestApplyLights(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
-        from btap.necb.loads import space_types as SpaceTypes
+        from btap.codes.necb import lighting
+        from btap.codes.necb.loads import space_types as SpaceTypes
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)

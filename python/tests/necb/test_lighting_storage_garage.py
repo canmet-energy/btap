@@ -90,12 +90,12 @@ def entry(log, article):
 class TestStorageGarage(unittest.TestCase):
     @property
     def SG(self):
-        from btap.necb.lighting import storage_garage
+        from btap.codes.necb.lighting import storage_garage
         return storage_garage
 
     @property
     def PERIM(self):
-        from btap.necb.lighting.storage_garage import perimeter
+        from btap.codes.necb.lighting.storage_garage import perimeter
         return perimeter
 
     # --- applicability -----------------------------------------------------
@@ -234,7 +234,7 @@ class TestStorageGarage(unittest.TestCase):
     # storage-garage manifest entry report citations it never earned.
     def test_the_general_occupancy_path_no_longer_claims_this_article(self):
         source = (Path(__file__).resolve().parents[2]
-                  / "btap" / "necb" / "lighting" / "apply_lights.py").read_text(encoding="UTF-8")
+                  / "btap" / "codes" / "necb" / "lighting" / "apply_lights.py").read_text(encoding="UTF-8")
         self.assertFalse(re.search(r"article='4\.2\.2\.2\.", source),
                          "apply_lights must not cite 4.2.2.2 — that is the storage-garage article")
 

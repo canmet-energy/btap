@@ -143,10 +143,10 @@ citation no-loss test, not these numbers. Re-run per stage and report movement.
 Command:
 
     cd python && BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
-      .venv/bin/python -m coverage run --source=btap/necb -m pytest -q -p no:cacheprovider tests/ \
+      .venv/bin/python -m coverage run --source=btap/codes -m pytest -q -p no:cacheprovider tests/ \
       && .venv/bin/python -m coverage report --sort=cover --skip-empty
 
-`btap/necb` overall: **89% — 7,362 statements, 776 missed.**
+`btap/codes` overall: **89% — 7,362 statements, 776 missed.**
 
 | module | stmts | miss | cov |
 |---|---:|---:|---:|

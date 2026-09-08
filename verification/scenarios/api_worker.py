@@ -45,7 +45,7 @@ def _write(run_dir, payload):
 
 def run(call, run_dir):
     """:return: the observations dict for a resolved ``api_call``."""
-    from btap.necb import cli, performance_compliance
+    from btap.codes import cli, performance_compliance
 
     kwargs = dict(call)
     model_path = kwargs.pop("model", None)

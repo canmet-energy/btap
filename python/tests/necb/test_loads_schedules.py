@@ -24,7 +24,7 @@ class TestSchedules(unittest.TestCase):
     def test_hourly_ruleset_day_values(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = openstudio.model.Model()
         schedule = loads.Schedules.add(model, 'NECB-A-Occupancy')
         ruleset = schedule.to_ScheduleRuleset().get()
@@ -39,7 +39,7 @@ class TestSchedules(unittest.TestCase):
     def test_design_days_and_setpoints(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = openstudio.model.Model()
         heating = loads.Schedules.add(
             model, 'NECB-A-Thermostat Setpoint-Heating').to_ScheduleRuleset().get()
@@ -55,7 +55,7 @@ class TestSchedules(unittest.TestCase):
     def test_memoized_and_activity_constant(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = openstudio.model.Model()
         first = loads.Schedules.add(model, 'NECB-Activity')
         again = loads.Schedules.add(model, 'NECB-Activity')
@@ -67,7 +67,7 @@ class TestSchedules(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = openstudio.model.Model()
         audit = AuditLog()
         schedule = loads.Schedules.add(model, 'NECB-Z-Nonsense', audit=audit)
@@ -79,7 +79,7 @@ class TestSchedules(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = openstudio.model.Model()
         audit = AuditLog()
         names = list(dict.fromkeys(r['name'] for r in loads.table('2020', 'schedules')))

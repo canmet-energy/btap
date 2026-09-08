@@ -14,21 +14,21 @@ The 15 sites (verified against the code, not against this file's own
 literals — computing the expected value the same way it is produced in
 product code would be circular):
 
- 1. ``btap/necb/compliance.py:320``               ``lighting_prefix``
- 2. ``btap/necb/envelope/reference.py:57``         ``prefix``
- 3. ``btap/necb/hvac/efficiency.py:280``           ``prefix`` (staging)
- 4. ``btap/necb/hvac/efficiency.py:547``           ``prefix`` (fan curve)
- 5. ``btap/necb/hvac/efficiency.py:572``           ``prefix`` (pump rules)
- 6. ``btap/necb/hvac/efficiency.py:845``           ``hp_article``
- 7. ``btap/necb/hvac/reference.py:607``            ``prefix`` (terminal/secondary split)
- 8. ``btap/necb/hvac/reference.py:929``            ``prefix`` (air economizer)
- 9. ``btap/necb/hvac/reference.py:996``            ``prefix`` (water economizer)
-10. ``btap/necb/hvac/reference.py:1220``           ``table``/``article`` (humidification)
-11. ``btap/necb/hvac/reference.py:1351``           ``prefix`` (DCV)
-12. ``btap/necb/lighting/reference.py:40``         ``prefix``
-13. ``btap/necb/lighting/reference_daylighting.py:60``  ``prefix``
-14. ``btap/necb/shw/reference.py:22``              ``prefix``
-15. ``btap/necb/loads/apply.py:78``                ``rules['schedule_table_prefix']``
+ 1. ``btap/codes/compliance.py:321``               ``prefix``
+ 2. ``btap/codes/necb/envelope/reference.py:57``         ``prefix``
+ 3. ``btap/codes/necb/hvac/efficiency.py:280``           ``prefix`` (staging)
+ 4. ``btap/codes/necb/hvac/efficiency.py:547``           ``prefix`` (fan curve)
+ 5. ``btap/codes/necb/hvac/efficiency.py:572``           ``prefix`` (pump rules)
+ 6. ``btap/codes/necb/hvac/efficiency.py:845``           ``hp_article``
+ 7. ``btap/codes/necb/hvac/reference.py:607``            ``prefix`` (terminal/secondary split)
+ 8. ``btap/codes/necb/hvac/reference.py:929``            ``prefix`` (air economizer)
+ 9. ``btap/codes/necb/hvac/reference.py:996``            ``prefix`` (water economizer)
+10. ``btap/codes/necb/hvac/reference.py:1220``           ``table``/``article`` (humidification)
+11. ``btap/codes/necb/hvac/reference.py:1351``           ``prefix`` (DCV)
+12. ``btap/codes/necb/lighting/reference.py:40``         ``prefix``
+13. ``btap/codes/necb/lighting/reference_daylighting.py:60``  ``prefix``
+14. ``btap/codes/necb/shw/reference.py:22``              ``prefix``
+15. ``btap/codes/necb/loads/apply.py:78``                ``rules['schedule_table_prefix']``
 
 Site 15 is a genuine finding: the ``prefix`` local in ``apply_loads`` is
 threaded into ``_apply_ventilation`` as a parameter but that function's own
@@ -115,7 +115,7 @@ def windowed_office_model(vintage):
     """A raw-fixture proposed model tagged office-everywhere, windowed, with
     lights applied — the minimal fixture reference_daylighting needs (ported
     from tests/necb/test_lighting_reference_daylighting.py's helper)."""
-    from btap.necb import lighting, loads
+    from btap.codes.necb import lighting, loads
 
     model = load_raw_fixture()
     map_ = {s.nameString(): ["Space Function", "Office enclosed > 25 m2"]
@@ -145,9 +145,9 @@ class TestCodesRegistry(unittest.TestCase):
             self.assertIn(("2020", site), EXPECTED, site)
             self.assertIn(("2025", site), EXPECTED, site)
 
-    # ---- 1. compliance.py:320 lighting_prefix (consumed at 341/346/354/357) ----
+    # ---- 1. compliance.py:321 prefix (consumed at 342/347/355/358) ----
     def test_compliance_reference_daylighting_gap(self):
-        from btap.necb import performance_compliance
+        from btap.codes import performance_compliance
         from tests.necb.support import proposed_with_hvac, zone_types_for
 
         site = "compliance.reference_daylighting_gap"
@@ -169,7 +169,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 2. envelope/reference.py:57 prefix (consumed at :66 prescriptive) ----
     def test_envelope_reference_prescriptive(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
 
         site = "envelope.reference.prescriptive"
         for edition in ("2020", "2025"):
@@ -186,9 +186,9 @@ class TestCodesRegistry(unittest.TestCase):
     # ---- 3. hvac/efficiency.py:280 prefix (apply_staging, DX cooling) ----
     def test_hvac_efficiency_staging_dx_cooling(self):
         import btap.modeling as modeling
+        from btap.codes.necb import hvac
+        from btap.codes.necb.hvac import efficiency
         from btap.modeling.hvac.components import coils
-        from btap.necb import hvac
-        from btap.necb.hvac import efficiency
         from tests.necb.hvac_helpers import load_fixture, sorted_zones
 
         site = "hvac.efficiency.staging_dx_cooling"
@@ -214,7 +214,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 4. hvac/efficiency.py:547 prefix (VAV fan power curve) ----
     def test_hvac_efficiency_fan_power_curve(self):
-        from btap.necb.hvac import efficiency
+        from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.fan_power_curve"
         for edition in ("2020", "2025"):
@@ -233,7 +233,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 5. hvac/efficiency.py:572 prefix (hydronic pump riding-curve) ----
     def test_hvac_efficiency_pump_riding_curve(self):
-        from btap.necb.hvac import efficiency
+        from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.pump_riding_curve"
         for edition in ("2020", "2025"):
@@ -253,7 +253,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 6. hvac/efficiency.py:845 hp_article (single-speed heat pump alignment) ----
     def test_hvac_efficiency_heat_pump_capacity_alignment(self):
-        from btap.necb.hvac import efficiency
+        from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.heat_pump_capacity_alignment"
         for edition in ("2020", "2025"):
@@ -276,7 +276,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 7. hvac/reference.py:607 prefix (terminal/secondary capacity split) ----
     def test_hvac_reference_terminal_secondary_split(self):
-        from btap.necb.hvac import reference
+        from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.terminal_secondary_split"
         for edition in ("2020", "2025"):
@@ -294,7 +294,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 8. hvac/reference.py:929 prefix (air economizer, system 1 exemption) ----
     def test_hvac_reference_economizer_air(self):
-        from btap.necb.hvac import reference
+        from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.economizer_air"
         for edition in ("2020", "2025"):
@@ -310,7 +310,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 9. hvac/reference.py:996 prefix (water economizer) ----
     def test_hvac_reference_economizer_water(self):
-        from btap.necb.hvac import reference
+        from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.economizer_water"
         for edition in ("2020", "2025"):
@@ -326,7 +326,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 10. hvac/reference.py:1220 table/article (humidification) ----
     def test_hvac_reference_humidification(self):
-        from btap.necb.hvac import reference
+        from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.humidification"
         for edition in ("2020", "2025"):
@@ -344,7 +344,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 11. hvac/reference.py:1351 prefix (demand-controlled ventilation) ----
     def test_hvac_reference_dcv(self):
-        from btap.necb.hvac import reference
+        from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.dcv"
         for edition in ("2020", "2025"):
@@ -364,7 +364,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 12. lighting/reference.py:40 prefix (Part 4 allowance) ----
     def test_lighting_reference_part4_allowance(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         site = "lighting.reference.part4_allowance"
         for edition in ("2020", "2025"):
@@ -381,7 +381,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 13. lighting/reference_daylighting.py:60 prefix (reflectances) ----
     def test_lighting_reference_daylighting_reflectances(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         site = "lighting.reference_daylighting.reflectances"
         for edition in ("2020", "2025"):
@@ -398,7 +398,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 14. shw/reference.py:22 prefix (identical-to-proposed) ----
     def test_shw_reference_identical_to_proposed(self):
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         site = "shw.reference.identical_to_proposed"
         for edition in ("2020", "2025"):
@@ -415,7 +415,7 @@ class TestCodesRegistry(unittest.TestCase):
 
     # ---- 15. loads/apply.py:78 rules['schedule_table_prefix'] (ventilation) ----
     def test_loads_apply_ventilation(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
 
         site = "loads.apply.ventilation"
         for edition in ("2020", "2025"):

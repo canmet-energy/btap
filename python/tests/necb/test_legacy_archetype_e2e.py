@@ -183,8 +183,8 @@ class TestLegacyArchetypeE2E(unittest.TestCase):
         must SAY it is not an annual determination rather than quietly
         reporting one.
         """
+        from btap.codes.compliance import performance_compliance
         from btap.costing.hvac import geometry as cost_geometry
-        from btap.necb.compliance import performance_compliance
 
         model = self._model()
         run_dir = tempfile.mkdtemp(prefix="necb-e2e-week-py-")

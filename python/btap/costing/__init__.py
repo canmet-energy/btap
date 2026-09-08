@@ -7,7 +7,7 @@ at runtime (costs_csv=/local_factors_csv= kwargs, or BTAP_COSTING_DIR /
 OPENSTUDIO_COSTING_DIR) and are never committed or redistributed.
 
 Dependency direction is the design (D-77): costing imports btap.modeling
-and btap.audit, NEVER btap.necb. Where a costing rule needs NECB-owned
+and btap.audit, NEVER btap.codes. Where a costing rule needs NECB-owned
 geometry (the daylighted-area sensors), the NECB layer passes a provider in.
 Sub-namespaced (hvac/envelope/lighting + shw) because Database/Report exist
 per domain; import the domain modules directly.

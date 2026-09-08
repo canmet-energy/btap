@@ -14,7 +14,7 @@ MANIFEST = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
 @support.needs_sdk
 class TestVariantMockups(unittest.TestCase):
     def run_mockup(self, name):
-        from btap.necb.compliance import performance_compliance
+        from btap.codes.compliance import performance_compliance
 
         spec = MANIFEST[name]
         mode = "sizing" if support.engine_available() else "none"

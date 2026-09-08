@@ -112,7 +112,7 @@ def lights_model(lights_type):
     oracle: one tagged SpaceType per PAIR, then apply_lights."""
     import openstudio
 
-    from btap.necb import lighting
+    from btap.codes.necb import lighting
 
     model = openstudio.model.Model()
     for bt, st in PAIRS:
@@ -181,7 +181,7 @@ def build_case(window=None, skylight=None):
 
 
 def office_tagged(model):
-    from btap.necb import loads
+    from btap.codes.necb import loads
 
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
     loads.assign_space_types(model, map_, vintage="2020")
@@ -232,7 +232,7 @@ class TestOracleGoldensLighting(unittest.TestCase):
     # ---- lighting_daylighting.json: sidelighting:3, skylight:2, controls:4 -
 
     def test_daylighting_geometry_and_controls_match_the_frozen_oracle(self):
-        from btap.necb.lighting import daylighting
+        from btap.codes.necb.lighting import daylighting
 
         expected = golden("lighting_daylighting")
         self.assert_same_keys(["sidelighting", "skylight", "controls_on_fixture"],
@@ -272,7 +272,7 @@ class TestOracleGoldensLighting(unittest.TestCase):
         # other two placements does what legacy does ('all' is the blanket
         # default of this entry point, 'necb2020' is the code rule, D-57).
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = office_tagged(load_raw_fixture())
         wall = next(s for s in model.getSurfaces()
@@ -308,7 +308,7 @@ class TestOracleGoldensLighting(unittest.TestCase):
     # ---- lighting_costing.json: led_2020_total + context ------------------
 
     def test_led_2020_fixture_costing_matches_the_frozen_oracle(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         expected = golden("lighting_costing")
         self.assert_same_keys(["led_2020_total", "context"], expected.keys(), "lighting_costing")

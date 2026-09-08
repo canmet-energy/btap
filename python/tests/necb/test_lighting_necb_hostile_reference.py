@@ -44,7 +44,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
     def catalog_lpd_w_per_m2(self, space_type):
         import openstudio
 
-        from btap.necb.loads import space_types as SpaceTypes
+        from btap.codes.necb.loads import space_types as SpaceTypes
 
         record = SpaceTypes.find(building_type="Space Function", space_type=space_type,
                                  vintage="2020")
@@ -79,7 +79,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         space_type = self.hostile_lights(
@@ -117,7 +117,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         space_type = self.with_space(self.hostile_lights(
@@ -145,7 +145,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         self.with_space(tagged_space_type(model, "Space Function", KNOWN_SPACE_TYPE))
@@ -164,7 +164,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model = openstudio.model.Model()
         plenum = self.hostile_lights(

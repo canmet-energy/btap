@@ -23,14 +23,14 @@ OWNERS = [
      "costing (hvac + envelope + lighting + shw)"),
     (re.compile(r"/btap/geometry\.rb|create_shape|create_bar"), "btap.modeling"),
     (re.compile(r"space_types\.json|schedules\.json|beps_compliance_path\.rb"),
-     "btap.necb (loads)"),
-    (re.compile(r"lighting|daylight"), "btap.necb (lighting)"),
-    (re.compile(r"service_water_heating|shw"), "btap.necb (shw)"),
+     "btap.codes (loads)"),
+    (re.compile(r"lighting|daylight"), "btap.codes (lighting)"),
+    (re.compile(r"service_water_heating|shw"), "btap.codes (shw)"),
     (re.compile(r"hvac_system|autozone|efficienc|curves|chiller|boiler|/fan"),
-     "btap.necb (hvac) or btap.modeling"),
+     "btap.codes (hvac) or btap.modeling"),
     (re.compile(r"building_envelope|thermal_transmittance|fdwr|thermal_bridging"),
-     "btap.necb (envelope)"),
-    (re.compile(r"necb_20\d\d\.rb"), "btap.necb (+ the domain each hunk touches)"),
+     "btap.codes (envelope)"),
+    (re.compile(r"necb_20\d\d\.rb"), "btap.codes (+ the domain each hunk touches)"),
 ]
 
 

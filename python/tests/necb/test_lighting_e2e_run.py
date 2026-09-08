@@ -18,7 +18,7 @@ OFFICE = ["Space Function", "Office enclosed > 25 m2"]
 
 
 def loaded_lit_model():
-    from btap.necb import loads
+    from btap.codes.necb import loads
 
     model = load_raw_fixture()
     for lights in model.getLightss():
@@ -36,7 +36,7 @@ class TestE2ERun(unittest.TestCase):
     @needs_engine
     def test_lighting_energy_alive_in_energyplus(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
         from btap.simulation.runner import attach_weather, is_clean_run, run_energyplus
 
         model = loaded_lit_model()
@@ -66,7 +66,7 @@ class TestE2ERun(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import envelope, lighting
+        from btap.codes.necb import envelope, lighting
 
         model = loaded_lit_model()
         audit = AuditLog()

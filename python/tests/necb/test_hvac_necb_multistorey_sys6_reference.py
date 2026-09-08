@@ -24,8 +24,8 @@ import unittest
 
 import btap.modeling as modeling
 from btap.audit import AuditLog
+from btap.codes.necb import hvac, loads
 from btap.costing.hvac import geometry
-from btap.necb import hvac, loads
 from tests.necb.hvac_helpers import sorted_zones
 from tests.support import needs_sdk
 

@@ -22,12 +22,12 @@ class TestLoadsDataIntegrity(unittest.TestCase):
 
     @property
     def space_types(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
         return loads.table('2020', 'space_types')
 
     @property
     def schedules(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
         return loads.table('2020', 'schedules')
 
     def test_counts_and_keys(self):
@@ -128,7 +128,7 @@ class TestLoadsDataIntegrity(unittest.TestCase):
                         'Table A-8.4.3.2.(2)-B: storage rooms >= 5 m2 have 1 W/m2')
 
     def test_2025_aliases_2020_with_renumbered_citations(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
         rules = loads.rules('2025')
         self.assertEqual('2020', loads.data_vintage('2025'))
         self.assertEqual('A-8.4.3.2.(1)(b)', rules['schedule_table_prefix'])
@@ -138,7 +138,7 @@ class TestLoadsDataIntegrity(unittest.TestCase):
                          len(loads.table('2025', 'space_types')))
 
     def test_coverage_manifest_lint(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
         for vintage in ('2020', '2025'):
             coverage = loads.rules(vintage)['article_coverage']['articles']
             # 5 core 8.4.3 entries + 8.4.2.7. internal loads (ffb58bc38) + 8.4.3.6.
@@ -162,7 +162,7 @@ class TestLoadsDataIntegrity(unittest.TestCase):
                 self.assertTrue(a.get('gaps') or a.get('how'), f"{a['article']}: has how/gaps")
 
     def test_space_type_lookup_api(self):
-        from btap.necb import loads
+        from btap.codes.necb import loads
         record = loads.SpaceTypes.record(building_type='Space Function',
                                          space_type='Office enclosed > 25 m2')
         self.assertEqual('A', record['necb_schedule_type'])

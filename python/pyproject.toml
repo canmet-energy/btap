@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "canmet-btap"  # PyPI similarity check blocks "btap" (bta exists); the import stays `btap`
-version = "0.2.1"
+version = "0.3.0"
 description = "NECB 2020/2025 Part 8 performance-path compliance toolchain (Python port of the btap gem family)"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -50,8 +50,8 @@ dependencies = [
 tbd = ["canmet-tbd==3.5.2"]
 
 [project.scripts]
-btap-compliance = "btap.necb.cli:main"
-btap-necb-coverage = "btap.necb.coverage:main"
+btap-compliance = "btap.codes.cli:main"
+btap-necb-coverage = "btap.codes.coverage:main"
 
 [tool.setuptools.packages.find]
 include = ["btap*"]
@@ -104,16 +104,16 @@ include_external_packages = true
 [[tool.importlinter.contracts]]
 name = "family dependency direction (D-77)"
 type = "layers"
-layers = ["btap.necb", "btap.costing", "btap.modeling", "btap.audit"]
+layers = ["btap.codes", "btap.costing", "btap.modeling", "btap.audit"]
 
 [[tool.importlinter.contracts]]
 name = "simulation depends only on audit"
 type = "forbidden"
 source_modules = ["btap.simulation"]
-forbidden_modules = ["btap.modeling", "btap.costing", "btap.necb"]
+forbidden_modules = ["btap.modeling", "btap.costing", "btap.codes"]
 
 [[tool.importlinter.contracts]]
 name = "audit is SDK-free and bottom of the family"
 type = "forbidden"
 source_modules = ["btap.audit"]
-forbidden_modules = ["openstudio", "btap.simulation", "btap.modeling", "btap.costing", "btap.necb"]
+forbidden_modules = ["openstudio", "btap.simulation", "btap.modeling", "btap.costing", "btap.codes"]

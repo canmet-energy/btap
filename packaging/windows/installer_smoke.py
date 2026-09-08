@@ -42,7 +42,7 @@ def check_structure(stage: Path) -> None:
     """What must exist, and what must NOT."""
     required = [
         "bin/btap-compliance.cmd", "python/python.exe", "python/python312.dll",
-        "python/python312._pth", "python/Lib/site-packages/btap/necb/cli.py",
+        "python/python312._pth", "python/Lib/site-packages/btap/codes/cli.py",
         "python/Lib/site-packages/openstudio", "samples/run-demo.cmd",
         "samples/5ZoneNoHVAC.osm", "LICENSE", "THIRD-PARTY-NOTICES.txt",
         "PROVENANCE.json", "README-windows.txt",

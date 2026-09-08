@@ -6,7 +6,8 @@ import unittest
 from pathlib import Path
 
 from btap.audit import AuditLog
-from btap.necb import tiers
+from btap.codes.necb import tiers
+from btap.codes.necb.editions.necb2025 import eui_archetypes, part11_ghg
 from tests.necb.support import DDY, EPW, needs_engine, needs_sdk, proposed_with_hvac
 
 
@@ -27,36 +28,37 @@ class TestTierArithmetic(unittest.TestCase):
 
     def test_eui_bet_arithmetic(self):
         audit = AuditLog()
-        target = tiers.eui_building_energy_target(
+        target = eui_archetypes.eui_building_energy_target(
             {"Office": None}, 1600.0, hdd=3890, process_loads_kwh=5000.0,
             audit=audit)
         self.assertAlmostEqual(1600.0 * 175 + 5000.0, target["bet_kwh"],
                                delta=0.1, msg="BET = A x EUI + PL")
         with self.assertRaises(ValueError):
-            tiers.eui_building_energy_target({"Casino": 100}, 1600.0, hdd=3890)
+            eui_archetypes.eui_building_energy_target(
+                {"Casino": 100}, 1600.0, hdd=3890)
         cold = AuditLog()
-        tiers.eui_building_energy_target({"Office": None}, 1600.0, hdd=9500,
-                                         audit=cold)
+        eui_archetypes.eui_building_energy_target({"Office": None}, 1600.0,
+                                                  hdd=9500, audit=cold)
         self.assertTrue(any("HDD" in w["action"] for w in cold.warnings),
                         "HDD >= 9000 inapplicability warns")
 
     def test_ghg_levels(self):
         energy = {"electricity_kwh": 10_000.0, "natural_gas_kwh": 50_000.0}
-        kg = tiers.operational_ghg_kg(energy, "ONTARIO")
+        kg = part11_ghg.operational_ghg_kg(energy, "ONTARIO")
         self.assertAlmostEqual((10_000 * 57.9 + 50_000 * 185) / 1000.0, kg,
                                delta=0.1)
         audit = AuditLog()
-        level = tiers.ghg_level(kg, kg * 4, audit=audit)
+        level = part11_ghg.ghg_level(kg, kg * 4, audit=audit)
         self.assertEqual("B", level["level"],
                          "25% of target -> level B (<= 25%)")
-        self.assertEqual("F", tiers.ghg_level(99.0, 100.0)["level"])
-        self.assertIsNone(tiers.ghg_level(101.0, 100.0)["level"])
+        self.assertEqual("F", part11_ghg.ghg_level(99.0, 100.0)["level"])
+        self.assertIsNone(part11_ghg.ghg_level(101.0, 100.0)["level"])
 
 
 @needs_engine
 class TestEUIPathEndToEnd(unittest.TestCase):
     def test_eui_path_end_to_end(self):
-        from btap.necb import performance_compliance
+        from btap.codes import performance_compliance
 
         dir = tempfile.mkdtemp(prefix="osnecb-eui-")
         result = performance_compliance(
@@ -95,7 +97,7 @@ class TestEUIPathEndToEnd(unittest.TestCase):
 @needs_sdk
 class TestEUIPathGuards(unittest.TestCase):
     def test_eui_path_guards(self):
-        from btap.necb import performance_compliance
+        from btap.codes import performance_compliance
 
         with self.assertRaises(ValueError):
             performance_compliance(
@@ -106,7 +108,7 @@ class TestEUIPathGuards(unittest.TestCase):
     def test_eui_path_refuses_outside_applicability(self):
         # 8.4.4.1.(1)/Table-note applicability REFUSES on the pure 'eui' path
         # — a verdict outside applicability is not a determination.
-        from btap.necb import performance_compliance
+        from btap.codes import performance_compliance
 
         with self.assertRaises(ValueError) as ctx:
             performance_compliance(

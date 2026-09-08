@@ -28,7 +28,7 @@ HOSTILE_ELA_CM2 = 5000.0
 
 def build_reference(model):
     from btap.audit import AuditLog
-    from btap.necb import envelope
+    from btap.codes.necb import envelope
 
     envelope.reference_envelope(model, vintage='2020', hdd=HDD, audit=AuditLog())
     return model
@@ -127,7 +127,7 @@ class TestNECBHostileReferenceEnvelope(unittest.TestCase):
     # Pin the formula itself so a fix to the object-clearing above cannot
     # quietly change the resulting rate. I_AGW = (5/75)^0.6 x I75 x S / A_AGW.
     def test_reference_infiltration_matches_the_i_agw_formula(self):
-        from btap.necb.envelope import prescriptive as Prescriptive
+        from btap.codes.necb.envelope import prescriptive as Prescriptive
 
         model = load_raw_fixture()
         build_reference(model)

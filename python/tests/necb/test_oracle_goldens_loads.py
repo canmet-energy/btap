@@ -157,7 +157,7 @@ class TestOracleGoldensLoads(unittest.TestCase):
         values. Pin both sides of that correction before comparing everything
         else exactly.
         """
-        from btap.necb import loads
+        from btap.codes.necb import loads
         expected = golden('loads_merged_tables')
         self.assertEqual({'space_types', 'schedules'}, set(expected))
         self.assertEqual(308, len(expected['space_types']))
@@ -205,7 +205,7 @@ class TestOracleGoldensLoads(unittest.TestCase):
         day-of-week flags and dates."""
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         expected = golden('loads_schedules')
         names = list(dict.fromkeys(r['name'] for r in loads.table('2020', 'schedules')))
         self.assertGreaterEqual(len(names), 85,
@@ -227,7 +227,7 @@ class TestOracleGoldensLoads(unittest.TestCase):
         schedule/thermostat applies on identically tagged models."""
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         expected = golden('loads_apply')
         pairs = [p for p in PAIRS
                  if loads.SpaceTypes.find(building_type=p[0], space_type=p[1])]
