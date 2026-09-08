@@ -31,9 +31,9 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 from btap.codes.necb.envelope import climate, fenestration
 from btap.codes.necb.envelope import thermal_bridging as thermal_bridging_module
-from btap.codes import Ruleset
 from btap.codes.necb.envelope.rules import (
     _ground_floor_extent,
     _max_fdwr,

@@ -31,8 +31,8 @@ import threading
 
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
-from btap.codes.necb.envelope import climate
 from btap.codes import Ruleset
+from btap.codes.necb.envelope import climate
 from btap.codes.necb.envelope.rules import _max_u
 
 # TBD built-in PSI sets (BETBG-derived); a dict of detail=>psi may be given

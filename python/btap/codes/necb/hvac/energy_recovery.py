@@ -10,7 +10,8 @@ from __future__ import annotations
 import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
-from btap.codes.necb.hvac.reference import optional_flow, rules
+from btap.codes import Ruleset
+from btap.codes.necb.hvac.reference import optional_flow
 
 
 def apply_energy_recovery(model, vintage='2020', *, hdd, audit=None):
@@ -31,10 +32,15 @@ def apply_energy_recovery(model, vintage='2020', *, hdd, audit=None):
     :param audit: AuditLog or None (a new one is created if None)
     :return: AuditLog — carrying the per-loop 5.2.10.1 determinations
     """
+    return _apply_energy_recovery(model, Ruleset.from_edition(vintage),
+                                  hdd=hdd, audit=audit)
+
+
+def _apply_energy_recovery(model, ruleset, *, hdd, audit=None):
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
-    rule = rules(vintage).get('energy_recovery')
+    rule = ruleset.rules("hvac").get('energy_recovery')
     if rule is None:
         return audit
 
