@@ -16,6 +16,8 @@ Lanes: python (every PR; engine-free), verify (sizing; container+engine),
 parity (annual --quick; dispatch cadence).
 """
 
+import re
+
 LAST_CROSS_LANGUAGE_COMMIT = "85ab14352677093e24038d933cf1071e5b03431a"
 LAST_CROSS_LANGUAGE_RUN_ID = 33544573991
 LAST_CROSS_LANGUAGE_RUN_URL = (
@@ -37,23 +39,67 @@ CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
 
 
-def _corpus(slug, tier, lane, extra=()):
+#: The default code id. Every scenario frozen before the multi-edition work
+#: is a ``necb2020`` scenario, and for that id ``_corpus`` must stay
+#: byte-identical to its pre-Stage-0 self — same id, same argv, same seal.
+DEFAULT_CODE = "necb2020"
+
+#: A first-edition seal. NO cross-language attestation exists for an edition
+#: whose scenarios were authored after the Ruby product retired (D-84), so
+#: ``all_scenarios()`` must leave these untouched — no ``retired_seal``, no
+#: 85ab143. The seal-attestation gate in test_frozen_scenarios.py asserts it.
+FIRST_FREEZE_SEAL = (
+    "python-only:first frozen post-R6 for NECB {edition} — no "
+    "cross-language attestation exists for this edition"
+)
+
+#: The annual tier's non-vacuity contract, in the serialisable assertion
+#: schema ``runner.check_assertions`` interprets. This is the same guarantee
+#: freeze.py used to hard-code for ids starting ``corpus-annual``; carrying
+#: it on the scenario means the NORMAL comparator enforces it on every run,
+#: not only at freeze time.
+ANNUAL_ASSERTS = [
+    {"op": "json_gt", "file": "report.json",
+     "path": "proposed.total_site_kwh", "value": 0},
+    {"op": "json_exists", "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"},
+]
+
+
+def edition_of(code):
+    """The 4-digit edition a code id ends with (``necb2025`` -> ``2025``)."""
+    match = re.search(r"(\d{4})$", code)
+    if not match:
+        raise ValueError(
+            f"code id {code!r} does not end in a 4-digit edition")
+    return match.group(1)
+
+
+def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
     model = "<SEED>" if slug == "5zone-onramp" else f"<CORPUS>/{slug}.osm"
     args = FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS
-    return {
-        "id": f"corpus-{tier}-{slug}",
+    # Stage 7 rewrites --vintage to --code; until then the CLI's own
+    # argument name is what argv has to carry.
+    vintage = [] if code == DEFAULT_CODE else ["--vintage", edition_of(code)]
+    scenario = {
+        "id": (f"corpus-{tier}-{slug}" if code == DEFAULT_CODE
+               else f"corpus-{tier}-{slug}-{code}"),
         "lane": lane, "kind": "cli",
         "replaces": ["B1", "B2"] if tier != "annual" else ["B3", "B4", "B7"],
-        "argv": [model, *sim, *epw, *args, "-o", "<RUN_DIR>", *extra],
+        "argv": [model, *sim, *epw, *args, *vintage, "-o", "<RUN_DIR>", *extra],
         "env": {},
         "expect_exit": 6,
         "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
         "streams": {"stdout": "exact", "stderr": "exact"},
-        "seal": "ruby",
+        "seal": ("ruby" if code == DEFAULT_CODE
+                 else FIRST_FREEZE_SEAL.format(edition=edition_of(code))),
     }
+    if tier == "annual":
+        scenario["asserts"] = [dict(a) for a in ANNUAL_ASSERTS]
+    return scenario
 
 
 def corpus_scenarios(slugs):
@@ -199,14 +245,31 @@ UNCOVERED = [
      "option": "a future API-level scenario (parity lane) is a named "
                "OPTION, not a witness; nothing is frozen unless it "
                "appears in this manifest"},
-    {"branch": "full-year end-to-end determination (exits 0/1 through a "
-               "real annual run)",
-     "why": "a 40-90 minute scenario; live Leg B's annual tier only ever "
-            "ran --quick (exit 6), so this matches Leg B's own scope",
-     "witness": "the verdict-unit scenarios freeze both determination "
-                "renderings and exit codes at unit level",
-     "option": "a dispatch-only full-year scenario remains possible if a "
-               "later phase demands it"},
+]
+
+#: Branches this suite USED to declare uncovered and now covers. The record
+#: stays here — beside UNCOVERED, in the same authored file — so a reader
+#: sees what closed a gap and, precisely, what the closure does and does not
+#: claim.
+NEWLY_COVERED = [
+    {"branch": "full-year determination (exits 0/1 through a real annual "
+               "run)",
+     "covered_by": "API pipeline execution of a full-year determination, "
+                   "classified by the SHARED cli.verdict_exit — NOT a "
+                   "literal CLI end-to-end run. The scenario calls "
+                   "performance_compliance in an isolated worker "
+                   "subprocess and maps the ComplianceResult to an exit "
+                   "code through the very function the CLI uses, so the "
+                   "classification is the product's, not the harness's; "
+                   "the CLI's own argument parsing and process wiring are "
+                   "outside what this freezes",
+     "scenario": "determination-01-baseboard-gas-necb2025",
+     "cost": "40-90 minutes — a dispatch-cadence (parity lane) scenario, "
+             "which is why it was declared uncovered for as long as it was",
+     "still_unit_level": "CLI RENDERING of both determinations stays "
+                         "covered by the verdict-unit scenarios "
+                         "(verdict-compliant / verdict-not-compliant); "
+                         "the API scenario does not exercise cli.emit"},
 ]
 
 
