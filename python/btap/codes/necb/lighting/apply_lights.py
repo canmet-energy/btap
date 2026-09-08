@@ -259,8 +259,11 @@ def _add_additional_lights(space_type, record):
     lights.setSpaceType(space_type)
 
 
-def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
-    """NECB2015-lineage apply_lighting_schedule: plain schedule at/below the 8.6
+def _wire_lighting_schedule(model, space_type, record, code, audit):
+    """``code`` is this edition's :class:`btap.codes.Ruleset` — not spelled
+    ``ruleset``, because the OpenStudio ScheduleRuleset this synthesizes is.
+
+    NECB2015-lineage apply_lighting_schedule: plain schedule at/below the 8.6
     W/m2 threshold; above it, synthesize the occupancy-sensor ruleset —
     hour-by-hour, when occupancy < rel_absence_occ the lighting value is
     multiplied by (1 - rel_absence_occ x occ_sense - personal_control)."""
@@ -275,21 +278,21 @@ def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
         space_type.setDefaultScheduleSet(schedule_set)
 
     lpd = _f(record['lighting_per_area'])
-    threshold = _f(ruleset.rules("lighting")['sensor_schedule_lpd_threshold_w_per_ft2'])
+    threshold = _f(code.rules("lighting")['sensor_schedule_lpd_threshold_w_per_ft2'])
     lighting_name = record['lighting_schedule']
     if lighting_name is None:
         return
 
     if lpd <= threshold:
         schedule_set.setLightingSchedule(
-            Schedules._add(model, lighting_name, ruleset, audit=audit))
+            Schedules._add(model, lighting_name, code, audit=audit))
         return
 
     occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
     rel_absence = _f(record['rel_absence_occ'])
     personal = _f(record['personal_control'])
     occ_sense = _f(record['occ_sense'])
-    schedules = loads.table(ruleset.edition, 'schedules')
+    schedules = loads.table(code.edition, 'schedules')
     occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
     lighting_rows = [r for r in schedules if r['name'] == lighting_name]
     if not occupancy_rows or not lighting_rows:
@@ -297,7 +300,7 @@ def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
                    f"sensor-schedule synthesis needs both '{occupancy_name}' and '{lighting_name}' — "
                    'falling back to the plain lighting schedule', target=space_type.nameString())
         schedule_set.setLightingSchedule(
-            Schedules._add(model, lighting_name, ruleset, audit=audit))
+            Schedules._add(model, lighting_name, code, audit=audit))
         return
 
     ruleset_name = (f"{occupancy_name}-{lighting_name}-{_num(rel_absence)}-{_num(personal)}-"
@@ -308,9 +311,10 @@ def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
         schedule_set.setLightingSchedule(existing)
         return
 
-    ruleset = _synthesize_sensor_ruleset(model, ruleset_name, occupancy_rows, lighting_rows,
-                                         rel_absence, personal, occ_sense)
-    schedule_set.setLightingSchedule(ruleset)
+    synthesized = _synthesize_sensor_ruleset(model, ruleset_name, occupancy_rows,
+                                             lighting_rows, rel_absence, personal,
+                                             occ_sense)
+    schedule_set.setLightingSchedule(synthesized)
     audit.info('lighting', 'occupancy-sensor lighting schedule synthesized (LPD > 8.6 W/m2)',
                target=space_type.nameString(),
                inputs={'rel_absence_occ': rel_absence, 'personal_control': personal,

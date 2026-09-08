@@ -36,7 +36,12 @@ def add(model, name, vintage='2020', audit=None):
     return _add(model, name, Ruleset.from_edition(vintage), audit=audit)
 
 
-def _add(model, name, ruleset, audit=None):
+def _add(model, name, code, audit=None):
+    """``code`` is this edition's :class:`btap.codes.Ruleset`. It is NOT named
+    ``ruleset`` here because the OpenStudio object this builds is a
+    ScheduleRuleset, and the domain has called that ``ruleset`` since the
+    port — one name for two unrelated things in one 30-line function is how
+    a later edit picks the wrong one."""
     audit = audit if audit is not None else NullAudit()
     if name is None or str(name) == '':
         return None
@@ -46,10 +51,10 @@ def _add(model, name, ruleset, audit=None):
     if existing is not None:
         return existing
 
-    rows = [r for r in _loads.table(ruleset.edition, 'schedules') if r['name'] == name]
+    rows = [r for r in _loads.table(code.edition, 'schedules') if r['name'] == name]
     if not rows:
         audit.warn('schedules',
-                   f"no NECB {ruleset.edition} schedule data named '{name}' — falling back to Always On "
+                   f"no NECB {code.edition} schedule data named '{name}' — falling back to Always On "
                    '(legacy fails silently here)',
                    target=name)
         return model.alwaysOnDiscreteSchedule()
