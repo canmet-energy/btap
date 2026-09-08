@@ -41,7 +41,7 @@ unless a moved link itself is wrong.
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build coverage
 .venv/bin/pytest -n auto -q tests/
 .venv/bin/lint-imports
 .venv/bin/ruff check .

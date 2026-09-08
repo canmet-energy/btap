@@ -131,3 +131,63 @@ good as the test next to it.
 - The checks prove a transform *fires* and produces the *code value*. They do
   not prove the code value is the right reading of the article; that still
   needs a human against the NECB text.
+
+## Line-coverage baseline — 2026-09-07 (informational)
+
+Measured before the multi-edition refactor (`docs/NECB_MULTI_EDITION_PLAN.md`,
+Stage 0.4) with `coverage` over the full suite less `test_frozen_scenarios.py`
+(859 passed, 26m44s under instrumentation). This table is **informational**:
+the refactor's gates are the frozen lanes, the citation table and the
+citation no-loss test, not these numbers. Re-run per stage and report movement.
+
+Command:
+
+    cd python && BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
+      .venv/bin/python -m coverage run --source=btap/necb -m pytest -q -p no:cacheprovider tests/ \
+      && .venv/bin/python -m coverage report --sort=cover --skip-empty
+
+`btap/necb` overall: **89% — 7,362 statements, 776 missed.**
+
+| module | stmts | miss | cov |
+|---|---:|---:|---:|
+| `lighting/storage_garage/schedules.py` | 140 | 32 | 77% |
+| `hvac/checker.py` | 118 | 25 | 79% |
+| `lighting/storage_garage/__init__.py` | 127 | 26 | 80% |
+| `cli.py` | 420 | 73 | 83% |
+| `lighting/daylighted_areas.py` | 246 | 42 | 83% |
+| `lighting/apply_lights.py` | 251 | 40 | 84% |
+| `envelope/climate.py` | 63 | 9 | 86% |
+| `lighting/daylight_control_requirement.py` | 190 | 26 | 86% |
+| `lighting/_legacy_2011.py` | 147 | 21 | 86% |
+| `eui_archetypes.py` | 320 | 41 | 87% |
+| `hvac/efficiency.py` | 904 | 117 | 87% |
+| `loads/apply.py` | 273 | 33 | 88% |
+| `report/model_query.py` | 72 | 9 | 88% |
+| `envelope/fenestration.py` | 44 | 5 | 89% |
+| `lighting/daylighting.py` | 195 | 22 | 89% |
+| `lighting/storage_garage/perimeter.py` | 112 | 12 | 89% |
+| `shw/efficiency.py` | 201 | 23 | 89% |
+| `shw/prescriptive.py` | 39 | 4 | 90% |
+| `coverage.py` | 117 | 11 | 91% |
+| `report/html.py` | 58 | 5 | 91% |
+| `compliance.py` | 651 | 49 | 92% |
+| `envelope/prescriptive.py` | 187 | 15 | 92% |
+| `hvac/reference.py` | 791 | 64 | 92% |
+| `lighting/reference_daylighting.py` | 49 | 4 | 92% |
+| `decisions.py` | 30 | 2 | 93% |
+| `envelope/__init__.py` | 29 | 2 | 93% |
+| `envelope/reference.py` | 207 | 15 | 93% |
+| `envelope/thermal_bridging.py` | 66 | 3 | 95% |
+| `hvac/energy_recovery.py` | 101 | 5 | 95% |
+| `loads/schedules.py` | 78 | 4 | 95% |
+| `shw/demand.py` | 184 | 10 | 95% |
+| `lighting/__init__.py` | 57 | 2 | 96% |
+| `report/charts.py` | 52 | 2 | 96% |
+| `report/sections.py` | 390 | 16 | 96% |
+| `shw/__init__.py` | 26 | 1 | 96% |
+| `envelope/rules.py` | 60 | 2 | 97% |
+| `loads/__init__.py` | 34 | 1 | 97% |
+| `tiers.py` | 67 | 2 | 97% |
+| `report/checklist.py` | 76 | 1 | 99% |
+| `hvac/__init__.py`, `__init__.py`, `lighting/exterior.py`, `lighting/reference.py`, `loads/space_types.py`, `report/__init__.py`, `report/svg.py`, `shw/reference.py` | — | 0 | 100% |
+| **TOTAL** | **7362** | **776** | **89%** |
