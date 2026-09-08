@@ -14,7 +14,8 @@
 	"containerUser": "vscode",
 	"remoteUser": "vscode",
 	"containerEnv": {
-		"VSCODE": "TRUE"
+		"VSCODE": "TRUE",
+		"PYTEST_XDIST_AUTO_NUM_WORKERS": "8"
 	},
 	"customizations": {
 		"vscode": {

@@ -125,6 +125,40 @@ def check_required_python_engines(scenarios):
             f"{thermal_bridging.PINNED_TBD_VERSION}")
 
 
+def _wants_energyplus(scenario):
+    """Does this scenario RUN EnergyPlus? Two independent shapes: an API
+    scenario simulating anything but 'none' (the kwarg defaults to
+    'annual', so an absent key still means a real run), and a CLI argv
+    carrying --simulate annual|sizing."""
+    if scenario.get("kind") == "api":
+        if scenario.get("api_call", {}).get("simulate", "annual") != "none":
+            return True
+    argv = scenario.get("argv", [])
+    for index, token in enumerate(argv[:-1]):
+        if token == "--simulate" and argv[index + 1] in ("annual", "sizing"):
+            return True
+    return False
+
+
+def check_required_energyplus(scenarios):
+    """SEPARATE from the tbd check above: those are different engines with
+    different failure modes, and a freeze that silently lacks EnergyPlus
+    would die deep inside a scenario instead of at the door."""
+    wanting = [s["id"] for s in scenarios if _wants_energyplus(s)]
+    if not wanting:
+        return
+    runner._sys_path_python()
+    try:
+        from btap.simulation.engine import ensure_energyplus
+        ensure_energyplus()
+    except Exception as error:  # noqa: BLE001 — every failure is the same answer
+        die("scenarios need a working EnergyPlus engine in the FREEZER "
+            f"interpreter and none resolved ({error!r}).\n"
+            f"  affected: {', '.join(wanting)}\n"
+            "  run python/.venv/bin/python verification/scenarios/freeze.py "
+            "in the container image (or set BTAP_ENERGYPLUS).")
+
+
 def normalized_streams(sc, run):
     return {stream: runner.normalize(getattr(run, stream),
                                      run.run_dir or "<none>", run.scratch)
@@ -283,6 +317,7 @@ def main():
         check_required_python_engines(scenarios)
     except ValueError as error:
         die(str(error))
+    check_required_energyplus(scenarios)
 
     cr = runner.load_compare_runs()
     spec = cr.load_spec(REPO_ROOT / "verification" / "spec.json")
@@ -316,7 +351,7 @@ def main():
 
         # live-run comparisons that need no baseline (fragments, bytes, set)
         probe = runner.compare(
-            {**sc, "files": [], "text_files": {},
+            {**sc, "files": [], "text_files": {}, "asserts": [],
              "streams": {k: v for k, v in sc.get("streams", {}).items()
                          if v != "exact"}},
             run1, spec, cr)
@@ -324,14 +359,15 @@ def main():
             die(f"{sc['id']}: live-run contract failed pre-freeze:\n"
                 + "\n".join(probe))
 
-        # non-vacuity for annual energies
-        if sc["id"].startswith("corpus-annual"):
-            rep = json.loads((Path(run1.run_dir) / "report.json")
-                             .read_text(encoding="utf-8"))
-            if not (rep.get("proposed", {}).get("total_site_kwh")
-                    and "unmet_occupied_hours" in rep.get("proposed", {})):
-                die(f"{sc['id']}: annual baseline lacks energies/unmet "
-                    "hours — a vacuous baseline must not freeze")
+        # NON-VACUITY, per scenario, from the scenario's own authored
+        # `asserts` block — the same runner.check_assertions the normal
+        # comparator runs on every later run, so this is a contract the
+        # baselines keep, not a one-off freeze-time inspection. A baseline
+        # that fails its own non-vacuity does not freeze.
+        vacuity = runner.check_assertions(sc, run1)
+        if vacuity:
+            die(f"{sc['id']}: non-vacuity assertions failed — a vacuous "
+                "baseline must not freeze:\n" + "\n".join(vacuity))
 
         # publish this scenario's baselines
         dest = baselines / sc["id"]

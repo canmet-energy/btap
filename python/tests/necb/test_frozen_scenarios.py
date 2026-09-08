@@ -144,6 +144,30 @@ class TestFrozenScenarios(unittest.TestCase):
                 scenario["last_cross_language_run_url"])
             self.assertIn("D-84", scenario["seal_transition_reason"])
 
+    def test_first_freeze_seals_claim_no_attestation(self):
+        """A scenario authored AFTER the Ruby product retired has no
+        cross-language history to point at. `all_scenarios()` converts only
+        `ruby`/`ruby-api:` seals, so a `python-only:` seal must arrive with
+        none of the transition metadata — carrying 85ab143 on a run Ruby
+        never made would be a fabricated attestation, which is the exact
+        failure this suite exists to make impossible."""
+        attestation_fields = ("retired_seal", "last_cross_language_commit",
+                              "last_cross_language_run_id",
+                              "last_cross_language_run_url",
+                              "seal_transition_reason")
+        offenders = []
+        for scenario in self.manifest["scenarios"]:
+            if scenario["seal"] == "python-only:post-handoff":
+                continue  # the converted seals; asserted above
+            if not scenario["seal"].startswith("python-only:"):
+                continue
+            carried = [f for f in attestation_fields if f in scenario]
+            if carried:
+                offenders.append(f"{scenario['id']}: {carried}")
+        self.assertEqual([], offenders,
+                         "python-only seals carrying cross-language "
+                         "attestation fields:\n" + "\n".join(offenders))
+
     def test_ci_wires_every_lane(self):
         """Every lane the manifest declares must have a CI executor — the
         exact silent failure this guards against happened: a step-removal

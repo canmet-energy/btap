@@ -97,3 +97,7 @@ python/.parity-venv/
 !verification/scenarios/baselines/**/audit.txt
 !verification/scenarios/baselines/**/report.json
 packaging/pypi/energyplus/dist/
+
+# Claude Code agent worktrees and coverage data files
+.claude/worktrees/
+.coverage

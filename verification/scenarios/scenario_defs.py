@@ -16,6 +16,8 @@ Lanes: python (every PR; engine-free), verify (sizing; container+engine),
 parity (annual --quick; dispatch cadence).
 """
 
+import re
+
 LAST_CROSS_LANGUAGE_COMMIT = "85ab14352677093e24038d933cf1071e5b03431a"
 LAST_CROSS_LANGUAGE_RUN_ID = 33544573991
 LAST_CROSS_LANGUAGE_RUN_URL = (
@@ -37,23 +39,67 @@ CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
 
 
-def _corpus(slug, tier, lane, extra=()):
+#: The default code id. Every scenario frozen before the multi-edition work
+#: is a ``necb2020`` scenario, and for that id ``_corpus`` must stay
+#: byte-identical to its pre-Stage-0 self — same id, same argv, same seal.
+DEFAULT_CODE = "necb2020"
+
+#: A first-edition seal. NO cross-language attestation exists for an edition
+#: whose scenarios were authored after the Ruby product retired (D-84), so
+#: ``all_scenarios()`` must leave these untouched — no ``retired_seal``, no
+#: 85ab143. The seal-attestation gate in test_frozen_scenarios.py asserts it.
+FIRST_FREEZE_SEAL = (
+    "python-only:first frozen post-R6 for NECB {edition} — no "
+    "cross-language attestation exists for this edition"
+)
+
+#: The annual tier's non-vacuity contract, in the serialisable assertion
+#: schema ``runner.check_assertions`` interprets. This is the same guarantee
+#: freeze.py used to hard-code for ids starting ``corpus-annual``; carrying
+#: it on the scenario means the NORMAL comparator enforces it on every run,
+#: not only at freeze time.
+ANNUAL_ASSERTS = [
+    {"op": "json_gt", "file": "report.json",
+     "path": "proposed.total_site_kwh", "value": 0},
+    {"op": "json_exists", "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"},
+]
+
+
+def edition_of(code):
+    """The 4-digit edition a code id ends with (``necb2025`` -> ``2025``)."""
+    match = re.search(r"(\d{4})$", code)
+    if not match:
+        raise ValueError(
+            f"code id {code!r} does not end in a 4-digit edition")
+    return match.group(1)
+
+
+def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
     model = "<SEED>" if slug == "5zone-onramp" else f"<CORPUS>/{slug}.osm"
     args = FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS
-    return {
-        "id": f"corpus-{tier}-{slug}",
+    # Stage 7 rewrites --vintage to --code; until then the CLI's own
+    # argument name is what argv has to carry.
+    vintage = [] if code == DEFAULT_CODE else ["--vintage", edition_of(code)]
+    scenario = {
+        "id": (f"corpus-{tier}-{slug}" if code == DEFAULT_CODE
+               else f"corpus-{tier}-{slug}-{code}"),
         "lane": lane, "kind": "cli",
         "replaces": ["B1", "B2"] if tier != "annual" else ["B3", "B4", "B7"],
-        "argv": [model, *sim, *epw, *args, "-o", "<RUN_DIR>", *extra],
+        "argv": [model, *sim, *epw, *args, *vintage, "-o", "<RUN_DIR>", *extra],
         "env": {},
         "expect_exit": 6,
         "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
         "streams": {"stdout": "exact", "stderr": "exact"},
-        "seal": "ruby",
+        "seal": ("ruby" if code == DEFAULT_CODE
+                 else FIRST_FREEZE_SEAL.format(edition=edition_of(code))),
     }
+    if tier == "annual":
+        scenario["asserts"] = [dict(a) for a in ANNUAL_ASSERTS]
+    return scenario
 
 
 def corpus_scenarios(slugs):
@@ -199,19 +245,163 @@ UNCOVERED = [
      "option": "a future API-level scenario (parity lane) is a named "
                "OPTION, not a witness; nothing is frozen unless it "
                "appears in this manifest"},
-    {"branch": "full-year end-to-end determination (exits 0/1 through a "
-               "real annual run)",
-     "why": "a 40-90 minute scenario; live Leg B's annual tier only ever "
-            "ran --quick (exit 6), so this matches Leg B's own scope",
-     "witness": "the verdict-unit scenarios freeze both determination "
-                "renderings and exit codes at unit level",
-     "option": "a dispatch-only full-year scenario remains possible if a "
-               "later phase demands it"},
+]
+
+#: Branches this suite USED to declare uncovered and now covers. The record
+#: stays here — beside UNCOVERED, in the same authored file — so a reader
+#: sees what closed a gap and, precisely, what the closure does and does not
+#: claim.
+NEWLY_COVERED = [
+    {"branch": "full-year determination (exits 0/1 through a real annual "
+               "run)",
+     "covered_by": "API pipeline execution of a full-year determination, "
+                   "classified by the SHARED cli.verdict_exit — NOT a "
+                   "literal CLI end-to-end run. The scenario calls "
+                   "performance_compliance in an isolated worker "
+                   "subprocess and maps the ComplianceResult to an exit "
+                   "code through the very function the CLI uses, so the "
+                   "classification is the product's, not the harness's; "
+                   "the CLI's own argument parsing and process wiring are "
+                   "outside what this freezes",
+     "scenario": "determination-01-baseboard-gas-necb2025",
+     "cost": "about 3 minutes on the corpus model (189 s, three reference "
+             "capacity iterations, when authored on 2026-09-08) — the 40-90 "
+             "minute figure that kept it uncovered was the oracle archetypes' "
+             "cost, not the corpus's; it stays parity-lane by policy (a real "
+             "EnergyPlus annual run), not by cost",
+     "still_unit_level": "CLI RENDERING of both determinations stays "
+                         "covered by the verdict-unit scenarios "
+                         "(verdict-compliant / verdict-not-compliant); "
+                         "the API scenario does not exercise cli.emit"},
+]
+
+
+# ------------------------------------------------------------ NECB 2025
+#: The first frozen evidence for a second edition (multi-edition plan,
+#: Stage 0 / R-A). Four scenarios: two no-simulation corpus runs in the
+#: python lane, and two real annual API runs in the parity lane — the
+#: first full-year determination this suite has ever frozen, and the only
+#: frozen witness of the 2025 archetype-EUI path. Every value pinned below
+#: (expect_exit, compliant, ghg.level, tier) was read off an authoring run
+#: of the unmodified product on 2026-09-08 and is asserted, not assumed:
+#: a baseline that fails its own asserts does not freeze.
+NECB2025_EDITION = "necb2025"
+
+_WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
+
+EDITION_SCENARIOS = [
+    # Reference build audited at 2025: the envelope prescriptive decision
+    # cites 8.4.5.1.(2) (8.4.4.1.(2) at 2020), and every emitter that
+    # records the edition records 2025.
+    {**_corpus("01-baseboard-gas", "none", "python", code=NECB2025_EDITION),
+     "replaces": [],
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "audit_entry", "article": "8.4.5.1.(2)", "count": 1},
+         {"op": "audit_entry", "inputs": {"vintage": "2025"}, "count": 4},
+     ]},
+    # D-85 at 2025: the proposed VRF outdoor unit that serves no reference
+    # zone is purged, audited once, at info.
+    {**_corpus("08-vrf", "none", "python", code=NECB2025_EDITION),
+     "replaces": [],
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "audit_entry", "step": "build", "level": "info",
+          "action": "proposed VRF outdoor unit serves no reference zone — "
+                    "removed",
+          "ruling": "D-85", "inputs": {"terminals": 0}, "count": 1},
+     ]},
+    # The full-year determination, as an API scenario: the CLI has no
+    # province argument, and the Part 11 GHG binding (Stage 5) is only
+    # frozen if the run scores GHG against a reference. Authoring run:
+    # exit 1 / not compliant because the REFERENCE building's unmet
+    # heating hours (801 h) exceed the 8.4.1.2.(3) 100 h limit after three
+    # capacity increases (8.4.1.2.(5)); the energy verdict itself passes
+    # (76.0 % of target, tier 1); GHG level "F" at 95.3 % of the GHG
+    # target. The asserts tie the pinned exit to that reason.
+    {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"vintage": "2025", "simulate": "annual",
+                  "province_state": "ONTARIO",
+                  "model": "<CORPUS>/01-baseboard-gas.osm",
+                  "weather": _WEATHER_2025, "building": {"storeys": 1}},
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
+     "asserts": [
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.total_site_kwh", "value": 0},
+         {"op": "json_exists", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours"},
+         {"op": "json_exists", "file": "report.json",
+          "path": "reference.unmet_occupied_hours"},
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "json_exists", "file": "report.json", "path": "ghg"},
+         {"op": "json_equals", "file": "report.json", "path": "ghg.level",
+          "value": "F"},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "proposed does not exceed the building energy target",
+          "article": "8.4.1.2.(2)", "count": 1},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "unmet heating hours EXCEED 100 h",
+          "article": "8.4.1.2.(3)", "count": 1},
+         {"op": "audit_entry", "level": "warning", "article": "8.4.1.2.(5)",
+          "count": 1},
+         {"op": "observation_equals", "key": "compliant", "value": False},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": True},
+     ]},
+    # The 2025 archetype-EUI path: no reference building is built, so no
+    # reference_sizing/ or reference_annual/ appears, the target comes from
+    # Table 8.4.4.1 (140 000 kWh for 800 m2 of Office at 175 kWh/m2), and
+    # the proposed's own GHG mass is reported without a comparative level.
+    # Authoring run: exit 0 / compliant, 93.1 % of target, tier 1, 37 s.
+    {"id": f"api-eui-path-{NECB2025_EDITION}",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"vintage": "2025", "path": "eui",
+                  "archetypes_map": {"Office": "all"},
+                  "simulate": "annual", "province_state": "ONTARIO",
+                  "model": "<CORPUS>/01-baseboard-gas.osm",
+                  "weather": _WEATHER_2025, "building": {"storeys": 1}},
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
+     "asserts": [
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.building_energy_target_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json", "path": "percent_of_target",
+          "value": 0},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.ghg_kg_co2e", "value": 0},
+         {"op": "path_absent", "relative": "reference_sizing"},
+         {"op": "path_absent", "relative": "reference_annual"},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": False},
+         {"op": "observation_equals", "key": "compliant", "value": True},
+     ]},
 ]
 
 
 def all_scenarios(slugs):
-    scenarios = corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS + VERDICT_SCENARIOS
+    scenarios = (corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS
+                 + VERDICT_SCENARIOS + EDITION_SCENARIOS)
     for scenario in scenarios:
         seal = scenario["seal"]
         if seal == "ruby" or seal.startswith("ruby-api:"):

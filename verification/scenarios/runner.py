@@ -28,6 +28,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -38,6 +39,12 @@ EPW = (PYTHON_ROOT / "tests" / "fixtures" / "weather"
 SEED = REPO_ROOT / "verification" / "oracle" / "fixtures" / "5ZoneNoHVAC.osm"
 MANIFEST = HERE / "manifest.json"
 BASELINES = HERE / "baselines"
+API_WORKER = HERE / "api_worker.py"
+
+#: What api_worker.py writes and _execute_api reads back. It is a TRANSPORT,
+#: not an artifact: the parent deletes it after reading so an API run dir
+#: still holds exactly the file set its scenario declares.
+OBSERVATIONS = "observations.json"
 
 DEFAULT_TIMEOUT_S = 600
 
@@ -156,8 +163,18 @@ def resolve(value, ctx):
     return value
 
 
+def ddy_for(epw):
+    """The design-day sibling of an EPW, derived exactly as the CLI derives
+    it when --ddy is absent (btap/necb/cli.py: stem + '.ddy' for a .epw,
+    otherwise the file itself) — so an API scenario's weather is the same
+    pair a CLI scenario would have assembled."""
+    stem, ext = os.path.splitext(str(epw))
+    return stem + ".ddy" if ext.lower() == ".epw" else str(epw)
+
+
 def make_ctx(run_dir, corpus, lone):
     return {"<RUN_DIR>": run_dir, "<ROOT>": REPO_ROOT, "<EPW>": EPW,
+            "<DDY>": ddy_for(EPW),
             "<SEED>": SEED, "<CORPUS>": corpus, "<LONE_EPW>": lone}
 
 
@@ -185,12 +202,18 @@ def normalize(text, run_dir, scratch=None):
 # ------------------------------------------------------------ execution
 
 class ScenarioRun:
-    def __init__(self, exit_code, stdout, stderr, run_dir, scratch=None):
+    def __init__(self, exit_code, stdout, stderr, run_dir, scratch=None,
+                 observations=None):
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
         self.run_dir = run_dir
         self.scratch = scratch
+        #: In-memory observations an API scenario's worker reported —
+        #: `reference_model_present`, `compliant`, the full report — the
+        #: things that leave no trace in the run dir. None for every other
+        #: kind. `observation_equals` assertions read this.
+        self.observations = observations
 
 
 def execute(scenario, run_dir, ctx):
@@ -200,7 +223,7 @@ def execute(scenario, run_dir, ctx):
         run.scratch = _scratch_of(ctx)
         return run
     if kind == "api":
-        return _execute_api(scenario, run_dir)
+        return _execute_api(scenario, run_dir, ctx)
     if kind == "audit-unit":
         return _execute_audit_unit(run_dir)
     if kind == "verdict-unit":
@@ -230,14 +253,72 @@ def _sys_path_python():
         sys.path.insert(0, str(PYTHON_ROOT))
 
 
-def _execute_api(scenario, run_dir):
-    _sys_path_python()
-    from btap.necb import performance_compliance
-    from tests.necb.support import compliance_fixture
+def resolve_deep(value, ctx):
+    """`resolve` over every STRING in a nested api_call structure."""
+    if isinstance(value, str):
+        return resolve(value, ctx)
+    if isinstance(value, dict):
+        return {k: resolve_deep(v, ctx) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [resolve_deep(v, ctx) for v in value]
+    return value
 
-    performance_compliance(compliance_fixture(), run_dir=str(run_dir),
-                           **scenario["api_call"])
-    return ScenarioRun(None, "", "", run_dir)
+
+def _execute_api(scenario, run_dir, ctx):
+    """An API scenario in an ISOLATED WORKER SUBPROCESS.
+
+    In-process execution ignored `timeout_s` entirely (it reaches only the
+    subprocess.run in _execute_cli), so a hung full-year determination hung
+    the whole suite. Out of process it is a failed run instead. The worker
+    also reports the exit code the PRODUCT's cli.verdict_exit computes, so
+    `expect_exit` is checked by the same run.exit_code comparison in
+    `compare` that every CLI scenario goes through.
+    """
+    call = resolve_deep(scenario["api_call"], ctx)
+    env = build_env(scenario, {k: resolve(v, ctx)
+                               for k, v in scenario.get("env", {}).items()})
+    run_dir = Path(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    handle, payload = tempfile.mkstemp(prefix="api-call-", suffix=".json")
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as fh:
+            json.dump(call, fh)
+        try:
+            proc = subprocess.run(
+                [python_exe(), str(API_WORKER), payload, str(run_dir)],
+                capture_output=True, text=True, env=env, cwd=str(REPO_ROOT),
+                timeout=scenario.get("timeout_s", DEFAULT_TIMEOUT_S),
+                check=False)
+            returncode, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
+        except subprocess.TimeoutExpired as expired:
+            # A timeout is a FAILED RUN, never a hang and never a silent
+            # pass: no observations to read, so the run carries the error
+            # `compare` turns into a problem.
+            timeout_s = scenario.get("timeout_s", DEFAULT_TIMEOUT_S)
+            return ScenarioRun(
+                None, expired.stdout or "",
+                (expired.stderr or "") + f"\nTIMEOUT after {timeout_s}s\n",
+                run_dir,
+                observations={"error": f"api worker timed out after "
+                                       f"{timeout_s}s"})
+    finally:
+        os.unlink(payload)
+
+    written = run_dir / OBSERVATIONS
+    if not written.is_file():
+        return ScenarioRun(
+            returncode, stdout, stderr, run_dir,
+            observations={"error": "the api worker wrote no "
+                                   f"{OBSERVATIONS} (exit {returncode})"})
+    obs = json.loads(written.read_text(encoding="utf-8"))
+    # Transport, not artifact — remove it so the run dir still holds
+    # exactly the file set the scenario declares.
+    written.unlink()
+    if "error" in obs:
+        return ScenarioRun(returncode, stdout, stderr, run_dir,
+                           observations=obs)
+    return ScenarioRun(obs["exit"], stdout, stderr, run_dir,
+                       observations=obs)
 
 
 def _execute_audit_unit(run_dir):
@@ -277,6 +358,155 @@ def _execute_verdict_unit(scenario, run_dir):
     out = io.StringIO()
     cli.emit(result, {"json": False, "report_html": False}, out)
     return ScenarioRun(cli.verdict_exit(result), out.getvalue(), "", run_dir)
+
+
+# ------------------------------------------------------------ assertions
+
+#: The complete assertion vocabulary. It is a SERIALISABLE SCHEMA — it is
+#: echoed into the generated manifest.json — so no lambdas and no
+#: freeze-only logic: exactly these ops, one interpreter, called from
+#: freeze.py before publishing AND from `compare` on every later run. An
+#: assertion that only ran at freeze time could regress silently.
+ASSERT_OPS = ("json_exists", "json_equals", "json_gt", "json_in",
+              "audit_entry", "path_absent", "observation_equals")
+
+_MISSING = object()
+
+
+def _dig(data, dotted):
+    """Walk a dotted path; :return: the value or the _MISSING sentinel."""
+    node = data
+    for key in dotted.split("."):
+        if isinstance(node, dict) and key in node:
+            node = node[key]
+        elif isinstance(node, list) and key.lstrip("-").isdigit():
+            index = int(key)
+            if -len(node) <= index < len(node):
+                node = node[index]
+            else:
+                return _MISSING
+        else:
+            return _MISSING
+    return node
+
+
+def _load_json(run_dir, name, problems, label):
+    path = Path(run_dir) / name
+    if not path.is_file():
+        problems.append(f"{label}: {name} does not exist")
+        return _MISSING
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except ValueError as error:
+        problems.append(f"{label}: {name} is not readable JSON ({error})")
+        return _MISSING
+
+
+def _subset_match(expected, actual):
+    """`inputs` matches as a SUBSET, recursively: every key the assertion
+    names must be present and equal; keys it does not name are free."""
+    if isinstance(expected, dict):
+        if not isinstance(actual, dict):
+            return False
+        return all(key in actual and _subset_match(value, actual[key])
+                   for key, value in expected.items())
+    return expected == actual
+
+
+def _audit_entries(run_dir, problems, label):
+    audit = _load_json(run_dir, "audit.json", problems, label)
+    if audit is _MISSING:
+        return None
+    return audit if isinstance(audit, list) else audit.get("entries", [])
+
+
+def check_assertions(scenario, run):
+    """Interpret a scenario's `asserts` block. :return: problem strings
+    (empty means every assertion held). Unknown ops RAISE — a typo must
+    never read as a vacuous pass."""
+    problems = []
+    label = scenario["id"]
+    run_dir = run.run_dir
+    for assertion in scenario.get("asserts", []):
+        op = assertion["op"]
+        if op not in ASSERT_OPS:
+            raise ValueError(
+                f"{label}: unknown assertion op {op!r} — the vocabulary is "
+                f"{list(ASSERT_OPS)}")
+        if run_dir is None and op != "observation_equals":
+            problems.append(f"{label}: {op} needs a run dir and this "
+                            "scenario produced none")
+            continue
+
+        if op in ("json_exists", "json_equals", "json_gt", "json_in"):
+            data = _load_json(run_dir, assertion["file"], problems, label)
+            if data is _MISSING:
+                continue
+            path = assertion["path"]
+            value = _dig(data, path)
+            if value is _MISSING:
+                problems.append(f"{label}: {assertion['file']} has no "
+                                f"{path}")
+                continue
+            if op == "json_exists":
+                continue
+            if op == "json_equals":
+                if value != assertion["value"]:
+                    problems.append(
+                        f"{label}: {assertion['file']} {path} is "
+                        f"{value!r}, expected {assertion['value']!r}")
+            elif op == "json_gt":
+                if not (isinstance(value, (int, float))
+                        and not isinstance(value, bool)
+                        and value > assertion["value"]):
+                    problems.append(
+                        f"{label}: {assertion['file']} {path} is "
+                        f"{value!r}, expected > {assertion['value']!r}")
+            elif op == "json_in":
+                if value not in assertion["values"]:
+                    problems.append(
+                        f"{label}: {assertion['file']} {path} is "
+                        f"{value!r}, expected one of "
+                        f"{assertion['values']!r}")
+
+        elif op == "audit_entry":
+            entries = _audit_entries(run_dir, problems, label)
+            if entries is None:
+                continue
+            fields = {k: v for k, v in assertion.items()
+                      if k not in ("op", "count")}
+            matches = [
+                entry for entry in entries
+                if all(_subset_match(value, entry.get(field))
+                       if field == "inputs" else entry.get(field) == value
+                       for field, value in fields.items())]
+            if len(matches) != assertion["count"]:
+                problems.append(
+                    f"{label}: audit.json has {len(matches)} entries "
+                    f"matching {fields!r}, expected exactly "
+                    f"{assertion['count']}")
+
+        elif op == "path_absent":
+            if (Path(run_dir) / assertion["relative"]).exists():
+                problems.append(f"{label}: {assertion['relative']} exists "
+                                "but was asserted absent")
+
+        elif op == "observation_equals":
+            if run.observations is None:
+                problems.append(
+                    f"{label}: observation_equals {assertion['key']!r} but "
+                    "the run carries NO observations (only API scenarios "
+                    "produce them)")
+                continue
+            value = _dig(run.observations, assertion["key"])
+            if value is _MISSING:
+                problems.append(f"{label}: no observation "
+                                f"{assertion['key']!r}")
+            elif value != assertion["value"]:
+                problems.append(
+                    f"{label}: observation {assertion['key']!r} is "
+                    f"{value!r}, expected {assertion['value']!r}")
+    return problems
 
 
 # ------------------------------------------------------------ comparison
@@ -399,4 +629,16 @@ def compare(scenario, run, spec, cr):
             got = repr(actual)[:60]
             problems.append(f"{scenario['id']}: {assertion['file']} != "
                             f"{assertion['equals']!r} (got {got})")
+
+    # An API worker that timed out or crashed reports it here — with
+    # expect_exit possibly None, this is what keeps a dead run from
+    # reading as a pass.
+    if isinstance(run.observations, dict) and "error" in run.observations:
+        problems.append(f"{scenario['id']}: api worker failed — "
+                        f"{run.observations['error']}")
+
+    # The authored `asserts` block, on EVERY run — the same interpreter
+    # freeze.py calls before publishing, so an assertion cannot be a
+    # freeze-time-only guarantee.
+    problems.extend(check_assertions(scenario, run))
     return problems

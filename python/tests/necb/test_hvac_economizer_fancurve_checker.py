@@ -22,12 +22,12 @@ from tests.support import needs_engine, needs_sdk
 @needs_sdk
 class TestEconomizerFancurveChecker(unittest.TestCase):
 
-    def reference_for(self, system_zone_type, storeys=1):
+    def reference_for(self, system_zone_type, storeys=1, vintage='2020'):
         model = load_fixture()
         modeling.build_system(model, 'Baseboard gas boiler', sorted_zones(model))
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage='2020',
+            model, vintage=vintage,
             building={'storeys': storeys,
                       'zone_types': {z.nameString(): system_zone_type
                                      for z in model.getThermalZones()},
@@ -51,25 +51,32 @@ class TestEconomizerFancurveChecker(unittest.TestCase):
 
     @needs_engine
     def test_fan_power_curve_applied_after_sizing(self):
-        # drive toward sys6/VAV if selected
-        result, _ = self.reference_for('Office - open plan', storeys=5)
-        reference = result.model
-        if not len(reference.getFanVariableVolumes()):
-            self.skipTest('no VAV fans in this reference selection')
+        for vintage, prefix in (('2020', '8.4.4'), ('2025', '8.4.5')):
+            with self.subTest(vintage=vintage):
+                # drive toward sys6/VAV if selected
+                result, _ = self.reference_for('Office - open plan', storeys=5, vintage=vintage)
+                reference = result.model
+                if not len(reference.getFanVariableVolumes()):
+                    self.skipTest('no VAV fans in this reference selection')
 
-        with tempfile.TemporaryDirectory() as tmp:
-            attach_weather(reference)
-            out = runner.run_energyplus(reference, str(Path(tmp) / 'sizing'), sizing_only=True)
-            self.assertTrue(runner.is_clean_run(out), 'sizing run completes cleanly')
-            audit = AuditLog()
-            hvac.apply_efficiencies(reference, vintage='2020', audit=audit)
+                with tempfile.TemporaryDirectory() as tmp:
+                    attach_weather(reference)
+                    out = runner.run_energyplus(reference, str(Path(tmp) / 'sizing'), sizing_only=True)
+                    self.assertTrue(runner.is_clean_run(out), 'sizing run completes cleanly')
+                    audit = AuditLog()
+                    hvac.apply_efficiencies(reference, vintage=vintage, audit=audit)
 
-        fan = reference.getFanVariableVolumes()[0]
-        self.assertAlmostEqual(0.227143, float(fan.fanPowerCoefficient1().get()), delta=1e-5,
-                               msg='Table 8.4.4.17 row applied (small fan -> airfoil riding)')
-        self.assertAlmostEqual(0.47, fan.fanPowerMinimumFlowFraction(), delta=1e-6,
-                               msg='below-D floor via minimum-flow clamp')
-        self.assertTrue(any('8.4.4.17' in str(e.get('article') or '') for e in audit.entries))
+                fan = reference.getFanVariableVolumes()[0]
+                self.assertAlmostEqual(
+                    0.227143, float(fan.fanPowerCoefficient1().get()), delta=1e-5,
+                    msg='Table 8.4.4.17 row applied (small fan -> airfoil riding)')
+                self.assertAlmostEqual(0.47, fan.fanPowerMinimumFlowFraction(), delta=1e-6,
+                                       msg='below-D floor via minimum-flow clamp')
+                entry = next(
+                    (e for e in audit.entries
+                     if str(e.get('article') or '').startswith(f'{prefix}.17.')), None)
+                self.assertIsNotNone(entry, f'no {prefix}.17 citation emitted for vintage {vintage}')
+                self.assertEqual(f'{prefix}.17.(2)-(5); Table {prefix}.17.', entry['article'])
 
     def test_part5_checker(self):
         model = load_fixture()
