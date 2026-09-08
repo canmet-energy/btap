@@ -1119,3 +1119,30 @@ any result.
   create`, and `gh workflow run test.yml --ref stage0-multi-edition` once
   GitHub is reachable. **Stage 0 is otherwise complete**; Stage 1 (R-B)
   does not start until the PR is merged on main.
+
+## Deferred findings (logged for later, outside the refactor)
+
+- **DF-1 — corpus `01-baseboard-gas` reference building fails 8.4.1.2.(3)
+  at both editions.** NECB 2020 8.4.1.2.(3) applies the 100 h unmet-heating
+  limit "for both the proposed and reference buildings"; the product
+  checks each and requires both (`compliance.py:965-993`). Proposed: 41.75
+  h (passes). Reference: 1268.75 → 945.5 → 842.75 → 801.0 h as the heating
+  sizing factor climbs to 2.441 over three 8.4.1.2.(5) increases —
+  flattening, not converging, so raising `max_capacity_iterations` will
+  not fix it. Doubling capacity recovered a third of the shortfall, which
+  points at something in the reference that does not respond to sizing
+  factors: hard-sized equipment (the product's own warning names it), an
+  availability/setpoint schedule mismatch in the rebuilt reference
+  systems, or the zone sizing factor not reaching the boiler side of a
+  boiler-and-baseboard reference. Proposed cooling (1709.75 h) is vacuous
+  under sentence (4): no mechanical cooling. Identical numbers at 2020 and
+  2025. Candidate for a D-XX or a corpus fix; frozen as-is in
+  `determination-01-baseboard-gas-necb2025` (the scenario pins the
+  reason, so fixing it is an adjudicated re-freeze). User's call
+  2026-09-08: "log it for later."
+
+## Stage 1 — opened 2026-09-08
+
+Opened on the user's instruction before the Stage 0 PR is merged (push
+blocked by network), so Stage 1 work stacks on `stage0-multi-edition`
+rather than main. Same execution model and the one-heavy-job rule.
