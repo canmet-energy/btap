@@ -26,6 +26,13 @@ blocks) is proven to hold with only one edition present too -- the same
 removability property this whole module exists to check. That test file is
 EXPECTED TO FAIL alongside ``test_edition_provenance.py`` until the sibling
 provenance data lands.
+
+Stage 5 extends the same SDK-free script once more: with only one edition
+present, ``Ruleset.behaviour`` must still answer ``None`` for a behaviour the
+ABSENT edition owns rather than raising -- otherwise a one-edition install
+could not run. (The behaviour vocabulary is therefore code-side, not derived
+from the manifests on disk; ``tests/necb/test_behaviour_binding.py`` is what
+keeps it tied to them.)
 """
 
 from __future__ import annotations
@@ -123,6 +130,14 @@ result["coverage_article_has_text"] = bool(article.get("raw"))
 result["coverage_editions"] = list(coverage.editions())
 from tests.necb.test_edition_provenance import check_provenance
 result["provenance_problems"] = check_provenance(Path({tmp!r}))
+# Stage 5: the edition-bound behaviours answer correctly with only THIS
+# edition present -- the absent edition's binding must be an honest None,
+# not a crash, or a one-edition install could not run at all.
+ruleset = codes.resolve({code_id!r})
+result["behaviours"] = {{
+    name: (None if ruleset.behaviour(name) is None else ruleset.behaviour(name).__name__)
+    for name in sorted(codes.BEHAVIOURS)
+}}
 print(json.dumps(result))
 """
 
@@ -192,7 +207,9 @@ class TestEditionIndependence(unittest.TestCase):
                 with tempfile.TemporaryDirectory(prefix="edition-data-") as tmp:
                     tmp_path = Path(tmp)
                     _isolated_tree(tmp_path, code_id)
-                    script = _DATA_ONLY_SCRIPT.format(tmp=str(tmp_path), edition=ruleset.edition)
+                    script = _DATA_ONLY_SCRIPT.format(tmp=str(tmp_path),
+                                                      edition=ruleset.edition,
+                                                      code_id=code_id)
                     rc, out, err = _run(script, timeout=60)
                     self.assertEqual(0, rc, f"{code_id}: subprocess failed:\n{err}")
                     summary = _summary(out)
@@ -204,6 +221,20 @@ class TestEditionIndependence(unittest.TestCase):
                     # edition present -- no cross-edition dependency in validation.
                     self.assertEqual([], summary["provenance_problems"],
                                      f"{code_id}: {summary['provenance_problems']}")
+                    # Stage 5 behaviour binding, per edition: a 2020-only tree
+                    # answers None for both (2020 owns no edition-specific
+                    # code); a 2025-only tree resolves both modules.
+                    expected = {
+                        "necb2020": {"archetype_eui_path": None,
+                                     "part11_ghg": None},
+                        "necb2025": {
+                            "archetype_eui_path":
+                                "btap.codes.necb.editions.necb2025.eui_archetypes",
+                            "part11_ghg":
+                                "btap.codes.necb.editions.necb2025.part11_ghg"},
+                    }[code_id]
+                    self.assertEqual(expected, summary["behaviours"],
+                                     f"{code_id}: {summary['behaviours']}")
 
     def test_missing_edition_raises_naming_edition_and_path(self):
         """Only necb2025 present: resolving necb2020 must name both."""

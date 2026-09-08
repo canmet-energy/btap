@@ -6,6 +6,10 @@
   "generated": "2026-07-22",
   "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.py; the 2025 EUI arithmetic lives in editions/necb2025/ and reads this edition's eui_targets.json)."
  },
+ "unmet_cooling": {
+  "minimum_allowance_h": 20.0,
+  "note": "2025's 8.4.1.2.(4) allows +10% of the reference or 20 h, whichever is greater."
+ },
  "article_coverage": {
   "articles": [
    {

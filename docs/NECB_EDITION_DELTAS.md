@@ -22,15 +22,15 @@ coverage documents already track.
 | hvac_efficiencies (`efficiencies.json`) | 2423 | 0 | 6 | 96 | 4 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
-| shw (`shw_rules.json`) | 75 | 1 | 0 | 2 | 0 |
-| necb (`necb_rules.json`) | 0 | 0 | 0 | 0 | 0 |
+| shw (`shw_rules.json`) | 75 | 1 | 3 | 2 | 0 |
+| necb (`necb_rules.json`) | 0 | 0 | 2 | 0 | 0 |
 | tables/daylighting_controls_4_2_1_6 (`tables/daylighting_controls_4_2_1_6.json`) | 541 | 0 | 0 | 0 | 0 |
 | tables/exterior_lighting (`tables/exterior_lighting.json`) | 159 | 0 | 0 | 0 | 0 |
 | tables/led_lighting (`tables/led_lighting.json`) | 2156 | 0 | 0 | 0 | 0 |
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24640 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46695** | **26** | **6** | **99** | **4** |
+| **Total** | **46695** | **26** | **11** | **99** | **4** |
 
 ## necb2020 → necb2025
 
@@ -219,7 +219,7 @@ _No renumbering or value changes — every leaf is identical._
 </details>
 
 <details>
-<summary><b>shw</b> (`shw_rules.json`) — 78 leaves: 75 identical, 1 renumbered, 0 changed, 2 added, 0 removed (click to expand)</summary>
+<summary><b>shw</b> (`shw_rules.json`) — 81 leaves: 75 identical, 1 renumbered, 3 changed, 2 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -231,15 +231,23 @@ _No renumbering or value changes — every leaf is identical._
 
 | Path | Kind | Old → New |
 |---|---|---|
+| `efficiency.heat_pump.metric` | changed | EF → UEF |
+| `efficiency.heat_pump.minimum_cop` | changed | 2.1 → 2.23 |
+| `efficiency.heat_pump.note` | changed | NECB 2020 Table 6.2.2.1 storage-type heat pump: EF >= 2.1. → NECB 2025 Table 6.2.2.1 storage-type heat pump: UEF >= 2.23 (the one substantive 2025 change to this table). |
 | `changes_vs_2020.heat_pump_storage_water_heater` | added | — → EF >= 2.1 (2020) -> UEF >= 2.23 (2025); class not modeled |
 | `changes_vs_2020.implemented_formulas` | added | — → none changed |
 
 </details>
 
 <details>
-<summary><b>necb</b> (`necb_rules.json`) — 0 leaves: 0 identical, 0 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
+<summary><b>necb</b> (`necb_rules.json`) — 2 leaves: 0 identical, 0 renumbered, 2 changed, 0 added, 0 removed (click to expand)</summary>
 
-_No comparable leaves — every key in this file is excluded (provenance / article_coverage / prose)._
+#### Changed / added / removed
+
+| Path | Kind | Old → New |
+|---|---|---|
+| `unmet_cooling.minimum_allowance_h` | changed | 0.0 → 20.0 |
+| `unmet_cooling.note` | changed | 2020's 8.4.1.2.(4) wording is +10% of the reference building's unmet cooling hours with no absolute floor, so this edition declares 0.0. → 2025's 8.4.1.2.(4) allows +10% of the reference or 20 h, whichever is greater. |
 
 </details>
 

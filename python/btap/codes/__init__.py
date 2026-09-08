@@ -28,7 +28,11 @@ One :class:`Ruleset` per edition, discovered from the per-edition manifests at
 ``btap/codes/<family>/data/<code id>/manifest.json``: every edition-specific
 article number a rule cites comes from :meth:`Ruleset.article`, which raises
 rather than falling back, so an edition that forgets a key fails loudly
-instead of emitting another edition's citation into an AHJ report.
+instead of emitting another edition's citation into an AHJ report. The same
+manifest binds this edition's own CODE (Stage 5): :meth:`Ruleset.behaviour`
+resolves a behaviour name to the module implementing it here, or ``None``
+when this edition has no such feature — which is what replaced the
+``vintage == "2025"`` tests in the pipeline.
 
 Three edition lists exist deliberately and must stay separate:
 
@@ -59,6 +63,23 @@ DATA_DIR = Path(__file__).parent / "data"
 _FAMILY_MODULES = {"necb": "btap.codes.necb"}
 
 _REQUIRED_FIELDS = ("id", "family", "edition", "label")
+
+#: Every behaviour name product code is allowed to ask an edition for
+#: (multi-edition plan, Stage 5). Deliberately a CODE-side vocabulary rather
+#: than "whatever the manifests on this disk happen to declare", because the
+#: two answers a caller can get are different facts:
+#:
+#: * a name IN this set that an edition does not bind -> ``None``, "this
+#:   edition has no such feature". A one-edition install (the removability
+#:   gate ships exactly that) must still answer ``None`` for a behaviour some
+#:   OTHER edition owns — deriving the vocabulary from the present manifests
+#:   would turn that into a crash.
+#: * a name NOT in this set -> ``KeyError``, "no such behaviour exists".
+#:
+#: ``tests/necb/test_behaviour_binding.py`` closes the loop in both
+#: directions: every name here is bound by at least one manifest and asked
+#: for by product code, and every manifest binding names one of these.
+BEHAVIOURS = frozenset({"archetype_eui_path", "part11_ghg"})
 
 
 class UnknownRuleset(KeyError, ValueError):
@@ -112,14 +133,33 @@ class Ruleset:
                 f"(it declares {sorted(self.articles)})"
             ) from None
 
-    def behaviour(self, name: str) -> Any:
-        """The edition-specific implementation registered under ``name``.
+    #: The edition-specific implementation modules this edition binds, by
+    #: behaviour name (``{"part11_ghg": "btap.codes.necb.editions.necb2025.
+    #: part11_ghg"}``). Empty when the edition owns no code of its own —
+    #: which is the whole point: the pipeline asks for the behaviour and gets
+    #: ``None``, instead of testing the edition's name.
+    behaviours: Mapping[str, str] = field(default_factory=dict)
 
-        STAGE 5 of the multi-edition plan binds these through the manifest.
-        Until then this always returns ``None`` — "this edition registers no
-        override" — which is the answer for both editions today.
+    def behaviour(self, name: str) -> Any:
+        """The module this edition binds under ``name``, or ``None``.
+
+        ``None`` means "this edition registers no such behaviour", and every
+        call site treats that as "the feature does not exist here" — the 2025
+        archetype-EUI path and the Part 11 GHG scoring are absent from 2020
+        that way, with no edition literal anywhere in the pipeline.
+
+        An unregistered ``name`` raises :class:`KeyError`: asking for a
+        behaviour nobody implements is a typo, not an edition without it.
         """
-        return None
+        if name not in BEHAVIOURS:
+            raise KeyError(
+                f"unknown behaviour name {name!r} — the vocabulary is "
+                f"{sorted(BEHAVIOURS)}. Add the name to btap.codes.BEHAVIOURS "
+                "and bind it in at least one manifest; do not spell it "
+                "differently at the call site."
+            )
+        dotted = self.behaviours.get(name)
+        return None if dotted is None else _import_behaviour(dotted)
 
     def rules(self, domain: str) -> dict:
         """The rule tables for one domain ('hvac', 'envelope', …).
@@ -155,6 +195,15 @@ def _read_manifest(path: Path) -> Ruleset:
             f"{path} declares id {data['id']!r} but sits in "
             f"{path.parent.name!r} — the directory name IS the code id"
         )
+    behaviours = dict(data.get("behaviours") or {})
+    unknown = sorted(set(behaviours) - BEHAVIOURS)
+    if unknown:
+        raise ValueError(
+            f"{path} binds unknown behaviour name(s) {unknown} — the "
+            f"vocabulary is {sorted(BEHAVIOURS)}. A binding no call site can "
+            "ask for is an orphan; add the name to btap.codes.BEHAVIOURS "
+            "together with the code that resolves it."
+        )
     return Ruleset(
         id=data["id"],
         family=data["family"],
@@ -162,7 +211,28 @@ def _read_manifest(path: Path) -> Ruleset:
         label=data["label"],
         articles=MappingProxyType(dict(data.get("articles") or {})),
         literal_remaps=MappingProxyType(dict(data.get("literal_remaps") or {})),
+        behaviours=MappingProxyType(behaviours),
     )
+
+
+@lru_cache(maxsize=None)
+def _import_behaviour(dotted: str):
+    """The module a manifest binds, imported once per process.
+
+    Cached HERE rather than on the :class:`Ruleset` so the dataclass stays
+    frozen plain data: a determination resolves a behaviour on every phase
+    that has one, and re-entering ``import_module`` each time would be the
+    only cost of routing through the registry.
+    """
+    from importlib import import_module
+
+    try:
+        return import_module(dotted)
+    except ImportError as exc:
+        raise ImportError(
+            f"a manifest binds the behaviour module {dotted!r}, which does not "
+            f"import: {exc}"
+        ) from exc
 
 
 def _family_roots() -> tuple[tuple[str, Path], ...]:
