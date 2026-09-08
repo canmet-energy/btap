@@ -1252,3 +1252,18 @@ rather than main. Same execution model and the one-heavy-job rule.
   beside it logged 25 GB available and the cgroup recorded no OOM. The
   harness watchdog misfired; the freeze completed when run detached
   (`setsid nohup`) with bounded foreground waits. Feedback drafted.
+- **Stage 1 pushed** (`stage1-integration` @ `6660362`); PR creation and
+  dispatch retrying in a detached loop (`pr_retry.sh`) because the harness
+  watchdog now kills background tasks within ~70 s regardless of memory.
+
+## Stage 2 — opened 2026-09-08
+
+Stacked on `stage1-integration` (Stage 1 PR pending GitHub). Deviation
+from the execution-model table, recorded: the `Ruleset` registry, the
+per-edition manifests, the 15 citation sites and the scanner's own
+fallbacks go to **one Opus agent** rather than Sonnet + Opus, because the
+sites cannot be built or tested without the registry API and splitting
+them would serialise anyway. Sonnet writes the registry's API tests from
+the spec in parallel (they fail until the implementation lands — the same
+gate-first pattern as the namespace test). The frozen lanes are the gate:
+byte-identical, no re-freeze.
