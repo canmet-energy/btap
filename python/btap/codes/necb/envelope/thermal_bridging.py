@@ -31,7 +31,7 @@ import threading
 
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.envelope import climate
 from btap.codes.necb.envelope.rules import _max_u
 
@@ -117,7 +117,7 @@ def _process(model, argh):
     return result, logs
 
 
-def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
+def apply(model, *, code, hdd=None, psi_set="regular (BETBG)", audit=None):
     """Uprate walls/roofs/exposed floors so the TBD-derated effective Ut meets
     the NECB maximum U at this HDD, using the given PSI set.
 
@@ -125,7 +125,7 @@ def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
     :return: the TBD result dict (:io, :surfaces), or False when tbd is
         unavailable (audited)
     """
-    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+    return _apply(model, resolve(code), hdd=hdd,
                   psi_set=psi_set, audit=audit)
 
 

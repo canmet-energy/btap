@@ -1,7 +1,7 @@
 """NECB performance-path helpers: reference HVAC selection (Table 8.4.4.7.-A/-B) and
 the proposed->reference transform (port of btap-necb's hvac/reference.rb).
 
-All rule content lives in data/reference_rules_<vintage>.json (vendored, with
+All rule content lives in each edition's own reference_rules.json (vendored, with
 article-level provenance); this code is a rules interpreter, not a rules store.
 
 Port notes (D-79): Ruby's symbol keys collapse to str throughout — the
@@ -18,7 +18,7 @@ import openstudio
 
 from btap._compat import NullAudit, opt, ruby_round, sorted_by_name
 from btap.audit import emit_coverage
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
@@ -50,7 +50,7 @@ class Assignment:
     articles: list = field(default_factory=list)
 
 
-def select_reference_systems(*, facts, building, vintage='2020', audit=None,
+def select_reference_systems(*, facts, building, code='necb2020', audit=None,
                              proposed_annual=None):
     """Select the NECB reference HVAC system for every zone group of a characterized
     model. Pure logic: no model access — everything comes from the facts dict (see
@@ -60,12 +60,12 @@ def select_reference_systems(*, facts, building, vintage='2020', audit=None,
     :param building: dict — 'storeys' (above-ground count), 'zone_types'
         ({zone name => space-type description string}), optional 'kitchen_hood_zones',
         'refrigerated_zones' (lists of zone names for conditions the model cannot express)
-    :param vintage: str, e.g. '2020'
+    :param code: the code id, e.g. 'necb2020'
     :param audit: AuditLog or None
     :return: list[Assignment]
     """
     return _select_reference_systems(facts=facts, building=building,
-                                     ruleset=Ruleset.from_edition(vintage),
+                                     ruleset=resolve(code),
                                      audit=audit, proposed_annual=proposed_annual)
 
 
@@ -430,7 +430,7 @@ class ReferenceResult:
     audit: object = None
 
 
-def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_annual=None):
+def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_annual=None):
     """Generate the NECB reference HVAC for a proposed model (any OSM). The proposed
     model is untouched: the reference is built on a clone.
 
@@ -438,7 +438,7 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
     select reference systems per Table 8.4.4.7.-A -> replace each zone group's HVAC
     with the mapped catalog system (energy type follows proposed) -> apply the
     reference modeling rules (8.4.4.8 oversizing caps, 8.4.4.18 fan specs, 8.4.4.13
-    heat-pump operating limits) -> apply vintage minimum efficiencies.
+    heat-pump operating limits) -> apply the edition's minimum efficiencies.
 
     Sizing: the package never runs simulations. Capacity-threshold selection rules and
     the proposed-oversizing comparison use sized values when present and warn when
@@ -447,13 +447,13 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
     cleanly via apply_efficiencies after sizing).
 
     :param model: the proposed openstudio.model.Model
-    :param vintage: str
+    :param code: the code id, e.g. 'necb2020'
     :param building: dict or None — overrides for 'storeys', 'zone_types',
         'kitchen_hood_zones', 'refrigerated_zones' (defaults derived from the model)
     :param audit: AuditLog or None
     :return: ReferenceResult — model (clone), assignments, audit
     """
-    return _reference_hvac(model, Ruleset.from_edition(vintage), building=building,
+    return _reference_hvac(model, resolve(code), building=building,
                            audit=audit, proposed_annual=proposed_annual)
 
 
@@ -602,7 +602,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     return ReferenceResult(model=reference, assignments=assignments, audit=audit)
 
 
-def _audit_terminal_secondary_split(zones, reference_system, vintage, audit):
+def _audit_terminal_secondary_split(zones, reference_system, code, audit):
     """8.4.4.9.(3) / 8.4.4.10.(7) (2025: 8.4.5.9.(3)/8.4.5.10.(7)) — the
     terminal/secondary capacity split, D-50. Reference systems 1, 2 and 5 put
     heating and/or cooling in BOTH a zone terminal (PTAC / four- or two-pipe
@@ -614,7 +614,7 @@ def _audit_terminal_secondary_split(zones, reference_system, vintage, audit):
     outdoor air into the supply stream instead of feeding it to the zone
     separately, so EnergyPlus has no equivalent accounting for them — declared,
     not silently assumed."""
-    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+    prefix = resolve(code).article('reference_subsection')
     article = f'{prefix}.9.(3); {prefix}.10.(7)'
     accounted = sum(1 for z in zones if z.sizingZone().accountforDedicatedOutdoorAirSystem())
     if accounted > 0:
@@ -931,14 +931,14 @@ def _zone_space_types(model):
     return out
 
 
-def _apply_economizers(model, air_loops, reference_system, vintage, rules_data, audit):
+def _apply_economizers(model, air_loops, reference_system, code, rules_data, audit):
     """8.4.4.12 (2025: 8.4.5.12): reference cooling-with-outside-air. Table -12
     routes systems 1/3/4/6 and all heat-pump systems to 5.2.2.8 (air economizer:
     up to 100% outdoor air, differential reversion) and systems 2/5 to 5.2.2.9
     (WATER-side economizer, built since D-56)."""
-    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+    prefix = resolve(code).article('reference_subsection')
     if reference_system in (2, 5):
-        _apply_water_economizer(model, reference_system, vintage, rules_data, audit)
+        _apply_water_economizer(model, reference_system, code, rules_data, audit)
         return
     # D-20: NO economizer on System 1 (100%-outdoor-air makeup air). An air
     # economizer cannot increase OA above a system that is already all
@@ -1002,8 +1002,8 @@ def _array(x):
 # temperature, and a tower held at 29 C can never deliver water colder than the
 # chilled-water return.
 
-def _apply_water_economizer(model, reference_system, vintage, rules_data, audit):
-    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+def _apply_water_economizer(model, reference_system, code, rules_data, audit):
+    prefix = resolve(code).article('reference_subsection')
     article = f'{prefix}.12. (Table -12 -> 5.2.2.9)'
     spec = rules_data['water_economizer']
     loops = _chilled_water_loops(model)
@@ -1221,13 +1221,13 @@ def _scheduled_humidity_setpoint(air_loop):
     return None
 
 
-def _rebuild_humidification(reference, captured, rules_data, vintage, audit):
+def _rebuild_humidification(reference, captured, rules_data, code, audit):
     """Rebuild humidification on the reference loops, after they exist."""
     if not captured:
         return
 
     spec = rules_data['humidification']
-    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+    prefix = resolve(code).article('reference_subsection')
     table = f'Table {prefix}.7.-B'
     article = f'{table} Note (1)'
     served = []
@@ -1358,8 +1358,8 @@ DCV_METHODS = ('IndoorAirQualityProcedure', 'IndoorAirQualityProcedureGenericCon
                'ProportionalControlBasedOnDesignOccupancy', 'ProportionalControlBasedOnDesignOARate')
 
 
-def _apply_dcv(air_loops, zones, proposed_dcv, vintage, audit):
-    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+def _apply_dcv(air_loops, zones, proposed_dcv, code, audit):
+    prefix = resolve(code).article('reference_subsection')
     article = f'{prefix}.15.(2)'
     sources = [proposed_dcv[z.nameString()] for z in zones
                if proposed_dcv.get(z.nameString()) is not None]

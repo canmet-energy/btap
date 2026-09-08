@@ -1,7 +1,7 @@
 """Vintage efficiency application (port of btap-necb's hvac/efficiency.rb) — a
 faithful, SDK-only port of the NECB subset of openstudio-standards'
 model_apply_hvac_efficiency_standard, driven entirely by the vendored
-data/efficiencies_<vintage>.json (NECB Table 5.2.12.1 values + performance curves).
+each edition's own efficiencies.json (NECB Table 5.2.12.1 values + performance curves).
 
 Covered components: hot-water boilers (incl. NECB primary/secondary staging),
 electric chillers (incl. 2100 kW split + cooling-tower sizing rules), single-speed
@@ -23,7 +23,7 @@ from datetime import date, datetime
 import openstudio
 
 from btap._compat import NullAudit, ruby_round, sorted_by_name
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
 
@@ -34,16 +34,16 @@ def data(edition):
     return rulesdata.load("hvac_efficiencies", code_id(edition))
 
 
-def apply(model, vintage='2020', audit=None, proposed=None):
+def apply(model, code='necb2020', audit=None, proposed=None):
     """Apply NECB minimum-performance values + curves to every supported component.
 
     :param model: sized openstudio.model.Model
-    :param vintage: e.g. '2020'
+    :param code: the code id, e.g. 'necb2020'
     :param audit: AuditLog or None
     :param proposed: SIZED proposed model, enabling the 8.4.4.14.(1)-(3) pump power transfer
     :return: True
     """
-    return _apply(model, Ruleset.from_edition(vintage), audit=audit, proposed=proposed)
+    return _apply(model, resolve(code), audit=audit, proposed=proposed)
 
 
 def _apply(model, ruleset, audit=None, proposed=None):
@@ -222,7 +222,7 @@ def _apply_vrf(unit, tables, ruleset, audit):
 MAX_STAGES = 4
 
 
-def apply_staging(model, rules, vintage, audit):
+def apply_staging(model, rules, code, audit):
     """Post-sizing stage-COUNT pass. Sentence (7)/(8) read the same way: at or
     below the two-stage threshold the equipment is modelled as two equal
     stages; above it, as equal stages of the stage size (rounded up). Only
@@ -235,14 +235,14 @@ def apply_staging(model, rules, vintage, audit):
     :param model: sized openstudio.model.Model (modified in place)
     :param rules: the reference ruleset (dx_staging / furnace_staging /
         economizer_dx_staging blocks)
-    :param vintage: NECB vintage ('2020' or '2025')
+    :param code: the code id ('necb2020' or 'necb2025')
     :param audit: AuditLog or None
     :return: dict {coil handle -> the TOTAL capacity measured before re-staging}.
         Growing a coil appends a stage EnergyPlus has never sized, so the new top
         stage reads back None and shrinking one leaves a stale partial value behind
         — the appliers must bin on the measurement taken here, not on a re-read.
     """
-    return _apply_staging(model, rules, Ruleset.from_edition(vintage), audit)
+    return _apply_staging(model, rules, resolve(code), audit)
 
 
 def _apply_staging(model, rules, ruleset, audit):
@@ -530,7 +530,7 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     reference PumpVariableSpeeds get the Table's riding-curve row (identical
     coefficients to the 8.4.4.17 airfoil fan row — same DOE-2 lineage; the
     VSD row is vendored for completeness). Coefficients come from the
-    ruleset's hydronic_pumps.curves (Table 8.4.4.14., both vintages
+    ruleset's hydronic_pumps.curves (Table 8.4.4.14., both editions
     identical). E+ mapping: A/B/C -> part-load performance coefficients 1-3
     (4th = 0); the below-D floor (P = E x Prated) is approximated by the
     minimum-flow clamp at D x rated flow — the polynomial at D equals E
@@ -1672,12 +1672,12 @@ def electric_or_no_heating(coil):
 
 # ---------------- the HVAC-module facades ----------------
 
-def apply_efficiencies(model, vintage='2020', audit=None, proposed=None):
+def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
     """Facade: apply NECB minimum efficiencies to a sized model. Pass the sized
     PROPOSED model via proposed= to enable the 8.4.4.14.(1)-(3) pump power
     transfer (combined W/(L/s) by loop type); without it the Table 8.4.4.14
     curves still apply and the skip is noted in the audit."""
-    return _apply(model, Ruleset.from_edition(vintage), audit=audit,
+    return _apply(model, resolve(code), audit=audit,
                   proposed=proposed)
 
 

@@ -18,7 +18,7 @@ import openstudio
 
 from btap._compat import NullAudit, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb import loads as necb_loads
 from btap.codes.necb.loads import schedules as loads_schedules
 from btap.codes.necb.loads import space_types as loads_space_types
@@ -163,7 +163,7 @@ def _auto_size(model, *, ruleset, shw_scale=1.0, audit=None):
             "parasitic_loss_w": parasitic, "spaces_w_dhw": spaces}
 
 
-def apply_shw(model, *, vintage="2020", fuel="NaturalGas", shw_scale=1.0, audit=None):
+def apply_shw(model, *, code="necb2020", fuel="NaturalGas", shw_scale=1.0, audit=None):
     """Build the full SHW system: auto-size, create the loop + water heater +
     pump, one WaterUseConnections/WaterUseEquipment per demanding space, apply
     Part 6 efficiency on the sized heater.
@@ -172,7 +172,7 @@ def apply_shw(model, *, vintage="2020", fuel="NaturalGas", shw_scale=1.0, audit=
         'HeatPump' builds an air-source WaterHeaterHeatPump (pumped condenser)
         around the tank, with the code EF/UEF floor as the coil's rated COP
     """
-    return _apply_shw(model, Ruleset.from_edition(vintage), fuel=fuel,
+    return _apply_shw(model, resolve(code), fuel=fuel,
                       shw_scale=shw_scale, audit=audit)
 
 

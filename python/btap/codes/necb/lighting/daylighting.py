@@ -53,7 +53,7 @@ import openstudio
 
 from btap._compat import ruby_div, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.lighting import daylight_control_requirement as DaylightControlRequirement
 from btap.codes.necb.lighting import daylighted_areas as DaylightedAreas
 
@@ -80,7 +80,7 @@ STEPPED_STEPS_2020 = 3  # 4.2.2.1.(11)(a)(i) / (14)(a)(i): 67% / 33% / off
 PLACEMENTS = ['all', 'necb2020', 'necb2011']
 
 
-def add_controls(model, vintage='2020', placement=None, option=None,
+def add_controls(model, code='necb2020', placement=None, option=None,
                  office_match='legacy', unknown_control_requirement='required', audit=None):
     """:param placement: 'all' | 'necb2020' | 'necb2011' — THE selection knob,
         which spaces get a sensor. 'all' (DEFAULT) = every space with exterior
@@ -107,7 +107,7 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         DaylightControlRequirement.evaluate
     :return: number of controls created
     """
-    return _add_controls(model, Ruleset.from_edition(vintage), placement=placement,
+    return _add_controls(model, resolve(code), placement=placement,
                          option=option, office_match=office_match,
                          unknown_control_requirement=unknown_control_requirement,
                          audit=audit)

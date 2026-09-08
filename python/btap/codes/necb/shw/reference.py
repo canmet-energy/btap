@@ -13,12 +13,12 @@ from __future__ import annotations
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.shw import efficiency as Efficiency
 
 
-def reference_shw(model, *, vintage="2020", audit=None):
-    return _reference_shw(model, Ruleset.from_edition(vintage), audit=audit)
+def reference_shw(model, *, code="necb2020", audit=None):
+    return _reference_shw(model, resolve(code), audit=audit)
 
 
 def _reference_shw(model, ruleset, audit=None):

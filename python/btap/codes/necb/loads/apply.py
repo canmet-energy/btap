@@ -12,7 +12,7 @@ import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.loads import schedules as Schedules
 from btap.codes.necb.loads import space_types as SpaceTypes
 
@@ -29,13 +29,13 @@ def _s(value):
     return '' if value is None else str(value)
 
 
-def assign_space_types(model, map, vintage='2020', audit=None):
+def assign_space_types(model, map, code='necb2020', audit=None):
     """Bare-geometry on-ramp: create/tag NECB space types and assign spaces.
 
     :param map: {space name -> [building_type, space_type]} (the pair must
         exist in the vendored data)
     """
-    return _assign_space_types(model, map, Ruleset.from_edition(vintage), audit=audit)
+    return _assign_space_types(model, map, resolve(code), audit=audit)
 
 
 def _assign_space_types(model, map, ruleset, audit=None):
@@ -74,10 +74,10 @@ def _assign_space_types(model, map, ruleset, audit=None):
     return audit
 
 
-def apply_loads(model, vintage='2020', audit=None):
+def apply_loads(model, code='necb2020', audit=None):
     """Apply NECB internal loads + schedules + thermostats to every tagged space
     type in the model. NO Lights, NO service water heating (sibling gems)."""
-    return _apply_loads(model, Ruleset.from_edition(vintage), audit=audit)
+    return _apply_loads(model, resolve(code), audit=audit)
 
 
 def _apply_loads(model, ruleset, audit=None):
@@ -304,10 +304,10 @@ def _apply_infiltration(space_type, record, audit):
                        'cfm_per_ft2_ext_wall': per_ext_wall, 'ach': ach})
 
 
-def apply_schedule_set(model, space_type, record, vintage, audit):
+def apply_schedule_set(model, space_type, record, code, audit):
     """DefaultScheduleSet wiring: occupancy + activity + equipment (NOT lighting)."""
     return _apply_schedule_set(model, space_type, record,
-                               Ruleset.from_edition(vintage), audit)
+                               resolve(code), audit)
 
 
 def _apply_schedule_set(model, space_type, record, ruleset, audit):
@@ -335,11 +335,11 @@ def _apply_schedule_set(model, space_type, record, ruleset, audit):
                target=space_type.nameString(), article='8.4.3.2.(1)')
 
 
-def apply_thermostat(model, space_type, record, vintage, audit):
+def apply_thermostat(model, space_type, record, code, audit):
     """A dual-setpoint thermostat per space type from the setpoint schedules
     (legacy: created unattached; _assign_zone_thermostats hooks zones lacking one)."""
     return _apply_thermostat(model, space_type, record,
-                             Ruleset.from_edition(vintage), audit)
+                             resolve(code), audit)
 
 
 def _apply_thermostat(model, space_type, record, ruleset, audit):

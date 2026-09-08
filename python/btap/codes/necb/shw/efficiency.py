@@ -20,7 +20,7 @@ import openstudio
 from btap._compat import NullAudit, ruby_round, ruby_str
 from btap._sdk import ensure_sdk_hashable
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 
 # `uniq` over SDK plant loops (apply_solar_pool_minimums) keys on the objects
 # themselves, exactly as the Ruby Array#uniq did.
@@ -56,8 +56,8 @@ def _to_f(value) -> float:
     return float(m.group(0)) if m else 0.0
 
 
-def apply_efficiency(water_heater, *, vintage="2020", audit=None):
-    return _apply_efficiency(water_heater, Ruleset.from_edition(vintage), audit=audit)
+def apply_efficiency(water_heater, *, code="necb2020", audit=None):
+    return _apply_efficiency(water_heater, resolve(code), audit=audit)
 
 
 def _apply_efficiency(water_heater, ruleset, audit=None):
@@ -195,14 +195,14 @@ def _apply_instantaneous(water_heater, rules, fuel, capacity, audit):
     return True
 
 
-def apply_heat_pump_efficiency(hpwh, *, vintage="2020", audit=None):
+def apply_heat_pump_efficiency(hpwh, *, code="necb2020", audit=None):
     """Heat-pump water heater performance: the code floor (2020: EF >= 2.1;
     2025: UEF >= 2.23) applied as the DX coil's rated COP — CONSERVATIVE
     (rated COP >= EF in practice since EF includes tank standby), audited.
 
     Floor and metric come from THIS edition's ``shw_rules.json``
     (``efficiency.heat_pump``), not from an edition test in the code."""
-    return _apply_heat_pump_efficiency(hpwh, Ruleset.from_edition(vintage), audit=audit)
+    return _apply_heat_pump_efficiency(hpwh, resolve(code), audit=audit)
 
 
 def _apply_heat_pump_efficiency(hpwh, ruleset, audit=None):
@@ -339,8 +339,8 @@ def _optional(value):
 # SEF is an equipment RATING with no EnergyPlus field — detected solar
 # collectors get an audited determination citing the printed minimums, never a
 # silent skip.
-def apply_solar_pool_minimums(model, *, vintage="2020", audit=None):
-    return _apply_solar_pool_minimums(model, Ruleset.from_edition(vintage), audit=audit)
+def apply_solar_pool_minimums(model, *, code="necb2020", audit=None):
+    return _apply_solar_pool_minimums(model, resolve(code), audit=audit)
 
 
 def _apply_solar_pool_minimums(model, ruleset, audit=None):

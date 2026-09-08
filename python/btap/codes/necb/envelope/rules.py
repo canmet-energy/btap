@@ -16,20 +16,20 @@ run resolves its edition once rather than once per surface.
 from __future__ import annotations
 
 from btap._compat import NullAudit, ruby_round
-from btap.codes import Ruleset
+from btap.codes import resolve
 
 U_FALLBACK = 0.110
 SURFACE_TYPES = ["wall", "roofceiling", "floor", "window", "skylight", "door"]
 BOUNDARIES = ["outdoors", "ground"]
 
 
-def max_u(*, vintage, surface, boundary, hdd, audit=None):
+def max_u(*, code, surface, boundary, hdd, audit=None):
     """Maximum overall (effective) thermal transmittance, W/(m2.K).
 
     :param surface: wall|roofceiling|floor|window|skylight|door
     :param boundary: outdoors|ground
     """
-    return _max_u(ruleset=Ruleset.from_edition(vintage), surface=surface,
+    return _max_u(ruleset=resolve(code), surface=surface,
                   boundary=boundary, hdd=hdd, audit=audit)
 
 
@@ -59,12 +59,12 @@ def _max_u(*, ruleset, surface, boundary, hdd, audit=None):
     return value
 
 
-def ground_floor_extent(*, vintage, hdd):
+def ground_floor_extent(*, code, hdd):
     """Ground-floor insulation extent (Table 3.2.3.1 floors row): zone 8
     requires the table U over the full slab area; zones 4-7B require it only
     within a perimeter strip (3.2.3.3.(3)) — the slab field carries no
     prescriptive maximum there."""
-    return _ground_floor_extent(ruleset=Ruleset.from_edition(vintage), hdd=hdd)
+    return _ground_floor_extent(ruleset=resolve(code), hdd=hdd)
 
 
 def _ground_floor_extent(*, ruleset, hdd):
@@ -75,9 +75,9 @@ def _ground_floor_extent(*, ruleset, hdd):
     return {"extent": "perimeter_strip", "width_m": ext["strip_width_m"]}
 
 
-def max_fdwr(*, vintage, hdd, audit=None):
+def max_fdwr(*, code, hdd, audit=None):
     """Maximum fenestration-and-door-to-gross-wall ratio (3.2.1.4.(1))."""
-    return _max_fdwr(ruleset=Ruleset.from_edition(vintage), hdd=hdd, audit=audit)
+    return _max_fdwr(ruleset=resolve(code), hdd=hdd, audit=audit)
 
 
 def _max_fdwr(*, ruleset, hdd, audit=None):
@@ -110,9 +110,9 @@ def _max_fdwr(*, ruleset, hdd, audit=None):
     return value
 
 
-def max_srr(*, vintage, audit=None):
+def max_srr(*, code, audit=None):
     """Maximum skylight-to-gross-roof-area ratio (3.2.1.4.(2))."""
-    return _max_srr(ruleset=Ruleset.from_edition(vintage), audit=audit)
+    return _max_srr(ruleset=resolve(code), audit=audit)
 
 
 def _max_srr(*, ruleset, audit=None):
