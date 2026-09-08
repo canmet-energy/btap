@@ -56,7 +56,7 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
     the sibling MODULE is imported as ``thermal_bridging_module`` above — the
     parameter would otherwise shadow it inside this function."""
     audit = audit if audit is not None else AuditLog()
-    hdd = climate.hdd18(model, hdd=hdd, audit=audit)
+    hdd = climate.hdd18(model, edition=str(vintage), hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 

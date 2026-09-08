@@ -139,7 +139,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
             self.assertEqual(EPW.name, name,
                              "the golden's only HDD probe is the shared Toronto EPW")
             model = attach_weather(load_raw_fixture())
-            hdd = self.n.climate.hdd18(model)
+            hdd = self.n.climate.hdd18(model, edition="2020")
             checked.add(name)
             # Ruby's gate is assert_equal: the nearest-Table-C-1-city HDD is an
             # integer from the vendored table, never a computed float.

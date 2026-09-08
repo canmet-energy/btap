@@ -60,21 +60,14 @@ SKYLIGHT_VT_THRESHOLD = 0.4         # 4.2.2.1.(15)(b)
 HIGH_LATITUDE_DEG_N = 55.0          # 4.2.2.1.(15)(c)
 HIGH_LATITUDE_THRESHOLD_W = 200.0   # 4.2.2.1.(15)(c)
 
-#: STAGE 3 INTERIM. This chain (``table``/``residue``/``requirement``/
-#: ``evaluate``) is not edition-aware yet: the next Stage 3 change threads
-#: ``edition`` through it and its callers. Until then the table is read from
-#: the necb2020 snapshot; necb2025 ships its own byte-identical copy (the
-#: nine control columns agree 0-of-909 differing cells), so the read moves to
-#: the caller's edition without any value changing.
-_INTERIM_EDITION = "2020"
-
-#: Cached per data root — see envelope/climate.py.
-_table_cache: dict[object, dict] = {}
+#: Cached per (data root, edition) — see envelope/climate.py.
+_table_cache: dict[tuple, dict] = {}
 
 
-def table():
+def table(edition):
     """Table 4.2.1.6.'s two daylight-control columns, mapped to the NECB
-    space-function catalog names. Five states per column:
+    space-function catalog names, from ``edition``'s own snapshot. Five
+    states per column:
       required       — the column carries 'X'
       not_required   — the column carries a dash (the two editions agree)
       not_applicable — the table refers the space type to a DIFFERENT article
@@ -85,43 +78,51 @@ def table():
       unknown        — the space type has NO ROW in Table 4.2.1.6, so neither
                        column can be read for it. Never decided silently
     'unknown' is STRUCTURAL, not an extraction defect. The table's nine control
-    columns were re-read 2026-07-30 after the upstream extraction fix and agree
-    exactly between the 2020 and 2025 editions (0 differing cells of 909), so
-    the earlier conflict machinery — 2025 primary, 2020 corroborating — is gone
-    from the data file. What remains unknown is three catalog entries that the
-    printed table genuinely does not list: the '- undefined -' sentinel, the
-    legacy-only convention-centre seating type, and WholeBuilding (whose LPD
-    comes from the building-type method of Table 4.2.1.5)."""
-    root = _data_root()
-    if root not in _table_cache:
-        path = edition_file(_INTERIM_EDITION, 'tables',
+    columns were re-read 2026-07-30 after the upstream extraction fix. NECB
+    2020 and 2025 each load their own copy of this table from their own
+    edition snapshot (``data/necb2020/``, ``data/necb2025/``) — nothing here
+    reads across editions — and the two copies are currently byte-identical
+    (0 differing cells of 909 on the nine control columns): a verified finding
+    about two independent snapshots, not a shared table or a dependency
+    between the editions (Stage 3; Stage 4 adds an optional
+    ``byte_identical_to`` provenance annotation recording that finding).
+    What remains unknown is three catalog entries that the printed table
+    genuinely does not list: the '- undefined -' sentinel, the legacy-only
+    convention-centre seating type, and WholeBuilding (whose LPD comes from
+    the building-type method of Table 4.2.1.5)."""
+    key = (_data_root(), str(edition))
+    if key not in _table_cache:
+        path = edition_file(edition, 'tables',
                             'daylighting_controls_4_2_1_6.json')
-        _table_cache[root] = json.loads(path.read_text(encoding='utf-8'))
-    return _table_cache[root]
+        _table_cache[key] = json.loads(path.read_text(encoding='utf-8'))
+    return _table_cache[key]
 
 
-def residue():
-    return table()['residue']
+def residue(edition):
+    return table(edition)['residue']
 
 
-def requirement(standards_space_type):
+def requirement(standards_space_type, *, edition):
     """:return: the Table 4.2.1.6. row for a standards space-type name
     (schedule-letter suffixes stripped), or None when the name is not in the
     catalog at all"""
     if standards_space_type is None:
         return None
 
-    return table()['space_types'].get(_base_name(standards_space_type))
+    return table(edition)['space_types'].get(_base_name(standards_space_type))
 
 
 def _base_name(standards_space_type):
     return re.sub(r'-sch-[A-Z]\Z', '', str(standards_space_type))
 
 
-def evaluate(space, audit=None, unknown_default='required', shading_surfaces=None, seen=None):
+def evaluate(space, *, edition, audit=None, unknown_default='required', shading_surfaces=None, seen=None):
     """Evaluate 4.2.2.1.(10)-(15) for one space.
 
     :param space: openstudio.model.Space
+    :param edition: the NECB edition ('2020', '2025') whose Table 4.2.1.6.
+        snapshot governs. Required — every edition ships its own copy and
+        none is substituted for another (Stage 3).
     :param unknown_default: 'required' or 'not_required' — what to do when
         Table 4.2.1.6. cannot be read for this space type. Default 'required' —
         photocontrols in the REFERENCE building lower the reference's lighting
@@ -135,7 +136,7 @@ def evaluate(space, audit=None, unknown_default='required', shading_surfaces=Non
     """
     audit = audit if audit is not None else NullAudit()
     standards_type = _standards_space_type(space)
-    row = requirement(standards_type)
+    row = requirement(standards_type, edition=edition)
     lpd = _general_lighting_lpd(space)
     areas = DaylightedAreas.areas(space, audit=audit)
 

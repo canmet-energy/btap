@@ -115,7 +115,7 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         eligible = _necb_default_spaces(model, office_match, audit)
         rule = 'NECB 2011 (legacy-exact)'
     elif placement == 'necb2020':
-        eligible, fractions = _necb2020_spaces(model, audit, unknown_control_requirement)
+        eligible, fractions = _necb2020_spaces(model, str(vintage), audit, unknown_control_requirement)
         rule = 'NECB 2020/2025 4.2.2.1.(10)-(15)'
     else:
         eligible = [s for s in sorted_by_name(model.getSpaces()) if _is_daylighted(s)]
@@ -248,7 +248,7 @@ def _zone_fraction(space, zone, controlled_area_m2):
     return max(min(controlled_area_m2 / denominator, 1.0), 0.0)
 
 
-def _necb2020_spaces(model, audit, unknown_control_requirement):
+def _necb2020_spaces(model, edition, audit, unknown_control_requirement):
     """NECB 2020/2025 4.2.2.1.(10)-(15) selection. Sidelighting and toplighting
     are evaluated INDEPENDENTLY and unioned — a space qualifies on either.
 
@@ -286,7 +286,7 @@ def _necb2020_spaces(model, audit, unknown_control_requirement):
             continue
 
         verdict = DaylightControlRequirement.evaluate(
-            space, audit=audit, unknown_default=unknown_control_requirement,
+            space, edition=edition, audit=audit, unknown_default=unknown_control_requirement,
             shading_surfaces=shading, seen=seen)
         areas = verdict['areas']
         side = verdict['sidelighting']['required']

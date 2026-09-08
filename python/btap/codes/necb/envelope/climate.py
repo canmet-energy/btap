@@ -17,17 +17,9 @@ from btap.codes.necb import _data_root, edition_file
 
 TOLERANCE_KM = 500.0
 
-#: STAGE 3 INTERIM. ``hdd18`` and ``table_c1`` are not edition-aware yet: the
-#: next Stage 3 change threads ``edition`` through hdd18's five product call
-#: sites (multi-edition plan, Stage 3, "Thread edition through the two
-#: globally-cached loaders"). Until then this loader reads the necb2020
-#: snapshot's copy of Table C-1; necb2025 ships its own byte-identical copy,
-#: so the read moves to the caller's edition without any value changing.
-_INTERIM_EDITION = "2020"
-
-#: Cached per data root, so a test that repoints the family is not served the
-#: previous root's table.
-_TABLE_C1: dict[object, list] = {}
+#: Cached per (data root, edition), so a test that repoints the family or
+#: passes a different edition is not served a stale root's/edition's table.
+_TABLE_C1: dict[tuple, list] = {}
 
 # The .stat annual heating-degree-day line. Ruby's String#match is a SEARCH,
 # and `.` does not cross newlines in either language — so re.search, never
@@ -38,17 +30,20 @@ _STAT_HDD_RE = re.compile(
 _EPW_SUFFIX_RE = re.compile(r"\.epw\Z", re.IGNORECASE)
 
 
-def table_c1():
-    root = _data_root()
-    if root not in _TABLE_C1:
-        path = edition_file(_INTERIM_EDITION, "tables", "table_c1.json")
+def table_c1(edition):
+    key = (_data_root(), str(edition))
+    if key not in _TABLE_C1:
+        path = edition_file(edition, "tables", "table_c1.json")
         with open(path, encoding="utf-8") as handle:
-            _TABLE_C1[root] = json.load(handle)["table"]
-    return _TABLE_C1[root]
+            _TABLE_C1[key] = json.load(handle)["table"]
+    return _TABLE_C1[key]
 
 
-def hdd18(model, *, hdd=None, audit=None):
-    """:return: HDD18, or None (with an audit warning) when unresolvable."""
+def hdd18(model, *, edition, hdd=None, audit=None):
+    """:param edition: the NECB edition ('2020', '2025') whose Table C-1 copy
+        resolves the nearest-city fallback. Required — every edition ships its
+        own snapshot and none is substituted for another (Stage 3).
+    :return: HDD18, or None (with an audit warning) when unresolvable."""
     audit = audit if audit is not None else NullAudit()
     if hdd is not None:
         audit.info("climate", "HDD supplied explicitly", value=hdd)
@@ -60,7 +55,7 @@ def hdd18(model, *, hdd=None, audit=None):
                    "no weather file on model — HDD unresolvable (pass hdd: explicitly)")
         return None
 
-    from_city = nearest_city_hdd(weather, audit)
+    from_city = nearest_city_hdd(weather, edition, audit)
     if from_city is not None:
         return from_city
 
@@ -73,12 +68,12 @@ def hdd18(model, *, hdd=None, audit=None):
     return None
 
 
-def nearest_city_hdd(weather_file, audit):
+def nearest_city_hdd(weather_file, edition, audit):
     """Nearest NECB Table C-1 city by haversine distance (legacy convention)."""
     audit = audit if audit is not None else NullAudit()
     lat = weather_file.latitude()
     lon = weather_file.longitude()
-    best = min(table_c1(), key=lambda row: haversine_km([lat, lon], row["lat_long"]))
+    best = min(table_c1(edition), key=lambda row: haversine_km([lat, lon], row["lat_long"]))
     distance = haversine_km([lat, lon], best["lat_long"])
     if distance > TOLERANCE_KM:
         audit.info("climate",

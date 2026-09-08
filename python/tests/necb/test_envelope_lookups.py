@@ -78,14 +78,14 @@ class TestLookups(unittest.TestCase):
     def test_hdd_explicit_wins(self):
         from btap.audit import AuditLog
         audit = AuditLog()
-        self.assertEqual(4321, self.n.climate.hdd18(load_raw_fixture(), hdd=4321, audit=audit))
+        self.assertEqual(4321, self.n.climate.hdd18(load_raw_fixture(), edition="2020", hdd=4321, audit=audit))
         self.assertTrue(any('explicitly' in e['action'] for e in audit.entries))
 
     def test_hdd_from_table_c1_for_toronto(self):
         from btap.audit import AuditLog
         model = attach_weather(load_raw_fixture())
         audit = AuditLog()
-        hdd = self.n.climate.hdd18(model, audit=audit)
+        hdd = self.n.climate.hdd18(model, edition="2020", audit=audit)
         decision = next((e for e in audit.entries if 'Table C-1' in e['action']), None)
         self.assertIsNotNone(decision, 'Toronto is well within the 500 km tolerance')
         # the EPW is Toronto Intl AP = Pearson, whose Table C-1 row is Mississauga
@@ -101,7 +101,7 @@ class TestLookups(unittest.TestCase):
     def test_hdd_unresolvable_warns(self):
         from btap.audit import AuditLog
         audit = AuditLog()
-        self.assertIsNone(self.n.climate.hdd18(load_raw_fixture(), audit=audit))
+        self.assertIsNone(self.n.climate.hdd18(load_raw_fixture(), edition="2020", audit=audit))
         self.assertTrue(any('no weather file' in w['action'] for w in audit.warnings))
 
 

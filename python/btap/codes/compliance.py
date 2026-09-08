@@ -231,7 +231,7 @@ def _attach_weather_and_hdd(run):
     # HDD for the envelope rules (explicit > Table C-1 from the EPW site >
     # .stat)
     if run.hdd is None:
-        run.hdd = envelope.hdd18(run.proposed, audit=audit)
+        run.hdd = envelope.hdd18(run.proposed, edition=str(opts["vintage"]), audit=audit)
     if run.hdd is None:
         raise ValueError(
             "HDD unresolvable: pass hdd= or weather with a recognized site")
@@ -661,7 +661,7 @@ def _eui_compliance(model, *, vintage, weather, hdd, run_dir, simulate,
             runner.attach_weather(proposed, epw=weather["epw"],
                                   ddy=weather["ddy"])
         if hdd is None:
-            hdd = envelope.hdd18(proposed, audit=audit)
+            hdd = envelope.hdd18(proposed, edition=str(vintage), audit=audit)
 
         # Mapping -> model-derived areas -> HARD applicability (refuse outside
         # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a

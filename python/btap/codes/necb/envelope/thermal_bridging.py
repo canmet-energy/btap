@@ -133,7 +133,7 @@ def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
                    article="3.1.1.7.")
         return False
 
-    hdd = climate.hdd18(model, hdd=hdd, audit=audit)
+    hdd = climate.hdd18(model, edition=str(vintage), hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 
