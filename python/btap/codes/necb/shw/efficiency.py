@@ -20,7 +20,7 @@ import openstudio
 from btap._compat import NullAudit, ruby_round, ruby_str
 from btap._sdk import ensure_sdk_hashable
 from btap.audit import AuditLog
-from btap.codes.necb import shw as SHW
+from btap.codes import Ruleset
 
 # `uniq` over SDK plant loops (apply_solar_pool_minimums) keys on the objects
 # themselves, exactly as the Ruby Array#uniq did.
@@ -57,8 +57,12 @@ def _to_f(value) -> float:
 
 
 def apply_efficiency(water_heater, *, vintage="2020", audit=None):
+    return _apply_efficiency(water_heater, Ruleset.from_edition(vintage), audit=audit)
+
+
+def _apply_efficiency(water_heater, ruleset, audit=None):
     audit = audit if audit is not None else AuditLog()
-    rules = SHW.rules(vintage)["efficiency"]
+    rules = ruleset.rules("shw")["efficiency"]
 
     capacity = _optional(water_heater.heaterMaximumCapacity())
     volume_m3 = _optional(water_heater.tankVolume())
@@ -198,8 +202,12 @@ def apply_heat_pump_efficiency(hpwh, *, vintage="2020", audit=None):
 
     Floor and metric come from THIS edition's ``shw_rules.json``
     (``efficiency.heat_pump``), not from an edition test in the code."""
+    return _apply_heat_pump_efficiency(hpwh, Ruleset.from_edition(vintage), audit=audit)
+
+
+def _apply_heat_pump_efficiency(hpwh, ruleset, audit=None):
     audit = audit if audit is not None else AuditLog()
-    heat_pump = SHW.rules(vintage)["efficiency"]["heat_pump"]
+    heat_pump = ruleset.rules("shw")["efficiency"]["heat_pump"]
     floor = heat_pump["minimum_cop"]
     metric = heat_pump["metric"]
     coil = hpwh.dXCoil().to_CoilWaterHeatingAirToWaterHeatPump()
@@ -332,7 +340,11 @@ def _optional(value):
 # collectors get an audited determination citing the printed minimums, never a
 # silent skip.
 def apply_solar_pool_minimums(model, *, vintage="2020", audit=None):
-    spec = SHW.rules(vintage).get("solar_pool_minimums")
+    return _apply_solar_pool_minimums(model, Ruleset.from_edition(vintage), audit=audit)
+
+
+def _apply_solar_pool_minimums(model, ruleset, audit=None):
+    spec = ruleset.rules("shw").get("solar_pool_minimums")
     if spec is None:
         return None
     audit = audit if audit is not None else NullAudit()

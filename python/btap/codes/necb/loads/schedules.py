@@ -19,6 +19,7 @@ from datetime import datetime
 import openstudio
 
 from btap._compat import NullAudit, sorted_by_name
+from btap.codes import Ruleset
 from btap.codes.necb import loads as _loads
 
 DAY_TOKENS = ['Wkdy', 'Wknd', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -32,6 +33,10 @@ _TOKEN_DAYS = {'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
 def add(model, name, vintage='2020', audit=None):
     """:param name: e.g. 'NECB-A-Occupancy'
     :return: the ruleset (or the always-on fallback)"""
+    return _add(model, name, Ruleset.from_edition(vintage), audit=audit)
+
+
+def _add(model, name, ruleset, audit=None):
     audit = audit if audit is not None else NullAudit()
     if name is None or str(name) == '':
         return None
@@ -41,10 +46,10 @@ def add(model, name, vintage='2020', audit=None):
     if existing is not None:
         return existing
 
-    rows = [r for r in _loads.table(vintage, 'schedules') if r['name'] == name]
+    rows = [r for r in _loads.table(ruleset.edition, 'schedules') if r['name'] == name]
     if not rows:
         audit.warn('schedules',
-                   f"no NECB {vintage} schedule data named '{name}' — falling back to Always On "
+                   f"no NECB {ruleset.edition} schedule data named '{name}' — falling back to Always On "
                    '(legacy fails silently here)',
                    target=name)
         return model.alwaysOnDiscreteSchedule()

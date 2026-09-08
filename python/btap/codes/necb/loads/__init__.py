@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 
 from btap.audit import AuditLog  # the family's ONE AuditLog (Ruby's alias)
+from btap.codes import Ruleset
 from btap.codes.necb import _data_root, code_id, edition_file, rulesdata
 
 __all__ = ["AuditLog", "rules", "table",
@@ -58,9 +59,10 @@ Apply = _apply
 
 def assign_space_types(model, map, vintage='2020', audit=None):
     """Assign NECB space types to a bare-geometry model. See Apply."""
-    return _apply.assign_space_types(model, map, vintage=vintage, audit=audit)
+    return _apply._assign_space_types(model, map, Ruleset.from_edition(vintage),
+                                      audit=audit)
 
 
 def apply_loads(model, vintage='2020', audit=None):
     """Facade: apply NECB loads to every tagged space type."""
-    return _apply.apply_loads(model, vintage=vintage, audit=audit)
+    return _apply._apply_loads(model, Ruleset.from_edition(vintage), audit=audit)

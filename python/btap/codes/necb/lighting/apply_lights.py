@@ -282,7 +282,7 @@ def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
 
     if lpd <= threshold:
         schedule_set.setLightingSchedule(
-            Schedules.add(model, lighting_name, vintage=ruleset.edition, audit=audit))
+            Schedules._add(model, lighting_name, ruleset, audit=audit))
         return
 
     occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
@@ -297,7 +297,7 @@ def _wire_lighting_schedule(model, space_type, record, ruleset, audit):
                    f"sensor-schedule synthesis needs both '{occupancy_name}' and '{lighting_name}' — "
                    'falling back to the plain lighting schedule', target=space_type.nameString())
         schedule_set.setLightingSchedule(
-            Schedules.add(model, lighting_name, vintage=ruleset.edition, audit=audit))
+            Schedules._add(model, lighting_name, ruleset, audit=audit))
         return
 
     ruleset_name = (f"{occupancy_name}-{lighting_name}-{_num(rel_absence)}-{_num(personal)}-"
