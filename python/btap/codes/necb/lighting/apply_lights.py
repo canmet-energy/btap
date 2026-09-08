@@ -84,7 +84,7 @@ def _apply_lights(model, ruleset, lights_type='NECB_Default', lights_scale=1.0,
     # spaces) are warned individually in _apply_to_space_type.
     audit.decision('lighting', f"interior lighting applied ({lights_type}, scale {lights_scale})",
                    inputs={'space_types_applied': applied, 'space_types_eligible': eligible,
-                           'vintage': ruleset.edition},
+                           'code': ruleset.id, 'edition': ruleset.edition},
                    article='4.2.1.4.; 4.2.1.5.; 4.2.1.6.')
     _emit_article_coverage(ruleset, audit)
     return audit

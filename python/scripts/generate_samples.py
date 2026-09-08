@@ -150,7 +150,7 @@ def simulatable() -> set[str] | None:
     return {r["name"] for r in rows if r["status"] == "ok"}
 
 
-def seed(vintage="2020"):
+def seed(code="necb2020"):
     """The shared proposed building: the DOE prototype fixture, NECB-tagged,
     with loads/lighting/SHW applied. Identical recipe to the Ruby's seed()."""
     from btap._sdk import load_model
@@ -166,9 +166,9 @@ def seed(vintage="2020"):
             st.setStandardsBuildingType("Space Function")
             st.setStandardsSpaceType("Office enclosed > 25 m2")
     audit = AuditLog()
-    loads.apply_loads(model, vintage=vintage, audit=audit)
-    lighting.apply_lights(model, vintage=vintage, audit=audit)
-    shw.apply_shw(model, vintage=vintage, fuel="NaturalGas", audit=audit)
+    loads.apply_loads(model, code=code, audit=audit)
+    lighting.apply_lights(model, code=code, audit=audit)
+    shw.apply_shw(model, code=code, fuel="NaturalGas", audit=audit)
     return model
 
 

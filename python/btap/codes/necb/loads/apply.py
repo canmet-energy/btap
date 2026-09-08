@@ -66,7 +66,7 @@ def _assign_space_types(model, map, ruleset, audit=None):
     audit.decision('loads', 'NECB space types assigned',
                    inputs={'spaces_assigned': assigned,
                            'space_types_created': len(cache),
-                           'vintage': ruleset.edition})
+                           'code': ruleset.id, 'edition': ruleset.edition})
     if unmapped:
         audit.warn('loads',
                    'spaces with no space-type mapping (no loads will be applied): '
@@ -93,7 +93,8 @@ def _apply_loads(model, ruleset, audit=None):
     audit.decision('loads', 'NECB internal loads applied (people, plug/gas equipment, '
                             'ventilation OA, modelling infiltration, schedules, thermostats '
                             '— lighting and SHW excluded by scope)',
-                   inputs={'space_types_applied': applied, 'vintage': ruleset.edition},
+                   inputs={'space_types_applied': applied,
+                           'code': ruleset.id, 'edition': ruleset.edition},
                    article='8.4.3.2.(1)-(2)')
     _assign_zone_thermostats(model, audit)
     _emit_article_coverage(ruleset, audit)

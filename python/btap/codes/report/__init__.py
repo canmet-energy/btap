@@ -94,7 +94,7 @@ def render(result, options=None):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NECB {Html.esc(report.get('vintage'))} Compliance Report{title_suffix}</title>
+<title>{Html.esc(report.get('code_label'))} Compliance Report{title_suffix}</title>
 <style>{Html.CSS}{DIAGRAM_CSS}</style>
 </head>
 <body>

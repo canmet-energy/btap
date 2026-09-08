@@ -169,8 +169,8 @@ def split_ref(ref: object) -> tuple[str | None, int | None]:
     return match.group(1), int(match.group(2)) if match.group(2) else None
 
 
-def disposition_key_for(vintage: str, key: str) -> str | None:
-    if vintage != "2020":
+def disposition_key_for(edition: str, key: str) -> str | None:
+    if edition != "2020":
         return key
     if key.startswith("8.4.4."):
         return None
@@ -257,8 +257,8 @@ class CoverageGenerator:
             )
         return citations
 
-    def citations_for(self, vintage: str, articles: dict) -> dict[str, list[dict]]:
-        """Resolve every scanned citation site onto ``vintage``'s article ids.
+    def citations_for(self, edition: str, articles: dict) -> dict[str, list[dict]]:
+        """Resolve every scanned citation site onto ``edition``'s article ids.
 
         Every edition-specific number comes from that edition's manifest:
         ``reference_subsection`` for the ``{prefix}`` the rule modules
@@ -268,7 +268,7 @@ class CoverageGenerator:
         coverage-enabled edition cannot recreate, inside the tool that
         documents the defect, the defect itself.
         """
-        manifest = self.editions[vintage]
+        manifest = self.editions[edition]
         reference_prefix = manifest_article(manifest, "reference_subsection")
         remaps = dict(manifest.get("literal_remaps") or {})
         legacy = LITERAL_REFERENCE_SUBSECTION + "."
@@ -278,7 +278,7 @@ class CoverageGenerator:
         renumbered = reference_prefix != LITERAL_REFERENCE_SUBSECTION
         if renumbered and legacy not in remaps:
             raise ValueError(
-                f"NECB {vintage} numbers the reference subsection "
+                f"NECB {edition} numbers the reference subsection "
                 f"{reference_prefix}, but btap/codes/necb/data/"
                 f"{manifest.get('id')}/manifest.json has no literal_remaps "
                 f"entry for {legacy!r} — every {legacy} literal in the rule "
@@ -286,7 +286,7 @@ class CoverageGenerator:
             )
         if not renumbered and remaps:
             raise ValueError(
-                f"NECB {vintage} numbers the reference subsection "
+                f"NECB {edition} numbers the reference subsection "
                 f"{reference_prefix} — the numbering the source literals "
                 f"already use — yet its manifest declares literal_remaps "
                 f"{sorted(remaps)}"
@@ -316,17 +316,17 @@ class CoverageGenerator:
                         citations[article].append(candidate)
         return citations
 
-    def declarations_for(self, vintage: str) -> dict[str, list[dict]]:
+    def declarations_for(self, edition: str) -> dict[str, list[dict]]:
         """Every 8.4 coverage declaration this edition's manifest points at.
 
-        MANIFEST-driven (Stage 3): the rule files no longer carry the vintage
+        MANIFEST-driven (Stage 3): the rule files no longer carry the edition
         in their names, so a filename glob cannot find them and an edition that
         renames one must say so in its own manifest.
         """
         declarations: dict[str, list[dict]] = defaultdict(list)
         manifest_dir = (self.inputs.manifest_root / EDITION_DATA_REL
-                        / f"necb{vintage}")
-        rules = (self.editions[vintage].get("rules") or {})
+                        / f"necb{edition}")
+        rules = (self.editions[edition].get("rules") or {})
         for key, filename in sorted(rules.items()):
             path = manifest_dir / filename
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -340,26 +340,26 @@ class CoverageGenerator:
                 article, sentence = split_ref(entry.get("article"))
                 if article:
                     declaration = dict(entry)
-                    declaration.update(gem=gem_name, vintage=vintage, sentence=sentence)
+                    declaration.update(gem=gem_name, edition=edition, sentence=sentence)
                     declarations[article].append(declaration)
         if not declarations:
             raise ValueError(
-                f"no 8.4 declarations found for {vintage} — the edition manifest's "
+                f"no 8.4 declarations found for {edition} — the edition manifest's "
                 "`rules` map went stale"
             )
         return declarations
 
-    def executed_for(self, vintage: str) -> dict[str, list[dict]]:
+    def executed_for(self, edition: str) -> dict[str, list[dict]]:
         executed: dict[str, list[dict]] = defaultdict(list)
         for run_dir in self.inputs.audit_dirs:
             audit_path = run_dir / "audit.json"
             if not audit_path.exists():
                 continue
             try:
-                run_vintage = str(json.loads((run_dir / "report.json").read_text())["vintage"])
+                run_edition = str(json.loads((run_dir / "report.json").read_text())["edition"])
             except (OSError, KeyError, TypeError, ValueError):
-                run_vintage = ""
-            if run_vintage != vintage:
+                run_edition = ""
+            if run_edition != edition:
                 continue
             levels: dict[str, Counter] = defaultdict(Counter)
             for entry in json.loads(audit_path.read_text(encoding="utf-8")):
@@ -372,15 +372,15 @@ class CoverageGenerator:
             for article, counts in levels.items():
                 executed[article].append({
                     "run": run_dir.name,
-                    "vintage": run_vintage,
+                    "edition": run_edition,
                     "levels": counts,
                 })
         return executed
 
-    def dispositions_for(self, vintage: str, articles: dict) -> dict[str, dict]:
+    def dispositions_for(self, edition: str, articles: dict) -> dict[str, dict]:
         dispositions = {}
         for key, value in self.dispositions_2025.items():
-            mapped = disposition_key_for(vintage, key)
+            mapped = disposition_key_for(edition, key)
             if mapped and mapped in articles:
                 dispositions[mapped] = value
         return dispositions
@@ -432,7 +432,7 @@ class CoverageGenerator:
             levels = ", ".join(
                 f"{count} {level}" for level, count in observation["levels"].items()
             )
-            details.append(f"{observation['run']} ({observation['vintage']}): {levels}")
+            details.append(f"{observation['run']} ({observation['edition']}): {levels}")
         return f'<span class="pill {css}" title="{esc(" | ".join(details))}">{label}</span>'
 
     def code_ref_link(self, ref: object) -> str:
@@ -585,7 +585,7 @@ class CoverageGenerator:
             marks = []
             for group in groups.values():
                 declaration = group[0]
-                vintages = ", ".join(sorted({item["vintage"] for item in group}))
+                edition_list = ", ".join(sorted({item["edition"] for item in group}))
                 label, css = STATUS_META.get(
                     declaration["status"], (declaration["status"], "none")
                 )
@@ -594,7 +594,7 @@ class CoverageGenerator:
                 code_html = " · ".join(self.code_ref_link(ref) for ref in code)
                 pill = (
                     f'<span class="pill {css}" title="{esc(declaration["gem"])} '
-                    f'({esc(vintages)}): {esc(str(declaration.get("how") or "")[:160])}">'
+                    f'({esc(edition_list)}): {esc(str(declaration.get("how") or "")[:160])}">'
                     f'{esc(declaration["gem"])}: {esc(label)}</span>'
                 )
                 marks.append(pill if not code_html else f'{pill} <span class="dim">[{code_html}]</span>')
@@ -628,27 +628,27 @@ class CoverageGenerator:
             f'<ul class="clauses">{"".join(items)}</ul>{equation_html}</details>\n'
         )
 
-    def vintage_part(self, vintage: str) -> dict:
-        articles = json.loads(self.inputs.caches[vintage].read_text(encoding="utf-8"))["articles"]
+    def edition_part(self, edition: str) -> dict:
+        articles = json.loads(self.inputs.caches[edition].read_text(encoding="utf-8"))["articles"]
         outside = [key for key in articles if not key.startswith("8.4.")]
         if outside:
             raise ValueError(
-                f"LINT: non-8.4 content in the {vintage} text cache: {', '.join(outside)}"
+                f"LINT: non-8.4 content in the {edition} text cache: {', '.join(outside)}"
             )
-        declarations = self.declarations_for(vintage)
-        citations = self.citations_for(vintage, articles)
-        executed = self.executed_for(vintage)
-        dispositions = self.dispositions_for(vintage, articles)
+        declarations = self.declarations_for(edition)
+        citations = self.citations_for(edition, articles)
+        executed = self.executed_for(edition)
+        dispositions = self.dispositions_for(edition, articles)
         states, conflicts = self.states_for(articles, declarations, citations, dispositions)
         counts = Counter(states.values())
         total = sum(counts.values())
         if total != len(articles):
             raise ValueError(
-                f"SELF-CHECK FAILED ({vintage}): states sum to {total}, not {len(articles)}"
+                f"SELF-CHECK FAILED ({edition}): states sum to {total}, not {len(articles)}"
             )
 
         sections = []
-        for prefix, subsection_title in SUBSECTIONS[vintage].items():
+        for prefix, subsection_title in SUBSECTIONS[edition].items():
             rows = []
             matching = sorted(
                 (article for article in articles if article.startswith(prefix + ".")),
@@ -688,7 +688,7 @@ class CoverageGenerator:
                 pages = "–".join(str(page) for page in (record.get("pages") or []))
                 conflict_marker = ' <span class="pill bad">⚑</span>' if conflict else ""
                 rows.append(
-                    f'<tr class="article" id="v{vintage}-a{article.replace(".", "-")}">\n'
+                    f'<tr class="article" id="v{edition}-a{article.replace(".", "-")}">\n'
                     f'  <td class="ref">{esc(article)}.</td>\n'
                     f'  <td><b>{esc(title)}</b>\n'
                     f'      <span class="pill {css}">{label}</span>'
@@ -708,8 +708,8 @@ class CoverageGenerator:
         )
         cards += f'<div class="card bad"><b>{len(conflicts)}</b><span>⚑ Conflicts</span></div>'
         html = (
-            f'<details class="vintage-part" open id="v{vintage}">\n'
-            f'<summary><b>NECB {vintage}</b> — {len(articles)} articles '
+            f'<details class="edition-part" open id="v{edition}">\n'
+            f'<summary><b>NECB {edition}</b> — {len(articles)} articles '
             '<span class="dim">(click to collapse)</span></summary>\n'
             f'<div class="cards">{cards}</div>\n'
             f'<div class="scroll">{"".join(sections)}</div>\n'
@@ -726,7 +726,7 @@ class CoverageGenerator:
         }
 
     def render(self) -> tuple[str, dict[str, dict]]:
-        parts = {vintage: self.vintage_part(vintage) for vintage in sorted(self.editions)}
+        parts = {edition: self.edition_part(edition) for edition in sorted(self.editions)}
         if not self.inputs.audit_dirs:
             run_note = (
                 'No run evidence supplied (set NECB_AUDIT_JSONS to one or more run directories '
@@ -821,9 +821,9 @@ HTML_TEMPLATE = """  <!-- Generated by python/scripts/generate_necb_8_4_coverage
     .coderefs a {{ color:var(--clone); text-decoration:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }}
     .coderefs a:hover {{ text-decoration:underline; }}
     .delegnote {{ margin:.2rem 0 .4rem; font-size:.78rem; }}
-    details.vintage-part {{ margin:1.4rem 0; border:1px solid var(--line); border-radius:8px; padding:.2rem .9rem .6rem; }}
-    details.vintage-part > summary {{ cursor:pointer; font-size:1.25rem; padding:.55rem 0; color:var(--fg); }}
-    details.vintage-part[open] > summary {{ border-bottom:1px solid var(--line); margin-bottom:.6rem; }}
+    details.edition-part {{ margin:1.4rem 0; border:1px solid var(--line); border-radius:8px; padding:.2rem .9rem .6rem; }}
+    details.edition-part > summary {{ cursor:pointer; font-size:1.25rem; padding:.55rem 0; color:var(--fg); }}
+    details.edition-part[open] > summary {{ border-bottom:1px solid var(--line); margin-bottom:.6rem; }}
 </style></head><body>
 
   <h1>NECB Section 8.4 — Performance Path coverage</h1>
@@ -913,18 +913,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     _generator, parts = generate(inputs, args.output)
     print(f"wrote {args.output.relative_to(REPO_ROOT) if args.output.is_relative_to(REPO_ROOT) else args.output}")
-    for vintage, part in parts.items():
+    for edition, part in parts.items():
         counts = " ".join(f"{key}={value}" for key, value in part["counts"].items())
         conflicts = ", ".join(part["conflicts"])
         print(
-            f"  {vintage}: {counts}  (sum {sum(part['counts'].values())}/"
+            f"  {edition}: {counts}  (sum {sum(part['counts'].values())}/"
             f"{len(part['articles'])})  conflicts: {conflicts}"
         )
         parse_failures = [
             article for article, record in part["articles"].items() if not record["parse_ok"]
         ]
         print(
-            f"  {vintage} clause-tree fallbacks: "
+            f"  {edition} clause-tree fallbacks: "
             f"{', '.join(parse_failures) if parse_failures else 'none'}"
         )
     return 0

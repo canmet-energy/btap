@@ -88,7 +88,7 @@ def _apply(model, ruleset, audit=None, proposed=None):
                       proposed=proposed)
     _align_heat_pump_heating_capacity(model, audit, ruleset)
     audit.info('efficiency', 'NECB efficiency pass complete',
-               inputs={'vintage': ruleset.edition,
+               inputs={'code': ruleset.id, 'edition': ruleset.edition,
                        'boilers': len(model.getBoilerHotWaters()),
                        'chillers': len(model.getChillerElectricEIRs()),
                        'dx_cooling': len(model.getCoilCoolingDXSingleSpeeds()),

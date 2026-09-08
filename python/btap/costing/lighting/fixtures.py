@@ -46,8 +46,8 @@ HEIGHT_COLUMNS = (
 # supplied by the NECB layer. Costing owns no daylighted-area geometry —
 # that is rule machinery — so when the model HAS daylighting controls and
 # no provider is given, this raises rather than silently under-costing.
-def cost(model, *, database, vintage, province_state, city, audit, daylighting_areas=None):
-    template = f"NECB{vintage}"
+def cost(model, *, database, edition, province_state, city, audit, daylighting_areas=None):
+    template = f"NECB{edition}"
     section = {"space_report": [], "fixture_report": [], "total_lighting_cost": 0.0}
     total = 0.0
 

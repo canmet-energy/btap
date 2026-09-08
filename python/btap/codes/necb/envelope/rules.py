@@ -51,7 +51,8 @@ def _max_u(*, ruleset, surface, boundary, hdd, audit=None):
     if value is None:
         value = U_FALLBACK
     audit.decision("rules", "maximum effective U-value looked up",
-                   inputs={"vintage": ruleset.edition, "surface": surface,
+                   inputs={"code": ruleset.id, "edition": ruleset.edition,
+                           "surface": surface,
                            "boundary": boundary, "hdd": hdd},
                    value=f"{value} W/m2K",
                    article=f"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 "
@@ -104,7 +105,8 @@ def _max_fdwr(*, ruleset, hdd, audit=None):
         raise RuntimeError(f"fdwr pieces did not cover hdd={hdd}")
 
     audit.decision("rules", "maximum FDWR computed",
-                   inputs={"vintage": ruleset.edition, "hdd": hdd},
+                   inputs={"code": ruleset.id, "edition": ruleset.edition,
+                           "hdd": hdd},
                    value=ruby_round(value, 4),
                    article=fdwr.get("article"))
     return value
@@ -119,6 +121,7 @@ def _max_srr(*, ruleset, audit=None):
     audit = audit if audit is not None else NullAudit()
     srr = ruleset.rules("envelope")["srr_max"]
     audit.decision("rules", "maximum skylight-to-roof ratio looked up",
-                   inputs={"vintage": ruleset.edition}, value=srr.get("value"),
+                   inputs={"code": ruleset.id, "edition": ruleset.edition},
+                   value=srr.get("value"),
                    article=srr.get("article"))
     return srr["value"]

@@ -31,7 +31,7 @@ from pathlib import Path
 
 from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset, necb
+from btap.codes import necb, resolve
 from btap.codes.necb import tiers
 from btap.simulation import runner
 
@@ -84,7 +84,7 @@ _COOLING_PATTERN = re.compile(
     r"IdealLoadsAirSystem")
 
 
-def performance_compliance(model, *, vintage="2020", weather=None, building=None,
+def performance_compliance(model, *, code="necb2020", weather=None, building=None,
                            hdd=None, run_dir, simulate="annual", run_period=None,
                            costing=False, city=None, province_state=None,
                            costs_csv=None, thermal_bridging=None,
@@ -98,7 +98,7 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
     2025 8.4.4 archetype-EUI path — no reference building).
 
     :param model: openstudio.model.Model or a .osm path (the proposed building)
-    :param vintage: '2020' or '2025'
+    :param code: the code id — 'necb2020' (default) or 'necb2025'
     :param weather: {'epw':, 'ddy':, 'stat':} — epw+ddy required unless
         simulate='none'
     :param building: facts for reference-system selection ({'storeys':,
@@ -126,21 +126,21 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
     weather = weather or {}
     report_options = report_options or {}
     simulate = str(simulate)
-    ruleset = Ruleset.from_edition(vintage)
+    ruleset = resolve(code)
     if str(path) == "eui":
         # The archetype-EUI path EXISTS only where an edition binds an
         # implementation for it (Stage 5): no edition literal here, so an
         # edition that never adopts 8.4.4 simply has no such path.
         if ruleset.behaviour("archetype_eui_path") is None:
             raise ValueError(
-                "the archetype-EUI path is a NECB 2025 feature (vintage: 2025)")
+                "the archetype-EUI path is a NECB 2025 feature (code: necb2025)")
         if archetypes_map is None:
             raise ValueError(
                 "the 'eui' path requires archetypes_map={archetype: 'all' | "
                 "[space names]}")
 
         return _eui_compliance(model, ruleset=ruleset,
-                               vintage=vintage, weather=weather, hdd=hdd,
+                               weather=weather, hdd=hdd,
                                run_dir=run_dir, simulate=simulate,
                                run_period=run_period,
                                archetypes_map=archetypes_map,
@@ -156,7 +156,7 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
     # other. `report` starts EMPTY and is rebound after the proposed sizing
     # (below) — a failure flush before that point deliberately writes the
     # empty dict (pinned by test_failed_run_still_writes_audit_trail).
-    opts = {"model": model, "vintage": str(vintage), "weather": weather,
+    opts = {"model": model, "code": ruleset.id, "weather": weather,
             "building": building, "run_dir": str(run_dir), "simulate": simulate,
             "run_period": run_period, "costing": costing, "city": city,
             "province_state": province_state, "costs_csv": costs_csv,
@@ -191,7 +191,7 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
 def _load_and_validate(run):
     opts = run.opts
     audit = run.audit
-    vintage = opts["vintage"]
+    ruleset = run.ruleset
     with audit.with_building("input model"):
         proposed = _load_model(opts["model"], audit=audit)
         if opts["necb_loads"]:
@@ -211,7 +211,8 @@ def _load_and_validate(run):
         # audit trail is still flushed to run_dir).
         _validate_space_types(proposed, run.ruleset, audit)
     audit.decision("compliance", "performance-path run started",
-                   inputs={"vintage": vintage, "simulate": opts["simulate"],
+                   inputs={"code": ruleset.id, "edition": ruleset.edition,
+                           "simulate": opts["simulate"],
                            "costing": opts["costing"]},
                    article="8.4.1.2.(1)")
     run.proposed = proposed
@@ -278,7 +279,8 @@ def _size_proposed(run):
 def _base_report(run):
     """The determination report skeleton (rebound over the pre-flight {} once
     the proposed is sized — the flush-before-this-point contract above)."""
-    return {"vintage": run.opts["vintage"], "hdd": run.hdd,
+    return {"edition": run.ruleset.edition, "code": run.ruleset.id,
+            "code_label": run.ruleset.label, "hdd": run.hdd,
             "simulate": run.opts["simulate"], "proposed": {}, "reference": {}}
 
 
@@ -507,7 +509,7 @@ def _finalize(run):
     opts = run.opts
     report = run.report
     audit = run.audit
-    _emit_article_coverage(opts["vintage"], audit)
+    _emit_article_coverage(run.ruleset.edition, audit)
     report["compliant"] = run.compliant
     report["warnings"] = [w["action"] for w in audit.warnings]
     _write_outputs(opts["run_dir"], report, audit)
@@ -629,7 +631,7 @@ def _validate_input_model(proposed, audit, building=None, require_storeys=True):
                        "openstudio_version": proposed.version().str()})
 
 
-def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
+def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
                     run_period, archetypes_map, process_loads_kwh, costing,
                     city, province_state, costs_csv, necb_loads,
                     report_html=False, report_options=None, audit=None):
@@ -661,7 +663,7 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
         audit.decision("compliance",
                        "ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) — no "
                        "reference building",
-                       inputs={"vintage": vintage,
+                       inputs={"code": ruleset.id, "edition": ruleset.edition,
                                "archetypes": list(archetypes_map.keys())},
                        article="8.4.4.1.")
 
@@ -680,15 +682,17 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
         # determination) -> Table 8.4.4.2 conformance -> normalize if needed.
         resolved = archetypes.resolve(proposed, archetypes_map, audit=audit)
         archetypes.verify_applicability(resolved, hdd=hdd, audit=audit)
-        check = archetypes.conformance(proposed, resolved, vintage=vintage,
+        check = archetypes.conformance(proposed, resolved, code=ruleset.id,
                                        audit=audit)
         if not check["conformant"]:
-            archetypes.normalize(proposed, resolved, vintage=vintage,
+            archetypes.normalize(proposed, resolved, code=ruleset.id,
                                  audit=audit)
         audit.building = None  # BET derivation + verdicts are comparisons,
         # not model work
 
-        report = {"vintage": vintage, "hdd": hdd, "simulate": simulate,
+        report = {"edition": ruleset.edition, "code": ruleset.id,
+                  "code_label": ruleset.label, "hdd": hdd,
+                  "simulate": simulate,
                   "path": "eui", "proposed": {}, "reference": {},
                   "eui": {"conformant_to_8_4_4_2": check["conformant"],
                           "normalized": not check["conformant"],
@@ -748,9 +752,10 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
         # shared epilogue (coverage + outputs + optional HTML) — no reference
         # model on this path.
         return _finalize(_Run(
-            opts={"vintage": vintage, "run_dir": str(run_dir),
+            opts={"code": ruleset.id, "run_dir": str(run_dir),
                   "report_html": report_html,
                   "report_options": report_options},
+            ruleset=ruleset,
             proposed=proposed, reference=None, report=report, audit=audit,
             compliant=compliant))
     except Exception as e:
@@ -1086,7 +1091,7 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
 
             with audit.with_building(f"{label} building"):
                 factors = _bump_capacities(model, label, report, bump,
-                                           ruleset.edition,
+                                           ruleset.id,
                                            step=step, trace=zone_trace)
                 record["bumped"][label] = factors
                 if factors["mode"] == "zonal":
@@ -1178,14 +1183,14 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
                inputs={"iterations": len(history)}, article="8.4.1.2.(5)")
 
 
-def _bump_capacities(model, label, report, bump, vintage, *, step, trace):
+def _bump_capacities(model, label, report, bump, code, *, step, trace):
     """One building's sentence-(5) increase for one round: per-zone
     Sizing:Zone factors on the failing thermal blocks when the previous run's
     per-zone unmet hours can attribute the failure, global SizingParameters
     otherwise. Returns the history record ('mode', headline factors, per-zone
     factors)."""
     targets = _failing_zone_targets(label, report, bump,
-                                    Ruleset.from_edition(vintage))
+                                    resolve(code))
     zone_hours = report[label].get("zone_unmet_occupied_hours") or {}
     sizing = model.getSizingParameters()
     by_name = {z.nameString().upper(): z for z in model.getThermalZones()}
@@ -1251,7 +1256,7 @@ def _failing_zone_targets(label, report, bump, ruleset):
     should the next run steer each one toward? Heating (sentence (3)): any
     zone over 100 h in a building whose heating gate failed. Cooling
     (sentence (4), proposed only): any zone whose unmet cooling exceeds the
-    SAME zone of the reference (a clone — zone names match) plus the vintage
+    SAME zone of the reference (a clone — zone names match) plus the edition
     allowance. Targets sit at SECANT_TARGET_FRACTION of the applicable limit
     so the extrapolation lands safely inside it, not on its edge."""
     zones = report[label].get("zone_unmet_occupied_hours") or {}
@@ -1347,7 +1352,7 @@ def _cost_models(proposed, reference, report, *, city, province_state,
               f"${ruby_str(ruby_round(delta, 2))}")
 
 
-def _emit_article_coverage(vintage, audit):
+def _emit_article_coverage(edition, audit):
     """Completeness accounting for the umbrella's OWN manifest. Resolution is
     ours (a data file next to this package); the emission is the family's
     shared one (btap.audit emit_coverage, the same call the five domain
@@ -1355,7 +1360,7 @@ def _emit_article_coverage(vintage, audit):
     status, partial/not_implemented warn — EXCEPT entries flagged gap_owner:
     "modeller", which emit as info scope notes (D-09). Emitted at the end of
     the happy path only — a crash flush must not assert coverage."""
-    emit_coverage(_umbrella_rules(vintage)["article_coverage"], audit)
+    emit_coverage(_umbrella_rules(edition)["article_coverage"], audit)
 
 
 def _write_outputs(run_dir, report, audit):
@@ -1389,13 +1394,13 @@ def _flush_on_failure(run_dir, report, audit, error):
 
 
 def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
-                           vintage, audit):
+                           code, audit):
     """The 8.4.4 supplement verdict on a reference-path run. Returns the
     report['eui_path'] dict — 'computed': False with 'reason'/'mismatches',
     or 'computed': True with 'bet_kwh', 'compliant', 'basis', 'lines' and the
     energy-tier fields. See the call site for the check-first contract."""
     return _eui_supplement_verdict(proposed, options, hdd, report, run_dir,
-                                   run_period, Ruleset.from_edition(vintage), audit)
+                                   run_period, resolve(code), audit)
 
 
 def _eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
@@ -1420,7 +1425,7 @@ def _eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
         archetypes.bet_areas(resolved, audit=audit),
         resolved["total_area_m2"], hdd=hdd,
         process_loads_kwh=options.get("process_loads_kwh") or 0.0, audit=audit)
-    check = archetypes.conformance(proposed, resolved, vintage=ruleset.edition,
+    check = archetypes.conformance(proposed, resolved, code=ruleset.id,
                                    audit=audit)
     if check["conformant"]:
         proposed_kwh = report["proposed"]["total_site_kwh"]
@@ -1432,7 +1437,7 @@ def _eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
         with audit.with_building("proposed building (EUI-normalized)"):
             archetypes.normalize(
                 normalized, archetypes.resolve(normalized, mapping, audit=audit),
-                vintage=ruleset.edition, audit=audit)
+                code=ruleset.id, audit=audit)
         eui_results = {}
         _run_annual(normalized, os.path.join(run_dir, "proposed_eui_annual"),
                     run_period, eui_results, audit=audit)
@@ -1493,7 +1498,7 @@ def _validate_space_types(proposed, ruleset, audit):
         if st is not None and "plenum" in st.lower():
             st = None
         record = (loads.SpaceTypes.find(building_type=bt, space_type=st,
-                                        vintage=ruleset.edition)
+                                        edition=ruleset.edition)
                   if bt and st else None)
         if record is not None and not loads.SpaceTypes.is_undefined(record):
             continue
@@ -1506,7 +1511,7 @@ def _validate_space_types(proposed, ruleset, audit):
                    "space-type pre-flight passed — every floor-area space "
                    "type resolves against the NECB catalog",
                    inputs={"floor_area_spaces_checked": checked,
-                           "vintage": ruleset.edition})
+                           "code": ruleset.id, "edition": ruleset.edition})
         return
 
     catalog = loads.table(ruleset.edition, "space_types")

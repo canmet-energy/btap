@@ -18,7 +18,7 @@ decision (D-XX) recording how we read it. Audit text convention: violations
 SHOUTED, passes lowercase — the report's checklist classifier is
 deliberately case-SENSITIVE.
 
-Vintages are '2020' and '2025' only. Import domains directly
+Editions are '2020' and '2025' only. Import domains directly
 (``from btap.codes.necb import loads``). The umbrella pipeline is
 ``performance_compliance`` (M6); the CLI is ``btap.codes.cli`` (console
 script ``btap-compliance``).
@@ -32,12 +32,12 @@ instead of emitting another edition's citation into an AHJ report. The same
 manifest binds this edition's own CODE (Stage 5): :meth:`Ruleset.behaviour`
 resolves a behaviour name to the module implementing it here, or ``None``
 when this edition has no such feature — which is what replaced the
-``vintage == "2025"`` tests in the pipeline.
+``edition == "2025"`` tests in the pipeline.
 
 Three edition lists exist deliberately and must stay separate:
 
-* :func:`editions` — "has a manifest here". Backs the CLI's ``--vintage``
-  choices.
+* :func:`editions` — "has a manifest here". The editions of one family,
+  as edition strings; the CLI selects with ``--code`` and :func:`code_ids`.
 * :func:`btap.codes.coverage.editions` — "has packaged Section 8.4 article
   text". A different, narrower question; never redefine it in terms of this
   one.
@@ -177,16 +177,6 @@ class Ruleset:
         """
         return _rules_loader(self.family).load(domain, self.id)
 
-    @classmethod
-    def from_edition(cls, edition: str) -> "Ruleset":
-        """TRANSITIONAL — the NECB edition ('2020'/'2025') as the ``vintage``
-        parameter still carries it.
-
-        Deleted in Stage 7 together with ``vintage``, when the public API takes
-        a code id. New code should call :func:`resolve` with a full id.
-        """
-        return resolve(f"necb{edition}")
-
 
 def _read_manifest(path: Path) -> Ruleset:
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -312,7 +302,9 @@ def code_ids() -> list[str]:
 def editions(family: str) -> list[str]:
     """The editions of one code family that HAVE a manifest here, sorted.
 
-    This is the list the CLI offers as ``--vintage`` choices. It is NOT
+    The CLI offers :func:`code_ids` (full code ids) as its ``--code``
+    choices; this is the edition-string view of the same registry, for the
+    per-edition data accessors. It is NOT
     ``btap.codes.coverage.editions()``, which answers the narrower "has
     packaged Section 8.4 article text" — an edition may be a first-class
     ruleset long before its article text is cached.

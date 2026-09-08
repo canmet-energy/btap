@@ -81,15 +81,15 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
     model = "<SEED>" if slug == "5zone-onramp" else f"<CORPUS>/{slug}.osm"
     args = FIXTURE_ARGS if slug == "5zone-onramp" else BASE_ARGS
-    # Stage 7 rewrites --vintage to --code; until then the CLI's own
-    # argument name is what argv has to carry.
-    vintage = [] if code == DEFAULT_CODE else ["--vintage", edition_of(code)]
+    # The CLI selects an edition by CODE ID (Stage 7); the default is
+    # implicit, so only a non-default edition appears in argv.
+    selector = [] if code == DEFAULT_CODE else ["--code", code]
     scenario = {
         "id": (f"corpus-{tier}-{slug}" if code == DEFAULT_CODE
                else f"corpus-{tier}-{slug}-{code}"),
         "lane": lane, "kind": "cli",
         "replaces": ["B1", "B2"] if tier != "annual" else ["B3", "B4", "B7"],
-        "argv": [model, *sim, *epw, *args, *vintage, "-o", "<RUN_DIR>", *extra],
+        "argv": [model, *sim, *epw, *args, *selector, "-o", "<RUN_DIR>", *extra],
         "env": {},
         "expect_exit": 6,
         "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
@@ -197,7 +197,7 @@ API_SCENARIOS = [
     # CLI exposes thermal_bridging. Ruby API seal via ruby_tbd_compliance.rb.
     {"id": "api-thermal-bridging", "lane": "python", "kind": "api",
      "replaces": ["B9"],
-     "api_call": {"vintage": "2020", "simulate": "none", "hdd": 3890,
+     "api_call": {"code": "necb2020", "simulate": "none", "hdd": 3890,
                   "building": {"storeys": 1},
                   "thermal_bridging": "efficient (BETBG)"},
      "env": {}, "expect_exit": None,
@@ -296,17 +296,17 @@ EDITION_SCENARIOS = [
     {**_corpus("01-baseboard-gas", "none", "python", code=NECB2025_EDITION),
      "replaces": [],
      "asserts": [
-         {"op": "json_equals", "file": "report.json", "path": "vintage",
+         {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "audit_entry", "article": "8.4.5.1.(2)", "count": 1},
-         {"op": "audit_entry", "inputs": {"vintage": "2025"}, "count": 4},
+         {"op": "audit_entry", "inputs": {"code": "necb2025"}, "count": 4},
      ]},
     # D-85 at 2025: the proposed VRF outdoor unit that serves no reference
     # zone is purged, audited once, at info.
     {**_corpus("08-vrf", "none", "python", code=NECB2025_EDITION),
      "replaces": [],
      "asserts": [
-         {"op": "json_equals", "file": "report.json", "path": "vintage",
+         {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "audit_entry", "step": "build", "level": "info",
           "action": "proposed VRF outdoor unit serves no reference zone — "
@@ -323,7 +323,7 @@ EDITION_SCENARIOS = [
     # target. The asserts tie the pinned exit to that reason.
     {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
-     "api_call": {"vintage": "2025", "simulate": "annual",
+     "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
                   "province_state": "ONTARIO",
                   "model": "<CORPUS>/01-baseboard-gas.osm",
                   "weather": _WEATHER_2025, "building": {"storeys": 1}},
@@ -341,7 +341,7 @@ EDITION_SCENARIOS = [
           "path": "reference.unmet_occupied_hours"},
          {"op": "json_equals", "file": "report.json", "path": "annual",
           "value": True},
-         {"op": "json_equals", "file": "report.json", "path": "vintage",
+         {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "json_equals", "file": "report.json", "path": "tier",
           "value": 1},
@@ -367,7 +367,7 @@ EDITION_SCENARIOS = [
     # Authoring run: exit 0 / compliant, 93.1 % of target, tier 1, 37 s.
     {"id": f"api-eui-path-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
-     "api_call": {"vintage": "2025", "path": "eui",
+     "api_call": {"code": NECB2025_EDITION, "path": "eui",
                   "archetypes_map": {"Office": "all"},
                   "simulate": "annual", "province_state": "ONTARIO",
                   "model": "<CORPUS>/01-baseboard-gas.osm",
@@ -386,7 +386,7 @@ EDITION_SCENARIOS = [
           "value": 1},
          {"op": "json_equals", "file": "report.json", "path": "annual",
           "value": True},
-         {"op": "json_equals", "file": "report.json", "path": "vintage",
+         {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "json_gt", "file": "report.json",
           "path": "proposed.ghg_kg_co2e", "value": 0},
