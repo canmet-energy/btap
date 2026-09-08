@@ -493,7 +493,7 @@ def _supplement_eui(run):
             and run.report["proposed"].get("total_site_kwh") is not None):
         return
 
-    run.report["eui_path"] = eui_supplement_verdict(
+    run.report["eui_path"] = _eui_supplement_verdict(
         run.proposed, opts["eui_supplement"], run.hdd, run.report,
         opts["run_dir"], opts["run_period"], run.ruleset, run.audit)
 
@@ -1389,18 +1389,23 @@ def _flush_on_failure(run_dir, report, audit, error):
 
 
 def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
-                           ruleset, audit):
+                           vintage, audit):
     """The 8.4.4 supplement verdict on a reference-path run. Returns the
     report['eui_path'] dict — 'computed': False with 'reason'/'mismatches',
     or 'computed': True with 'bet_kwh', 'compliant', 'basis', 'lines' and the
     energy-tier fields. See the call site for the check-first contract."""
+    return _eui_supplement_verdict(proposed, options, hdd, report, run_dir,
+                                   run_period, Ruleset.from_edition(vintage), audit)
+
+
+def _eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
+                            ruleset, audit):
     mapping = options.get("archetypes")
     if mapping is None:
         raise ValueError("eui_supplement requires archetypes: "
                          "{archetype: 'all' | [space names]}")
     # Reached only from `_supplement_eui`, which has already established that
-    # this edition binds the behaviour; resolving from `vintage` here keeps
-    # the public signature (and this function's direct unit tests) unchanged.
+    # this edition binds the behaviour.
     archetypes = ruleset.behaviour("archetype_eui_path")
     resolved = archetypes.resolve(proposed, mapping, audit=audit)
     problems = archetypes.applicability_problems(resolved, hdd=hdd, audit=audit)
