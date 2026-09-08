@@ -1109,3 +1109,13 @@ any result.
     produced **no** diff — the 2025 baselines add no new coverage rows;
     the one-line move from 0.3a was already on the branch.
   Nothing else moved. Gate run (python, verify, parity lanes) in progress.
+- **Gate after R-A:** python 5 passed / 32 subtests (202 s), verify 3
+  (94 s), parity 4 (321 s, both annual API scenarios re-run and matched
+  their baselines — a second determinism witness). R-A committed as
+  `20e479f` on `stage0-multi-edition` with the attribution in the message.
+- **Blocked on network (2026-09-08):** `git push`, the PR, and the
+  workflow dispatch all failed — github.com times out from the container
+  while pypi.org answers. Nothing to do locally; retry the push, `gh pr
+  create`, and `gh workflow run test.yml --ref stage0-multi-edition` once
+  GitHub is reachable. **Stage 0 is otherwise complete**; Stage 1 (R-B)
+  does not start until the PR is merged on main.
