@@ -11,6 +11,7 @@
   "literal_remaps": {
     "8.4.4.": "8.4.5."
   },
+  "path": "btap.codes.necb.path",
   "behaviours": {
     "archetype_eui_path": "btap.codes.necb.editions.necb2025.eui_archetypes",
     "part11_ghg": "btap.codes.necb.editions.necb2025.part11_ghg"

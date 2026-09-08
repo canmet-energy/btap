@@ -111,6 +111,11 @@ class Ruleset:
     #: citing rule needs ("the reference subsection"), never the number itself,
     #: because the number is exactly what moves between editions.
     articles: Mapping[str, str] = field(default_factory=dict)
+    #: The dotted module implementing this edition's determination lifecycle
+    #: (:class:`btap.codes.pipeline.CodePath`) — ``"btap.codes.necb.path"``.
+    #: Resolved by :meth:`path`; the field holds the name, the method the
+    #: module, exactly as ``behaviours``/:meth:`behaviour` do.
+    code_path: str | None = None
     #: How this edition renumbers article literals that source code writes in
     #: another edition's numbering (``{"8.4.4.": "8.4.5."}``). Empty when the
     #: edition needs no rewriting. Consumed by the Section 8.4 coverage
@@ -177,6 +182,29 @@ class Ruleset:
         """
         return _rules_loader(self.family).load(domain, self.id)
 
+    def path(self) -> Any:
+        """The code family's :class:`btap.codes.pipeline.CodePath` for this
+        edition — the module the manifest's ``path`` names.
+
+        Resolved through the registry rather than imported, which is what
+        keeps the neutral pipeline free of every code family: the pipeline
+        asks the edition for its determination lifecycle and gets NECB's
+        (``btap.codes.necb.path``), an OBC SB-10's, or a step code's without
+        naming any of them.
+
+        Raises :class:`ValueError` on an edition that declares none — a
+        registered edition with no lifecycle cannot be determined against,
+        and a silent default would run it against another family's code.
+        """
+        if not self.code_path:
+            raise ValueError(
+                f"{self.id} declares no 'path' — add it to "
+                f"btap/codes/{self.family}/data/{self.id}/manifest.json "
+                "(the dotted module implementing btap.codes.pipeline.CodePath "
+                "for this edition)"
+            )
+        return _import_code_path(self.code_path)
+
 
 def _read_manifest(path: Path) -> Ruleset:
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -205,6 +233,7 @@ def _read_manifest(path: Path) -> Ruleset:
         articles=MappingProxyType(dict(data.get("articles") or {})),
         literal_remaps=MappingProxyType(dict(data.get("literal_remaps") or {})),
         behaviours=MappingProxyType(behaviours),
+        code_path=data.get("path") or None,
     )
 
 
@@ -224,6 +253,24 @@ def _import_behaviour(dotted: str):
     except ImportError as exc:
         raise ImportError(
             f"a manifest binds the behaviour module {dotted!r}, which does not "
+            f"import: {exc}"
+        ) from exc
+
+
+@lru_cache(maxsize=None)
+def _import_code_path(dotted: str):
+    """The determination lifecycle a manifest names, imported once per process.
+
+    Separate from :func:`_import_behaviour` only so each error names the thing
+    the manifest actually got wrong.
+    """
+    from importlib import import_module
+
+    try:
+        return import_module(dotted)
+    except ImportError as exc:
+        raise ImportError(
+            f"a manifest names the code path module {dotted!r}, which does not "
             f"import: {exc}"
         ) from exc
 

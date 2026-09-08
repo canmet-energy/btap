@@ -9,6 +9,7 @@
     "heat_pump_aux_fuel": "8.4.4.13.(2)(c)"
   },
   "literal_remaps": {},
+  "path": "btap.codes.necb.path",
   "behaviours": {},
   "rules": {
     "umbrella": "necb_rules.json",
