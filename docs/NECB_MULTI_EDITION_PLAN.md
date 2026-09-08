@@ -1471,3 +1471,10 @@ gate hash, so it rides R-C.
   adjudicated prose, left for a deliberate edit. **Stage 5 complete.**
   Stage 6 (Opus, one loader + private `Ruleset` implementations behind
   the 97 public wrappers) spawned on it.
+- **GitHub caught up (evening 2026-09-08):** Stage 1 = **PR #34**, dispatch
+  run 34263068213 **all four jobs green** (the R-B baselines reproduced on
+  a fresh runner); Stage 2 = **PR #35** (base `stage1-integration`),
+  dispatch run 34266662144 watched; `stage2/3/4-integration` pushed;
+  `stage5-integration` queued for push. Stages 3–5 PRs are not opened
+  yet — they stack, and the user chose local progress over PR ceremony;
+  they can be opened in one pass when the link holds.
