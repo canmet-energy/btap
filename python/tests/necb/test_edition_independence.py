@@ -18,6 +18,14 @@ already needs it. ``test_full_edition_independence`` therefore gates the
 whole 7-step script on the SDK (the literal removability gate);
 ``test_registry_and_coverage_independence`` re-runs the SDK-free subset
 (steps 1, 2, 5) so those assertions run on an SDK-less runner too.
+
+Stage 4 extends the SDK-free subprocess script with one more call:
+``tests.necb.test_edition_provenance.check_provenance`` on the one-edition
+temp tree, so the checked-provenance contract (manifest ``provenance``
+blocks) is proven to hold with only one edition present too -- the same
+removability property this whole module exists to check. That test file is
+EXPECTED TO FAIL alongside ``test_edition_provenance.py`` until the sibling
+provenance data lands.
 """
 
 from __future__ import annotations
@@ -113,6 +121,8 @@ from btap.codes import coverage
 article = coverage.get_article({edition!r}, "8.4.1.1")
 result["coverage_article_has_text"] = bool(article.get("raw"))
 result["coverage_editions"] = list(coverage.editions())
+from tests.necb.test_edition_provenance import check_provenance
+result["provenance_problems"] = check_provenance(Path({tmp!r}))
 print(json.dumps(result))
 """
 
@@ -190,6 +200,10 @@ class TestEditionIndependence(unittest.TestCase):
                     self.assertEqual([ruleset.edition], summary["editions"])
                     self.assertTrue(summary["coverage_article_has_text"])
                     self.assertEqual([ruleset.edition], summary["coverage_editions"])
+                    # Stage 4: the provenance contract holds with only this one
+                    # edition present -- no cross-edition dependency in validation.
+                    self.assertEqual([], summary["provenance_problems"],
+                                     f"{code_id}: {summary['provenance_problems']}")
 
     def test_missing_edition_raises_naming_edition_and_path(self):
         """Only necb2025 present: resolving necb2020 must name both."""
