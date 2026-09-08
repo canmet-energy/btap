@@ -317,7 +317,7 @@ def _build_reference(run):
     audit = run.audit
     proposed = run.proposed
     vintage = opts["vintage"]
-    lighting_prefix = "8.4.5" if vintage == "2025" else "8.4.4"
+    prefix = "8.4.5" if vintage == "2025" else "8.4.4"
     with audit.with_building("reference building"):
         reference_result = hvac.reference_hvac(
             proposed, vintage=vintage, building=opts["building"], audit=audit,
@@ -338,12 +338,12 @@ def _build_reference(run):
                 "compliance",
                 "reference photocontrols BUILT by default: 4.2.2 requires "
                 "photocontrols, and "
-                f"{lighting_prefix}.5.(9)-(12) requires their effect to be "
+                f"{prefix}.5.(9)-(12) requires their effect to be "
                 "evaluated in the reference — a reference generated without "
                 "them is non-conformant, so correctness outranks the "
                 "detailed-daylighting runtime cost (pass "
                 "reference_daylighting: false to opt out)",
-                article=f"{lighting_prefix}.5.(9)-(12)", ruling="D-51")
+                article=f"{prefix}.5.(9)-(12)", ruling="D-51")
             lighting.reference_daylighting(reference, vintage=vintage,
                                            proposed=proposed, audit=audit)
         else:
@@ -351,10 +351,10 @@ def _build_reference(run):
                 "compliance",
                 "reference photocontrols SUPPRESSED by the caller "
                 "(reference_daylighting: false): "
-                f"{lighting_prefix}.5.(9)-(12) photocontrol effect is NOT "
+                f"{prefix}.5.(9)-(12) photocontrol effect is NOT "
                 "evaluated in this reference, so the target it sets is more "
                 "lenient than the code requires",
-                article=f"{lighting_prefix}.5.(9)-(12)", ruling="D-51")
+                article=f"{prefix}.5.(9)-(12)", ruling="D-51")
         shw.reference_shw(reference, vintage=vintage, audit=audit)
     audit.building = None
     audit.info(
