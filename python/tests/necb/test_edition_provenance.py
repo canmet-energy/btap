@@ -33,7 +33,9 @@ REQUIRED_ENTRY_KEYS = {
     "retrieved", "method", "source_verification", "result_sha256",
 }
 #: Keys an entry MAY carry in addition to the required ones.
-OPTIONAL_ENTRY_KEYS = {"byte_identical_to"}
+# `note` is the entry's own disclosure of what source_sha256 does NOT cover
+# (mixed-origin files, self-archived caches) — optional, free text.
+OPTIONAL_ENTRY_KEYS = {"byte_identical_to", "note"}
 ALLOWED_ENTRY_KEYS = REQUIRED_ENTRY_KEYS | OPTIONAL_ENTRY_KEYS
 
 METHODS = {"transcribed", "copied", "generated"}
@@ -156,13 +158,25 @@ def _check_archived_payload(code_id: str, manifest_dir: Path, name: str, entry: 
     if entry.get("source_verification") != "archived":
         return []
     archive_path = manifest_dir / "provenance" / _archive_name(name)
+    expected = entry.get("source_sha256")
     if not archive_path.exists():
+        # The named exception: a cache that IS its own canonical payload
+        # (the Section 8.4 article caches) is archived as itself — only when
+        # the entry says so in a note and source_sha256 equals result_sha256,
+        # and then the shipped file must hash to it.
+        if expected == entry.get("result_sha256") and entry.get("note"):
+            shipped = manifest_dir / name
+            if shipped.exists() and _sha256(shipped) == expected:
+                return []
+            return [
+                f"{code_id}: provenance[{name!r}] is self-archived but the "
+                f"shipped file does not hash to source_sha256"
+            ]
         return [
             f"{code_id}: provenance[{name!r}] is 'archived' but its payload is "
             f"missing at {archive_path}"
         ]
     actual = _sha256(archive_path)
-    expected = entry.get("source_sha256")
     if actual != expected:
         return [
             f"{code_id}: provenance[{name!r}] archived payload sha256 {actual!r} != "
@@ -214,7 +228,9 @@ def _check_copied_own_fields(code_id: str, name: str, entry: dict) -> list[str]:
     if entry.get("method") != "copied":
         return []
     problems = []
-    for key in ("source", "source_revision", "source_sha256", "extractor", "retrieved"):
+    # source_revision is required only where the source is revision-
+    # addressable — check (e) covers that; an MCP source honestly has none.
+    for key in ("source", "source_sha256", "extractor", "retrieved"):
         if not entry.get(key):
             problems.append(
                 f"{code_id}: provenance[{name!r}] is 'copied' but its own {key!r} is "
