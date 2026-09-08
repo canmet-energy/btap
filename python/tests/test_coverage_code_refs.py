@@ -23,7 +23,7 @@ SIZING_TIME = re.compile(
 
 #: Where each code family keeps one snapshot directory per edition. Discovery
 #: is MANIFEST-driven since Stage 3 of the multi-edition plan: the rule files
-#: no longer carry the vintage in their names, so a filename grammar
+#: no longer carry the edition in their names, so a filename grammar
 #: (``*_rules_*.json``) cannot find them and an edition that renames a file
 #: must say so in its manifest.
 EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"

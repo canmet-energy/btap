@@ -87,7 +87,7 @@ class TestArchetypes(unittest.TestCase):
     def test_bare_model_is_not_conformant_with_named_mismatches(self):
         model = compliance_fixture()
         resolved = A.resolve(model, {"Office": "all"}, audit=quiet())
-        check = A.conformance(model, resolved, vintage="2025", audit=quiet())
+        check = A.conformance(model, resolved, code="necb2025", audit=quiet())
         self.assertFalse(check["conformant"])
         self.assertTrue(any("occupant density" in m for m in check["mismatches"]),
                         "names the density gap")
@@ -111,11 +111,11 @@ class TestArchetypes(unittest.TestCase):
             equipment.setSpace(space)
         audit = quiet()
         resolved = A.resolve(model, {"Office": "all"}, audit=audit)
-        A.normalize(model, resolved, vintage="2025", audit=audit)
+        A.normalize(model, resolved, code="necb2025", audit=audit)
 
         check = A.conformance(model,
                               A.resolve(model, {"Office": "all"}, audit=audit),
-                              vintage="2025", audit=audit)
+                              code="necb2025", audit=audit)
         self.assertTrue(
             check["conformant"],
             "normalize->check round trip failed: "
@@ -146,7 +146,7 @@ class TestArchetypes(unittest.TestCase):
         space = model.getSpaces()[0]
         before = space.lightingPowerPerFloorArea()  # fixture + the hostile 99
         resolved = A.resolve(model, {"Office": "all"}, audit=quiet())
-        A.normalize(model, resolved, vintage="2025", audit=quiet())
+        A.normalize(model, resolved, code="necb2025", audit=quiet())
 
         self.assertAlmostEqual(
             before, space.lightingPowerPerFloorArea(), delta=0.01,
@@ -161,7 +161,7 @@ class TestArchetypes(unittest.TestCase):
         model = proposed_with_hvac()
         people_before = len(model.getPeoples())
         result = performance_compliance(
-            model, vintage="2025", path="eui", simulate="none", hdd=3890,
+            model, code="necb2025", path="eui", simulate="none", hdd=3890,
             archetypes_map={"Office": "all"},
             run_dir=tempfile.mkdtemp(prefix="osnecb-euinone-"))
 

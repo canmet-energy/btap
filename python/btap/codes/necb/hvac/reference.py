@@ -580,14 +580,14 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         if assignment.reference_system == 'hp':
             _apply_heat_pump_limits(result.air_loops, rules_data, audit)
         _apply_economizers(reference, result.air_loops, assignment.reference_system,
-                           ruleset.edition, rules_data, audit)
-        _apply_dcv(result.air_loops, zones, proposed_dcv, ruleset.edition, audit)
+                           ruleset.id, rules_data, audit)
+        _apply_dcv(result.air_loops, zones, proposed_dcv, ruleset.id, audit)
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
         _audit_terminal_secondary_split(zones, assignment.reference_system,
-                                        ruleset.edition, audit)
+                                        ruleset.id, audit)
 
     _rebuild_humidification(reference, proposed_humidification, rules_data,
-                            ruleset.edition, audit)
+                            ruleset.id, audit)
     _purge_orphaned_ems(reference, audit)
     _purge_orphaned_vrf(reference, audit)
     _apply_oversizing_caps(model, reference, rules_data, audit)

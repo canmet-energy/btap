@@ -144,13 +144,13 @@ class TestLoadsDataIntegrity(unittest.TestCase):
 
     def test_coverage_manifest_lint(self):
         from btap.codes.necb import loads
-        for vintage in ('2020', '2025'):
-            coverage = loads.rules(vintage)['article_coverage']['articles']
+        for edition in ('2020', '2025'):
+            coverage = loads.rules(edition)['article_coverage']['articles']
             # 5 core 8.4.3 entries + 8.4.2.7. internal loads (ffb58bc38) + 8.4.3.6.
             # outdoor air (f42f19533) — bump this pin when the manifest grows.
             # 8.4.3.2. is declared per sentence (3 rows) since the coverage-depth pass.
             self.assertEqual(9, len(coverage),
-                             f"{vintage}: subsection 8.4.3 + shared entries accounted")
+                             f"{edition}: subsection 8.4.3 + shared entries accounted")
             # The per-sentence split preserves the cross-gem delegation honesty: the
             # schedule sentence still names both sibling gems in its gaps.
             article = next(a for a in coverage if a['article'] == '8.4.3.2.(1)')

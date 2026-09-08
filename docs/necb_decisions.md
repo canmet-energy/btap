@@ -119,6 +119,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-84** — R6 retirement: Python is the sole product implementation while the pinned Ruby oracle survives _(process)_
 - **D-85** — VRF Table-I class selection and exact minimum assignment _(runtime)_
 - **D-86** — R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition _(process)_
+- **D-87** — R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output _(process)_
 
 <!-- TOC END -->
 
@@ -4846,3 +4847,61 @@ explicit allowlist naming the historical records that are deliberately never
 rewritten — `PORT_STATUS.md`, the R6 and D-80 reviews, the M6/M7 port review,
 the multi-edition plan itself, both ledgers' `old` columns, and dated wording
 inside this decision record.
+
+## D-87
+
+**Decided:** Stage 7 of the multi-edition refactor (R-C in
+`docs/NECB_MULTI_EDITION_PLAN.md`) is the ONE behavioural stage, 2026-09-08.
+The public way to name a code edition becomes the CODE ID, and the argument
+and the output change together so that exactly one re-freeze absorbs both.
+
+**The API.** `performance_compliance(model, *, code="necb2020", …)`, and
+`code=` on every public domain function. The CLI takes
+`--code {necb2020,necb2025}`, its choices read from `btap.codes.code_ids()`
+and its default preserved as `necb2020`. `vintage` is gone as a parameter
+name everywhere; `Ruleset.from_edition` is DELETED, so `resolve(code)` is
+the only route to a `Ruleset`, and an id no manifest declares raises
+`UnknownRuleset` naming the registered ids rather than falling back.
+
+**One distinction survives, deliberately.** A *code id* (`necb2020`) selects
+a RULESET; an *edition* string (`2020`) addresses that edition's DATA. So the
+pure catalog accessors — `loads.table`, `lighting.table`, `led_record`,
+`SpaceTypes.record/find/list_pairs`, `efficiency.data`, the six `rules`
+shims, `climate.hdd18`, the Table 4.2.1.6. daylight chain, `necb.code_id`
+and `necb.edition_file` — keep an `edition=` keyword, and the lighting
+coster's `"NECB" + edition` template selector becomes `edition=` with them.
+That is an edition concept, not the retired `vintage` selector; what the
+decision removes is one word standing for two different things.
+
+**`vintage` leaves the OUTPUT surface too, not only the signature.**
+`report.json` replaces `"vintage"` with `"edition"`, `"code"` and
+`"code_label"` on both compliance paths; the run option dict is keyed
+`"code"`; the ten audit emitters that recorded the edition now emit
+`inputs {"code", "edition"}` — the id says which ruleset ran, the edition
+stays readable beside it; the CLI's `--json` payload reports `edition` and
+`code`; `generate_necb_8_4_coverage.py` filters runs by `report["edition"]`;
+and the archetype sweep takes `--code`. The 13 hardcoded `"NECB"` literals in
+the report renderer and the CLI now read the report's own `code_label` (or
+the family name peeled off it), which renders IDENTICAL text for both
+editions today and lets a second code family name itself with no renderer
+edit.
+
+**Accepted R-C diff categories, and nothing else:** the `usage-*` help-text
+baselines (`--code {necb2020,necb2025}` replaces `--vintage {2020,2025}`);
+`report.json`'s key change plus the two added keys; audit `inputs.vintage`
+becoming `inputs.code` + `inputs.edition` at the 4–5 emitter entries per run,
+in BOTH `audit.json` and the normalized `audit.txt`; every affected
+`baseline_sha256`; the 2025 scenarios' argv and the three API scenarios'
+`api_call.code`, with their serialised `asserts` re-keyed at the same counts
+(`defs_sha256`); `runner.py`'s synthetic verdict report gaining
+`edition`/`code`/`code_label` (`runner_sha256`); the regenerated coverage
+documents' terminology; and `provenance.commit`. The re-freeze runs on a
+clean tree by the orchestrator, and any leaf outside those categories is a
+finding.
+
+**Nothing numeric moves.** No value, article string, audit action text,
+ordering or count changes. `python/tests/necb/test_codes_registry.py`'s
+30-entry `(edition, site) → article` table and
+`python/tests/test_citation_no_loss.py` are unchanged; only the call sites
+are re-keyed to code ids, which is why that table is the proof that the
+citation surface survived the rename.

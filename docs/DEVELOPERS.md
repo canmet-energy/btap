@@ -22,6 +22,12 @@ and `verification/oracle/`.
   because report classification is case-sensitive.
 - Rules target NECB 2020 and 2025 only. Article-coverage manifests state every
   partial or missing sentence and emit the corresponding warning.
+- An edition is selected by CODE ID: `code="necb2020"` on every public
+  function, `--code necb2020` on the CLI (`btap.codes.code_ids()` is the
+  list, `necb2020` the default). The per-edition data accessors take
+  `edition="2020"`. `report.json` carries `edition`, `code` and
+  `code_label`; audit entries that record the ruleset carry `code` and
+  `edition` in `inputs` (D-87).
 - Python is authoritative. Intentional output changes include a clean-tree
   frozen-scenario re-freeze and reviewed baseline diff in the same change.
 

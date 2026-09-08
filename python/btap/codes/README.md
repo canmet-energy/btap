@@ -53,7 +53,7 @@ space_map = {s.nameString(): ('Space Function', 'Office enclosed > 25 m2')
              for s in model.getSpaces()}
 
 result = performance_compliance(
-    model, vintage='2020',
+    model, code='necb2020',
     weather={'epw': 'toronto.epw', 'ddy': 'toronto.ddy'},
     building={'storeys': 1},
     necb_loads={'space_type_map': space_map, 'shw_fuel': 'NaturalGas',
@@ -143,7 +143,7 @@ reference building is generated or simulated; the target is
 
 ```python
 result = performance_compliance(
-    model, vintage='2025', path='eui',
+    model, code='necb2025', path='eui',
     archetypes={'Office': 'all'},          # archetype -> 'all' | [space names]
     process_loads_kwh=0,
     weather={'epw': ..., 'ddy': ...}, run_dir='runs/eui')

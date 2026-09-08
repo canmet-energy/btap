@@ -230,7 +230,7 @@ class TestNecbStaging(unittest.TestCase):
                                    msg=f'{coil.nameString()}: stage 1 = half the total')
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         # one table row, applied to EVERY stage
         cops = {s.grossRatedCoolingCOP()
@@ -301,7 +301,7 @@ class TestNecbStaging(unittest.TestCase):
             s.setNominalCapacity(150_000.0)  # -> ceil(150/66) = 3 stages
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         grown = model.getCoilHeatingGasMultiStages()[0]
         self.assertEqual(3, len(grown.stages()))

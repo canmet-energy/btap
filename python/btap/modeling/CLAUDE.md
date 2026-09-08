@@ -106,8 +106,8 @@ NRCan building-stock records.
 
 - **`apply_wwr(model, ratio)` is PURE GEOMETRY — no default, no code
   knowledge.** NECB's FDWR maximum is `btap.codes`'s envelope rule
-  (`max_fdwr(vintage=, hdd=)`, article 3.2.1.4, vintages `'2020'`/`'2025'`
-  — NOT `'NECB2020'`). Accepts a float, a dict of compass bins, or bins as
+  (`max_fdwr(code=, hdd=)`, article 3.2.1.4, code ids `'necb2020'`/
+  `'necb2025'`). Accepts a float, a dict of compass bins, or bins as
   keywords (`**bins`); bins left out get NO windows.
 - **THERMOSTATS gate the whole envelope pass** (D-75 — an earlier note
   blamed construction seeding, wrongly). The conditioned-space test requires

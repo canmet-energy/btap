@@ -54,8 +54,8 @@ class TestE2ERun(unittest.TestCase):
                              for z in model.getThermalZones()))
 
         audit = AuditLog()
-        loads.assign_space_types(model, office_map(model), vintage='2020', audit=audit)
-        loads.apply_loads(model, vintage='2020', audit=audit)
+        loads.assign_space_types(model, office_map(model), code='necb2020', audit=audit)
+        loads.apply_loads(model, code='necb2020', audit=audit)
 
         self.assertTrue(all(z.thermostatSetpointDualSetpoint().is_initialized()
                             for z in model.getThermalZones()),
@@ -93,11 +93,11 @@ class TestThreeDomainComposition(unittest.TestCase):
 
         model = bare_geometry()
         audit = AuditLog()
-        loads.assign_space_types(model, office_map(model), vintage='2020', audit=audit)
-        loads.apply_loads(model, vintage='2020', audit=audit)
+        loads.assign_space_types(model, office_map(model), code='necb2020', audit=audit)
+        loads.apply_loads(model, code='necb2020', audit=audit)
         modeling.build_system(model, 'Baseboard gas boiler',
                               sorted_by_name(model.getThermalZones()))
-        apply_prescriptive(model, vintage='2020', hdd=3890, audit=audit)
+        apply_prescriptive(model, code='necb2020', hdd=3890, audit=audit)
 
         steps = list(dict.fromkeys(e['step'] for e in audit.entries))
         for step in ('loads', 'schedules', 'coverage', 'prescriptive'):

@@ -114,12 +114,6 @@ class RulesetRegistryTests(unittest.TestCase):
         self.assertIsNot(resolve("necb2020").rules("shw"),
                          resolve("necb2025").rules("shw"))
 
-    def test_from_edition_equals_resolve(self):
-        from btap.codes import Ruleset, resolve
-
-        self.assertEqual(Ruleset.from_edition("2020"), resolve("necb2020"))
-        self.assertEqual(Ruleset.from_edition("2025"), resolve("necb2025"))
-
     def test_resolve_unknown_id_raises_with_id_in_message(self):
         from btap.codes import resolve
 

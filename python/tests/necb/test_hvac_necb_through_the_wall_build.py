@@ -51,7 +51,7 @@ class TestNecbThroughTheWallBuild(unittest.TestCase):
         model, types = self.build_incompatible_cooling_residential_model()
 
         audit = AuditLog()
-        result = hvac.reference_hvac(model, vintage='2020',
+        result = hvac.reference_hvac(model, code='necb2020',
                                      building={'storeys': 1, 'zone_types': types}, audit=audit)
 
         self.assertEqual(['through_the_wall'], sorted({a.action for a in result.assignments}),

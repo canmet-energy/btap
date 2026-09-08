@@ -41,7 +41,7 @@ class TestNecbMultistoreySys6Reference(unittest.TestCase):
         model = modeling.bar(
             space_type_ratios={('Space Function', 'Office enclosed > 25 m2'): 1.0},
             length=40.0, width=20.0, num_stories_above_grade=3, wwr=0.3)
-        loads.apply_loads(model, vintage='2020')
+        loads.apply_loads(model, code='necb2020')
         modeling.build_system(model, 'Baseboard gas boiler', sorted_zones(model))
         return model
 
@@ -52,7 +52,7 @@ class TestNecbMultistoreySys6Reference(unittest.TestCase):
                                 'fixture precondition: real geometry, not a storeys override')
 
         audit = AuditLog()
-        result = hvac.reference_hvac(model, vintage='2020', audit=audit)
+        result = hvac.reference_hvac(model, code='necb2020', audit=audit)
 
         self.assertEqual(['General Area'], sorted({a.category for a in result.assignments}),
                          'bar-tagged Office enclosed > 25 m2 zones must vote General Area')
@@ -69,7 +69,7 @@ class TestNecbMultistoreySys6Reference(unittest.TestCase):
     # the BUILT model actually carries that value.
     def test_system_6_supply_fan_total_efficiency_matches_the_declared_0_55(self):
         model = self.multistorey_proposed_model()
-        result = hvac.reference_hvac(model, vintage='2020')
+        result = hvac.reference_hvac(model, code='necb2020')
 
         declared = hvac.rules('2020')['fans']['system_6']['supply_efficiency']
         self.assertAlmostEqual(0.55, declared, delta=1e-9,

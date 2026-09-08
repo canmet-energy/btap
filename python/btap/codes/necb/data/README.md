@@ -65,7 +65,7 @@ object is the documented form.)
 `Ruleset.behaviour(name)` returns the imported module, or `None` when this
 edition binds nothing under that name — and every call site reads `None` as
 "this edition has no such feature". That is how NECB 2020 has no 8.4.4
-archetype-EUI path and no Part 11 GHG scoring without a single `vintage ==
+archetype-EUI path and no Part 11 GHG scoring without a single `edition ==
 "2025"` test surviving in `compliance.py`.
 
 Three rules hold the binding together, all gated by
@@ -311,7 +311,7 @@ WHERE a coefficient comes from; the live coefficients are named constants in
 `shw/efficiency.py`. Editing a formula string here changes nothing at runtime —
 change the code and the string together. Numeric values that ARE consumed (bin
 intercepts/slopes, thermal-efficiency floors, parasitic fractions, curve
-coefficients, the solar/pool minimums) are read through `shw.rules(vintage)` and
+coefficients, the solar/pool minimums) are read through `shw.rules(edition)` and
 covered by the orphan-key lint: a vendored key nobody reads fails the build.
 
 Verification trail: transcribed from the legacy pass, cross-verified against the

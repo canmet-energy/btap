@@ -17,8 +17,8 @@ class TestSHWRules(unittest.TestCase):
     def test_rules_and_coverage_lint(self):
         from btap.codes.necb import shw
 
-        for vintage in ("2020", "2025"):
-            rules = shw.rules(vintage)
+        for edition in ("2020", "2025"):
+            rules = shw.rules(edition)
             self.assertEqual(0.82, rules["efficiency"]["fuel_fired"]["burner_efficiency"])
             plc = rules["efficiency"]["part_load_curve"]
             self.assertEqual([0.7576, 1.0071, -1.4443, 0.6844], plc["coefficients"])
@@ -27,7 +27,7 @@ class TestSHWRules(unittest.TestCase):
                              "article scope: fuel-fired only")
             # 8.4.5.9.(2) in 2020, renumbered 8.4.6.9.(2) in 2025 (directional —
             # the 2025 SWH article is 8.4.6.9, NOT 8.4.5.9).
-            self.assertEqual("8.4.6.9.(2)" if vintage == "2025" else "8.4.5.9.(2)",
+            self.assertEqual("8.4.6.9.(2)" if edition == "2025" else "8.4.5.9.(2)",
                              plc["article"])
             self.assertEqual([0.021826, 0.97763, 0.000543],
                              plc["code_fheatplc"]["coefficients"])
@@ -50,8 +50,8 @@ class TestSHWRules(unittest.TestCase):
     def test_part_load_curve_is_functionally_the_code_fheatplc(self):
         from btap.codes.necb import shw
 
-        for vintage in ("2020", "2025"):
-            plc = shw.rules(vintage)["efficiency"]["part_load_curve"]
+        for edition in ("2020", "2025"):
+            plc = shw.rules(edition)["efficiency"]["part_load_curve"]
             cubic = plc["coefficients"]
             a, b, c = plc["code_fheatplc"]["coefficients"]
 
@@ -63,14 +63,14 @@ class TestSHWRules(unittest.TestCase):
 
             # self-check the code polynomial at its rating point before trusting it
             self.assertAlmostEqual(1.0, fheatplc(1.0), delta=1e-5,
-                                   msg=f"{vintage}: FHeatPLC(1.0) must be ~1.0")
+                                   msg=f"{edition}: FHeatPLC(1.0) must be ~1.0")
             self.assertAlmostEqual(1.0, poly(cubic, 1.0), delta=5e-3,
-                                   msg=f"{vintage}: applied PLF(1.0) must be ~1.0")
+                                   msg=f"{edition}: applied PLF(1.0) must be ~1.0")
 
             worst = max(abs((x / poly(cubic, x)) - fheatplc(x)) / fheatplc(x)
                         for x in (pct / 100.0 for pct in range(25, 101, 5)))
             self.assertLess(worst, 0.03,
-                            f"{vintage}: applied curve deviates {worst * 100:.2f}% from "
+                            f"{edition}: applied curve deviates {worst * 100:.2f}% from "
                             "the code FHeatPLC")
 
 
@@ -82,7 +82,7 @@ class TestSHW(unittest.TestCase):
 
         model = tagged_model()
         audit = AuditLog()
-        loop = shw.apply_shw(model, vintage="2020", fuel="NaturalGas", audit=audit)
+        loop = shw.apply_shw(model, code="necb2020", fuel="NaturalGas", audit=audit)
 
         self.assertIsNotNone(loop)
         heaters = model.getWaterHeaterMixeds()
@@ -115,7 +115,7 @@ class TestSHW(unittest.TestCase):
 
         model = load_raw_fixture()  # untagged: no space types -> no SHW demand
         audit = AuditLog()
-        result = shw.apply_shw(model, vintage="2020", audit=audit)
+        result = shw.apply_shw(model, code="necb2020", audit=audit)
         self.assertIsNone(result)
         self.assertEqual([], list(model.getPlantLoops()))
         self.assertTrue(any("no SHW loop added" in e["action"] for e in audit.entries))
@@ -134,7 +134,7 @@ class TestSHW(unittest.TestCase):
         heater.setHeaterMaximumCapacity(15_000)
         heater.setHeaterFuelType("NaturalGas")
         audit = AuditLog()
-        shw.apply_water_heater_efficiency(heater, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(heater, code="necb2020", audit=audit)
 
         self.assertAlmostEqual(0.82, heater.heaterThermalEfficiency().get(), delta=1e-9,
                                msg="burner efficiency")
@@ -149,7 +149,7 @@ class TestSHW(unittest.TestCase):
         electric.setTankVolume(0.200)
         electric.setHeaterMaximumCapacity(11_000)
         electric.setHeaterFuelType("Electricity")
-        shw.apply_water_heater_efficiency(electric, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(electric, code="necb2020", audit=audit)
         self.assertAlmostEqual(1.0, electric.heaterThermalEfficiency().get(), delta=1e-9)
         expected_ua = openstudio.convert(80.0, "W", "Btu/hr").get() / 70.0
         expected_ua_si = openstudio.convert(expected_ua, "Btu/hr*R", "W/K").get()
@@ -162,7 +162,7 @@ class TestSHW(unittest.TestCase):
         large.setTankVolume(0.500)
         large.setHeaterMaximumCapacity(100_000)
         large.setHeaterFuelType("NaturalGas")
-        shw.apply_water_heater_efficiency(large, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(large, code="necb2020", audit=audit)
         self.assertGreater(large.heaterThermalEfficiency().get(), 0.9,
                            "Et + UA/capacity adjustment")
 
@@ -212,7 +212,7 @@ class TestSHW(unittest.TestCase):
             h.setHeaterMaximumCapacity(30_000)
             h.setTankVolume(volume_m3)
             audit = AuditLog()
-            shw.apply_water_heater_efficiency(h, vintage="2020", audit=audit)
+            shw.apply_water_heater_efficiency(h, code="necb2020", audit=audit)
             return h, audit
 
         gas_storage, _ = build("NaturalGas", 0.3)
@@ -242,9 +242,9 @@ class TestSHW(unittest.TestCase):
         from btap.codes.necb import shw
 
         model = tagged_model()
-        shw.apply_shw(model, vintage="2020", fuel="Electricity")
+        shw.apply_shw(model, code="necb2020", fuel="Electricity")
         audit = AuditLog()
-        shw.reference_shw(model, vintage="2020", audit=audit)
+        shw.reference_shw(model, code="necb2020", audit=audit)
         self.assertTrue(any(e.get("article") == "8.4.4.20.(1)" for e in audit.entries))
         coverage = [e for e in audit.entries if e["step"] == "coverage"]
         self.assertGreaterEqual(len(coverage), 6)

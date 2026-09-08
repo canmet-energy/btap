@@ -138,13 +138,13 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
         from tests.necb.support import load_raw_fixture
 
         model = load_raw_fixture()
-        envelope.apply_prescriptive(model, vintage="2020", hdd=3890,
+        envelope.apply_prescriptive(model, code="necb2020", hdd=3890,
                                     audit=AuditLog())
         wall = next(s for s in model.getSurfaces()
                     if s.outsideBoundaryCondition() == "Outdoors"
                     and s.surfaceType() == "Wall")
         wall.setWindowToWallRatio(0.3)
-        envelope.apply_prescriptive(model, vintage="2020", hdd=3890,
+        envelope.apply_prescriptive(model, code="necb2020", hdd=3890,
                                     audit=AuditLog())
 
         legacy = golden()["tbd_rsi"]

@@ -1,4 +1,4 @@
-"""HP + instantaneous water heaters (the last SHW backlog item minus vintages).
+"""HP + instantaneous water heaters (the last SHW backlog item minus editions).
 
 Port of btap-necb/test/test_shw_hp_instantaneous.rb.
 """
@@ -30,7 +30,7 @@ class TestHPInstantaneous(unittest.TestCase):
         audit = AuditLog()
 
         small_gas = self.instantaneous_heater(model, "NaturalGas", 40_000)
-        shw.apply_water_heater_efficiency(small_gas, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(small_gas, code="necb2020", audit=audit)
         self.assertAlmostEqual(0.86, small_gas.heaterThermalEfficiency().get(), delta=1e-9,
                                msg="gas < 59 kW: conservative UEF row")
         self.assertAlmostEqual(
@@ -38,12 +38,12 @@ class TestHPInstantaneous(unittest.TestCase):
             delta=1e-9, msg="tankless: zero UA")
 
         big_gas = self.instantaneous_heater(model, "NaturalGas", 100_000)
-        shw.apply_water_heater_efficiency(big_gas, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(big_gas, code="necb2020", audit=audit)
         self.assertAlmostEqual(0.94, big_gas.heaterThermalEfficiency().get(), delta=1e-9,
                                msg="gas all others: Et 0.94")
 
         oil = self.instantaneous_heater(model, "FuelOilNo2", 40_000)
-        shw.apply_water_heater_efficiency(oil, vintage="2020", audit=audit)
+        shw.apply_water_heater_efficiency(oil, code="necb2020", audit=audit)
         self.assertAlmostEqual(0.80, oil.heaterThermalEfficiency().get(), delta=1e-9)
 
         self.assertTrue(any("instantaneous rows" in str(e.get("article") or "")
@@ -57,7 +57,7 @@ class TestHPInstantaneous(unittest.TestCase):
 
         model = tagged_model()
         audit = AuditLog()
-        loop = shw.apply_shw(model, vintage="2020", fuel="HeatPump", audit=audit)
+        loop = shw.apply_shw(model, code="necb2020", fuel="HeatPump", audit=audit)
 
         self.assertIsNotNone(loop)
         hpwhs = model.getWaterHeaterHeatPumps()
@@ -80,7 +80,7 @@ class TestHPInstantaneous(unittest.TestCase):
         from btap.codes.necb import shw
 
         model = tagged_model()
-        shw.apply_shw(model, vintage="2025", fuel="HeatPump")
+        shw.apply_shw(model, code="necb2025", fuel="HeatPump")
         coil = (model.getWaterHeaterHeatPumps()[0]
                 .dXCoil().to_CoilWaterHeatingAirToWaterHeatPump().get())
         self.assertAlmostEqual(2.23, coil.ratedCOP(), delta=1e-9, msg="2025 UEF floor")
@@ -90,7 +90,7 @@ class TestHPInstantaneous(unittest.TestCase):
         from btap.codes.necb import shw
 
         model = tagged_model()
-        shw.apply_shw(model, vintage="2020", fuel="HeatPump")
+        shw.apply_shw(model, code="necb2020", fuel="HeatPump")
         audit = AuditLog()
         report = shw.cost(model, city="TORONTO", province_state="ONTARIO", audit=audit)
         self.assertGreaterEqual(report.shw["hphw"], 1, "HPWH tank costed as HPHW_Heater")

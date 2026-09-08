@@ -54,8 +54,8 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
             "re-baselined explicitly (see test_citation_no_loss.py), not "
             "silently absorbed by a loose floor",
         )
-        for vintage, expected_articles in (("2020", 52), ("2025", 57)):
-            part = parts[vintage]
+        for edition, expected_articles in (("2020", 52), ("2025", 57)):
+            part = parts[edition]
             self.assertEqual(expected_articles, len(part["articles"]))
             self.assertEqual(expected_articles, sum(part["counts"].values()))
             self.assertGreater(sum(map(len, part["declarations"].values())), 40)

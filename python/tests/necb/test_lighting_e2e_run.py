@@ -26,8 +26,8 @@ def loaded_lit_model():
     for definition in model.getLightsDefinitions():
         definition.remove()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage="2020")
-    loads.apply_loads(model, vintage="2020")
+    loads.assign_space_types(model, map_, code="necb2020")
+    loads.apply_loads(model, code="necb2020")
     return model
 
 
@@ -41,7 +41,7 @@ class TestE2ERun(unittest.TestCase):
 
         model = loaded_lit_model()
         audit = AuditLog()
-        lighting.apply_lights(model, vintage="2020", audit=audit)
+        lighting.apply_lights(model, code="necb2020", audit=audit)
 
         with tempfile.TemporaryDirectory(prefix="oslight-e2e-") as dir_:
             attach_weather(model, epw=EPW, ddy=DDY)
@@ -70,11 +70,11 @@ class TestE2ERun(unittest.TestCase):
 
         model = loaded_lit_model()
         audit = AuditLog()
-        lighting.apply_lights(model, vintage="2020", audit=audit)
+        lighting.apply_lights(model, code="necb2020", audit=audit)
         modeling.build_system(model, "Baseboard gas boiler",
                               sorted_by_name(model.getThermalZones()))
-        envelope.apply_prescriptive(model, vintage="2020", hdd=3890, audit=audit)
-        lighting.cost(model, vintage="2020", city="TORONTO", province_state="ONTARIO",
+        envelope.apply_prescriptive(model, code="necb2020", hdd=3890, audit=audit)
+        lighting.cost(model, edition="2020", city="TORONTO", province_state="ONTARIO",
                       audit=audit)
 
         steps = {e["step"] for e in audit.entries}
