@@ -306,7 +306,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         global_cooling = model.getSizingParameters().coolingSizingFactor()
         trace = {}
         factors = _bump_capacities(model, "proposed", report,
-                                   {"heating": True, "cooling": True}, "2020",
+                                   {"heating": True, "cooling": True}, "necb2020",
                                    step=1.4, trace=trace)
 
         self.assertEqual("zonal", factors["mode"])
@@ -345,7 +345,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         factors = _bump_capacities(bare, "proposed",
                                    {"proposed": {}, "reference": {}},
                                    {"heating": True, "cooling": False},
-                                   "2020", step=1.4, trace={})
+                                   "necb2020", step=1.4, trace={})
         self.assertEqual("global", factors["mode"])
         self.assertAlmostEqual(bare_global * 1.4,
                                bare.getSizingParameters().heatingSizingFactor(),
@@ -364,7 +364,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         mixed_gc = mixed_model.getSizingParameters().coolingSizingFactor()
         mixed_gh = mixed_model.getSizingParameters().heatingSizingFactor()
         factors = _bump_capacities(mixed_model, "proposed", mixed_report,
-                                   {"heating": True, "cooling": True}, "2020",
+                                   {"heating": True, "cooling": True}, "necb2020",
                                    step=1.4, trace={})
         self.assertEqual("mixed", factors["mode"])
         self.assertIn("ZONE BAD", factors["zones"])

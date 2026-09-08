@@ -208,7 +208,7 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     for slug, system in SAMPLES:
         gate(slug, system)
         try:
-            model = seed("2020")
+            model = seed("necb2020")
             modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))
             size = save(model, out, slug)
         except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named
@@ -223,7 +223,7 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     # evidence of that.
     for slug, lead, backup in STAGED:
         try:
-            model = seed("2020")
+            model = seed("necb2020")
             loop = plant_loops.hot_water(model, fuel=lead, backup_fuel=backup, reuse=False)
             loop.setLoadDistributionScheme("SequentialLoad")
             modeling.build_system(model, "Baseboard gas boiler",
@@ -239,7 +239,7 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
     for slug, system, note, setup in STRESS_CASES:
         gate(slug, system)
         try:
-            model = seed("2020")
+            model = seed("necb2020")
             if setup is not None:
                 setup(model)
             modeling.build_system(model, system, sorted_by_name(model.getThermalZones()))

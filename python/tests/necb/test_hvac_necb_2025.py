@@ -106,8 +106,8 @@ class TestNecb2025(unittest.TestCase):
             value = coil.ratedCOP()
             cops[code] = value.get() if hasattr(value, 'is_initialized') else value
         # seer_to_cop_no_fan(15) = -0.0076*225 + 0.3796*15 = 3.984
-        self.assertAlmostEqual(3.984, cops['2020'], delta=0.01)
-        self.assertAlmostEqual(3.984, cops['2025'], delta=0.01)
+        self.assertAlmostEqual(3.984, cops['necb2020'], delta=0.01)
+        self.assertAlmostEqual(3.984, cops['necb2025'], delta=0.01)
         # heating side unchanged: 7.4 HSPF (Single Package) both editions
 
     def test_2025_boiler_and_chiller_values_unchanged(self):

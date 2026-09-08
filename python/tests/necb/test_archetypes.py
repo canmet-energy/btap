@@ -189,7 +189,7 @@ class TestArchetypes(unittest.TestCase):
         report = {"proposed": {"total_site_kwh": 100_000.0}}
         out = eui_supplement_verdict(
             model, {"archetypes": {"Office": "all"}}, 3890, report,
-            tempfile.mkdtemp(prefix="osnecb-sup-"), None, "2025", audit)
+            tempfile.mkdtemp(prefix="osnecb-sup-"), None, "necb2025", audit)
         self.assertEqual(False, out["computed"])
         self.assertIn("does not conform", out["reason"])
         self.assertTrue(out["mismatches"])
