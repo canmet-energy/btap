@@ -1577,3 +1577,33 @@ Stacked on `stage7-integration` (`b8cf6ae`). Opus: `btap/codes/pipeline.py`
 + `manifest.path`, with the six evidence-bearing symbols owned per the
 rev-7 table and forwarding functions on the executed call path.
 Byte-identical: no re-freeze.
+- **Stage 9a (Opus) delivered, integrated and verified** —
+  `stage9a-code-path` (`3c4f929`, 3 commits) → `stage9a-integration`,
+  17 files, +2090/−1484. `btap/codes/pipeline.py` (lifecycle only),
+  `CodePath` protocol, `btap/codes/necb/path.py`, `manifest.path` on both
+  editions, `Ruleset.path()`; the six evidence-bearing symbols owned per
+  the table: `performance_compliance`, `_load_and_validate` (neutral half)
+  and `_run_annual` stay executed in `compliance.py`; `_build_reference`,
+  `_evaluate`, `_evaluate_unmet` are forwarders that the family module
+  calls back through — Fable's own `sys.settrace` run confirmed
+  `performance_compliance → _load_and_validate → path.validate →
+  path.determine → compliance._build_reference` on a no-simulation run,
+  and `test_code_path.py` covers the two annual-only forwarders and a
+  real determination. Coverage `code` pointers unchanged (the "pointer
+  refresh" commit is the manifest `path` key + regenerated docs). New
+  import-linter contract: `btap.codes.pipeline` may not import
+  `btap.codes.necb` — **4 kept / 0 broken**. Verified: full suite 929
+  passed; frozen lanes python 32 / verify 3 / parity 4 **byte-identical,
+  no re-freeze**; targeted 32 passed; light gates and docs clean. The
+  agent backgrounded its suite against instructions and stalled on a
+  watcher; stopped by TaskStop, work committed on its own branch
+  (`stage9a-code-path`, not the worktree branch — checked). **Stage 9a
+  complete.**
+
+## Executable plan complete (2026-09-08)
+
+Stages 0–7 and 9a are done. What remains is not executable without
+decisions: Stage 8 (one plan per back-catalogue edition, transcription
+and engineering review), 9b (OBC SB-10, a new domain), 9c (BC Step Code,
+absolute metrics). Open for the user: Sol's review; `.wslconfig`; DF-1;
+the HPWH prose; merging the stacked PRs (#34, #35, and 3–7 + 9a queued).
