@@ -129,7 +129,12 @@ class TestNoLegacyNamespace(unittest.TestCase):
     def test_the_renamed_package_is_the_one_on_disk(self):
         package = REPO_ROOT / "python" / "btap" / "codes"
         self.assertTrue((package / "__init__.py").is_file())
-        self.assertFalse((REPO_ROOT / "python" / "btap" / "necb").exists())
+        # Tracked files, not the filesystem: a branch switch leaves the old
+        # package's __pycache__ behind, and that is not a legacy package.
+        legacy = subprocess.run(["git", "ls-files", "python/btap/necb"],
+                                cwd=REPO_ROOT, capture_output=True,
+                                text=True, check=True).stdout.split()
+        self.assertEqual([], legacy)
         for domain in ("envelope", "hvac", "lighting", "loads", "shw"):
             self.assertTrue((package / "necb" / domain).is_dir(), domain)
         editions = package / "necb" / "editions"
