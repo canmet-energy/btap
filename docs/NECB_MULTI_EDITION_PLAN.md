@@ -1374,3 +1374,13 @@ where Stage 3 puts them (the decisions registry stays neutral).
   registry and coverage report only that edition, the other edition's
   rules raise naming edition and path, the hook refuses without
   `_testing=True`. Full verification running detached.
+- **Stage 3 verified and complete** on `stage3-integration` (`4c13b52`):
+  removability gate 4/4; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; full suite 897 passed (a single
+  failure in the first pass was not reproducible; the one document moved
+  by 8 anchor tokens and is now committed, which is the document-drift
+  test's condition — the same trap the Stage 2 agent hit); lint-imports
+  3/3; ruff, orphan keys, TOC clean. **Incident:** resuming the threading
+  agent after taking over its work made it run a full suite concurrently
+  with the integration verification; its runs were killed by PID (after a
+  pattern-based kill matched my own shell — trap recorded in memory).
