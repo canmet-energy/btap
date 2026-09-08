@@ -85,7 +85,10 @@ is never modified; the translation is recorded in the audit).
 
 ## What the pipeline does
 
-The step numbers match the `# N.` markers in `compliance.py` — that list is
+The lifecycle is `pipeline.py` (code-family-neutral) calling NECB's
+`necb/path.py` through the `CodePath` hooks; the entry point and the
+evidence-bearing phase functions stay in `compliance.py`. The step numbers
+below match the `# N.` markers across those three files — that list is
 canonical.
 
 1. Load + validate the input model — on-ramp for bare geometry, simulate-ability

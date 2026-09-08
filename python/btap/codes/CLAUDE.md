@@ -11,6 +11,39 @@ reference transforms; ONE AuditLog spans everything.
 
 [README.md](README.md) is the API guide. This file is the traps.
 
+## Three modules, one determination (Stage 9a)
+
+`compliance.performance_compliance` is still the entry point, but the
+determination is split by OWNERSHIP, not by convenience:
+
+- **`pipeline.py`** — code-family-NEUTRAL lifecycle only: the `_Run` context,
+  phase ordering, the `run_dir` layout, the input-simulate-ability gate,
+  coverage emission, `report.json`/`audit.json`/`audit.txt`, the failure
+  flush, and the `CodePath` protocol. **It imports no code family** — an
+  import contract enforces that, indirect chains included — and reaches one
+  only through `Ruleset.path()`, which resolves the module the edition's
+  manifest names (`"path": "btap.codes.necb.path"`), exactly as `behaviours`
+  are resolved.
+- **`necb/path.py`** — NECB's `CodePath`: `validate` (on-ramp, space-type
+  pre-flight), `climate` (Table C-1 HDD), `prepare_annual`/`consume_annual`
+  (the heat-pump election variables around the pipeline's EnergyPlus call),
+  `determine` (reference build → sizing → 8.4.1.2 verdicts → GHG → costing →
+  EUI supplement), `citations`, `report_sections`, and `alternate_path` (the
+  8.4.4 archetype-EUI path, whose phase sequence is genuinely not this one).
+- **`compliance.py`** — the entry point plus the six symbols the Section 8.4
+  coverage `code` pointers name. `_build_reference`, `_evaluate` and
+  `_evaluate_unmet` are FORWARDING functions **on the executed call path**:
+  the family calls them and they delegate back through the registry. A dead
+  stub that resolved the pointer without running would make the evidence
+  technically valid and substantively false — `tests/necb/test_code_path.py`
+  is the gate. Never "tidy" a forwarder away, and never let `compliance.py`
+  or `pipeline.py` import `btap.codes.necb`.
+
+**Full compliance does not imply a reference building.** `Verdict` carries
+what a regime produces (`compliant` + the report it filled in); the report
+renders what is present. A future absolute-metric regime compares against
+thresholds and builds no reference at all.
+
 ## Pipeline (`compliance.performance_compliance`)
 
 clone → on-ramp → **space-type pre-flight** (every floor-area space type must

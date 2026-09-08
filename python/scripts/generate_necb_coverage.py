@@ -112,7 +112,7 @@ def render(records: list[dict]) -> str:
     host_scope_text = "delegated to the umbrella or a sibling Python domain"
     emitter_text = "Each Python domain emits its section of this accounting into"
     epilogue_text = (
-        "is emitted by `compliance.py#_emit_article_coverage` from the epilogue both"
+        "is emitted by `pipeline.py#_emit_article_coverage` from the epilogue both"
     )
     delegation_text = "the sibling-domain entry that actually"
     out = [

@@ -11,7 +11,7 @@ Statuses: **implemented** / **partial** (warns every run) /
 `gap_owner: "modeller"` are field/document-verified scope notes and do
 not warn (D-09, D-76). Each Python domain emits its section of this accounting into
 the shared AuditLog on every run — including the umbrella, whose manifest
-is emitted by `compliance.py#_emit_article_coverage` from the epilogue both
+is emitted by `pipeline.py#_emit_article_coverage` from the epilogue both
 compliance paths share — so nothing is silently missed.
 
 ## At a glance

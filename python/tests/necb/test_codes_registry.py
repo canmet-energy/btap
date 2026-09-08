@@ -14,7 +14,7 @@ The 15 sites (verified against the code, not against this file's own
 literals — computing the expected value the same way it is produced in
 product code would be circular):
 
- 1. ``btap/codes/compliance.py#_build_reference``                     ``prefix`` (lighting_subsection)
+ 1. ``btap/codes/necb/path.py#build_reference``                       ``prefix`` (lighting_subsection)
  2. ``btap/codes/necb/envelope/reference.py#apply``                   ``prefix``
  3. ``btap/codes/necb/hvac/efficiency.py#apply_staging``              ``prefix``
  4. ``btap/codes/necb/hvac/efficiency.py#_apply_fan_power_curve``     ``prefix``
