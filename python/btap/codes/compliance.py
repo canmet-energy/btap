@@ -959,17 +959,10 @@ def _evaluate_unmet(report, vintage, audit):
     return status["all_ok"]
 
 
-_UMBRELLA_RULES: dict[tuple, dict] = {}
-
-
 def _umbrella_rules(vintage):
-    """This edition's umbrella rule file, memoized per data root + edition."""
-    key = (necb._data_root(), str(vintage))
-    if key not in _UMBRELLA_RULES:
-        path = necb.edition_file(vintage, "necb_rules.json")
-        with open(path, encoding="utf-8") as handle:
-            _UMBRELLA_RULES[key] = json.load(handle)
-    return _UMBRELLA_RULES[key]
+    """This edition's umbrella rule file — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
+    return necb.rulesdata.load("umbrella", necb.code_id(vintage))
 
 
 def _minimum_cooling_allowance_h(vintage):

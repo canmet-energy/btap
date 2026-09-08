@@ -20,23 +20,13 @@ always happened by call time.
 
 from __future__ import annotations
 
-import json
-
-from btap.codes.necb import _data_root, edition_file
-
-_RULES_CACHE: dict[tuple, dict] = {}
+from btap.codes.necb import code_id, rulesdata
 
 
 def _load_rules(vintage):
-    """Load the vendored envelope rules for a vintage ('2020', '2025')."""
-    key = (_data_root(), str(vintage))
-    cached = _RULES_CACHE.get(key)
-    if cached is not None:
-        return cached
-
-    with open(edition_file(vintage, "envelope_rules.json"), encoding="utf-8") as handle:
-        _RULES_CACHE[key] = json.load(handle)
-    return _RULES_CACHE[key]
+    """This edition's envelope rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
+    return rulesdata.load("envelope", code_id(vintage))
 
 
 #: Public name while the submodules below have not been imported yet — the

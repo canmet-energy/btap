@@ -16,7 +16,6 @@ Requires a SIZED model (capacities read from hard or autosized values).
 
 from __future__ import annotations
 
-import json
 import math
 import re
 from datetime import date, datetime
@@ -25,19 +24,14 @@ import openstudio
 
 from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import Ruleset
-from btap.codes.necb import _data_root, edition_file
+from btap.codes.necb import code_id, rulesdata
 from btap.codes.necb.hvac.reference import rules as _rules
 from btap.modeling.hvac.components import coils as _coils
 
-_DATA: dict[tuple, dict] = {}
-
-
 def data(vintage):
-    key = (_data_root(), str(vintage))
-    if key not in _DATA:
-        with open(edition_file(vintage, 'efficiencies.json'), encoding='utf-8') as f:
-            _DATA[key] = json.load(f)
-    return _DATA[key]
+    """This edition's minimum-efficiency tables — a shim over the family's ONE
+    loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
+    return rulesdata.load("hvac_efficiencies", code_id(vintage))
 
 
 def apply(model, vintage='2020', audit=None, proposed=None):

@@ -11,7 +11,6 @@ characterization facts dict, the building info dict and the assignment actions
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 
@@ -20,26 +19,20 @@ import openstudio
 from btap._compat import NullAudit, opt, ruby_round, sorted_by_name
 from btap.audit import emit_coverage
 from btap.codes import Ruleset
-from btap.codes.necb import _data_root, edition_file
+from btap.codes.necb import code_id, rulesdata
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 
-_RULES: dict[tuple, dict] = {}
-
-
 def rules(vintage):
-    """Load (and memoize) the vendored NECB reference ruleset for a vintage.
+    """This edition's HVAC reference ruleset — a shim over the family's ONE
+    loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache.
 
     :param vintage: NECB vintage ('2020' or '2025')
-    :return: dict — parsed data/<code id>/reference_rules.json
+    :return: dict — the edition's manifest-declared ``hvac`` rule file
     """
-    key = (_data_root(), str(vintage))
-    if key not in _RULES:
-        with open(edition_file(vintage, "reference_rules.json"), encoding="utf-8") as f:
-            _RULES[key] = json.load(f)
-    return _RULES[key]
+    return rulesdata.load("hvac", code_id(vintage))
 
 
 @dataclass

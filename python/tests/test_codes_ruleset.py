@@ -81,12 +81,38 @@ class RulesetRegistryTests(unittest.TestCase):
             "btap.codes.necb.editions.necb2025.eui_archetypes",
             resolve("necb2025").behaviour("archetype_eui_path").__name__)
 
-    def test_rules_raises_not_implemented(self):
-        # Stage 6 placeholder.
+    def test_rules_loads_this_editions_own_file(self):
+        """Stage 6: ``rules`` is the ONE loader, and it reads THIS edition."""
+        from btap.codes import resolve
+        from btap.codes.necb import rulesdata
+
+        rules = resolve("necb2020").rules("envelope")
+        self.assertIsInstance(rules, dict)
+        self.assertTrue(rules)
+        # The same memoized object the family's loader hands the domain shim:
+        # one cache, not one per caller.
+        self.assertIs(rules, rulesdata.load("envelope", "necb2020"))
+        # Every domain the manifest declares resolves; nothing else does.
+        for domain in ("umbrella", "envelope", "hvac", "hvac_efficiencies",
+                       "lighting", "loads", "shw"):
+            self.assertTrue(resolve("necb2025").rules(domain), domain)
+
+    def test_rules_of_undeclared_domain_raises_naming_edition_and_domain(self):
+        """No default file name, no other edition's rules — one loud error."""
         from btap.codes import resolve
 
-        with self.assertRaises(NotImplementedError):
-            resolve("necb2020").rules("envelope")
+        with self.assertRaises(ValueError) as ctx:
+            resolve("necb2020").rules("plumbing")
+        message = str(ctx.exception)
+        self.assertIn("necb2020", message)
+        self.assertIn("plumbing", message)
+
+    def test_rules_are_per_edition_not_shared(self):
+        """Two editions are two snapshots: the loader never crosses them."""
+        from btap.codes import resolve
+
+        self.assertIsNot(resolve("necb2020").rules("shw"),
+                         resolve("necb2025").rules("shw"))
 
     def test_from_edition_equals_resolve(self):
         from btap.codes import Ruleset, resolve
