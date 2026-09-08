@@ -264,8 +264,11 @@ NEWLY_COVERED = [
                    "the CLI's own argument parsing and process wiring are "
                    "outside what this freezes",
      "scenario": "determination-01-baseboard-gas-necb2025",
-     "cost": "40-90 minutes — a dispatch-cadence (parity lane) scenario, "
-             "which is why it was declared uncovered for as long as it was",
+     "cost": "about 3 minutes on the corpus model (189 s, three reference "
+             "capacity iterations, when authored on 2026-09-08) — the 40-90 "
+             "minute figure that kept it uncovered was the oracle archetypes' "
+             "cost, not the corpus's; it stays parity-lane by policy (a real "
+             "EnergyPlus annual run), not by cost",
      "still_unit_level": "CLI RENDERING of both determinations stays "
                          "covered by the verdict-unit scenarios "
                          "(verdict-compliant / verdict-not-compliant); "
@@ -273,8 +276,132 @@ NEWLY_COVERED = [
 ]
 
 
+# ------------------------------------------------------------ NECB 2025
+#: The first frozen evidence for a second edition (multi-edition plan,
+#: Stage 0 / R-A). Four scenarios: two no-simulation corpus runs in the
+#: python lane, and two real annual API runs in the parity lane — the
+#: first full-year determination this suite has ever frozen, and the only
+#: frozen witness of the 2025 archetype-EUI path. Every value pinned below
+#: (expect_exit, compliant, ghg.level, tier) was read off an authoring run
+#: of the unmodified product on 2026-09-08 and is asserted, not assumed:
+#: a baseline that fails its own asserts does not freeze.
+NECB2025_EDITION = "necb2025"
+
+_WEATHER_2025 = {"epw": "<EPW>", "ddy": "<DDY>"}
+
+EDITION_SCENARIOS = [
+    # Reference build audited at 2025: the envelope prescriptive decision
+    # cites 8.4.5.1.(2) (8.4.4.1.(2) at 2020), and every emitter that
+    # records the edition records 2025.
+    {**_corpus("01-baseboard-gas", "none", "python", code=NECB2025_EDITION),
+     "replaces": [],
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "audit_entry", "article": "8.4.5.1.(2)", "count": 1},
+         {"op": "audit_entry", "inputs": {"vintage": "2025"}, "count": 4},
+     ]},
+    # D-85 at 2025: the proposed VRF outdoor unit that serves no reference
+    # zone is purged, audited once, at info.
+    {**_corpus("08-vrf", "none", "python", code=NECB2025_EDITION),
+     "replaces": [],
+     "asserts": [
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "audit_entry", "step": "build", "level": "info",
+          "action": "proposed VRF outdoor unit serves no reference zone — "
+                    "removed",
+          "ruling": "D-85", "inputs": {"terminals": 0}, "count": 1},
+     ]},
+    # The full-year determination, as an API scenario: the CLI has no
+    # province argument, and the Part 11 GHG binding (Stage 5) is only
+    # frozen if the run scores GHG against a reference. Authoring run:
+    # exit 1 / not compliant because the REFERENCE building's unmet
+    # heating hours (801 h) exceed the 8.4.1.2.(3) 100 h limit after three
+    # capacity increases (8.4.1.2.(5)); the energy verdict itself passes
+    # (76.0 % of target, tier 1); GHG level "F" at 95.3 % of the GHG
+    # target. The asserts tie the pinned exit to that reason.
+    {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"vintage": "2025", "simulate": "annual",
+                  "province_state": "ONTARIO",
+                  "model": "<CORPUS>/01-baseboard-gas.osm",
+                  "weather": _WEATHER_2025, "building": {"storeys": 1}},
+     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
+     "asserts": [
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.total_site_kwh", "value": 0},
+         {"op": "json_exists", "file": "report.json",
+          "path": "proposed.unmet_occupied_hours"},
+         {"op": "json_exists", "file": "report.json",
+          "path": "reference.unmet_occupied_hours"},
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "json_exists", "file": "report.json", "path": "ghg"},
+         {"op": "json_equals", "file": "report.json", "path": "ghg.level",
+          "value": "F"},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "proposed does not exceed the building energy target",
+          "article": "8.4.1.2.(2)", "count": 1},
+         {"op": "audit_entry", "step": "compliance", "level": "decision",
+          "action": "unmet heating hours EXCEED 100 h",
+          "article": "8.4.1.2.(3)", "count": 1},
+         {"op": "audit_entry", "level": "warning", "article": "8.4.1.2.(5)",
+          "count": 1},
+         {"op": "observation_equals", "key": "compliant", "value": False},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": True},
+     ]},
+    # The 2025 archetype-EUI path: no reference building is built, so no
+    # reference_sizing/ or reference_annual/ appears, the target comes from
+    # Table 8.4.4.1 (140 000 kWh for 800 m2 of Office at 175 kWh/m2), and
+    # the proposed's own GHG mass is reported without a comparative level.
+    # Authoring run: exit 0 / compliant, 93.1 % of target, tier 1, 37 s.
+    {"id": f"api-eui-path-{NECB2025_EDITION}",
+     "lane": "parity", "kind": "api", "replaces": [],
+     "api_call": {"vintage": "2025", "path": "eui",
+                  "archetypes_map": {"Office": "all"},
+                  "simulate": "annual", "province_state": "ONTARIO",
+                  "model": "<CORPUS>/01-baseboard-gas.osm",
+                  "weather": _WEATHER_2025, "building": {"storeys": 1}},
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
+     "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
+     "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
+     "asserts": [
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.total_site_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json",
+          "path": "reference.building_energy_target_kwh", "value": 0},
+         {"op": "json_gt", "file": "report.json", "path": "percent_of_target",
+          "value": 0},
+         {"op": "json_equals", "file": "report.json", "path": "tier",
+          "value": 1},
+         {"op": "json_equals", "file": "report.json", "path": "annual",
+          "value": True},
+         {"op": "json_equals", "file": "report.json", "path": "vintage",
+          "value": "2025"},
+         {"op": "json_gt", "file": "report.json",
+          "path": "proposed.ghg_kg_co2e", "value": 0},
+         {"op": "path_absent", "relative": "reference_sizing"},
+         {"op": "path_absent", "relative": "reference_annual"},
+         {"op": "observation_equals", "key": "reference_model_present",
+          "value": False},
+         {"op": "observation_equals", "key": "compliant", "value": True},
+     ]},
+]
+
+
 def all_scenarios(slugs):
-    scenarios = corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS + VERDICT_SCENARIOS
+    scenarios = (corpus_scenarios(slugs) + API_SCENARIOS + FAILURE_SCENARIOS
+                 + VERDICT_SCENARIOS + EDITION_SCENARIOS)
     for scenario in scenarios:
         seal = scenario["seal"]
         if seal == "ruby" or seal.startswith("ruby-api:"):
