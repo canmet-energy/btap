@@ -68,12 +68,18 @@ class RulesetRegistryTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             resolve("necb2020").article("no_such_article_key")
 
-    def test_behaviour_returns_none(self):
-        # Stage 5 placeholder.
+    def test_behaviour_is_bound_through_the_manifest(self):
+        # Stage 5: the placeholder that returned None for both editions is
+        # now the manifest binding. 2020 binds nothing (so the 8.4.4 EUI path
+        # simply does not exist there); 2025 binds its own module. The full
+        # contract, including the orphan rule, is
+        # tests/necb/test_behaviour_binding.py.
         from btap.codes import resolve
 
         self.assertIsNone(resolve("necb2020").behaviour("archetype_eui_path"))
-        self.assertIsNone(resolve("necb2025").behaviour("archetype_eui_path"))
+        self.assertEqual(
+            "btap.codes.necb.editions.necb2025.eui_archetypes",
+            resolve("necb2025").behaviour("archetype_eui_path").__name__)
 
     def test_rules_raises_not_implemented(self):
         # Stage 6 placeholder.

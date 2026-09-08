@@ -132,6 +132,11 @@
   "parasitic": {
    "on_cycle_heat_fraction": 0.0,
    "off_cycle_heat_fraction": 0.8
+  },
+  "heat_pump": {
+   "minimum_cop": 2.23,
+   "metric": "UEF",
+   "note": "NECB 2025 Table 6.2.2.1 storage-type heat pump: UEF >= 2.23 (the one substantive 2025 change to this table)."
   }
  },
  "article_coverage": {

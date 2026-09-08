@@ -131,6 +131,11 @@
   "parasitic": {
    "on_cycle_heat_fraction": 0.0,
    "off_cycle_heat_fraction": 0.8
+  },
+  "heat_pump": {
+   "minimum_cop": 2.1,
+   "metric": "EF",
+   "note": "NECB 2020 Table 6.2.2.1 storage-type heat pump: EF >= 2.1."
   }
  },
  "article_coverage": {

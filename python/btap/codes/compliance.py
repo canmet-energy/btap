@@ -33,8 +33,6 @@ from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog, emit_coverage
 from btap.codes import Ruleset, necb
 from btap.codes.necb import tiers
-from btap.codes.necb.editions.necb2025 import eui_archetypes as archetypes
-from btap.codes.necb.editions.necb2025 import part11_ghg
 from btap.simulation import runner
 
 
@@ -71,6 +69,9 @@ class _Run:
     hdd: object = None
     proposed_annual_data: dict = None
     compliant: bool | None = None
+    #: The edition this run is determined against — built ONCE here and reused
+    #: by every phase that asks it for an edition-specific behaviour.
+    ruleset: object = None
 
 
 HEATING_UNMET_LIMIT_H = 100.0    # 8.4.1.2.(3)
@@ -125,8 +126,12 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
     weather = weather or {}
     report_options = report_options or {}
     simulate = str(simulate)
+    ruleset = Ruleset.from_edition(vintage)
     if str(path) == "eui":
-        if str(vintage) != "2025":
+        # The archetype-EUI path EXISTS only where an edition binds an
+        # implementation for it (Stage 5): no edition literal here, so an
+        # edition that never adopts 8.4.4 simply has no such path.
+        if ruleset.behaviour("archetype_eui_path") is None:
             raise ValueError(
                 "the archetype-EUI path is a NECB 2025 feature (vintage: 2025)")
         if archetypes_map is None:
@@ -134,7 +139,8 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
                 "the 'eui' path requires archetypes_map={archetype: 'all' | "
                 "[space names]}")
 
-        return _eui_compliance(model, vintage=vintage, weather=weather, hdd=hdd,
+        return _eui_compliance(model, ruleset=ruleset,
+                               vintage=vintage, weather=weather, hdd=hdd,
                                run_dir=run_dir, simulate=simulate,
                                run_period=run_period,
                                archetypes_map=archetypes_map,
@@ -161,7 +167,7 @@ def performance_compliance(model, *, vintage="2020", weather=None, building=None
             "reference_daylighting": reference_daylighting,
             "eui_supplement": eui_supplement, "report_html": report_html,
             "report_options": report_options}
-    run = _Run(opts=opts, report={}, audit=audit, hdd=hdd)
+    run = _Run(opts=opts, report={}, audit=audit, hdd=hdd, ruleset=ruleset)
     try:
         _load_and_validate(run)        # 1. input model in, gates passed
         _attach_weather_and_hdd(run)   # 2. weather + heating degree-days
@@ -439,11 +445,13 @@ def _compare_and_iterate(run):
                    "energy comparison performed (compliance undetermined)")
 
 
-# 8. NECB 2025 Part 11: operational GHG performance level (needs a province)
+# 8. Part 11 operational GHG performance level, for the editions that have
+#    one (NECB 2025 today) — needs a province
 def _score_ghg(run):
     opts = run.opts
     report = run.report
-    if not (opts["vintage"] == "2025" and opts["simulate"] == "annual"
+    part11_ghg = run.ruleset.behaviour("part11_ghg")
+    if not (part11_ghg is not None and opts["simulate"] == "annual"
             and opts["province_state"]):
         return
 
@@ -481,7 +489,8 @@ def _cost_both(run):
 # compute the verdict from that run.
 def _supplement_eui(run):
     opts = run.opts
-    if not (opts["eui_supplement"] and opts["vintage"] == "2025"
+    if not (opts["eui_supplement"]
+            and run.ruleset.behaviour("archetype_eui_path") is not None
             and run.report["proposed"].get("total_site_kwh") is not None):
         return
 
@@ -621,7 +630,7 @@ def _validate_input_model(proposed, audit, building=None, require_storeys=True):
                        "openstudio_version": proposed.version().str()})
 
 
-def _eui_compliance(model, *, vintage, weather, hdd, run_dir, simulate,
+def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
                     run_period, archetypes_map, process_loads_kwh, costing,
                     city, province_state, costs_csv, necb_loads,
                     report_html=False, report_options=None, audit=None):
@@ -635,6 +644,10 @@ def _eui_compliance(model, *, vintage, weather, hdd, run_dir, simulate,
     BET; the Section 10 tier is computed against the same BET."""
     from btap.codes.necb import envelope
 
+    # Both edition-bound: the caller has already refused the path when this
+    # edition binds no archetype-EUI implementation.
+    archetypes = ruleset.behaviour("archetype_eui_path")
+    part11_ghg = ruleset.behaviour("part11_ghg")
     audit = audit if audit is not None else AuditLog()
     report_options = report_options or {}
     os.makedirs(run_dir, exist_ok=True)
@@ -706,7 +719,7 @@ def _eui_compliance(model, *, vintage, weather, hdd, run_dir, simulate,
                 article="8.4.4.1.(2)")
             report.update(tiers.energy_tier(proposed_kwh, target["bet_kwh"],
                                             audit=audit))
-            if province_state:
+            if province_state and part11_ghg is not None:
                 ghg = part11_ghg.operational_ghg_kg(report["proposed"],
                                                     province_state)
                 if ghg is not None:
@@ -946,11 +959,36 @@ def _evaluate_unmet(report, vintage, audit):
     return status["all_ok"]
 
 
+_UMBRELLA_RULES: dict[tuple, dict] = {}
+
+
+def _umbrella_rules(vintage):
+    """This edition's umbrella rule file, memoized per data root + edition."""
+    key = (necb._data_root(), str(vintage))
+    if key not in _UMBRELLA_RULES:
+        path = necb.edition_file(vintage, "necb_rules.json")
+        with open(path, encoding="utf-8") as handle:
+            _UMBRELLA_RULES[key] = json.load(handle)
+    return _UMBRELLA_RULES[key]
+
+
+def _minimum_cooling_allowance_h(vintage):
+    """The absolute floor, in hours, under 8.4.1.2.(4)'s cooling allowance.
+
+    Every edition DECLARES this: 2025 allows +10% of the reference or 20 h,
+    whichever is greater; 2020's wording has no floor and declares 0.0. A
+    missing key raises rather than defaulting — a silent 0.0 for an edition
+    that meant 20 h is exactly the cross-edition leak the snapshots remove.
+    """
+    return float(_umbrella_rules(vintage)["unmet_cooling"]["minimum_allowance_h"])
+
+
 def _unmet_status(report, vintage):
     """The (3)/(4) arithmetic without audit side effects — shared by the
     formal verdicts and the capacity-iteration loop.
-    (4): 2020 wording is +10% of reference; 2025's 8.4.5 path allows +10% or
-    20 h, whichever is greater."""
+    (4): the allowance is +10% of the reference, or this edition's declared
+    minimum (necb_rules.json `unmet_cooling.minimum_allowance_h`: 2020 has no
+    floor, 2025's 8.4.5 path allows 20 h), whichever is greater."""
     def dig(section, key):
         return (report[section].get("unmet_occupied_hours") or {}).get(key)
 
@@ -959,9 +997,8 @@ def _unmet_status(report, vintage):
     proposed_cooling_h = dig("proposed", "cooling")
     reference_cooling_h = dig("reference", "cooling")
 
-    allowance = float(reference_cooling_h or 0.0) * 0.10
-    if str(vintage) == "2025":
-        allowance = max(allowance, 20.0)
+    allowance = max(float(reference_cooling_h or 0.0) * 0.10,
+                    _minimum_cooling_allowance_h(vintage))
     proposed_heating_ok = (proposed_heating_h is not None
                            and proposed_heating_h <= HEATING_UNMET_LIMIT_H)
     reference_heating_ok = (reference_heating_h is not None
@@ -1236,9 +1273,7 @@ def _failing_zone_targets(label, report, bump, vintage):
             continue
 
         ref_h = float((ref_zones.get(zone) or {}).get("cooling") or 0.0)
-        allowance = ref_h * 0.10
-        if str(vintage) == "2025":
-            allowance = max(allowance, 20.0)
+        allowance = max(ref_h * 0.10, _minimum_cooling_allowance_h(vintage))
         if float(hours.get("cooling") or 0.0) > ref_h + allowance:
             targets.setdefault(zone, {})["cooling"] = (
                 (ref_h + allowance) * SECANT_TARGET_FRACTION)
@@ -1325,8 +1360,7 @@ def _emit_article_coverage(vintage, audit):
     status, partial/not_implemented warn — EXCEPT entries flagged gap_owner:
     "modeller", which emit as info scope notes (D-09). Emitted at the end of
     the happy path only — a crash flush must not assert coverage."""
-    with open(necb.edition_file(vintage, "necb_rules.json"), encoding="utf-8") as handle:
-        emit_coverage(json.load(handle)["article_coverage"], audit)
+    emit_coverage(_umbrella_rules(vintage)["article_coverage"], audit)
 
 
 def _write_outputs(run_dir, report, audit):
@@ -1369,6 +1403,10 @@ def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
     if mapping is None:
         raise ValueError("eui_supplement requires archetypes: "
                          "{archetype: 'all' | [space names]}")
+    # Reached only from `_supplement_eui`, which has already established that
+    # this edition binds the behaviour; resolving from `vintage` here keeps
+    # the public signature (and this function's direct unit tests) unchanged.
+    archetypes = Ruleset.from_edition(vintage).behaviour("archetype_eui_path")
     resolved = archetypes.resolve(proposed, mapping, audit=audit)
     problems = archetypes.applicability_problems(resolved, hdd=hdd, audit=audit)
     if problems:

@@ -48,8 +48,10 @@ schedules and occupancy/receptacle loads stay identical-by-clone (8.4.3.2);
 lighting power and SHW efficiencies ARE regenerated to code on the reference.
 
 - Modes `simulate='annual' | 'sizing' | 'none'` — only `'annual'` determines.
-- `path='eui'` (2025 only) — the 8.4.4 archetype-EUI path via
-  `necb/editions/necb2025/eui_archetypes.py`. Areas are COMPUTED from the
+- `path='eui'` (2025 only) — the 8.4.4 archetype-EUI path, reached through the
+  edition's `behaviours.archetype_eui_path` binding, never by importing
+  `necb/editions/necb2025/eui_archetypes.py`; an edition that binds nothing
+  has no such path. Areas are COMPUTED from the
   model per 8.4.4.1.(3), unmapped area pro-rata per (4); <90% coverage or
   HDD ≥ 9000 HARD-REFUSE.
   The proposed is CHECKED against Table 8.4.4.2 and, when non-conformant,
