@@ -1414,3 +1414,27 @@ under the removability gate with one edition present.
   heat-pump rows); shw 1 renumbered + 2 added; the six shared tables
   43,796 identical leaves. That is the review artifact the principle asked
   for. Held for integration with the provenance branch.
+- **Checked provenance (Opus) delivered and reviewed** — `stage4-provenance`
+  (`0f42b64`), 22 files, +1591/−4: 32 entries = exactly the declared
+  outputs (14 + 18); **17 archived, 13 revision_addressable with real
+  hashes against the user's `bundle install` of the oracle at REF, 2
+  manual, 0 current_only**; 15 payloads (440 KB raw, +69 KB in the wheel);
+  68 MCP requests replayed through `btap._mcp.MCPClient`, one cross-checked
+  against the tool result; `verify-source` demoed for all four classes
+  and a corrupted payload; oracle located from the environment only after
+  `test_self_containment` caught a repo-relative locator. Schema
+  extensions accepted: multi-file oracle sources as a `request` list with
+  per-file hashes; a `note` disclosing what the hash does not cover; the
+  two 8.4 caches archived as themselves.
+- **Stage 4 integration** (`stage4-integration`, `4d34d8a`): the two halves
+  disagreed at exactly the schema extensions — the test rejected `note`,
+  demanded a payload file for the self-archived caches, and required
+  `source_revision` on copied MCP entries (which honestly have none).
+  All three were the test being stricter than the plan in the wrong place;
+  corrected with the conditions spelled out (self-archived only with
+  matching hashes and a note; revision only where check (e) requires it).
+  **Verified:** provenance + removability + registry tests 50 passed;
+  full suite 905 passed; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; lint-imports 3/3; ruff; orphan keys;
+  TOC; `NECB_EDITION_DELTAS.md --check` current; docs regenerate to no
+  diff. **Stage 4 complete.**
