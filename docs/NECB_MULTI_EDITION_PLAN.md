@@ -1523,3 +1523,57 @@ matrix row's categories, anything else a finding.
   `btap/codes` 95, `btap/costing` 3, `scripts` 22, `tests` 278 (the plan's
   "277 call sites" was right to within one). CLI parser test fails on
   `--vintage` as designed. Held for integration.
+- **Stage 7 (Opus) delivered and reviewed** — `stage7-public-api`
+  (`10918c5`, 6 commits), 128 files, +984/−848: 88 `vintage` parameters
+  and 304 keyword call sites → 0, plus the positional edition-string
+  sites; `code=` everywhere public, `edition=` on pure catalog accessors
+  (a code id selects a ruleset, an edition string addresses data);
+  `Ruleset.from_edition` gone; `--code {necb2020,necb2025}` default
+  `necb2020`; report `edition`+`code`+`code_label`; audit
+  `inputs.code`/`edition`; `sections.code_label()` for the literals except
+  the one `"(2025)"` that names the edition which *introduced* the EUI
+  path (honest on 2020 reports); the three Stage-6 helpers whose Ruleset
+  parameter was named `code` renamed `edition_rules`; **D-87** adjudicates
+  R-C. `test_codes_registry` EXPECTED and `citation_counts_baseline`
+  byte-unchanged; full suite 906 passed; frozen python lane failed on
+  exactly the predicted categories before the freeze.
+- **Integration** (`stage7-integration`): AST gate merged — its docstring
+  tripped the namespace gate (one docstring fix); all six gates green.
+- **R-C executed** from clean tree `14f3575`, all 39 scenarios, every
+  assert held. **Attribution by script (`attribute_rc.py`): no findings.**
+  83 files / 29 scenarios: audit.json 351 leaves = 117 entries
+  `inputs.vintage → code + edition`; audit.txt the same 117 lines;
+  report.json 108 leaves = 27 × (`vintage` → `edition`, +`code`,
+  +`code_label`); usage stderr 8 lines. Manifest: `provenance.commit`,
+  `defs_sha256`, `runner_sha256`; 29 `baseline_sha256`; `argv` ×2,
+  `api_call` ×3, `asserts` ×4; `gate/freezer/spec_sha256`, counts, ids
+  unchanged. Parallel verification of the frozen tree running.
+- **Stage 7 verified on the frozen tree:** full suite 917 passed; frozen
+  lanes python 32 / verify 3 / parity 4 green; the two namespace/vintage
+  gates, citation table, removability and provenance 34 passed; light
+  gates and docs clean. **Stage 7 complete — Stages 0–7 done.** Three
+  re-freezes in total (R-A, R-B, R-C), each single-cause and attributed
+  with no findings; every stage between them byte-identical. `vintage`
+  no longer exists as a parameter anywhere under `python/`.
+
+## Milestone — Stages 0–7 complete (2026-09-08)
+
+What the tree now is: `btap.codes` with `btap.codes.necb`; two
+independent edition snapshots under `necb/data/necb20{20,25}/` with
+checked provenance (17 archived / 13 revision-addressable / 2 manual);
+citations, floors and behaviours from the manifests through a `Ruleset`
+registry; one loader; `code="necb2020"` / `--code` as the only selector;
+gates that make the properties permanent (namespace, no-vintage,
+citation table, no-loss, removability with provenance, behaviour
+binding, edition delta). Open items: Sol's review of the whole; PRs for
+Stages 3–7 (stacked, queued); `.wslconfig`; DF-1; the HPWH prose
+finding; Stage 8 is per-edition content work under its own template
+(and must close the HTML template's hardcoded 2020/2025 placeholders);
+9a next; 9b/9c are new implementation plans.
+
+## Stage 9a — opened 2026-09-08
+Stacked on `stage7-integration` (`b8cf6ae`). Opus: `btap/codes/pipeline.py`
+(lifecycle mechanics only) + `CodePath` protocol + `btap/codes/necb/path.py`
++ `manifest.path`, with the six evidence-bearing symbols owned per the
+rev-7 table and forwarding functions on the executed call path.
+Byte-identical: no re-freeze.
