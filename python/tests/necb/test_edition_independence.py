@@ -83,11 +83,9 @@ audit = AuditLog()
 before = len(audit.entries)
 compliance._emit_article_coverage(edition, audit)
 result["umbrella_rules_emitted"] = len(audit.entries) > before
-# climate.table_c1() backs hdd18(); Stage 3 adds edition= to both -- a
-# one-line change here: climate.table_c1(edition=edition).
-result["climate_table_c1"] = bool(envelope.climate.table_c1())
-# daylight_control_requirement.table(); same one-line change: table(edition=edition).
-result["daylight_table"] = bool(lighting.DaylightControlRequirement.table())
+# Both loaders are edition-aware (Stage 3): each reads its own snapshot.
+result["climate_table_c1"] = bool(envelope.climate.table_c1(edition))
+result["daylight_table"] = bool(lighting.DaylightControlRequirement.table(edition))
 article = coverage.get_article(edition, "8.4.1.1")
 result["coverage_article_has_text"] = bool(article.get("raw"))
 result["coverage_editions"] = list(coverage.editions())
