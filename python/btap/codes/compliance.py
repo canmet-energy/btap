@@ -195,7 +195,7 @@ def _load_and_validate(run):
     with audit.with_building("input model"):
         proposed = _load_model(opts["model"], audit=audit)
         if opts["necb_loads"]:
-            _apply_necb_loads(proposed, vintage, opts["necb_loads"], audit)
+            _apply_necb_loads(proposed, run.ruleset, opts["necb_loads"], audit)
         # After the on-ramp (it may have added thermostats to bare geometry):
         # the input must be a simulate-able building before any transform.
         _validate_input_model(proposed, audit, building=opts["building"])
@@ -209,7 +209,7 @@ def _load_and_validate(run):
         # whose reference silently failed to build; fail here, loudly, with
         # the full list (the raise lands inside the pipeline except, so the
         # audit trail is still flushed to run_dir).
-        _validate_space_types(proposed, vintage, audit)
+        _validate_space_types(proposed, run.ruleset, audit)
     audit.decision("compliance", "performance-path run started",
                    inputs={"vintage": vintage, "simulate": opts["simulate"],
                            "costing": opts["costing"]},
@@ -237,7 +237,7 @@ def _attach_weather_and_hdd(run):
     # HDD for the envelope rules (explicit > Table C-1 from the EPW site >
     # .stat)
     if run.hdd is None:
-        run.hdd = envelope.hdd18(run.proposed, edition=str(opts["vintage"]), audit=audit)
+        run.hdd = envelope.hdd18(run.proposed, edition=run.ruleset.edition, audit=audit)
     if run.hdd is None:
         raise ValueError(
             "HDD unresolvable: pass hdd= or weather with a recognized site")
@@ -317,28 +317,29 @@ def _run_proposed_annual(run):
 # 5. reference building: HVAC, envelope, lighting (+ photocontrols) and SHW
 #    transforms on ONE clone, same audit
 def _build_reference(run):
-    from btap.codes.necb import envelope, hvac, lighting, shw
+    from btap.codes.necb import envelope, hvac, lighting
+    from btap.codes.necb.shw import reference as shw_reference
 
     opts = run.opts
     audit = run.audit
     proposed = run.proposed
-    vintage = opts["vintage"]
-    prefix = Ruleset.from_edition(vintage).article("lighting_subsection")
+    ruleset = run.ruleset
+    prefix = ruleset.article("lighting_subsection")
     with audit.with_building("reference building"):
-        reference_result = hvac.reference_hvac(
-            proposed, vintage=vintage, building=opts["building"], audit=audit,
+        reference_result = hvac.reference._reference_hvac(
+            proposed, ruleset, building=opts["building"], audit=audit,
             proposed_annual=run.proposed_annual_data)
         reference = reference_result.model
-        envelope.reference_envelope(
-            reference, vintage=vintage, hdd=run.hdd,
+        envelope.reference._apply(
+            reference, ruleset, hdd=run.hdd,
             actual_roof_absorptance_used=opts["actual_roof_absorptance_used"],
             thermal_bridging=opts["thermal_bridging"], audit=audit)
         # daylighting: tells reference_lighting whether (5)-(12) are covered
         # by the separate daylighting transform below — it shouts the gap only
         # when they are not.
-        lighting.reference_lighting(reference, vintage=vintage,
-                                    daylighting=opts["reference_daylighting"],
-                                    audit=audit)
+        lighting.Reference._reference_lighting(
+            reference, ruleset, daylighting=opts["reference_daylighting"],
+            audit=audit)
         if opts["reference_daylighting"]:
             audit.decision(
                 "compliance",
@@ -350,8 +351,8 @@ def _build_reference(run):
                 "detailed-daylighting runtime cost (pass "
                 "reference_daylighting: false to opt out)",
                 article=f"{prefix}.5.(9)-(12)", ruling="D-51")
-            lighting.reference_daylighting(reference, vintage=vintage,
-                                           proposed=proposed, audit=audit)
+            lighting.ReferenceDaylighting._apply(reference, ruleset,
+                                                proposed=proposed, audit=audit)
         else:
             audit.warn(
                 "compliance",
@@ -361,7 +362,7 @@ def _build_reference(run):
                 "evaluated in this reference, so the target it sets is more "
                 "lenient than the code requires",
                 article=f"{prefix}.5.(9)-(12)", ruling="D-51")
-        shw.reference_shw(reference, vintage=vintage, audit=audit)
+        shw_reference._reference_shw(reference, ruleset, audit=audit)
     audit.building = None
     audit.info(
         "compliance",
@@ -385,7 +386,6 @@ def _size_reference(run):
 
     opts = run.opts
     audit = run.audit
-    vintage = opts["vintage"]
     reference = run.reference
     if opts["simulate"] == "none":
         return
@@ -404,12 +404,12 @@ def _size_reference(run):
                               sizing_only=True)
         # proposed: enables the 8.4.4.14.(1)-(3) pump power transfer (the
         # proposed was sized in step 1, so its pump flows/powers are readable)
-        hvac.apply_efficiencies(reference, vintage=vintage, audit=audit,
-                                proposed=run.proposed)
+        hvac.efficiency._apply(reference, run.ruleset, audit=audit,
+                               proposed=run.proposed)
         # 5.2.10.1 energy recovery is a POST-SIZING determination (Table
         # 5.2.10.1.-A/-B thresholds need the sized supply/OA flows).
-        hvac.apply_energy_recovery(reference, vintage=vintage, hdd=run.hdd,
-                                   audit=audit)
+        hvac.energy_recovery._apply_energy_recovery(reference, run.ruleset,
+                                                    hdd=run.hdd, audit=audit)
         # T3: 5.2.2.7 economizer trigger is likewise a post-sizing determination
         hvac.apply_economizer_thresholds(reference, audit=audit)
         audit.info("compliance",
@@ -424,7 +424,6 @@ def _size_reference(run):
 def _compare_and_iterate(run):
     opts = run.opts
     audit = run.audit
-    vintage = opts["vintage"]
     run.compliant = None
     if opts["simulate"] == "annual":
         # Stamp the reference's first annual — step 4 sits outside the earlier
@@ -434,11 +433,11 @@ def _compare_and_iterate(run):
                         os.path.join(opts["run_dir"], "reference_annual"),
                         opts["run_period"], run.report["reference"], audit=audit)
         _iterate_capacities(run.proposed, run.reference, run.report,
-                            vintage=vintage, run_dir=opts["run_dir"],
+                            ruleset=run.ruleset, run_dir=opts["run_dir"],
                             run_period=opts["run_period"],
                             max_iterations=opts["max_capacity_iterations"],
                             step=opts["capacity_step"], audit=audit)
-        run.compliant = _evaluate(run.report, vintage, opts["run_period"], audit)
+        run.compliant = _evaluate(run.report, run.ruleset, opts["run_period"], audit)
     elif opts["simulate"] == "sizing":
         audit.info("compliance",
                    "simulate: :sizing — both models generated and sized; no "
@@ -496,7 +495,7 @@ def _supplement_eui(run):
 
     run.report["eui_path"] = eui_supplement_verdict(
         run.proposed, opts["eui_supplement"], run.hdd, run.report,
-        opts["run_dir"], opts["run_period"], opts["vintage"], run.audit)
+        opts["run_dir"], opts["run_period"], run.ruleset, run.audit)
 
 
 # 11. emit article coverage; write report.json / audit.json / audit.txt
@@ -656,7 +655,7 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
         with audit.with_building("input model"):
             proposed = _load_model(model, audit=audit)
             if necb_loads:
-                _apply_necb_loads(proposed, vintage, necb_loads, audit)
+                _apply_necb_loads(proposed, ruleset, necb_loads, audit)
             _validate_input_model(proposed, audit, building=None,
                                   require_storeys=False)
         audit.decision("compliance",
@@ -674,7 +673,7 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
             runner.attach_weather(proposed, epw=weather["epw"],
                                   ddy=weather["ddy"])
         if hdd is None:
-            hdd = envelope.hdd18(proposed, edition=str(vintage), audit=audit)
+            hdd = envelope.hdd18(proposed, edition=ruleset.edition, audit=audit)
 
         # Mapping -> model-derived areas -> HARD applicability (refuse outside
         # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a
@@ -759,27 +758,28 @@ def _eui_compliance(model, *, ruleset, vintage, weather, hdd, run_dir, simulate,
         raise
 
 
-def _apply_necb_loads(proposed, vintage, options, audit):
+def _apply_necb_loads(proposed, ruleset, options, audit):
     """The bare-geometry on-ramp: NECB space types -> loads -> lighting ->
     SHW -> (optionally) an HVAC system, all on the proposed clone with the
     shared audit."""
     import btap.modeling as modeling
     from btap._compat import sorted_by_name
-    from btap.codes.necb import lighting, loads, shw
+    from btap.codes.necb import lighting, loads
+    from btap.codes.necb.shw import demand as shw_demand
 
     map_ = options.get("space_type_map")
     if map_ is None:
         raise ValueError("necb_loads requires space_type_map: "
                          "{space name: [building_type, space_type]}")
 
-    loads.assign_space_types(proposed, map_, vintage=vintage, audit=audit)
-    loads.apply_loads(proposed, vintage=vintage, audit=audit)
-    lighting.apply_lights(proposed, vintage=vintage,
+    loads.Apply._assign_space_types(proposed, map_, ruleset, audit=audit)
+    loads.Apply._apply_loads(proposed, ruleset, audit=audit)
+    lighting.ApplyLights._apply_lights(proposed, ruleset,
                           lights_type=options.get("lights_type")
                           or "NECB_Default", audit=audit)
     shw_fuel = options.get("shw_fuel")
     if shw_fuel:
-        shw.apply_shw(proposed, vintage=vintage, fuel=shw_fuel, audit=audit)
+        shw_demand._apply_shw(proposed, ruleset, fuel=shw_fuel, audit=audit)
     hvac_system = options.get("hvac_system")
     if hvac_system:
         result = modeling.build_system(
@@ -882,7 +882,7 @@ def _heating_election_data(proposed, inventory, audit):
     return {"loops": loops, "zones": zones}
 
 
-def _evaluate(report, vintage, run_period, audit):
+def _evaluate(report, ruleset, run_period, audit):
     """8.4.1.2 sentences (2)-(4). A shortened run period reports the same
     arithmetic but flags that it is NOT a code-compliant determination."""
     proposed_kwh = report["proposed"].get("total_site_kwh")
@@ -904,7 +904,7 @@ def _evaluate(report, vintage, run_period, audit):
         article="8.4.1.2.(2)")
     report.update(tiers.energy_tier(proposed_kwh, reference_kwh, audit=audit))
 
-    unmet_ok = _evaluate_unmet(report, vintage, audit)
+    unmet_ok = _evaluate_unmet(report, ruleset, audit)
 
     if run_period:
         audit.warn("compliance",
@@ -917,8 +917,8 @@ def _evaluate(report, vintage, run_period, audit):
     return energy_ok and unmet_ok
 
 
-def _evaluate_unmet(report, vintage, audit):
-    status = _unmet_status(report, vintage)
+def _evaluate_unmet(report, ruleset, audit):
+    status = _unmet_status(report, ruleset)
     audit.decision(
         "compliance",
         "unmet heating hours within 100 h for both buildings"
@@ -965,7 +965,7 @@ def _umbrella_rules(vintage):
     return necb.rulesdata.load("umbrella", necb.code_id(vintage))
 
 
-def _minimum_cooling_allowance_h(vintage):
+def _minimum_cooling_allowance_h(ruleset):
     """The absolute floor, in hours, under 8.4.1.2.(4)'s cooling allowance.
 
     Every edition DECLARES this: 2025 allows +10% of the reference or 20 h,
@@ -973,10 +973,10 @@ def _minimum_cooling_allowance_h(vintage):
     missing key raises rather than defaulting — a silent 0.0 for an edition
     that meant 20 h is exactly the cross-edition leak the snapshots remove.
     """
-    return float(_umbrella_rules(vintage)["unmet_cooling"]["minimum_allowance_h"])
+    return float(ruleset.rules("umbrella")["unmet_cooling"]["minimum_allowance_h"])
 
 
-def _unmet_status(report, vintage):
+def _unmet_status(report, ruleset):
     """The (3)/(4) arithmetic without audit side effects — shared by the
     formal verdicts and the capacity-iteration loop.
     (4): the allowance is +10% of the reference, or this edition's declared
@@ -991,7 +991,7 @@ def _unmet_status(report, vintage):
     reference_cooling_h = dig("reference", "cooling")
 
     allowance = max(float(reference_cooling_h or 0.0) * 0.10,
-                    _minimum_cooling_allowance_h(vintage))
+                    _minimum_cooling_allowance_h(ruleset))
     proposed_heating_ok = (proposed_heating_h is not None
                            and proposed_heating_h <= HEATING_UNMET_LIMIT_H)
     reference_heating_ok = (reference_heating_h is not None
@@ -1031,7 +1031,7 @@ def _mechanical_cooling(model):
                for o in model.modelObjects())
 
 
-def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
+def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
                         run_period, max_iterations, step, audit):
     """8.4.1.2.(5): "the capacities of the primary and secondary systems of
     the proposed building or the reference building, where applicable, shall
@@ -1059,7 +1059,7 @@ def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
 
     zone_trace = {}  # (label, zone, metric) => [(factor, unmet_hours), ...]
     for index in range(max_iterations):
-        status = _unmet_status(report, vintage)
+        status = _unmet_status(report, ruleset)
         if status["all_ok"]:
             break
 
@@ -1085,7 +1085,8 @@ def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
                 continue
 
             with audit.with_building(f"{label} building"):
-                factors = _bump_capacities(model, label, report, bump, vintage,
+                factors = _bump_capacities(model, label, report, bump,
+                                           ruleset.edition,
                                            step=step, trace=zone_trace)
                 record["bumped"][label] = factors
                 if factors["mode"] == "zonal":
@@ -1130,7 +1131,7 @@ def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
                     hvac.prepare_for_resizing(model, audit=audit)
                     runner.run_energyplus(model, f"{dir}_sizing",
                                           sizing_only=True)
-                    hvac.apply_efficiencies(model, vintage=vintage,
+                    hvac.efficiency._apply(model, ruleset,
                                             audit=audit, proposed=proposed)
                 _run_annual(model, dir, run_period, report[label], audit=audit)
 
@@ -1143,7 +1144,7 @@ def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
         # the equipment is not responding to sizing factors (hard-sized, or
         # the gate fails for equipment that does not exist) — iterating
         # further is futile.
-        after = _unmet_status(report, vintage)
+        after = _unmet_status(report, ruleset)
         improvements = []
         if bumps["proposed"]["heating"]:
             improvements.append(float(status["proposed_heating_h"] or 0.0)
@@ -1167,7 +1168,7 @@ def _iterate_capacities(proposed, reference, report, *, vintage, run_dir,
         record["stalled"] = True
         break
 
-    final = _unmet_status(report, vintage)
+    final = _unmet_status(report, ruleset)
     if not (history and final["all_ok"]):
         return
 
@@ -1183,7 +1184,8 @@ def _bump_capacities(model, label, report, bump, vintage, *, step, trace):
     per-zone unmet hours can attribute the failure, global SizingParameters
     otherwise. Returns the history record ('mode', headline factors, per-zone
     factors)."""
-    targets = _failing_zone_targets(label, report, bump, vintage)
+    targets = _failing_zone_targets(label, report, bump,
+                                    Ruleset.from_edition(vintage))
     zone_hours = report[label].get("zone_unmet_occupied_hours") or {}
     sizing = model.getSizingParameters()
     by_name = {z.nameString().upper(): z for z in model.getThermalZones()}
@@ -1244,7 +1246,7 @@ def _bump_capacities(model, label, report, bump, vintage, *, step, trace):
     return result
 
 
-def _failing_zone_targets(label, report, bump, vintage):
+def _failing_zone_targets(label, report, bump, ruleset):
     """Which zones does the previous run blame, and what unmet-hours value
     should the next run steer each one toward? Heating (sentence (3)): any
     zone over 100 h in a building whose heating gate failed. Cooling
@@ -1266,7 +1268,7 @@ def _failing_zone_targets(label, report, bump, vintage):
             continue
 
         ref_h = float((ref_zones.get(zone) or {}).get("cooling") or 0.0)
-        allowance = max(ref_h * 0.10, _minimum_cooling_allowance_h(vintage))
+        allowance = max(ref_h * 0.10, _minimum_cooling_allowance_h(ruleset))
         if float(hours.get("cooling") or 0.0) > ref_h + allowance:
             targets.setdefault(zone, {})["cooling"] = (
                 (ref_h + allowance) * SECANT_TARGET_FRACTION)
@@ -1387,7 +1389,7 @@ def _flush_on_failure(run_dir, report, audit, error):
 
 
 def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
-                           vintage, audit):
+                           ruleset, audit):
     """The 8.4.4 supplement verdict on a reference-path run. Returns the
     report['eui_path'] dict — 'computed': False with 'reason'/'mismatches',
     or 'computed': True with 'bet_kwh', 'compliant', 'basis', 'lines' and the
@@ -1399,7 +1401,7 @@ def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
     # Reached only from `_supplement_eui`, which has already established that
     # this edition binds the behaviour; resolving from `vintage` here keeps
     # the public signature (and this function's direct unit tests) unchanged.
-    archetypes = Ruleset.from_edition(vintage).behaviour("archetype_eui_path")
+    archetypes = ruleset.behaviour("archetype_eui_path")
     resolved = archetypes.resolve(proposed, mapping, audit=audit)
     problems = archetypes.applicability_problems(resolved, hdd=hdd, audit=audit)
     if problems:
@@ -1413,7 +1415,7 @@ def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
         archetypes.bet_areas(resolved, audit=audit),
         resolved["total_area_m2"], hdd=hdd,
         process_loads_kwh=options.get("process_loads_kwh") or 0.0, audit=audit)
-    check = archetypes.conformance(proposed, resolved, vintage=vintage,
+    check = archetypes.conformance(proposed, resolved, vintage=ruleset.edition,
                                    audit=audit)
     if check["conformant"]:
         proposed_kwh = report["proposed"]["total_site_kwh"]
@@ -1425,7 +1427,7 @@ def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
         with audit.with_building("proposed building (EUI-normalized)"):
             archetypes.normalize(
                 normalized, archetypes.resolve(normalized, mapping, audit=audit),
-                vintage=vintage, audit=audit)
+                vintage=ruleset.edition, audit=audit)
         eui_results = {}
         _run_annual(normalized, os.path.join(run_dir, "proposed_eui_annual"),
                     run_period, eui_results, audit=audit)
@@ -1459,7 +1461,7 @@ def eui_supplement_verdict(proposed, options, hdd, report, run_dir, run_period,
             **tiers.energy_tier(proposed_kwh, target["bet_kwh"])}
 
 
-def _validate_space_types(proposed, vintage, audit):
+def _validate_space_types(proposed, ruleset, audit):
     """Pre-flight gate for the reference path: every space that counts toward
     floor area (and is not a plenum) must carry standards tags that resolve
     against the NECB space-type catalog. Warns per unresolvable type, then
@@ -1486,7 +1488,7 @@ def _validate_space_types(proposed, vintage, audit):
         if st is not None and "plenum" in st.lower():
             st = None
         record = (loads.SpaceTypes.find(building_type=bt, space_type=st,
-                                        vintage=vintage)
+                                        vintage=ruleset.edition)
                   if bt and st else None)
         if record is not None and not loads.SpaceTypes.is_undefined(record):
             continue
@@ -1499,16 +1501,16 @@ def _validate_space_types(proposed, vintage, audit):
                    "space-type pre-flight passed — every floor-area space "
                    "type resolves against the NECB catalog",
                    inputs={"floor_area_spaces_checked": checked,
-                           "vintage": vintage})
+                           "vintage": ruleset.edition})
         return
 
-    catalog = loads.table(vintage, "space_types")
+    catalog = loads.table(ruleset.edition, "space_types")
     lines = []
     for (name, bt, st), spaces in problems.items():
         audit.warn(
             "compliance",
             f"space type '{name}' [{_inspect(bt)}, {_inspect(st)}] is "
-            f"UNRESOLVABLE against the NECB {vintage} catalog — "
+            f"UNRESOLVABLE against the NECB {ruleset.edition} catalog — "
             "lighting/loads/SHW rules cannot be established for "
             f"{len(spaces)} space(s)",
             target=", ".join(spaces), article="8.4.3.1.(2); 4.2.1.6.",
@@ -1527,7 +1529,7 @@ def _validate_space_types(proposed, vintage, audit):
     joined = "\n  ".join(lines)
     raise PreflightError(
         f"pre-flight FAILED: {len(problems)} space type(s) do not resolve "
-        f"against the NECB {vintage} space-type catalog, so the "
+        f"against the NECB {ruleset.edition} space-type catalog, so the "
         "reference building cannot be generated correctly (unmatched types "
         "silently keep the proposed's lighting/loads, waiving the "
         f"allowances):\n  {joined}")
