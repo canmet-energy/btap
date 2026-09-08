@@ -1146,3 +1146,71 @@ any result.
 Opened on the user's instruction before the Stage 0 PR is merged (push
 blocked by network), so Stage 1 work stacks on `stage0-multi-edition`
 rather than main. Same execution model and the one-heavy-job rule.
+- **Stage 0 PR #33 opened**; four-job workflow dispatched as run
+  34238540365 (lint green at time of writing; watched).
+- **Spawned (worktrees off `stage0-multi-edition`):** Opus — the R-B
+  rename sweep, the eui/tiers move per the symbol map, R7 ledger + chain
+  test, D-XX process entry, 0.3.0 bump, scanner glob/gem-key sites; one
+  full-suite run allowed at the end, and a path-only proof of the frozen
+  lane's differences via ledger substitution. Sonnet —
+  `test_no_legacy_namespace.py`.
+- **Namespace gate (Sonnet) delivered and verified** — branch
+  `worktree-agent-a84194dba7fc284f4`. Two corrections applied by Fable on
+  that branch (`4ce6d69`): (a) the agent's pattern `\bbtap[./-]necb\b`
+  also matched the retired gem name `btap-necb`, which is period prose in
+  ~100 docstrings the rename must not reword AND the stem of the live
+  `btap-necb-coverage` console entry point the plan keeps through Stage 4
+  — narrowed to `btap.necb` / `btap/necb`; (b) pytest-function style
+  converted to `unittest.TestCase` so the zero-install `unittest discover`
+  fallback runs it. Pre-rename inventory with the corrected pattern:
+  **678 hits in 152 tracked files** (python 664, CLAUDE.md 4,
+  verification 4, docs 3, packaging 2, README 1). Held for integration
+  with the rename; merging it earlier would redden the stage branch.
+- **Dispatch run 34238540365: all four jobs green** (lint, python, verify,
+  parity). The parity job re-ran both annual API scenarios on a GitHub
+  runner and matched the baselines frozen here — the cross-machine
+  determinism witness for the first frozen full-year determination.
+  **PR #33 is ready for the user's merge decision.** Stage 1 continues on
+  top of it.
+- **User: merge #33 ("do it").** GitHub unreachable again from the
+  container (github.com:443 times out / api refused; pypi.org fine) — the
+  third outage since the VM restart. Push of the final log commit, the
+  squash merge, and the pull are in a bounded background retry (30 × 60 s).
+  Local `main` is still `ac6712f` until that lands; Opus's rename branch
+  will be rebased onto the squash-merged main with
+  `git rebase --onto main <stage0 tip>` rather than merged, so only its
+  own commits replay.
+- **Rename (Opus) delivered and reviewed** — `stage1-btap-codes` (`3bf7bd5`),
+  one commit, 208 files, +1606/−1165, 53 renames; `python/btap/necb/` gone,
+  tree matches the plan (`codes/{cli,compliance,coverage,decisions,report}`,
+  `codes/necb/{envelope,hvac,lighting,loads,shw,tiers.py,editions/necb2025/
+  {eui_archetypes,part11_ghg}.py,data/}`, `codes/data/{decisions.json,
+  coverage/}`). Full suite 873 passed / 8 skipped; lint-imports 3/3 with the
+  contract rewritten to `btap.codes → costing → modeling → audit`; ruff
+  clean; orphan keys, decisions TOC, both generators clean and idempotent.
+  Frozen python lane fails on exactly `audit.json` (`/inputs/code[]`) and
+  `audit.txt` for the 20 evidence-bearing scenarios; `report.json` carries
+  no code pointers; the agent's ledger-substitution proof rebuilt 32/32
+  byte-identical — no non-path difference. R7 ledger: 87 unique refs, 313
+  uses, chain test proves R7.old == R6.new, R7.new == live manifests,
+  totals equal; `tiers.py` leaves the pointer set (32 files → 31).
+  **Judgment calls accepted:** `DATA_DIR` on `btap.codes.necb`; the
+  scanner's `gem == "necb"` kept as the umbrella *label* (renaming it would
+  change generated HTML content — flagged for Stage 3) while `domain_for`
+  gains `removeprefix("necb/")` to preserve the exact prior domain mapping;
+  console script names unchanged (user surface); package `CLAUDE.md`/
+  `README.md` at `btap/codes/`; 0.3.0 in `pyproject`, `btap/__init__`,
+  the `.iss` guard and four usage examples; `docs/python_port_m6_m7_review.md`
+  added to the historical set; a `test_self_containment.py` allowlist row
+  for the gate; `test.yml:106` bare comment fixed by hand. **D-86** (`kind:
+  process`) adjudicates R-B. The agent ran the full suite twice, serially
+  (a docstring edit after regenerating docs shifted `#L` anchors — the
+  known trap) — disclosed, accepted.
+- **Two namespace gates existed** (Sonnet's, held, and Opus's own written
+  after the plan log named Sonnet's). Opus's lands: it carries the same two
+  corrections, is `unittest` style, and is already wired to the
+  self-containment allowlist. Sonnet's branch is dropped, not merged.
+- **R-B freeze started on `stage1-integration` (= `3bf7bd5`) while GitHub
+  is still unreachable** (merge retry at attempt 16+). If the eventual
+  rebase onto squash-merged main changes the commit beneath, the freeze
+  re-runs and the only permitted diff is `provenance.commit`.
