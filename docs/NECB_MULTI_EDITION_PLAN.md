@@ -1031,3 +1031,48 @@ any result.
   blocker; the scenario freezes what the product does. 0.2 will add an
   `audit_entry` assert on that decision so the pinned `exit 1` is tied to
   its reason, not just its number.
+- **2020 diagnostic of the same model: identical to 2025 except GHG.**
+  `exit 1`, `compliant False`, proposed 117908.3 / reference 155047.2 kWh,
+  unmet proposed {41.75, 1709.75} / reference {801.0, 10.5}, three
+  iterations to factor 2.441 — byte-for-byte the 2025 numbers; `ghg None`
+  at 2020 (no Part 11). Two conclusions: (1) the reference building's
+  heating shortfall is **edition-independent** — a corpus-model /
+  reference-generator property, surfaced only now because no full-year
+  determination had ever been frozen; **finding for the user**, outside
+  Stage 0's scope, candidate for a D-XX or a corpus fix later; (2) for this
+  model the two editions build the same reference building, consistent
+  with the survey's "2 rules genuinely differ". Also a free determinism
+  witness: two independent annual runs agreed to the printed precision.
+- **0.1 (Opus) delivered and verified** — `stage0-scenario-machinery`
+  (`9517ecc`), 5 files. Read in full: `_corpus(code=)` byte-identical for
+  necb2020 (agent verified all 35 against the manifest), `edition_of`,
+  `FIRST_FREEZE_SEAL`, `ANNUAL_ASSERTS` carried on the two annual corpus
+  scenarios; `api_worker.py` pops `model`, uses the product's
+  `cli.verdict_exit`, writes the whole report; `_execute_api` resolves
+  placeholders recursively, spawns the worker with `timeout_s`, turns
+  timeout/crash/no-output into an `error` observation that `compare`
+  reports (needed because `api-thermal-bridging` has `expect_exit None`);
+  `observations.json` is deleted after reading so the run dir keeps its
+  declared file set — accepted as documented; `check_assertions` with the
+  seven ops, unknown op raises, wired into `compare` and the freezer with
+  the probe passing `asserts: []`; separate EnergyPlus preflight; the gap
+  moved to a `NEWLY_COVERED` record; seal-attestation gate. Frozen lane:
+  30/30 subtests pass, only `test_manifest_integrity` fails on the
+  machinery hash — exactly the pre-R-A state. Its "40-90 minutes" cost
+  wording was corrected in 0.2.
+- **0.3b (Sonnet) delivered and verified** — `worktree-agent-a089d408552410d69`
+  (`5f28f36`), one new file, **30/30 live, 0 skipped**; spot-checked the
+  literals against `efficiency.py:314/554/613`, `reference.py:1220`.
+  **Finding:** `loads/apply.py:78`'s `rules['schedule_table_prefix']` is a
+  dead parameter — `_apply_ventilation`'s citation never uses it, so the
+  loads site emits the same string at both editions. The survey's "15
+  renumbering sites" is really 14 live + 1 dead; Stage 2 should either
+  wire it or delete it, not "migrate" it.
+- **Integration:** branch `stage0-multi-edition` = main + 0.1 + 0.3a + 0.4
+  + 0.3b + housekeeping (`7b69a3f`: xdist cap, trap, `.claude/worktrees/`
+  and `.coverage` ignored, plan committed) + 0.2 (`74dc41f`). All four
+  2025 scenarios validate: 39 scenarios, python 32 / verify 3 / parity 4,
+  no duplicate ids, no python-only seal carries attestation. The
+  determination scenario's asserts tie `exit 1` to the 8.4.1.2.(2) pass,
+  the 8.4.1.2.(3) EXCEED decision and the 8.4.1.2.(5) warning. Full suite
+  running once, alone, 8 workers, frozen module excluded; R-A next.
