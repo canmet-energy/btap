@@ -4,13 +4,13 @@
 
 Written on the pre-migration tree, deliberately: Stage 6 left ``vintage`` as
 the public parameter name on 97 domain functions (277 call sites in tests and
-scripts) plus five functions outside ``btap/necb`` that use it as an edition
+scripts) plus five functions outside the NECB package that use it as an edition
 selector (see ``docs/NECB_MULTI_EDITION_PLAN.md``, "Stage 7 — the public
 API"). This gate is expected to FAIL with the full inventory until that
 migration lands and every site is renamed to ``code=`` (or ``edition=`` for
 the five costing/sample selectors) — at which point it passes and stands as
 the standing gate against regression, the same way
-``test_no_legacy_namespace.py`` stands for the ``btap.necb`` rename.
+``test_no_legacy_namespace.py`` stands for the ``the NECB package`` rename.
 
 The walk is over ``git ls-files``, never the working tree, for the same
 reason ``test_no_legacy_namespace.py`` gives: untracked build output (e.g.
