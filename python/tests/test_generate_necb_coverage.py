@@ -25,10 +25,10 @@ class TestGenerateNecbGemCoverage(unittest.TestCase):
             self.assertEqual(0, result)
             self.assertEqual(committed.read_bytes(), output.read_bytes())
 
-    def test_collection_is_non_vacuous_and_covers_both_vintages(self):
+    def test_collection_is_non_vacuous_and_covers_both_editions(self):
         records = coverage.collect_records(REPO_ROOT)
         self.assertGreater(len(records), 200)
-        self.assertEqual({"2020", "2025"}, {row["vintage"] for row in records})
+        self.assertEqual({"2020", "2025"}, {row["edition"] for row in records})
         self.assertGreaterEqual(len({row["gem"] for row in records}), 6)
         self.assertTrue(all(row["article"] for row in records))
         refs = [

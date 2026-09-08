@@ -31,7 +31,7 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.envelope import climate, fenestration
 from btap.codes.necb.envelope import thermal_bridging as thermal_bridging_module
 from btap.codes.necb.envelope.rules import (
@@ -56,12 +56,12 @@ SURFACE_CLASS = {"Wall": "wall", "RoofCeiling": "roofceiling", "Floor": "floor"}
 ENCLOSURE_R = 1.0 / 6.25
 
 
-def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
+def apply(model, *, code, hdd=None, apply_fdwr=False, apply_srr=False,
           include_films=True, thermal_bridging=None, audit=None):
     """PORT NOTE: the ``thermal_bridging`` KEYWORD keeps the Ruby spelling, so
     the sibling MODULE is imported as ``thermal_bridging_module`` above — the
     parameter would otherwise shadow it inside this function."""
-    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+    return _apply(model, resolve(code), hdd=hdd,
                   apply_fdwr=apply_fdwr, apply_srr=apply_srr,
                   include_films=include_films, thermal_bridging=thermal_bridging,
                   audit=audit)
@@ -417,11 +417,11 @@ def _subsurface_target_construction(model, sub_class, ruleset, hdd, _include_fil
     return c
 
 
-def apply_prescriptive(model, *, vintage, hdd=None, apply_fdwr=False,
+def apply_prescriptive(model, *, code, hdd=None, apply_fdwr=False,
                        apply_srr=False, include_films=True,
                        thermal_bridging=None, audit=None):
     """Facade (Ruby ``Envelope.apply_prescriptive``)."""
-    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+    return _apply(model, resolve(code), hdd=hdd,
                   apply_fdwr=apply_fdwr, apply_srr=apply_srr,
                   include_films=include_films, thermal_bridging=thermal_bridging,
                   audit=audit)

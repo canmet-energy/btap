@@ -30,7 +30,7 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.envelope import climate
 from btap.codes.necb.envelope import prescriptive as Prescriptive
 from btap.codes.necb.envelope.rules import _max_fdwr, _max_srr
@@ -50,9 +50,9 @@ LIGHTWEIGHT_THICKNESS_M = 0.15
 _GROUND_OR_FOUNDATION_RE = re.compile(r"Ground|Foundation", re.IGNORECASE)
 
 
-def apply(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
+def apply(model, *, code, hdd=None, actual_roof_absorptance_used=False,
           thermal_bridging=None, audit=None):
-    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+    return _apply(model, resolve(code), hdd=hdd,
                   actual_roof_absorptance_used=actual_roof_absorptance_used,
                   thermal_bridging=thermal_bridging, audit=audit)
 
@@ -467,9 +467,9 @@ def _emit_article_coverage(ruleset, audit):
     emit_coverage(ruleset.rules("envelope").get("article_coverage"), audit)
 
 
-def reference_envelope(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
+def reference_envelope(model, *, code, hdd=None, actual_roof_absorptance_used=False,
                        thermal_bridging=None, audit=None):
     """Facade: reference envelope IN PLACE on the caller's clone."""
-    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+    return _apply(model, resolve(code), hdd=hdd,
                   actual_roof_absorptance_used=actual_roof_absorptance_used,
                   thermal_bridging=thermal_bridging, audit=audit)

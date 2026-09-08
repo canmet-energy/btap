@@ -8,7 +8,7 @@ minimum-OA flows — the umbrella calls it after the reference sizing run.
 Tests hard-size the flows instead of running EnergyPlus.
 
 This REPLACED the NECB 2011 150 kW exhaust-heat-content trigger, which was
-the wrong vintage — and permissive exactly where it matters (see the first
+the wrong edition — and permissive exactly where it matters (see the first
 test: a small high-%OA system is "R" under 2020, waved through by 2011)."""
 
 from __future__ import annotations
@@ -36,11 +36,11 @@ class TestNecbEnergyRecovery(unittest.TestCase):
             sorted_zones(model))
         return model
 
-    def reference(self, model, vintage='2020', extra=None):
+    def reference(self, model, code='necb2020', extra=None):
         types = {z.nameString(): 'Office - enclosed' for z in model.getThermalZones()}
         building = {'storeys': 3, 'zone_types': types}
         building.update(extra or {})
-        return hvac.reference_hvac(model, vintage=vintage, building=building)
+        return hvac.reference_hvac(model, code=code, building=building)
 
     def size_loops(self, model, supply_m3s, oa_fraction, non_continuous=False):
         """Hard-size every reference air loop (the trigger needs sized flows), set the
@@ -167,9 +167,9 @@ class TestNecbEnergyRecovery(unittest.TestCase):
         self.assertEqual(count, len(result.model.getHeatExchangerAirToAirSensibleAndLatents()))
 
     def test_2025_erv_cites_renumbered_article(self):
-        result = self.reference(self.proposed_office(), vintage='2025')
+        result = self.reference(self.proposed_office(), code='necb2025')
         self.size_loops(result.model, supply_m3s=0.25, oa_fraction=0.85)
-        audit = hvac.apply_energy_recovery(result.model, vintage='2025', hdd=HDD_TORONTO)
+        audit = hvac.apply_energy_recovery(result.model, code='necb2025', hdd=HDD_TORONTO)
         decision = next(e for e in audit.entries if 'energy recovery added' in e['action'])
         self.assertRegex(decision['article'], r'8\.4\.5\.19')
 
@@ -219,10 +219,10 @@ class TestNecbEnergyRecovery(unittest.TestCase):
         self.assertEqual('implemented', erv['inputs']['status'])
         self.assertRegex(erv['action'], r'(?i)POST-SIZING')
 
-    def test_coverage_manifest_lint_both_vintages(self):
+    def test_coverage_manifest_lint_both_editions(self):
         valid = ('implemented', 'partial', 'not_implemented', 'satisfied_by_clone', 'host_scope')
-        for vintage in ('2020', '2025'):
-            manifest = hvac.rules(vintage)['article_coverage']['articles']
+        for edition in ('2020', '2025'):
+            manifest = hvac.rules(edition)['article_coverage']['articles']
             # 12 article-level + 40 per-sentence + the 2 shared entries
             self.assertEqual(54, len(manifest))
             for art in manifest:
@@ -231,7 +231,7 @@ class TestNecbEnergyRecovery(unittest.TestCase):
                 if art['status'] in ('partial', 'not_implemented'):
                     self.assertTrue(art.get('gaps'),
                                     f"{art['article']} is {art['status']} but declares no gaps")
-            prefix = '8.4.4' if vintage == '2020' else '8.4.5'
+            prefix = '8.4.4' if edition == '2020' else '8.4.5'
             shared = ('8.4.1.1. (HVAC)', '8.4.2.10.')
             self.assertTrue(all(a['article'].startswith(prefix) or a['article'] in shared
                                 for a in manifest))
@@ -261,7 +261,7 @@ class TestNecbEnergyRecovery(unittest.TestCase):
 
         for chiller in chillers:
             chiller.setReferenceCapacity(200_000.0)
-        second_pass = hvac.apply_efficiencies(result.model, vintage='2020')
+        second_pass = hvac.apply_efficiencies(result.model, code='necb2020')
         self.assertTrue(second_pass)
         self.assertTrue(all(abs(c.referenceCOP() - 2.802) < 0.001 for c in chillers),
                         'the post-sizing efficiency pass must retain Table 8.4.3.5 COP 2.802')

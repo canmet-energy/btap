@@ -9,7 +9,7 @@ calls :func:`btap.codes.compliance.performance_compliance` directly.
 Usage::
 
     python3 scripts/necb_archetype_sweep.py [fleet | BUILDING_TYPE ...]
-        [--mode sizing|annual|full] [--vintage 2020|2025]
+        [--mode sizing|annual|full] [--code necb2020|necb2025]
         [--location toronto|edmonton|yellowknife] [--workers N] [--resume]
 
 ``annual`` is the January 1-7 quick tier; ``full`` is the 8760-hour tier.
@@ -93,7 +93,7 @@ LOCATIONS = {
 @dataclass(frozen=True)
 class SweepConfig:
     mode: str
-    vintage: str
+    code: str
     location: str
     workers: int
     cache_dir: Path
@@ -278,7 +278,7 @@ def normalized_report_summary(result) -> dict[str, object]:
 def _result_path(building_type: str, config: SweepConfig) -> Path:
     key = _recipe_key(building_type, config)
     return config.cache_dir / (
-        f"result_{building_type}_{config.mode}_{config.vintage}_{config.location}_{key}.json"
+        f"result_{building_type}_{config.mode}_{config.code}_{config.location}_{key}.json"
     )
 
 
@@ -286,7 +286,7 @@ def _run_dir(building_type: str, config: SweepConfig) -> Path:
     key = _recipe_key(building_type, config)
     return config.cache_dir / (
         f"sweep_run_{config.mode}_{building_type.lower()}_"
-        f"{config.vintage}_{config.location}_{key}"
+        f"{config.code}_{config.location}_{key}"
     )
 
 
@@ -308,7 +308,7 @@ def run_one(building_type: str, config: SweepConfig) -> dict[str, object]:
             "verdict": "GEN-FAIL",
             "detail": str(error),
             "mode": config.mode,
-            "vintage": config.vintage,
+            "code": config.code,
             "location": config.location,
             "fuel": config.fuel,
             "ecm": config.ecm,
@@ -336,7 +336,7 @@ def run_one(building_type: str, config: SweepConfig) -> dict[str, object]:
         model = load_model(str(osm))
         result = performance_compliance(
             model,
-            vintage=config.vintage,
+            code=config.code,
             simulate="annual" if annual else "sizing",
             hdd=hdd,
             weather={"epw": str(epw), "ddy": str(ddy)},
@@ -368,7 +368,7 @@ def run_one(building_type: str, config: SweepConfig) -> dict[str, object]:
             "verdict": "PASS",
             "detail": detail,
             "mode": config.mode,
-            "vintage": config.vintage,
+            "code": config.code,
             "location": config.location,
             "fuel": config.fuel,
             "ecm": config.ecm,
@@ -386,7 +386,7 @@ def run_one(building_type: str, config: SweepConfig) -> dict[str, object]:
         "verdict": verdict,
         "detail": detail,
         "mode": config.mode,
-        "vintage": config.vintage,
+        "code": config.code,
         "location": config.location,
         "fuel": config.fuel,
         "ecm": config.ecm,
@@ -401,7 +401,7 @@ def _worker_command(building_type: str, config: SweepConfig) -> list[str]:
         str(Path(__file__).resolve()),
         "--one", building_type,
         "--mode", config.mode,
-        "--vintage", config.vintage,
+        "--code", config.code,
         "--location", config.location,
         "--workers", "1",
         "--cache-dir", str(config.cache_dir),
@@ -421,7 +421,7 @@ def _resumed_result(building_type: str, config: SweepConfig) -> dict | None:
     expected = {
         "type": building_type,
         "mode": config.mode,
-        "vintage": config.vintage,
+        "code": config.code,
         "location": config.location,
         "fuel": config.fuel,
         "ecm": config.ecm,
@@ -473,7 +473,7 @@ def run_workers(building_types: list[str], config: SweepConfig,
                     "verdict": "ERROR",
                     "detail": f"worker exited {child.returncode} with no JSON result",
                     "mode": config.mode,
-                    "vintage": config.vintage,
+                    "code": config.code,
                     "location": config.location,
                     "fuel": config.fuel,
                     "ecm": config.ecm,
@@ -492,7 +492,7 @@ def structured_summary(building_types: list[str], results: list[dict],
         "schema_version": 1,
         "mode": config.mode,
         "tier": "week" if config.mode == "annual" else config.mode,
-        "vintage": config.vintage,
+        "code": config.code,
         "location": config.location,
         "fuel": config.fuel,
         "ecm": config.ecm,
@@ -513,8 +513,8 @@ def _parser() -> argparse.ArgumentParser:
         default=os.environ.get("SWEEP_MODE", "sizing"),
     )
     parser.add_argument(
-        "--vintage", choices=("2020", "2025"),
-        default=os.environ.get("VINTAGE", "2020"),
+        "--code", choices=("necb2020", "necb2025"),
+        default=os.environ.get("CODE", "necb2020"),
     )
     parser.add_argument(
         "--location", choices=tuple(LOCATIONS),
@@ -541,7 +541,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--workers must be at least 1")
     config = SweepConfig(
         mode=args.mode,
-        vintage=args.vintage,
+        code=args.code,
         location=args.location,
         workers=workers,
         cache_dir=args.cache_dir,
@@ -570,7 +570,7 @@ def main(argv: list[str] | None = None) -> int:
     results = run_workers(building_types, config)
     summary = structured_summary(building_types, results, config)
     summary_path = args.summary or config.cache_dir / (
-        f"summary_{config.mode}_{config.vintage}_{config.location}.json"
+        f"summary_{config.mode}_{config.code}_{config.location}.json"
     )
     _write_json(summary_path, summary)
     print(json.dumps(summary, indent=2, sort_keys=True))

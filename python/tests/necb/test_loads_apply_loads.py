@@ -37,8 +37,8 @@ class TestApplyLoads(unittest.TestCase):
         from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
-        loads.assign_space_types(model, map_, vintage='2020', audit=audit)
-        loads.apply_loads(model, vintage='2020', audit=audit)
+        loads.assign_space_types(model, map_, code='necb2020', audit=audit)
+        loads.apply_loads(model, code='necb2020', audit=audit)
         return model, audit
 
     def office_space_type(self, model):
@@ -50,7 +50,7 @@ class TestApplyLoads(unittest.TestCase):
         from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
-        loads.assign_space_types(model, map_, vintage='2020', audit=audit)
+        loads.assign_space_types(model, map_, code='necb2020', audit=audit)
         decision = next(e for e in audit.entries
                         if e['action'] == 'NECB space types assigned')
         self.assertEqual(2, decision['inputs']['space_types_created'],
@@ -156,8 +156,8 @@ class TestApplyLoads(unittest.TestCase):
         plenum = openstudio.model.SpaceType(model)
         plenum.setName('Attic plenum')
         audit = AuditLog()
-        loads.assign_space_types(model, map_, vintage='2020', audit=audit)
-        loads.apply_loads(model, vintage='2020', audit=audit)
+        loads.assign_space_types(model, map_, code='necb2020', audit=audit)
+        loads.apply_loads(model, code='necb2020', audit=audit)
 
         self.assertTrue(any('plenum space type skipped' in e['action']
                             for e in audit.entries))
@@ -183,8 +183,8 @@ class TestApplyLoads(unittest.TestCase):
         from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
-        loads.assign_space_types(model, map_, vintage='2025', audit=audit)
-        loads.apply_loads(model, vintage='2025', audit=audit)
+        loads.assign_space_types(model, map_, code='necb2025', audit=audit)
+        loads.apply_loads(model, code='necb2025', audit=audit)
         office = self.office_space_type(model)
         self.assertTrue(len(office.people()) > 0, '2025 aliases the 2020 data')
 

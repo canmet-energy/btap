@@ -96,6 +96,12 @@ Terms that recur across the five Python subpackages, docs and decision register:
   assigns packaged through-the-wall units (vs the identical-copy rule).
 - **thermal block** — NECB's normative zoning unit (8.4.1.1); in the facts
   schema and code it is a `zone_group`.
-- **vintage** — the NECB edition (`'2020'` / `'2025'`); the API word
-  everywhere. (`template` appears only inside vendored legacy 90.1 rows and
-  costing CSV columns.)
+- **code id** — the public selector for one code edition
+  (`'necb2020'` / `'necb2025'`): `code=` on every API and `--code` on the
+  CLI, and the `code` field of a report and of every audit entry that
+  records which ruleset ran (D-87).
+- **edition** — the code-family-relative half of a code id (`'2020'` /
+  `'2025'`). Per-edition DATA is addressed by it, so the catalog
+  accessors take `edition=`. (`template` appears only inside vendored
+  legacy 90.1 rows and costing CSV columns; `vintage` was the pre-D-87
+  spelling and is gone from the API.)

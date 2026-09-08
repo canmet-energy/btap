@@ -105,15 +105,15 @@ class TestPrescriptive(unittest.TestCase):
         from btap.codes.necb import shw
         valid = ["implemented", "partial", "not_implemented",
                  "satisfied_by_clone", "host_scope"]
-        for vintage in ("2020", "2025"):
-            for art in shw.rules(vintage)["article_coverage"]["articles"]:
+        for edition in ("2020", "2025"):
+            for art in shw.rules(edition)["article_coverage"]["articles"]:
                 self.assertIn(art["status"], valid,
-                              f"{vintage} {art['article']}: illegal status")
+                              f"{edition} {art['article']}: illegal status")
                 self.assertTrue(art.get("how") or art.get("gaps"),
-                                f"{vintage} {art['article']}: needs how or gaps")
+                                f"{edition} {art['article']}: needs how or gaps")
                 if not art.get("gap_owner"):
                     continue
 
                 self.assertEqual("modeller", art["gap_owner"],
-                                 f"{vintage} {art['article']}: only 'modeller' is "
+                                 f"{edition} {art['article']}: only 'modeller' is "
                                  "recognised by Coverage.emit")

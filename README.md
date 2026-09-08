@@ -195,7 +195,7 @@ Coverage is generated from the code, not hand-maintained:
   2025's is the EUI path, so nothing is renumbered across editions.
 
 As generated today, the rollup reports (the coverage document itself opens
-with this table, then a collapsible section per vintage in that edition's own
+with this table, then a collapsible section per edition in that edition's own
 article numbering):
 
 | | NECB 2020 | NECB 2025 |
@@ -208,7 +208,7 @@ article numbering):
 | Field / document verification (modeller scope, does not warn) | 10 | 10 |
 | **Total entries** | **119** | **122** |
 
-Counts are per-vintage rows, and coverage is declared **per sentence** where
+Counts are per-edition rows, and coverage is declared **per sentence** where
 the underlying work distinguishes sentences — so one article can contribute
 several rows. The not-implemented rows are individual *sentences* — the
 multi-energy capacity ratios (heating (5), cooling (4)) and two supply-air fan

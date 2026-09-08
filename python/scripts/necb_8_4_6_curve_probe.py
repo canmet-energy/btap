@@ -620,14 +620,14 @@ def build_and_apply() -> dict[str, Any]:
     ashp_heat.setName("Probe ASHP Heating Coil")
     ashp_heat.setRatedTotalHeatingCapacity(15_000)
 
-    hvac_efficiency.apply_efficiencies(model, vintage="2020", audit=audit)
+    hvac_efficiency.apply_efficiencies(model, code="necb2020", audit=audit)
 
     swh_model = openstudio.model.Model()
     heater = openstudio.model.WaterHeaterMixed(swh_model)
     heater.setHeaterFuelType("NaturalGas")
     heater.setHeaterMaximumCapacity(30_000)
     heater.setTankVolume(0.3)
-    shw.apply_water_heater_efficiency(heater, vintage="2020", audit=AuditLog())
+    shw.apply_water_heater_efficiency(heater, code="necb2020", audit=AuditLog())
 
     return {
         "model": model,
@@ -642,7 +642,7 @@ def build_and_apply() -> dict[str, Any]:
             "hvac": "btap.codes.necb.hvac.efficiency.apply_efficiencies",
             "shw": "btap.codes.necb.shw.apply_water_heater_efficiency",
             "chiller_topology": "btap.modeling.hvac.systems.plant_loops.chilled_water",
-            "vintage": "2020",
+            "edition": "2020",
             "model_level": True,
         },
     }

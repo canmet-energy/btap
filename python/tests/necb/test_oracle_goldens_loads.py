@@ -243,7 +243,7 @@ class TestOracleGoldensLoads(unittest.TestCase):
             st.setName(f"{building_type} {space_type}")
             st.setStandardsBuildingType(building_type)
             st.setStandardsSpaceType(space_type)
-        loads.apply_loads(model, vintage='2020')
+        loads.apply_loads(model, code='necb2020')
 
         mismatches = []
         for building_type, space_type_name in pairs:

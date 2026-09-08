@@ -110,7 +110,7 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
                         'winter_design_temp_c': -20}
                 assignments = []
                 for a in hvac.select_reference_systems(facts=facts, building=info,
-                                                       vintage='2020', audit=None):
+                                                       code='necb2020', audit=None):
                     entry = {'system': a.reference_system, 'action': str(a.action),
                              'energy_type': a.energy_type, 'catalog': a.catalog_name,
                              'zones': len(a.zones)}

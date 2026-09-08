@@ -193,7 +193,7 @@ class TestNecbStaging(unittest.TestCase):
                 c.setEconomizerControlType('DifferentialEnthalpy')
 
             audit = AuditLog()
-            efficiency.apply_staging(model, self.rules(), '2020', audit)
+            efficiency.apply_staging(model, self.rules(), 'necb2020', audit)
             self.assertEqual(expected, len(coil.stages()),
                              f"{kw} kW economizer system: lowest stage must be <= "
                              f"{25 if kw >= 70 else 50}%")
@@ -213,7 +213,7 @@ class TestNecbStaging(unittest.TestCase):
             s.setGrossRatedTotalCoolingCapacity(100_000.0 * (i + 1) / n)
         for c in model.getControllerOutdoorAirs():
             c.setEconomizerControlType('NoEconomizer')
-        efficiency.apply_staging(model, self.rules(), '2020', AuditLog())
+        efficiency.apply_staging(model, self.rules(), 'necb2020', AuditLog())
         self.assertEqual(2, len(coil.stages()), 'no economizer: ceil(100/66) = 2, no floor')
 
     @needs_engine
@@ -230,7 +230,7 @@ class TestNecbStaging(unittest.TestCase):
                                    msg=f'{coil.nameString()}: stage 1 = half the total')
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         # one table row, applied to EVERY stage
         cops = {s.grossRatedCoolingCOP()
@@ -281,7 +281,7 @@ class TestNecbStaging(unittest.TestCase):
             s.setNominalCapacity(400_000.0)  # 400 kW -> 7 stages wanted
 
         audit = AuditLog()
-        efficiency.apply_staging(model, self.rules(), '2020', audit)
+        efficiency.apply_staging(model, self.rules(), 'necb2020', audit)
 
         self.assertEqual(4, len(model.getCoilHeatingGasMultiStages()[0].stages()))
         clamp = next((e for e in audit.entries if 'CLAMPED' in str(e['action'])), None)
@@ -301,7 +301,7 @@ class TestNecbStaging(unittest.TestCase):
             s.setNominalCapacity(150_000.0)  # -> ceil(150/66) = 3 stages
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         grown = model.getCoilHeatingGasMultiStages()[0]
         self.assertEqual(3, len(grown.stages()))
@@ -322,7 +322,7 @@ class TestNecbStaging(unittest.TestCase):
         model, _ = self.build('PSZ MAU Electric and DX Coils and Electric Baseboard with PTAC',
                               config={})
         audit = AuditLog()
-        efficiency.apply_staging(model, self.rules(), '2020', audit)
+        efficiency.apply_staging(model, self.rules(), 'necb2020', audit)
 
         skips = [e for e in audit.entries if e.get('ruling') == 'D-48']
         self.assertTrue(skips, 'the single-speed skips are audited')

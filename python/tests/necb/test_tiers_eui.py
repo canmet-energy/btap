@@ -62,7 +62,7 @@ class TestEUIPathEndToEnd(unittest.TestCase):
 
         dir = tempfile.mkdtemp(prefix="osnecb-eui-")
         result = performance_compliance(
-            proposed_with_hvac(), vintage="2025", path="eui",
+            proposed_with_hvac(), code="necb2025", path="eui",
             archetypes_map={"Office": "all"},
             weather={"epw": str(EPW), "ddy": str(DDY)}, run_dir=dir,
             run_period={"begin_month": 1, "begin_day": 1, "end_month": 1,
@@ -101,7 +101,7 @@ class TestEUIPathGuards(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             performance_compliance(
-                proposed_with_hvac(), vintage="2020", path="eui",
+                proposed_with_hvac(), code="necb2020", path="eui",
                 archetypes_map={"Office": "all"},
                 run_dir=tempfile.mkdtemp(prefix="osnecb-x-"))
 
@@ -112,7 +112,7 @@ class TestEUIPathGuards(unittest.TestCase):
 
         with self.assertRaises(ValueError) as ctx:
             performance_compliance(
-                proposed_with_hvac(), vintage="2025", path="eui",
+                proposed_with_hvac(), code="necb2025", path="eui",
                 simulate="none", hdd=9500, archetypes_map={"Office": "all"},
                 run_dir=tempfile.mkdtemp(prefix="osnecb-hdd-"))
         self.assertIn("NOT applicable", str(ctx.exception))

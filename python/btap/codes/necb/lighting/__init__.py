@@ -35,34 +35,34 @@ __all__ = ["AuditLog", "Costing", "rules", "table",
            "DaylightControlRequirement", "Daylighting", "StorageGarage",
            "ReferenceDaylighting"]
 
-#: Table cache keyed by (data root, vintage, table) — see loads/__init__.py.
+#: Table cache keyed by (data root, edition, table) — see loads/__init__.py.
 #: The rule files are cached once for the whole family in ``necb.rulesdata``.
 _tables: dict[tuple, list] = {}
 
 
-def rules(vintage):
+def rules(edition):
     """This edition's lighting rules — a shim over the family's ONE loader
     (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
-    return rulesdata.load("lighting", code_id(vintage))
+    return rulesdata.load("lighting", code_id(edition))
 
 
-def table(name, vintage):
-    """One transcribed lighting table out of ``vintage``'s own snapshot.
+def table(name, edition):
+    """One transcribed lighting table out of ``edition``'s own snapshot.
 
-    ``vintage`` is REQUIRED: before Stage 3 the vintage was baked into the file
+    ``edition`` is REQUIRED: before Stage 3 the edition was baked into the file
     name (``led_lighting_2020``) and every edition read the 2020 file.
     """
-    key = (_data_root(), str(vintage), name)
+    key = (_data_root(), str(edition), name)
     if key not in _tables:
-        path = edition_file(vintage, "tables", f"{name}.json")
+        path = edition_file(edition, "tables", f"{name}.json")
         _tables[key] = json.loads(path.read_text(encoding="utf-8"))["table"]
     return _tables[key]
 
 
-def led_record(building_type, space_type, vintage):
+def led_record(building_type, space_type, edition):
     """The merged LED alternative table (lighting_per_area W/ft2 + heat
-    fractions), from ``vintage``'s own copy."""
-    for r in table("led_lighting", vintage):
+    fractions), from ``edition``'s own copy."""
+    for r in table("led_lighting", edition):
         if r["building_type"] == building_type and r["space_type"] == space_type:
             return r
     return None

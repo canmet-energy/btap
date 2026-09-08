@@ -46,7 +46,7 @@ class TestNecbPumpRules(unittest.TestCase):
         model = openstudio.model.Model()
         _, pump = loop_with_vsd_pump(model, 'Cooling', flow=0.02)
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertAlmostEqual(RIDING['a'], pump.coefficient1ofthePartLoadPerformanceCurve(),
                                delta=1e-6)
@@ -72,7 +72,7 @@ class TestNecbPumpRules(unittest.TestCase):
         reference = openstudio.model.Model()
         _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)  # 20 L/s
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         self.assertAlmostEqual(2000.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
                                msg='combined proposed intensity (100 W per L/s) x reference '
@@ -95,7 +95,7 @@ class TestNecbPumpRules(unittest.TestCase):
         pump = openstudio.model.PumpConstantSpeed(reference)
         pump.setRatedFlowRate(0.005)
         pump.addToNode(loop_.supplyInletNode())
-        hvac.apply_efficiencies(reference, vintage='2020', audit=AuditLog(), proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=AuditLog(), proposed=proposed)
         self.assertAlmostEqual(600.0, pump.ratedPowerConsumption().get(), delta=0.1,
                                msg='120 W/(L/s) x 5 L/s')
 
@@ -106,7 +106,7 @@ class TestNecbPumpRules(unittest.TestCase):
         reference = openstudio.model.Model()
         _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.02)
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         self.assertTrue(any('NOT transferred' in w['action'] for w in audit.warnings),
                         'undeterminable proposed pumps warn loudly')
@@ -122,7 +122,7 @@ class TestNecbPumpRules(unittest.TestCase):
         reference = openstudio.model.Model()
         loop_with_vsd_pump(reference, 'Cooling', flow=0.02)  # no Cooling pumps in proposed
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         self.assertTrue(any('NO Cooling-type loop pumps' in w['action'] for w in audit.warnings),
                         'missing loop-type correspondence warns')
@@ -131,7 +131,7 @@ class TestNecbPumpRules(unittest.TestCase):
         model = openstudio.model.Model()
         loop_with_vsd_pump(model, 'Heating', flow=0.01)
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2025', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2025', audit=audit)
         self.assertTrue(any('8.4.5.14.(4)-(5)' in str(e.get('article') or '')
                             for e in audit.entries),
                         '2025 cites the renumbered article')
@@ -151,7 +151,7 @@ class TestNecbPumpRules(unittest.TestCase):
         ref_swh, ref_swh_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.00002)
         openstudio.model.WaterHeaterMixed(reference).addToNode(ref_swh.supplyOutletNode())
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         # reference SWH pump untouched: no hard power, no riding-curve coefficients
         self.assertTrue(ref_swh_pump.ratedPowerConsumption().empty(),
@@ -175,7 +175,7 @@ class TestNecbPumpRules(unittest.TestCase):
         # legacy SWH-scale head: flow x head / power >> motor eff
         ref_pump.setRatedPumpHead(1_927_540.0)
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         power = ref_pump.ratedPowerConsumption().get()
         self.assertAlmostEqual(10.0, power, delta=0.1, msg='transferred power is authoritative')
@@ -205,7 +205,7 @@ class TestNecbPumpRules(unittest.TestCase):
         ref_loop, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
         self.add_boiler(ref_loop, 100.0)  # cap = 4.5 x 100 = 450 W
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         power = ref_pump.ratedPowerConsumption().get()
         self.assertAlmostEqual(450.0, power, delta=0.5,
@@ -229,7 +229,7 @@ class TestNecbPumpRules(unittest.TestCase):
         ref_loop, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
         self.add_boiler(ref_loop, 300.0)  # cap = 1350 W > 800 W
         audit = AuditLog()
-        hvac.apply_efficiencies(reference, vintage='2020', audit=audit, proposed=proposed)
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         self.assertAlmostEqual(800.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
                                msg='below-cap transfer untouched (min-wins)')
@@ -258,7 +258,7 @@ class TestNecbOperatingSchedules(unittest.TestCase):
             loop.setAvailabilitySchedule(sched)
 
         result = hvac.reference_hvac(
-            proposed, vintage='2020',
+            proposed, code='necb2020',
             building={'storeys': 1,
                       'zone_types': {z.nameString(): 'Office - enclosed'
                                      for z in proposed.getThermalZones()}})
@@ -277,7 +277,7 @@ class TestNecbOperatingSchedules(unittest.TestCase):
         # no air loops
         modeling.build_system(proposed, 'Baseboard gas boiler', sorted_zones(proposed))
         result = hvac.reference_hvac(
-            proposed, vintage='2020',
+            proposed, code='necb2020',
             building={'storeys': 1,
                       'zone_types': {z.nameString(): 'Office - enclosed'
                                      for z in proposed.getThermalZones()}})

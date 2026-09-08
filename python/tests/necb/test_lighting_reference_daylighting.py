@@ -22,11 +22,11 @@ def windowed_office_model():
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage="2020")
+    loads.assign_space_types(model, map_, code="necb2020")
     for w in model.getSurfaces():
         if w.outsideBoundaryCondition() == "Outdoors" and w.surfaceType() == "Wall":
             w.setWindowToWallRatio(0.4)
-    lighting.apply_lights(model, vintage="2020")
+    lighting.apply_lights(model, code="necb2020")
     return model
 
 
@@ -46,7 +46,7 @@ class TestReferenceDaylighting(unittest.TestCase):
 
         reference = proposed.clone(True).to_Model()
         audit = AuditLog()
-        lighting.reference_daylighting(reference, vintage="2020", proposed=proposed,
+        lighting.reference_daylighting(reference, code="necb2020", proposed=proposed,
                                        placement="all", audit=audit)
 
         # (10)(b) reflectances on interior-facing layers
@@ -82,7 +82,7 @@ class TestReferenceDaylighting(unittest.TestCase):
 
         reference = windowed_office_model()
         audit = AuditLog()
-        lighting.reference_daylighting(reference, vintage="2020",
+        lighting.reference_daylighting(reference, code="necb2020",
                                        placement="necb_default",
                                        office_match="legacy", audit=audit)
         # Post-#2119 legacy threshold semantics: the skylight criteria no longer
@@ -108,7 +108,7 @@ class TestReferenceDaylighting(unittest.TestCase):
         for label, daylighting in [("without", False), ("with", True)]:
             model = windowed_office_model()
             if daylighting:
-                lighting.reference_daylighting(model, vintage="2020", placement="all")
+                lighting.reference_daylighting(model, code="necb2020", placement="all")
             for z in model.getThermalZones():
                 z.setUseIdealAirLoads(True)
             with tempfile.TemporaryDirectory(prefix=f"osdl-{label}-") as dir_:

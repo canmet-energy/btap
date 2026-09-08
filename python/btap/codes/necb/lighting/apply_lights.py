@@ -25,7 +25,7 @@ import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb import lighting as _lighting
 
 _WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
@@ -50,13 +50,13 @@ def _inspect(value):
     return 'nil' if value is None else f'"{value}"'
 
 
-def apply_lights(model, vintage='2020', lights_type='NECB_Default',
+def apply_lights(model, code='necb2020', lights_type='NECB_Default',
                  lights_scale=1.0, audit=None):
     """Apply NECB interior lighting to every tagged space type.
 
     :param lights_type: 'NECB_Default' or 'LED'
     """
-    return _apply_lights(model, Ruleset.from_edition(vintage), lights_type=lights_type,
+    return _apply_lights(model, resolve(code), lights_type=lights_type,
                          lights_scale=lights_scale, audit=audit)
 
 
@@ -84,7 +84,7 @@ def _apply_lights(model, ruleset, lights_type='NECB_Default', lights_scale=1.0,
     # spaces) are warned individually in _apply_to_space_type.
     audit.decision('lighting', f"interior lighting applied ({lights_type}, scale {lights_scale})",
                    inputs={'space_types_applied': applied, 'space_types_eligible': eligible,
-                           'vintage': ruleset.edition},
+                           'code': ruleset.id, 'edition': ruleset.edition},
                    article='4.2.1.4.; 4.2.1.5.; 4.2.1.6.')
     _emit_article_coverage(ruleset, audit)
     return audit
@@ -102,12 +102,12 @@ def _is_consequential(space_type):
     return any(s.partofTotalFloorArea() for s in space_type.spaces())
 
 
-def unmatched_space_types(model, vintage):
+def unmatched_space_types(model, code):
     """Space types (with their standards tags) that a Part 4 LPD could NOT be
     established for, restricted to ones that matter. The reference
     transform hard-fails on these: reference LPD == proposed LPD means the
     8.4.5.5.(1) allowance is silently waived."""
-    return _unmatched_space_types(model, Ruleset.from_edition(vintage))
+    return _unmatched_space_types(model, resolve(code))
 
 
 def _unmatched_space_types(model, ruleset):
@@ -123,7 +123,7 @@ def _unmatched_space_types(model, ruleset):
         standards = space_type.standardsSpaceType()
         standards_type = standards.get() if standards.is_initialized() else None
         record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                                 vintage=ruleset.edition)
+                                 edition=ruleset.edition)
         if not (record is None or SpaceTypes.is_undefined(record)):
             continue
 
@@ -144,7 +144,7 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
     standards = space_type.standardsSpaceType()
     standards_type = standards.get() if standards.is_initialized() else None
     record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                             vintage=ruleset.edition)
+                             edition=ruleset.edition)
     if record is None or SpaceTypes.is_undefined(record):
         if _is_consequential(space_type):
             audit.warn('lighting',
@@ -173,7 +173,7 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
     if lpd != 0.0:
         if lights_type == 'LED':
             led = _lighting.led_record(building_type=building_type, space_type=standards_type,
-                                       vintage=ruleset.edition)
+                                       edition=ruleset.edition)
             if led is None:
                 raise ValueError(
                     f"no LED lighting data for ['{building_type}', '{standards_type}']")
@@ -259,9 +259,10 @@ def _add_additional_lights(space_type, record):
     lights.setSpaceType(space_type)
 
 
-def _wire_lighting_schedule(model, space_type, record, code, audit):
-    """``code`` is this edition's :class:`btap.codes.Ruleset` — not spelled
-    ``ruleset``, because the OpenStudio ScheduleRuleset this synthesizes is.
+def _wire_lighting_schedule(model, space_type, record, edition_rules, audit):
+    """``edition_rules`` is this edition's :class:`btap.codes.Ruleset` — not
+    spelled ``ruleset``, because the OpenStudio ScheduleRuleset this
+    synthesizes is; nor ``code``, which is the public API's code id.
 
     NECB2015-lineage apply_lighting_schedule: plain schedule at/below the 8.6
     W/m2 threshold; above it, synthesize the occupancy-sensor ruleset —
@@ -278,21 +279,21 @@ def _wire_lighting_schedule(model, space_type, record, code, audit):
         space_type.setDefaultScheduleSet(schedule_set)
 
     lpd = _f(record['lighting_per_area'])
-    threshold = _f(code.rules("lighting")['sensor_schedule_lpd_threshold_w_per_ft2'])
+    threshold = _f(edition_rules.rules("lighting")["sensor_schedule_lpd_threshold_w_per_ft2"])
     lighting_name = record['lighting_schedule']
     if lighting_name is None:
         return
 
     if lpd <= threshold:
         schedule_set.setLightingSchedule(
-            Schedules._add(model, lighting_name, code, audit=audit))
+            Schedules._add(model, lighting_name, edition_rules, audit=audit))
         return
 
     occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
     rel_absence = _f(record['rel_absence_occ'])
     personal = _f(record['personal_control'])
     occ_sense = _f(record['occ_sense'])
-    schedules = loads.table(code.edition, 'schedules')
+    schedules = loads.table(edition_rules.edition, 'schedules')
     occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
     lighting_rows = [r for r in schedules if r['name'] == lighting_name]
     if not occupancy_rows or not lighting_rows:
@@ -300,7 +301,7 @@ def _wire_lighting_schedule(model, space_type, record, code, audit):
                    f"sensor-schedule synthesis needs both '{occupancy_name}' and '{lighting_name}' — "
                    'falling back to the plain lighting schedule', target=space_type.nameString())
         schedule_set.setLightingSchedule(
-            Schedules._add(model, lighting_name, code, audit=audit))
+            Schedules._add(model, lighting_name, edition_rules, audit=audit))
         return
 
     ruleset_name = (f"{occupancy_name}-{lighting_name}-{_num(rel_absence)}-{_num(personal)}-"

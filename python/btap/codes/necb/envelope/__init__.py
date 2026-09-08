@@ -10,7 +10,7 @@ The generic machinery it drives lives in btap.modeling (``Geometry`` ->
 module; Python imports them where they are used.
 
 PORT NOTE (naming collision Ruby does not have): ``rules`` is BOTH the
-vintage-data loader defined here (Ruby ``Envelope.rules``) and the file name
+edition-data loader defined here (Ruby ``Envelope.rules``) and the file name
 of the lookup module (``rules.rb`` -> ``rules.py``). Importing the submodule
 rebinds the package attribute, so the loader is restored at the BOTTOM of
 this file, after the submodule imports. Internal callers reach it lazily
@@ -23,14 +23,14 @@ from __future__ import annotations
 from btap.codes.necb import code_id, rulesdata
 
 
-def _load_rules(vintage):
+def _load_rules(edition):
     """This edition's envelope rules — a shim over the family's ONE loader
     (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
-    return rulesdata.load("envelope", code_id(vintage))
+    return rulesdata.load("envelope", code_id(edition))
 
 
 #: Public name while the submodules below have not been imported yet — the
-#: lookup module calls ``envelope.rules(vintage)`` exactly as the Ruby does.
+#: lookup module calls ``envelope.rules(edition)`` exactly as the Ruby does.
 rules = _load_rules
 
 # The domain files, in the Ruby require order. Each defines its behaviour on

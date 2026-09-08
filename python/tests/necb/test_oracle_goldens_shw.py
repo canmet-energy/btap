@@ -94,7 +94,7 @@ class TestOracleGoldensSHW(unittest.TestCase):
         legacy_sig = golden()["swh"]
 
         model = tagged_model()
-        shw.apply_shw(model, vintage="2020", fuel="NaturalGas")
+        shw.apply_shw(model, code="necb2020", fuel="NaturalGas")
 
         heaters = model.getWaterHeaterMixeds()
         self.assertIsNotNone(legacy_sig["heater"])
@@ -140,7 +140,7 @@ class TestOracleGoldensSHW(unittest.TestCase):
             heater.setTankVolume(volume_m3)
             heater.setHeaterMaximumCapacity(capacity_w)
             heater.setHeaterFuelType(fuel)
-            shw.apply_water_heater_efficiency(heater, vintage="2020")
+            shw.apply_water_heater_efficiency(heater, code="necb2020")
 
             key = f"{fuel}/{capacity_w}/{ruby_str(volume_m3)}"
             legacy = legacy_bins[key]

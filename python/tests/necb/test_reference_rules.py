@@ -47,7 +47,7 @@ def sample(test, slug):
 
 
 def compliance(test, slug, dir, **kwargs):
-    return performance_compliance(sample(test, slug), vintage="2020",
+    return performance_compliance(sample(test, slug), code="necb2020",
                                   hdd=3890, simulate="none", run_dir=dir,
                                   **kwargs)
 
@@ -169,7 +169,7 @@ class TestReferenceRules(unittest.TestCase):
                        "DOAS with fan coil air-cooled chiller with district "
                        "hot water"):
             model = load_raw_fixture()
-            loads.apply_loads(model, vintage="2020", audit=AuditLog())
+            loads.apply_loads(model, code="necb2020", audit=AuditLog())
             modeling.build_system(model, system,
                                   sorted_by_name(model.getThermalZones()))
 
@@ -178,7 +178,7 @@ class TestReferenceRules(unittest.TestCase):
                              "heating")
 
             reference = hvac.reference_hvac(
-                model, vintage="2020", building={"storeys": 1},
+                model, code="necb2020", building={"storeys": 1},
                 audit=AuditLog()).model
 
             self.assertEqual(0, district_count(reference),
@@ -203,7 +203,7 @@ class TestReferenceRulesAnnual(unittest.TestCase):
         with tempfile.TemporaryDirectory() as dir:
             r = performance_compliance(
                 sample(self, "16-ashp-electric-supp-hw-baseboard"),
-                vintage="2020", hdd=3890,
+                code="necb2020", hdd=3890,
                 weather={"epw": str(EPW), "ddy": str(DDY)},
                 simulate="annual",
                 run_period={"begin_month": 1, "begin_day": 1, "end_month": 1,
@@ -226,7 +226,7 @@ class TestReferenceRulesAnnual(unittest.TestCase):
         # an annual run.
         with tempfile.TemporaryDirectory() as dir:
             r = performance_compliance(
-                sample(self, "01-baseboard-gas"), vintage="2020", hdd=3890,
+                sample(self, "01-baseboard-gas"), code="necb2020", hdd=3890,
                 weather={"epw": str(EPW), "ddy": str(DDY)},
                 simulate="annual",
                 run_period={"begin_month": 1, "begin_day": 1, "end_month": 1,

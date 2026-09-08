@@ -178,7 +178,7 @@ class TestEfficiencyProvenance(unittest.TestCase):
         self.assertNotRegex(source, r'heat_rejection',
                             'apply_efficiencies grew a heat_rejection consumer — re-verify its '
                             'values against the printed NECB table first (they are 90.1 '
-                            'vintages, D-59)')
+                            'editions, D-59)')
 
     # ==================== NECB 2025 (D-60) ====================
 

@@ -23,7 +23,7 @@ def rule_manifests(package_root: Path) -> list[Path]:
     """Every edition's declared rule files, MANIFEST-driven.
 
     Since Stage 3 of the multi-edition plan the rule files no longer carry the
-    vintage in their names, so a filename grammar cannot find them. Each
+    edition in their names, so a filename grammar cannot find them. Each
     edition's `manifest.json` enumerates its own files; this tool runs under a
     bare `python3` in the `lint` job and so reads them off disk rather than
     importing `btap.codes`.

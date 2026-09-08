@@ -109,7 +109,7 @@ model = compliance_fixture()
 run_dir = Path({tmp!r}) / "run"
 run_dir.mkdir(exist_ok=True)
 building = {{"storeys": 1, "zone_types": zone_types_for(model), "winter_design_temp_c": -20}}
-cr = compliance.performance_compliance(model, vintage=edition, simulate="none", hdd=3890,
+cr = compliance.performance_compliance(model, code=f"necb{{edition}}", simulate="none", hdd=3890,
                                        building=building, run_dir=str(run_dir))
 result["compliance_result_type"] = type(cr).__name__
 result["compliance_report_present"] = bool(cr.report)

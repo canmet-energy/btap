@@ -317,7 +317,7 @@ def synthetic_record(archetype):
 
 # ---- conformance check -------------------------------------------------
 
-def conformance(model, resolved, *, vintage, audit):
+def conformance(model, resolved, *, code, audit):
     """Does the model ALREADY carry the Table 8.4.4.2 values, so one
     as-specified annual run can lawfully serve both compliance paths?
     Compares, per mapped space: occupant density, receptacle power, SWH peak
@@ -332,7 +332,7 @@ def conformance(model, resolved, *, vintage, audit):
     scratch = openstudio.model.Model()
     for archetype, info in resolved["archetypes"].items():
         record = synthetic_record(archetype)
-        targets = target_schedules(scratch, record, vintage)
+        targets = target_schedules(scratch, record, code)
         for space in info["spaces"]:
             check_space_values(space, archetype, record, mismatches)
             check_space_schedules(space, archetype, targets, mismatches)
@@ -349,7 +349,7 @@ def conformance(model, resolved, *, vintage, audit):
 
 # ---- normalization -----------------------------------------------------
 
-def normalize(model, resolved, *, vintage, audit):
+def normalize(model, resolved, *, code, audit):
     """Rewrites the (already-cloned) model to Table 8.4.4.2 for every mapped
     space: occupancy + receptacle loads and operating schedules via a cloned
     space type per (original type x archetype), SWH flows per occupant, and
@@ -402,15 +402,15 @@ def normalize(model, resolved, *, vintage, audit):
                 st.setDefaultScheduleSet(fresh)
                 apply.apply_people(st, record, audit)
                 apply.apply_equipment(st, record, audit)
-                apply.apply_schedule_set(model, st, record, vintage, audit)
-                apply.apply_thermostat(model, st, record, vintage, audit)
+                apply.apply_schedule_set(model, st, record, code, audit)
+                apply.apply_thermostat(model, st, record, code, audit)
                 # lighting OPERATION follows the letter (adopted
                 # interpretation; POWER untouched — the loads package's wiring
                 # deliberately excludes lighting, so it is wired here) and
                 # per-instance overrides on the clone's Lights are cleared so
                 # the set governs.
                 fresh.setLightingSchedule(loads.Schedules.add(
-                    model, record["lighting_schedule"], vintage=vintage,
+                    model, record["lighting_schedule"], code=code,
                     audit=audit))
                 for light in st.lights():
                     light.resetSchedule()
@@ -421,7 +421,7 @@ def normalize(model, resolved, *, vintage, audit):
                 light.resetSchedule()
             space.setDesignSpecificationOutdoorAir(
                 archetype_dsoa(model, archetype, record))
-            normalize_swh(model, space, record, vintage, audit)
+            normalize_swh(model, space, record, code, audit)
         audit.decision(
             "eui", f"spaces normalized to Table 8.4.4.2 ({archetype})",
             inputs={"spaces": len(info["spaces"]),
@@ -592,26 +592,26 @@ def inherited_schedule(instance, label):
     return openstudio.model.OptionalSchedule()
 
 
-def target_schedules(scratch, record, vintage):
+def target_schedules(scratch, record, code):
     from btap.codes.necb import loads
 
     quiet = AuditLog()
     return {
         "occupancy": loads.Schedules.add(scratch, record["occupancy_schedule"],
-                                         vintage=vintage, audit=quiet),
+                                         code=code, audit=quiet),
         "lighting": loads.Schedules.add(scratch, record["lighting_schedule"],
-                                        vintage=vintage, audit=quiet),
+                                        code=code, audit=quiet),
         "electric equipment": loads.Schedules.add(
-            scratch, record["electric_equipment_schedule"], vintage=vintage,
+            scratch, record["electric_equipment_schedule"], code=code,
             audit=quiet),
         "heating setpoint": loads.Schedules.add(
-            scratch, record["heating_setpoint_schedule"], vintage=vintage,
+            scratch, record["heating_setpoint_schedule"], code=code,
             audit=quiet),
         "cooling setpoint": loads.Schedules.add(
-            scratch, record["cooling_setpoint_schedule"], vintage=vintage,
+            scratch, record["cooling_setpoint_schedule"], code=code,
             audit=quiet),
         "SWH": loads.Schedules.add(
-            scratch, record["service_water_heating_schedule"], vintage=vintage,
+            scratch, record["service_water_heating_schedule"], code=code,
             audit=quiet),
     }
 
@@ -687,7 +687,7 @@ def space_swh_flow_m3s(space):
                for e in space.waterUseEquipment())
 
 
-def normalize_swh(model, space, record, vintage, audit):
+def normalize_swh(model, space, record, code, audit):
     from btap.codes.necb import loads
 
     target = swh_target_m3s(space, record)
@@ -706,7 +706,7 @@ def normalize_swh(model, space, record, vintage, audit):
         return
     share = target / len(equipment)
     quiet_sched = loads.Schedules.add(
-        model, record["service_water_heating_schedule"], vintage=vintage,
+        model, record["service_water_heating_schedule"], code=code,
         audit=audit)
     for e in equipment:
         # definitions may be shared across spaces — give this instance its own

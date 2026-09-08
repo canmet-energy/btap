@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_COVERAGE.md"
 #: Where each code family keeps one snapshot directory per edition, relative to
 #: the manifest root. Discovery is MANIFEST-driven (multi-edition plan, Stage
-#: 3): rule files no longer carry the vintage in their names. This generator
+#: 3): rule files no longer carry the edition in their names. This generator
 #: runs under a bare `python3` in the `lint` job, so it reads the manifests off
 #: disk rather than importing `btap.codes`.
 EDITION_DATA = Path("python") / "btap" / "codes" / "necb" / "data"
@@ -27,7 +27,7 @@ STATUS_GROUPS = (
     ("host_scope", "Host / other-gem scope"),
 )
 FIELD_VERIFIED_HEADING = "Field / document verification (modeller scope, does not warn)"
-VINTAGES = ("2020", "2025")
+EDITIONS = ("2020", "2025")
 
 
 def manifest_paths(manifest_root: Path) -> list[tuple[Path, str, str]]:
@@ -42,9 +42,9 @@ def manifest_paths(manifest_root: Path) -> list[tuple[Path, str, str]]:
     return found
 
 
-def canonical(article: object, vintage: object) -> str:
+def canonical(article: object, edition: object) -> str:
     value = str(article or "")
-    if str(vintage) != "2020":
+    if str(edition) != "2020":
         return value
     match = re.match(r"8\.4\.([45])\.", value)
     if match is None:
@@ -66,7 +66,7 @@ def collect_records(manifest_root: Path) -> list[dict]:
         raise ValueError("no coverage manifests found — the glob went stale")
 
     records = []
-    for path, domain, vintage in manifests:
+    for path, domain, edition in manifests:
         data = json.loads(path.read_text(encoding="utf-8"))
         coverage = data.get("article_coverage", {}).get("articles")
         if coverage is None:
@@ -75,9 +75,9 @@ def collect_records(manifest_root: Path) -> list[dict]:
             raw_article = str(article.get("article") or "")
             records.append({
                 "gem": domain,
-                "vintage": str(vintage),
+                "edition": str(edition),
                 "article": raw_article,
-                "canonical": canonical(raw_article, vintage),
+                "canonical": canonical(raw_article, edition),
                 "title": str(article.get("title") or ""),
                 "status": str(article.get("status") or ""),
                 "how": article.get("how"),
@@ -122,7 +122,7 @@ def render(records: list[dict]) -> str:
         f"# {title}",
         "",
         f"Rollup of every {owner}'s NECB `article_coverage` manifest, one collapsible",
-        "section per vintage, each in that code edition's own article numbering.",
+        "section per edition, each in that code edition's own article numbering.",
         "Statuses: **implemented** / **partial** (warns every run) /",
         "**not_implemented** (warns every run) / **satisfied_by_clone** /",
         f"**host_scope** ({host_scope_text}); entries with",
@@ -149,31 +149,31 @@ def render(records: list[dict]) -> str:
         lambda row: str(row["gap_owner"] or "") == "modeller",
     ))
     for heading, predicate in summary_rows:
-        counts = [sum(row["vintage"] == vintage and predicate(row) for row in records)
-                  for vintage in VINTAGES]
+        counts = [sum(row["edition"] == edition and predicate(row) for row in records)
+                  for edition in EDITIONS]
         if sum(counts):
             out.append(f"| {heading} | {counts[0]} | {counts[1]} |")
-    vintage_counts = [sum(row["vintage"] == vintage for row in records) for vintage in VINTAGES]
+    edition_counts = [sum(row["edition"] == edition for row in records) for edition in EDITIONS]
     out.extend([
-        f"| **Total entries** | **{vintage_counts[0]}** | **{vintage_counts[1]}** |",
+        f"| **Total entries** | **{edition_counts[0]}** | **{edition_counts[1]}** |",
         "",
     ])
 
-    for vintage in VINTAGES:
-        vintage_rows = [row for row in records if row["vintage"] == vintage]
+    for edition in EDITIONS:
+        edition_rows = [row for row in records if row["edition"] == edition]
         out.extend([
             "<details>",
-            f"<summary><b>NECB {vintage}</b> — {len(vintage_rows)} entries (click to expand)</summary>",
+            f"<summary><b>NECB {edition}</b> — {len(edition_rows)} entries (click to expand)</summary>",
             "",
         ])
         field_verified = sorted(
-            (row for row in vintage_rows if str(row["gap_owner"] or "") == "modeller"),
+            (row for row in edition_rows if str(row["gap_owner"] or "") == "modeller"),
             key=lambda row: (row["gem"], article_sort_key(row["canonical"])),
         )
 
         for status, heading in STATUS_GROUPS:
             group = sorted(
-                (row for row in vintage_rows
+                (row for row in edition_rows
                  if row["status"] == status and str(row["gap_owner"] or "") != "modeller"),
                 key=lambda row: (row["gem"], article_sort_key(row["canonical"])),
             )
@@ -209,9 +209,9 @@ def render(records: list[dict]) -> str:
             )
             out.append("")
 
-        covering = [row for row in vintage_rows if row["status"] != "host_scope"]
+        covering = [row for row in edition_rows if row["status"] != "host_scope"]
         host = sorted(
-            (row for row in vintage_rows if row["status"] == "host_scope"),
+            (row for row in edition_rows if row["status"] == "host_scope"),
             key=lambda row: (row["gem"], article_sort_key(row["canonical"])),
         )
         if host:
@@ -241,7 +241,7 @@ def render(records: list[dict]) -> str:
     domains = len({row["gem"] for row in records})
     out.extend([
         f"_{len(records)} coverage entries across {domains} domains "
-        f"({vintage_counts[0]} × 2020, {vintage_counts[1]} × 2025)._",
+        f"({edition_counts[0]} × 2020, {edition_counts[1]} × 2025)._",
         "",
     ])
     return "\n".join(out)
@@ -262,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args(argv)
     records = generate(args.manifest_root, args.output)
-    print(f"wrote {args.output.name} — {len(records)} entries in two vintage sections")
+    print(f"wrote {args.output.name} — {len(records)} entries in two edition sections")
     return 0
 
 

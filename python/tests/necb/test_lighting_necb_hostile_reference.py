@@ -47,7 +47,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         from btap.codes.necb.loads import space_types as SpaceTypes
 
         record = SpaceTypes.find(building_type="Space Function", space_type=space_type,
-                                 vintage="2020")
+                                 edition="2020")
         self.assertIsNotNone(record,
                              f"fixture precondition: '{space_type}' must exist in the catalog")
         return openstudio.convert(float(record["lighting_per_area"]), "W/ft^2", "W/m^2").get()
@@ -85,7 +85,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         space_type = self.hostile_lights(
             tagged_space_type(model, "Space Function", KNOWN_SPACE_TYPE))
 
-        lighting.reference_lighting(model, vintage="2020", audit=AuditLog())
+        lighting.reference_lighting(model, code="necb2020", audit=AuditLog())
 
         self.assertAlmostEqual(self.catalog_lpd_w_per_m2(KNOWN_SPACE_TYPE),
                                self.lpd_of(space_type), delta=1e-6,
@@ -125,7 +125,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
 
         audit = AuditLog()
         with self.assertRaises(ValueError) as ctx:
-            lighting.reference_lighting(model, vintage="2020", audit=audit)
+            lighting.reference_lighting(model, code="necb2020", audit=audit)
 
         self.assertIn(UNKNOWN_SPACE_TYPE, str(ctx.exception),
                       "the refusal must name the unresolvable space type")
@@ -152,7 +152,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
         tagged_space_type(model, "Space Function", UNKNOWN_SPACE_TYPE)  # orphan: no spaces
 
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage="2020", audit=audit)  # must not raise
+        lighting.reference_lighting(model, code="necb2020", audit=audit)  # must not raise
 
         self.assertFalse(any("UNRESOLVABLE" in str(w["action"]) for w in audit.warnings),
                          "orphan space types must not generate unresolvable warnings")
@@ -171,7 +171,7 @@ class TestNECBHostileReferenceLighting(unittest.TestCase):
             tagged_space_type(model, "Space Function", "Office enclosed <= 25 m2"))
         plenum.setName("Zone 1 Plenum")
 
-        lighting.reference_lighting(model, vintage="2020", audit=AuditLog())
+        lighting.reference_lighting(model, code="necb2020", audit=AuditLog())
 
         self.assertAlmostEqual(HOSTILE_W_PER_M2, self.lpd_of(plenum), delta=1e-6,
                                msg="plenums are exempt by design and must be left untouched")

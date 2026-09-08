@@ -37,7 +37,7 @@ def tagged_model():
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage="2020")
+    loads.assign_space_types(model, map_, code="necb2020")
     return model
 
 

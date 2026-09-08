@@ -17,7 +17,7 @@ class TestDataIntegrity(unittest.TestCase):
         self.assertEqual(308, len(led))
         record = lighting.led_record(building_type="Space Function",
                                      space_type="Office enclosed > 25 m2",
-                                     vintage="2020")
+                                     edition="2020")
         self.assertIsNotNone(record)
         self.assertGreater(float(record["lighting_per_area"]), 0)
         self.assertIn("lighting_fraction_radiant", record)
@@ -69,8 +69,8 @@ class TestDataIntegrity(unittest.TestCase):
                                        delta=0.05, msg=name)
 
     def test_rules_and_coverage_lint(self):
-        for vintage in ["2020", "2025"]:
-            rules = lighting.rules(vintage)
+        for edition in ["2020", "2025"]:
+            rules = lighting.rules(edition)
             self.assertAlmostEqual(0.799256505, rules["sensor_schedule_lpd_threshold_w_per_ft2"],
                                    delta=1e-9)
             self.assertEqual(5.0, rules["dwelling_unit_lpd_w_per_m2"])

@@ -4,7 +4,7 @@
 # NECB coverage across the Python btap package
 
 Rollup of every Python domain's NECB `article_coverage` manifest, one collapsible
-section per vintage, each in that code edition's own article numbering.
+section per edition, each in that code edition's own article numbering.
 Statuses: **implemented** / **partial** (warns every run) /
 **not_implemented** (warns every run) / **satisfied_by_clone** /
 **host_scope** (delegated to the umbrella or a sibling Python domain); entries with

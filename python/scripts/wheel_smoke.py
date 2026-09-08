@@ -133,7 +133,7 @@ def run_checks() -> int:
                 st.setStandardsBuildingType("Space Function")
                 st.setStandardsSpaceType("Office enclosed > 25 m2")
         audit = AuditLog()
-        loads.apply_loads(model, vintage="2020", audit=audit)
+        loads.apply_loads(model, code="necb2020", audit=audit)
         assert model.getPeoples(), "apply_loads produced no occupancy"
         assert audit.entries, "apply_loads wrote nothing to the audit"
     check("a real domain operation runs end to end (necb loads on the packaged seed)",
