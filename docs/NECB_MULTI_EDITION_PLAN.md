@@ -1214,3 +1214,21 @@ rather than main. Same execution model and the one-heavy-job rule.
   is still unreachable** (merge retry at attempt 16+). If the eventual
   rebase onto squash-merged main changes the commit beneath, the freeze
   re-runs and the only permitted diff is `provenance.commit`.
+- **R-B executed** from clean tree `ca7d382` → commit `1cc5709`.
+  **Attribution by script** (`attribute_rb.py`: rewrites HEAD's baselines
+  through the R7 ledger + rename rules and compares to the freeze; checks
+  every manifest field): 54 files / 27 scenarios (20 python-lane + 3
+  verify + 4 parity), `audit.json` ×27 and `audit.txt` ×27 all path-only,
+  `report.json` untouched; manifest `provenance.commit`, `freezer_sha256`,
+  `runner_sha256`, and 27 `baseline_sha256` — the touched set exactly; no
+  other top-level, provenance or scenario field; no id added/removed;
+  `defs/gate/spec_sha256` unchanged. Regenerating both coverage documents
+  after the freeze: no diff. **No findings.** Three-lane gate + light
+  gates running.
+- **Stage 1 verification block complete on `1cc5709`:** frozen lanes
+  python 32 / verify 3 / parity 4 green; full suite green; lint-imports
+  3/3; ruff clean; orphan keys OK; decisions TOC current; docs regenerate
+  to no diff. **Waiting on GitHub** for the #33 merge; then
+  `git rebase --onto main 8f28f73 stage1-integration`, re-freeze (only
+  `provenance.commit` may move — attributed like every other freeze), push,
+  PR, dispatch.
