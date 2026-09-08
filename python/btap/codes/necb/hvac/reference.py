@@ -14,36 +14,30 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import openstudio
 
 from btap._compat import NullAudit, opt, ruby_round, sorted_by_name
 from btap.audit import emit_coverage
 from btap.codes import Ruleset
+from btap.codes.necb import _data_root, edition_file
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 
-RULES_DIR = Path(__file__).parent / "data"
-
-_RULES: dict[str, dict] = {}
+_RULES: dict[tuple, dict] = {}
 
 
 def rules(vintage):
     """Load (and memoize) the vendored NECB reference ruleset for a vintage.
 
     :param vintage: NECB vintage ('2020' or '2025')
-    :return: dict — parsed data/reference_rules_<vintage>.json
+    :return: dict — parsed data/<code id>/reference_rules.json
     """
-    key = str(vintage)
+    key = (_data_root(), str(vintage))
     if key not in _RULES:
-        path = RULES_DIR / f"reference_rules_{key}.json"
-        if not path.exists():
-            raise ValueError(
-                f"no NECB reference rules for vintage '{key}' (expected {path})")
-        with open(path, encoding="utf-8") as f:
+        with open(edition_file(vintage, "reference_rules.json"), encoding="utf-8") as f:
             _RULES[key] = json.load(f)
     return _RULES[key]
 

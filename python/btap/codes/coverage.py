@@ -12,8 +12,13 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, TextIO
 
-_EDITIONS = ("2020", "2025")
-_ARTICLE_FILE = "necb_8_4_articles_{edition}.json"
+#: Inside an edition's snapshot: the packaged Section 8.4 article text. Each
+#: edition carries its OWN copy (Stage 3); nothing here reads another
+#: edition's file, and an edition without this file simply is not listed.
+_ARTICLE_TEXT = ("coverage", "articles_8_4.json")
+#: Code-family-neutral, and deliberately NOT per-edition: the disposition is
+#: one curated responsibility map the generator reads across editions, and the
+#: attribution is one Crown-copyright notice covering all cached text.
 _DISPOSITION_FILE = "necb_8_4_disposition.json"
 _ATTRIBUTION_FILE = "ATTRIBUTION.md"
 
@@ -27,15 +32,28 @@ def _load_json(name: str) -> dict[str, Any]:
     return json.loads(_resource(name).read_text(encoding="utf-8"))
 
 
+@cache
+def _load_path(path: Path) -> dict[str, Any]:
+    """Cached on the resolved PATH, so repointing the family's data root in a
+    test is never served the previous root's article text."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def _edition(value: str | int) -> str:
     edition = str(value)
-    if edition not in _EDITIONS:
-        raise ValueError(f"unsupported NECB edition {edition!r}; expected 2020 or 2025")
+    known = editions()
+    if edition not in known:
+        raise ValueError(
+            f"unsupported NECB edition {edition!r}; the installed reference "
+            f"carries {', '.join(known) or '(none)'}"
+        )
     return edition
 
 
 def _article_document(edition: str | int) -> dict[str, Any]:
-    return _load_json(_ARTICLE_FILE.format(edition=_edition(edition)))
+    from btap.codes.necb import edition_file
+
+    return _load_path(edition_file(_edition(edition), *_ARTICLE_TEXT))
 
 
 def _number_key(number: str) -> tuple[int, ...]:
@@ -43,8 +61,21 @@ def _number_key(number: str) -> tuple[int, ...]:
 
 
 def editions() -> tuple[str, ...]:
-    """NECB editions included in the installed reference."""
-    return _EDITIONS
+    """NECB editions whose snapshot carries packaged Section 8.4 article text.
+
+    Deliberately NARROWER than :func:`btap.codes.editions`, which answers "has
+    a manifest here": an edition is a first-class ruleset long before its
+    article text is cached, and conflating the two would make a missing cache
+    look like a missing code edition.
+    """
+    from btap.codes import editions as _registered
+    from btap.codes.necb import _data_root, code_id
+
+    root = _data_root()
+    return tuple(
+        edition for edition in _registered("necb")
+        if root.joinpath(code_id(edition), *_ARTICLE_TEXT).is_file()
+    )
 
 
 def article_numbers(edition: str | int) -> tuple[str, ...]:
@@ -113,12 +144,9 @@ def _fetch(edition: str, output: Path | None, err: TextIO) -> int:
             file=err,
         )
         return 2
-    destination = output or (
-        Path(__file__).resolve().parent
-        / "data"
-        / "coverage"
-        / _ARTICLE_FILE.format(edition=edition)
-    )
+    from btap.codes.necb import _data_root, code_id
+
+    destination = output or _data_root().joinpath(code_id(edition), *_ARTICLE_TEXT)
     return subprocess.run(
         [
             sys.executable,
@@ -137,21 +165,22 @@ def _parser() -> argparse.ArgumentParser:
         prog="btap-necb-coverage",
         description="Read the installed NECB Section 8.4 coverage reference",
     )
+    installed = editions()
     commands = parser.add_subparsers(dest="command", required=True)
 
     commands.add_parser("editions", help="list installed NECB editions")
 
     list_parser = commands.add_parser("list", help="list article numbers")
-    list_parser.add_argument("edition", choices=_EDITIONS)
+    list_parser.add_argument("edition", choices=installed)
     list_parser.add_argument("--format", choices=("text", "json"), default="text")
 
     get_parser = commands.add_parser("get", help="get one article")
-    get_parser.add_argument("edition", choices=_EDITIONS)
+    get_parser.add_argument("edition", choices=installed)
     get_parser.add_argument("number")
     get_parser.add_argument("--format", choices=("text", "json"), default="text")
 
     provenance_parser = commands.add_parser("provenance", help="show cache provenance")
-    provenance_parser.add_argument("edition", choices=_EDITIONS)
+    provenance_parser.add_argument("edition", choices=installed)
 
     disposition_parser = commands.add_parser(
         "disposition", help="show all dispositions or one article's disposition"
@@ -163,7 +192,7 @@ def _parser() -> argparse.ArgumentParser:
     fetch_parser = commands.add_parser(
         "fetch", help="maintainer-only: refresh one cache from a source checkout"
     )
-    fetch_parser.add_argument("edition", choices=_EDITIONS)
+    fetch_parser.add_argument("edition", choices=installed)
     fetch_parser.add_argument("--out", type=Path)
     return parser
 

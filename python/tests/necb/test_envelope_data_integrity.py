@@ -106,7 +106,8 @@ class TestDataIntegrity(unittest.TestCase):
             'verified via MCP: 2025 envelope tables are numerically identical to 2020')
 
     def test_table_c1_vendored(self):
-        path = self.n.RULES_DIR / 'table_c1.json'
+        from btap.codes.necb import edition_file
+        path = edition_file('2020', 'tables', 'table_c1.json')
         with open(path, encoding='utf-8') as handle:
             data = json.load(handle)
         self.assertGreaterEqual(len(data['table']), 679)

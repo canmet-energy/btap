@@ -1,7 +1,7 @@
 """NECB 2025 vintage: same reference-rule VALUES as 2020 but the performance path moved
 from Subsection 8.4.4 to 8.4.5 (verified via the codes MCP edition diff). Selections
 must be identical across vintages while citations carry the 2025 article numbers.
-Efficiencies are native 2025 (efficiencies_2025.json, transcribed from Tables
+Efficiencies are native 2025 (necb2025/efficiencies.json, transcribed from Tables
 5.2.12.1.-K/-N/-O/-A): chillers/boilers/furnaces/unitary-AC/HP cooling ladders are
 verified identical to 2020; the real change is split-system HP heating HSPF 7.4 -> 7.8."""
 
@@ -69,8 +69,6 @@ class TestNecb2025(unittest.TestCase):
         rules = hvac.rules('2025')
         self.assertEqual('8.4.5.8.(1)-(2)', rules['oversizing']['article'])
         self.assertEqual('2025', rules['provenance']['edition'])
-        self.assertIsNone(rules['provenance'].get('efficiency_vintage_fallback'),
-                          'fallback lifted')
 
     # end-to-end reference_hvac at vintage 2025: correct topology, native efficiencies,
     # and NO fallback warning
@@ -89,12 +87,6 @@ class TestNecb2025(unittest.TestCase):
         self.assertRegex(selection['article'], r'8\.4\.5')
         self.assertEqual([], [w for w in result.audit.warnings if 'fall back' in w['action']],
                          '2025 efficiencies are native — no fallback warning')
-
-    def test_effective_vintage_native_for_both(self):
-        for v in ('2020', '2025'):
-            vintage, reason = hvac.efficiency.effective_vintage(v)
-            self.assertEqual(v, vintage)
-            self.assertIsNone(reason)
 
     # Table 5.2.12.1.-A specifies SEER 15 for the small HP cooling class in both editions.
     def test_small_heat_pump_cooling_is_seer_15_in_both_editions(self):

@@ -106,11 +106,8 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         DaylightControlRequirement.evaluate
     :return: number of controls created
     """
-    from btap.codes.necb import loads
-
     audit = audit if audit is not None else AuditLog()
     placement = resolve_placement(placement, option, audit)
-    data_vintage = loads.data_vintage(vintage)
     created = 0
     fractions = {}
 
@@ -133,7 +130,7 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         if zone.primaryDaylightingControl().is_initialized():
             continue
 
-        setpoint = _illuminance_setpoint(space, data_vintage)
+        setpoint = _illuminance_setpoint(space, vintage)
         if setpoint is None:
             audit.warn('daylighting',
                        'no target_illuminance_setpoint for this space type — no sensor placed',
@@ -478,7 +475,7 @@ def _is_daylighted(space):
                for sub in surface.subSurfaces())
 
 
-def _illuminance_setpoint(space, data_vintage):
+def _illuminance_setpoint(space, vintage):
     from btap.codes.necb.loads import space_types as SpaceTypes
 
     if not space.spaceType().is_initialized():
@@ -491,7 +488,7 @@ def _illuminance_setpoint(space, data_vintage):
 
     record = SpaceTypes.find(building_type=space_type.standardsBuildingType().get(),
                              space_type=space_type.standardsSpaceType().get(),
-                             vintage=data_vintage)
+                             vintage=vintage)
     if record is None:
         return None
 

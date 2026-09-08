@@ -48,7 +48,7 @@ import math
 import re
 
 from btap._compat import NullAudit, ruby_round
-from btap.codes.necb import lighting as _lighting
+from btap.codes.necb import _data_root, edition_file
 from btap.codes.necb.lighting import daylighted_areas as DaylightedAreas
 
 PRIMARY_THRESHOLD_W = 150.0         # 4.2.2.1.(10)(a)
@@ -60,7 +60,16 @@ SKYLIGHT_VT_THRESHOLD = 0.4         # 4.2.2.1.(15)(b)
 HIGH_LATITUDE_DEG_N = 55.0          # 4.2.2.1.(15)(c)
 HIGH_LATITUDE_THRESHOLD_W = 200.0   # 4.2.2.1.(15)(c)
 
-_table_cache = None
+#: STAGE 3 INTERIM. This chain (``table``/``residue``/``requirement``/
+#: ``evaluate``) is not edition-aware yet: the next Stage 3 change threads
+#: ``edition`` through it and its callers. Until then the table is read from
+#: the necb2020 snapshot; necb2025 ships its own byte-identical copy (the
+#: nine control columns agree 0-of-909 differing cells), so the read moves to
+#: the caller's edition without any value changing.
+_INTERIM_EDITION = "2020"
+
+#: Cached per data root — see envelope/climate.py.
+_table_cache: dict[object, dict] = {}
 
 
 def table():
@@ -83,11 +92,12 @@ def table():
     printed table genuinely does not list: the '- undefined -' sentinel, the
     legacy-only convention-centre seating type, and WholeBuilding (whose LPD
     comes from the building-type method of Table 4.2.1.5)."""
-    global _table_cache
-    if _table_cache is None:
-        path = _lighting.DATA_DIR / 'daylighting_controls_4_2_1_6.json'
-        _table_cache = json.loads(path.read_text(encoding='utf-8'))
-    return _table_cache
+    root = _data_root()
+    if root not in _table_cache:
+        path = edition_file(_INTERIM_EDITION, 'tables',
+                            'daylighting_controls_4_2_1_6.json')
+        _table_cache[root] = json.loads(path.read_text(encoding='utf-8'))
+    return _table_cache[root]
 
 
 def residue():

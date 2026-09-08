@@ -128,8 +128,11 @@ The two generated coverage documents are
 part of the evidence history; their inputs and code pointers are Python-owned
 after R6. Do not edit either output by hand.
 
-Section 8.4 source caches ship under `python/btap/codes/data/coverage/` for
-offline, versioned use. Refresh them only as a maintainer operation with
+Section 8.4 source caches ship inside each edition's own snapshot at
+`python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for
+offline, versioned use; the Crown-copyright notice and the cross-edition
+disposition stay code-family-neutral in `python/btap/codes/data/coverage/`.
+Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 

@@ -35,9 +35,9 @@ class TestSHWRules(unittest.TestCase):
             self.assertGreaterEqual(len(coverage), 6)
             for a in coverage:
                 self.assertTrue(a.get("how") or a.get("gaps"))
-        # Vintage aliasing is owned by the loads domain (btap.codes.necb.loads.data_vintage,
-        # called directly from shw/demand.py) — shw does not vendor its own
-        # data_vintage_alias key (removed as dead config; see provenance.note).
+        # No edition aliases another's data since Stage 3 of the multi-edition
+        # plan: shw reads the space-type and schedule tables out of the edition
+        # it was called with, and no rules file carries an alias key.
         self.assertIsNone(shw.rules("2025").get("data_vintage_alias"))
         self.assertRegex(shw.rules("2025")["changes_vs_2020"]["heat_pump_storage_water_heater"],
                          r"UEF >= 2\.23")

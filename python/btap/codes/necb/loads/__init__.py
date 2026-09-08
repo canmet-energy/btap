@@ -1,50 +1,42 @@
 """The loads domain of btap.codes (port of btap-necb's loads.rb): NECB space-use
 data application (people, plug/gas equipment, ventilation OA, infiltration,
-NECB-<letter> schedule sets, thermostats) — and the family's vintage-data
-authority (2025 aliases the 2020 tables where verified identical).
+NECB-<letter> schedule sets, thermostats).
 
-The vendored data lives in ``data/`` beside this module, byte-identical to the
-gem's ``lib/btap_necb/loads/data/``: the per-vintage rules manifests plus the
-merged space-type and schedule tables.
+Every edition reads its OWN space-type and schedule tables out of its own
+snapshot (``btap/codes/necb/data/<code id>/tables/``). Two editions verified
+identical ship two identical copies; nothing aliases another edition (Stage 3
+of the multi-edition plan removed ``data_vintage``).
 """
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from btap.audit import AuditLog  # the family's ONE AuditLog (Ruby's alias)
+from btap.codes.necb import _data_root, edition_file
 
-__all__ = ["DATA_DIR", "AuditLog", "rules", "data_vintage", "table",
+__all__ = ["AuditLog", "rules", "table",
            "assign_space_types", "apply_loads",
            "SpaceTypes", "Schedules", "Apply"]
 
-DATA_DIR = Path(__file__).parent / "data"
-
-_rules: dict[str, dict] = {}
-_tables: dict[tuple[str, str], list] = {}
+#: Caches keyed by (data root, vintage[, table]) so a test that repoints the
+#: family's data root is never served the previous root's tables.
+_rules: dict[tuple, dict] = {}
+_tables: dict[tuple, list] = {}
 
 
 def rules(vintage):
-    key = str(vintage)
+    key = (_data_root(), str(vintage))
     if key not in _rules:
-        path = DATA_DIR / f"loads_rules_{key}.json"
-        if not path.exists():
-            raise ValueError(
-                f"no NECB loads rules for vintage '{vintage}' (expected {path})")
+        path = edition_file(vintage, "loads_rules.json")
         _rules[key] = json.loads(path.read_text(encoding="utf-8"))
     return _rules[key]
 
 
-def data_vintage(vintage):
-    """The vintage whose data tables back this vintage (2025 -> 2020)."""
-    return rules(vintage).get("data_vintage_alias") or str(vintage)
-
-
 def table(vintage, name):
-    key = (data_vintage(vintage), name)
+    key = (_data_root(), str(vintage), name)
     if key not in _tables:
-        path = DATA_DIR / f"{name}_{key[0]}.json"
+        path = edition_file(vintage, "tables", f"{name}.json")
         _tables[key] = json.loads(path.read_text(encoding="utf-8"))["table"]
     return _tables[key]
 

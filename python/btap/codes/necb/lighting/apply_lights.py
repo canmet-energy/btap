@@ -99,7 +99,6 @@ def unmatched_space_types(model, vintage):
     established for, restricted to ones that matter. The reference
     transform hard-fails on these: reference LPD == proposed LPD means the
     8.4.5.5.(1) allowance is silently waived."""
-    from btap.codes.necb import loads
     from btap.codes.necb.loads import space_types as SpaceTypes
 
     result = []
@@ -112,7 +111,7 @@ def unmatched_space_types(model, vintage):
         standards = space_type.standardsSpaceType()
         standards_type = standards.get() if standards.is_initialized() else None
         record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                                 vintage=loads.data_vintage(vintage))
+                                 vintage=vintage)
         if not (record is None or SpaceTypes.is_undefined(record)):
             continue
 
@@ -122,7 +121,6 @@ def unmatched_space_types(model, vintage):
 
 
 def _apply_to_space_type(model, space_type, vintage, lights_type, lights_scale, audit):
-    from btap.codes.necb import loads
     from btap.codes.necb.loads import space_types as SpaceTypes
 
     name = space_type.nameString()
@@ -134,7 +132,7 @@ def _apply_to_space_type(model, space_type, vintage, lights_type, lights_scale, 
     standards = space_type.standardsSpaceType()
     standards_type = standards.get() if standards.is_initialized() else None
     record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                             vintage=loads.data_vintage(vintage))
+                             vintage=vintage)
     if record is None or SpaceTypes.is_undefined(record):
         if _is_consequential(space_type):
             audit.warn('lighting',
@@ -162,7 +160,8 @@ def _apply_to_space_type(model, space_type, vintage, lights_type, lights_scale, 
 
     if lpd != 0.0:
         if lights_type == 'LED':
-            led = _lighting.led_record(building_type=building_type, space_type=standards_type)
+            led = _lighting.led_record(building_type=building_type, space_type=standards_type,
+                                       vintage=vintage)
             if led is None:
                 raise ValueError(
                     f"no LED lighting data for ['{building_type}', '{standards_type}']")
@@ -263,7 +262,6 @@ def _wire_lighting_schedule(model, space_type, record, vintage, audit):
         schedule_set.setName(f"{space_type.nameString()} Schedule Set")
         space_type.setDefaultScheduleSet(schedule_set)
 
-    data_vintage = loads.data_vintage(vintage)
     lpd = _f(record['lighting_per_area'])
     threshold = _f(_lighting.rules(vintage)['sensor_schedule_lpd_threshold_w_per_ft2'])
     lighting_name = record['lighting_schedule']
@@ -272,14 +270,14 @@ def _wire_lighting_schedule(model, space_type, record, vintage, audit):
 
     if lpd <= threshold:
         schedule_set.setLightingSchedule(
-            Schedules.add(model, lighting_name, vintage=data_vintage, audit=audit))
+            Schedules.add(model, lighting_name, vintage=vintage, audit=audit))
         return
 
     occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
     rel_absence = _f(record['rel_absence_occ'])
     personal = _f(record['personal_control'])
     occ_sense = _f(record['occ_sense'])
-    schedules = loads.table(data_vintage, 'schedules')
+    schedules = loads.table(vintage, 'schedules')
     occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
     lighting_rows = [r for r in schedules if r['name'] == lighting_name]
     if not occupancy_rows or not lighting_rows:
@@ -287,7 +285,7 @@ def _wire_lighting_schedule(model, space_type, record, vintage, audit):
                    f"sensor-schedule synthesis needs both '{occupancy_name}' and '{lighting_name}' — "
                    'falling back to the plain lighting schedule', target=space_type.nameString())
         schedule_set.setLightingSchedule(
-            Schedules.add(model, lighting_name, vintage=data_vintage, audit=audit))
+            Schedules.add(model, lighting_name, vintage=vintage, audit=audit))
         return
 
     ruleset_name = (f"{occupancy_name}-{lighting_name}-{_num(rel_absence)}-{_num(personal)}-"

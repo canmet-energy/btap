@@ -13,11 +13,21 @@ import re
 from pathlib import Path
 
 from btap._compat import NullAudit, opt, ruby_round
+from btap.codes.necb import _data_root, edition_file
 
-TABLE_C1_PATH = Path(__file__).parent / "data" / "table_c1.json"
 TOLERANCE_KM = 500.0
 
-_TABLE_C1 = None
+#: STAGE 3 INTERIM. ``hdd18`` and ``table_c1`` are not edition-aware yet: the
+#: next Stage 3 change threads ``edition`` through hdd18's five product call
+#: sites (multi-edition plan, Stage 3, "Thread edition through the two
+#: globally-cached loaders"). Until then this loader reads the necb2020
+#: snapshot's copy of Table C-1; necb2025 ships its own byte-identical copy,
+#: so the read moves to the caller's edition without any value changing.
+_INTERIM_EDITION = "2020"
+
+#: Cached per data root, so a test that repoints the family is not served the
+#: previous root's table.
+_TABLE_C1: dict[object, list] = {}
 
 # The .stat annual heating-degree-day line. Ruby's String#match is a SEARCH,
 # and `.` does not cross newlines in either language — so re.search, never
@@ -29,11 +39,12 @@ _EPW_SUFFIX_RE = re.compile(r"\.epw\Z", re.IGNORECASE)
 
 
 def table_c1():
-    global _TABLE_C1
-    if _TABLE_C1 is None:
-        with open(TABLE_C1_PATH, encoding="utf-8") as handle:
-            _TABLE_C1 = json.load(handle)["table"]
-    return _TABLE_C1
+    root = _data_root()
+    if root not in _TABLE_C1:
+        path = edition_file(_INTERIM_EDITION, "tables", "table_c1.json")
+        with open(path, encoding="utf-8") as handle:
+            _TABLE_C1[root] = json.load(handle)["table"]
+    return _TABLE_C1[root]
 
 
 def hdd18(model, *, hdd=None, audit=None):

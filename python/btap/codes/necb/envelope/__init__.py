@@ -21,25 +21,20 @@ always happened by call time.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-RULES_DIR = Path(__file__).parent / "data"
+from btap.codes.necb import _data_root, edition_file
 
-_RULES_CACHE: dict[str, dict] = {}
+_RULES_CACHE: dict[tuple, dict] = {}
 
 
 def _load_rules(vintage):
     """Load the vendored envelope rules for a vintage ('2020', '2025')."""
-    key = str(vintage)
+    key = (_data_root(), str(vintage))
     cached = _RULES_CACHE.get(key)
     if cached is not None:
         return cached
 
-    path = RULES_DIR / f"envelope_rules_{key}.json"
-    if not path.exists():
-        raise ValueError(
-            f"no NECB envelope rules for vintage '{key}' (expected {path})")
-    with open(path, encoding="utf-8") as handle:
+    with open(edition_file(vintage, "envelope_rules.json"), encoding="utf-8") as handle:
         _RULES_CACHE[key] = json.load(handle)
     return _RULES_CACHE[key]
 
@@ -88,7 +83,6 @@ rules = _load_rules
 
 __all__ = [
     "BOUNDARIES",
-    "RULES_DIR",
     "SURFACE_TYPES",
     "U_FALLBACK",
     "apply_prescriptive",

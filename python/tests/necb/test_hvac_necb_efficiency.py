@@ -98,7 +98,7 @@ class TestNecbEfficiency(unittest.TestCase):
         self.assertGreater(cop, 2.5)
         self.assertRegex(coil.nameString(), r'SEER|EER')
         # Exact value, hand-derived the same way as the ASHP heating COP below:
-        # efficiencies_2020.json's unitary_acs table, AirCooled/All Other/Single
+        # necb2020/efficiencies.json's unitary_acs table, AirCooled/All Other/Single
         # Package, 0-65000 Btu/hr bin (15 kW = ~51,182 Btu/hr) declares SEER 15.0;
         # seer_to_cop_no_fan(seer) = -0.0076*seer^2 + 0.3796*seer (efficiency.py).
         self.assertAlmostEqual((-0.0076 * 15.0 * 15.0) + (0.3796 * 15.0), cop, delta=1e-6,

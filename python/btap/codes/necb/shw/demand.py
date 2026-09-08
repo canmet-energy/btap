@@ -48,8 +48,7 @@ def _auto_size(model, *, vintage="2020", shw_scale=1.0, audit=None):
     """
     audit = audit if audit is not None else NullAudit()
     rules = SHW.rules(vintage)["autosize"]
-    data_vintage = necb_loads.data_vintage(vintage)
-    schedules = necb_loads.table(data_vintage, "schedules")
+    schedules = necb_loads.table(vintage, "schedules")
     if shw_scale is None or shw_scale == "none" or shw_scale == "NECB_Default":
         shw_scale = 1.0
     if isinstance(shw_scale, str):
@@ -71,7 +70,7 @@ def _auto_size(model, *, vintage="2020", shw_scale=1.0, audit=None):
 
         record = loads_space_types.find(
             building_type=space_type.standardsBuildingType().get(),
-            space_type=space_type.standardsSpaceType().get(), vintage=data_vintage)
+            space_type=space_type.standardsSpaceType().get(), vintage=vintage)
         if record is None or loads_space_types.is_undefined(record):
             continue
         if (_to_f(record.get("service_water_heating_peak_flow_per_area")) == 0
@@ -184,12 +183,11 @@ def apply_shw(model, *, vintage="2020", fuel="NaturalGas", shw_scale=1.0, audit=
         return None
 
     rules = SHW.rules(vintage)["autosize"]
-    data_vintage = necb_loads.data_vintage(vintage)
     heat_pump = str(fuel) == "HeatPump"
     loop = _build_loop(model, sizing, "Electricity" if heat_pump else fuel, rules, audit)
 
     for entry in sizing["spaces_w_dhw"]:
-        _add_water_use(model, loop, entry, data_vintage, audit)
+        _add_water_use(model, loop, entry, vintage, audit)
 
     tank = [c.to_WaterHeaterMixed().get() for c in loop.supplyComponents(
         openstudio.model.WaterHeaterMixed.iddObjectType())][0]
@@ -278,7 +276,7 @@ def _build_loop(model, sizing, fuel, rules, audit):
     return loop
 
 
-def _add_water_use(model, loop, entry, data_vintage, audit):
+def _add_water_use(model, loop, entry, vintage, audit):
     space = entry["space"]
     definition = openstudio.model.WaterUseEquipmentDefinition(model)
     definition.setName(f"{space.nameString().capitalize()} Water Use Def")
@@ -290,7 +288,7 @@ def _add_water_use(model, loop, entry, data_vintage, audit):
     equipment = openstudio.model.WaterUseEquipment(definition)
     equipment.setName(str(space.nameString().capitalize()))
     equipment.setSpace(space)
-    schedule = loads_schedules.add(model, entry["schedule"], vintage=data_vintage, audit=audit)
+    schedule = loads_schedules.add(model, entry["schedule"], vintage=vintage, audit=audit)
     equipment.setFlowRateFractionSchedule(schedule)
 
     connections = openstudio.model.WaterUseConnections(model)

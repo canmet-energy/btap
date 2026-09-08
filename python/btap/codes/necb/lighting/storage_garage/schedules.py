@@ -32,7 +32,7 @@ def space_types(spaces):
     return sorted_by_name(result)
 
 
-def space_type_record(space_type, data_vintage):
+def space_type_record(space_type, vintage):
     from btap.codes.necb.loads import space_types as SpaceTypes
 
     bt = space_type.standardsBuildingType()
@@ -40,7 +40,7 @@ def space_type_record(space_type, data_vintage):
     if not (bt.is_initialized() and st.is_initialized()):
         return None
 
-    return SpaceTypes.find(building_type=bt.get(), space_type=st.get(), vintage=data_vintage)
+    return SpaceTypes.find(building_type=bt.get(), space_type=st.get(), vintage=vintage)
 
 
 def lighting_power_density(space):

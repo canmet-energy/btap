@@ -15,20 +15,25 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_8_4_COVERAGE.html"
 DEFAULT_COVERAGE_DATA = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
-DEFAULT_CACHE_2020 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2020.json"
-DEFAULT_CACHE_2025 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2025.json"
-DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
 # The per-edition ruleset manifests btap.codes discovers (multi-edition plan,
 # Stage 2). This generator is run by the `lint` CI job with a bare `python3`
 # and NO install, so it reads the same files off disk by the same path
 # convention rather than importing `btap.codes.editions()`.
 DEFAULT_EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+# Each edition's OWN Section 8.4 article text, inside its own snapshot
+# (Stage 3). The disposition stays family-neutral: it is one curated
+# responsibility map read across editions, so it is not an edition's own file.
+DEFAULT_CACHE_2020 = DEFAULT_EDITION_DATA / "necb2020" / "coverage" / "articles_8_4.json"
+DEFAULT_CACHE_2025 = DEFAULT_EDITION_DATA / "necb2025" / "coverage" / "articles_8_4.json"
+DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
 # The article numbering the SOURCE citation literals are written in. A rule
 # module writing `article="8.4.4.13.(2)(g)"` means "the reference subsection as
 # NECB 2020 numbers it"; each edition's manifest says how THAT edition numbers
 # it (`literal_remaps`). This is a property of the source text, not of any one
 # edition, which is why it is not a manifest key.
 LITERAL_REFERENCE_SUBSECTION = "8.4.4"
+#: The edition data directory, relative to a manifest root.
+EDITION_DATA_REL = Path("python") / "btap" / "codes" / "necb" / "data"
 PYTHON_INPUT_MODE = "python"
 DEFAULT_INPUT_MODE = PYTHON_INPUT_MODE
 REPO_URL = "https://github.com/canmet-energy/openstudio-necb-gems"
@@ -70,7 +75,9 @@ STATE_META = {
     "unknown": ("Unknown", "bad"),
 }
 DOMAIN_SUBDIRS = ("hvac", "envelope", "loads", "lighting", "shw")
-MANIFEST_DOMAINS = {"reference": "hvac", "necb": "necb"}
+#: manifest `rules` key -> the domain name the document prints. The umbrella's
+#: file is the family name; hvac declares two files (rules + efficiencies).
+MANIFEST_DOMAINS = {"umbrella": "necb", "hvac_efficiencies": "hvac"}
 
 
 @dataclass(frozen=True)
@@ -207,17 +214,11 @@ def domain_for(relative: str) -> str:
     raise ValueError(f"cannot attribute {relative} to a domain — teach domain_for")
 
 
-def manifest_domain(path: Path) -> str:
-    match = re.match(r"([a-z]+)_rules_", path.name)
-    if match is None:
-        raise ValueError(f"cannot derive manifest domain from {path}")
-    return MANIFEST_DOMAINS.get(match.group(1), match.group(1))
-
-
 class CoverageGenerator:
     def __init__(self, inputs: Inputs):
         self.inputs = inputs
-        self.editions = edition_manifests()
+        self.editions = edition_manifests(
+            self.inputs.manifest_root / EDITION_DATA_REL)
         self.raw_citations = self._scan_citations()
         self.dispositions_2025 = json.loads(
             inputs.disposition.read_text(encoding="utf-8")
@@ -316,16 +317,23 @@ class CoverageGenerator:
         return citations
 
     def declarations_for(self, vintage: str) -> dict[str, list[dict]]:
+        """Every 8.4 coverage declaration this edition's manifest points at.
+
+        MANIFEST-driven (Stage 3): the rule files no longer carry the vintage
+        in their names, so a filename glob cannot find them and an edition that
+        renames one must say so in its own manifest.
+        """
         declarations: dict[str, list[dict]] = defaultdict(list)
-        paths = sorted(
-            self.inputs.manifest_root.glob(f"python/btap/**/*_rules_{vintage}.json")
-        )
-        for path in paths:
+        manifest_dir = (self.inputs.manifest_root / EDITION_DATA_REL
+                        / f"necb{vintage}")
+        rules = (self.editions[vintage].get("rules") or {})
+        for key, filename in sorted(rules.items()):
+            path = manifest_dir / filename
             data = json.loads(path.read_text(encoding="utf-8"))
             entries = data.get("article_coverage", {}).get("articles")
             if entries is None:
                 continue
-            gem_name = manifest_domain(path)
+            gem_name = MANIFEST_DOMAINS.get(key, key)
             for entry in entries:
                 if not str(entry.get("article") or "").startswith("8.4"):
                     continue
@@ -336,7 +344,8 @@ class CoverageGenerator:
                     declarations[article].append(declaration)
         if not declarations:
             raise ValueError(
-                f"no 8.4 declarations found for {vintage} — the manifest glob went stale"
+                f"no 8.4 declarations found for {vintage} — the edition manifest's "
+                "`rules` map went stale"
             )
         return declarations
 
@@ -839,9 +848,10 @@ HTML_TEMPLATE = """  <!-- Generated by python/scripts/generate_necb_8_4_coverage
         demonstrably executed in at least one scenario. Still not proof of correct values.</li>
   </ul>
     <b>Prescriptive values</b> (U-values, LPDs, efficiencies) are governed by the Python package's data JSON — the number
-    the software actually applies and the thing to audit: <code>python/btap/codes/necb/envelope/data/envelope_rules_*.json</code>,
-    <code>python/btap/codes/necb/loads/data/space_types_*.json</code>, <code>python/btap/codes/necb/shw/data/shw_rules_*.json</code>,
-    <code>python/btap/codes/necb/hvac/data/efficiencies_*.json</code>. The official code wording is available through the
+    the software actually applies and the thing to audit. Each edition keeps its own complete snapshot under
+    <code>python/btap/codes/necb/data/necb&lt;edition&gt;/</code>: <code>envelope_rules.json</code>,
+    <code>tables/space_types.json</code>, <code>shw_rules.json</code>, <code>efficiencies.json</code>.
+    The official code wording is available through the
   building-codes MCP (<code>get_section</code>/<code>get_table</code>) as a human reference only.</div>
 
   <p class="lede"><b>Jump to:</b> <a href="#v2020">NECB 2020</a> ({count_2020} articles,
