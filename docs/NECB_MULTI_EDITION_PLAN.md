@@ -1146,3 +1146,29 @@ any result.
 Opened on the user's instruction before the Stage 0 PR is merged (push
 blocked by network), so Stage 1 work stacks on `stage0-multi-edition`
 rather than main. Same execution model and the one-heavy-job rule.
+- **Stage 0 PR #33 opened**; four-job workflow dispatched as run
+  34238540365 (lint green at time of writing; watched).
+- **Spawned (worktrees off `stage0-multi-edition`):** Opus — the R-B
+  rename sweep, the eui/tiers move per the symbol map, R7 ledger + chain
+  test, D-XX process entry, 0.3.0 bump, scanner glob/gem-key sites; one
+  full-suite run allowed at the end, and a path-only proof of the frozen
+  lane's differences via ledger substitution. Sonnet —
+  `test_no_legacy_namespace.py`.
+- **Namespace gate (Sonnet) delivered and verified** — branch
+  `worktree-agent-a84194dba7fc284f4`. Two corrections applied by Fable on
+  that branch (`4ce6d69`): (a) the agent's pattern `\bbtap[./-]necb\b`
+  also matched the retired gem name `btap-necb`, which is period prose in
+  ~100 docstrings the rename must not reword AND the stem of the live
+  `btap-necb-coverage` console entry point the plan keeps through Stage 4
+  — narrowed to `btap.necb` / `btap/necb`; (b) pytest-function style
+  converted to `unittest.TestCase` so the zero-install `unittest discover`
+  fallback runs it. Pre-rename inventory with the corrected pattern:
+  **678 hits in 152 tracked files** (python 664, CLAUDE.md 4,
+  verification 4, docs 3, packaging 2, README 1). Held for integration
+  with the rename; merging it earlier would redden the stage branch.
+- **Dispatch run 34238540365: all four jobs green** (lint, python, verify,
+  parity). The parity job re-ran both annual API scenarios on a GitHub
+  runner and matched the baselines frozen here — the cross-machine
+  determinism witness for the first frozen full-year determination.
+  **PR #33 is ready for the user's merge decision.** Stage 1 continues on
+  top of it.
