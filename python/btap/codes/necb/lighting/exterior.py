@@ -18,14 +18,14 @@ from btap.audit import AuditLog
 from btap.codes import Ruleset
 from btap.codes.necb import _data_root, edition_file
 
-#: Cached per (data root, vintage) — each edition reads its own copy.
+#: Cached per (data root, edition) — each edition reads its own copy.
 _data_cache: dict[tuple, dict] = {}
 
 
-def _data(vintage):
-    key = (_data_root(), str(vintage))
+def _data(edition):
+    key = (_data_root(), str(edition))
     if key not in _data_cache:
-        path = edition_file(vintage, 'tables', 'exterior_lighting.json')
+        path = edition_file(edition, 'tables', 'exterior_lighting.json')
         _data_cache[key] = json.loads(path.read_text(encoding='utf-8'))
     return _data_cache[key]
 

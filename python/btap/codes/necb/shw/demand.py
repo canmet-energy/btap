@@ -70,7 +70,7 @@ def _auto_size(model, *, ruleset, shw_scale=1.0, audit=None):
 
         record = loads_space_types.find(
             building_type=space_type.standardsBuildingType().get(),
-            space_type=space_type.standardsSpaceType().get(), vintage=ruleset.edition)
+            space_type=space_type.standardsSpaceType().get(), edition=ruleset.edition)
         if record is None or loads_space_types.is_undefined(record):
             continue
         if (_to_f(record.get("service_water_heating_peak_flow_per_area")) == 0

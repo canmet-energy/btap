@@ -499,7 +499,7 @@ def _illuminance_setpoint(space, ruleset):
 
     record = SpaceTypes.find(building_type=space_type.standardsBuildingType().get(),
                              space_type=space_type.standardsSpaceType().get(),
-                             vintage=ruleset.edition)
+                             edition=ruleset.edition)
     if record is None:
         return None
 

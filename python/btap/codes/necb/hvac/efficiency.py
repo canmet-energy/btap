@@ -28,10 +28,10 @@ from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
 
 
-def data(vintage):
+def data(edition):
     """This edition's minimum-efficiency tables — a shim over the family's ONE
     loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
-    return rulesdata.load("hvac_efficiencies", code_id(vintage))
+    return rulesdata.load("hvac_efficiencies", code_id(edition))
 
 
 def apply(model, vintage='2020', audit=None, proposed=None):

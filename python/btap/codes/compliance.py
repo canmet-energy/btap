@@ -959,10 +959,10 @@ def _evaluate_unmet(report, ruleset, audit):
     return status["all_ok"]
 
 
-def _umbrella_rules(vintage):
+def _umbrella_rules(edition):
     """This edition's umbrella rule file — a shim over the family's ONE loader
     (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
-    return necb.rulesdata.load("umbrella", necb.code_id(vintage))
+    return necb.rulesdata.load("umbrella", necb.code_id(edition))
 
 
 def _minimum_cooling_allowance_h(ruleset):

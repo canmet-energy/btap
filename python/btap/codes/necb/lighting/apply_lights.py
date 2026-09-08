@@ -123,7 +123,7 @@ def _unmatched_space_types(model, ruleset):
         standards = space_type.standardsSpaceType()
         standards_type = standards.get() if standards.is_initialized() else None
         record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                                 vintage=ruleset.edition)
+                                 edition=ruleset.edition)
         if not (record is None or SpaceTypes.is_undefined(record)):
             continue
 
@@ -144,7 +144,7 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
     standards = space_type.standardsSpaceType()
     standards_type = standards.get() if standards.is_initialized() else None
     record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                             vintage=ruleset.edition)
+                             edition=ruleset.edition)
     if record is None or SpaceTypes.is_undefined(record):
         if _is_consequential(space_type):
             audit.warn('lighting',
@@ -173,7 +173,7 @@ def _apply_to_space_type(model, space_type, ruleset, lights_type, lights_scale, 
     if lpd != 0.0:
         if lights_type == 'LED':
             led = _lighting.led_record(building_type=building_type, space_type=standards_type,
-                                       vintage=ruleset.edition)
+                                       edition=ruleset.edition)
             if led is None:
                 raise ValueError(
                     f"no LED lighting data for ['{building_type}', '{standards_type}']")

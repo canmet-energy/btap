@@ -50,7 +50,7 @@ def _assign_space_types(model, map, ruleset, audit=None):
             continue
 
         record = SpaceTypes.record(building_type=pair[0], space_type=pair[1],
-                                   vintage=ruleset.edition)
+                                   edition=ruleset.edition)
         key = tuple(pair)
         space_type = cache.get(key)
         if space_type is None:
@@ -114,7 +114,7 @@ def _apply_to_space_type(model, space_type, ruleset, audit):
     standards_type = (standards_space_type.get()
                       if standards_space_type.is_initialized() else None)
     record = SpaceTypes.find(building_type=building_type, space_type=standards_type,
-                             vintage=ruleset.edition)
+                             edition=ruleset.edition)
     if record is None:
         audit.warn('loads', f"space type not in the NECB {ruleset.edition} data (standards tags "
                             f"[{_inspect(building_type)}, {_inspect(standards_type)}]) — "

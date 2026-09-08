@@ -26,14 +26,14 @@ from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 
 
-def rules(vintage):
+def rules(edition):
     """This edition's HVAC reference ruleset — a shim over the family's ONE
     loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache.
 
-    :param vintage: NECB vintage ('2020' or '2025')
+    :param edition: the NECB edition ('2020' or '2025')
     :return: dict — the edition's manifest-declared ``hvac`` rule file
     """
-    return rulesdata.load("hvac", code_id(vintage))
+    return rulesdata.load("hvac", code_id(edition))
 
 
 @dataclass
