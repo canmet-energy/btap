@@ -1517,3 +1517,9 @@ Fable**: clean-tree freeze, content-aligned attribution against the
 matrix row's categories, anything else a finding.
 - **Stage 2 dispatch run 34266662144: all four jobs green.** Stage
   branches through 5 on origin; 6 queued.
+- **No-vintage AST gate (Sonnet) delivered** — `worktree-agent-a60660760595ddbeb`
+  (`5df398d`), one file, allowlist = itself only (no genuinely historical
+  `.py` fixture exists). Pre-migration inventory: **398 hits** —
+  `btap/codes` 95, `btap/costing` 3, `scripts` 22, `tests` 278 (the plan's
+  "277 call sites" was right to within one). CLI parser test fails on
+  `--vintage` as designed. Held for integration.
