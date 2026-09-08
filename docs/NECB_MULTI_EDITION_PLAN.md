@@ -1498,3 +1498,20 @@ gate hash, so it rides R-C.
   and docs clean. Audit emitters intact (14 `'vintage':` key sites).
   **Stage 6 complete.** Stages 2–6 landed with zero re-freezes, as the
   matrix promised.
+
+## Stage 7 — opened 2026-09-08 (R-C, behavioural)
+
+Stacked on `stage6-integration` (`7b0ac69`). Opus — the whole public
+surface: `code=` on `performance_compliance` and every public wrapper (57
+after the Stage 6 count; plus the eight helpers that kept `vintage` for
+protected tests, whose call sites move in the same change), the five
+costing `vintage=`→`edition=` renames, every test/script call site,
+`--code` in the CLI with `necb2020` default, `Ruleset.from_edition`
+deleted, `vintage` out of every output (report `edition`+`code`+
+`code_label`; audit `inputs.code`/`edition`; the 13 `"NECB"` literals),
+the synthetic verdict report in `runner.py`, the coverage-gen run filter,
+the 2025 scenarios' argv and the three API scenarios' `api_call.code` +
+their asserts, D-87, docs. Sonnet — `test_no_vintage_parameter.py` (AST
+gate over tracked `.py` under `python/`), spec-first. Then **R-C by
+Fable**: clean-tree freeze, content-aligned attribution against the
+matrix row's categories, anything else a finding.
