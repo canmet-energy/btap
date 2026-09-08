@@ -44,6 +44,89 @@ when a new edition lands, regenerate its snapshot and diff.
 
 ---
 
+## `manifest.json`'s `provenance` block — and `provenance/`
+
+Stage 4 of the multi-edition plan added a **checked** `provenance` block to each
+manifest. It covers **exactly the manifest-declared outputs** — every entry in
+`rules`, `tables` and `coverage_text`, plus 2025's `eui_targets` and
+`ghg_factors` — and nothing else: not `manifest.json` itself (a self-hash is
+recursive) and not the files under `provenance/` (an archived artifact would
+then need its own archived artifact, and so on).
+
+```json
+"tables/lpd_space_functions.json": {
+  "source": "mcp:necb:2025",          // or oracle:<REF>, printed:<citation>, self:<what>
+  "request": {"tool": "get_table", "code": "necb", "edition": "2025",
+              "division": "B", "table_number": "4.2.1.6"},
+  "source_revision": null,            // MCP: no build id is exposed. Oracle: the REF sha
+  "source_sha256": "…",               // the RETAINED artifact's hash (see below)
+  "extractor": "manual (transcription from the archived MCP payload)",
+  "retrieved": "2026-07-12",
+  "method": "transcribed",            // transcribed | copied | generated
+  "source_verification": "archived",  // archived | revision_addressable | current_only | manual
+  "note": "…",
+  "result_sha256": "…"                // the SHIPPED file's bytes
+}
+```
+
+**Two dimensions, not one status.** `method` says how the file came to be;
+`source_verification` says how strongly its origin can be re-established. A
+result hash proves integrity, never origin — which is why each entry pins the
+source side too:
+
+- **`archived`** — the canonical source payload is retained in this snapshot at
+  `provenance/<basename>.result.json` and `source_sha256` hashes THAT file. The
+  payload is a JSON object keyed by canonical request
+  (`get_table:necb:2025:4.2.1.6`) whose values are the tool RESULTS, never the
+  JSON-RPC/SSE envelope (whose request ids and transport metadata change per
+  call), written with sorted keys, `(",", ":")` separators and no trailing
+  newline. Two entries are archived *as themselves*: each edition's
+  `coverage/articles_8_4.json` IS the retained artifact, so its `source_sha256`
+  equals its `result_sha256` and its entry says so.
+- **`revision_addressable`** — the source is the pinned legacy oracle, and
+  `source_revision` is a sha a reader can check out (`legacy_pin/REF`). For one
+  source file `request` is `{"path": …}` and `source_sha256` is that file's hash
+  at REF; for several, `request` is a list of `{"path", "sha256"}` and
+  `source_sha256` hashes the canonical form of that list.
+- **`current_only`** — a live source with nothing retained; an honest, lesser
+  attestation. No entry ships this today.
+- **`manual`** — transcription with no retrievable artifact (the two umbrella
+  self-declarations).
+
+**`byte_identical_to` is an annotation, never a dependency.** 2025's six shared
+tables are `copied` and carry their OWN `source_*` fields, because the copy was
+made from the same retained artifact and not from another edition's live file —
+including a duplicate of the archived payload under `necb2025/provenance/`. The
+annotation is checked only when both editions are present, and it never gates
+the edition that declares it. Removing an edition stays `git rm -r` of one
+directory.
+
+Re-check one file against what its entry pins:
+
+```bash
+btap-necb-coverage verify-source necb2020 tables/space_types.json
+```
+
+Exit 0 verified, 1 a hash mismatch, 3 not checkable on this machine (the oracle
+is not installed, or the entry is `current_only`/`manual`). The oracle checkout
+comes from the ENVIRONMENT, never from an assumed repository layout — an
+installed wheel has no repository around it, and
+`tests/test_self_containment.py` keeps this package out of one:
+
+```bash
+BUNDLE_GEMFILE="$PWD/legacy_pin/Gemfile" \
+  btap-necb-coverage verify-source necb2020 efficiencies.json   # asks bundler
+BTAP_ORACLE_CHECKOUT=/path/to/openstudio-standards-at-REF \
+  btap-necb-coverage verify-source necb2020 efficiencies.json   # or point at it
+```
+
+**Refreshing an archived payload is a maintainer MCP operation**, deliberately
+outside the CLI: replay the entry's `request` through `btap._mcp.MCPClient`
+("codes" server), canonicalise the results into the same keyed object, and
+update `source_sha256`. Ordinary runtime stays offline.
+
+---
+
 ## `necb_rules.json` — the umbrella
 
 Carries ONLY `article_coverage`: the umbrella has no rule data of its own

@@ -105,6 +105,14 @@ learns *why* we read the article that way.
   edition's files** — no `extends`, no alias, no fallback rung; a missing file
   raises naming the edition and the path. Two editions verified identical ship
   two byte-identical copies. `git rm -r necb2020/` is the removal operation.
+  Each manifest also carries a **checked `provenance` block** over exactly its
+  declared outputs (never itself, never `provenance/`), pinning the SOURCE side
+  as well as the result: `archived` entries retain the canonical MCP payload in
+  that edition's `provenance/`, `revision_addressable` ones name the oracle
+  revision and file. `btap-necb-coverage verify-source <code id> <file>`
+  re-checks one (0 verified, 1 mismatch, 3 not checkable here). A `copied`
+  file carries its OWN source fields; `byte_identical_to` is an annotation,
+  never a dependency.
 - **`btap/codes/data/`** holds what is code-family-NEUTRAL: `decisions.json`
   and `coverage/`. Adding a second family must not move them again. What is
   left in `coverage/` is `necb_8_4_disposition.json` (one curated

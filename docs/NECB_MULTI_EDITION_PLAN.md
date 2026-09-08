@@ -1384,3 +1384,56 @@ where Stage 3 puts them (the decisions registry stays neutral).
   agent after taking over its work made it run a full suite concurrently
   with the integration verification; its runs were killed by PID (after a
   pattern-based kill matched my own shell — trap recorded in memory).
+
+## Stage 4 — opened 2026-09-08
+
+Stacked on `stage3-integration` (`c5661db`). Two halves in parallel: the
+**provenance** manifest (evidence) and the **delta** generator plus
+`test_edition_provenance.py` (review), against one agreed schema.
+
+- **Provenance half delivered** — `stage4-provenance`. Each manifest gained a
+  checked `provenance` block over EXACTLY its declared outputs — 14 for
+  necb2020, 18 for necb2025, no extras, `manifest.json` and `provenance/`
+  deliberately outside the set. The manifests' non-provenance content is
+  byte-unchanged (key order, formatting and trailing newline preserved);
+  the frozen python lane stayed byte-identical, no re-freeze.
+  - 17 of the 32 entries are **`archived`**: the canonical MCP result payloads
+    (never the JSON-RPC envelope) are retained per edition under
+    `provenance/<basename>.result.json` — one keyed object per shipped file,
+    key `get_table:necb:2025:4.2.1.6`, sorted keys, `(",", ":")` separators,
+    no trailing newline — and `source_sha256` hashes that file. 68 distinct
+    live requests were replayed through `btap._mcp.MCPClient` (the same
+    server the `mcp__codes__*` tools reach; one payload was compared to the
+    tool's own result and matched exactly). 440 KB of retained payload; the wheel grows 1,752,307 -> 1,822,721 bytes (+68.8 KiB, +4.0%), well inside the 2 MB bound.
+  - 13 are **`revision_addressable`** on `legacy_pin/REF`: the merged
+    standards_data tables, the efficiency tables, the lighting constants and
+    the SHW algorithm parameters. `request` carries each oracle path WITH its
+    sha256 at REF and `source_sha256` hashes the canonical form of that list;
+    the hashes were computed from the installed bundle
+    (`bundle show openstudio-standards`), so none is null.
+  - 2 are **`manual`** (the two umbrella self-declarations, which have no
+    external source to re-fetch). **No entry is `current_only`** — every live
+    source that governs shipped values was archived instead.
+  - 2025's six shared tables are `method: copied` with their OWN `source_*`
+    fields and an optional `byte_identical_to`; the archived payloads for the
+    two MCP-sourced ones are DUPLICATED into `necb2025/provenance/` so the
+    edition stays independently verifiable. No cross-edition dependency.
+  - `extractor` names the tool actually used: `fetch_necb_8_4_text.rb@c7b0bf7`
+    / `@9d69093` for the two Section 8.4 caches (the Ruby fetcher of the day,
+    retired at R6; the current Python port succeeds it) and `manual (…)` with
+    the transcriber's role everywhere else. `fetch_necb_8_4_text` is NOT
+    attributed to any Part 4/5/6 rule table.
+  - Each cache is its own retained artifact, so its `source_sha256` equals its
+    `result_sha256` and its note says exactly what that does and does not
+    prove.
+  - **New** `btap-necb-coverage verify-source <code id> <file>`: 0 verified,
+    1 hash mismatch, 3 not checkable here (oracle absent — it prints the
+    revision, the paths and the install command; `current_only`; `manual`).
+    The oracle checkout comes from the ENVIRONMENT only —
+    `BTAP_ORACLE_CHECKOUT`, else `bundle show openstudio-standards` when a
+    `BUNDLE_GEMFILE` is already exported — because the package may not reach
+    into a repository layout it will not have when installed
+    (`tests/test_self_containment.py` caught the first attempt, which named
+    `legacy_pin/Gemfile` directly). Existing subcommands' help is untouched.
+  - `ATTRIBUTION.md`'s scope statement now covers the archived payloads
+    (one Crown-copyright notice, not a second one).
