@@ -2,16 +2,16 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "c0f12ba9afd453853d9b65fbe48ae1c8bd775b6c",
+  "commit": "b37b4191f9cd32b6bd4ae30ae174e424c273c488",
   "dirty": false,
-  "freezer_sha256": "b1c4c9c1d620e240f0c707f2eb778038209f3ae7f7d04c2e1afcbad1176fc5c2",
-  "defs_sha256": "a76eaf0c0ca3a669a996b74017dc753b488c1731b23be815cfb0ad425cb5fccf",
-  "runner_sha256": "e72d050dca444af741acfeac61c1590135007e5eac8dfa4b2ed831a91dfe5753",
-  "gate_sha256": "d01c3f956db30be26109bdcd18547df8e9ba456b67df34425e6cf2d7d83d8976",
+  "freezer_sha256": "8a4298a90f4b90a26eb246ea51a6dc64bed13963bd04d73fd428c1752164b87d",
+  "defs_sha256": "a218152ea1b5d265e8853bcae6a32d486d7f1f4b65bc8db88ee75f6b64b0f3dc",
+  "runner_sha256": "23f01ebc9378bb8f46703b0e6ea515d57d3b3c975f87b0daa2ac2955e0147124",
+  "gate_sha256": "bbb5508bb775d6f976fbf2088eb5bca7f4b963c58ad49dc57a82d1fae11d5523",
   "openstudio_cli": "3.11.0+241b8abb4d",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 4
+   "python-only": 8
   },
   "retired_seals": {
    "ruby": 29,
@@ -29,9 +29,9 @@
   "sample_manifest_sha256": "951f023ef88a5e53a53b655317e2d44344aeeafe30e7f68fd0dd33a4b9074ac8"
  },
  "counts": {
-  "python": 30,
+  "python": 32,
   "verify": 3,
-  "parity": 2
+  "parity": 4
  },
  "scenarios": [
   {
@@ -1041,6 +1041,19 @@
     "stderr": "exact"
    },
    "seal": "python-only:post-handoff",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    }
+   ],
    "retired_seal": "ruby",
    "last_cross_language_commit": "85ab14352677093e24038d933cf1071e5b03431a",
    "last_cross_language_run_id": 33544573991,
@@ -1093,6 +1106,19 @@
     "stderr": "exact"
    },
    "seal": "python-only:post-handoff",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    }
+   ],
    "retired_seal": "ruby",
    "last_cross_language_commit": "85ab14352677093e24038d933cf1071e5b03431a",
    "last_cross_language_run_id": 33544573991,
@@ -1578,6 +1604,352 @@
    "baseline_sha256": {
     "stdout.txt": "1e410c2429769eb5c81435dd2369353bdf52d392b311453fdda7a03d30b4a6b6"
    }
+  },
+  {
+   "id": "corpus-none-01-baseboard-gas-necb2025",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<CORPUS>/01-baseboard-gas.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--vintage",
+    "2025",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen post-R6 for NECB 2025 \u2014 no cross-language attestation exists for this edition",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "vintage",
+     "value": "2025"
+    },
+    {
+     "op": "audit_entry",
+     "article": "8.4.5.1.(2)",
+     "count": 1
+    },
+    {
+     "op": "audit_entry",
+     "inputs": {
+      "vintage": "2025"
+     },
+     "count": 4
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "6d3d962ac77ad2086bbbe29ac25c7a582696011a323eceb92436787ba3591123",
+    "audit.txt": "433ef991eb77e43a356decf1840c347ee81d5077be702025c7941ac244d409da",
+    "report.json": "6c7c6d249cb71efe55e6f4092e1c528bc228b29e2beb539cff07cebc4bfbc517",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "0b59b13919cae384382c6066e2fdd86d984693baa3689fab08cca71778d883be"
+   }
+  },
+  {
+   "id": "corpus-none-08-vrf-necb2025",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [],
+   "argv": [
+    "<CORPUS>/08-vrf.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "--vintage",
+    "2025",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen post-R6 for NECB 2025 \u2014 no cross-language attestation exists for this edition",
+   "asserts": [
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "vintage",
+     "value": "2025"
+    },
+    {
+     "op": "audit_entry",
+     "step": "build",
+     "level": "info",
+     "action": "proposed VRF outdoor unit serves no reference zone \u2014 removed",
+     "ruling": "D-85",
+     "inputs": {
+      "terminals": 0
+     },
+     "count": 1
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "ac7c47ca1a7acd90bc5472f447f307b06e001a0bd53ba4d08cd23b8e71e1d371",
+    "audit.txt": "3d58fc6aa3968fa1d07cd6426886dffbc72636fdf3e1bf0829ff57d828d0d15d",
+    "report.json": "4f54b575fe8ba313446e87ebc18ee9d2f97eb3c3709e752f13bc2729894c75bb",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "e720eb806d1b68f0194dacc908c356517a6e5568aa6d7e32e7f2c2a16bfd9101"
+   }
+  },
+  {
+   "id": "determination-01-baseboard-gas-necb2025",
+   "lane": "parity",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "vintage": "2025",
+    "simulate": "annual",
+    "province_state": "ONTARIO",
+    "model": "<CORPUS>/01-baseboard-gas.osm",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    },
+    "building": {
+     "storeys": 1
+    }
+   },
+   "env": {},
+   "expect_exit": 1,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen post-R6 for NECB 2025 \u2014 no cross-language attestation exists for this edition",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "reference.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "reference.unmet_occupied_hours"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "vintage",
+     "value": "2025"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "tier",
+     "value": 1
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "ghg"
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "ghg.level",
+     "value": "F"
+    },
+    {
+     "op": "audit_entry",
+     "step": "compliance",
+     "level": "decision",
+     "action": "proposed does not exceed the building energy target",
+     "article": "8.4.1.2.(2)",
+     "count": 1
+    },
+    {
+     "op": "audit_entry",
+     "step": "compliance",
+     "level": "decision",
+     "action": "unmet heating hours EXCEED 100 h",
+     "article": "8.4.1.2.(3)",
+     "count": 1
+    },
+    {
+     "op": "audit_entry",
+     "level": "warning",
+     "article": "8.4.1.2.(5)",
+     "count": 1
+    },
+    {
+     "op": "observation_equals",
+     "key": "compliant",
+     "value": false
+    },
+    {
+     "op": "observation_equals",
+     "key": "reference_model_present",
+     "value": true
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "06d69b80ab50690d15d026c4b3b669f1aab1f18d8acff24b2613c8596c09e9f7",
+    "audit.txt": "4b69147f30bcc159b2ebe8e876669872f8cf3d5d9f53aa008eeb9f077303c00f",
+    "report.json": "891626d75fb55991feb0cbde0450a91d0c7c94694f67c5b00f2a97c32abd3005"
+   }
+  },
+  {
+   "id": "api-eui-path-necb2025",
+   "lane": "parity",
+   "kind": "api",
+   "replaces": [],
+   "api_call": {
+    "vintage": "2025",
+    "path": "eui",
+    "archetypes_map": {
+     "Office": "all"
+    },
+    "simulate": "annual",
+    "province_state": "ONTARIO",
+    "model": "<CORPUS>/01-baseboard-gas.osm",
+    "weather": {
+     "epw": "<EPW>",
+     "ddy": "<DDY>"
+    },
+    "building": {
+     "storeys": 1
+    }
+   },
+   "env": {},
+   "expect_exit": 0,
+   "timeout_s": 5400,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {},
+   "seal": "python-only:first frozen post-R6 for NECB 2025 \u2014 no cross-language attestation exists for this edition",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "reference.building_energy_target_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "percent_of_target",
+     "value": 0
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "tier",
+     "value": 1
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "annual",
+     "value": true
+    },
+    {
+     "op": "json_equals",
+     "file": "report.json",
+     "path": "vintage",
+     "value": "2025"
+    },
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.ghg_kg_co2e",
+     "value": 0
+    },
+    {
+     "op": "path_absent",
+     "relative": "reference_sizing"
+    },
+    {
+     "op": "path_absent",
+     "relative": "reference_annual"
+    },
+    {
+     "op": "observation_equals",
+     "key": "reference_model_present",
+     "value": false
+    },
+    {
+     "op": "observation_equals",
+     "key": "compliant",
+     "value": true
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "0a5494296fd97f64a7cee1ec02a2aa57a2fcd26f6af9237e2a7cf33eb5e87476",
+    "audit.txt": "b5cb4c0594be59a1bca82223e2b9864bab8226d87c54b11ef7eb961a8a5b6acb",
+    "report.json": "5256803a55114eaf93322a6561be88864195bd778474b0ecba1980c0fdda6fa9"
+   }
   }
  ],
  "uncovered": [
@@ -1586,12 +1958,6 @@
    "why": "nothing of it is frozen: the failure sub-branches (failed bump, stall detection, post-bump nonconvergence, cap exhaustion) AND the zero-iteration warning all require a real annual run engineered to fail unmet hours; no CLI flag exposes max_capacity_iterations",
    "witness": "the converged/empty path only \u2014 the annual scenarios freeze capacity_iterations: []; the failure branches remain covered ONLY by existing unit tests",
    "option": "a future API-level scenario (parity lane) is a named OPTION, not a witness; nothing is frozen unless it appears in this manifest"
-  },
-  {
-   "branch": "full-year end-to-end determination (exits 0/1 through a real annual run)",
-   "why": "a 40-90 minute scenario; live Leg B's annual tier only ever ran --quick (exit 6), so this matches Leg B's own scope",
-   "witness": "the verdict-unit scenarios freeze both determination renderings and exit codes at unit level",
-   "option": "a dispatch-only full-year scenario remains possible if a later phase demands it"
   }
  ]
 }

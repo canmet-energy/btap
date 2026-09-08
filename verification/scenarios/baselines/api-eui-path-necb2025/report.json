@@ -1,0 +1,103 @@
+{
+ "vintage": "2025",
+ "hdd": 3890,
+ "simulate": "annual",
+ "path": "eui",
+ "proposed": {
+  "clean_run": true,
+  "total_site_kwh": 130361.1,
+  "electricity_kwh": 40519.4,
+  "natural_gas_kwh": 89841.7,
+  "district_heating_kwh": 0.0,
+  "district_cooling_kwh": 0.0,
+  "end_uses_kwh": {
+   "heating": 77569.4,
+   "cooling": 0.0,
+   "fans": 0.0,
+   "pumps": 1441.7,
+   "interior_lighting": 16775.0,
+   "interior_equipment": 22302.8,
+   "water_systems": 12275.0
+  },
+  "floor_area_m2": 800.0,
+  "eui_kwh_per_m2": 163.0,
+  "unmet_occupied_hours": {
+   "heating": 58.75,
+   "cooling": 1650.5
+  },
+  "zone_unmet_occupied_hours": {
+   "THERMAL ZONE 1": {
+    "heating": 1.75,
+    "cooling": 1422.25
+   },
+   "THERMAL ZONE 2": {
+    "heating": 0.5,
+    "cooling": 1169.25
+   },
+   "THERMAL ZONE 3": {
+    "heating": 3.0,
+    "cooling": 922.25
+   },
+   "THERMAL ZONE 4": {
+    "heating": 0.5,
+    "cooling": 1311.0
+   },
+   "THERMAL ZONE 5": {
+    "heating": 58.75,
+    "cooling": 829.0
+   }
+  },
+  "ghg_kg_co2e": 18966.8
+ },
+ "reference": {
+  "method": "archetype EUI (Table 8.4.4.1)",
+  "building_energy_target_kwh": 140000.0,
+  "lines": [
+   {
+    "archetype": "Office",
+    "area_m2": 800.0,
+    "eui": 175,
+    "kwh": 140000.0
+   }
+  ]
+ },
+ "eui": {
+  "conformant_to_8_4_4_2": false,
+  "normalized": true,
+  "mismatches": [
+   "Story 1 Core Space (Office): occupant density 0.0500 people/m2, Table 8.4.4.2 requires 0.0400",
+   "Story 1 Core Space (Office): SWH peak flow 0.000008010 m3/s, requires 0.000006703",
+   "Story 1 Core Space (Office): OA Sum 0.002539/person + 0.000305/m2, requires Sum 0.002500 + 0.000300 (62.1 office space)",
+   "Story 1 Core Space (Office): heating setpoint schedule differs on day 1 hour 1 (15.600 vs 18.000)",
+   "Story 1 Core Space (Office): cooling setpoint schedule differs on day 1 hour 1 (26.700 vs 35.000)",
+   "Story 1 East Perimeter Space (Office): occupant density 0.0500 people/m2, Table 8.4.4.2 requires 0.0400",
+   "Story 1 East Perimeter Space (Office): SWH peak flow 0.000001685 m3/s, requires 0.000001410",
+   "Story 1 East Perimeter Space (Office): OA Sum 0.002539/person + 0.000305/m2, requires Sum 0.002500 + 0.000300 (62.1 office space)",
+   "Story 1 East Perimeter Space (Office): heating setpoint schedule differs on day 1 hour 1 (15.600 vs 18.000)",
+   "Story 1 East Perimeter Space (Office): cooling setpoint schedule differs on day 1 hour 1 (26.700 vs 35.000)",
+   "Story 1 North Perimeter Space (Office): occupant density 0.0500 people/m2, Table 8.4.4.2 requires 0.0400",
+   "Story 1 North Perimeter Space (Office): SWH peak flow 0.000003870 m3/s, requires 0.000003238",
+   "Story 1 North Perimeter Space (Office): OA Sum 0.002539/person + 0.000305/m2, requires Sum 0.002500 + 0.000300 (62.1 office space)",
+   "Story 1 North Perimeter Space (Office): heating setpoint schedule differs on day 1 hour 1 (15.600 vs 18.000)",
+   "Story 1 North Perimeter Space (Office): cooling setpoint schedule differs on day 1 hour 1 (26.700 vs 35.000)",
+   "Story 1 South Perimeter Space (Office): occupant density 0.0500 people/m2, Table 8.4.4.2 requires 0.0400",
+   "Story 1 South Perimeter Space (Office): SWH peak flow 0.000003870 m3/s, requires 0.000003238",
+   "Story 1 South Perimeter Space (Office): OA Sum 0.002539/person + 0.000305/m2, requires Sum 0.002500 + 0.000300 (62.1 office space)",
+   "Story 1 South Perimeter Space (Office): heating setpoint schedule differs on day 1 hour 1 (15.600 vs 18.000)",
+   "Story 1 South Perimeter Space (Office): cooling setpoint schedule differs on day 1 hour 1 (26.700 vs 35.000)",
+   "Story 1 West Perimeter Space (Office): occupant density 0.0500 people/m2, Table 8.4.4.2 requires 0.0400",
+   "Story 1 West Perimeter Space (Office): SWH peak flow 0.000001685 m3/s, requires 0.000001410",
+   "Story 1 West Perimeter Space (Office): OA Sum 0.002539/person + 0.000305/m2, requires Sum 0.002500 + 0.000300 (62.1 office space)",
+   "Story 1 West Perimeter Space (Office): heating setpoint schedule differs on day 1 hour 1 (15.600 vs 18.000)",
+   "Story 1 West Perimeter Space (Office): cooling setpoint schedule differs on day 1 hour 1 (26.700 vs 35.000)"
+  ]
+ },
+ "percent_of_target": 93.1,
+ "tier": 1,
+ "annual": true,
+ "compliant": true,
+ "warnings": [
+  "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
+  "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) \u2014 partial. Applied: check-then-normalize (Archetypes.conformance / normalize!): the proposed is checked against the Table 8.4.4.2. values (occupant density, receptacle W/m2, SWH L/h/occupant; schedule profiles compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. Gaps: unmapped spaces keep their modeled loads (the Table applies \u201cfor the applicable building archetype\u201d); spaces with no water-use equipment warn rather than gaining a SWH system"
+ ]
+}

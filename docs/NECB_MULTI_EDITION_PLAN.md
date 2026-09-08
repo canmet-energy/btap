@@ -1076,3 +1076,36 @@ any result.
   determination scenario's asserts tie `exit 1` to the 8.4.1.2.(2) pass,
   the 8.4.1.2.(3) EXCEED decision and the 8.4.1.2.(5) warning. Full suite
   running once, alone, 8 workers, frozen module excluded; R-A next.
+- **Full suite on the integrated branch:** 876 passed, 55 subtests, 1
+  failed — `test_freeze_seal_transition` pinned the first-freeze seal
+  count at 4; it is 8 now (four 2025 scenarios). Pin moved with the
+  reason in a comment (`b37b419`). lint-imports 3/3, ruff clean,
+  decisions TOC clean. The plan did not foresee this pin; it is the one
+  Stage 0 test edit outside the contract's list and is recorded here.
+- **R-A executed** from clean tree `b37b419`, `python/.venv/bin/python
+  verification/scenarios/freeze.py`, all 39 scenarios, every authored
+  `asserts` block held at freeze time (the freezer dies otherwise).
+  **Field-by-field attribution of the diff, against the matrix row:**
+  - 35 existing baseline directories: **untouched** (git shows no
+    modification under `baselines/` other than four new directories);
+    no existing `baseline_sha256` moved.
+  - four new directories: `corpus-none-01-baseboard-gas-necb2025`,
+    `corpus-none-08-vrf-necb2025`, `determination-01-baseboard-gas-necb2025`,
+    `api-eui-path-necb2025`.
+  - manifest `provenance`: `commit` c0f12ba→b37b419; `defs_sha256`,
+    `freezer_sha256`, `runner_sha256`, `gate_sha256` moved;
+    `active_seals` python-only 4→8; `attestation_note`, `dirty`,
+    `final_cross_language_attestation`, `openstudio_cli`, `retired_seals`
+    **unchanged**. `spec_sha256` **unchanged**.
+  - `counts` 30/3/2 → 32/3/4; scenario list +4, order of the 35 preserved.
+  - `uncovered`: the "full-year end-to-end determination" entry removed
+    (its covered record lives in `scenario_defs.NEWLY_COVERED`, not in the
+    manifest — no new manifest key).
+  - **one category the matrix row did not name explicitly:** the two
+    existing `corpus-annual-*` entries gained an `asserts` field (the
+    non-vacuity the freezer used to hard-code, now carried on the scenario
+    per Sol's review 4). Their baselines and hashes are unchanged.
+  - generated docs: regenerating both coverage documents after the freeze
+    produced **no** diff — the 2025 baselines add no new coverage rows;
+    the one-line move from 0.3a was already on the branch.
+  Nothing else moved. Gate run (python, verify, parity lanes) in progress.
