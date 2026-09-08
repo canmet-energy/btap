@@ -32,7 +32,8 @@ import threading
 from btap._compat import ruby_round, ruby_str
 from btap.audit import AuditLog
 from btap.codes.necb.envelope import climate
-from btap.codes.necb.envelope.rules import max_u
+from btap.codes import Ruleset
+from btap.codes.necb.envelope.rules import _max_u
 
 # TBD built-in PSI sets (BETBG-derived); a dict of detail=>psi may be given
 # instead for custom sets (kept vocabulary-compatible with btap/bridging.rb
@@ -124,6 +125,13 @@ def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
     :return: the TBD result dict (:io, :surfaces), or False when tbd is
         unavailable (audited)
     """
+    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+                  psi_set=psi_set, audit=audit)
+
+
+def _apply(model, ruleset, *, hdd=None, psi_set="regular (BETBG)", audit=None):
+    """The uprate against ONE resolved edition — the prescriptive pass that
+    calls this already holds the ruleset (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     if not is_available():
         audit.warn("thermal_bridging",
@@ -133,14 +141,14 @@ def apply(model, *, vintage, hdd=None, psi_set="regular (BETBG)", audit=None):
                    article="3.1.1.7.")
         return False
 
-    hdd = climate.hdd18(model, edition=str(vintage), hdd=hdd, audit=audit)
+    hdd = climate.hdd18(model, edition=ruleset.edition, hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 
     targets = {
-        "wall_ut": max_u(vintage=vintage, surface="wall", boundary="outdoors", hdd=hdd),
-        "roof_ut": max_u(vintage=vintage, surface="roofceiling", boundary="outdoors", hdd=hdd),
-        "floor_ut": max_u(vintage=vintage, surface="floor", boundary="outdoors", hdd=hdd),
+        "wall_ut": _max_u(ruleset=ruleset, surface="wall", boundary="outdoors", hdd=hdd),
+        "roof_ut": _max_u(ruleset=ruleset, surface="roofceiling", boundary="outdoors", hdd=hdd),
+        "floor_ut": _max_u(ruleset=ruleset, surface="floor", boundary="outdoors", hdd=hdd),
     }
 
     argh = {"uprate_walls": True, "uprate_roofs": True, "uprate_floors": True,

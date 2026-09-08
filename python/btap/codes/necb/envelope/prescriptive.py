@@ -33,7 +33,13 @@ from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
 from btap.codes.necb.envelope import climate, fenestration
 from btap.codes.necb.envelope import thermal_bridging as thermal_bridging_module
-from btap.codes.necb.envelope.rules import ground_floor_extent, max_fdwr, max_srr, max_u
+from btap.codes import Ruleset
+from btap.codes.necb.envelope.rules import (
+    _ground_floor_extent,
+    _max_fdwr,
+    _max_srr,
+    _max_u,
+)
 from btap.modeling.envelope import constructions as Constructions
 
 SUBSURFACE_CLASS = {
@@ -55,8 +61,19 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
     """PORT NOTE: the ``thermal_bridging`` KEYWORD keeps the Ruby spelling, so
     the sibling MODULE is imported as ``thermal_bridging_module`` above — the
     parameter would otherwise shadow it inside this function."""
+    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+                  apply_fdwr=apply_fdwr, apply_srr=apply_srr,
+                  include_films=include_films, thermal_bridging=thermal_bridging,
+                  audit=audit)
+
+
+def _apply(model, ruleset, *, hdd=None, apply_fdwr=False, apply_srr=False,
+           include_films=True, thermal_bridging=None, audit=None):
+    """The prescriptive pass over ONE resolved edition: the surface loop and
+    every table lookup under it read the same :class:`btap.codes.Ruleset`
+    rather than re-resolving the edition per surface (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
-    hdd = climate.hdd18(model, edition=str(vintage), hdd=hdd, audit=audit)
+    hdd = climate.hdd18(model, edition=ruleset.edition, hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 
@@ -87,14 +104,14 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
 
         boundary = boundary_of(surface)
         if boundary is None:
-            _assign_interzone_envelope(model, surface, surface_class, vintage, hdd,
+            _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
                                        include_films, cache, audit)
             continue
 
         if boundary == "ground" and surface_class == "floor":
-            _assign_ground_floor(model, surface, vintage, hdd, include_films, cache, audit)
+            _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit)
         else:
-            _assign_surface(model, surface, surface_class, boundary, vintage, hdd,
+            _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                             include_films, cache, audit)
         for sub in sorted_by_name(surface.subSurfaces()):
             sub_class = SUBSURFACE_CLASS.get(sub.subSurfaceType())
@@ -107,7 +124,7 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
             if boundary == "ground":  # NECB: no ground windows/doors
                 continue
 
-            construction = _assign_subsurface(model, sub, sub_class, vintage, hdd,
+            construction = _assign_subsurface(model, sub, sub_class, ruleset, hdd,
                                               include_films, cache, audit)
             if sub_class == "window" and window_construction is None:
                 window_construction = construction
@@ -121,16 +138,16 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
                    inputs={"surfaces": outside_envelope}, article="1.4.1.2.", ruling="D-24")
 
     if apply_fdwr:
-        limit = max_fdwr(vintage=vintage, hdd=hdd, audit=audit)
+        limit = _max_fdwr(ruleset=ruleset, hdd=hdd, audit=audit)
         if window_construction is None:
             window_construction = _subsurface_target_construction(
-                model, "window", vintage, hdd, include_films, cache, audit)
+                model, "window", ruleset, hdd, include_films, cache, audit)
         fenestration.apply_fdwr(model, limit, window_construction, audit=audit)
     if apply_srr:
-        limit = max_srr(vintage=vintage, audit=audit)
+        limit = _max_srr(ruleset=ruleset, audit=audit)
         if skylight_construction is None:
             skylight_construction = _subsurface_target_construction(
-                model, "skylight", vintage, hdd, include_films, cache, audit)
+                model, "skylight", ruleset, hdd, include_films, cache, audit)
         fenestration.apply_srr(model, limit, skylight_construction, audit=audit)
 
     # 3.1.1.7: table values are EFFECTIVE transmittance — uprate for thermal
@@ -140,7 +157,7 @@ def apply(model, *, vintage, hdd=None, apply_fdwr=False, apply_srr=False,
     # must not become a bare Python truth test.
     if thermal_bridging is not None and thermal_bridging is not False:
         psi = "regular (BETBG)" if thermal_bridging is True else thermal_bridging
-        thermal_bridging_module.apply(model, vintage=vintage, hdd=hdd, psi_set=psi,
+        thermal_bridging_module._apply(model, ruleset=ruleset, hdd=hdd, psi_set=psi,
                                       audit=audit)
     else:
         audit.warn("thermal_bridging",
@@ -177,7 +194,7 @@ def inside_envelope(space) -> bool:
     return tag is not None and tag.lower() != "unconditioned"
 
 
-def _assign_interzone_envelope(model, surface, surface_class, vintage, hdd,
+def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
                                include_films, cache, audit):
     """Assemblies separating conditioned space from ENCLOSED UNCONDITIONED
     space (attic ceilings, walls to unheated storage, floors over crawlspaces)
@@ -207,7 +224,7 @@ def _assign_interzone_envelope(model, surface, surface_class, vintage, hdd,
                    target=surface.nameString(), ruling="D-24")
         return
 
-    u = max_u(vintage=vintage, surface=surface_class, boundary="outdoors", hdd=hdd)
+    u = _max_u(ruleset=ruleset, surface=surface_class, boundary="outdoors", hdd=hdd)
     r = (1.0 / u) - ENCLOSURE_R
     if include_films:
         r -= Constructions.film_r_interzone(surface_class)
@@ -230,8 +247,8 @@ def _assign_interzone_envelope(model, surface, surface_class, vintage, hdd,
     adj.setConstruction(cache[key])
 
 
-def _target_conductance(vintage, surface_class, boundary, hdd, include_films, audit):
-    u = max_u(vintage=vintage, surface=surface_class, boundary=boundary, hdd=hdd)
+def _target_conductance(ruleset, surface_class, boundary, hdd, include_films, audit):
+    u = _max_u(ruleset=ruleset, surface=surface_class, boundary=boundary, hdd=hdd)
     if not include_films:
         return u
 
@@ -239,7 +256,7 @@ def _target_conductance(vintage, surface_class, boundary, hdd, include_films, au
     return 1.0 / ((1.0 / u) - r_films)
 
 
-def _assign_surface(model, surface, surface_class, boundary, vintage, hdd,
+def _assign_surface(model, surface, surface_class, boundary, ruleset, hdd,
                     include_films, cache, audit):
     construction = opt(surface.construction())
     layered = None if construction is None else opt(construction.to_Construction())
@@ -248,7 +265,7 @@ def _assign_surface(model, surface, surface_class, boundary, vintage, hdd,
                    target=surface.nameString())
         return
 
-    target = _target_conductance(vintage, surface_class, boundary, hdd, include_films, audit)
+    target = _target_conductance(ruleset, surface_class, boundary, hdd, include_films, audit)
     key = (str(construction.handle()), surface_class, boundary, target)
     if key not in cache:
         c = Constructions.opaque_at_conductance(model, layered, target)
@@ -265,7 +282,7 @@ def _assign_surface(model, surface, surface_class, boundary, vintage, hdd,
     surface.setConstruction(cache[key])
 
 
-def _assign_ground_floor(model, surface, vintage, hdd, include_films, cache, audit):
+def _assign_ground_floor(model, surface, ruleset, hdd, include_films, cache, audit):
     """Table 3.2.3.1 floors row is zone-conditional: zone 8 prescribes the
     table U over the FULL slab area; zones 4-7B prescribe it only within a
     1.2 m perimeter strip (3.2.3.3.(3)) and leave the slab field without a
@@ -275,17 +292,17 @@ def _assign_ground_floor(model, surface, vintage, hdd, include_films, cache, aud
     the bare slab and OMIT the strip; the old BTAP path applied the strip U
     over the full area — both simplifications diverge from the printed table,
     see D-32.)"""
-    extent = ground_floor_extent(vintage=vintage, hdd=hdd)
+    extent = _ground_floor_extent(ruleset=ruleset, hdd=hdd)
     if extent["extent"] == "full_area":
-        _assign_surface(model, surface, "floor", "ground", vintage, hdd,
+        _assign_surface(model, surface, "floor", "ground", ruleset, hdd,
                         include_films, cache, audit)
         return
 
-    _apply_ground_strip(model, surface, vintage, hdd, include_films,
+    _apply_ground_strip(model, surface, ruleset, hdd, include_films,
                         extent["width_m"], cache, audit)
 
 
-def _apply_ground_strip(model, surface, vintage, hdd, include_films, width_m,
+def _apply_ground_strip(model, surface, ruleset, hdd, include_films, width_m,
                         cache, audit):
     kiva = opt(surface.adjacentFoundation())
     if kiva is None:
@@ -296,7 +313,7 @@ def _apply_ground_strip(model, surface, vintage, hdd, include_films, width_m,
                    article="Table 3.2.3.1.; 3.2.3.3.(3)", ruling="D-32")
         return
 
-    u = max_u(vintage=vintage, surface="floor", boundary="ground", hdd=hdd)
+    u = _max_u(ruleset=ruleset, surface="floor", boundary="ground", hdd=hdd)
     target = (1.0 / ((1.0 / u) - Constructions.film_r("floor", "ground"))
               if include_films else u)
     slab_r = 0.0
@@ -345,7 +362,7 @@ def _apply_ground_strip(model, surface, vintage, hdd, include_films, width_m,
         cache[key] = True
 
 
-def _assign_subsurface(model, sub, sub_class, vintage, hdd, include_films, cache, audit):
+def _assign_subsurface(model, sub, sub_class, ruleset, hdd, include_films, cache, audit):
     construction = opt(sub.construction())
     base = None if construction is None else opt(construction.to_Construction())
     if base is None:
@@ -356,7 +373,7 @@ def _assign_subsurface(model, sub, sub_class, vintage, hdd, include_films, cache
     # SimpleGlazing's uFactor IS the overall (with-films) value — films are
     # E+'s job there; only opaque doors get the construction-only solve.
     opaque_door = sub_class == "door" and base.isOpaque()
-    target = _target_conductance(vintage, sub_class, "outdoors", hdd,
+    target = _target_conductance(ruleset, sub_class, "outdoors", hdd,
                                  include_films and opaque_door, audit)
     key = (str(base.handle()), sub_class, target)
     if key not in cache:
@@ -378,13 +395,13 @@ def _assign_subsurface(model, sub, sub_class, vintage, hdd, include_films, cache
     return cache[key]
 
 
-def _subsurface_target_construction(model, sub_class, vintage, hdd, _include_films,
+def _subsurface_target_construction(model, sub_class, ruleset, hdd, _include_films,
                                     cache, audit):
     """A window/skylight construction at the prescriptive U when the model has
     no existing subsurface of that class to derive one from (needed by the
     FDWR/SRR rebuild on windowless models)."""
     # always SimpleGlazing here — its uFactor is the with-films value
-    target = _target_conductance(vintage, sub_class, "outdoors", hdd, False, audit)
+    target = _target_conductance(ruleset, sub_class, "outdoors", hdd, False, audit)
     stub = openstudio.model.Construction(model)
     stub.setName(f"NECB {sub_class} base")
     glazing = openstudio.model.SimpleGlazing(model)
@@ -404,6 +421,7 @@ def apply_prescriptive(model, *, vintage, hdd=None, apply_fdwr=False,
                        apply_srr=False, include_films=True,
                        thermal_bridging=None, audit=None):
     """Facade (Ruby ``Envelope.apply_prescriptive``)."""
-    return apply(model, vintage=vintage, hdd=hdd, apply_fdwr=apply_fdwr,
-                 apply_srr=apply_srr, include_films=include_films,
-                 thermal_bridging=thermal_bridging, audit=audit)
+    return _apply(model, Ruleset.from_edition(vintage), hdd=hdd,
+                  apply_fdwr=apply_fdwr, apply_srr=apply_srr,
+                  include_films=include_films, thermal_bridging=thermal_bridging,
+                  audit=audit)
