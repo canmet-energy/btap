@@ -5,7 +5,8 @@
   "inputs": {
    "spaces_assigned": 5,
    "space_types_created": 1,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "building": "input model",
   "level": "decision"
@@ -190,7 +191,8 @@
   "action": "NECB internal loads applied (people, plug/gas equipment, ventilation OA, modelling infiltration, schedules, thermostats \u2014 lighting and SHW excluded by scope)",
   "inputs": {
    "space_types_applied": 1,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "article": "8.4.3.2.(1)-(2)",
   "building": "input model",
@@ -351,7 +353,8 @@
   "inputs": {
    "space_types_applied": 1,
    "space_types_eligible": 8,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "article": "4.2.1.4.; 4.2.1.5.; 4.2.1.6.",
   "building": "input model",
@@ -592,7 +595,8 @@
   "action": "space-type pre-flight passed \u2014 every floor-area space type resolves against the NECB catalog",
   "inputs": {
    "floor_area_spaces_checked": 5,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "building": "input model",
   "level": "info"
@@ -601,7 +605,8 @@
   "step": "compliance",
   "action": "performance-path run started",
   "inputs": {
-   "vintage": "2020",
+   "code": "necb2020",
+   "edition": "2020",
    "simulate": "none",
    "costing": false
   },
@@ -725,7 +730,8 @@
   "step": "efficiency",
   "action": "NECB efficiency pass complete",
   "inputs": {
-   "vintage": "2020",
+   "code": "necb2020",
+   "edition": "2020",
    "boilers": 0,
    "chillers": 0,
    "dx_cooling": 0,
@@ -1987,7 +1993,8 @@
   "inputs": {
    "space_types_applied": 1,
    "space_types_eligible": 8,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "article": "4.2.1.4.; 4.2.1.5.; 4.2.1.6.",
   "building": "reference building",

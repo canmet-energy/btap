@@ -17,7 +17,8 @@
   "step": "compliance",
   "action": "ARCHETYPE-EUI compliance path (NECB 2025 8.4.4) \u2014 no reference building",
   "inputs": {
-   "vintage": "2025",
+   "code": "necb2025",
+   "edition": "2025",
    "archetypes": [
     "Office"
    ]

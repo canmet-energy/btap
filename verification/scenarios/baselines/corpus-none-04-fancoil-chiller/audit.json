@@ -18,7 +18,8 @@
   "action": "space-type pre-flight passed \u2014 every floor-area space type resolves against the NECB catalog",
   "inputs": {
    "floor_area_spaces_checked": 5,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "building": "input model",
   "level": "info"
@@ -27,7 +28,8 @@
   "step": "compliance",
   "action": "performance-path run started",
   "inputs": {
-   "vintage": "2020",
+   "code": "necb2020",
+   "edition": "2020",
    "simulate": "none",
    "costing": false
   },
@@ -329,7 +331,8 @@
   "step": "efficiency",
   "action": "NECB efficiency pass complete",
   "inputs": {
-   "vintage": "2020",
+   "code": "necb2020",
+   "edition": "2020",
    "boilers": 2,
    "chillers": 0,
    "dx_cooling": 0,
@@ -1591,7 +1594,8 @@
   "inputs": {
    "space_types_applied": 1,
    "space_types_eligible": 7,
-   "vintage": "2020"
+   "code": "necb2020",
+   "edition": "2020"
   },
   "article": "4.2.1.4.; 4.2.1.5.; 4.2.1.6.",
   "building": "reference building",
