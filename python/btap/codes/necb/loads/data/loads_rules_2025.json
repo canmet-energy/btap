@@ -6,9 +6,13 @@
   "changes_vs_2020": {
    "schedule_tables_renumbered": "A-8.4.3.2.(1)-A..K -> A-8.4.3.2.(1)(b)-A..K (Article 8.4.3.2 restructured into clauses in 2025)",
    "values": "none found"
-  }
+  },
+  "non_rule_keys_note": "schedule_table_prefix records THIS edition's numbering of the Appendix A schedule tables (2020 numbers it A-8.4.3.2.(1)). It was threaded into the ventilation applier as a parameter that applier never cited, so multi-edition Stage 2 removed the dead parameter; the recorded fact is kept here because nothing else in the tree carries it."
  },
  "data_vintage_alias": "2020",
+ "non_rule_keys": [
+  "schedule_table_prefix"
+ ],
  "schedule_table_prefix": "A-8.4.3.2.(1)(b)",
  "article_coverage": {
   "articles": [

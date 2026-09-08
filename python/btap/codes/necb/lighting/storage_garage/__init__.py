@@ -83,7 +83,7 @@ def apply(model, vintage='2020', entrance_spaces=None, audit=None):
                    article='4.2.2.2.')
         return {'applies': False}
 
-    article = '4.2.2.2.' if str(vintage) == '2025' else '4.2.2.2.'
+    article = '4.2.2.2.'
     result = {'applies': True, 'spaces': len(spaces)}
     result['zoning'] = _check_zoning(spaces, audit, article)
     result['occupancy'] = _apply_occupancy_reduction(model, spaces, vintage, audit, article)

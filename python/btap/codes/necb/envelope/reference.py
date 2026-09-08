@@ -30,6 +30,7 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
+from btap.codes import Ruleset
 from btap.codes.necb.envelope import climate
 from btap.codes.necb.envelope import prescriptive as Prescriptive
 from btap.codes.necb.envelope.rules import max_fdwr, max_srr
@@ -54,7 +55,7 @@ def apply(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
     from btap.codes.necb import envelope
 
     audit = audit if audit is not None else AuditLog()
-    prefix = "8.4.5" if str(vintage) == "2025" else "8.4.4"
+    prefix = Ruleset.from_edition(vintage).article("reference_subsection")
     hdd = climate.hdd18(model, hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")

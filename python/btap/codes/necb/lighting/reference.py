@@ -21,6 +21,7 @@ import re
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 from btap.codes.necb import lighting as _lighting
 from btap.codes.necb.lighting import apply_lights as ApplyLights
 
@@ -37,7 +38,7 @@ def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
     shouted here. Defaults to False so a caller that never runs the
     daylighting transform still gets the loud gap without opting in."""
     audit = audit if audit is not None else AuditLog()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('lighting_subsection')
 
     # HARD GATE: apply_lights silently skips space types with no NECB
     # catalog record, and the reference is a clone — so an unmatched type

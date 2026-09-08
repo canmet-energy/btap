@@ -31,6 +31,7 @@ from pathlib import Path
 
 from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog, emit_coverage
+from btap.codes import Ruleset
 from btap.codes.necb import tiers
 from btap.codes.necb.editions.necb2025 import eui_archetypes as archetypes
 from btap.codes.necb.editions.necb2025 import part11_ghg
@@ -318,7 +319,7 @@ def _build_reference(run):
     audit = run.audit
     proposed = run.proposed
     vintage = opts["vintage"]
-    prefix = "8.4.5" if vintage == "2025" else "8.4.4"
+    prefix = Ruleset.from_edition(vintage).article("lighting_subsection")
     with audit.with_building("reference building"):
         reference_result = hvac.reference_hvac(
             proposed, vintage=vintage, building=opts["building"], audit=audit,

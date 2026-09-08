@@ -20,6 +20,7 @@ from datetime import date
 from pathlib import Path
 
 from btap._compat import opt, ruby_round, ruby_str
+from btap.codes import editions
 
 #: Exit codes are load-bearing: "your building fails the code", "your file is
 #: not NECB-tagged" and "EnergyPlus crashed" have three different fixes, and a
@@ -181,7 +182,7 @@ def build_parser():
                    help="list the weather files this install carries")
     p.add_argument("-o", "--out", dest="run_dir", metavar="DIR",
                    help="run directory (default: ./necb_run_<model>)")
-    p.add_argument("--vintage", choices=["2020", "2025"], default="2020",
+    p.add_argument("--vintage", choices=editions("necb"), default="2020",
                    help="NECB vintage: 2020 or 2025 (default 2020)")
     p.add_argument("--storeys", type=int, metavar="N",
                    help="above-ground storey count override")
