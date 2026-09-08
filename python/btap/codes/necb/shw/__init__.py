@@ -12,20 +12,13 @@ D-63 solar and pool minimums, and the article-coverage manifest.
 
 from __future__ import annotations
 
-import json
-
-from btap.codes.necb import _data_root, edition_file
-
-_RULES: dict[tuple, dict] = {}
+from btap.codes.necb import code_id, rulesdata
 
 
 def rules(vintage):
-    """The parsed shw ruleset for a vintage, memoized (Ruby ``@rules``)."""
-    key = (_data_root(), str(vintage))
-    if key not in _RULES:
-        with open(edition_file(vintage, "shw_rules.json"), encoding="utf-8") as f:
-            _RULES[key] = json.load(f)
-    return _RULES[key]
+    """This edition's shw rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
+    return rulesdata.load("shw", code_id(vintage))
 
 
 # Demand + plant: see demand.apply_shw.

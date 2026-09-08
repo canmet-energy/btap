@@ -57,8 +57,17 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
     :param unknown_control_requirement: 'required' | 'not_required' —
         'necb2020' only — the default for an unresolvable Table 4.2.1.6. column
         (warns)"""
+    return _apply(reference, Ruleset.from_edition(vintage), proposed=proposed,
+                  placement=placement, office_match=office_match,
+                  unknown_control_requirement=unknown_control_requirement, audit=audit)
+
+
+def _apply(reference, ruleset, proposed=None, placement='necb2020',
+           office_match='any_enclosed_office',
+           unknown_control_requirement='required', audit=None):
+    """The 8.4.x.5.(9)-(12) daylighting transform against ONE resolved edition."""
     audit = audit if audit is not None else AuditLog()
-    prefix = Ruleset.from_edition(vintage).article('lighting_subsection')
+    prefix = ruleset.article('lighting_subsection')
     # `placement` is the single selector; Daylighting owns its vocabulary
     # (including the 'necb_default' alias), so normalize through IT rather
     # than keeping a second copy of the mapping here, then pass it straight
@@ -75,7 +84,7 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
 
             proposed_setpoints[control.space().get().nameString()] = control.illuminanceSetpoint()
 
-    created = Daylighting.add_controls(reference, vintage=vintage, placement=placement,
+    created = Daylighting._add_controls(reference, ruleset, placement=placement,
                                        office_match=office_match,
                                        unknown_control_requirement=unknown_control_requirement,
                                        audit=audit)

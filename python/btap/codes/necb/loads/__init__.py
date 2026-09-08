@@ -13,24 +13,27 @@ from __future__ import annotations
 import json
 
 from btap.audit import AuditLog  # the family's ONE AuditLog (Ruby's alias)
-from btap.codes.necb import _data_root, edition_file
+from btap.codes import Ruleset
+from btap.codes.necb import _data_root, code_id, edition_file, rulesdata
 
 __all__ = ["AuditLog", "rules", "table",
            "assign_space_types", "apply_loads",
            "SpaceTypes", "Schedules", "Apply"]
 
-#: Caches keyed by (data root, vintage[, table]) so a test that repoints the
-#: family's data root is never served the previous root's tables.
-_rules: dict[tuple, dict] = {}
+#: Table cache keyed by (data root, vintage, table) so a test that repoints
+#: the family's data root is never served the previous root's tables. The rule
+#: files are cached once for the whole family in ``necb.rulesdata``.
 _tables: dict[tuple, list] = {}
 
 
 def rules(vintage):
-    key = (_data_root(), str(vintage))
-    if key not in _rules:
-        path = edition_file(vintage, "loads_rules.json")
-        _rules[key] = json.loads(path.read_text(encoding="utf-8"))
-    return _rules[key]
+    """This edition's loads rules — a shim over the family's ONE loader.
+
+    The name is an ADDRESS (Section 8.4 coverage ``code`` pointers and the
+    removability gate call it), so Stage 6 kept it while the mechanism moved
+    to :func:`btap.codes.necb.rulesdata.load`.
+    """
+    return rulesdata.load("loads", code_id(vintage))
 
 
 def table(vintage, name):
@@ -56,9 +59,10 @@ Apply = _apply
 
 def assign_space_types(model, map, vintage='2020', audit=None):
     """Assign NECB space types to a bare-geometry model. See Apply."""
-    return _apply.assign_space_types(model, map, vintage=vintage, audit=audit)
+    return _apply._assign_space_types(model, map, Ruleset.from_edition(vintage),
+                                      audit=audit)
 
 
 def apply_loads(model, vintage='2020', audit=None):
     """Facade: apply NECB loads to every tagged space type."""
-    return _apply.apply_loads(model, vintage=vintage, audit=audit)
+    return _apply._apply_loads(model, Ruleset.from_edition(vintage), audit=audit)

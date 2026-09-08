@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 
 from btap.audit import AuditLog  # the family's ONE AuditLog (Ruby's alias)
-from btap.codes.necb import _data_root, edition_file
+from btap.codes.necb import _data_root, code_id, edition_file, rulesdata
 from btap.costing.lighting import report as Costing  # Ruby: Costing = BtapCosting::Lighting
 
 __all__ = ["AuditLog", "Costing", "rules", "table",
@@ -35,17 +35,15 @@ __all__ = ["AuditLog", "Costing", "rules", "table",
            "DaylightControlRequirement", "Daylighting", "StorageGarage",
            "ReferenceDaylighting"]
 
-#: Caches keyed by (data root, vintage[, table]) — see loads/__init__.py.
-_rules: dict[tuple, dict] = {}
+#: Table cache keyed by (data root, vintage, table) — see loads/__init__.py.
+#: The rule files are cached once for the whole family in ``necb.rulesdata``.
 _tables: dict[tuple, list] = {}
 
 
 def rules(vintage):
-    key = (_data_root(), str(vintage))
-    if key not in _rules:
-        path = edition_file(vintage, "lighting_rules.json")
-        _rules[key] = json.loads(path.read_text(encoding="utf-8"))
-    return _rules[key]
+    """This edition's lighting rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
+    return rulesdata.load("lighting", code_id(vintage))
 
 
 def table(name, vintage):

@@ -33,6 +33,7 @@ import re
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 
 ZONE_AREA_LIMIT_M2 = 360.0          # (1)
 OCCUPANCY_REDUCTION = 0.30          # (2) at least 30%
@@ -74,6 +75,12 @@ def apply(model, vintage='2020', entrance_spaces=None, audit=None):
         bay, so (3) is applied only when the modeller says which spaces they
         are, and is declared otherwise.
     :return: the determinations, keyed by sentence"""
+    return _apply(model, Ruleset.from_edition(vintage),
+                  entrance_spaces=entrance_spaces, audit=audit)
+
+
+def _apply(model, ruleset, entrance_spaces=None, audit=None):
+    """Article 4.2.2.2. against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     spaces = garage_spaces(model)
     if not spaces:
@@ -85,7 +92,7 @@ def apply(model, vintage='2020', entrance_spaces=None, audit=None):
     article = '4.2.2.2.'
     result = {'applies': True, 'spaces': len(spaces)}
     result['zoning'] = _check_zoning(spaces, audit, article)
-    result['occupancy'] = _apply_occupancy_reduction(model, spaces, vintage, audit, article)
+    result['occupancy'] = _apply_occupancy_reduction(model, spaces, ruleset, audit, article)
     result['entrances'] = _apply_entrance_control(model, spaces, entrance_spaces, audit, article)
     result['daylight'] = _apply_daylight_response(model, spaces, audit, article)
     _declare_exemptions(audit, article)
@@ -117,8 +124,13 @@ def _check_zoning(spaces, audit, article):
     return {'oversized': len(oversized), 'zones': len(zones)}
 
 
-def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
+def _apply_occupancy_reduction(model, spaces, code, audit, article):
     """(2) >=30% reduction when no activity for 20 min.
+
+    ``code`` is this edition's :class:`btap.codes.Ruleset`. It is NOT called
+    ``ruleset`` because the ScheduleRuleset this builds per space type is, and
+    that one is rebound inside the loop — one name for both would read the
+    previous iteration's schedule as the edition on the second pass.
 
     The gem's existing occupancy-sensor path cannot serve this: it is gated
     on LPD > 8.6 W/m2 and both garage records sit at 1.5-1.9 W/m2, so it
@@ -131,13 +143,13 @@ def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
 
     applied = []
     for space_type in space_types(spaces):
-        record = space_type_record(space_type, vintage)
+        record = space_type_record(space_type, code.edition)
         if record is None:
             continue
 
         lighting_name = '' if record['lighting_schedule'] is None else str(record['lighting_schedule'])
         occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
-        schedules = loads.table(vintage, 'schedules')
+        schedules = loads.table(code.edition, 'schedules')
         lighting_rows = [r for r in schedules if r['name'] == lighting_name]
         occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
         if not lighting_rows or not occupancy_rows:
@@ -148,12 +160,12 @@ def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
             continue
 
         name = f"{lighting_name}-garage-occ{ruby_round(OCCUPANCY_REDUCTION * 100)}-Light Ruleset"
-        ruleset = next((s for s in sorted_by_name(model.getSchedules())
-                        if s.nameString() == name), None)
-        if ruleset is None:
-            ruleset = build_reduced_ruleset(model, name, occupancy_rows, lighting_rows,
-                                            OCCUPANCY_REDUCTION)
-        set_lighting_schedule(space_type, ruleset)
+        schedule = next((s for s in sorted_by_name(model.getSchedules())
+                         if s.nameString() == name), None)
+        if schedule is None:
+            schedule = build_reduced_ruleset(model, name, occupancy_rows,
+                                             lighting_rows, OCCUPANCY_REDUCTION)
+        set_lighting_schedule(space_type, schedule)
         applied.append(space_type.nameString())
 
     audit.decision('lighting',

@@ -11,7 +11,6 @@ characterization facts dict, the building info dict and the assignment actions
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 
@@ -20,26 +19,21 @@ import openstudio
 from btap._compat import NullAudit, opt, ruby_round, sorted_by_name
 from btap.audit import emit_coverage
 from btap.codes import Ruleset
-from btap.codes.necb import _data_root, edition_file
+from btap.codes.necb import code_id, rulesdata
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
 
-_RULES: dict[tuple, dict] = {}
-
 
 def rules(vintage):
-    """Load (and memoize) the vendored NECB reference ruleset for a vintage.
+    """This edition's HVAC reference ruleset — a shim over the family's ONE
+    loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache.
 
     :param vintage: NECB vintage ('2020' or '2025')
-    :return: dict — parsed data/<code id>/reference_rules.json
+    :return: dict — the edition's manifest-declared ``hvac`` rule file
     """
-    key = (_data_root(), str(vintage))
-    if key not in _RULES:
-        with open(edition_file(vintage, "reference_rules.json"), encoding="utf-8") as f:
-            _RULES[key] = json.load(f)
-    return _RULES[key]
+    return rulesdata.load("hvac", code_id(vintage))
 
 
 @dataclass
@@ -70,11 +64,19 @@ def select_reference_systems(*, facts, building, vintage='2020', audit=None,
     :param audit: AuditLog or None
     :return: list[Assignment]
     """
+    return _select_reference_systems(facts=facts, building=building,
+                                     ruleset=Ruleset.from_edition(vintage),
+                                     audit=audit, proposed_annual=proposed_annual)
+
+
+def _select_reference_systems(*, facts, building, ruleset, audit=None,
+                              proposed_annual=None):
+    """The Table 8.4.4.7.-A selection against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else NullAudit()
-    ruleset = rules(vintage)
-    selection = ruleset['selection']
-    definitions = ruleset['system_definitions']
-    hp_rules = ruleset['heat_pump_reference']
+    rules_data = ruleset.rules("hvac")
+    selection = rules_data['selection']
+    definitions = rules_data['system_definitions']
+    hp_rules = rules_data['heat_pump_reference']
 
     assignments = []
     for group in facts['zone_groups']:
@@ -451,6 +453,17 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
     :param audit: AuditLog or None
     :return: ReferenceResult — model (clone), assignments, audit
     """
+    return _reference_hvac(model, Ruleset.from_edition(vintage), building=building,
+                           audit=audit, proposed_annual=proposed_annual)
+
+
+def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=None):
+    """The proposed -> reference HVAC transform against ONE resolved edition.
+
+    Everything under it — the selection, the per-assignment rules, the
+    humidification rebuild, the efficiencies pass and the coverage emission —
+    reads this same :class:`btap.codes.Ruleset` (Stage 6).
+    """
     import btap.modeling as modeling
     from btap.audit import AuditLog
     from btap.codes.necb.hvac import efficiency as _efficiency
@@ -460,11 +473,11 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
 
     facts = _classify.characterize(reference, audit=audit)
     info = _building_info(reference, building, audit)
-    assignments = select_reference_systems(facts=facts, building=info,
-                                           vintage=vintage, audit=audit,
-                                           proposed_annual=proposed_annual)
+    assignments = _select_reference_systems(facts=facts, building=info,
+                                            ruleset=ruleset, audit=audit,
+                                            proposed_annual=proposed_annual)
 
-    ruleset = rules(vintage)
+    rules_data = ruleset.rules("hvac")
     zones_by_name = {z.nameString(): z for z in reference.getThermalZones()}
     # 8.4.3.2.(1): operating schedules identical in both buildings — capture
     # each zone's PROPOSED air-system availability schedule now, while the
@@ -562,27 +575,29 @@ def reference_hvac(model, vintage='2020', building=None, audit=None, proposed_an
                        inputs={'system': assignment.reference_system, 'action': assignment.action},
                        value=assignment.catalog_name,
                        article='; '.join(_uniq([a for a in assignment.articles if a is not None])))
-        _apply_fan_rules(result.air_loops, assignment.reference_system, ruleset, audit)
-        _apply_zone_fan_rules(zones, assignment.reference_system, ruleset, audit)
+        _apply_fan_rules(result.air_loops, assignment.reference_system, rules_data, audit)
+        _apply_zone_fan_rules(zones, assignment.reference_system, rules_data, audit)
         if assignment.reference_system == 'hp':
-            _apply_heat_pump_limits(result.air_loops, ruleset, audit)
+            _apply_heat_pump_limits(result.air_loops, rules_data, audit)
         _apply_economizers(reference, result.air_loops, assignment.reference_system,
-                           vintage, ruleset, audit)
-        _apply_dcv(result.air_loops, zones, proposed_dcv, vintage, audit)
+                           ruleset.edition, rules_data, audit)
+        _apply_dcv(result.air_loops, zones, proposed_dcv, ruleset.edition, audit)
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
-        _audit_terminal_secondary_split(zones, assignment.reference_system, vintage, audit)
+        _audit_terminal_secondary_split(zones, assignment.reference_system,
+                                        ruleset.edition, audit)
 
-    _rebuild_humidification(reference, proposed_humidification, ruleset, vintage, audit)
+    _rebuild_humidification(reference, proposed_humidification, rules_data,
+                            ruleset.edition, audit)
     _purge_orphaned_ems(reference, audit)
     _purge_orphaned_vrf(reference, audit)
-    _apply_oversizing_caps(model, reference, ruleset, audit)
-    _efficiency.apply(reference, vintage=vintage, audit=audit)
+    _apply_oversizing_caps(model, reference, rules_data, audit)
+    _efficiency._apply(reference, ruleset=ruleset, audit=audit)
     for chiller, cop in purchased_cooling_chillers:
         chiller.setReferenceCOP(cop)
         audit.decision('efficiency', 'purchased-cooling reference chiller COP applied',
                        target=chiller.nameString(), value=f'COP {cop}',
                        article='Table 8.4.3.5')
-    _emit_article_coverage(ruleset, audit)
+    _emit_article_coverage(rules_data, audit)
 
     return ReferenceResult(model=reference, assignments=assignments, audit=audit)
 
@@ -622,14 +637,14 @@ def _audit_terminal_secondary_split(zones, reference_system, vintage, audit):
                article=article, ruling='D-50')
 
 
-def _apply_zone_fan_rules(zones, reference_system, ruleset, audit):
+def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
     """T10 (audit 2026-07-25): 8.4.4.18.(3) fan spec (640 Pa / 40% combined)
     covers HVAC systems 1-5 — including their ZONE-equipment supply fans
     (fan coils, PTAC/PTHP OnOff fans), which previously kept SDK defaults."""
     if reference_system == 6:
         return
 
-    spec = (ruleset.get('fans') or {}).get('systems_1_3_4_5', {}).get('supply') or {}
+    spec = (rules_data.get('fans') or {}).get('systems_1_3_4_5', {}).get('supply') or {}
     pressure = spec.get('pressure_rise_pa') or 640.0
     eff = spec.get('total_efficiency') or 0.40
     touched = 0
@@ -866,12 +881,12 @@ def _apply_operating_schedules(air_loops, proposed_availability, audit):
                            value=chosen.nameString(), article='8.4.3.2.(1)', ruling='D-14')
 
 
-def _emit_article_coverage(ruleset, audit):
+def _emit_article_coverage(rules_data, audit):
     """Completeness accounting: every article of the reference subsection is written
     to the audit with its handling status and how many decisions cited it this run —
     unimplemented or partially-implemented articles surface as warnings, so a missed
     requirement is visible in every log rather than discovered by review."""
-    emit_coverage(ruleset['article_coverage'], audit)
+    emit_coverage(rules_data['article_coverage'], audit)
 
 
 def _clone_model(model):
@@ -916,14 +931,14 @@ def _zone_space_types(model):
     return out
 
 
-def _apply_economizers(model, air_loops, reference_system, vintage, ruleset, audit):
+def _apply_economizers(model, air_loops, reference_system, vintage, rules_data, audit):
     """8.4.4.12 (2025: 8.4.5.12): reference cooling-with-outside-air. Table -12
     routes systems 1/3/4/6 and all heat-pump systems to 5.2.2.8 (air economizer:
     up to 100% outdoor air, differential reversion) and systems 2/5 to 5.2.2.9
     (WATER-side economizer, built since D-56)."""
     prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     if reference_system in (2, 5):
-        _apply_water_economizer(model, reference_system, vintage, ruleset, audit)
+        _apply_water_economizer(model, reference_system, vintage, rules_data, audit)
         return
     # D-20: NO economizer on System 1 (100%-outdoor-air makeup air). An air
     # economizer cannot increase OA above a system that is already all
@@ -987,10 +1002,10 @@ def _array(x):
 # temperature, and a tower held at 29 C can never deliver water colder than the
 # chilled-water return.
 
-def _apply_water_economizer(model, reference_system, vintage, ruleset, audit):
+def _apply_water_economizer(model, reference_system, vintage, rules_data, audit):
     prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     article = f'{prefix}.12. (Table -12 -> 5.2.2.9)'
-    spec = ruleset['water_economizer']
+    spec = rules_data['water_economizer']
     loops = _chilled_water_loops(model)
     if not loops:
         audit.warn('build', f'reference system {reference_system} routes to the 5.2.2.9 water economizer but the '
@@ -1206,12 +1221,12 @@ def _scheduled_humidity_setpoint(air_loop):
     return None
 
 
-def _rebuild_humidification(reference, captured, ruleset, vintage, audit):
+def _rebuild_humidification(reference, captured, rules_data, vintage, audit):
     """Rebuild humidification on the reference loops, after they exist."""
     if not captured:
         return
 
-    spec = ruleset['humidification']
+    spec = rules_data['humidification']
     prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     table = f'Table {prefix}.7.-B'
     article = f'{table} Note (1)'
@@ -1412,8 +1427,8 @@ def _audit_dcv_caveats(air_loop, mech, sources, enabled, copied, article, audit)
 # 8.4.4.18.(3): systems 1/3/4/5 -> supply fan 640 Pa @ 40% combined efficiency, no
 # return fan. 8.4.4.18.(4): system 6 -> supply 1000 Pa @ 55%, return 250 Pa @ 30%.
 
-def _apply_fan_rules(air_loops, reference_system, ruleset, audit):
-    fans = ruleset['fans']
+def _apply_fan_rules(air_loops, reference_system, rules_data, audit):
+    fans = rules_data['fans']
     spec = fans['system_6'] if reference_system == 6 else fans['systems_1_3_4_5']
     for air_loop in _array(air_loops):
         for comp in _coils.supply_components(air_loop):
@@ -1445,10 +1460,10 @@ def _set_fan_total_efficiency(fan, efficiency):
         fan.setFanEfficiency(efficiency)
 
 
-def _apply_heat_pump_limits(air_loops, ruleset, audit):
+def _apply_heat_pump_limits(air_loops, rules_data, audit):
     """8.4.4.13.(2)(d): the reference heat pump shall not operate in heating mode
     below -10 degC."""
-    cutoff = ruleset['heat_pump_reference']['heating_cutoff_oat_c']
+    cutoff = rules_data['heat_pump_reference']['heating_cutoff_oat_c']
     for air_loop in _array(air_loops):
         for comp in _coils.supply_components(air_loop):
             staged = comp.to_CoilHeatingDXMultiSpeed()
@@ -1459,7 +1474,7 @@ def _apply_heat_pump_limits(air_loops, ruleset, audit):
             coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(cutoff)
             audit.decision('rules', 'heat pump heating cutoff set', target=coil.nameString(),
                            value=f'compressor off below {cutoff} degC',
-                           article=ruleset['heat_pump_reference']['article'])
+                           article=rules_data['heat_pump_reference']['article'])
 
 
 def optional_flow(value):
@@ -1486,10 +1501,10 @@ GENERIC_ZONE_COOLING_FACTOR = 1.1
 HP_ZONE_COOLING_FACTOR = 1.0
 
 
-def _apply_oversizing_caps(proposed, reference, ruleset, audit):
+def _apply_oversizing_caps(proposed, reference, rules_data, audit):
     """8.4.4.8: reference oversizing = the lesser of the proposed oversizing and the
     cap (30% heating / 10% cooling), applied via the model-wide sizing factors."""
-    caps = ruleset['oversizing']
+    caps = rules_data['oversizing']
     sizing = proposed.getSizingParameters()
     heat_prop = sizing.heatingSizingFactor()
     cool_prop = sizing.coolingSizingFactor()
@@ -1546,7 +1561,7 @@ def _apply_oversizing_caps(proposed, reference, ruleset, audit):
                    inputs={'zones_pinned': hp_pinned, 'global_cooling_factor': cool_ref},
                    value='per-zone cooling sizing factor 1.0 overrides the global factor (measured: sized DX '
                          'capacity identical with the global at 1.10 vs 1.00)',
-                   article=f"{heat_pump_article_base(ruleset.get('selection') or {})}.(2)(b)", ruling='D-52')
+                   article=f"{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)", ruling='D-52')
 
 
 _ARTICLE_NUMBER_RE = re.compile(r'\d+\.\d+\.\d+\.\d+')
