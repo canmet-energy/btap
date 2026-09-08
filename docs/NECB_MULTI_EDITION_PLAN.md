@@ -1239,3 +1239,16 @@ rather than main. Same execution model and the one-heavy-job rule.
   tracked files only, so the absence check now uses `git ls-files`
   (`369cd9e`). Not a rename gap. **#33 is MERGED on GitHub**; the fetch of
   main is what the flaky link keeps refusing.
+- **Rebased onto squash-merged main** (`5c3c1a2`): `git rebase --onto main
+  8f28f73 stage1-integration -X theirs` (the only conflict surface was the
+  plan doc, which main held at an earlier log state); resulting tree
+  byte-identical to the verified pre-rebase tip. **Re-froze on the rebased
+  tip so `provenance.commit` names a real commit:** the diff is exactly
+  `provenance.commit` ca7d382 → 5a90c98 — no baseline file, hash, count
+  or scenario field moved; all 39 scenarios including both annual API
+  runs reproduced byte-identically (third determinism witness).
+- **Harness incident:** the freeze was killed twice as a background task
+  "because the system is running low on memory" while a sampler running
+  beside it logged 25 GB available and the cgroup recorded no OOM. The
+  harness watchdog misfired; the freeze completed when run detached
+  (`setsid nohup`) with bounded foreground waits. Feedback drafted.
