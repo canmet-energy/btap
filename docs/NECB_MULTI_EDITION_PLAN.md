@@ -1438,3 +1438,18 @@ under the removability gate with one edition present.
   **byte-identical, no re-freeze**; lint-imports 3/3; ruff; orphan keys;
   TOC; `NECB_EDITION_DELTAS.md --check` current; docs regenerate to no
   diff. **Stage 4 complete.**
+
+## Stage 5 — opened 2026-09-08
+
+Stacked on `stage4-integration` (`8c5b222`). One Opus agent: manifest
+`behaviours` binding for `archetype_eui_path` and `part11_ghg`,
+`Ruleset.behaviour()`, the exact four-site dispatch in `compliance.py`
+(rev-7 table), the direct `eui_archetypes` import deleted, the two
+hardcoded floors to data, the behaviour-orphan gate, and the removability
+gate extended to the binding. Gate: frozen lanes byte-identical — the
+`api-eui-path-necb2025` and determination scenarios are the witnesses.
+**Verification change (user's question):** per-stage verification now
+runs the suite at 16 workers concurrently with the three lanes (~20
+processes, ~8 GB) — ~6 min instead of ~17; agents keep the one-run rule.
+Splitting the python lane's 32 scenarios across workers would move the
+gate hash, so it rides R-C.
