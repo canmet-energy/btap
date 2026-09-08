@@ -1232,3 +1232,10 @@ rather than main. Same execution model and the one-heavy-job rule.
   `git rebase --onto main 8f28f73 stage1-integration`, re-freeze (only
   `provenance.commit` may move — attributed like every other freeze), push,
   PR, dispatch.
+- **Full suite on `1cc5709`: 880 passed, 1 failed** —
+  `test_the_renamed_package_is_the_one_on_disk` asserted the old directory
+  does not *exist*, and a branch switch leaves `python/btap/necb/__pycache__`
+  behind (zero tracked or source files — verified). The gate's own rule is
+  tracked files only, so the absence check now uses `git ls-files`
+  (`369cd9e`). Not a rename gap. **#33 is MERGED on GitHub**; the fetch of
+  main is what the flaky link keeps refusing.
