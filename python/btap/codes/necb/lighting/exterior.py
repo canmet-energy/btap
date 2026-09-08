@@ -15,6 +15,7 @@ import openstudio
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 from btap.codes.necb import _data_root, edition_file
 
 #: Cached per (data root, vintage) — each edition reads its own copy.
@@ -37,8 +38,12 @@ def allowance(zone, quantities, vintage='2020', audit=None):
         unit), e.g. {'parking_and_drives_m2': 500, 'entrances_exits_m': 12}
     :return: {'basic_site_w', 'tradable_w', 'non_tradable_w', 'total_w', 'lines'}
     """
+    return _allowance(zone, quantities, Ruleset.from_edition(vintage), audit=audit)
+
+
+def _allowance(zone, quantities, ruleset, audit=None):
     audit = audit if audit is not None else AuditLog()
-    data = _data(vintage)
+    data = _data(ruleset.edition)
     zone_key = str(zone)
     if zone_key not in data['basic_site_allowance_w']:
         raise ValueError(f"unknown exterior lighting zone '{zone}' (0..4)")

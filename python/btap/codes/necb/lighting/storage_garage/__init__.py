@@ -33,6 +33,7 @@ import re
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 
 ZONE_AREA_LIMIT_M2 = 360.0          # (1)
 OCCUPANCY_REDUCTION = 0.30          # (2) at least 30%
@@ -74,6 +75,12 @@ def apply(model, vintage='2020', entrance_spaces=None, audit=None):
         bay, so (3) is applied only when the modeller says which spaces they
         are, and is declared otherwise.
     :return: the determinations, keyed by sentence"""
+    return _apply(model, Ruleset.from_edition(vintage),
+                  entrance_spaces=entrance_spaces, audit=audit)
+
+
+def _apply(model, ruleset, entrance_spaces=None, audit=None):
+    """Article 4.2.2.2. against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     spaces = garage_spaces(model)
     if not spaces:
@@ -85,7 +92,7 @@ def apply(model, vintage='2020', entrance_spaces=None, audit=None):
     article = '4.2.2.2.'
     result = {'applies': True, 'spaces': len(spaces)}
     result['zoning'] = _check_zoning(spaces, audit, article)
-    result['occupancy'] = _apply_occupancy_reduction(model, spaces, vintage, audit, article)
+    result['occupancy'] = _apply_occupancy_reduction(model, spaces, ruleset, audit, article)
     result['entrances'] = _apply_entrance_control(model, spaces, entrance_spaces, audit, article)
     result['daylight'] = _apply_daylight_response(model, spaces, audit, article)
     _declare_exemptions(audit, article)
@@ -117,7 +124,7 @@ def _check_zoning(spaces, audit, article):
     return {'oversized': len(oversized), 'zones': len(zones)}
 
 
-def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
+def _apply_occupancy_reduction(model, spaces, ruleset, audit, article):
     """(2) >=30% reduction when no activity for 20 min.
 
     The gem's existing occupancy-sensor path cannot serve this: it is gated
@@ -131,13 +138,13 @@ def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
 
     applied = []
     for space_type in space_types(spaces):
-        record = space_type_record(space_type, vintage)
+        record = space_type_record(space_type, ruleset.edition)
         if record is None:
             continue
 
         lighting_name = '' if record['lighting_schedule'] is None else str(record['lighting_schedule'])
         occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
-        schedules = loads.table(vintage, 'schedules')
+        schedules = loads.table(ruleset.edition, 'schedules')
         lighting_rows = [r for r in schedules if r['name'] == lighting_name]
         occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
         if not lighting_rows or not occupancy_rows:
