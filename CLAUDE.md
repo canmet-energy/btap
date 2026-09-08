@@ -127,6 +127,14 @@ doc checks before merging documentation changes.
 
 ## Traps
 
+**`-n auto` is sized for CI, not this host.** The devcontainer sees every
+host core (48 on the reference machine) and every xdist worker imports the
+OpenStudio SDK, so one `-n auto` run is ~50 SDK-loaded processes. Three of
+those plus two EnergyPlus runs exhausted the 32 GB WSL2 VM on 2026-09-08 and
+took the VM down. The devcontainer sets `PYTEST_XDIST_AUTO_NUM_WORKERS=8`;
+keep it, never run two full suites concurrently, and run simulations one at
+a time.
+
 **The locale is load-bearing.** Generated documents contain UTF-8. CI and the
 devcontainer force a UTF-8 locale; preserve it and use explicit UTF-8 when a
 tool reads generated text.
