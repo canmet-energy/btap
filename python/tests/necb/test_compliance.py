@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 from btap.codes import performance_compliance
-from btap.codes.compliance import (
+from btap.codes.necb.path import (
     _bump_capacities,
     _next_sizing_factor,
 )

@@ -87,7 +87,7 @@ import btap.codes as codes
 result = {{"code_ids": codes.code_ids(), "editions": codes.editions("necb")}}
 from btap.audit import AuditLog
 from btap.codes.necb import loads, lighting, envelope, hvac, shw
-from btap.codes import compliance, coverage
+from btap.codes import compliance, coverage, pipeline
 edition = {edition!r}
 result["loads_rules"] = bool(loads.rules(edition))
 result["lighting_rules"] = bool(lighting.rules(edition))
@@ -96,7 +96,7 @@ result["hvac_rules"] = bool(hvac.rules(edition))
 result["shw_rules"] = bool(shw.rules(edition))
 audit = AuditLog()
 before = len(audit.entries)
-compliance._emit_article_coverage(edition, audit)
+pipeline._emit_article_coverage(codes.resolve(f"necb{{edition}}"), audit)
 result["umbrella_rules_emitted"] = len(audit.entries) > before
 # Both loaders are edition-aware (Stage 3): each reads its own snapshot.
 result["climate_table_c1"] = bool(envelope.climate.table_c1(edition))

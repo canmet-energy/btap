@@ -11,8 +11,8 @@ which file its ``envelope`` rules are in, so an edition that renames or
 splits a rule file changes its manifest and nothing else.
 
 The domain accessors (``loads.rules``, ``lighting.rules``, ``envelope.rules``,
-``hvac.reference.rules``, ``hvac.efficiency.data``, ``shw.rules``, and
-``compliance._umbrella_rules``) stay as shims over this: their NAMES are
+``hvac.reference.rules``, ``hvac.efficiency.data``, and ``shw.rules``)
+stay as shims over this: their NAMES are
 addresses — the Section 8.4 coverage ``code`` pointers and the removability
 gate both call them — so the loader consolidates the mechanism without moving
 the doorbell.
