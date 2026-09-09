@@ -28,8 +28,9 @@ determination is split by OWNERSHIP, not by convenience:
   pre-flight), `climate` (Table C-1 HDD), `prepare_annual`/`consume_annual`
   (the heat-pump election variables around the pipeline's EnergyPlus call),
   `determine` (reference build → sizing → 8.4.1.2 verdicts → GHG → costing →
-  EUI supplement), `citations`, `report_sections`, and `alternate_path` (the
-  8.4.4 archetype-EUI path, whose phase sequence is genuinely not this one).
+  EUI supplement), `abort` (the failure-flush citation, 8.4.2.1),
+  `citations`, `report_sections`, and `alternate_path` (the 8.4.4
+  archetype-EUI path, whose phase sequence is genuinely not this one).
 - **`compliance.py`** — the entry point plus the six symbols the Section 8.4
   coverage `code` pointers name. `_build_reference`, `_evaluate` and
   `_evaluate_unmet` are FORWARDING functions **on the executed call path**:
@@ -43,6 +44,44 @@ determination is split by OWNERSHIP, not by convenience:
 what a regime produces (`compliant` + the report it filled in); the report
 renders what is present. A future absolute-metric regime compares against
 thresholds and builds no reference at all.
+
+### What 9a is, stated narrowly: an NECB-PRESERVING scaffold
+
+The lifecycle and the family boundary are REAL — the `CodePath` protocol, the
+manifest `path` key resolved through `Ruleset.path()`, the forwarders on the
+executed call path, and the import-linter contract that keeps
+`pipeline.py` free of `btap.codes.necb`. Nothing in the neutral pipeline
+writes a NECB citation into an audit trail any more:
+`tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` fails on any
+`article=` keyword or `[58].x.y` literal reaching an audit call in
+`pipeline.py`.
+
+**Three things 9a does NOT deliver — deferred to 9b/9c, where a second family
+makes the neutral shape testable rather than speculative. Do not describe them
+as done, and do not "just neutralize" one in passing: each moves a report
+leaf.**
+
+1. **`report/sections.py` hardcodes NECB Section 8.4 article paths — 13
+   sites, in four functions**: `verdict_banner` (6), `path_declaration` (2),
+   `energy` (3), `hvac_building_block` (2). The renderer takes the code NAME
+   from `report['code_label']`; the article NUMBERS are still literals.
+   `TestDeferredRendererInventory` pins the inventory, so changing it is a
+   deliberate act with a plan entry behind it.
+2. **`citations()` and `report_sections()` have no product call site.** They
+   are declared, implemented and unit-tested, and nothing calls them. Wiring
+   either needs the ruleset plumbed into the render context and new manifest
+   article keys (`render_all` composes from its own fixed `ORDER`, a different
+   list from `report_sections()`'s report keys) — a report change.
+3. **`pipeline._validate_input_model` still RAISES NECB prose** (Table
+   8.4.4.7.-A, the 8.4.1.2 determination). Exceptions, not audit entries, and
+   the rev-7 ownership table keeps the neutral model-loading half here — but
+   the text is NECB's.
+
+**The abort citation must stay a literal `article=` in family source.** The
+Section 8.4 scanner reads `article=` constants by AST, so routing 8.4.2.1
+through `citations()` or a module constant drops the
+`(edition, 8.4.2.1, warn)` count to zero and breaks the citation no-loss
+gate. That constraint is why `abort` is a hook rather than a lookup.
 
 ## Pipeline (`compliance.performance_compliance`)
 

@@ -91,6 +91,17 @@ class CodePath(Protocol):
     def report_sections(self, run) -> list:
         """The report sections this regime produced, in render order."""
 
+    def abort(self, audit, error) -> None:
+        """Record, in this CODE's terms, a run that ended before it could
+        determine anything (NECB: 8.4.2.1 — compliance is assessed THROUGH
+        MODELING, so a run that did not complete modelled nothing).
+
+        Called from :func:`_flush_on_failure` immediately before the audit
+        trail is written, so the entry is the trail's last. It takes the audit
+        and the exception rather than the run because the failure flush also
+        serves a family's :meth:`alternate_path`, which has no :class:`_Run`
+        of the pipeline's."""
+
     def alternate_path(self, model, name, **options):
         """Run a compliance path that is NOT the standard lifecycle above.
 
@@ -191,7 +202,7 @@ def run(model, *, code="necb2020", weather=None, building=None,
         state.report = verdict.report
         return _finalize(state)          # 6. coverage + outputs -> ComplianceResult
     except Exception as e:
-        _flush_on_failure(str(run_dir), state.report, audit, e)
+        _flush_on_failure(str(run_dir), state.report, audit, e, code_path)
         raise
 
 
@@ -226,11 +237,13 @@ def _size_proposed(run):
     opts = run.opts
     audit = run.audit
     if opts["simulate"] == "none":
-        audit.warn("compliance",
-                   "proposed is UNSIZED (simulate: :none) — data-centre kW "
-                   "thresholds and capacity-binned efficiencies fall back with "
-                   "warnings; the 5.2.10.1 energy-recovery determination needs "
-                   "sized flows and is SKIPPED")
+        # Nothing to size, and the pipeline has nothing to say about it: WHAT
+        # an unsized proposed costs a determination is the CODE's statement
+        # (NECB: capacity-binned efficiencies, the data-centre kW thresholds
+        # and the 5.2.10.1 energy-recovery determination all need sized
+        # flows), so the family makes it from its `determine` hook — the next
+        # audit-emitting step on this path, which keeps the entry exactly
+        # where it was.
         return
 
     try:
@@ -396,18 +409,18 @@ def _write_outputs(run_dir, report, audit):
         handle.write(str(audit))
 
 
-def _flush_on_failure(run_dir, report, audit, error):
+def _flush_on_failure(run_dir, report, audit, error, code_path):
     """On any failure mid-run, record the abort in the audit and flush the
     audit trail + whatever partial report exists to run_dir, so a broken
     proposed (which aborts before the reference is even built) still leaves
-    diagnostics behind. The caller re-raises the original error
-    afterwards."""
+    diagnostics behind. The caller re-raises the original error afterwards.
+
+    WHICH article an incomplete run offends is the code's to say, not the
+    lifecycle's, so the family's :meth:`CodePath.abort` writes that entry.
+    The pipeline owns only the ordering — the abort is the last entry in the
+    trail it then writes."""
     try:
-        audit.warn("compliance",
-                   f"run ABORTED before completion: {type(error).__name__}: "
-                   f"{error}",
-                   inputs={"error_class": type(error).__name__},
-                   article="8.4.2.1.")
+        code_path.abort(audit, error)
         _write_outputs(run_dir, report, audit)
     except Exception:
         # never let a write failure mask the original error
