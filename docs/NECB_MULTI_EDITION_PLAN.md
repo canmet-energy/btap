@@ -1766,3 +1766,28 @@ edition would be silently dropped from the rendered document), and
 registry; then a per-edition plan in the rev-7 shape (2017 first) with
 the table inventory as its first deliverable, for Sol's review before any
 rule file is written. 9b/9c remain new implementation plans.
+
+## Snapshot self-description (Phase A) — 2026-09-09
+
+The user asked whether an edition's snapshot should name other editions.
+A full classification (every cross-edition token by key path and reader)
+found runtime independence intact but self-description not: 656
+NECB2011-named curve identifiers emitted into models and audits, 19 (in
+the end 24) coverage sentences explaining a rule by another edition, 936
+dead vendored column values, comparative and forward-referencing prose.
+**D-88** states the policy; `test_snapshot_self_description.py` enforces
+it (2482 problems on the pre-change tree, 0 after). Phase A is name-only:
+curves renamed in the snapshots and, in lockstep, in `btap.modeling`'s DX
+catalog because the efficiency pass reuses curves by name (pre-existing
+alias hazard → **DF-4**); 24 coverage strings rewritten in each edition's
+own terms; dead columns and comparison blocks removed; every comparative
+sentence gone from provenance; `scripts/refresh_provenance_hashes.py`
+added. The plan's own citation table was wrong (unitary equipment on the
+absorption-chiller article) — corrected from the snapshots' 8.4 text.
+**DF-2** (curves vs the editions' own tables: EIR_FPLR identical to
+rounding; CAP_FT/EIR_FT differ outright, unit basis open; boilers/furnaces
+within 0.5–1.9 % of FHeatPLC; DX/fan/SWH have no edition table) and
+**DF-3** (both snapshots carry NECB 2015's Table C-1) are Phase B under
+D-89 — the user chose Phase A first. Vintage-match matrix: 7 of 14 (2020)
+and 8 of 18 (2025) files are inherited or copied rather than the edition's
+own text. R-N next.

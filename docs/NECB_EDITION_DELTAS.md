@@ -30,11 +30,11 @@ there rather than silently dropped from the comparison.
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 76 | 1 | 0 | 0 | 0 |
-| hvac (`reference_rules.json`) | 319 | 23 | 0 | 1 | 0 |
+| hvac (`reference_rules.json`) | 319 | 23 | 1 | 1 | 0 |
 | hvac_efficiencies (`efficiencies.json`) | 2394 | 10 | 8 | 97 | 4 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
-| shw (`shw_rules.json`) | 75 | 1 | 3 | 0 | 0 |
+| shw (`shw_rules.json`) | 75 | 1 | 3 | 1 | 0 |
 | necb (`necb_rules.json`) | 0 | 0 | 2 | 0 | 0 |
 | tables/daylighting_controls_4_2_1_6 (`tables/daylighting_controls_4_2_1_6.json`) | 541 | 0 | 0 | 0 | 0 |
 | tables/exterior_lighting (`tables/exterior_lighting.json`) | 159 | 0 | 0 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **45742** | **36** | **13** | **98** | **4** |
+| **Total** | **45742** | **36** | **14** | **99** | **4** |
 
 ## necb2020 → necb2025
 
@@ -58,7 +58,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac</b> (`reference_rules.json`) — 343 leaves: 319 identical, 23 renumbered, 0 changed, 1 added, 0 removed (click to expand)</summary>
+<summary><b>hvac</b> (`reference_rules.json`) — 344 leaves: 319 identical, 23 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -92,6 +92,7 @@ there rather than silently dropped from the comparison.
 
 | Path | Kind | Old → New |
 |---|---|---|
+| `energy_recovery.trigger_provenance` | changed | NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), retrieved via codes MCP get_table 2026-07-22. → NECB 2025 Tables 5.2.10.1.-A (p.149, non-continuous) / -B (continuous), retrieved via codes MCP get_table 2026-07-22. |
 | `fans.text_2025` | added | — → 8.4.5.18.(3): HVAC systems 1 to 5 -> supply 640 Pa @ 40%, no return fan; (4): system 6 -> 13C SAT, supply 1000 Pa @ 55%, return 250 Pa @ 30% |
 
 </details>
@@ -249,7 +250,7 @@ _No renumbering or value changes — every leaf is identical._
 </details>
 
 <details>
-<summary><b>shw</b> (`shw_rules.json`) — 79 leaves: 75 identical, 1 renumbered, 3 changed, 0 added, 0 removed (click to expand)</summary>
+<summary><b>shw</b> (`shw_rules.json`) — 80 leaves: 75 identical, 1 renumbered, 3 changed, 1 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -264,6 +265,7 @@ _No renumbering or value changes — every leaf is identical._
 | `efficiency.heat_pump.metric` | changed | EF → UEF |
 | `efficiency.heat_pump.minimum_cop` | changed | 2.1 → 2.23 |
 | `efficiency.heat_pump.note` | changed | NECB 2020 Table 6.2.2.1 storage-type heat pump: EF >= 2.1. → NECB 2025 Table 6.2.2.1 storage-type heat pump: UEF >= 2.23. |
+| `solar_pool_minimums.article` | added | — → Table 6.2.2.1 |
 
 </details>
 

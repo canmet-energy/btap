@@ -90,6 +90,18 @@ D-XX entry** recording why the two editions are now one implementation.
 (Stage 5 itself needs no new decision: it binds code that was already
 2025-only, with no change in behaviour.)
 
+**Self-description rule (D-88).** A snapshot names another edition ONLY as
+its origin, in provenance fields (`provenance`, `notes`, `derivation`,
+`*_note`, `*_provenance`), never comparatively ("identical to 2020",
+"renumbered from") and never forward (a 2020 file does not know 2025
+exists). Everything the snapshot emits, consumes or displays — curve
+identifiers, `article_coverage` prose, table columns, rule keys — speaks in
+its own numbering. Comparisons belong in the generated
+`docs/NECB_EDITION_DELTAS.md`; identity in the manifest's
+`byte_identical_to`. `tests/necb/test_snapshot_self_description.py`
+enforces it; `scripts/refresh_provenance_hashes.py` refreshes the result
+hashes after any data edit.
+
 ---
 
 ## `manifest.json`'s `provenance` block — and `provenance/`
