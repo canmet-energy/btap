@@ -17,7 +17,7 @@
 ; or downloads on the user's machine.
 
 #define AppName    "BTAP Compliance"
-#define AppVersion "0.2.1"
+#define AppVersion "0.3.0"
 
 [Setup]
 AppName={#AppName}

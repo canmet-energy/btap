@@ -1,7 +1,7 @@
 """SDK-only envelope geometry (port of btap-modeling's envelope/geometry.rb):
 exposed conditioned surface census and centroid-scaled subsurface helpers.
 The NECB rule appliers built on these (apply_fdwr / apply_srr, 3.2.1.4) live
-in btap.necb's envelope domain.
+in btap.codes's envelope domain.
 
 "Conditioned, non-plenum" is proxied by Space partofTotalFloorArea + a zone
 thermostat (on standards-untagged models the proxy is equivalent to the

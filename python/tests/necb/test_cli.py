@@ -17,7 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from btap.necb import cli
+from btap.codes import cli
 from tests.necb.support import DDY, EPW, FIXTURE_OSM, needs_engine, needs_sdk
 
 FIXTURE = str(FIXTURE_OSM)
@@ -95,7 +95,7 @@ class TestCLIPreflight(CLICase):
                              "must name the on-ramp that fixes it")
 
     def test_preflight_error_is_a_value_error_so_existing_handlers_work(self):
-        from btap.necb.compliance import PreflightError
+        from btap.codes.compliance import PreflightError
 
         self.assertTrue(issubclass(PreflightError, ValueError))
 
@@ -157,7 +157,7 @@ class TestCLIPreflight(CLICase):
             " table: %s' % file)\n"
             "    return _real(file, *a, **k)\n"
             "builtins.open = guarded\n"
-            "from btap.necb import cli\n"
+            "from btap.codes import cli\n"
             "sys.exit(cli.run(sys.argv[1:]))\n")
         with tempfile.TemporaryDirectory() as dir:
             script = os.path.join(dir, "guarded_cli.py")

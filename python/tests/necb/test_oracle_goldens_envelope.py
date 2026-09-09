@@ -87,7 +87,7 @@ def surface_conductances(model):
 class TestOracleGoldensEnvelope(unittest.TestCase):
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     # ------------------------------------------------------- envelope_lookups

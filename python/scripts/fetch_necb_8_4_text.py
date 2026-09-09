@@ -4,7 +4,7 @@
 Fetches every NECB Section 8.4 article for ONE edition (EDITION=2025 default,
 EDITION=2020 supported), parses each into a sentence/clause tree with STRICT
 sanity checks, and caches the result to
-``btap/necb/data/coverage/necb_8_4_articles_2025.json``
+``btap/codes/data/coverage/necb_8_4_articles_2025.json``
 for the coverage-document generator (which must run in CI without MCP access).
 
   python3 scripts/fetch_necb_8_4_text.py
@@ -252,7 +252,7 @@ def main():
     parser.add_argument(
         "--out",
         type=Path,
-        help=("Output path (default: python/btap/necb/data/coverage/"
+        help=("Output path (default: python/btap/codes/data/coverage/"
               "necb_8_4_articles_<edition>.json)")
     )
     args = parser.parse_args()
@@ -263,7 +263,7 @@ def main():
     if args.out:
         out_path = args.out
     else:
-        out_path = (PYTHON_ROOT / "btap" / "necb" / "data" / "coverage" /
+        out_path = (PYTHON_ROOT / "btap" / "codes" / "data" / "coverage" /
                     f"necb_8_4_articles_{edition}.json")
 
     client = MCPClient("codes")

@@ -1146,3 +1146,124 @@ any result.
 Opened on the user's instruction before the Stage 0 PR is merged (push
 blocked by network), so Stage 1 work stacks on `stage0-multi-edition`
 rather than main. Same execution model and the one-heavy-job rule.
+- **Stage 0 PR #33 opened**; four-job workflow dispatched as run
+  34238540365 (lint green at time of writing; watched).
+- **Spawned (worktrees off `stage0-multi-edition`):** Opus — the R-B
+  rename sweep, the eui/tiers move per the symbol map, R7 ledger + chain
+  test, D-XX process entry, 0.3.0 bump, scanner glob/gem-key sites; one
+  full-suite run allowed at the end, and a path-only proof of the frozen
+  lane's differences via ledger substitution. Sonnet —
+  `test_no_legacy_namespace.py`.
+- **Namespace gate (Sonnet) delivered and verified** — branch
+  `worktree-agent-a84194dba7fc284f4`. Two corrections applied by Fable on
+  that branch (`4ce6d69`): (a) the agent's pattern `\bbtap[./-]necb\b`
+  also matched the retired gem name `btap-necb`, which is period prose in
+  ~100 docstrings the rename must not reword AND the stem of the live
+  `btap-necb-coverage` console entry point the plan keeps through Stage 4
+  — narrowed to `btap.necb` / `btap/necb`; (b) pytest-function style
+  converted to `unittest.TestCase` so the zero-install `unittest discover`
+  fallback runs it. Pre-rename inventory with the corrected pattern:
+  **678 hits in 152 tracked files** (python 664, CLAUDE.md 4,
+  verification 4, docs 3, packaging 2, README 1). Held for integration
+  with the rename; merging it earlier would redden the stage branch.
+- **Dispatch run 34238540365: all four jobs green** (lint, python, verify,
+  parity). The parity job re-ran both annual API scenarios on a GitHub
+  runner and matched the baselines frozen here — the cross-machine
+  determinism witness for the first frozen full-year determination.
+  **PR #33 is ready for the user's merge decision.** Stage 1 continues on
+  top of it.
+- **User: merge #33 ("do it").** GitHub unreachable again from the
+  container (github.com:443 times out / api refused; pypi.org fine) — the
+  third outage since the VM restart. Push of the final log commit, the
+  squash merge, and the pull are in a bounded background retry (30 × 60 s).
+  Local `main` is still `ac6712f` until that lands; Opus's rename branch
+  will be rebased onto the squash-merged main with
+  `git rebase --onto main <stage0 tip>` rather than merged, so only its
+  own commits replay.
+- **Rename (Opus) delivered and reviewed** — `stage1-btap-codes` (`3bf7bd5`),
+  one commit, 208 files, +1606/−1165, 53 renames; `python/btap/necb/` gone,
+  tree matches the plan (`codes/{cli,compliance,coverage,decisions,report}`,
+  `codes/necb/{envelope,hvac,lighting,loads,shw,tiers.py,editions/necb2025/
+  {eui_archetypes,part11_ghg}.py,data/}`, `codes/data/{decisions.json,
+  coverage/}`). Full suite 873 passed / 8 skipped; lint-imports 3/3 with the
+  contract rewritten to `btap.codes → costing → modeling → audit`; ruff
+  clean; orphan keys, decisions TOC, both generators clean and idempotent.
+  Frozen python lane fails on exactly `audit.json` (`/inputs/code[]`) and
+  `audit.txt` for the 20 evidence-bearing scenarios; `report.json` carries
+  no code pointers; the agent's ledger-substitution proof rebuilt 32/32
+  byte-identical — no non-path difference. R7 ledger: 87 unique refs, 313
+  uses, chain test proves R7.old == R6.new, R7.new == live manifests,
+  totals equal; `tiers.py` leaves the pointer set (32 files → 31).
+  **Judgment calls accepted:** `DATA_DIR` on `btap.codes.necb`; the
+  scanner's `gem == "necb"` kept as the umbrella *label* (renaming it would
+  change generated HTML content — flagged for Stage 3) while `domain_for`
+  gains `removeprefix("necb/")` to preserve the exact prior domain mapping;
+  console script names unchanged (user surface); package `CLAUDE.md`/
+  `README.md` at `btap/codes/`; 0.3.0 in `pyproject`, `btap/__init__`,
+  the `.iss` guard and four usage examples; `docs/python_port_m6_m7_review.md`
+  added to the historical set; a `test_self_containment.py` allowlist row
+  for the gate; `test.yml:106` bare comment fixed by hand. **D-86** (`kind:
+  process`) adjudicates R-B. The agent ran the full suite twice, serially
+  (a docstring edit after regenerating docs shifted `#L` anchors — the
+  known trap) — disclosed, accepted.
+- **Two namespace gates existed** (Sonnet's, held, and Opus's own written
+  after the plan log named Sonnet's). Opus's lands: it carries the same two
+  corrections, is `unittest` style, and is already wired to the
+  self-containment allowlist. Sonnet's branch is dropped, not merged.
+- **R-B freeze started on `stage1-integration` (= `3bf7bd5`) while GitHub
+  is still unreachable** (merge retry at attempt 16+). If the eventual
+  rebase onto squash-merged main changes the commit beneath, the freeze
+  re-runs and the only permitted diff is `provenance.commit`.
+- **R-B executed** from clean tree `ca7d382` → commit `1cc5709`.
+  **Attribution by script** (`attribute_rb.py`: rewrites HEAD's baselines
+  through the R7 ledger + rename rules and compares to the freeze; checks
+  every manifest field): 54 files / 27 scenarios (20 python-lane + 3
+  verify + 4 parity), `audit.json` ×27 and `audit.txt` ×27 all path-only,
+  `report.json` untouched; manifest `provenance.commit`, `freezer_sha256`,
+  `runner_sha256`, and 27 `baseline_sha256` — the touched set exactly; no
+  other top-level, provenance or scenario field; no id added/removed;
+  `defs/gate/spec_sha256` unchanged. Regenerating both coverage documents
+  after the freeze: no diff. **No findings.** Three-lane gate + light
+  gates running.
+- **Stage 1 verification block complete on `1cc5709`:** frozen lanes
+  python 32 / verify 3 / parity 4 green; full suite green; lint-imports
+  3/3; ruff clean; orphan keys OK; decisions TOC current; docs regenerate
+  to no diff. **Waiting on GitHub** for the #33 merge; then
+  `git rebase --onto main 8f28f73 stage1-integration`, re-freeze (only
+  `provenance.commit` may move — attributed like every other freeze), push,
+  PR, dispatch.
+- **Full suite on `1cc5709`: 880 passed, 1 failed** —
+  `test_the_renamed_package_is_the_one_on_disk` asserted the old directory
+  does not *exist*, and a branch switch leaves `python/btap/necb/__pycache__`
+  behind (zero tracked or source files — verified). The gate's own rule is
+  tracked files only, so the absence check now uses `git ls-files`
+  (`369cd9e`). Not a rename gap. **#33 is MERGED on GitHub**; the fetch of
+  main is what the flaky link keeps refusing.
+- **Rebased onto squash-merged main** (`5c3c1a2`): `git rebase --onto main
+  8f28f73 stage1-integration -X theirs` (the only conflict surface was the
+  plan doc, which main held at an earlier log state); resulting tree
+  byte-identical to the verified pre-rebase tip. **Re-froze on the rebased
+  tip so `provenance.commit` names a real commit:** the diff is exactly
+  `provenance.commit` ca7d382 → 5a90c98 — no baseline file, hash, count
+  or scenario field moved; all 39 scenarios including both annual API
+  runs reproduced byte-identically (third determinism witness).
+- **Harness incident:** the freeze was killed twice as a background task
+  "because the system is running low on memory" while a sampler running
+  beside it logged 25 GB available and the cgroup recorded no OOM. The
+  harness watchdog misfired; the freeze completed when run detached
+  (`setsid nohup`) with bounded foreground waits. Feedback drafted.
+- **Stage 1 pushed** (`stage1-integration` @ `6660362`); PR creation and
+  dispatch retrying in a detached loop (`pr_retry.sh`) because the harness
+  watchdog now kills background tasks within ~70 s regardless of memory.
+
+## Stage 2 — opened 2026-09-08
+
+Stacked on `stage1-integration` (Stage 1 PR pending GitHub). Deviation
+from the execution-model table, recorded: the `Ruleset` registry, the
+per-edition manifests, the 15 citation sites and the scanner's own
+fallbacks go to **one Opus agent** rather than Sonnet + Opus, because the
+sites cannot be built or tested without the registry API and splitting
+them would serialise anyway. Sonnet writes the registry's API tests from
+the spec in parallel (they fail until the implementation lands — the same
+gate-first pattern as the namespace test). The frozen lanes are the gate:
+byte-identical, no re-freeze.

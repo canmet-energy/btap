@@ -26,7 +26,7 @@ def print_at(z):
 class TestPrescriptive(unittest.TestCase):
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     def applied_model(self, **kwargs):

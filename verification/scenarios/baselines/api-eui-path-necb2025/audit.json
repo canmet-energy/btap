@@ -206,8 +206,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/compliance.py#_evaluate",
-    "python/btap/necb/compliance.py#_evaluate_unmet"
+    "python/btap/codes/compliance.py#_evaluate",
+    "python/btap/codes/compliance.py#_evaluate_unmet"
    ]
   },
   "article": "8.4.1.2.",
@@ -220,7 +220,7 @@
    "status": "satisfied_by_clone",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/compliance.py#_build_reference"
+    "python/btap/codes/compliance.py#_build_reference"
    ]
   },
   "article": "8.4.1.5.",
@@ -233,7 +233,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/compliance.py#performance_compliance"
+    "python/btap/codes/compliance.py#performance_compliance"
    ]
   },
   "article": "8.4.2.1.",
@@ -247,7 +247,7 @@
    "decisions_citing": 0,
    "code": [
     "python/btap/simulation/runner.py#energy_results",
-    "python/btap/necb/compliance.py#_run_annual"
+    "python/btap/codes/compliance.py#_run_annual"
    ]
   },
   "article": "8.4.2.2.(1)",
@@ -260,8 +260,8 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/compliance.py#_evaluate",
-    "python/btap/necb/cli.py#verdict_exit",
+    "python/btap/codes/compliance.py#_evaluate",
+    "python/btap/codes/cli.py#verdict_exit",
     "python/btap/simulation/runner.py#run_energyplus"
    ]
   },
@@ -275,7 +275,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/loads/schedules.py#add",
+    "python/btap/codes/necb/loads/schedules.py#add",
     "python/btap/simulation/runner.py#attach_weather"
    ]
   },
@@ -325,7 +325,7 @@
    "decisions_citing": 0,
    "code": [
     "python/btap/simulation/runner.py#attach_weather",
-    "python/btap/necb/envelope/climate.py#hdd18"
+    "python/btap/codes/necb/envelope/climate.py#hdd18"
    ]
   },
   "article": "8.4.2.3.(1)",
@@ -349,7 +349,7 @@
    "status": "implemented",
    "decisions_citing": 0,
    "code": [
-    "python/btap/necb/compliance.py#_load_and_validate"
+    "python/btap/codes/compliance.py#_load_and_validate"
    ]
   },
   "article": "8.4.3.1.",
@@ -362,8 +362,8 @@
    "status": "implemented",
    "decisions_citing": 5,
    "code": [
-    "python/btap/necb/tiers.py#eui_building_energy_target",
-    "python/btap/necb/eui_archetypes.py#resolve"
+    "python/btap/codes/necb/editions/necb2025/eui_archetypes.py#eui_building_energy_target",
+    "python/btap/codes/necb/editions/necb2025/eui_archetypes.py#resolve"
    ]
   },
   "article": "8.4.4.1.",
@@ -376,8 +376,8 @@
    "status": "partial",
    "decisions_citing": 3,
    "code": [
-    "python/btap/necb/eui_archetypes.py#conformance",
-    "python/btap/necb/eui_archetypes.py#normalize"
+    "python/btap/codes/necb/editions/necb2025/eui_archetypes.py#conformance",
+    "python/btap/codes/necb/editions/necb2025/eui_archetypes.py#normalize"
    ]
   },
   "article": "8.4.4.2.(1)",
@@ -390,7 +390,7 @@
    "status": "implemented",
    "decisions_citing": 3,
    "code": [
-    "python/btap/necb/eui_archetypes.py#normalize"
+    "python/btap/codes/necb/editions/necb2025/eui_archetypes.py#normalize"
    ]
   },
   "article": "8.4.4.2.(2)",

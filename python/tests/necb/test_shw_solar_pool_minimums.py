@@ -15,7 +15,7 @@ from tests.necb.support import needs_sdk
 @needs_sdk
 class TestSolarPoolMinimums(unittest.TestCase):
     def spec(self):
-        from btap.necb import shw
+        from btap.codes.necb import shw
         return shw.rules("2020")["solar_pool_minimums"]
 
     def pool_model(self, fuel):
@@ -50,7 +50,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
 
     def test_gas_pool_heater_takes_the_printed_minimum(self):
         from btap.audit import AuditLog
-        from btap.necb.shw import efficiency
+        from btap.codes.necb.shw import efficiency
 
         model, heater = self.pool_model("NaturalGas")
         audit = AuditLog()
@@ -63,7 +63,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
 
     def test_oil_pool_heater_takes_its_row_and_electric_is_audited_not_forced(self):
         from btap.audit import AuditLog
-        from btap.necb.shw import efficiency
+        from btap.codes.necb.shw import efficiency
 
         model, heater = self.pool_model("FuelOilNo2")
         efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=AuditLog())
@@ -81,7 +81,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb.shw import efficiency
+        from btap.codes.necb.shw import efficiency
 
         model = openstudio.model.Model()
         openstudio.model.SolarCollectorFlatPlateWater(model)
@@ -96,7 +96,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb.shw import efficiency
+        from btap.codes.necb.shw import efficiency
 
         model = openstudio.model.Model()
         openstudio.model.WaterHeaterMixed(model)

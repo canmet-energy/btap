@@ -42,7 +42,7 @@ def box(windows=(), skylights=(), width=10.0, depth=8.0, height=3.0,
     ([x0, x1, z0, z1] on the y = 0 wall) and skylights ([x0, x1, y0, y1])."""
     import openstudio
 
-    from btap.necb import lighting, loads
+    from btap.codes.necb import lighting, loads
 
     model = openstudio.model.Model()
     if latitude:
@@ -88,12 +88,12 @@ def box(windows=(), skylights=(), width=10.0, depth=8.0, height=3.0,
 class TestDaylightingNecb2020(unittest.TestCase):
     @property
     def DA(self):
-        from btap.necb.lighting import daylighted_areas
+        from btap.codes.necb.lighting import daylighted_areas
         return daylighted_areas
 
     @property
     def REQ(self):
-        from btap.necb.lighting import daylight_control_requirement
+        from btap.codes.necb.lighting import daylight_control_requirement
         return daylight_control_requirement
 
     # --- geometry: 4.2.2.3. / 4.2.2.5. ---------------------------------------
@@ -145,7 +145,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # exterior-window loop); #2119 moved it out, and the quarantine port mirrors
         # that. For ONE skylight in a windowless box the two rules coincide — they
         # diverge once there are several apertures for 4.2.2.5. to union.
-        from btap.necb.lighting import daylighting
+        from btap.codes.necb.lighting import daylighting
 
         _model, space = box(skylights=[(4.0, 6.0, 3.0, 5.0)])
         areas = self.DA.areas(space)
@@ -375,7 +375,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
     def test_controls_are_placed_with_a_daylighted_area_fraction_not_1_0(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model, space = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
@@ -399,7 +399,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
     def test_legacy_2011_placement_is_still_reachable_and_shouts(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
@@ -418,7 +418,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
     def test_reference_daylighting_defaults_to_the_2020_rule(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
@@ -443,7 +443,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
     def test_unevaluated_1500_hour_exception_is_declared_every_run(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
@@ -461,7 +461,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
     def test_deprecated_option_alias_still_selects_the_same_rule(self):
         from btap.audit import AuditLog
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         # option='NECB_Default' == placement='necb2020', end to end
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
@@ -507,7 +507,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
                             for e in blanket_audit.entries))
 
     def test_placement_default_is_the_blanket_rule_and_unknowns_raise(self):
-        from btap.necb import lighting
+        from btap.codes.necb import lighting
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         created = lighting.add_daylighting_controls(model, vintage="2020")

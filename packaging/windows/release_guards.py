@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Refuse to release a staged tree that would ship broken or unaccounted bytes.
 
-    python3 packaging/windows/release_guards.py --version 0.2.1 [--stage DIR]
+    python3 packaging/windows/release_guards.py --version 0.3.0 [--stage DIR]
 
 These run BEFORE the installer is compiled and before a tag is pushed. Each
 one exists because the failure it catches is invisible until a user hits it:

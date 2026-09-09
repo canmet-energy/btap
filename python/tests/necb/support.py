@@ -33,7 +33,7 @@ def load_raw_fixture():
 
 def tagged_model():
     """The raw fixture tagged office everywhere (Ruby ``tagged_model``)."""
-    from btap.necb import loads
+    from btap.codes.necb import loads
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}

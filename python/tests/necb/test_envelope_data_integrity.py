@@ -27,7 +27,7 @@ BINS = ['3000', '4000', '5000', '6000', '7000', '9999']
 class TestDataIntegrity(unittest.TestCase):
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     def test_rules_load_and_unknown_vintage_raises(self):

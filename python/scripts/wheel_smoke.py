@@ -71,7 +71,7 @@ def run_checks() -> int:
     check("imported from the installed wheel, not the source tree", not_shadowed)
 
     def data_loads():
-        from btap.necb import loads
+        from btap.codes.necb import loads
         rules = loads.rules("2020")
         assert rules, "necb loads rules are empty"
         from btap.modeling.hvac import catalog
@@ -80,7 +80,7 @@ def run_checks() -> int:
     check("packaged data loads (necb rules + the 97-system catalog)", data_loads)
 
     def coverage_reference_loads():
-        from btap.necb import coverage
+        from btap.codes import coverage
 
         assert coverage.editions() == ("2020", "2025")
         for edition, expected_count in (("2020", 52), ("2025", 57)):
@@ -126,7 +126,7 @@ def run_checks() -> int:
     def domain_operation():
         from btap._sdk import load_model
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model = load_model(modeling.hvac.catalog_report.FIXTURE)
         for st in model.getSpaceTypes():
             if st.spaces():
@@ -145,7 +145,7 @@ def run_checks() -> int:
         # and run a REAL process operation on the packaged seed model.
         import tbd
 
-        from btap.necb.envelope import thermal_bridging as tb
+        from btap.codes.necb.envelope import thermal_bridging as tb
         assert tbd.VERSION == tb.PINNED_TBD_VERSION, (
             f"engine {tbd.VERSION} != pinned {tb.PINNED_TBD_VERSION}")
         assert tbd.UPSTREAM_SHA == tb.PINNED_TBD_UPSTREAM_SHA, "upstream SHA drift"

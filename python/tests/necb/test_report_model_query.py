@@ -5,7 +5,7 @@ uFactor fallback) and nil-safety."""
 
 import unittest
 
-from btap.necb.report import model_query as MQ
+from btap.codes.report import model_query as MQ
 from tests.necb.support import compliance_fixture, needs_sdk
 
 

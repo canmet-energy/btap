@@ -11,9 +11,9 @@ Python distribution with five subpackages:
 - `btap.modeling`: generic OpenStudio model authoring
 - `btap.costing`: costing and the licensed-data boundary
 - `btap.simulation`: EnergyPlus execution and remote simulation
-- `btap.necb`: NECB rules, reference building, determination, report, and CLI
+- `btap.codes`: NECB rules, reference building, determination, report, and CLI
 
-The enforced D-77 dependency direction is `necb` → `costing` → `modeling` →
+The enforced D-77 dependency direction is `codes` → `costing` → `modeling` →
 `audit`, with `simulation` beside and depending only on `audit`. The completed
 M0–M8 port history remains in [PORT_STATUS.md](../PORT_STATUS.md); it is a
 historical record, not a description of a second live implementation.
@@ -42,7 +42,7 @@ x86-64 platforms; other platforms use the version-verified provisioner.
 
 ```bash
 btap-compliance model.osm --epw weather.epw
-python3 -m btap.necb.cli model.osm --simulate none
+python3 -m btap.codes.cli model.osm --simulate none
 btap-necb-coverage --help
 ```
 

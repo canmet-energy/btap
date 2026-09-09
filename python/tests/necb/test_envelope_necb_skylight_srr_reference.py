@@ -32,7 +32,7 @@ def model_with_skylights(srr):
     prescriptive path uses to ADD skylights."""
     import openstudio
 
-    from btap.necb.envelope import fenestration as Fenestration
+    from btap.codes.necb.envelope import fenestration as Fenestration
 
     model = load_raw_fixture()
     glazing = openstudio.model.SimpleGlazing(model)
@@ -51,7 +51,7 @@ def model_with_skylights(srr):
 
 def reference(model):
     from btap.audit import AuditLog
-    from btap.necb import envelope
+    from btap.codes.necb import envelope
 
     audit = AuditLog()
     envelope.reference_envelope(model, vintage='2020', hdd=HDD, audit=audit)

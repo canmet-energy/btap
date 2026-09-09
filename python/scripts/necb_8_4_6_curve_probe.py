@@ -22,9 +22,9 @@ sys.path.insert(0, str(PYTHON_ROOT))
 import openstudio  # noqa: E402
 
 from btap.audit import AuditLog  # noqa: E402
+from btap.codes.necb import shw  # noqa: E402
+from btap.codes.necb.hvac import efficiency as hvac_efficiency  # noqa: E402
 from btap.modeling.hvac.systems import plant_loops  # noqa: E402
-from btap.necb import shw  # noqa: E402
-from btap.necb.hvac import efficiency as hvac_efficiency  # noqa: E402
 
 TOL_SAMPLED = 0.03
 TOL_SURFACE = 0.005
@@ -639,8 +639,8 @@ def build_and_apply() -> dict[str, Any]:
         "ashp_heat": ashp_heat,
         "heater": heater,
         "model_application": {
-            "hvac": "btap.necb.hvac.efficiency.apply_efficiencies",
-            "shw": "btap.necb.shw.apply_water_heater_efficiency",
+            "hvac": "btap.codes.necb.hvac.efficiency.apply_efficiencies",
+            "shw": "btap.codes.necb.shw.apply_water_heater_efficiency",
             "chiller_topology": "btap.modeling.hvac.systems.plant_loops.chilled_water",
             "vintage": "2020",
             "model_level": True,

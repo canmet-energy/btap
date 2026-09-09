@@ -62,13 +62,13 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
             self.assertGreater(sum(map(len, part["citations"].values())), 20)
             self.assertEqual(set(part["articles"]), set(part["states"]))
         self.assertIn("python/scripts/generate_necb_8_4_coverage.py", html)
-        self.assertIn("python/btap/necb/", html)
+        self.assertIn("python/btap/codes/", html)
         self.assertNotRegex(html, r"btap-[^/]+/lib/")
 
     def test_python_is_the_only_input_authority(self):
         self.assertEqual("python", coverage.DEFAULT_INPUT_MODE)
         self.assertEqual(REPO_ROOT / "docs" / "NECB_8_4_COVERAGE.html", coverage.DEFAULT_OUTPUT)
-        expected_data = REPO_ROOT / "python" / "btap" / "necb" / "data" / "coverage"
+        expected_data = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
         self.assertEqual(expected_data / "necb_8_4_articles_2020.json", coverage.DEFAULT_CACHE_2020)
         self.assertEqual(expected_data / "necb_8_4_articles_2025.json", coverage.DEFAULT_CACHE_2025)
         self.assertEqual(expected_data / "necb_8_4_disposition.json", coverage.DEFAULT_DISPOSITION)

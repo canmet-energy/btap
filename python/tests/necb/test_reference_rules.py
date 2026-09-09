@@ -20,7 +20,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from btap.necb import performance_compliance
+from btap.codes import performance_compliance
 from tests.necb.support import (
     DDY,
     EPW,
@@ -163,7 +163,7 @@ class TestReferenceRules(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import hvac, loads
+        from btap.codes.necb import hvac, loads
 
         for system in ("Baseboard district hot water",
                        "DOAS with fan coil air-cooled chiller with district "

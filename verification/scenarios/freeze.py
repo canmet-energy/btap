@@ -113,7 +113,7 @@ def check_required_python_engines(scenarios):
         return
     try:
         import tbd
-        from btap.necb.envelope import thermal_bridging
+        from btap.codes.necb.envelope import thermal_bridging
     except ImportError as error:
         raise ValueError(
             "thermal-bridging scenario requires the pinned tbd engine in the "

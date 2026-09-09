@@ -25,7 +25,7 @@ def attach_weather(model):
 class TestLookups(unittest.TestCase):
     @property
     def n(self):
-        from btap.necb import envelope
+        from btap.codes.necb import envelope
         return envelope
 
     # "first value where hdd < bin ceiling" — spot values from NECB 2020 Table 3.2.2.2

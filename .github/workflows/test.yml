@@ -103,7 +103,7 @@ jobs:
         run: |
           pip install -q "canmet-tbd==3.5.2"
       # The D-77 dependency arrows as an enforced contract, not a convention:
-      # necb -> costing -> modeling -> audit, simulation beside, and audit
+      # codes -> costing -> modeling -> audit, simulation beside, and audit
       # SDK-free (the property the bare-runner audit suite depends on). It
       # has already caught real drift — a lazily-imported SDK helper that had
       # crept into the stdlib-only _compat module.

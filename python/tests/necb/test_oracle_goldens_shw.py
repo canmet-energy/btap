@@ -89,7 +89,7 @@ class TestOracleGoldensSHW(unittest.TestCase):
         self.assertEqual(9, len(data["efficiencies"]), "efficiencies: 9 bins")
 
     def test_demand_and_tank_match_the_oracle(self):
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         legacy_sig = golden()["swh"]
 
@@ -129,7 +129,7 @@ class TestOracleGoldensSHW(unittest.TestCase):
     def test_efficiency_every_bin_matches_the_oracle(self):
         import openstudio
 
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         legacy_bins = golden()["efficiencies"]
         checked = set()

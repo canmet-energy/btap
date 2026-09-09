@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage the Windows installer payload — on Linux, without a Windows machine.
 
-    python3 packaging/windows/stage_python.py --version 0.2.1 [--outdir stage]
+    python3 packaging/windows/stage_python.py --version 0.3.0 [--outdir stage]
 
 The installer ships a PRE-INSTALLED tree, never a setup-time `pip install`:
 the bytes are then deterministic, the install works offline, and no

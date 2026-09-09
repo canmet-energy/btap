@@ -3,7 +3,11 @@
 This repository contains one product implementation: the Python distribution
 `canmet-btap` (import `btap`), licensed **LGPL-3.0-or-later**. It has five
 subpackages: `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`,
-and `btap.necb`. The former `btap-*` Ruby gems retired at R6 under D-84.
+and `btap.codes`. `btap.codes` is the code-compliance layer, with the NECB
+family under `btap.codes.necb` (D-86 renamed and re-shaped that package at
+Stage 1 of the multi-edition plan; the old namespace is gone, and
+`python/tests/test_no_legacy_namespace.py` keeps it gone). The former
+`btap-*` Ruby gems retired at R6 under D-84.
 
 Ruby still has one deliberate role. `legacy_pin/` bundles the pinned
 `openstudio-standards` revision, and the Ruby files in `verification/oracle/`
@@ -21,9 +25,14 @@ unless a moved link itself is wrong.
 - **Pure OpenStudio SDK.** Product code does not depend on
   `openstudio-standards`, measures, or legacy BTAP.
 - **One distribution, five subpackages.** Dependency direction is
-  `btap.necb` → `btap.costing` → `btap.modeling` → `btap.audit`, with
+  `btap.codes` → `btap.costing` → `btap.modeling` → `btap.audit`, with
   `btap.simulation` beside and depending only on audit. Import-linter enforces
   this D-77 contract.
+- **Code families live under `btap.codes`.** `btap.codes.necb` holds the five
+  NECB rule domains, the NECB rule tables in `btap/codes/necb/data/`, and
+  `btap/codes/necb/editions/necb2025/` for what exists in one edition only.
+  Code-family-neutral data — `decisions.json` and the Section 8.4 caches —
+  sits in `btap/codes/data/`.
 - **One AuditLog schema:**
   `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
   Levels are `decision`, `info`, and `warning`; warnings are never silent.
@@ -60,7 +69,7 @@ runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
 ## Decisions and coverage
 
-`python/btap/necb/data/decisions.json` is canonical. The authored document is
+`python/btap/codes/data/decisions.json` is canonical. The authored document is
 `docs/necb_decisions.md`; its TOC is generated. Adding a `## D-XX` heading means
 adding the registry entry, and vice versa. A `kind: runtime` entry must be cited
 by product Python source.
@@ -79,7 +88,7 @@ split a uniformly implemented article merely to inflate coverage. Use
 Generated coverage documents live in `docs/`; regenerate both and review their
 diffs rather than hand-editing them.
 
-The Section 8.4 caches live under `python/btap/necb/data/coverage/` and ship in
+The Section 8.4 caches live under `python/btap/codes/data/coverage/` and ship in
 the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
 

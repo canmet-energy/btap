@@ -4,7 +4,7 @@
 The proposed models are generated out of process by
 ``verification/oracle/gen_legacy_archetype.rb`` under ``legacy_pin/Gemfile``.
 Only the consumer is Python: each worker loads the oracle-produced OSM and
-calls :func:`btap.necb.compliance.performance_compliance` directly.
+calls :func:`btap.codes.compliance.performance_compliance` directly.
 
 Usage::
 
@@ -247,8 +247,8 @@ def generate(building_type: str, config: SweepConfig) -> tuple[Path, bool]:
 
 def _pipeline_dependencies():
     from btap._sdk import load_model
+    from btap.codes.compliance import PreflightError, performance_compliance
     from btap.costing.hvac.geometry import above_ground_storeys
-    from btap.necb.compliance import PreflightError, performance_compliance
 
     return load_model, above_ground_storeys, performance_compliance, PreflightError
 

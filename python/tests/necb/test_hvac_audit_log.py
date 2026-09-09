@@ -12,7 +12,7 @@ from __future__ import annotations
 import unittest
 
 from btap.audit import AuditLog
-from btap.necb.hvac import checker, energy_recovery, reference
+from btap.codes.necb.hvac import checker, energy_recovery, reference
 
 
 class TestAuditLog(unittest.TestCase):

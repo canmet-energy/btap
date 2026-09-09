@@ -13,16 +13,16 @@ This file is what a change *here* costs.
 [[tool.importlinter.contracts]]
 name = "family dependency direction (D-77)"
 type = "layers"
-layers = ["btap.necb", "btap.costing", "btap.modeling", "btap.audit"]
+layers = ["btap.codes", "btap.costing", "btap.modeling", "btap.audit"]
 ```
 
-`lint-imports` fails if costing ever imports `btap.necb`. It prices MODEL
+`lint-imports` fails if costing ever imports `btap.codes`. It prices MODEL
 OBJECTS; it owns no code rules. Where a costing rule needs NECB-owned
 geometry — the daylighted-area sensor BOM — the NECB layer passes a
 `daylighting_areas` provider **in**:
 
 - a callable `(space) -> {'sidelighted_m2': …, 'skylight_m2': …}`;
-- `btap.necb.lighting` supplies `_daylighting.costing_area_provider()` by
+- `btap.codes.necb.lighting` supplies `_daylighting.costing_area_provider()` by
   default when the caller passes none;
 - when the model HAS daylighting controls and no provider was given,
   `fixtures.cost` **raises**. Silently under-costing is the failure that

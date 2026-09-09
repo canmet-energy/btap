@@ -23,8 +23,8 @@ import os
 import unittest
 
 import btap.modeling as modeling
+from btap.codes.necb import hvac
 from btap.modeling.hvac import catalog
-from btap.necb import hvac
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import FIXTURES, needs_sdk
 

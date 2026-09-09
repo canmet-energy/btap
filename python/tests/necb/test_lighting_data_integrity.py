@@ -8,7 +8,7 @@ import re
 import unittest
 from collections import Counter
 
-from btap.necb import lighting
+from btap.codes.necb import lighting
 
 
 class TestDataIntegrity(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestDataIntegrity(unittest.TestCase):
         self.assertAlmostEqual(1.9, garage["lpd_w_per_m2"], delta=1e-9)
 
     def test_2020_lpds_spot_verified_vs_space_types(self):
-        from btap.necb.loads import space_types as SpaceTypes
+        from btap.codes.necb.loads import space_types as SpaceTypes
 
         # atrium bins in the loads-gem space-type records equal the code values
         for letter in ["A"]:

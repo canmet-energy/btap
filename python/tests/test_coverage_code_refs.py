@@ -10,6 +10,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MAPPING_PATH = Path(__file__).with_name("data") / "coverage_code_ref_mapping.json"
+#: The R7 (Stage 1 / R-B, D-86) ledger: the R6 ledger's `new` column carried
+#: through the btap.necb -> btap.codes rename and the eui/tiers move. Two
+#: ledgers, never one rewritten in place — see test_r7_ledger_chains_from_r6.
+MAPPING_PATH_R7 = (Path(__file__).with_name("data")
+                   / "coverage_code_ref_mapping_r7.json")
 SIZING_TIME = re.compile(
     r"sizing[- ]time|autosiz|not explicitly enforced|not individually evaluated",
     re.IGNORECASE,
@@ -93,6 +98,9 @@ def test_every_covering_entry_names_its_code():
 
 
 def test_reviewed_mapping_was_consumed_without_unknown_old_refs():
+    """The R6 ledger: Ruby gem owner -> Python owner. Frozen; its `new` column
+    is a historical endpoint, so it is checked against the R7 ledger's `old`
+    column (below) rather than against the live manifests."""
     mapping = json.loads(MAPPING_PATH.read_text(encoding="utf-8"))
     rows = mapping["mappings"]
     assert mapping["source_checkpoint"] == "cbce093"
@@ -105,9 +113,45 @@ def test_reviewed_mapping_was_consumed_without_unknown_old_refs():
     assert len(set(new_refs)) == len(new_refs)
 
     actual = Counter(code_refs(coverage_manifests()))
-    expected = Counter({row["new"]: row["uses"] for row in rows})
-    assert actual == expected
     assert not set(actual).intersection(old_refs)
     assert not {
         ref for ref in actual if re.match(r"^btap-[^/]+/lib/", ref)
     }.difference(old_refs)
+
+
+def test_r7_ledger_chains_from_r6_to_the_live_manifests():
+    """The CHAIN, in three links, so neither ledger can be quietly edited:
+
+    1. every R7 `old` is an R6 `new` (and every R6 `new` is an R7 `old`) —
+       R-B moved paths, it did not add, drop or merge an owner;
+    2. every R7 `new` is a live manifest reference, with the same use count;
+    3. the R7 use counts still sum to R6's 313.
+    """
+    r6 = json.loads(MAPPING_PATH.read_text(encoding="utf-8"))["mappings"]
+    r7_mapping = json.loads(MAPPING_PATH_R7.read_text(encoding="utf-8"))
+    rows = r7_mapping["mappings"]
+    assert r7_mapping["schema_version"] == 1
+
+    # --- link 1: R7.old == R6.new, as a multiset with its use counts --------
+    assert Counter({row["old"]: row["uses"] for row in rows}) == Counter(
+        {row["new"]: row["uses"] for row in r6}
+    )
+    assert len(rows) == len(r6) == 87
+    assert len({row["old"] for row in rows}) == len(rows)
+    assert len({row["new"] for row in rows}) == len(rows)
+
+    # --- link 2: R7.new == the live manifests -------------------------------
+    assert Counter(code_refs(coverage_manifests())) == Counter(
+        {row["new"]: row["uses"] for row in rows}
+    )
+
+    # --- link 3: the total survived both hops ------------------------------
+    assert sum(row["uses"] for row in rows) == sum(row["uses"] for row in r6)
+    assert sum(row["uses"] for row in rows) == 313
+
+    # No live pointer may still name the pre-R-B package.
+    assert not [row for row in rows if row["new"].startswith("python/btap/necb/")]
+    # tiers.py's one pointer followed eui_building_energy_target into the
+    # 2025 edition module, so the owning-file count drops 32 -> 31.
+    assert len({row["old"].split("#")[0] for row in rows}) == 32
+    assert len({row["new"].split("#")[0] for row in rows}) == 31

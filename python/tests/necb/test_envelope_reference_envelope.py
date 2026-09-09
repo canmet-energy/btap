@@ -51,7 +51,7 @@ def proposed_model():
 
 def reference(model, **kwargs):
     from btap.audit import AuditLog
-    from btap.necb import envelope
+    from btap.codes.necb import envelope
 
     audit = AuditLog()
     envelope.reference_envelope(model, vintage='2020', hdd=HDD, audit=audit, **kwargs)
@@ -228,7 +228,7 @@ class TestReferenceEnvelope(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb.envelope import reference as Reference
+        from btap.codes.necb.envelope import reference as Reference
 
         model = openstudio.model.Model()
 
@@ -308,7 +308,7 @@ class TestReferenceEnvelope(unittest.TestCase):
 
         # Plain import: M5 delivered this. A guard here would let a
         # regression that removes reference_hvac pass as a green skip.
-        from btap.necb import envelope, hvac
+        from btap.codes.necb import envelope, hvac
         reference_hvac = hvac.reference_hvac
 
         proposed = proposed_model()

@@ -155,7 +155,7 @@ def seed(vintage="2020"):
     with loads/lighting/SHW applied. Identical recipe to the Ruby's seed()."""
     from btap._sdk import load_model
     from btap.audit import AuditLog
-    from btap.necb import lighting, loads, shw
+    from btap.codes.necb import lighting, loads, shw
 
     model = load_model(fixture())
     # The fixture is ASHRAE-tagged; the NECB pre-flight (correctly) rejects that.

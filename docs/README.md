@@ -5,7 +5,7 @@ Two registers are **live**:
 - **D — decisions** (`necb_decisions.md`): the judgement calls a reviewer
   cannot re-derive from the code — code interpretations, accepted deviations,
   product-shaping choices. Mirrored machine-readably in
-  `../python/btap/necb/data/decisions.json` and surfaced **at runtime**: code
+  `../python/btap/codes/data/decisions.json` and surfaced **at runtime**: code
   paths tag their audit entries with `ruling: 'D-XX'`, and the AHJ report's
   "Decisions and assumptions applied" appendix lists the ones that fired in the
   run. Adding a `## D-XX` heading without a registry entry fails
@@ -85,8 +85,9 @@ Terms that recur across the five Python subpackages, docs and decision register:
   reference generation.
 - **archetype (two senses)** — (1) the NECB 2025 8.4.4 *building archetypes*
   (Table 8.4.4.1 EUI targets; implemented in
-  `python/btap/necb/eui_archetypes.py`); (2) the project's 17 legacy NECB
-  prototype buildings used as the validation fleet (the "fleet"). Reading code
+  `python/btap/codes/necb/editions/necb2025/eui_archetypes.py`); (2) the
+  project's 17 legacy NECB prototype buildings used as the validation fleet
+  (the "fleet"). Reading code
   or docs, check which sense is live.
 - **fleet** — the 17 legacy NECB archetype buildings used for sweep
   validation (the "fleet sweep" is the merge gate for energy-affecting

@@ -34,7 +34,7 @@ class TestApplyLoads(unittest.TestCase):
 
     def applied_model(self):
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
         loads.assign_space_types(model, map_, vintage='2020', audit=audit)
@@ -47,7 +47,7 @@ class TestApplyLoads(unittest.TestCase):
 
     def test_assign_space_types_on_ramp(self):
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
         loads.assign_space_types(model, map_, vintage='2020', audit=audit)
@@ -65,7 +65,7 @@ class TestApplyLoads(unittest.TestCase):
     def test_people_and_equipment_golden(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, _ = self.applied_model()
         office = self.office_space_type(model)
         record = loads.SpaceTypes.record(building_type='Space Function',
@@ -94,7 +94,7 @@ class TestApplyLoads(unittest.TestCase):
     def test_ventilation_rescale_and_stash(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, _ = self.applied_model()
         office = self.office_space_type(model)
         record = loads.SpaceTypes.record(building_type='Space Function',
@@ -119,7 +119,7 @@ class TestApplyLoads(unittest.TestCase):
     def test_schedules_thermostats_and_infiltration(self):
         import openstudio
 
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, _ = self.applied_model()
         office = self.office_space_type(model)
         record = loads.SpaceTypes.record(building_type='Space Function',
@@ -151,7 +151,7 @@ class TestApplyLoads(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         plenum = openstudio.model.SpaceType(model)
         plenum.setName('Attic plenum')
@@ -180,7 +180,7 @@ class TestApplyLoads(unittest.TestCase):
 
     def test_2025_citation_prefix_flows_to_audit(self):
         from btap.audit import AuditLog
-        from btap.necb import loads
+        from btap.codes.necb import loads
         model, map_ = self.mapped_model()
         audit = AuditLog()
         loads.assign_space_types(model, map_, vintage='2025', audit=audit)

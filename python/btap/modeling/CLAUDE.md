@@ -17,13 +17,13 @@ which were measured, not reasoned, and are expensive to rediscover.
 
 There is NO `lighting/` or `shw/` here: those domains had no code-free
 authoring half — their "authoring" *was* applying NECB tables, so they live
-wholesale in `btap.necb`. Only geometry, hvac and envelope had generic
+wholesale in `btap.codes`. Only geometry, hvac and envelope had generic
 machinery.
 
 **No `article=` citation is permitted anywhere in this subpackage.** Rule
-application lives in `btap.necb`; there is no article-coverage manifest here
+application lives in `btap.codes`; there is no article-coverage manifest here
 because there is nothing to declare. `lint-imports` enforces the direction
-(`btap.necb → btap.costing → btap.modeling → btap.audit`).
+(`btap.codes → btap.costing → btap.modeling → btap.audit`).
 
 ## Measured footprints — the part that is not a port
 
@@ -105,7 +105,7 @@ NRCan building-stock records.
 ## Windows, thermostats, constructions
 
 - **`apply_wwr(model, ratio)` is PURE GEOMETRY — no default, no code
-  knowledge.** NECB's FDWR maximum is `btap.necb`'s envelope rule
+  knowledge.** NECB's FDWR maximum is `btap.codes`'s envelope rule
   (`max_fdwr(vintage=, hdd=)`, article 3.2.1.4, vintages `'2020'`/`'2025'`
   — NOT `'NECB2020'`). Accepts a float, a dict of compass bins, or bins as
   keywords (`**bins`); bins left out get NO windows.

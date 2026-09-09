@@ -39,7 +39,7 @@ import openstudio  # noqa: E402
 
 from btap._sdk import load_model  # noqa: E402
 from btap.audit import AuditLog  # noqa: E402
-from btap.necb import envelope, lighting, loads  # noqa: E402
+from btap.codes.necb import envelope, lighting, loads  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OFFICE = ["Space Function", "Office enclosed > 25 m2"]

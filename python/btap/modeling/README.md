@@ -21,7 +21,7 @@ btap/modeling/
 ```
 
 No `lighting/` or `shw/`: their authoring is NECB-table application and
-lives in `btap.necb` — see [CLAUDE.md](CLAUDE.md).
+lives in `btap.codes` — see [CLAUDE.md](CLAUDE.md).
 
 ## Footprint wizards
 
@@ -136,9 +136,9 @@ retargets existing ones, so seed a basic construction set (or start from an
 OSM that has one) before any envelope pass. With that, the full authoring
 chain is in-package:
 
-geometry → `btap.necb.loads` → `btap.necb.lighting` → `btap.necb.shw` →
-`modeling.build_system` → `btap.necb.envelope` prescriptive →
-`btap.necb.performance_compliance` (proposed + reference + costing, one
+geometry → `btap.codes.necb.loads` → `btap.codes.necb.lighting` → `btap.codes.necb.shw` →
+`modeling.build_system` → `btap.codes.necb.envelope` prescriptive →
+`btap.codes.performance_compliance` (proposed + reference + costing, one
 audit) — pinned by the full-family composition test in `tests/modeling/`.
 
 ## Citation conventions
@@ -146,7 +146,7 @@ audit) — pinned by the full-family composition test in `tests/modeling/`.
 `article=` in audit entries is the NECB clause that mandates a value;
 `ruling='D-nn'` is the adjudicated reading of it. The registry is
 [docs/necb_decisions.md](../../../docs/necb_decisions.md) plus its
-drift-tested `btap/necb/data/decisions.json` mirror; `L-nn` cites the legacy
+drift-tested `btap/codes/data/decisions.json` mirror; `L-nn` cites the legacy
 findings register. The family glossary lives in
 [docs/README.md](../../../docs/README.md).
 

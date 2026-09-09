@@ -15,7 +15,7 @@ from tests.necb.support import needs_sdk
 class TestPrescriptive(unittest.TestCase):
     @property
     def P(self):
-        from btap.necb.shw import prescriptive
+        from btap.codes.necb.shw import prescriptive
         return prescriptive
 
     # spaces_w_dhw entries only need the two keys the rule reads.
@@ -102,7 +102,7 @@ class TestPrescriptive(unittest.TestCase):
     # The gem had no status whitelist, unlike envelope/hvac/loads/lighting — a
     # typo'd status would have passed CI and rendered as an em-dash in the report.
     def test_every_coverage_status_is_legal(self):
-        from btap.necb import shw
+        from btap.codes.necb import shw
         valid = ["implemented", "partial", "not_implemented",
                  "satisfied_by_clone", "host_scope"]
         for vintage in ("2020", "2025"):

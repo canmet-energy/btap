@@ -11,13 +11,13 @@ import unittest
 from pathlib import Path
 
 from btap.audit import AuditLog
-from btap.necb import decisions as Decisions
-from btap.necb.compliance import ComplianceResult
-from btap.necb.report import charts as Charts
-from btap.necb.report import checklist as Checklist
-from btap.necb.report import html as H
-from btap.necb.report import render as render_report
-from btap.necb.report import sections as Sections
+from btap.codes import decisions as Decisions
+from btap.codes.compliance import ComplianceResult
+from btap.codes.report import charts as Charts
+from btap.codes.report import checklist as Checklist
+from btap.codes.report import html as H
+from btap.codes.report import render as render_report
+from btap.codes.report import sections as Sections
 
 # The Python-owned copy of the Ruby paired-bars golden — byte-identity with
 # the gem-tree original is enforced by tests/test_fixture_drift.py until R6.

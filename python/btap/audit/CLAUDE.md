@@ -13,7 +13,7 @@ what a change *here* costs, which the README does not say.
 
 This is the one subpackage where a small edit reaches everywhere. There is
 no adapter layer between it and its callers: `btap.modeling`,
-`btap.costing`, `btap.necb` and `btap.simulation` all import the same
+`btap.costing`, `btap.codes` and `btap.simulation` all import the same
 `AuditLog`. Changing the schema, the level names, or `__str__`'s format
 changes the AHJ report.
 
@@ -49,7 +49,7 @@ name = "audit is SDK-free and bottom of the family"
 type = "forbidden"
 source_modules = ["btap.audit"]
 forbidden_modules = ["openstudio", "btap.simulation", "btap.modeling",
-                     "btap.costing", "btap.necb"]
+                     "btap.costing", "btap.codes"]
 ```
 
 `lint-imports` fails on violation, and CI's `lint` job runs on a bare

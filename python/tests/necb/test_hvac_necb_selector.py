@@ -8,8 +8,8 @@ import copy
 import unittest
 
 from btap.audit import AuditLog
+from btap.codes.necb import hvac
 from btap.modeling.hvac import catalog
-from btap.necb import hvac
 
 
 def group(zones=None, heated=True, cooled=True, heat_fuels=None,

@@ -12,7 +12,7 @@ from pathlib import Path
 PYTHON_ROOT = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = PYTHON_ROOT.parent
 
-PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "necb" / "data" / "decisions.json"
+PYTHON_REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
 TOC_SCRIPT = PYTHON_ROOT / "scripts" / "generate_decisions_toc.py"
 DECISIONS_DOC = REPO_ROOT / "docs" / "necb_decisions.md"
 
@@ -56,7 +56,7 @@ class TestDecisionsRegistrySync(unittest.TestCase):
             missing_entries, set(),
             f"## heading(s) in the doc have no canonical registry entry: "
             f"{sorted(missing_entries)} — add the entry to "
-            f"python/btap/necb/data/decisions.json (the canonical registry)")
+            f"python/btap/codes/data/decisions.json (the canonical registry)")
 
     def test_doc_toc_matches_the_canonical_registry(self):
         result = subprocess.run(

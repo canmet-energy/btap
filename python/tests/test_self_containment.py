@@ -69,12 +69,12 @@ ALLOWLIST = {
         "retires": "N/A-label",
         "why": "the rendered plan-view footer credits the component by name",
     },
-    "python/btap/necb/report/sections.py": {
+    "python/btap/codes/report/sections.py": {
         "refs": ["btap-necb"],
         "retires": "N/A-label",
         "why": "the compliance report's footer credits the btap family by name",
     },
-    "python/btap/necb/coverage.py": {
+    "python/btap/codes/coverage.py": {
         "refs": ["btap-necb"],
         "retires": "N/A-label",
         "why": ("btap-necb-coverage is the installed console-script name, not "
@@ -152,6 +152,13 @@ ALLOWLIST = {
         "refs": ["verification/"],
         "retires": "R6-oracle-boundary",
         "why": "enforces the permanent file-by-file verification disposition record",
+    },
+    "python/tests/test_no_legacy_namespace.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-scanner",
+        "why": ("the R-B namespace gate walks git ls-files across the whole "
+                "repository, so it names the trees it scans; it reads no "
+                "cross-tree DATA"),
     },
     # --- this gate ---------------------------------------------------------
     "python/tests/test_self_containment.py": {

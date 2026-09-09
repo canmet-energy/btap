@@ -27,7 +27,7 @@ btap/costing/
 ```
 
 Dependencies: `btap.modeling` (it prices MODEL OBJECTS) and `btap.audit`.
-**Never `btap.necb`** — import-linter's layered contract fails the build if
+**Never `btap.codes`** — import-linter's layered contract fails the build if
 that ever changes. Where a costing rule needs NECB-owned geometry (the
 daylighted-area sensors), the NECB layer passes a `daylighting_areas`
 provider in, and `fixtures.cost` **raises** if controls exist and none was

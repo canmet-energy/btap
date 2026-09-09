@@ -264,7 +264,7 @@ class TestFootprint(unittest.TestCase):
         self.assertEqual("East", fp.edge_orientation(pt(0, 1), pt(0, 0)))
 
     # Windows are PURE GEOMETRY here: a caller-chosen ratio, no default, no
-    # code knowledge. The NECB maximum belongs to btap.necb (envelope domain).
+    # code knowledge. The NECB maximum belongs to btap.codes (envelope domain).
     def test_apply_wwr_scalar(self):
         model = modeling.create_from_footprint(points=self.rect_ring(50.0, 30.0), storeys=2,
                                                zoning="single")
@@ -308,7 +308,7 @@ class TestFootprint(unittest.TestCase):
                          "omitted bins get no windows")
         self.assertEqual([], [ss for s in by_bin["West"] for ss in s.subSurfaces()])
 
-    # The seam with btap.necb (envelope domain): the NECB maximum is ITS rule
+    # The seam with btap.codes (envelope domain): the NECB maximum is ITS rule
     # (3.2.1.4), this gem only cuts the opening. Pinned as a number so a
     # change in either gem is visible — HDD 4500 gives (2000 - 0.2*4500)/3000
     # by hand.

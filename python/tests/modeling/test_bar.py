@@ -102,7 +102,7 @@ class TestBar(unittest.TestCase):
             modeling.bar(space_type_ratios=RATIOS, storeyz=2)
 
     # The Ruby test hard-fails (flunk) if the btap-necb gem goes missing
-    # rather than skipping; here btap.necb is a sibling subpackage of the
+    # rather than skipping; here btap.codes is a sibling subpackage of the
     # same distribution, so the composition simply runs (it was skipped
     # until M5 landed the necb port, and unskipped in that milestone).
     def test_full_family_composition_from_bar(self):
@@ -111,10 +111,10 @@ class TestBar(unittest.TestCase):
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
         from btap.audit import AuditLog
-        from btap.necb import envelope as necb_envelope
-        from btap.necb import lighting as necb_lighting
-        from btap.necb import loads as necb_loads
-        from btap.necb import shw as necb_shw
+        from btap.codes.necb import envelope as necb_envelope
+        from btap.codes.necb import lighting as necb_lighting
+        from btap.codes.necb import loads as necb_loads
+        from btap.codes.necb import shw as necb_shw
 
         model = modeling.bar(space_type_ratios=RATIOS, length=50.0, width=20.0,
                              num_stories_above_grade=2, wwr=0.4)

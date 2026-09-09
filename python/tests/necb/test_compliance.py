@@ -9,8 +9,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from btap.necb import performance_compliance
-from btap.necb.compliance import (
+from btap.codes import performance_compliance
+from btap.codes.compliance import (
     _bump_capacities,
     _next_sizing_factor,
 )
@@ -425,7 +425,7 @@ class TestComplianceWithEngine(unittest.TestCase):
                             for e in result.audit.entries))
 
     def test_annual_mode_week_run_full_determination(self):
-        from btap.necb import decisions as Decisions
+        from btap.codes import decisions as Decisions
 
         dir = tempfile.mkdtemp(prefix="osnecb-annual-")
         result = performance_compliance(

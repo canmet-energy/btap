@@ -4,7 +4,7 @@ While both implementations exist (until R6), every ``kind: runtime``
 decision must be cited by a ``ruling`` literal in BOTH of them — the Ruby
 gem's ``test_decisions_registry.rb`` enforces its side over gem ``lib/``;
 THIS file enforces the Python side over ``python/btap``, reading the
-CANONICAL registry (``python/btap/necb/data/decisions.json``).
+CANONICAL registry (``python/btap/codes/data/decisions.json``).
 
 Discovery is AST-BASED, deliberately: a line-regex scan counted the
 ``ruling='D-14'`` EXAMPLE in a module docstring as a citation, so a future
@@ -36,7 +36,7 @@ import unittest
 from pathlib import Path
 
 PYTHON_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY = PYTHON_ROOT / "btap" / "necb" / "data" / "decisions.json"
+REGISTRY = PYTHON_ROOT / "btap" / "codes" / "data" / "decisions.json"
 
 ID_TOKEN = re.compile(r"\bD-\d{2}\b")
 LITERAL_GRAMMAR = re.compile(r"\AD-\d{2}( D-\d{2})*\Z")

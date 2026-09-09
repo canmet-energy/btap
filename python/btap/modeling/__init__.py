@@ -3,7 +3,7 @@
 Parametric building geometry (footprint wizards, the bar engine, measured
 footprints), the 97-system HVAC catalog + builders, classify/teardown, the
 envelope constructions machinery, and the plan/render tooling. SDK-only,
-code-agnostic: no NECB anywhere (rule application lives in btap.necb).
+code-agnostic: no NECB anywhere (rule application lives in btap.codes).
 
 Every facade function imports its submodule lazily — deliberate (D-79): the
 package imports without the SDK, and during the milestone port a half-landed
@@ -203,7 +203,7 @@ def create_from_footprint(*, geojson=None, points=None, height_m=None, storeys=N
 def apply_wwr(model, wwr=None, audit=None, **bins):
     """Cut windows into every exterior wall to a caller-chosen window-to-wall
     ratio. NO default and no code knowledge — for the NECB maximum use
-    btap.necb's envelope domain, which owns the rule. Accepts a float, a dict
+    btap.codes's envelope domain, which owns the rule. Accepts a float, a dict
     of compass bins, or bins as keywords."""
     from btap.modeling.geometry import footprint as fp
 

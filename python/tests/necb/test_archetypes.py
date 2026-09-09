@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from btap.audit import AuditLog
-from btap.necb import eui_archetypes as A
+from btap.codes.necb.editions.necb2025 import eui_archetypes as A
 from tests.necb.support import compliance_fixture, needs_sdk, proposed_with_hvac
 
 
@@ -156,7 +156,7 @@ class TestArchetypes(unittest.TestCase):
     # -- pipeline integration (engine-free) ------------------------------------
 
     def test_eui_path_none_mode_normalizes_without_mutating_caller(self):
-        from btap.necb import performance_compliance
+        from btap.codes import performance_compliance
 
         model = proposed_with_hvac()
         people_before = len(model.getPeoples())
@@ -182,7 +182,7 @@ class TestArchetypes(unittest.TestCase):
         # proposed that does not conform, without run_normalized, must yield
         # an explicit not-computed result with the mismatch list — never a
         # verdict.
-        from btap.necb.compliance import eui_supplement_verdict
+        from btap.codes.compliance import eui_supplement_verdict
 
         model = proposed_with_hvac()
         audit = quiet()

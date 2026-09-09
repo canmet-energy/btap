@@ -4,13 +4,13 @@ and the family composition with ONE audit.
 Port of btap-costing/test/test_shw_costing_e2e.rb.
 
 Port note (M4): the Ruby fixture builds its SHW loop through
-``BtapNECB::SHW.apply_shw`` on a Loads-tagged model. btap.necb is not ported
+``BtapNECB::SHW.apply_shw`` on a Loads-tagged model. btap.codes is not ported
 until M5, so ``shw_model`` here builds the same costing-relevant topology
 directly with the SDK — a 'Main Service Water Loop' PlantLoop carrying one
 WaterHeaterMixed (fuel/efficiency/capacity as the NECB layer would set them:
 small-volume tanks route to the Et=0.9 'all others' row) and one constant-
 speed pump. The two NECB-composition tests (EnergyPlus run of the applied
-SHW schedules, family one-audit composition) were placeheld until btap.necb
+SHW schedules, family one-audit composition) were placeheld until btap.codes
 landed; M5 re-enabled them and they now drive the REAL apply_loads /
 apply_shw / apply_prescriptive path, as the Ruby original does.
 """
@@ -107,8 +107,8 @@ class TestCostingE2E(unittest.TestCase):
         import tempfile
 
         from btap._compat import opt
-        from btap.necb import loads as necb_loads
-        from btap.necb import shw as necb_shw
+        from btap.codes.necb import loads as necb_loads
+        from btap.codes.necb import shw as necb_shw
         from btap.simulation import runner
         from tests.necb.support import tagged_model
         from tests.support import DDY, EPW
@@ -141,9 +141,9 @@ class TestCostingE2E(unittest.TestCase):
         # costing; the family contract is that every stage writes to it.
         import btap.modeling as modeling
         from btap._compat import sorted_by_name
-        from btap.necb import envelope as necb_envelope
-        from btap.necb import loads as necb_loads
-        from btap.necb import shw as necb_shw
+        from btap.codes.necb import envelope as necb_envelope
+        from btap.codes.necb import loads as necb_loads
+        from btap.codes.necb import shw as necb_shw
         from tests.necb.support import tagged_model
 
         model = tagged_model()

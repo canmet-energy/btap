@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from btap.necb import coverage
+from btap.codes import coverage
 
 
 class TestCoverageReference(unittest.TestCase):
@@ -69,7 +69,7 @@ class TestCoverageCLI(unittest.TestCase):
     def test_fetch_delegates_to_the_maintainer_script_with_explicit_output(self):
         destination = Path("/tmp/necb-coverage-test.json")
         completed = subprocess.CompletedProcess([], 0)
-        with patch("btap.necb.coverage.subprocess.run", return_value=completed) as run:
+        with patch("btap.codes.coverage.subprocess.run", return_value=completed) as run:
             code, _, err = self.run_cli(
                 "fetch", "2020", "--out", str(destination)
             )
@@ -80,7 +80,7 @@ class TestCoverageCLI(unittest.TestCase):
 
     def test_module_help_works(self):
         proc = subprocess.run(
-            [sys.executable, "-m", "btap.necb.coverage", "--help"],
+            [sys.executable, "-m", "btap.codes.coverage", "--help"],
             capture_output=True,
             text=True,
             timeout=30,

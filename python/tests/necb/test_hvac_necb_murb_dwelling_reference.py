@@ -5,7 +5,7 @@ which is only a `building_type` string in the space-types catalog and
 happens to match the "residential" keyword — it is NOT a dwelling-unit
 `space_type` row. The real catalog dwelling row is:
   { "building_type": "Space Function", "space_type": "Dwelling units general" }
-(btap/necb/loads/data/space_types_2020.json).
+(btap/codes/necb/loads/data/space_types_2020.json).
 
 This file tags a model with that exact name and exercises BOTH domains'
 dwelling detection through the SAME model, on MODEL VALUES only:
@@ -29,7 +29,7 @@ import openstudio
 
 import btap.modeling as modeling
 from btap.audit import AuditLog
-from btap.necb import hvac, lighting
+from btap.codes.necb import hvac, lighting
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
 

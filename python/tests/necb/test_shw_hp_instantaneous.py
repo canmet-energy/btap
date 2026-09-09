@@ -24,7 +24,7 @@ class TestHPInstantaneous(unittest.TestCase):
         import openstudio
 
         from btap.audit import AuditLog
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         model = openstudio.model.Model()
         audit = AuditLog()
@@ -53,7 +53,7 @@ class TestHPInstantaneous(unittest.TestCase):
 
     def test_heat_pump_water_heater_build_and_floor(self):
         from btap.audit import AuditLog
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         model = tagged_model()
         audit = AuditLog()
@@ -77,7 +77,7 @@ class TestHPInstantaneous(unittest.TestCase):
                             for e in audit.entries))
 
     def test_2025_uef_floor(self):
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         model = tagged_model()
         shw.apply_shw(model, vintage="2025", fuel="HeatPump")
@@ -87,7 +87,7 @@ class TestHPInstantaneous(unittest.TestCase):
 
     def test_hphw_costing_detection(self):
         from btap.audit import AuditLog
-        from btap.necb import shw
+        from btap.codes.necb import shw
 
         model = tagged_model()
         shw.apply_shw(model, vintage="2020", fuel="HeatPump")

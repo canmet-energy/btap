@@ -13,7 +13,7 @@ import pathlib
 import re
 import unittest
 
-DATA_DIR = pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'necb' / 'hvac' / 'data'
+DATA_DIR = pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'codes' / 'necb' / 'hvac' / 'data'
 
 with open(DATA_DIR / 'efficiencies_2020.json', encoding='utf-8') as f:
     DATA = json.load(f)
