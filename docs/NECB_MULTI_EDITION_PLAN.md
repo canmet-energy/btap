@@ -1309,3 +1309,78 @@ byte-identical, no re-freeze.
   addresses): registry tests 31 passed; full suite 894 passed; frozen
   lanes python 32 / verify 3 / parity 4 **byte-identical, no re-freeze**;
   lint-imports 3/3; ruff; orphan keys; TOC; docs regenerate to no diff.
+
+## Stage 3 — opened 2026-09-08
+
+Stacked on `stage2-integration` (`fdd25fe`). Sequence: Opus — data by
+edition (rule files and tables into `necb/data/necb20{20,25}/`, 2025's own
+copies of the six shared tables, `data_vintage_alias`/`data_vintage()` and
+their seven callers removed, the dormant `efficiency_vintage_fallback` rung
+and the `requested_vintage` split deleted, envelope `articles`→`article`,
+`_data_root()`/`_set_data_root(_testing=True)` hook, every loader through
+it, the registry's manifest discovery through it, the four discovery sites
+manifest-driven, per-edition `coverage/articles_8_4.json`) ‖ Sonnet — the
+removability gate `test_edition_independence.py` from the spec (fresh
+subprocess, temp tree with one edition). Then Sonnet — edition through
+`climate.hdd18` (5 sites) and the daylight chain (4 functions + callers),
+which needs the per-edition `table_c1`/daylighting tables in place. Gate:
+frozen lanes byte-identical, no re-freeze. **Correction to D-86 recorded
+here:** it called the Section 8.4 caches "not NECB-specific"; they are
+per-edition NECB text and belong in each edition's snapshot, which is
+where Stage 3 puts them (the decisions registry stays neutral).
+- **Removability gate (Sonnet) delivered** — `stage3-test-edition-independence`
+  (`b042cfd`), one file, 6 tests all failing on `_set_data_root` missing as
+  intended. Calls: `code_ids/editions/resolve`, `loads/lighting/envelope/
+  hvac/shw.rules(edition)`, `compliance._emit_article_coverage` (umbrella),
+  `climate.table_c1()`, `DaylightControlRequirement.table()`,
+  `coverage.get_article/editions`, `performance_compliance(simulate="none")`.
+  Deviation accepted: every domain package imports `openstudio` at module
+  scope, so the full 7-step subprocess test is SDK-gated and a second
+  SDK-free test covers registry + coverage independence. Held for
+  integration; loader names to be confirmed against the data branch.
+- **Data by edition (Opus) delivered and reviewed** — `stage3-data-by-edition`
+  (`6c026f8`), 83 files: every move a `git mv` rename with 0–3 changed
+  lines; 2025's six table copies verified byte-identical to 2020's by
+  sha256; hook API exact and guarded; registry discovery now per family
+  root, caches keyed by `(root, …)`; full suite 885 passed; frozen python
+  lane byte-identical; wheel carries all 38 data files. Judgment calls
+  accepted: `necb_8_4_disposition.json` + `ATTRIBUTION.md` stay neutral
+  (the disposition is read for both editions via the cross-edition branch
+  Stage 4 owns — moving it would create the dependency Stage 3 removes);
+  five domain data READMEs folded into one `necb/data/README.md`; orphan
+  gate scope pinned by an explicit `NON_RULE_MANIFESTS`; `lighting.table`
+  and `led_record` now take a required vintage (the filename used to bake
+  in 2020 — the substrate defect itself); `_emit_article_coverage` raises
+  on a missing umbrella file instead of returning silently. **Handoff
+  item recorded:** `necb2025/lighting_rules.json:38`'s `how` text still
+  names `lpd_building_types_2025.json` because that string is emitted into
+  the frozen audit — correctable only in a re-freeze (R-C). The one
+  protected-test edit (`test_generate_necb_8_4_coverage.py`, the cache
+  path assertion) is the deliverable itself; the 52/57 counts untouched.
+  Two `_INTERIM_EDITION` constants left for the threading agent (Sonnet,
+  spawned on this branch).
+- **Threading (Sonnet) delivered; acceptance taken over by Fable.** The
+  agent stalled twice waiting on a background run the harness had
+  stopped; its tree held the complete diff (10 files, +74/−78): `hdd18(model,
+  *, edition, …)` through the five sites, `table_c1(edition)`, the daylight
+  chain `table/residue/requirement/evaluate` all edition-keyed, caches per
+  `(root, edition)`, both `_INTERIM_EDITION` constants gone, docstring
+  reframed as two independent snapshots. Read in full by Fable; committed
+  as `stage3-threading` (`7e394a7`) once its own test run had finished.
+- **Stage 3 integration** (`stage3-integration` = stage2 + data + threading
+  + gate; gate's two loader calls adapted to the new signatures):
+  `test_edition_independence` **4 passed / 4 subtests** — each edition
+  loads everything from a one-edition tree in a fresh subprocess, the
+  registry and coverage report only that edition, the other edition's
+  rules raise naming edition and path, the hook refuses without
+  `_testing=True`. Full verification running detached.
+- **Stage 3 verified and complete** on `stage3-integration` (`4c13b52`):
+  removability gate 4/4; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; full suite 897 passed (a single
+  failure in the first pass was not reproducible; the one document moved
+  by 8 anchor tokens and is now committed, which is the document-drift
+  test's condition — the same trap the Stage 2 agent hit); lint-imports
+  3/3; ruff, orphan keys, TOC clean. **Incident:** resuming the threading
+  agent after taking over its work made it run a full suite concurrently
+  with the integration verification; its runs were killed by PID (after a
+  pattern-based kill matched my own shell — trap recorded in memory).

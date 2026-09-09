@@ -102,7 +102,8 @@ class TestApplyLights(unittest.TestCase):
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
         lighting.apply_lights(model, vintage="2020", lights_type="LED", audit=AuditLog())
-        led = lighting.led_record(building_type=OFFICE[0], space_type=OFFICE[1])
+        led = lighting.led_record(building_type=OFFICE[0], space_type=OFFICE[1],
+                                  vintage="2020")
         lights = st.lights()[0]
         expected = openstudio.convert(float(led["lighting_per_area"]), "W/ft^2", "W/m^2").get()
         self.assertAlmostEqual(expected, lights.lightsDefinition().wattsperSpaceFloorArea().get(),

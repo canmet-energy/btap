@@ -15,17 +15,18 @@ import openstudio
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
-from btap.codes.necb import lighting as _lighting
+from btap.codes.necb import _data_root, edition_file
 
-_data_cache = None
+#: Cached per (data root, vintage) — each edition reads its own copy.
+_data_cache: dict[tuple, dict] = {}
 
 
-def _data():
-    global _data_cache
-    if _data_cache is None:
-        path = _lighting.DATA_DIR / 'exterior_lighting_2020.json'
-        _data_cache = json.loads(path.read_text(encoding='utf-8'))
-    return _data_cache
+def _data(vintage):
+    key = (_data_root(), str(vintage))
+    if key not in _data_cache:
+        path = edition_file(vintage, 'tables', 'exterior_lighting.json')
+        _data_cache[key] = json.loads(path.read_text(encoding='utf-8'))
+    return _data_cache[key]
 
 
 def allowance(zone, quantities, vintage='2020', audit=None):
@@ -37,7 +38,7 @@ def allowance(zone, quantities, vintage='2020', audit=None):
     :return: {'basic_site_w', 'tradable_w', 'non_tradable_w', 'total_w', 'lines'}
     """
     audit = audit if audit is not None else AuditLog()
-    data = _data()
+    data = _data(vintage)
     zone_key = str(zone)
     if zone_key not in data['basic_site_allowance_w']:
         raise ValueError(f"unknown exterior lighting zone '{zone}' (0..4)")

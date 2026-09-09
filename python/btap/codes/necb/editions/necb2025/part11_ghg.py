@@ -8,17 +8,18 @@ from __future__ import annotations
 import json
 
 from btap._compat import NullAudit, ruby_div, ruby_round
-from btap.codes.necb import DATA_DIR
+from btap.codes.necb import _data_root, edition_file
 
-_ghg_data: dict | None = None
+#: Cached per data root; this module IS the 2025 edition.
+_ghg_data: dict[object, dict] = {}
 
 
 def ghg_data() -> dict:
-    global _ghg_data
-    if _ghg_data is None:
-        with open(DATA_DIR / "ghg_factors_2025.json", encoding="utf-8") as handle:
-            _ghg_data = json.load(handle)
-    return _ghg_data
+    root = _data_root()
+    if root not in _ghg_data:
+        with open(edition_file("2025", "ghg_factors.json"), encoding="utf-8") as handle:
+            _ghg_data[root] = json.load(handle)
+    return _ghg_data[root]
 
 
 def operational_ghg_kg(energy, province_state):

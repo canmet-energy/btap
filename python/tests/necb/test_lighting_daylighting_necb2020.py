@@ -192,21 +192,21 @@ class TestDaylightingNecb2020(unittest.TestCase):
     # --- Table 4.2.1.6. control matrix ---------------------------------------
 
     def test_control_matrix_states_are_all_legal_and_the_residue_is_recorded(self):
-        rows = self.REQ.table()["space_types"]
+        rows = self.REQ.table(edition="2020")["space_types"]
         self.assertGreaterEqual(len(rows), 105, "every NECB space-function catalog name is mapped")
         legal = ["required", "not_required", "not_applicable", "not_listed", "unknown"]
         for name, row in rows.items():
             self.assertIn(row["sidelighting"], legal, f"{name} sidelighting")
             self.assertIn(row["toplighting"], legal, f"{name} toplighting")
         # anything not decided from the code text must be enumerated, not buried
-        published = [r["space_type"] for r in self.REQ.residue()]
+        published = [r["space_type"] for r in self.REQ.residue(edition="2020")]
         unresolved = [name for name, r in rows.items()
                       if r["sidelighting"] in ("unknown", "not_listed")
                       or r["toplighting"] in ("unknown", "not_listed")]
         self.assertEqual(sorted(unresolved), sorted(published),
                          "every column not read straight off the table appears in the published "
                          "residue list")
-        self.assertLessEqual(len(self.REQ.residue()), 12, "the residue stays small enough to file")
+        self.assertLessEqual(len(self.REQ.residue(edition="2020")), 12, "the residue stays small enough to file")
 
     def test_dwelling_units_are_not_listed_rather_than_unknown(self):
         # 4.2.2.1.(10)/(13) reach only spaces requiring the control "in accordance
@@ -215,7 +215,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # sentences do not reach them — a determination from the code text, NOT a
         # conservative guess. Getting this wrong photocontrolled 122 apartment spaces.
         for suffix in ["general", "long-term"]:
-            row = self.REQ.requirement(f"Dwelling units {suffix}")
+            row = self.REQ.requirement(f"Dwelling units {suffix}", edition="2020")
             self.assertEqual("not_listed", row["sidelighting"])
             self.assertEqual("not_listed", row["toplighting"])
         _model, space = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Dwelling units general")
@@ -227,21 +227,21 @@ class TestDaylightingNecb2020(unittest.TestCase):
                         "the determination is recorded with its reasoning")
 
     def test_control_matrix_spot_values(self):
-        self.assertEqual("required", self.REQ.requirement("Office enclosed > 25 m2")["sidelighting"])
-        self.assertEqual("required", self.REQ.requirement("Office enclosed > 25 m2")["toplighting"])
+        self.assertEqual("required", self.REQ.requirement("Office enclosed > 25 m2", edition="2020")["sidelighting"])
+        self.assertEqual("required", self.REQ.requirement("Office enclosed > 25 m2", edition="2020")["toplighting"])
         # 'X' in the corrected table (hbix#88) — it was not_required only in the
         # corrupt extraction. A genuine '-' row instead:
-        self.assertEqual("required", self.REQ.requirement("Library reading area")["sidelighting"])
+        self.assertEqual("required", self.REQ.requirement("Library reading area", edition="2020")["sidelighting"])
         self.assertEqual("not_required",
-                         self.REQ.requirement("Dormitory living quarters")["sidelighting"])
+                         self.REQ.requirement("Dormitory living quarters", edition="2020")["sidelighting"])
         # Table 4.2.1.6. refers these two out to other articles entirely
-        self.assertEqual("not_applicable", self.REQ.requirement("Guest room")["sidelighting"])
+        self.assertEqual("not_applicable", self.REQ.requirement("Guest room", edition="2020")["sidelighting"])
         self.assertEqual("not_applicable",
-                         self.REQ.requirement("Storage garage interior")["toplighting"])
+                         self.REQ.requirement("Storage garage interior", edition="2020")["toplighting"])
         # schedule-letter suffixes resolve to the same row
-        self.assertEqual(self.REQ.requirement("Computer/Server room"),
-                         self.REQ.requirement("Computer/Server room-sch-C"))
-        self.assertTrue(self.REQ.requirement("Retail facility mall concourse")["retail"],
+        self.assertEqual(self.REQ.requirement("Computer/Server room", edition="2020"),
+                         self.REQ.requirement("Computer/Server room-sch-C", edition="2020"))
+        self.assertTrue(self.REQ.requirement("Retail facility mall concourse", edition="2020")["retail"],
                         "4.2.2.1.(12)(c) retail flag")
 
     # --- 4.2.2.1.(10)/(13): the power tests ----------------------------------
@@ -250,7 +250,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         from btap.audit import AuditLog
 
         audit = AuditLog()
-        return self.REQ.evaluate(space, audit=audit, **kwargs), audit
+        return self.REQ.evaluate(space, edition="2020", audit=audit, **kwargs), audit
 
     def test_sidelighting_required_when_primary_power_reaches_150_w(self):
         # Office enclosed > 25 m2 = 7.1 W/m2; full-wall glazing head 3 m gives a

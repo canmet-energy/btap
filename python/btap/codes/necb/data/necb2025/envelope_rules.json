@@ -138,7 +138,7 @@
  },
  "hdd_bins_note": "keys are HDD bin CEILINGS {3000,4000,5000,6000,7000,9999} = zones 4/5/6/7A/7B/8; lookup rule (legacy-exact): first value where hdd < key, fallback 0.110",
  "reference_envelope": {
-  "articles": "8.4.5.1.(2), 8.4.5.3., 8.4.5.4.",
+  "article": "8.4.5.1.(2), 8.4.5.3., 8.4.5.4.",
   "roof_absorptance_if_actual_used": 0.7,
   "note": "populated fully in P4 (lightweight layers from Note A-8.4.4.4.(1), air leakage from 8.4.3.3.(3))"
  },

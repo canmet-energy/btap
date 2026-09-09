@@ -127,10 +127,15 @@ class TestLoadsDataIntegrity(unittest.TestCase):
                             for row in large_storage),
                         'Table A-8.4.3.2.(2)-B: storage rooms >= 5 m2 have 1 W/m2')
 
-    def test_2025_aliases_2020_with_renumbered_citations(self):
+    def test_2025_matches_2020_with_renumbered_citations(self):
+        # Stage 3: 2025 no longer ALIASES the 2020 tables (data_vintage is
+        # gone) — it ships its own byte-identical copies of them.
         from btap.codes.necb import loads
         rules = loads.rules('2025')
-        self.assertEqual('2020', loads.data_vintage('2025'))
+        self.assertEqual(loads.table('2020', 'space_types'),
+                         loads.table('2025', 'space_types'))
+        self.assertEqual(loads.table('2020', 'schedules'),
+                         loads.table('2025', 'schedules'))
         self.assertEqual('A-8.4.3.2.(1)(b)', rules['schedule_table_prefix'])
         self.assertEqual('A-8.4.3.2.(1)', loads.rules('2020')['schedule_table_prefix'])
         self.assertRegex(rules['provenance']['method'], 'row-by-row')

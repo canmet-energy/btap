@@ -4,7 +4,7 @@
   "edition": "2025",
   "source": "btap-necb umbrella pipeline self-declaration — the compliance determination itself (Part 8 Section 8.4). 2025 renumbering: the reference-building subsection is 8.4.5 (2020: 8.4.4); 8.4.4 is the NEW Energy Use Intensity path, which exists only here and only in this gem (tiers.rb).",
   "generated": "2026-07-22",
-  "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.rb; EUI arithmetic in tiers.rb reads eui_targets_2025.json)."
+  "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.py; the 2025 EUI arithmetic lives in editions/necb2025/ and reads this edition's eui_targets.json)."
  },
  "article_coverage": {
   "articles": [

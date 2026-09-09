@@ -5,7 +5,7 @@ which is only a `building_type` string in the space-types catalog and
 happens to match the "residential" keyword — it is NOT a dwelling-unit
 `space_type` row. The real catalog dwelling row is:
   { "building_type": "Space Function", "space_type": "Dwelling units general" }
-(btap/codes/necb/loads/data/space_types_2020.json).
+(btap/codes/necb/data/necb2020/tables/space_types.json).
 
 This file tags a model with that exact name and exercises BOTH domains'
 dwelling detection through the SAME model, on MODEL VALUES only:
@@ -16,7 +16,7 @@ dwelling detection through the SAME model, on MODEL VALUES only:
     99 W/m2 input.
  2. the hvac domain's _category_for keyword vote: 'dwelling' is a keyword of
     the "Residential/Accommodation Area" category (selection.categories in
-    reference_rules_2020.json) — a real model tagged with the dwelling
+    necb2020/reference_rules.json) — a real model tagged with the dwelling
     catalog name must vote that category and take the `special: residential`
     branch, exercised end-to-end via reference_hvac (not just the synthetic
     facts test_hvac_necb_selector already covers)."""
@@ -73,7 +73,7 @@ class TestNecbMurbDwellingReference(unittest.TestCase):
                          sorted({a.category for a in result.assignments}),
                          "the 'dwelling' keyword must route a real dwelling-tagged model into "
                          'the residential category (selection.categories in '
-                         'reference_rules_2020.json), not just in the synthetic facts of '
+                         'necb2020/reference_rules.json), not just in the synthetic facts of '
                          'test_hvac_necb_selector')
         self.assertEqual([1], sorted({a.reference_system for a in result.assignments}))
         self.assertEqual(['build'], sorted({a.action for a in result.assignments}))

@@ -10,7 +10,15 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "NECB_COVERAGE.md"
-MANIFEST_DOMAINS = {"reference": "hvac", "necb": "necb"}
+#: Where each code family keeps one snapshot directory per edition, relative to
+#: the manifest root. Discovery is MANIFEST-driven (multi-edition plan, Stage
+#: 3): rule files no longer carry the vintage in their names. This generator
+#: runs under a bare `python3` in the `lint` job, so it reads the manifests off
+#: disk rather than importing `btap.codes`.
+EDITION_DATA = Path("python") / "btap" / "codes" / "necb" / "data"
+#: manifest `rules` key -> the domain name the document prints. The umbrella's
+#: file is the family name; hvac declares two files (rules + efficiencies).
+MANIFEST_DOMAINS = {"umbrella": "necb", "hvac_efficiencies": "hvac"}
 STATUS_GROUPS = (
     ("implemented", "Implemented"),
     ("partial", "Partial (warns every run)"),
@@ -22,16 +30,16 @@ FIELD_VERIFIED_HEADING = "Field / document verification (modeller scope, does no
 VINTAGES = ("2020", "2025")
 
 
-def manifest_paths(manifest_root: Path) -> list[Path]:
-    return sorted(manifest_root.glob("python/btap/**/*_rules_*.json"))
-
-
-def manifest_domain(path: Path) -> str:
-    match = re.match(r"([a-z]+)_rules_", path.name)
-    if match is None:
-        raise ValueError(f"cannot derive manifest domain from {path}")
-    prefix = match.group(1)
-    return MANIFEST_DOMAINS.get(prefix, prefix)
+def manifest_paths(manifest_root: Path) -> list[tuple[Path, str, str]]:
+    """(rule file, domain, edition) for every edition's declared rule files."""
+    found = []
+    for manifest_path in sorted((manifest_root / EDITION_DATA).glob("*/manifest.json")):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        edition = str(manifest["edition"])
+        for key, filename in sorted((manifest.get("rules") or {}).items()):
+            found.append((manifest_path.parent / filename,
+                          MANIFEST_DOMAINS.get(key, key), edition))
+    return found
 
 
 def canonical(article: object, vintage: object) -> str:
@@ -58,14 +66,11 @@ def collect_records(manifest_root: Path) -> list[dict]:
         raise ValueError("no coverage manifests found — the glob went stale")
 
     records = []
-    for path in manifests:
+    for path, domain, vintage in manifests:
         data = json.loads(path.read_text(encoding="utf-8"))
         coverage = data.get("article_coverage", {}).get("articles")
         if coverage is None:
             continue
-        match = re.search(r"(\d{4})\.json$", path.name)
-        vintage = match.group(1) if match else data.get("provenance", {}).get("edition", "?")
-        domain = manifest_domain(path)
         for article in coverage:
             raw_article = str(article.get("article") or "")
             records.append({

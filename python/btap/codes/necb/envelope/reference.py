@@ -56,7 +56,7 @@ def apply(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
 
     audit = audit if audit is not None else AuditLog()
     prefix = Ruleset.from_edition(vintage).article("reference_subsection")
-    hdd = climate.hdd18(model, hdd=hdd, audit=audit)
+    hdd = climate.hdd18(model, edition=str(vintage), hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 

@@ -13,11 +13,13 @@ import re
 from pathlib import Path
 
 from btap._compat import NullAudit, opt, ruby_round
+from btap.codes.necb import _data_root, edition_file
 
-TABLE_C1_PATH = Path(__file__).parent / "data" / "table_c1.json"
 TOLERANCE_KM = 500.0
 
-_TABLE_C1 = None
+#: Cached per (data root, edition), so a test that repoints the family or
+#: passes a different edition is not served a stale root's/edition's table.
+_TABLE_C1: dict[tuple, list] = {}
 
 # The .stat annual heating-degree-day line. Ruby's String#match is a SEARCH,
 # and `.` does not cross newlines in either language — so re.search, never
@@ -28,16 +30,20 @@ _STAT_HDD_RE = re.compile(
 _EPW_SUFFIX_RE = re.compile(r"\.epw\Z", re.IGNORECASE)
 
 
-def table_c1():
-    global _TABLE_C1
-    if _TABLE_C1 is None:
-        with open(TABLE_C1_PATH, encoding="utf-8") as handle:
-            _TABLE_C1 = json.load(handle)["table"]
-    return _TABLE_C1
+def table_c1(edition):
+    key = (_data_root(), str(edition))
+    if key not in _TABLE_C1:
+        path = edition_file(edition, "tables", "table_c1.json")
+        with open(path, encoding="utf-8") as handle:
+            _TABLE_C1[key] = json.load(handle)["table"]
+    return _TABLE_C1[key]
 
 
-def hdd18(model, *, hdd=None, audit=None):
-    """:return: HDD18, or None (with an audit warning) when unresolvable."""
+def hdd18(model, *, edition, hdd=None, audit=None):
+    """:param edition: the NECB edition ('2020', '2025') whose Table C-1 copy
+        resolves the nearest-city fallback. Required — every edition ships its
+        own snapshot and none is substituted for another (Stage 3).
+    :return: HDD18, or None (with an audit warning) when unresolvable."""
     audit = audit if audit is not None else NullAudit()
     if hdd is not None:
         audit.info("climate", "HDD supplied explicitly", value=hdd)
@@ -49,7 +55,7 @@ def hdd18(model, *, hdd=None, audit=None):
                    "no weather file on model — HDD unresolvable (pass hdd: explicitly)")
         return None
 
-    from_city = nearest_city_hdd(weather, audit)
+    from_city = nearest_city_hdd(weather, edition, audit)
     if from_city is not None:
         return from_city
 
@@ -62,12 +68,12 @@ def hdd18(model, *, hdd=None, audit=None):
     return None
 
 
-def nearest_city_hdd(weather_file, audit):
+def nearest_city_hdd(weather_file, edition, audit):
     """Nearest NECB Table C-1 city by haversine distance (legacy convention)."""
     audit = audit if audit is not None else NullAudit()
     lat = weather_file.latitude()
     lon = weather_file.longitude()
-    best = min(table_c1(), key=lambda row: haversine_km([lat, lon], row["lat_long"]))
+    best = min(table_c1(edition), key=lambda row: haversine_km([lat, lon], row["lat_long"]))
     distance = haversine_km([lat, lon], best["lat_long"])
     if distance > TOLERANCE_KM:
         audit.info("climate",

@@ -13,11 +13,12 @@ import pathlib
 import re
 import unittest
 
-DATA_DIR = pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'codes' / 'necb' / 'hvac' / 'data'
+PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'btap' / 'codes' / 'necb'
+DATA_DIR = PACKAGE_ROOT / 'data'
 
-with open(DATA_DIR / 'efficiencies_2020.json', encoding='utf-8') as f:
+with open(DATA_DIR / 'necb2020' / 'efficiencies.json', encoding='utf-8') as f:
     DATA = json.load(f)
-with open(DATA_DIR / 'efficiencies_2025.json', encoding='utf-8') as f:
+with open(DATA_DIR / 'necb2025' / 'efficiencies.json', encoding='utf-8') as f:
     DATA_2025 = json.load(f)
 
 KW_PER_TON = 3.51685
@@ -173,7 +174,7 @@ class TestEfficiencyProvenance(unittest.TestCase):
         self.assertTrue(all(re.search(r'90\.1', str(r.get('notes') or ''))
                             for r in DATA['heat_rejection']),
                         'every heat_rejection row cites its 90.1 source')
-        source = (DATA_DIR.parent / 'efficiency.py').read_text(encoding='utf-8')
+        source = (PACKAGE_ROOT / 'hvac' / 'efficiency.py').read_text(encoding='utf-8')
         self.assertNotRegex(source, r'heat_rejection',
                             'apply_efficiencies grew a heat_rejection consumer — re-verify its '
                             'values against the printed NECB table first (they are 90.1 '

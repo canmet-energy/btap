@@ -6,9 +6,11 @@ compose btap.modeling's authoring machinery and btap.costing into the full
 Part 8 determination driven from ``compliance`` here. This is the ONLY package
 allowed to run EnergyPlus (through btap.simulation) — the domains are SDK-only.
 
-``data/`` here is deliberately code-family-NEUTRAL: the decisions registry and
-the Section 8.4 article caches. The NECB rule tables live one level down, in
-``btap/codes/necb/data/``.
+``data/`` here is deliberately code-family-NEUTRAL: the decisions registry, and
+the Section 8.4 disposition and attribution that speak for the family as a
+whole rather than for one edition. Everything an edition owns — its rule files,
+its transcribed tables and its Section 8.4 article text — lives in that
+edition's own snapshot under ``btap/codes/necb/data/<code id>/`` (Stage 3).
 
 Two citation axes run through every audit entry here (D-44): ``article``
 cites the code that mandates a value; ``ruling`` cites the adjudicated
@@ -49,9 +51,12 @@ from typing import Any, Mapping
 
 DATA_DIR = Path(__file__).parent / "data"
 
-#: Where a code family keeps one directory per edition. ``btap/codes/data/`` is
-#: code-family-NEUTRAL and holds no manifests, so it cannot match this.
-_MANIFEST_GLOB = "*/data/*/manifest.json"
+#: The code families that register editions here, by family name. Each module
+#: owns a ``_data_root()`` returning the directory that holds one subdirectory
+#: per edition of that family, so a test can repoint one family's data without
+#: the registry hardcoding a filesystem layout (multi-edition plan, Stage 3).
+#: Stage 9 adds the second family by adding a line here.
+_FAMILY_MODULES = {"necb": "btap.codes.necb"}
 
 _REQUIRED_FIELDS = ("id", "family", "edition", "label")
 
@@ -160,25 +165,50 @@ def _read_manifest(path: Path) -> Ruleset:
     )
 
 
+def _family_roots() -> tuple[tuple[str, Path], ...]:
+    """(family, data root) for every registered family, resolved AT CALL TIME.
+
+    Import-time resolution would freeze the packaged path into the module and
+    make the test-only data-root hook a no-op for discovery.
+    """
+    from importlib import import_module
+
+    return tuple(
+        (family, import_module(module)._data_root())
+        for family, module in sorted(_FAMILY_MODULES.items())
+    )
+
+
 @lru_cache(maxsize=None)
-def _registry() -> Mapping[str, Ruleset]:
-    """Every edition with a manifest on disk, by code id. Cached: the citation
-    sites resolve per call and a determination makes thousands of them."""
-    rulesets = {}
-    for path in sorted(Path(__file__).parent.glob(_MANIFEST_GLOB)):
-        ruleset = _read_manifest(path)
-        if ruleset.family != path.parents[2].name:
-            raise ValueError(
-                f"{path} declares family {ruleset.family!r} but sits under "
-                f"btap/codes/{path.parents[2].name}/"
-            )
-        rulesets[ruleset.id] = ruleset
+def _registry_for(roots: tuple[tuple[str, Path], ...]) -> Mapping[str, Ruleset]:
+    """Every edition with a manifest under ``roots``, by code id.
+
+    Cached on the roots, not on nothing: the citation sites resolve per call and
+    a determination makes thousands of them, but a test that swaps a family's
+    data root must not be served another root's registry.
+    """
+    rulesets: dict[str, Ruleset] = {}
+    for family, root in roots:
+        for path in sorted(root.glob("*/manifest.json")):
+            ruleset = _read_manifest(path)
+            if ruleset.family != family:
+                raise ValueError(
+                    f"{path} declares family {ruleset.family!r} but sits under "
+                    f"the {family!r} family's data root {root}"
+                )
+            rulesets[ruleset.id] = ruleset
     if not rulesets:
         raise ValueError(
-            f"no edition manifests found under {Path(__file__).parent}/"
-            f"{_MANIFEST_GLOB} — the packaged data went missing from the wheel"
+            "no edition manifests found under "
+            f"{', '.join(f'{root}/*/manifest.json' for _family, root in roots)}"
+            " — the packaged data went missing from the wheel"
         )
     return MappingProxyType(rulesets)
+
+
+def _registry() -> Mapping[str, Ruleset]:
+    """Every registered edition, by code id."""
+    return _registry_for(_family_roots())
 
 
 def code_ids() -> list[str]:

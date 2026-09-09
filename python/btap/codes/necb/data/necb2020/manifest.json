@@ -8,5 +8,23 @@
     "lighting_subsection": "8.4.4",
     "heat_pump_aux_fuel": "8.4.4.13.(2)(c)"
   },
-  "literal_remaps": {}
+  "literal_remaps": {},
+  "rules": {
+    "umbrella": "necb_rules.json",
+    "envelope": "envelope_rules.json",
+    "hvac": "reference_rules.json",
+    "hvac_efficiencies": "efficiencies.json",
+    "lighting": "lighting_rules.json",
+    "loads": "loads_rules.json",
+    "shw": "shw_rules.json"
+  },
+  "tables": [
+    "tables/space_types.json",
+    "tables/schedules.json",
+    "tables/led_lighting.json",
+    "tables/exterior_lighting.json",
+    "tables/table_c1.json",
+    "tables/daylighting_controls_4_2_1_6.json"
+  ],
+  "coverage_text": "coverage/articles_8_4.json"
 }

@@ -21,13 +21,24 @@ SIZING_TIME = re.compile(
 )
 
 
+#: Where each code family keeps one snapshot directory per edition. Discovery
+#: is MANIFEST-driven since Stage 3 of the multi-edition plan: the rule files
+#: no longer carry the vintage in their names, so a filename grammar
+#: (``*_rules_*.json``) cannot find them and an edition that renames a file
+#: must say so in its manifest.
+EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+
+
 def coverage_manifests():
     manifests = []
-    for path in sorted((REPO_ROOT / "python" / "btap").glob("**/*_rules_*.json")):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        articles = data.get("article_coverage", {}).get("articles")
-        if articles is not None:
-            manifests.append((path.relative_to(REPO_ROOT), articles))
+    for manifest_path in sorted(EDITION_DATA.glob("*/manifest.json")):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        for _domain, filename in sorted((manifest.get("rules") or {}).items()):
+            path = manifest_path.parent / filename
+            data = json.loads(path.read_text(encoding="utf-8"))
+            articles = data.get("article_coverage", {}).get("articles")
+            if articles is not None:
+                manifests.append((path.relative_to(REPO_ROOT), articles))
     return manifests
 
 

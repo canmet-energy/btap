@@ -43,7 +43,7 @@ import json
 
 from btap._compat import NullAudit, opt, ruby_div, ruby_round, sorted_by_name
 from btap.audit import AuditLog
-from btap.codes.necb import DATA_DIR
+from btap.codes.necb import _data_root, edition_file
 
 VALUE_TOL = 0.01          # 1% on densities/powers/flows
 SCHEDULE_TOL = 0.005      # 0.5% absolute on hourly schedule values
@@ -67,15 +67,17 @@ def _is_all(spec):
 
 # ---- Table 8.4.4.1 targets ---------------------------------------------
 
-_eui_data: dict | None = None
+#: Cached per data root — this module IS the 2025 edition, so it reads 2025's
+#: own snapshot and never another edition's.
+_eui_data: dict[object, dict] = {}
 
 
 def eui_data() -> dict:
-    global _eui_data
-    if _eui_data is None:
-        with open(DATA_DIR / "eui_targets_2025.json", encoding="utf-8") as handle:
-            _eui_data = json.load(handle)
-    return _eui_data
+    root = _data_root()
+    if root not in _eui_data:
+        with open(edition_file("2025", "eui_targets.json"), encoding="utf-8") as handle:
+            _eui_data[root] = json.load(handle)
+    return _eui_data[root]
 
 
 def eui_building_energy_target(archetype_areas, total_floor_area_m2, *, hdd,

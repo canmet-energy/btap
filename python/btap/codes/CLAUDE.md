@@ -95,22 +95,35 @@ learns *why* we read the article that way.
 - `step='coverage'` entries are deliberately untagged (manifest boilerplate
   would swamp the appendix fire counts — why D-09 is `runtime_unwired`).
 
-## Two directories named `data` — the rule INVERTED at R6
+## Two directories named `data` — and data lives by EDITION
 
-- **`btap/codes/necb/data/`** ships in the wheel: the NECB rules manifests,
-  EUI targets and GHG factors — everything that belongs to the NECB code
-  family specifically.
+- **`btap/codes/necb/data/<code id>/`** ships in the wheel: ONE INDEPENDENT
+  SNAPSHOT PER EDITION (`necb2020/`, `necb2025/`) — that edition's manifest,
+  its seven rule files, its `tables/` and its `coverage/articles_8_4.json`.
+  Multi-edition Stage 3 moved data here from the domain directories: code
+  lives by domain, data by edition. **Nothing at runtime reads another
+  edition's files** — no `extends`, no alias, no fallback rung; a missing file
+  raises naming the edition and the path. Two editions verified identical ship
+  two byte-identical copies. `git rm -r necb2020/` is the removal operation.
 - **`btap/codes/data/`** holds what is code-family-NEUTRAL: `decisions.json`
-  and `coverage/`. Adding a second family must not move them again.
-- **`btap/codes/data/coverage/`** ALSO ships now — the NECB 8.4 article-text
-  caches plus `ATTRIBUTION.md`. Before R6 this material sat outside the
-  packaged files and was script-only input. It is now versioned, offline
-  reference data with a packaged read API (`btap.codes.coverage`) and a
-  console entry point (`btap-necb-coverage`). The Crown NECB text is
-  attributed and explicitly outside the LGPL that covers the code — keep
-  `ATTRIBUTION.md` beside it.
+  and `coverage/`. Adding a second family must not move them again. What is
+  left in `coverage/` is `necb_8_4_disposition.json` (one curated
+  responsibility map the generator reads ACROSS editions — putting it inside
+  `necb2025/` would make the 2020 document depend on the 2025 snapshot) and
+  `ATTRIBUTION.md` (one Crown-copyright notice covering all cached NECB text;
+  `coverage.attribution()` takes no edition). Keep them there.
+- The NECB 8.4 article text is versioned, offline reference data with a
+  packaged read API (`btap.codes.coverage`) and a console entry point
+  (`btap-necb-coverage`). The Crown NECB text is attributed and explicitly
+  outside the LGPL that covers the code.
 - The HBIX fetch that refreshes those caches stays an explicit **maintainer**
   operation. Ordinary runtime is offline.
+- **Every loader resolves through `btap.codes.necb._data_root()` at CALL
+  time**, and every cache is keyed by that root. `_set_data_root(path,
+  _testing=True)` is the TEST-ONLY hook; it is deliberately not an environment
+  variable, because a production override would let a deployed run silently
+  replace adjudicated package data. Never build a data path from
+  `Path(__file__)` in a loader again.
 
 ## Key facts / traps
 

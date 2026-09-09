@@ -10,5 +10,27 @@
   },
   "literal_remaps": {
     "8.4.4.": "8.4.5."
-  }
+  },
+  "rules": {
+    "umbrella": "necb_rules.json",
+    "envelope": "envelope_rules.json",
+    "hvac": "reference_rules.json",
+    "hvac_efficiencies": "efficiencies.json",
+    "lighting": "lighting_rules.json",
+    "loads": "loads_rules.json",
+    "shw": "shw_rules.json"
+  },
+  "tables": [
+    "tables/space_types.json",
+    "tables/schedules.json",
+    "tables/led_lighting.json",
+    "tables/exterior_lighting.json",
+    "tables/table_c1.json",
+    "tables/daylighting_controls_4_2_1_6.json",
+    "tables/lpd_building_types.json",
+    "tables/lpd_space_functions.json"
+  ],
+  "coverage_text": "coverage/articles_8_4.json",
+  "eui_targets": "eui_targets.json",
+  "ghg_factors": "ghg_factors.json"
 }

@@ -115,7 +115,7 @@ class TestReferenceEnvelope(unittest.TestCase):
     # fresh MasslessOpaqueMaterial without copying solar/thermal/visible
     # absorptance from the original layer. The SDK's own default
     # solarAbsorptance for a new MasslessOpaqueMaterial is 0.7 — IDENTICAL to
-    # roof_absorptance_if_actual_used in envelope_rules_2020.json — so the
+    # roof_absorptance_if_actual_used in necb2020/envelope_rules.json — so the
     # reference roof absorptance ended up at 0.7 EVEN WHEN THE FLAG WAS FALSE,
     # which happened to look correct only because the NECB target and the SDK
     # default coincide. A hostile 0.3 proves it: 8.4.4.3.(2)(a) says the

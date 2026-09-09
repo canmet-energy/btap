@@ -33,7 +33,6 @@ import re
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
-from btap.codes.necb import lighting as _lighting
 
 ZONE_AREA_LIMIT_M2 = 360.0          # (1)
 OCCUPANCY_REDUCTION = 0.30          # (2) at least 30%
@@ -130,16 +129,15 @@ def _apply_occupancy_reduction(model, spaces, vintage, audit, article):
     from btap._compat import sorted_by_name
     from btap.codes.necb import loads
 
-    data_vintage = _lighting.data_vintage(vintage)
     applied = []
     for space_type in space_types(spaces):
-        record = space_type_record(space_type, data_vintage)
+        record = space_type_record(space_type, vintage)
         if record is None:
             continue
 
         lighting_name = '' if record['lighting_schedule'] is None else str(record['lighting_schedule'])
         occupancy_name = '' if record['occupancy_schedule'] is None else str(record['occupancy_schedule'])
-        schedules = loads.table(data_vintage, 'schedules')
+        schedules = loads.table(vintage, 'schedules')
         lighting_rows = [r for r in schedules if r['name'] == lighting_name]
         occupancy_rows = [r for r in schedules if r['name'] == occupancy_name]
         if not lighting_rows or not occupancy_rows:

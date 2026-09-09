@@ -31,13 +31,11 @@ from pathlib import Path
 
 from btap._compat import opt, ruby_div, ruby_round, ruby_str
 from btap.audit import AuditLog, emit_coverage
-from btap.codes import Ruleset
+from btap.codes import Ruleset, necb
 from btap.codes.necb import tiers
 from btap.codes.necb.editions.necb2025 import eui_archetypes as archetypes
 from btap.codes.necb.editions.necb2025 import part11_ghg
 from btap.simulation import runner
-
-DATA_DIR = Path(__file__).parent / "necb" / "data"
 
 
 class PreflightError(ValueError):
@@ -233,7 +231,7 @@ def _attach_weather_and_hdd(run):
     # HDD for the envelope rules (explicit > Table C-1 from the EPW site >
     # .stat)
     if run.hdd is None:
-        run.hdd = envelope.hdd18(run.proposed, audit=audit)
+        run.hdd = envelope.hdd18(run.proposed, edition=str(opts["vintage"]), audit=audit)
     if run.hdd is None:
         raise ValueError(
             "HDD unresolvable: pass hdd= or weather with a recognized site")
@@ -663,7 +661,7 @@ def _eui_compliance(model, *, vintage, weather, hdd, run_dir, simulate,
             runner.attach_weather(proposed, epw=weather["epw"],
                                   ddy=weather["ddy"])
         if hdd is None:
-            hdd = envelope.hdd18(proposed, audit=audit)
+            hdd = envelope.hdd18(proposed, edition=str(vintage), audit=audit)
 
         # Mapping -> model-derived areas -> HARD applicability (refuse outside
         # 8.4.4.1.(1)/HDD bounds: a verdict outside applicability is not a
@@ -1327,11 +1325,7 @@ def _emit_article_coverage(vintage, audit):
     status, partial/not_implemented warn — EXCEPT entries flagged gap_owner:
     "modeller", which emit as info scope notes (D-09). Emitted at the end of
     the happy path only — a crash flush must not assert coverage."""
-    path = DATA_DIR / f"necb_rules_{vintage}.json"
-    if not path.exists():
-        return
-
-    with open(path, encoding="utf-8") as handle:
+    with open(necb.edition_file(vintage, "necb_rules.json"), encoding="utf-8") as handle:
         emit_coverage(json.load(handle)["article_coverage"], audit)
 
 
@@ -1444,7 +1438,6 @@ def _validate_space_types(proposed, vintage, audit):
     from btap._compat import sorted_by_name
     from btap.codes.necb import loads
 
-    data_vintage = loads.data_vintage(vintage)
     problems: dict[tuple, list] = {}
     checked = 0
     for space in sorted_by_name(proposed.getSpaces()):
@@ -1462,7 +1455,7 @@ def _validate_space_types(proposed, vintage, audit):
         if st is not None and "plenum" in st.lower():
             st = None
         record = (loads.SpaceTypes.find(building_type=bt, space_type=st,
-                                        vintage=data_vintage)
+                                        vintage=vintage)
                   if bt and st else None)
         if record is not None and not loads.SpaceTypes.is_undefined(record):
             continue
@@ -1478,13 +1471,13 @@ def _validate_space_types(proposed, vintage, audit):
                            "vintage": vintage})
         return
 
-    catalog = loads.table(data_vintage, "space_types")
+    catalog = loads.table(vintage, "space_types")
     lines = []
     for (name, bt, st), spaces in problems.items():
         audit.warn(
             "compliance",
             f"space type '{name}' [{_inspect(bt)}, {_inspect(st)}] is "
-            f"UNRESOLVABLE against the NECB {data_vintage} catalog — "
+            f"UNRESOLVABLE against the NECB {vintage} catalog — "
             "lighting/loads/SHW rules cannot be established for "
             f"{len(spaces)} space(s)",
             target=", ".join(spaces), article="8.4.3.1.(2); 4.2.1.6.",
@@ -1503,7 +1496,7 @@ def _validate_space_types(proposed, vintage, audit):
     joined = "\n  ".join(lines)
     raise PreflightError(
         f"pre-flight FAILED: {len(problems)} space type(s) do not resolve "
-        f"against the NECB {data_vintage} space-type catalog, so the "
+        f"against the NECB {vintage} space-type catalog, so the "
         "reference building cannot be generated correctly (unmatched types "
         "silently keep the proposed's lighting/loads, waiving the "
         f"allowances):\n  {joined}")
