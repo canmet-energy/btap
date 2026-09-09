@@ -463,7 +463,14 @@ def apply_air_leakage_default(model, prefix, audit):
 
 
 def _emit_article_coverage(ruleset, audit):
-    """Completeness accounting (same contract as the hvac domain)."""
+    """Completeness accounting (same contract as the hvac domain).
+
+    The emitted prose cites only this edition's numbering (D-88). The lineage
+    it used to carry: NECB 2025 split the door U-values out into their own
+    Table 3.2.2.4, where 2020 carries them as the door row inside Tables
+    3.2.2.2/3.2.2.3; the values are the same, which is why both snapshots
+    coverage entries cite article 3.2.2.4.
+    """
     emit_coverage(ruleset.rules("envelope").get("article_coverage"), audit)
 
 

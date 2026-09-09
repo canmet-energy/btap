@@ -132,7 +132,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "2025 splits the door requirements out into Table 3.2.2.4. All values were verified identical to the 2020 snapshot (the door table equals the 2020 door row) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). Performance-path articles renumbered 8.4.4.x to 8.4.5.x.",
-      "result_sha256": "23e8e964566e368dda4bfee5dc06487980edf654a2ffafdf5406d6db3bb12290"
+      "result_sha256": "b9b2551bd72f2e0afcf62df4743f2d3c0f9ac3a5341511e535334231122f47c7"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2025",
@@ -312,7 +312,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "The three constants this file carries are the same legacy-derived values as the 2020 snapshot's (verified equal while writing this block); only the article_coverage prose differs, which is why the file is not byte-identical to 2020's. NECB 2025 Table 4.2.1.6 was transcribed in full into tables/lpd_space_functions.json — 162 exact name matches against the 2020 space-type records with ZERO LPD differences — and has its own archived entry. dwelling_unit_lpd_w_per_m2 = 5.0 is code text (8.4.5.5.(2)) and is not covered by source_sha256.",
-      "result_sha256": "f5a0b970b2d385506f56c74d3cf687fd41d9c504289d4ddb28a8880f1e6bd990"
+      "result_sha256": "bf45e2edb148e2bdc8627cac257db884531585016713b79f3295054567a3edaf"
     },
     "loads_rules.json": {
       "source": "mcp:necb:2025",
@@ -339,7 +339,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "Article 8.4.3.2 was reorganized into clauses in 2025 and the schedule tables renumbered A-8.4.3.2.(1)-X -> A-8.4.3.2.(1)(b)-X; the values are identical to 2020 (all 89 space functions compared row by row). This file carries only the numbering and the coverage manifest.",
-      "result_sha256": "debe18c034d00d6992b2dbcae8ed349b1392b155967f4e4d5c2da2f755161bdc"
+      "result_sha256": "cbae423690863f3d8dd15ada4436119fb18b1b830760012db730f8e6fa543377"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -360,7 +360,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "NECB 2025 Table 6.2.2.1 was retrieved in full via the MCP and compared to 2020: every formula this package implements is identical, so this edition's parameters are the same legacy-derived values, with the citations renumbered (8.4.5.20, 8.4.6.9). The one substantive 2025 change — storage-type heat-pump water heaters, EF >= 2.1 -> UEF >= 2.23 — is an equipment class this package does not model and is recorded in the file. The printed-table comparison is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
-      "result_sha256": "8ffaff288b7d97d39a85b947915036dacb39d60da59a2b98575ff9da9fd4b421"
+      "result_sha256": "567971de1d4bd18bc32c3859c1f5aa509328a2b929d2522027006f056d6ae692"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -523,9 +523,8 @@
       "retrieved": "2026-07-30",
       "method": "copied",
       "source_verification": "archived",
-      "byte_identical_to": "necb2020/tables/daylighting_controls_4_2_1_6.json",
-      "note": "The nine control columns of Table 4.2.1.6 agree exactly between the 2020 and 2025 editions — 0 differing cells of 909, asserted at generation time — so this edition ships its own byte-identical copy and the archived 2020 payload travels with it. Identical today is a finding about two snapshots, never a dependency between them. Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The 2025 edition's own 4.2.1.6 payload was compared at generation time — 0 differing cells of 909 — which is why the two editions ship byte-identical files; that is a finding, not a dependency.",
-      "result_sha256": "ed8fee6ede317df15a86be829427f21cecedde63e80bdb8ad067dfab671705dc"
+      "note": "The two editions' copies are NOT byte-identical: each cites its own dwelling-unit LPD article (2025: 8.4.5.5.(2)) in the not_listed note, so the annotation this entry used to carry was dropped. The nine control columns of Table 4.2.1.6 agree exactly between the 2020 and 2025 editions — 0 differing cells of 909, asserted at generation time — so this edition ships its own byte-identical copy and the archived 2020 payload travels with it. Identical today is a finding about two snapshots, never a dependency between them. Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The 2025 edition's own 4.2.1.6 payload was compared at generation time — 0 differing cells of 909 — which is why the two editions ship byte-identical files; that is a finding, not a dependency.",
+      "result_sha256": "b3441efd1adde756cf7511c2c7641b004aa1a06765df9c5dbc5f5be603720ee2"
     },
     "tables/lpd_building_types.json": {
       "source": "mcp:necb:2025",

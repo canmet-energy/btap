@@ -216,9 +216,9 @@
    },
    {
     "article": "3.2.2.4.",
-    "title": "Door U-values (2025 split-out table; 2020: within 3.2.2.x)",
+    "title": "Door U-values (Table 3.2.2.4)",
     "status": "implemented",
-    "how": "door values applied (2025 split-out table == 2020 door row)",
+    "how": "door values applied (Table 3.2.2.4)",
     "code": [
      "python/btap/codes/necb/envelope/prescriptive.py#_subsurface_target_construction"
     ]

@@ -25,7 +25,7 @@
     "article": "8.4.3.2.(1)",
     "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
     "status": "partial",
-    "how": "occupancy and receptacle densities, thermostats and the NECB-letter schedule sets applied per space type from the NECB records (2025 values verified identical to 2020)",
+    "how": "occupancy and receptacle densities, thermostats and the NECB-letter schedule sets applied per space type from the NECB records",
     "gaps": "lighting schedules are provided by the lighting domain and SWH schedules by the shw domain — apply them after apply_loads",
     "code": [
      "python/btap/codes/necb/loads/apply.py#apply_loads",
@@ -93,7 +93,7 @@
     "article": "8.4.3.6.",
     "title": "Outdoor Air",
     "status": "implemented",
-    "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone. (1)(a): on the 2025 EUI path the umbrella normalizes OA to the ASHRAE 62.1 rates at the Table 8.4.4.2 occupant density (adopted interpretation 2026-07-22; btap-necb Archetypes).",
+    "how": "(1)(b): peak outdoor-air rates enter as DesignSpecification:OutdoorAir from the NECB space-type data (ventilation standard basis); the reference inherits them by clone.",
     "code": [
      "python/btap/codes/necb/loads/apply.py#apply_loads"
     ]

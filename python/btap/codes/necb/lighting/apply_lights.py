@@ -428,6 +428,12 @@ def _set_fraction(definition, setter, value):
 
 
 def _emit_article_coverage(ruleset, audit):
+    # The emitted prose speaks only in this edition's numbering (D-88). The
+    # implementation history it used to carry: the lighting-schedule synthesis
+    # and the 8.4.x.5.(3) sensor-schedule reading are the NECB 2015 method,
+    # inherited unchanged by 2020 and 2025; the area-threshold occupancy-sensor
+    # space-type cloning it does NOT model was NECB 2011 machinery that became a
+    # no-op from 2015 on. See _wire_lighting_schedule above.
     emit_coverage(ruleset.rules("lighting")['article_coverage'], audit)
 
 

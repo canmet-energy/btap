@@ -391,6 +391,13 @@ def _assign_zone_thermostats(model, audit):
 
 
 def _emit_article_coverage(ruleset, audit):
+    # The emitted prose cites only this edition's numbering (D-88). The
+    # verification it used to carry: NECB 2025's Table A-8.4.3.2.(2)-B was
+    # compared row-by-row against 2020's for all 89 space functions (occupant
+    # density, receptacle load, SWH load, schedule letter, illuminance) and
+    # schedule set A cell-verified — identical; only the schedule-table numbers
+    # were renumbered. That comparison belongs in docs/NECB_EDITION_DELTAS.md,
+    # not in either snapshot's audit text.
     emit_coverage(ruleset.rules("loads")['article_coverage'], audit)
 
 

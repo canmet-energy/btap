@@ -116,7 +116,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is exactly the tables and articles this file's own provenance block names. Values were additionally cross-checked cell-by-cell against the legacy openstudio-standards NECB2020/data/surface_thermal_transmittance.json (exact match) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The MCP server exposes no build id, so source_revision is null; the archived payloads are the retained artifact.",
-      "result_sha256": "813c320070ebda497414edb767fce9a9a5a63eb6044b135a99154b653d8de8b8"
+      "result_sha256": "71a5fcd721f29b6f22171c42cf4024ecb770bdabf8b9b89ec87bd8cd63fee5ac"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2020",
@@ -272,7 +272,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Confirmed against the oracle at REF while writing this block: the sensor-schedule threshold 0.799256505 W/ft2 (8.6 W/m2) is NECB2015/lighting.rb:22 and the atrium LED equations (0 + 1.06h below 12 m, 4.3 + 0.71h at or above, x0.092903) are NECB2017/necb_2017.rb. The third value, dwelling_unit_lpd_w_per_m2 = 5.0, is code text (8.4.4.5.(2)) verified via the MCP and is NOT covered by source_sha256. The LPD and LED tables themselves are separate manifest outputs with their own entries.",
-      "result_sha256": "7da65f6ae702ad4bcc66455b3b28948366ed98a2bb970a554e3002205872dd79"
+      "result_sha256": "40b811bea795976802e555c15966a3cd6ceada3d6a64df44eba266513a40650b"
     },
     "loads_rules.json": {
       "source": "mcp:necb:2020",
@@ -299,7 +299,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This file carries only this edition's schedule-table numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the two tables this file's own verification block names.",
-      "result_sha256": "d1ca12acac344982fc9db54cf18f455a88f8912bc61103baa1cbf8c6721d428b"
+      "result_sha256": "22f5d0bb083bca068ebe38016b5348cc45be679fd135287dafc44cb5b8e5644b"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -479,7 +479,7 @@
       "method": "generated",
       "source_verification": "archived",
       "note": "Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The 2025 edition's own 4.2.1.6 payload was compared at generation time — 0 differing cells of 909 — which is why the two editions ship byte-identical files; that is a finding, not a dependency.",
-      "result_sha256": "ed8fee6ede317df15a86be829427f21cecedde63e80bdb8ad067dfab671705dc"
+      "result_sha256": "f4498b558863c4010c251e3d390f8b98e3eab6aff73f90bba31df9c353f6b611"
     },
     "coverage/articles_8_4.json": {
       "source": "mcp:necb:2020",

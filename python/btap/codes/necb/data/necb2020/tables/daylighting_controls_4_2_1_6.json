@@ -270,14 +270,14 @@
       "sidelighting": "not_listed",
       "toplighting": "not_listed",
       "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
-      "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+      "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
     },
     "Dwelling units long-term": {
       "table_row": null,
       "sidelighting": "not_listed",
       "toplighting": "not_listed",
       "evidence": "NOT PRESENT IN TABLE 4.2.1.6",
-      "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+      "note": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
     },
     "Electrical/Mechanical room": {
       "table_row": "Electrical/Mechanical room | Electrical/Mechanical room",
@@ -784,12 +784,12 @@
     {
       "space_type": "Dwelling units general",
       "issue": "no Table 4.2.1.6 row -> 4.2.2.1.(10)/(13) do not reach it (state not_listed)",
-      "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+      "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
     },
     {
       "space_type": "Dwelling units long-term",
       "issue": "no Table 4.2.1.6 row -> 4.2.2.1.(10)/(13) do not reach it (state not_listed)",
-      "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2)/8.4.5.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
+      "detail": "Dwelling units are NOT LISTED in Table 4.2.1.6 (their LPD comes from 8.4.4.5.(2), not from the space-by-space table). 4.2.2.1.(10) and (13) apply only to \"spaces requiring [the control] in accordance with Table 4.2.1.6.\", and 4.2.2.1.(2) ties the control requirement to the space-by-space space types OF that table, so a space type with no row cannot be a space \"requiring\" the control: sentences (10) and (13) do not reach it. Read from the code text, not guessed - which is why this is 'not_listed' and not 'unknown'."
     },
     {
       "space_type": "Audience seating area permanent - convention centre",

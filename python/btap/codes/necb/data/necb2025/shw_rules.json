@@ -213,7 +213,7 @@
    },
    {
     "article": "8.4.5.20.(1)",
-    "title": "Reference SWH identical to proposed (storage, power, energy type) (2025 renumbered performance path)",
+    "title": "Reference SWH identical to proposed (storage, power, energy type)",
     "status": "satisfied_by_clone",
     "how": "the umbrella clones the proposed; neither reference transform touches SWH plant sizing or fuel",
     "code": [
@@ -222,7 +222,7 @@
    },
    {
     "article": "8.4.5.20.(2)",
-    "title": "HP-source SWH -> air-source HP in the reference (2025 renumbered performance path)",
+    "title": "HP-source SWH -> air-source HP in the reference",
     "status": "implemented",
     "how": "apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction",
     "code": [
@@ -232,7 +232,7 @@
    },
    {
     "article": "8.4.5.20.(3)-(4)",
-    "title": "Remaining reference SWH sentences (2025 renumbered performance path)",
+    "title": "Remaining reference SWH sentences",
     "status": "partial",
     "how": "(3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically — trivially matching the (4)(a) ratio (Note A-8.4.5.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.6.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.6.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater — there is no electric counterpart in 8.4.6 to apply.",
     "gaps": "REFINED after machine-verification (D-41) and D-53: (3)/(4)/(6)/(7)/(8) are satisfied by clone and (5) is closed for every article-eligible heater. Remaining: (9) circulation-pump consolidation is satisfied BY CONSTRUCTION for models this gem authors — necb/demand.rb builds exactly ONE PumpConstantSpeed per service water loop, so there is never a set of pumps to consolidate. It is unverified only for a FOREIGN proposed that arrives with several pumps on one SHW loop; such a model is cloned as-is, keeping identical W/(L/s) (energy-equivalent, topology differs). No consolidation pass is implemented because it would be unreachable code on every model this toolchain produces.",
