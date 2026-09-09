@@ -8,21 +8,36 @@ every edition manifest off disk by the path convention
 ``necb_orphan_keys.py`` already use for the same reason.
 
 For each pair of CONSECUTIVE editions (sorted by manifest ``edition``; today
-just necb2020 -> necb2025) and for each domain in the manifest ``rules`` map
-plus each ``tables`` entry present in BOTH editions, this produces a
-leaf-level diff of the JSON with renumbering separated from value changes
-(multi-edition plan, Stage 4): a leaf whose value differs from its
-counterpart ONLY by substituting an article/table-number pattern (``8.4.4.``
--> ``8.4.5.``; a ``Table 5.2.12.1.-A`` suffix letter) is a RENUMBERING, not a
-value change; everything else is added / removed / changed (old -> new).
+just necb2020 -> necb2025), this first reports WHOLE-FILE additions,
+removals and renames over the UNION of manifest-declared outputs (the same
+coverage set ``python/tests/necb/test_edition_provenance.py`` uses for its
+provenance gate: every ``rules`` value, every ``tables`` entry, and the
+singular file keys ``coverage_text``/``eui_targets``/``ghg_factors``) --
+an output declared by only one edition's manifest, or declared by both under
+different filenames, would otherwise vanish silently from a diff keyed on
+"present in both, same path".
+
+For every output that DOES survive matching (same path in both editions, or
+matched-but-renamed), it then produces a leaf-level diff of the JSON with
+renumbering separated from value changes (multi-edition plan, Stage 4): a
+leaf whose value differs from its counterpart ONLY by substituting an
+article/table-number pattern (``8.4.4.`` -> ``8.4.5.``; a
+``Table 5.2.12.1.-A`` suffix letter) is a RENUMBERING, not a value change.
+A leaf that MOVED to a different key is a renumbering only when its
+canonical value also matches its old counterpart; a moved leaf whose value
+changed for a reason other than renumbering is reported as a CHANGE (old
+path -> new path, old value -> new value), never folded into renumbering.
+Everything else at a matched path is added / removed / changed (old -> new).
 ``provenance``, ``_provenance``, ``article_coverage`` and ``non_rule_keys*``
 are excluded at any level, and so is any leaf whose value is prose longer
 than 200 characters (a "how"/"notes" description, not a rule value).
 
-``coverage_text`` (the Section 8.4 article-text cache) is NOT diffed here:
-its keys are themselves bare article numbers and its renumbering churn is
-already what the provenance/coverage machinery accounts for; diffing it
-would just restate the citation-renumbering table with worse signal.
+``coverage_text`` (the Section 8.4 article-text cache) is matched at the
+whole-file level (so an edition-only or renamed coverage-text file is still
+reported) but is NOT leaf-diffed here: its keys are themselves bare article
+numbers and its renumbering churn is already what the provenance/coverage
+machinery accounts for; diffing it would just restate the citation-
+renumbering table with worse signal.
 
 Regenerated in the ``lint`` job next to ``generate_necb_coverage.py`` and
 ``generate_necb_8_4_coverage.py``; ``--check`` fails on drift (the
@@ -57,6 +72,25 @@ PROSE_LENGTH = 200
 #: Deliberately requires >= 2 dots so ordinary decimal VALUES (U-values like
 #: ``0.29``, one dot) are never mistaken for citations.
 CITATION_PATTERN = re.compile(r"\d+(?:\.\d+){2,}\.?(?:-[A-Z])?(?:\([0-9a-zA-Z]+\))*")
+
+#: manifest keys, besides ``rules`` and ``tables``, that each map to ONE
+#: declared output file. This is the same coverage set
+#: ``python/tests/necb/test_edition_provenance.py``'s ``declared_outputs``
+#: uses (duplicated, not imported: this generator stays off ``btap.codes``
+#: on purpose -- see the module docstring -- and that test module imports
+#: it).
+SINGULAR_FILE_KEYS = ("coverage_text", "eui_targets", "ghg_factors")
+#: Of those, the ones also leaf-diffed when a matched pair survives.
+#: ``coverage_text`` is matched (so an edition-only/renamed coverage-text
+#: file is still reported as added/removed/renamed) but never leaf-diffed --
+#: see the module docstring.
+LEAF_DIFFABLE_SINGULAR_KEYS = ("eui_targets", "ghg_factors")
+
+#: A trailing 4-digit edition year immediately before the extension --
+#: e.g. the ``_2020`` in ``tables/foo_2020.json`` -- stripped when matching a
+#: renamed ``tables`` entry (which, unlike a ``rules`` entry, has no manifest
+#: key of its own) by canonical basename across editions.
+EDITION_SUFFIX_PATTERN = re.compile(r"_(?:19|20)\d{2}(?=\.[^.]+$)")
 
 
 def _excluded(key: str) -> bool:
@@ -98,16 +132,22 @@ def flatten(node, path: tuple = ()) -> dict:
 
 
 class FileDelta:
-    """One file's leaf-level delta between two editions."""
+    """One file's leaf-level delta between two editions. ``old_rel_path``
+    and ``new_rel_path`` differ only when the whole file itself was matched
+    as a RENAME (see ``diff_whole_files``); otherwise they are equal."""
 
-    def __init__(self, domain: str, rel_path: str):
+    def __init__(self, domain: str, old_rel_path: str, new_rel_path: str):
         self.domain = domain
-        self.rel_path = rel_path
+        self.old_rel_path = old_rel_path
+        self.new_rel_path = new_rel_path
         self.identical: list[tuple] = []
         #: (old_path, old_value, new_path, new_value) -- old_path == new_path
-        #: for a same-path renumbering, or differ for a moved key.
+        #: for a same-path renumbering, or differ for a moved key whose
+        #: CANONICAL value also matches (a pure renumbering).
         self.renumbered: list[tuple] = []
-        #: (path, old_value, new_value)
+        #: (old_path, old_value, new_path, new_value) -- old_path == new_path
+        #: for an ordinary value change, or differ for a moved key whose
+        #: value changed for a reason other than renumbering.
         self.changed: list[tuple] = []
         #: (path, value)
         self.added: list[tuple] = []
@@ -115,13 +155,19 @@ class FileDelta:
         self.removed: list[tuple] = []
 
     @property
+    def rel_path_label(self) -> str:
+        if self.old_rel_path == self.new_rel_path:
+            return self.old_rel_path
+        return f"{self.old_rel_path} → {self.new_rel_path}"
+
+    @property
     def total(self) -> int:
         return (len(self.identical) + len(self.renumbered) + len(self.changed)
                 + len(self.added) + len(self.removed))
 
 
-def diff_file(domain: str, rel_path: str, old_data, new_data) -> FileDelta:
-    delta = FileDelta(domain, rel_path)
+def diff_file(domain: str, old_rel_path: str, new_rel_path: str, old_data, new_data) -> FileDelta:
+    delta = FileDelta(domain, old_rel_path, new_rel_path)
     old_leaves = flatten(old_data)
     new_leaves = flatten(new_data)
 
@@ -136,11 +182,15 @@ def diff_file(domain: str, rel_path: str, old_data, new_data) -> FileDelta:
         elif canonical(old_value) == canonical(new_value):
             delta.renumbered.append((path, old_value, path, new_value))
         else:
-            delta.changed.append((path, old_value, new_value))
+            delta.changed.append((path, old_value, path, new_value))
 
-    # Cross-path renumbering: a leaf that moved to a differently-numbered key
-    # (e.g. the article number is baked into the key itself). Pair only_old
-    # and only_new entries whose CANONICAL path is unique on both sides.
+    # Cross-path move: a leaf that moved to a differently-numbered key (e.g.
+    # the article number is baked into the key itself). Pair only_old and
+    # only_new entries whose CANONICAL path is unique on both sides -- but a
+    # moved leaf is a RENUMBERING only when its value is ALSO unchanged after
+    # canonicalisation; otherwise the move carries a real value change and is
+    # reported as CHANGED (old path -> new path), never folded into
+    # renumbering just because the key happened to move too.
     def canon_path(path: tuple) -> tuple:
         return tuple(canonical(segment) for segment in path)
 
@@ -156,7 +206,11 @@ def diff_file(domain: str, rel_path: str, old_data, new_data) -> FileDelta:
         new_paths = new_by_canon.get(canon)
         if new_paths and len(old_paths) == 1 and len(new_paths) == 1:
             old_path, new_path = old_paths[0], new_paths[0]
-            delta.renumbered.append((old_path, old_leaves[old_path], new_path, new_leaves[new_path]))
+            old_value, new_value = old_leaves[old_path], new_leaves[new_path]
+            if canonical(old_value) == canonical(new_value):
+                delta.renumbered.append((old_path, old_value, new_path, new_value))
+            else:
+                delta.changed.append((old_path, old_value, new_path, new_value))
             paired_old.add(old_path)
             paired_new.add(new_path)
 
@@ -167,7 +221,7 @@ def diff_file(domain: str, rel_path: str, old_data, new_data) -> FileDelta:
 
     delta.identical.sort()
     delta.renumbered.sort(key=lambda row: (row[0], row[2]))
-    delta.changed.sort(key=lambda row: row[0])
+    delta.changed.sort(key=lambda row: (row[0], row[2]))
     delta.added.sort(key=lambda row: row[0])
     delta.removed.sort(key=lambda row: row[0])
     return delta
@@ -208,28 +262,126 @@ def consecutive_pairs(manifests: list[dict]) -> list[tuple[dict, dict]]:
     return pairs
 
 
-def pair_files(older: dict, newer: dict) -> list[tuple[str, str]]:
-    """(domain label, relative path) for every rules-domain and tables entry
-    present in BOTH editions' manifests."""
-    files = []
-    older_rules = older.get("rules") or {}
-    newer_rules = newer.get("rules") or {}
-    for key in sorted(set(older_rules) & set(newer_rules)):
-        if older_rules[key] == newer_rules[key]:
-            files.append((_domain_label(key), older_rules[key]))
+def _canonical_basename(rel_path: str) -> str:
+    """The basename of ``rel_path`` with a trailing 4-digit edition year
+    before the extension stripped, so e.g. ``tables/foo_2020.json`` and
+    ``tables/foo.json`` (or ``tables/foo_2025.json``) are recognised as the
+    same table renamed across editions."""
+    return EDITION_SUFFIX_PATTERN.sub("", Path(rel_path).name)
+
+
+def _keyed_outputs(manifest: dict) -> dict[str, str]:
+    """domain-key -> relative path for every output that carries a stable
+    identity key across editions: each ``rules`` entry (keyed
+    ``rules:<domain>``) plus the singular file keys. ``tables`` entries have
+    no such key -- they are matched separately, by path."""
+    keyed: dict[str, str] = {}
+    for key, value in (manifest.get("rules") or {}).items():
+        keyed[f"rules:{key}"] = value
+    for key in SINGULAR_FILE_KEYS:
+        value = manifest.get(key)
+        if value:
+            keyed[key] = value
+    return keyed
+
+
+def _keyed_domain_label(key: str) -> str:
+    if key.startswith("rules:"):
+        return _domain_label(key.split(":", 1)[1])
+    return key
+
+
+class WholeFileDelta:
+    """Whole-FILE additions/removals/renames between two editions'
+    manifests, over the UNION of manifest-declared outputs -- distinct from
+    (and reported before) the leaf-level diff of a matched file's
+    contents."""
+
+    def __init__(self):
+        self.added: list[tuple[str, str]] = []        # (domain, new_path)
+        self.removed: list[tuple[str, str]] = []       # (domain, old_path)
+        self.renamed: list[tuple[str, str, str]] = []  # (domain, old_path, new_path)
+
+    @property
+    def total(self) -> int:
+        return len(self.added) + len(self.removed) + len(self.renamed)
+
+
+def diff_whole_files(older: dict, newer: dict) -> tuple[WholeFileDelta, list[tuple[str, str, str]]]:
+    """Whole-file added/removed/renamed, plus the (domain, old_rel_path,
+    new_rel_path) triples for every output MATCHED between the two editions
+    (same key/path, or matched-but-renamed) -- the latter is what feeds the
+    leaf-level diff. An output declared by only one manifest never appears
+    in the matched list; a renamed one appears in both (as a rename here,
+    and as a normal leaf-diffable pair there) so its content is still
+    compared."""
+    delta = WholeFileDelta()
+    pairs: list[tuple[str, str, str]] = []
+
+    older_keyed = _keyed_outputs(older)
+    newer_keyed = _keyed_outputs(newer)
+    for key in sorted(set(older_keyed) & set(newer_keyed)):
+        old_path, new_path = older_keyed[key], newer_keyed[key]
+        domain = _keyed_domain_label(key)
+        if key.startswith("rules:") or key in LEAF_DIFFABLE_SINGULAR_KEYS:
+            pairs.append((domain, old_path, new_path))
+        if old_path != new_path:
+            delta.renamed.append((domain, old_path, new_path))
+    for key in sorted(set(older_keyed) - set(newer_keyed)):
+        delta.removed.append((_keyed_domain_label(key), older_keyed[key]))
+    for key in sorted(set(newer_keyed) - set(older_keyed)):
+        delta.added.append((_keyed_domain_label(key), newer_keyed[key]))
+
     older_tables = set(older.get("tables") or [])
     newer_tables = set(newer.get("tables") or [])
-    for rel_path in sorted(older_tables & newer_tables):
-        files.append((f"tables/{Path(rel_path).stem}", rel_path))
-    return files
+    exact = older_tables & newer_tables
+    for rel_path in sorted(exact):
+        pairs.append((f"tables/{Path(rel_path).stem}", rel_path, rel_path))
+    only_old = older_tables - exact
+    only_new = newer_tables - exact
+
+    old_by_canon: dict = {}
+    for rel_path in only_old:
+        old_by_canon.setdefault(_canonical_basename(rel_path), []).append(rel_path)
+    new_by_canon: dict = {}
+    for rel_path in only_new:
+        new_by_canon.setdefault(_canonical_basename(rel_path), []).append(rel_path)
+
+    paired_old, paired_new = set(), set()
+    for canon in sorted(old_by_canon):
+        old_paths = old_by_canon[canon]
+        new_paths = new_by_canon.get(canon)
+        if new_paths and len(old_paths) == 1 and len(new_paths) == 1:
+            old_path, new_path = old_paths[0], new_paths[0]
+            domain = f"tables/{Path(old_path).stem}"
+            pairs.append((domain, old_path, new_path))
+            delta.renamed.append((domain, old_path, new_path))
+            paired_old.add(old_path)
+            paired_new.add(new_path)
+
+    for rel_path in sorted(only_old - paired_old):
+        delta.removed.append((f"tables/{Path(rel_path).stem}", rel_path))
+    for rel_path in sorted(only_new - paired_new):
+        delta.added.append((f"tables/{Path(rel_path).stem}", rel_path))
+
+    delta.added.sort()
+    delta.removed.sort()
+    delta.renamed.sort()
+    # `pairs` is left in construction order (rule keys in manifest-key sort
+    # order, then tables in path order) rather than re-sorted by domain
+    # label -- that construction order is what already reproduces the
+    # pre-fix document's file ordering (e.g. "shw" before "necb", the
+    # `umbrella` rule key's label, because "shw" < "umbrella" but not
+    # "shw" < "necb").
+    return delta, pairs
 
 
-def collect_pair_deltas(older: dict, newer: dict) -> list[FileDelta]:
+def collect_pair_deltas(older: dict, newer: dict, pairs: list[tuple[str, str, str]]) -> list[FileDelta]:
     deltas = []
-    for domain, rel_path in pair_files(older, newer):
-        old_data = json.loads((older["_dir"] / rel_path).read_text(encoding="utf-8"))
-        new_data = json.loads((newer["_dir"] / rel_path).read_text(encoding="utf-8"))
-        deltas.append(diff_file(domain, rel_path, old_data, new_data))
+    for domain, old_rel_path, new_rel_path in pairs:
+        old_data = json.loads((older["_dir"] / old_rel_path).read_text(encoding="utf-8"))
+        new_data = json.loads((newer["_dir"] / new_rel_path).read_text(encoding="utf-8"))
+        deltas.append(diff_file(domain, old_rel_path, new_rel_path, old_data, new_data))
     return deltas
 
 
@@ -255,23 +407,42 @@ def render(pairs: list[tuple[dict, dict]]) -> str:
         "is a review artifact over rule VALUES, not the citation renumbering the",
         "coverage documents already track.",
         "",
+        "Before the leaf-level tables, whole-file ADDED / REMOVED / RENAMED is",
+        "reported over the union of every manifest-declared output — an output",
+        "declared by only one edition, or renamed between editions, is called out",
+        "there rather than silently dropped from the comparison.",
+        "",
     ]
 
     if not pairs:
         out.extend(["_No consecutive edition pair found._", ""])
         return "\n".join(out)
 
-    all_pair_deltas = [(older, newer, collect_pair_deltas(older, newer)) for older, newer in pairs]
+    all_pair_deltas = []
+    for older, newer in pairs:
+        whole_file_delta, matched_pairs = diff_whole_files(older, newer)
+        deltas = collect_pair_deltas(older, newer, matched_pairs)
+        all_pair_deltas.append((older, newer, whole_file_delta, deltas))
 
     out.extend(["## Summary", ""])
-    for older, newer, deltas in all_pair_deltas:
+    for older, newer, whole_file_delta, deltas in all_pair_deltas:
         out.append(f"### {older['id']} \u2192 {newer['id']}")
         out.append("")
+        if whole_file_delta.total:
+            out.append("**Whole-file changes**")
+            out.append("")
+            for domain, new_path in whole_file_delta.added:
+                out.append(f"- added: `{new_path}` ({domain})")
+            for domain, old_path in whole_file_delta.removed:
+                out.append(f"- removed: `{old_path}` ({domain})")
+            for domain, old_path, new_path in whole_file_delta.renamed:
+                out.append(f"- renamed: `{old_path}` \u2192 `{new_path}` ({domain})")
+            out.append("")
         out.append("| File | Identical | Renumbered | Changed | Added | Removed |")
         out.append("|---|---|---|---|---|---|")
         for delta in deltas:
             out.append(
-                f"| {delta.domain} (`{delta.rel_path}`) | {len(delta.identical)} | "
+                f"| {delta.domain} (`{delta.rel_path_label}`) | {len(delta.identical)} | "
                 f"{len(delta.renumbered)} | {len(delta.changed)} | {len(delta.added)} | "
                 f"{len(delta.removed)} |"
             )
@@ -288,12 +459,12 @@ def render(pairs: list[tuple[dict, dict]]) -> str:
         )
         out.append("")
 
-    for older, newer, deltas in all_pair_deltas:
+    for older, newer, _whole_file_delta, deltas in all_pair_deltas:
         out.extend([f"## {older['id']} \u2192 {newer['id']}", ""])
         for delta in deltas:
             out.extend([
                 "<details>",
-                f"<summary><b>{delta.domain}</b> (`{delta.rel_path}`) — "
+                f"<summary><b>{delta.domain}</b> (`{delta.rel_path_label}`) — "
                 f"{delta.total} leaves: {len(delta.identical)} identical, "
                 f"{len(delta.renumbered)} renumbered, {len(delta.changed)} changed, "
                 f"{len(delta.added)} added, {len(delta.removed)} removed "
@@ -312,8 +483,12 @@ def render(pairs: list[tuple[dict, dict]]) -> str:
             if delta.changed or delta.added or delta.removed:
                 out.extend(["#### Changed / added / removed", "", "| Path | Kind | Old \u2192 New |",
                            "|---|---|---|"])
-                for path, old_value, new_value in delta.changed:
-                    out.append(f"| `{_path_str(path)}` | changed | {_fmt(old_value)} \u2192 {_fmt(new_value)} |")
+                for old_path, old_value, new_path, new_value in delta.changed:
+                    if old_path == new_path:
+                        path_label = f"`{_path_str(old_path)}`"
+                    else:
+                        path_label = f"`{_path_str(old_path)}` \u2192 `{_path_str(new_path)}`"
+                    out.append(f"| {path_label} | changed | {_fmt(old_value)} \u2192 {_fmt(new_value)} |")
                 for path, value in delta.added:
                     out.append(f"| `{_path_str(path)}` | added | \u2014 \u2192 {_fmt(value)} |")
                 for path, value in delta.removed:

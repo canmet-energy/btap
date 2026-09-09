@@ -262,7 +262,7 @@ def _collect(o, namespace):
 def _version():
     try:
         from importlib.metadata import version
-        return version("btap")
+        return version("canmet-btap")  # the DISTRIBUTION name, not the import name
     except Exception:
         return "dev"
 

@@ -144,6 +144,18 @@ def determine(run):
     ``compliance._build_reference`` is called rather than the implementation
     directly: it is the function the article-coverage pointers name, and a
     pointer must name code that runs."""
+    if run.opts["simulate"] == "none":
+        # The pipeline skipped the proposed sizing run; what that costs is
+        # NECB's own statement, not the lifecycle's. Emitted here because
+        # `determine` is the first hook the pipeline calls after the skipped
+        # sizing phase and nothing audits in between, so the entry keeps its
+        # position in the trail.
+        run.audit.warn(
+            "compliance",
+            "proposed is UNSIZED (simulate: :none) — data-centre kW "
+            "thresholds and capacity-binned efficiencies fall back with "
+            "warnings; the 5.2.10.1 energy-recovery determination needs "
+            "sized flows and is SKIPPED")
     compliance._build_reference(run)  # 5. reference transforms on one clone
     _size_reference(run)              # 6. reference sizing + post-sizing passes
     _compare_and_iterate(run)         # 7. 8.4.1.2.(2)-(4) + sentence-(5) loop
@@ -174,6 +186,21 @@ def report_sections(run):
     order = ("proposed", "reference", "eui", "eui_path", "ghg", "tier",
              "capacity_iterations")
     return [name for name in order if report.get(name) not in (None, {}, [])]
+
+
+def abort(audit, error):
+    """The failure-flush entry, in NECB's terms: 8.4.2.1 makes compliance a
+    matter of MODELING, so a run that ended before it could model both
+    buildings made no determination at all. The pipeline calls this from
+    :func:`btap.codes.pipeline._flush_on_failure` just before it writes the
+    trail, on both NECB paths (the reference lifecycle and the archetype-EUI
+    :func:`alternate_path`), so every aborted NECB run cites the same
+    article."""
+    audit.warn("compliance",
+               f"run ABORTED before completion: {type(error).__name__}: "
+               f"{error}",
+               inputs={"error_class": type(error).__name__},
+               article="8.4.2.1.")
 
 
 def alternate_path(model, name, *, ruleset, weather, hdd, run_dir, simulate,
@@ -529,7 +556,10 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
             proposed=proposed, reference=None, report=report, audit=audit,
             compliant=compliant))
     except Exception as e:
-        pipeline._flush_on_failure(str(run_dir), report, audit, e)
+        # `ruleset.path()` is this very module — reached the way the pipeline
+        # reaches it, through the registry, rather than by naming ourselves.
+        pipeline._flush_on_failure(str(run_dir), report, audit, e,
+                                   ruleset.path())
         raise
 
 

@@ -264,6 +264,30 @@ def resolve_deep(value, ctx):
     return value
 
 
+
+def _as_text(value):
+    """Partial subprocess output as str, whether Python gave bytes or text."""
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
+
+
+def _kill_process_group(proc):
+    """Kill the worker AND its descendants (it runs in its own session), then
+    reap it so the pipes close."""
+    import signal
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    try:
+        proc.communicate(timeout=10)
+    except Exception:  # noqa: BLE001 — it is dead; nothing more to collect
+        pass
+
+
 def _execute_api(scenario, run_dir, ctx):
     """An API scenario in an ISOLATED WORKER SUBPROCESS.
 
@@ -283,21 +307,27 @@ def _execute_api(scenario, run_dir, ctx):
     try:
         with os.fdopen(handle, "w", encoding="utf-8") as fh:
             json.dump(call, fh)
+        timeout_s = scenario.get("timeout_s", DEFAULT_TIMEOUT_S)
+        # The worker starts its OWN process group so that a timeout kills
+        # everything it spawned — an EnergyPlus descendant must not outlive
+        # the worker that was waiting on it (review Medium).
+        proc = subprocess.Popen(
+            [python_exe(), str(API_WORKER), payload, str(run_dir)],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env=env, cwd=str(REPO_ROOT), start_new_session=True)
         try:
-            proc = subprocess.run(
-                [python_exe(), str(API_WORKER), payload, str(run_dir)],
-                capture_output=True, text=True, env=env, cwd=str(REPO_ROOT),
-                timeout=scenario.get("timeout_s", DEFAULT_TIMEOUT_S),
-                check=False)
-            returncode, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
+            stdout, stderr = proc.communicate(timeout=timeout_s)
+            returncode = proc.returncode
         except subprocess.TimeoutExpired as expired:
             # A timeout is a FAILED RUN, never a hang and never a silent
             # pass: no observations to read, so the run carries the error
-            # `compare` turns into a problem.
-            timeout_s = scenario.get("timeout_s", DEFAULT_TIMEOUT_S)
+            # `compare` turns into a problem. Python hands back the partial
+            # output as BYTES even under text=True (review Medium), so it is
+            # decoded before it can touch a str.
+            _kill_process_group(proc)
             return ScenarioRun(
-                None, expired.stdout or "",
-                (expired.stderr or "") + f"\nTIMEOUT after {timeout_s}s\n",
+                None, _as_text(expired.stdout),
+                _as_text(expired.stderr) + f"\nTIMEOUT after {timeout_s}s\n",
                 run_dir,
                 observations={"error": f"api worker timed out after "
                                        f"{timeout_s}s"})
