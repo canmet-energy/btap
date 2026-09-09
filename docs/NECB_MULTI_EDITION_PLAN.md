@@ -1607,3 +1607,73 @@ decisions: Stage 8 (one plan per back-catalogue edition, transcription
 and engineering review), 9b (OBC SB-10, a new domain), 9c (BC Step Code,
 absolute metrics). Open for the user: Sol's review; `.wslconfig`; DF-1;
 the HPWH prose; merging the stacked PRs (#34, #35, and 3–7 + 9a queued).
+
+## 9a scope, corrected — 2026-09-09
+
+Review of the delivered Stage 9a found the claim wider than the code. The
+finding, verified: `CodePath.citations()` and `report_sections()` had **no
+product call sites** (tests only); the shared pipeline still spoke NECB in
+its own voice (the `5.2.10.1` energy-recovery sentence in `_size_proposed`
+and the `article="8.4.2.1."` emission in `_flush_on_failure`); and the shared
+renderer `report/sections.py` writes NECB Section 8.4 article paths as
+literals in 13 places. NECB was not regressed, but OBC or BCBC could not have
+arrived as a sibling package plus a manifest line alone.
+
+**What 9a delivers, stated narrowly: an NECB-PRESERVING scaffold.** The
+lifecycle and the family boundary are real — the `CodePath` protocol, the
+manifest `path` key resolved through `Ruleset.path()`, the forwarders on the
+executed call path, and the import-linter contract that keeps
+`btap.codes.pipeline` free of `btap.codes.necb` (4 kept). Everything a second
+family would need in order to render and cite *itself* is **deferred to
+9b/9c**, where a real second family makes the neutral shape testable rather
+than speculative.
+
+**Moved in the correction** (byte-identical; no re-freeze, and
+`verification/scenarios/` untouched):
+
+| emission | was | now | order proof |
+|---|---|---|---|
+| the `simulate: :none` warning naming data-centre kW thresholds, capacity-binned efficiencies and the 5.2.10.1 energy-recovery determination | `pipeline._size_proposed` | `necb.path.determine`, guarded on `simulate == "none"`, before `compliance._build_reference` | index **3** of a 233-entry `simulate="none"` trail before and after; nothing audits between the skipped sizing phase and `determine` |
+| `run ABORTED before completion: …`, `article="8.4.2.1."` | `pipeline._flush_on_failure` | `necb.path.abort`, called by `_flush_on_failure` immediately before `_write_outputs` | index **3** of the 4-entry flushed failure trail before and after; still the trail's last entry |
+
+`CodePath` gained one hook, `abort(audit, error)`, for the second of those.
+It takes the audit and the exception rather than a run because the failure
+flush also serves `alternate_path`, which has no pipeline `_Run`. The NECB
+citation had to stay a **literal `article=` keyword in family source**: the
+Section 8.4 scanner (`generate_necb_8_4_coverage.py::_scan_citations`) reads
+`article=` constants by AST, so routing 8.4.2.1 through `citations()` or a
+module constant would have dropped the `(2020|2025, 8.4.2.1, warn)` count to
+zero and broken the no-loss gate. `docs/NECB_8_4_COVERAGE.html` regenerated:
+the 8.4.2.1 citation now resolves to `necb/path.py:203` instead of
+`pipeline.py:410`, plus line shifts on seven sites in the same file.
+
+**Deferred to 9b/9c, explicitly not delivered by 9a:**
+
+1. **`report/sections.py`'s hardcoded 8.4 paths — 13 sites, by function:**
+   `verdict_banner` (6: the `EUI PATH (8.4.4)` badges and the shortened-run
+   `8.4.1.2` strip), `path_declaration` (2: the `8.4.1.2` and `8.4.4` rows of
+   the path-declaration table), `energy` (3: the `BET (8.4.4)` target row, the
+   Table 8.4.4.1 heading, and the `8.4.1.2.(5)` capacity-iteration caption),
+   `hvac_building_block` (2, prose). The renderer already takes its code NAME
+   from `report['code_label']` (`sections.code_family`); the article NUMBERS
+   are still NECB literals. `tests/necb/test_code_path.py::
+   TestDeferredRendererInventory` pins this inventory so a later edit is
+   deliberate.
+2. **The `citations()` and `report_sections()` hooks stay unwired.** Wiring
+   either today would add or move a report leaf: the renderer is handed a
+   report dict, not a `_Run` and not a `Ruleset`, and `render_all` composes
+   from its own fixed `ORDER` of section functions, which is a different list
+   from `report_sections()`'s report keys. Neutralizing them means plumbing
+   the ruleset into the render context and adding article keys to the
+   manifests — a report change, and 9b/9c's work.
+3. **Failure-citation text on the neutral side.** `pipeline.
+   _validate_input_model` still RAISES NECB-specific prose (Table 8.4.4.7.-A
+   System 3-vs-6, the 8.4.1.2 determination). Those are exceptions, not audit
+   entries, and the rev-7 ownership table deliberately keeps the neutral
+   model-loading half in the pipeline — but the text is NECB's, and a second
+   family will need it parameterized.
+
+Gate: `tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` now
+asserts that **no audit-surface call in `btap/codes/pipeline.py` cites a code
+article** — no `article=` keyword, no `[58].x.y` literal in a message — which
+is the property "the pipeline emits nothing NECB" reduces to.
