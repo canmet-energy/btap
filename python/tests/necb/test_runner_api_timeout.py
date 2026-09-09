@@ -21,6 +21,7 @@ runner = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(runner)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "reads /proc")
 class TestApiWorkerTimeout(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -61,14 +62,24 @@ class TestApiWorkerTimeout(unittest.TestCase):
         self.assertTrue(self.pid_file.is_file(), "the fake worker never started")
         pid = int(self.pid_file.read_text())
         for _ in range(50):
-            try:
-                os.kill(pid, 0)
-            except ProcessLookupError:
+            if not _alive(pid):
                 break
             time.sleep(0.1)
         else:
             os.kill(pid, 9)
             self.fail(f"grandchild {pid} survived the worker's timeout")
+
+
+def _alive(pid):
+    """Is the process still RUNNING? A killed orphan becomes a zombie in a
+    container with no init to reap it (the CI image), and os.kill(pid, 0)
+    succeeds on a zombie — so read the state from /proc instead."""
+    try:
+        with open(f"/proc/{pid}/stat", encoding="utf-8") as fh:
+            state = fh.read().rsplit(")", 1)[1].split()[0]
+    except FileNotFoundError:
+        return False
+    return state not in ("Z", "X")
 
 
 if __name__ == "__main__":
