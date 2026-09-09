@@ -1728,3 +1728,16 @@ is the property "the pipeline emits nothing NECB" reduces to.
   python 32 / verify 3 / parity 4 green; targeted 48; 4 contracts kept;
   gates and docs clean. Remaining from the review: the four-job dispatch
   on this head (network permitting).
+- **Final-head dispatch 34314583564 failed in `verify`** on the new
+  timeout test: in the CI container nothing reaps orphans, the killed
+  grandchild lingers as a zombie, and `os.kill(pid, 0)` succeeds on a
+  zombie. The test now reads the state from `/proc` (`cb8581c`); 953 other
+  tests passed in that run. Re-dispatched as 34346550719; **#41 retargeted
+  to `stage7-integration`** (it carries 9a). User: "do it" → merge #34–#41
+  bottom up **with merge commits** (three manifests' `provenance.commit`
+  name freeze commits; a squash would orphan them), each PR retargeted to
+  main first, gated on the re-dispatch being green (`merge_stack.sh`).
+- **Re-dispatch 34346550719: all four jobs green. #34–#41 merged bottom
+  up with merge commits, 11:50–11:51 on 2026-09-09; `origin/main` =
+  `d64eaca`, tree identical to `stage9a-review`.** The multi-edition
+  refactor, Stages 0–7 and 9a plus Sol's post-9a fixes, is on main.
