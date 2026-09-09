@@ -1750,3 +1750,19 @@ is the property "the pipeline emits nothing NECB" reduces to.
   **`origin/main` now equals the final reviewed tree.** Lesson recorded:
   never silence the output of a step whose failure changes what the next
   step does; verify the tree, not the log.
+
+## Stage 8 — POSTPONED (user decision, 2026-09-09)
+
+The MCP codes server carries NECB 2020 and 2025 only, so the 201x
+editions would have to be transcribed from printed text with no
+retrievable source artifact — `manual` provenance for every Part 8 rule
+and most tables, and no cross-check like the 2025 files had. The user
+postponed Stage 8 until the MCP carries the 201x editions. **Trigger to
+reopen:** `get_code_info("necb")` lists a 201x edition. **First items
+when it reopens**, both recorded above: the coverage HTML template's
+hardcoded 2020/2025 placeholders and `Inputs.cache_20xx` fields (a third
+edition would be silently dropped from the rendered document), and
+`test_generate_necb_8_4_coverage.py` deriving its edition list from the
+registry; then a per-edition plan in the rev-7 shape (2017 first) with
+the table inventory as its first deliverable, for Sol's review before any
+rule file is written. 9b/9c remain new implementation plans.
