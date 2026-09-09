@@ -2,7 +2,7 @@
  "provenance": {
   "code": "NECB",
   "edition": "2025",
-  "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors, split out in 2025), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). ALL VALUES VERIFIED IDENTICAL to NECB 2020 (opaque/fenestration/ground tables byte-match; 2025 door table equals the 2020 door row). Performance-path articles renumbered 8.4.4.x -> 8.4.5.x (verbatim text).",
+  "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). The performance-path articles this file cites are in Subsection 8.4.5.",
   "generated": "2026-07-12",
   "articles": [
    "3.1.1.6",

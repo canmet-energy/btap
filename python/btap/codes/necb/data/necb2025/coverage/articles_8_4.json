@@ -5,7 +5,7 @@
     "division": "B",
     "retrieved": "2026-07-22",
     "source": "building-codes MCP (get_section, JSON-RPC), Crown copyright — reproduction authorized (GoC work)",
-    "note": "Regenerate with: ruby scripts/fetch_necb_8_4_text.rb. The 2020->2025 renumbering (8.4.4->8.4.5) makes stale text actively misleading; check `retrieved` before trusting."
+    "note": "Regenerate with: ruby scripts/fetch_necb_8_4_text.rb. Section 8.4 is renumbered between editions, so stale text is actively misleading; check `retrieved` before trusting."
   },
   "articles": {
     "8.4.1.1": {

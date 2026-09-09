@@ -86,9 +86,14 @@ class TestDataIntegrity(unittest.TestCase):
         # aliases 2020's, it ships byte-identical copies of them.
         self.assertEqual(lighting.table("led_lighting", "2020"),
                          lighting.table("led_lighting", "2025"))
-        self.assertTrue(re.search(r"zero LPD differences|ZERO value differences",
-                                  lighting.rules("2025")["provenance"]["method"],
-                                  re.IGNORECASE))
+        # The provenance states this edition's OWN transcription, not a
+        # comparison with another edition's (D-88): the table equality the old
+        # 'ZERO value differences' sentence asserted is proven structurally
+        # above, and the edition delta is generated into
+        # docs/NECB_EDITION_DELTAS.md.
+        method = lighting.rules("2025")["provenance"]["method"]
+        self.assertTrue(re.search(r"Table 4\.2\.1\.6 is transcribed in full", method))
+        self.assertFalse(re.search(r"IDENTICAL to 2020", method, re.IGNORECASE))
 
 
 if __name__ == "__main__":

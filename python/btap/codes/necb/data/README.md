@@ -328,10 +328,14 @@ Each edition holds its own copy of every table it uses.
 - `space_types.json` — the 308 NECB2020-lineage space-type records, vendored
   VERBATIM from the openstudio-standards **MERGED** standards_data (inheritance
   chain NECB2011←2015←2017←2020, later keys win — the raw per-vintage files are
-  partial; the merge is what legacy actually runs). Every record keeps all 80
-  keys, including `lighting_*` and `service_water_heating_*`. Units are IP as in
-  legacy (documented in the provenance block); the apply layer converts exactly
-  as legacy does.
+  partial; the merge is what legacy actually runs). Every record keeps 78 of the
+  merge's 80 keys, including `lighting_*` and `service_water_heating_*`; the two
+  it drops are the vendored template columns `lighting_standard` and
+  `target_illuminance_setpoint_ref`, removed 2026-09-09 under D-88 because they
+  labelled every row `NECB2020` in BOTH editions' copies and nothing read them
+  (`led_lighting.json` drops `lighting_standard` for the same reason). Units are
+  IP as in legacy (documented in the provenance block); the apply layer converts
+  exactly as legacy does.
 - `schedules.json` — the 240 `NECB-<letter>-<category>` schedule records (Hourly
   24-value rows per `day_types` token + Constant records), vendored from the
   merged standards_data (the schedules table is inherited from NECB2015 —

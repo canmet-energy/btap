@@ -39,8 +39,14 @@ class TestSHWRules(unittest.TestCase):
         # plan: shw reads the space-type and schedule tables out of the edition
         # it was called with, and no rules file carries an alias key.
         self.assertIsNone(shw.rules("2025").get("data_vintage_alias"))
-        self.assertRegex(shw.rules("2025")["changes_vs_2020"]["heat_pump_storage_water_heater"],
-                         r"UEF >= 2\.23")
+        # And no snapshot describes itself by comparison with another edition
+        # (D-88): the changes_vs_2020 block this used to read is gone, and the
+        # delta between editions is generated into docs/NECB_EDITION_DELTAS.md.
+        # The requirement it pinned is read from the rule the engine applies.
+        self.assertIsNone(shw.rules("2025").get("changes_vs_2020"))
+        self.assertRegex(shw.rules("2025")["efficiency"]["heat_pump"]["metric"],
+                         r"UEF")
+        self.assertEqual(2.23, shw.rules("2025")["efficiency"]["heat_pump"]["minimum_cop"])
 
     # 8.4.5.9.(2) / 8.4.6.9.(2). FUNCTIONAL gate, not a coefficient pin: the code
     # writes a fuel-ratio curve (Fuel_pl = Fuel_des x FHeatPLC) while the E+

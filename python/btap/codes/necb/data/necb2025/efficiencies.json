@@ -2,23 +2,13 @@
   "provenance": {
     "code": "NECB",
     "edition": "2025",
-    "source": "NECB 2025 Table 5.2.12.1 series. RE-VERIFIED against the post-hbix#88 MCP extraction 2026-08-02 (D-60): the 2025 letter map MIRRORS 2020 (-A unitary ACs & HPs, -G PTAC/PTHP, -K chillers, -N boilers, -O furnaces, -I VRF, -M plant heat pumps heating). The earlier map in this block (\"-C PTAC/PTHP\") came from a corrupted pre-fix extraction; 2025 -C is the water/evaporatively-cooled unitary table.",
+    "source": "NECB 2025 Table 5.2.12.1 series, retrieved via the building-codes MCP (necb:2025); performance curves vendored from openstudio-standards NECB2011/data/curves.json. RE-VERIFIED against the post-hbix#88 MCP extraction 2026-08-02 (D-60): the letter map is -A unitary ACs & HPs, -G PTAC/PTHP, -K chillers, -N boilers, -O furnaces, -I VRF, -M plant heat pumps heating. The earlier map in this block (\"-C PTAC/PTHP\") came from a corrupted pre-fix extraction; -C is the water/evaporatively-cooled unitary table.",
     "generated": "2026-07-12",
     "articles": [
       "5.2.12.1",
       "5.2.12.2"
     ],
-    "verification": {
-      "unitary_acs": "Table -A 2025: large EER ladder identical to 2020 (verified printed); SEER2 single-phase rows (14.3) added verbatim - INERT for the engine (subcategory \"(single-phase)\" never matches the Single Package lookup).",
-      "heat_pumps": "Table -A small bin: the printed row reads \"air conditioners AND heat pumps ... SEER 15\" in BOTH editions, and both files now take that explicit class reading (D-59). The large ladder is identical.",
-      "heat_pumps_heating": "Table -A 2025: split-system small HSPF 7.4 -> 7.8 (printed, verified); single-package stays 7.4; COPh 3.3/3.2 ladder identical; low-temp COPh 2.25/2.05 vendored informationally (unread by the engine - the -8.3 C behaviour comes from the reference curves).",
-      "ptac_pthp": "Table -G 2025 is IDENTICAL to 2020 -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9). The earlier claim that \"Table -C changed moderately\" was the corrupted-extraction artifact; the carried-over coefficients are CORRECT for 2025 and the engine DOES apply them (verified in fleet audits).",
-      "chillers": "Table -K 2025 is byte-identical to 2020 -K (verified printed): Path B COPc ladder unchanged.",
-      "boilers": "Table -N 2025 identical to 2020 (verified printed).",
-      "furnaces": "Table -O 2025 identical under the same documented row choices (2025 moves the three-phase AFUE 78/Et 80 option to the <= 66 kW bin; the vendored strict-side picks are unaffected).",
-      "heat_rejection_5_2_12_2": "Table 5.2.12.2 2025 = the same 10 rows as 2020 (the 2020 extraction doubled them); axial direct-contact tower <= 0.013 kW/kW in BOTH editions - the apply_tower_rules constant is correct for 2025.",
-      "selection_8_4_5_7_A": "Table 8.4.5.7.-A 2025 is VERBATIM 8.4.4.7.-A 2020 (verified printed); the vendored 2025 selection rules differ from 2020 only in table-number strings; the 97-system matrix run under vintage 2025 produces identical assignments (D-60)."
-    }
+    "note": "Capacity match rule (ported from legacy model_find_object): row matches when minimum_capacity < capacity <= maximum_capacity, retried at 0.99x capacity on boundary misses; criteria keys absent from a row act as wildcards. Values re-verified against the post-hbix#88 MCP extraction 2026-08-02 (D-59/D-60): unitary_acs and heat_pumps = Table 5.2.12.1.-A, the small air-cooled bin reading \"air conditioners AND heat pumps ... SEER 15\" as an explicit class (D-59); PTAC/PTHP = Table -G (EER 11.9 / 14.1-1.0435xCap / 9.5; PTHP COPh 3.3/formula/2.9); heat_pumps_heating = Table -A (split-system small HSPF 7.8, single-package 7.4, COPh 3.3/3.2); chillers = Table -K Path B full-load COPc; boilers = Table -N; furnaces = Table -O (strict-side row choices documented). Vendored but INERT for the engine: the single-phase SEER2/EER2/HSPF2 rows (the subcategory never matches the Single Package lookup), the low-temperature COPh 2.25/2.05 rows (the -8.3 C behaviour comes from the reference part-load curves), and the Table 5.2.12.1.-M plant-heat-pump COPs. The heat_rejection family is VESTIGIAL for the reference path — never read by apply_efficiencies; the reference tower fan is set by apply_tower_rules from Table 5.2.12.2 plus the 8.4.5.11.(2)-(3) cell rules (D-26). IEER/IPLV/SCOP columns are not modeled: EnergyPlus carries full-load COP plus the vendored NECB reference part-load curves."
   },
   "vrf_air_source_heat_pumps": [
     {
@@ -2207,7 +2197,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2228,7 +2218,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2249,7 +2239,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2270,7 +2260,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2666,7 +2656,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "NECB 2025 Table 5.2.12.1.-A: split-system others HSPF V = 7.8 (2020: 7.4)."
+      "notes": "NECB 2025 Table 5.2.12.1.-A: split-system others HSPF V = 7.8."
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2883,5 +2873,5 @@
       "minimum_cop_lwt_60c": 2.95
     }
   ],
-  "plant_heat_pumps_heating_note": "NEW in NECB 2025 (Table 5.2.12.1.-M): plant AWHP/W2W heating COPs by leaving water temperature. Informational - not yet consumed by the engine (candidate for hs12/15/16 plant HP efficiency application)."
+  "plant_heat_pumps_heating_note": "NECB 2025 Table 5.2.12.1.-M: plant AWHP/W2W heating COPs by leaving water temperature. Informational - not yet consumed by the engine (candidate for hs12/15/16 plant HP efficiency application)."
 }

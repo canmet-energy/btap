@@ -40,7 +40,7 @@
       "method": "transcribed",
       "source_verification": "manual",
       "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
-      "result_sha256": "72594c074f5c3cdab3e8e0ad2253c03adba98009de8854ccad0b6fcfed495834"
+      "result_sha256": "f14f9e3fdeaec86a29baca0b1648f14dec3367967db303984f9a22e6a8b00168"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2020",
@@ -206,7 +206,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "8c359b03b2352f916e47e84d1495830d8a3d9ebb424537c009305667411eb832"
+      "result_sha256": "974e86a38cc625cffa2bb95a1dc79f964c97ba66a78204179cc86774b89ad872"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -299,7 +299,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This file carries only this edition's schedule-table numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the two tables this file's own verification block names.",
-      "result_sha256": "22f5d0bb083bca068ebe38016b5348cc45be679fd135287dafc44cb5b8e5644b"
+      "result_sha256": "2f63448c62a1dccd07e76bf5060594b30c309929345a27e82b3742face8155d5"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -348,8 +348,8 @@
       "retrieved": "2026-07-12",
       "method": "generated",
       "source_verification": "revision_addressable",
-      "note": "The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json and the remaining 22 differ only by keys inherited from the earlier vintages. Units are IP as in legacy.",
-      "result_sha256": "2487b3c0cc2875fcd20ce78b21d8a5b680ff6ed8ddcb59443d61723e1b2a5388"
+      "note": "The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json and the remaining 22 differ only by keys inherited from the earlier vintages. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
+      "result_sha256": "3b3bba2aa078a1308f024fd32ebb6239c3d2ca5a67016454b426c5fa0efd2965"
     },
     "tables/schedules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -398,8 +398,8 @@
       "retrieved": "2026-07-12",
       "method": "generated",
       "source_verification": "revision_addressable",
-      "note": "The merged legacy led_lighting_data table (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json.",
-      "result_sha256": "cbcdbe4d3010cf6f14af3c63b23e3973fe8bd535db02b90e184df1f38be07bc4"
+      "note": "The merged legacy led_lighting_data table (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json. The vendored lighting_standard template column was removed 2026-09-09; no reader (D-88).",
+      "result_sha256": "0d3f6dd379c5457af9378773f51ef61283759a9806a47be402b8014f54c8d4c7"
     },
     "tables/exterior_lighting.json": {
       "source": "mcp:necb:2020",
@@ -446,8 +446,8 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "archived",
-      "note": "Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61), and the 2025 edition's five tables were diffed value-for-value against these (identical but for m2 unicode cosmetics). Table -C rows other than facades are merged cells in the source extraction and were transcribed with their applicable zones.",
-      "result_sha256": "09b61ee9068fcc3775fd0e299ec9835b311c89b78f199ac65942831d3c3983f1"
+      "note": "Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). Table -C rows other than facades are merged cells in the source extraction and were transcribed with their applicable zones.",
+      "result_sha256": "4c12b192a0f053e9e21ccdc5f1da84deb36a0804ad12a724f0c974ef85c32fe8"
     },
     "tables/table_c1.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -460,8 +460,8 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "revision_addressable",
-      "note": "Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values the 2020/2025 editions revised (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
-      "result_sha256": "4e07564e39efc33c3b11b89c1f05119d63f56467e8d1c3cb9027a054e1d88fdd"
+      "note": "Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values this edition revises (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
+      "result_sha256": "ffd0ba3e3fccbc1c61ae0b00a696b155f3adc542b1e4a967bd3a6d19653720fd"
     },
     "tables/daylighting_controls_4_2_1_6.json": {
       "source": "mcp:necb:2020",
@@ -478,8 +478,8 @@
       "retrieved": "2026-07-30",
       "method": "generated",
       "source_verification": "archived",
-      "note": "Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The 2025 edition's own 4.2.1.6 payload was compared at generation time — 0 differing cells of 909 — which is why the two editions ship byte-identical files; that is a finding, not a dependency.",
-      "result_sha256": "f4498b558863c4010c251e3d390f8b98e3eab6aff73f90bba31df9c353f6b611"
+      "note": "Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree).",
+      "result_sha256": "28320de1e7109f994ed6b9e1c50c7632e72b3e98dd6a8318b87107dcec02130e"
     },
     "coverage/articles_8_4.json": {
       "source": "mcp:necb:2020",
@@ -545,13 +545,13 @@
         ]
       },
       "source_revision": null,
-      "source_sha256": "ba2f978885cc5948cc091af0fd42f3899e17452ea2b91f963da4a6a85bc632a2",
+      "source_sha256": "b6dd39c335524b8b2fd643328afa3745dfdfd6be7439fe5cefb3686759339c1d",
       "extractor": "fetch_necb_8_4_text.rb@c7b0bf7",
       "retrieved": "2026-08-20",
       "method": "generated",
       "source_verification": "archived",
       "note": "THE CACHE IS THE RETAINED ARTIFACT, so source_sha256 == result_sha256 and no separate payload is stored: this document is the canonicalised output of one get_section call per Section 8.4 article, with page furniture stripped and each article parsed into a sentence/clause tree under strict sanity checks (an article that fails any check keeps parse_ok:false and its raw text). What is NOT retained is the raw per-article JSON-RPC result; re-fetching reproduces the cache, not a byte-identical payload set. Written by the Ruby fetcher at c7b0bf7 (2026-08-20), which the current python/scripts/fetch_necb_8_4_text.py ports with cache-schema parity; the Ruby original retired with the gems under D-84 and is reachable at that commit.",
-      "result_sha256": "ba2f978885cc5948cc091af0fd42f3899e17452ea2b91f963da4a6a85bc632a2"
+      "result_sha256": "b6dd39c335524b8b2fd643328afa3745dfdfd6be7439fe5cefb3686759339c1d"
     }
   }
 }

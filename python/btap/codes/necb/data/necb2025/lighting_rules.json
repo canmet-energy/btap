@@ -2,11 +2,7 @@
  "provenance": {
   "vintage": "2025",
   "generated": "2026-07-12",
-  "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPD values are IDENTICAL to 2020: Table 4.2.1.6 (2025) transcribed in full (tables/lpd_space_functions.json) and joined to the 2020 space-type records by normalized name — 162 exact matches with ZERO value differences (incl. all three atrium bins 4.2/5.2/6.5 W/m2 and manual spot checks of every rename); residual unmatched rows are renames ('Health care facility' -> 'Healthcare facility', the legacy 'Penitentary' typo, atrium bin phrasing) and dwelling units (handled by 8.4.4.5.(2), not the table). The significant edition diff is STRUCTURAL: 2025 added the per-row 4.2.2.1 lighting-control requirement matrix (vendored in tables/lpd_space_functions.json) and reorganized 4.2.2. Table 4.2.1.5 (2025) also transcribed (tables/lpd_building_types.json).",
-  "changes_vs_2020": {
-   "interior_lpd_values": "none found",
-   "controls": "4.2.2 reorganized into per-space-function requirement matrix (4.2.2.1 sentences); vendored as controls_4_2_2_1 per row"
-  }
+  "method": "NECB 2025 verified against the building-codes MCP (necb:2025). Interior LPDs live in this edition's space-type records (tables/space_types.json: lighting_per_area W/ft2), and Table 4.2.1.6 is transcribed in full in tables/lpd_space_functions.json — 162 rows including all three atrium bins 4.2/5.2/6.5 W/m2, with the per-row 4.2.2.1 lighting-control requirement matrix; dwelling units are handled by 8.4.5.5.(2), not the table. Table 4.2.1.5 is transcribed in tables/lpd_building_types.json. LED alternatives are vendored in this edition's own tables/led_lighting.json. Occupancy-sensor/personal-control factors (Table 4.3.2.10) live in the space-type keys occ_sense / rel_absence_occ / personal_control. Runtime never contacts the MCP."
  },
  "sensor_schedule_lpd_threshold_w_per_ft2": 0.799256505,
  "dwelling_unit_lpd_w_per_m2": 5.0,
