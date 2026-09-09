@@ -34,7 +34,7 @@ class TestReportHTML(unittest.TestCase):
         dir = tempfile.mkdtemp(prefix="osnecb-rpt-")
         proposed = proposed_with_hvac()
         result = performance_compliance(
-            proposed, vintage="2020", simulate="sizing", weather=weather(),
+            proposed, code="necb2020", simulate="sizing", weather=weather(),
             building=building_for(proposed), run_dir=dir)
 
         html = report_renderer.render(
@@ -86,7 +86,7 @@ class TestReportHTML(unittest.TestCase):
         dir = tempfile.mkdtemp(prefix="osnecb-rpt2025-")
         proposed = proposed_with_hvac()
         result = performance_compliance(
-            proposed, vintage="2025", simulate="annual", weather=weather(),
+            proposed, code="necb2025", simulate="annual", weather=weather(),
             building=building_for(proposed), run_dir=dir,
             run_period={"begin_month": 1, "begin_day": 1, "end_month": 1,
                         "end_day": 7},
@@ -124,7 +124,7 @@ class TestReportHTML(unittest.TestCase):
         dir = tempfile.mkdtemp(prefix="osnecb-rpthook-")
         proposed = proposed_with_hvac()
         result = performance_compliance(
-            proposed, vintage="2020", simulate="sizing", weather=weather(),
+            proposed, code="necb2020", simulate="sizing", weather=weather(),
             building=building_for(proposed), run_dir=dir,
             report_html=True, report_options={"project_name": "Hook Test"})
 

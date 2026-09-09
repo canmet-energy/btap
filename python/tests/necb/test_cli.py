@@ -70,9 +70,9 @@ class TestCLIUsage(CLICase):
         self.assertEqual(2, self.run_cli(FIXTURE, "--epw", str(EPW), "--nope"))
         self.assertRegex(self.err.getvalue(), r"invalid option")
 
-    def test_bad_vintage_is_rejected_by_the_parser(self):
+    def test_bad_code_is_rejected_by_the_parser(self):
         self.assertEqual(2, self.run_cli(FIXTURE, *self.weather_args(),
-                                         "--vintage", "2011"))
+                                         "--code", "necb2011"))
 
 
 @needs_sdk

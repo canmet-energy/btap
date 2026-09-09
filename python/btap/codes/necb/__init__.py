@@ -75,24 +75,24 @@ def _set_data_root(path: Path | None, *, _testing: bool = False) -> None:
     _DATA_ROOT = None if path is None else Path(path)
 
 
-def code_id(vintage) -> str:
+def code_id(edition) -> str:
     """The code id for an NECB edition ('2025' -> 'necb2025').
 
-    TRANSITIONAL alongside ``vintage``; Stage 7 of the multi-edition plan makes
-    the id the parameter the public API takes.
+    The public API takes the id itself (Stage 7); this maps the EDITION string
+    the per-edition data accessors still key on onto that id.
     """
-    return f"necb{vintage}"
+    return f"necb{edition}"
 
 
-def edition_file(vintage, *parts: str) -> Path:
+def edition_file(edition, *parts: str) -> Path:
     """One file inside one edition's snapshot, or a loud error.
 
-    :param vintage: the NECB edition ('2020', '2025')
+    :param edition: the NECB edition ('2020', '2025')
     :param parts: the path inside the snapshot ('tables', 'schedules.json')
     :raises ValueError: naming BOTH the edition and the path it wanted. Never a
         fallback to another edition — that is the defect this layout removes.
     """
-    edition_id = code_id(vintage)
+    edition_id = code_id(edition)
     path = _data_root().joinpath(edition_id, *parts)
     if not path.exists():
         raise ValueError(

@@ -30,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "python" / "scripts" / "generate_necb_8_4_coverage.py"
 BASELINE_PATH = Path(__file__).with_name("data") / "citation_counts_baseline.json"
 
-#: Editions the scanner resolves citations for today (``vintage_part``'s own
+#: Editions the scanner resolves citations for today (``edition_part``'s own
 #: loop in ``generate_necb_8_4_coverage.py:render``).
 EDITIONS = ("2020", "2025")
 
@@ -50,7 +50,7 @@ def compute_citation_counts(coverage_module: ModuleType | None = None) -> dict:
     """Return ``{edition: {article: {kind: count}}}``.
 
     Drives the scanner's own ``CoverageGenerator.citations_for(edition,
-    articles)`` — the exact citation resolution ``vintage_part`` uses to build
+    articles)`` — the exact citation resolution ``edition_part`` uses to build
     the coverage document — for each edition in ``EDITIONS``. Each citation
     site the scanner records for an article contributes one count to that
     site's ``kind``.

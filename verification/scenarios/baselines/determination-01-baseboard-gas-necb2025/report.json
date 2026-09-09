@@ -1,5 +1,7 @@
 {
- "vintage": "2025",
+ "edition": "2025",
+ "code": "necb2025",
+ "code_label": "NECB 2025",
  "hdd": 3890,
  "simulate": "annual",
  "proposed": {

@@ -1,5 +1,7 @@
 {
- "vintage": "2020",
+ "edition": "2020",
+ "code": "necb2020",
+ "code_label": "NECB 2020",
  "hdd": 3890,
  "simulate": "none",
  "proposed": {},

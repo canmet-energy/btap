@@ -15,10 +15,10 @@ from __future__ import annotations
 from btap.codes.necb import code_id, rulesdata
 
 
-def rules(vintage):
+def rules(edition):
     """This edition's shw rules — a shim over the family's ONE loader
     (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
-    return rulesdata.load("shw", code_id(vintage))
+    return rulesdata.load("shw", code_id(edition))
 
 
 # Demand + plant: see demand.apply_shw.

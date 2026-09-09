@@ -79,8 +79,8 @@ def box(windows=(), skylights=(), width=10.0, depth=8.0, height=3.0,
         zone = openstudio.model.ThermalZone(model)
         space.setThermalZone(zone)
         loads.assign_space_types(model, {space.nameString(): ["Space Function", space_type]},
-                                 vintage="2020")
-        lighting.apply_lights(model, vintage="2020")
+                                 code="necb2020")
+        lighting.apply_lights(model, code="necb2020")
     return model, space
 
 
@@ -379,7 +379,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
         model, space = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
-        created = lighting.add_daylighting_controls(model, vintage="2020", placement="necb2020",
+        created = lighting.add_daylighting_controls(model, code="necb2020", placement="necb2020",
                                                     audit=audit)
         self.assertEqual(1, created)
         zone = space.thermalZone().get()
@@ -403,7 +403,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
-        created = lighting.add_daylighting_controls(model, vintage="2020",
+        created = lighting.add_daylighting_controls(model, code="necb2020",
                                                     placement="necb2011", audit=audit)
         # Post-#2119: the skylight criteria no longer apply to a window-only space,
         # and the >=25 m2 enclosed-office exemption now matches the 2020 name, so
@@ -422,7 +422,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
-        lighting.reference_daylighting(model, vintage="2020", audit=audit)
+        lighting.reference_daylighting(model, code="necb2020", audit=audit)
         self.assertEqual(1, len(model.getDaylightingControls()),
                          "the reference now gets photocontrols where 4.2.2.1.(10) requires them")
         self.assertTrue(any("D-57" in str(e.get("ruling")) and e["level"] == "decision"
@@ -432,7 +432,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # the step count and the zone fraction, asserted above for 'necb2020'.
         legacy_model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)],
                               space_type="Office enclosed > 25 m2")
-        lighting.reference_daylighting(legacy_model, vintage="2020", placement="necb_default",
+        lighting.reference_daylighting(legacy_model, code="necb2020", placement="necb_default",
                                        office_match="legacy")
         self.assertEqual(1, len(legacy_model.getDaylightingControls()))
         self.assertEqual(
@@ -447,7 +447,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
-        lighting.add_daylighting_controls(model, vintage="2020", placement="necb2020", audit=audit)
+        lighting.add_daylighting_controls(model, code="necb2020", placement="necb2020", audit=audit)
         self.assertTrue(any("4.2.2.1.(15)(a) EXCEPTION IS NOT EVALUATED" in w["action"]
                             for w in audit.warnings),
                         "the un-modellable exception is declared, not hidden")
@@ -466,7 +466,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # option='NECB_Default' == placement='necb2020', end to end
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         audit = AuditLog()
-        created = lighting.add_daylighting_controls(model, vintage="2020", option="NECB_Default",
+        created = lighting.add_daylighting_controls(model, code="necb2020", option="NECB_Default",
                                                     audit=audit)
         self.assertEqual(1, created)
         self.assertEqual(3,
@@ -482,7 +482,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # (which, post-#2119, qualifies this space — the two-step control proves it
         # was the 2011 rule and not the 2020 one that ran)
         legacy, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
-        self.assertEqual(1, lighting.add_daylighting_controls(legacy, vintage="2020",
+        self.assertEqual(1, lighting.add_daylighting_controls(legacy, code="necb2020",
                                                               option="NECB_Default",
                                                               placement="necb2011"))
         self.assertEqual(2,
@@ -493,7 +493,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         # option='all' wins over placement, exactly as it silently used to
         blanket, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
         blanket_audit = AuditLog()
-        self.assertEqual(1, lighting.add_daylighting_controls(blanket, vintage="2020",
+        self.assertEqual(1, lighting.add_daylighting_controls(blanket, code="necb2020",
                                                               option="all", placement="necb2011",
                                                               audit=blanket_audit))
         self.assertEqual(2,
@@ -510,7 +510,7 @@ class TestDaylightingNecb2020(unittest.TestCase):
         from btap.codes.necb import lighting
 
         model, _ = box(windows=[(0.0, 10.0, 0.0, 3.0)], space_type="Office enclosed > 25 m2")
-        created = lighting.add_daylighting_controls(model, vintage="2020")
+        created = lighting.add_daylighting_controls(model, code="necb2020")
         self.assertEqual(1, created)
         self.assertEqual(2,
                          model.getThermalZones()[0].primaryDaylightingControl().get()

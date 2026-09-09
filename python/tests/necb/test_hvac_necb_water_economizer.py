@@ -54,17 +54,17 @@ class TestNecbWaterEconomizer(unittest.TestCase):
             c.setRatedTotalCoolingCapacity(30_000.0)
         return model
 
-    def reference(self, model, types, vintage='2020', storeys=1):
+    def reference(self, model, types, code='necb2020', storeys=1):
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage=vintage,
+            model, code=code,
             building={'storeys': storeys,
                       'zone_types': {z.nameString(): types for z in model.getThermalZones()}},
             audit=audit)
         return result, audit
 
-    def sys2_reference(self, vintage='2020'):
-        return self.reference(self.sys2_proposed(), 'Data centre', vintage=vintage)
+    def sys2_reference(self, code='necb2020'):
+        return self.reference(self.sys2_proposed(), 'Data centre', code=code)
 
     @staticmethod
     def d56(audit):
@@ -168,7 +168,7 @@ class TestNecbWaterEconomizer(unittest.TestCase):
         self.assertEqual(10.0, entry['inputs']['capability_dry_bulb_c'])
 
     def test_2025_cites_the_renumbered_article(self):
-        _, audit = self.sys2_reference(vintage='2025')
+        _, audit = self.sys2_reference(code='necb2025')
         entry = next((e for e in self.d56(audit)
                       if 'water-side economizer built' in e['action']), None)
         self.assertIsNotNone(entry)
@@ -196,9 +196,9 @@ class TestNecbWaterEconomizer(unittest.TestCase):
     # test_hvac_necb_energy_recovery.py's twin pin moved with the D-62 commit —
     # caught by the 2026-08 clarity-review verification pass).
     def test_8_4_4_12_is_implemented_and_no_longer_warns(self):
-        for vintage in ('2020', '2025'):
-            prefix = '8.4.4' if vintage == '2020' else '8.4.5'
-            entry = next(a for a in hvac.rules(vintage)['article_coverage']['articles']
+        for edition in ('2020', '2025'):
+            prefix = '8.4.4' if edition == '2020' else '8.4.5'
+            entry = next(a for a in hvac.rules(edition)['article_coverage']['articles']
                          if a['article'] == f'{prefix}.12.')
             self.assertEqual('implemented', entry['status'])
             self.assertNotRegex(str(entry.get('gaps') or ''), r'5\.2\.2\.8\.\(4\)-\(5\)',
@@ -213,7 +213,7 @@ class TestNecbWaterEconomizer(unittest.TestCase):
 
     def test_checker_no_longer_flags_a_loop_that_has_a_water_economizer(self):
         result, _ = self.sys2_reference()
-        audit = hvac.check_part5(result.model, vintage='2020')
+        audit = hvac.check_part5(result.model, code='necb2020')
         flagged = [w for w in audit.warnings if 'NO economizer' in w['action']]
         self.assertEqual([], flagged, 'the checker no longer contradicts the reference builder')
         note = next((e for e in audit.entries
@@ -229,7 +229,7 @@ class TestNecbWaterEconomizer(unittest.TestCase):
         result, _ = self.sys2_reference()
         for hx in list(result.model.getHeatExchangerFluidToFluids()):
             hx.remove()
-        audit = hvac.check_part5(result.model, vintage='2020')
+        audit = hvac.check_part5(result.model, code='necb2020')
         self.assertTrue(any('NO economizer' in w['action'] for w in audit.warnings),
                         'removing the exchanger restores the 5.2.2.8 finding — the suppression '
                         'is scoped, not blanket')

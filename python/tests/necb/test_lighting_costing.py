@@ -26,8 +26,8 @@ def costed_fixture_model(lights_type="NECB_Default"):
 
     model = load_raw_fixture()
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage="2020")
-    lighting.apply_lights(model, vintage="2020", lights_type=lights_type)
+    loads.assign_space_types(model, map_, code="necb2020")
+    lighting.apply_lights(model, code="necb2020", lights_type=lights_type)
     return model
 
 
@@ -38,7 +38,7 @@ class TestCosting(unittest.TestCase):
         from btap.codes.necb import lighting
 
         audit = AuditLog()
-        report = lighting.cost(costed_fixture_model(), vintage="2020",
+        report = lighting.cost(costed_fixture_model(), edition="2020",
                                city=CITY, province_state=PROVINCE, audit=audit)
         self.assertGreater(report.total, 0)
         self.assertEqual(5, len(report.lighting["space_report"]), "all five fixture spaces costed")
@@ -54,12 +54,12 @@ class TestCosting(unittest.TestCase):
     def test_zone_multiplier_scales(self):
         from btap.codes.necb import lighting
 
-        base = lighting.cost(costed_fixture_model(), vintage="2020",
+        base = lighting.cost(costed_fixture_model(), edition="2020",
                              city=CITY, province_state=PROVINCE)
         scaled_model = costed_fixture_model()
         for z in scaled_model.getThermalZones():
             z.setMultiplier(2)
-        scaled = lighting.cost(scaled_model, vintage="2020", city=CITY, province_state=PROVINCE)
+        scaled = lighting.cost(scaled_model, edition="2020", city=CITY, province_state=PROVINCE)
         self.assertAlmostEqual(base.total * 2.0, scaled.total, delta=base.total * 0.01)
 
     def test_cfl_request_falls_back_to_led_only_2020_catalog(self):
@@ -68,9 +68,9 @@ class TestCosting(unittest.TestCase):
 
         audit = AuditLog()
         cfl = lighting.cost(costed_fixture_model(lights_type="NECB_Default"),
-                            vintage="2020", city=CITY, province_state=PROVINCE, audit=audit)
+                            edition="2020", city=CITY, province_state=PROVINCE, audit=audit)
         led = lighting.cost(costed_fixture_model(lights_type="LED"),
-                            vintage="2020", city=CITY, province_state=PROVINCE)
+                            edition="2020", city=CITY, province_state=PROVINCE)
         self.assertAlmostEqual(led.total, cfl.total, delta=0.05,
                                msg="NECB2020 sets are LED-only; CFL-modeled lights cost through "
                                    "the same LED sets (why legacy forces LED)")
@@ -85,16 +85,16 @@ class TestCosting(unittest.TestCase):
                     if s.outsideBoundaryCondition() == "Outdoors" and s.surfaceType() == "Wall")
         wall.setWindowToWallRatio(0.3)
         audit = AuditLog()
-        created = lighting.add_daylighting_controls(model, vintage="2020", audit=audit)
+        created = lighting.add_daylighting_controls(model, code="necb2020", audit=audit)
         self.assertGreaterEqual(created, 1, "a daylighted space got a control")
         control = model.getDaylightingControls()[0]
         self.assertEqual(400.0, control.illuminanceSetpoint(),
                          "office target illuminance from the space-type data")
         self.assertEqual("Stepped", control.lightingControlType())
 
-        base = lighting.cost(costed_fixture_model(), vintage="2020",
+        base = lighting.cost(costed_fixture_model(), edition="2020",
                              city=CITY, province_state=PROVINCE)
-        report = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE,
+        report = lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE,
                                audit=audit)
         self.assertGreater(report.lighting["daylighting_sensor_cost"], 0,
                            "sensors costed (BOM 407/10/17/14)")
@@ -114,11 +114,11 @@ class TestCosting(unittest.TestCase):
         wall = next(s for s in model.getSurfaces()
                     if s.outsideBoundaryCondition() == "Outdoors" and s.surfaceType() == "Wall")
         wall.setWindowToWallRatio(0.3)
-        lighting.add_daylighting_controls(model, vintage="2020")
+        lighting.add_daylighting_controls(model, code="necb2020")
 
         with self.assertRaises(ValueError):
-            costing.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
+            costing.cost(model, edition="2020", city=CITY, province_state=PROVINCE)
 
-        report = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
+        report = lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE)
         self.assertGreater(report.lighting["daylighting_sensor_cost"], 0)
 

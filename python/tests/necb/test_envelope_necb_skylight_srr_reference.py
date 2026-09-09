@@ -54,7 +54,7 @@ def reference(model):
     from btap.codes.necb import envelope
 
     audit = AuditLog()
-    envelope.reference_envelope(model, vintage='2020', hdd=HDD, audit=audit)
+    envelope.reference_envelope(model, code='necb2020', hdd=HDD, audit=audit)
     return audit
 
 

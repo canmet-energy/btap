@@ -48,6 +48,12 @@ unless a moved link itself is wrong.
   `inputs`.
 - **Audit text is case-sensitive.** Violations are SHOUTED and passes are
   lowercase because the report checklist classifier relies on that distinction.
+- **One public selector: the code id.** `performance_compliance(model, *,
+  code="necb2020", …)` and `btap-compliance --code necb2020` (D-87). Every
+  public function takes `code=`; only the per-edition DATA accessors take
+  `edition=` (`'2020'`). `vintage` is retired everywhere — argument,
+  `report.json` (`edition` + `code` + `code_label`) and audit `inputs`
+  (`code` + `edition`). An unregistered id raises `UnknownRuleset`.
 - **NECB 2020 and 2025 only.** Do not imply support for 2011–2017.
 - **Python is authoritative.** Behaviour changes are Python-only and require a
   clean-tree frozen-scenario re-freeze in the same change when outputs move.

@@ -21,7 +21,7 @@ class TestVariantMockups(unittest.TestCase):
         run_dir = tempfile.mkdtemp(prefix=f"mockup_{name}_")
         self.addCleanup(shutil.rmtree, run_dir, True)
         result = performance_compliance(
-            str(FIXTURES / spec["osm"]), vintage="2020", simulate=mode,
+            str(FIXTURES / spec["osm"]), code="necb2020", simulate=mode,
             hdd=3890, weather={"epw": str(support.EPW), "ddy": str(support.DDY)},
             building=spec.get("building"), run_dir=run_dir,
         )

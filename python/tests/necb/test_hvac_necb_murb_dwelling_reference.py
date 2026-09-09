@@ -67,7 +67,7 @@ class TestNecbMurbDwellingReference(unittest.TestCase):
         modeling.build_system(model, 'Baseboard gas boiler', sorted_zones(model))
 
         audit = AuditLog()
-        result = hvac.reference_hvac(model, vintage='2020', audit=audit)
+        result = hvac.reference_hvac(model, code='necb2020', audit=audit)
 
         self.assertEqual(['Residential/Accommodation Area'],
                          sorted({a.category for a in result.assignments}),
@@ -95,7 +95,7 @@ class TestNecbMurbDwellingReference(unittest.TestCase):
         space.setSpaceType(space_type)
 
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage='2020', audit=audit)
+        lighting.reference_lighting(model, code='necb2020', audit=audit)
 
         dwelling_lpd = float(lighting.rules('2020')['dwelling_unit_lpd_w_per_m2'])
         self.assertAlmostEqual(5.0, dwelling_lpd, delta=1e-9,

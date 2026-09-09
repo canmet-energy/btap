@@ -37,13 +37,13 @@ import openstudio
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.lighting import daylighting as Daylighting
 
 REFLECTANCES = {'Floor': 0.15, 'Wall': 0.50, 'RoofCeiling': 0.80}
 
 
-def apply(reference, vintage='2020', proposed=None, placement='necb2020',
+def apply(reference, code='necb2020', proposed=None, placement='necb2020',
           office_match='any_enclosed_office', unknown_control_requirement='required', audit=None):
     """Apply reference daylighting to a reference model (after the envelope
     reference transform). Set-points come from the proposed model's controls
@@ -57,7 +57,7 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
     :param unknown_control_requirement: 'required' | 'not_required' —
         'necb2020' only — the default for an unresolvable Table 4.2.1.6. column
         (warns)"""
-    return _apply(reference, Ruleset.from_edition(vintage), proposed=proposed,
+    return _apply(reference, resolve(code), proposed=proposed,
                   placement=placement, office_match=office_match,
                   unknown_control_requirement=unknown_control_requirement, audit=audit)
 

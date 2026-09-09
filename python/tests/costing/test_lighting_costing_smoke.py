@@ -48,7 +48,7 @@ class TestLightingCostingSmoke(unittest.TestCase):
         from btap.costing.lighting import report as lighting
 
         audit = AuditLog()
-        rep = lighting.cost(tagged_model(), vintage="2020", city=CITY,
+        rep = lighting.cost(tagged_model(), edition="2020", city=CITY,
                             province_state=PROVINCE, audit=audit)
         self.assertGreater(rep.total, 0)
         self.assertEqual(rep.total, rep.lighting["total_lighting_cost"])
@@ -73,9 +73,9 @@ class TestLightingCostingSmoke(unittest.TestCase):
     def test_cost_is_deterministic(self):
         from btap.costing.lighting import report as lighting
 
-        first = lighting.cost(tagged_model(), vintage="2020", city=CITY,
+        first = lighting.cost(tagged_model(), edition="2020", city=CITY,
                               province_state=PROVINCE)
-        second = lighting.cost(tagged_model(), vintage="2020", city=CITY,
+        second = lighting.cost(tagged_model(), edition="2020", city=CITY,
                                province_state=PROVINCE)
         self.assertEqual(first.total, second.total)
         self.assertEqual(first.lighting["space_report"], second.lighting["space_report"])
@@ -84,7 +84,7 @@ class TestLightingCostingSmoke(unittest.TestCase):
     def test_location_resolves_from_model_site(self):
         from btap.costing.lighting import report as lighting
 
-        rep = lighting.cost(tagged_model(), vintage="2020")  # fixture site: Toronto Intl AP
+        rep = lighting.cost(tagged_model(), edition="2020")  # fixture site: Toronto Intl AP
         self.assertEqual("TORONTO", rep.city)
         self.assertEqual("ONTARIO", rep.province_state)
         self.assertTrue(any("cost location resolved from the model site" in e["action"]
@@ -95,7 +95,7 @@ class TestLightingCostingSmoke(unittest.TestCase):
         from btap.costing.lighting import report as lighting
 
         audit = AuditLog()
-        rep = lighting.cost(load_fixture(), vintage="2020", city=CITY,
+        rep = lighting.cost(load_fixture(), edition="2020", city=CITY,
                             province_state=PROVINCE, audit=audit)
         self.assertEqual(0.0, rep.total)
         self.assertEqual([], rep.lighting["space_report"])
@@ -117,11 +117,11 @@ class TestLightingCostingSmoke(unittest.TestCase):
         space.thermalZone().get().setPrimaryDaylightingControl(control)
 
         with self.assertRaises(ValueError) as ctx:
-            lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
+            lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE)
         self.assertIn("no daylighting_areas: provider was given", str(ctx.exception))
 
         # with a provider the same model costs, and the sensor section appears
-        rep = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE,
+        rep = lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE,
                             daylighting_areas=lambda s: {"sidelighted_m2": 10.0,
                                                          "skylight_m2": 0.0})
         self.assertIn("daylighting_sensor_cost", rep.lighting)

@@ -115,8 +115,8 @@ class TestCostingE2E(unittest.TestCase):
 
         model = tagged_model()
         audit = AuditLog()
-        necb_loads.apply_loads(model, vintage="2020", audit=audit)
-        necb_shw.apply_shw(model, vintage="2020", fuel="NaturalGas", audit=audit)
+        necb_loads.apply_loads(model, code="necb2020", audit=audit)
+        necb_shw.apply_shw(model, code="necb2020", fuel="NaturalGas", audit=audit)
         for zone in model.getThermalZones():
             zone.setUseIdealAirLoads(True)
 
@@ -148,11 +148,11 @@ class TestCostingE2E(unittest.TestCase):
 
         model = tagged_model()
         audit = AuditLog()
-        necb_loads.apply_loads(model, vintage="2020", audit=audit)
-        necb_shw.apply_shw(model, vintage="2020", fuel="NaturalGas", audit=audit)
+        necb_loads.apply_loads(model, code="necb2020", audit=audit)
+        necb_shw.apply_shw(model, code="necb2020", fuel="NaturalGas", audit=audit)
         modeling.build_system(model, "Baseboard gas boiler",
                               sorted_by_name(model.getThermalZones()))
-        necb_envelope.apply_prescriptive(model, vintage="2020", hdd=3890, audit=audit)
+        necb_envelope.apply_prescriptive(model, code="necb2020", hdd=3890, audit=audit)
         necb_shw.cost(model, city=CITY, province_state=PROVINCE, audit=audit)
 
         steps = list(dict.fromkeys(e["step"] for e in audit.entries))

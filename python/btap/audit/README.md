@@ -68,10 +68,10 @@ not a regex, so:
 
 ## The emit contract
 
-Each domain owns an `article_coverage` manifest inside its vintage ruleset
+Each domain owns an `article_coverage` manifest inside its edition's ruleset
 JSON (`implemented` / `partial` / `not_implemented` / `satisfied_by_clone` /
 `host_scope`) and resolves it its own way — from a pre-resolved ruleset
-(hvac), from the domain's `rules(vintage)` (envelope, lighting, loads, shw),
+(hvac), from the domain's `rules(edition)` (envelope, lighting, loads, shw),
 or from a data-file path (the umbrella). What happens next is identical
 everywhere and lives here:
 

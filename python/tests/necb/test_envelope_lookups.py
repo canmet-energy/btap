@@ -32,48 +32,48 @@ class TestLookups(unittest.TestCase):
     def test_max_u_bin_semantics(self):
         n = self.n
         self.assertAlmostEqual(
-            0.290, n.max_u(vintage='2020', surface='wall', boundary='outdoors', hdd=2999),
+            0.290, n.max_u(code='necb2020', surface='wall', boundary='outdoors', hdd=2999),
             delta=1e-9)
         self.assertAlmostEqual(
-            0.265, n.max_u(vintage='2020', surface='wall', boundary='outdoors', hdd=3000),
+            0.265, n.max_u(code='necb2020', surface='wall', boundary='outdoors', hdd=3000),
             delta=1e-9,
             msg='hdd == bin ceiling falls to the NEXT bin (strict <)')
         self.assertAlmostEqual(
-            0.215, n.max_u(vintage='2020', surface='wall', boundary='outdoors', hdd=5000),
+            0.215, n.max_u(code='necb2020', surface='wall', boundary='outdoors', hdd=5000),
             delta=1e-9)
         self.assertAlmostEqual(
-            0.165, n.max_u(vintage='2020', surface='wall', boundary='outdoors', hdd=7000),
+            0.165, n.max_u(code='necb2020', surface='wall', boundary='outdoors', hdd=7000),
             delta=1e-9)
         # beyond the last bin: legacy fallback 0.110
         self.assertAlmostEqual(
-            0.110, n.max_u(vintage='2020', surface='wall', boundary='outdoors', hdd=9999),
+            0.110, n.max_u(code='necb2020', surface='wall', boundary='outdoors', hdd=9999),
             delta=1e-9)
         # ground + fenestration
         self.assertAlmostEqual(
-            0.379, n.max_u(vintage='2020', surface='floor', boundary='ground', hdd=7500),
+            0.379, n.max_u(code='necb2020', surface='floor', boundary='ground', hdd=7500),
             delta=1e-9)
         self.assertAlmostEqual(
-            1.90, n.max_u(vintage='2020', surface='window', boundary='outdoors', hdd=3500),
+            1.90, n.max_u(code='necb2020', surface='window', boundary='outdoors', hdd=3500),
             delta=1e-9)
         with self.assertRaises(ValueError):
-            n.max_u(vintage='2020', surface='porthole', boundary='outdoors', hdd=1)
+            n.max_u(code='necb2020', surface='porthole', boundary='outdoors', hdd=1)
         with self.assertRaises(ValueError):
-            n.max_u(vintage='2020', surface='window', boundary='ground', hdd=1)
+            n.max_u(code='necb2020', surface='window', boundary='ground', hdd=1)
 
     # 3.2.1.4.(1): 0.40 / linear / 0.20 with continuity at the boundaries
     def test_max_fdwr_piecewise(self):
         n = self.n
-        self.assertAlmostEqual(0.4, n.max_fdwr(vintage='2020', hdd=3999), delta=1e-9)
-        self.assertAlmostEqual(0.4, n.max_fdwr(vintage='2020', hdd=4000), delta=1e-9,
+        self.assertAlmostEqual(0.4, n.max_fdwr(code='necb2020', hdd=3999), delta=1e-9)
+        self.assertAlmostEqual(0.4, n.max_fdwr(code='necb2020', hdd=4000), delta=1e-9,
                                msg='continuous at 4000')
         self.assertAlmostEqual((2000 - 0.2 * 5000) / 3000.0,
-                               n.max_fdwr(vintage='2020', hdd=5000), delta=1e-9)
-        self.assertAlmostEqual(0.2, n.max_fdwr(vintage='2020', hdd=7000), delta=1e-9)
-        self.assertAlmostEqual(0.2, n.max_fdwr(vintage='2020', hdd=12_000), delta=1e-9)
+                               n.max_fdwr(code='necb2020', hdd=5000), delta=1e-9)
+        self.assertAlmostEqual(0.2, n.max_fdwr(code='necb2020', hdd=7000), delta=1e-9)
+        self.assertAlmostEqual(0.2, n.max_fdwr(code='necb2020', hdd=12_000), delta=1e-9)
 
     def test_max_srr(self):
-        self.assertAlmostEqual(0.02, self.n.max_srr(vintage='2020'), delta=1e-9)
-        self.assertAlmostEqual(0.02, self.n.max_srr(vintage='2025'), delta=1e-9)
+        self.assertAlmostEqual(0.02, self.n.max_srr(code='necb2020'), delta=1e-9)
+        self.assertAlmostEqual(0.02, self.n.max_srr(code='necb2025'), delta=1e-9)
 
     def test_hdd_explicit_wins(self):
         from btap.audit import AuditLog

@@ -341,7 +341,8 @@ def _execute_verdict_unit(scenario, run_dir):
     from btap.codes import cli
 
     report = {
-        "annual": True, "vintage": "2020", "hdd": 3890, "tier": 1,
+        "annual": True, "edition": "2020", "code": "necb2020",
+        "code_label": "NECB 2020", "hdd": 3890, "tier": 1,
         "percent_of_target": 90.1 if scenario["compliant"] else 109.9,
         "proposed": {"total_site_kwh": 2725.0, "eui_kwh_per_m2": 3.4,
                      "floor_area_m2": 800.0,

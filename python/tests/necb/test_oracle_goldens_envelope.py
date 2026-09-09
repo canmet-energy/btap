@@ -100,7 +100,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
                 for hdd in HDD_SWEEP:
                     key = f"{boundary}/{surface}/{hdd}"
                     legacy_u = legacy_values[key]
-                    u = self.n.max_u(vintage="2020", surface=surface,
+                    u = self.n.max_u(code="necb2020", surface=surface,
                                      boundary=boundary, hdd=hdd)
                     checked.add(key)
                     if abs(u - legacy_u) >= 1e-9:
@@ -119,7 +119,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
         for hdd in HDD_SWEEP:
             key = str(hdd)
             legacy_v = legacy_values[key]
-            v = self.n.max_fdwr(vintage="2020", hdd=hdd)
+            v = self.n.max_fdwr(code="necb2020", hdd=hdd)
             checked.add(key)
             if abs(v - legacy_v) >= 1e-9:
                 mismatches.append((key, legacy_v, v))
@@ -130,7 +130,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
 
     def test_srr_max_matches_the_oracle(self):
         legacy_srr = golden("envelope_lookups")["srr_max"]
-        self.assertAlmostEqual(legacy_srr, self.n.max_srr(vintage="2020"), delta=1e-9)
+        self.assertAlmostEqual(legacy_srr, self.n.max_srr(code="necb2020"), delta=1e-9)
 
     def test_hdd18_matches_the_oracle(self):
         legacy_values = golden("envelope_lookups")["hdd18"]
@@ -172,7 +172,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
         # include_films=False makes the target the table U itself, which
         # opaque_at_conductance solves for exactly.
         model = attach_weather(load_raw_fixture())
-        self.n.apply_prescriptive(model, vintage="2020", include_films=False)
+        self.n.apply_prescriptive(model, code="necb2020", include_films=False)
         c = surface_conductances(model)
 
         mismatches = [(name, legacy_c[name], c.get(name))
@@ -190,7 +190,7 @@ class TestOracleGoldensEnvelope(unittest.TestCase):
 
         legacy_fdwr = golden("envelope_prescriptive")["fdwr"]
         model = attach_weather(load_raw_fixture())
-        self.n.apply_prescriptive(model, vintage="2020", apply_fdwr=True)
+        self.n.apply_prescriptive(model, code="necb2020", apply_fdwr=True)
         census = Geometry.exposed_walls(model)
         self.assertAlmostEqual(
             legacy_fdwr, census["fdwr"], delta=0.01,

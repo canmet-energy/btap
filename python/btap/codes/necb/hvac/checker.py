@@ -22,7 +22,7 @@ import re
 import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.hvac import efficiency as _efficiency
 from btap.codes.necb.hvac.energy_recovery import annual_availability_hours, erv_threshold_verdict
 from btap.codes.necb.hvac.reference import optional_flow
@@ -31,14 +31,14 @@ from btap.modeling.hvac.components import coils as _coils
 TOLERANCE = 1e-3
 
 
-def check_part5(model, vintage='2020', building=None, hdd=None, audit=None):
+def check_part5(model, code='necb2020', building=None, hdd=None, audit=None):
     """:param hdd: heating degree-days — enables the 5.2.10.1 heat-recovery check
         (skipped with an info note otherwise)
     :param building: unused (kept for call-site compatibility; the old 150 kW
         trigger read winter_design_temp_c from it)
     :return: AuditLog
     """
-    return _check_part5(model, Ruleset.from_edition(vintage), building=building,
+    return _check_part5(model, resolve(code), building=building,
                         hdd=hdd, audit=audit)
 
 
@@ -116,9 +116,9 @@ def water_economizer_loops(air_loop):
     return names
 
 
-def check_heat_recovery(model, vintage, hdd, audit):
+def check_heat_recovery(model, code, hdd, audit):
     """5.2.10.1: same Table 5.2.10.1.-A/-B trigger as the reference ERV rule."""
-    return _check_heat_recovery(model, Ruleset.from_edition(vintage), hdd, audit)
+    return _check_heat_recovery(model, resolve(code), hdd, audit)
 
 
 def _check_heat_recovery(model, ruleset, hdd, audit):
@@ -167,12 +167,12 @@ def _check_heat_recovery(model, ruleset, hdd, audit):
                    target=air_loop.nameString(), article=rule['trigger_article'])
 
 
-def check_minimum_efficiencies(model, vintage, audit):
+def check_minimum_efficiencies(model, code, audit):
     """5.2.12: apply the NECB efficiency pass to a clone; any proposed value
     BELOW the applied value is below the code minimum. Capacity-binned
     rows need SIZED equipment — unsized items are skipped by the pass
     (run a sizing run first for full coverage)."""
-    return _check_minimum_efficiencies(model, Ruleset.from_edition(vintage), audit)
+    return _check_minimum_efficiencies(model, resolve(code), audit)
 
 
 def _check_minimum_efficiencies(model, ruleset, audit):

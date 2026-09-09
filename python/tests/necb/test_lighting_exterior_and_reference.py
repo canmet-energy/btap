@@ -81,7 +81,7 @@ class TestExteriorAndReference(unittest.TestCase):
         dwelling = tagged_space_type(model, "Space Function", "Dwelling units general")
 
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage="2020", audit=audit)
+        lighting.reference_lighting(model, code="necb2020", audit=audit)
 
         lights = dwelling.lights()[0] if dwelling.lights() else None
         self.assertIsNotNone(lights, "dwelling space type has lights")
@@ -111,7 +111,7 @@ class TestExteriorAndReference(unittest.TestCase):
         tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
 
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage="2020", daylighting=True, audit=audit)
+        lighting.reference_lighting(model, code="necb2020", daylighting=True, audit=audit)
 
         self.assertFalse(any(w["step"] == "lighting_reference"
                              and "8.4.4.5.(5)-(12)" in str(w.get("article"))
@@ -130,7 +130,7 @@ class TestExteriorAndReference(unittest.TestCase):
         model = openstudio.model.Model()
         tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage="2025", audit=audit)
+        lighting.reference_lighting(model, code="necb2025", audit=audit)
         self.assertTrue(any("8.4.5.5.(1)" in str(e.get("article")) for e in audit.entries),
                         "2025 renumbered citations")
 
@@ -146,7 +146,7 @@ class TestExteriorAndReference(unittest.TestCase):
         model = load_raw_fixture()
         audit = AuditLog()
         with self.assertRaises(ValueError) as ctx:
-            lighting.reference_lighting(model, vintage="2020", audit=audit)
+            lighting.reference_lighting(model, code="necb2020", audit=audit)
         self.assertIn("SmallOffice", str(ctx.exception),
                       "refusal names the unresolvable space type")
         self.assertTrue(any("UNRESOLVABLE" in str(w["action"]) for w in audit.warnings),
@@ -165,7 +165,7 @@ class TestExteriorAndReference(unittest.TestCase):
                 st.setStandardsBuildingType("Space Function")
                 st.setStandardsSpaceType("Office enclosed > 25 m2")
         audit = AuditLog()
-        lighting.reference_lighting(model, vintage="2020", audit=audit)
+        lighting.reference_lighting(model, code="necb2020", audit=audit)
 
         self.assertTrue(any(w["step"] == "lighting_reference"
                             and "8.4.4.5.(5)-(12)" in str(w.get("article"))

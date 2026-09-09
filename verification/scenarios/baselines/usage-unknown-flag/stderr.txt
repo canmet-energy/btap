@@ -12,8 +12,8 @@ options:
                         see them)
   --list-cities         list the weather files this install carries
   -o DIR, --out DIR     run directory (default: ./necb_run_<model>)
-  --vintage {2020,2025}
-                        NECB vintage: 2020 or 2025 (default 2020)
+  --code {necb2020,necb2025}
+                        code edition: necb2020 or necb2025 (default necb2020)
   --storeys N           above-ground storey count override
   --simulate {annual,sizing,none}
                         annual (default), sizing, or none

@@ -21,7 +21,7 @@ import re
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
-from btap.codes import Ruleset
+from btap.codes import resolve
 from btap.codes.necb.lighting import apply_lights as ApplyLights
 
 
@@ -30,13 +30,13 @@ def _inspect(value):
     return 'nil' if value is None else f'"{value}"'
 
 
-def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
+def reference_lighting(model, code='necb2020', daylighting=False, audit=None):
     """:param daylighting: whether the caller ALSO runs reference_daylighting
     on this model. When it does, (5)-(12) are modeled and audited there, so
     this transform stays silent about them; when it does not, the gap is
     shouted here. Defaults to False so a caller that never runs the
     daylighting transform still gets the loud gap without opting in."""
-    return _reference_lighting(model, Ruleset.from_edition(vintage),
+    return _reference_lighting(model, resolve(code),
                                daylighting=daylighting, audit=audit)
 
 

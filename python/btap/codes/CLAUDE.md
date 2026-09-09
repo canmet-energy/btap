@@ -137,6 +137,20 @@ learns *why* we read the article that way.
 
 ## Key facts / traps
 
+- **One selector, one spelling: `code="necb2020"` / `--code necb2020`**
+  (D-87). `resolve(code)` is the only way to a `Ruleset`; there is no
+  `from_edition` and no edition-string fallback. `ruleset.id` is what a
+  public argument and an audit `inputs.code` carry, `ruleset.edition` is
+  what the per-edition DATA accessors (`loads.table`, `lighting.table`,
+  `SpaceTypes.*`, `efficiency.data`, the six `rules` shims,
+  `climate.hdd18`) take as `edition=`. Passing one where the other
+  belongs raises in the registry's voice rather than reading the wrong
+  edition's data.
+- **The report renderer names the code from the report, never from a
+  literal.** `report['code_label']` ('NECB 2020') drives every heading,
+  title, declaration and Part 11 label; `sections.code_family` peels the
+  family name off it for the sentences that cite an article without an
+  edition. A second code family renders itself with no renderer edit.
 - **The CLI logic is `cli.py`; the console script is
   `btap-compliance = btap.codes.cli:main`.** `run(argv, out=, err=)` returns
   an int and never exits, so a 40-minute pipeline is testable in-process

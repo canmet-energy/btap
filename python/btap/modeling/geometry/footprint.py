@@ -239,7 +239,7 @@ def apply_wwr(model, ratio, audit=None):
 
     PURE GEOMETRY, and deliberately so. There is NO default ratio and no code
     knowledge here: NECB's FDWR maximum is a btap.codes (envelope domain)
-    concern (`NECB.max_fdwr(vintage=, hdd=)`, article 3.2.1.4), and this gem
+    concern (`NECB.max_fdwr(code=, hdd=)`, article 3.2.1.4), and this gem
     carries no NECB rules data by family contract. Callers pass a number they
     chose.
 

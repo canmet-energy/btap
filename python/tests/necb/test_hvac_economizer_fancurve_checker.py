@@ -22,12 +22,12 @@ from tests.support import needs_engine, needs_sdk
 @needs_sdk
 class TestEconomizerFancurveChecker(unittest.TestCase):
 
-    def reference_for(self, system_zone_type, storeys=1, vintage='2020'):
+    def reference_for(self, system_zone_type, storeys=1, code='necb2020'):
         model = load_fixture()
         modeling.build_system(model, 'Baseboard gas boiler', sorted_zones(model))
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage=vintage,
+            model, code=code,
             building={'storeys': storeys,
                       'zone_types': {z.nameString(): system_zone_type
                                      for z in model.getThermalZones()},
@@ -51,10 +51,10 @@ class TestEconomizerFancurveChecker(unittest.TestCase):
 
     @needs_engine
     def test_fan_power_curve_applied_after_sizing(self):
-        for vintage, prefix in (('2020', '8.4.4'), ('2025', '8.4.5')):
-            with self.subTest(vintage=vintage):
+        for code, prefix in (('necb2020', '8.4.4'), ('necb2025', '8.4.5')):
+            with self.subTest(code=code):
                 # drive toward sys6/VAV if selected
-                result, _ = self.reference_for('Office - open plan', storeys=5, vintage=vintage)
+                result, _ = self.reference_for('Office - open plan', storeys=5, code=code)
                 reference = result.model
                 if not len(reference.getFanVariableVolumes()):
                     self.skipTest('no VAV fans in this reference selection')
@@ -64,7 +64,7 @@ class TestEconomizerFancurveChecker(unittest.TestCase):
                     out = runner.run_energyplus(reference, str(Path(tmp) / 'sizing'), sizing_only=True)
                     self.assertTrue(runner.is_clean_run(out), 'sizing run completes cleanly')
                     audit = AuditLog()
-                    hvac.apply_efficiencies(reference, vintage=vintage, audit=audit)
+                    hvac.apply_efficiencies(reference, code=code, audit=audit)
 
                 fan = reference.getFanVariableVolumes()[0]
                 self.assertAlmostEqual(
@@ -75,7 +75,7 @@ class TestEconomizerFancurveChecker(unittest.TestCase):
                 entry = next(
                     (e for e in audit.entries
                      if str(e.get('article') or '').startswith(f'{prefix}.17.')), None)
-                self.assertIsNotNone(entry, f'no {prefix}.17 citation emitted for vintage {vintage}')
+                self.assertIsNotNone(entry, f'no {prefix}.17 citation emitted for code {code}')
                 self.assertEqual(f'{prefix}.17.(2)-(5); Table {prefix}.17.', entry['article'])
 
     def test_part5_checker(self):
@@ -100,7 +100,7 @@ class TestEconomizerFancurveChecker(unittest.TestCase):
             loop.setDesignSupplyAirFlowRate(0.5)
             oa.get().getControllerOutdoorAir().setMinimumOutdoorAirFlowRate(0.25)
 
-        audit = hvac.check_part5(model, vintage='2020', hdd=3890)
+        audit = hvac.check_part5(model, code='necb2020', hdd=3890)
         warnings = [w['action'] for w in audit.warnings]
         self.assertTrue(any('NO economizer' in w for w in warnings), '5.2.2.8 violation flagged')
         self.assertTrue(any('NO heat/energy recovery' in w for w in warnings),
