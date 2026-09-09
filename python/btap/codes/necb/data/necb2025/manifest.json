@@ -291,7 +291,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the 2025 letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). Real 2025 change: split-system heat-pump heating HSPF 7.4 -> 7.8. The performance CURVES in this file have no 2025 code source: they are the vendored legacy NECB curves (see the 2020 snapshot's oracle entry) and are not covered by source_sha256.",
-      "result_sha256": "0f0979506931e01cd0c3f00b811bbe1a61f0dba2206cdfc03110154db915c5e6"
+      "result_sha256": "ca0ab49bcdbbb34688de1c08857086e1634831e52696c2f482b11d6bcbedafa7"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -360,7 +360,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "NECB 2025 Table 6.2.2.1 was retrieved in full via the MCP and compared to 2020: every formula this package implements is identical, so this edition's parameters are the same legacy-derived values, with the citations renumbered (8.4.5.20, 8.4.6.9). The one substantive 2025 change — storage-type heat-pump water heaters, EF >= 2.1 -> UEF >= 2.23 — is an equipment class this package does not model and is recorded in the file. The printed-table comparison is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
-      "result_sha256": "0b385e0acfecd2364f3ea4acc8ce25b2aab79c77e4a1197480e301f633d8dd81"
+      "result_sha256": "8ffaff288b7d97d39a85b947915036dacb39d60da59a2b98575ff9da9fd4b421"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

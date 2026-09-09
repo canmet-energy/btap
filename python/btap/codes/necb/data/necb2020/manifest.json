@@ -251,7 +251,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Verified against the oracle at REF while writing this block: boilers, furnaces, unitary_acs and heat_rejection are VERBATIM; chillers differ in the notes column only; heat_pumps carries the D-59 correction (SEER 15 for the small air-cooled class, per printed Table 5.2.12.1.-A); heat_pumps_heating differs only in capacity-boundary rounding (64831 -> 64830 W); two of the 31 curve rows were regenerated 2026-07-22 from NECB 2020 8.4.5.4.(7). The vrf_air_source_heat_pumps and vrf_air_conditioners blocks have NO oracle counterpart: they were transcribed from printed Table 5.2.12.1.-I via the MCP (D-60) and are not covered by source_sha256.",
-      "result_sha256": "498f619185e6788db8302d20be99ce411904222912b44f29d480d08378a38119"
+      "result_sha256": "0dc8fd434a0a537442dde60a2df14cc308ba0889afb2f9270a3556dba00b30ab"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -320,7 +320,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2020 Table 6.2.2.1 via the MCP, and the solar/pool minimums re-verified 2026-08 (D-61/D-63). The printed-table side is a cross-check, not the origin, and is not archived here. The formula strings in the file are documentation; the live coefficients are named constants in shw/efficiency.py. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
-      "result_sha256": "5e5a4746e7a353cd562e3cec1e929ec2f475c2a38fc7aac656222918b393e48e"
+      "result_sha256": "7c35a243dda0919edf7162c4eccb3913934fd89476b890183787f8c3f45c52fe"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

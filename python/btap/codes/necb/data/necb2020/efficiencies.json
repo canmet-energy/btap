@@ -71,7 +71,7 @@
       "minimum_annual_fuel_utilization_efficiency": 0.9,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -86,7 +86,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.9,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -101,7 +101,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.9,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -116,7 +116,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 1.0,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -131,7 +131,7 @@
       "minimum_annual_fuel_utilization_efficiency": 0.86,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -146,7 +146,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.87,
       "minimum_combustion_efficiency": null,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     },
     {
@@ -161,7 +161,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.88,
-      "efffplr": "BOILER-EFFFPLR-NECB2011",
+      "efffplr": "BOILER-EFFFPLR",
       "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
     }
   ],
@@ -178,7 +178,7 @@
       "minimum_annual_fuel_utilization_efficiency": 0.95,
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR-NECB2011",
+      "efffplr": "FURNACE-EFFPLR",
       "notes": "From NECB 2020 Table 5.2.12.1.-O"
     },
     {
@@ -193,7 +193,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR-NECB2011",
+      "efffplr": "FURNACE-EFFPLR",
       "notes": "From NECB 2020 Table 5.2.12.1.-O"
     },
     {
@@ -208,7 +208,7 @@
       "minimum_annual_fuel_utilization_efficiency": null,
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
-      "efffplr": "FURNACE-EFFPLR-NECB2011",
+      "efffplr": "FURNACE-EFFPLR",
       "notes": "Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O"
     }
   ],
@@ -225,9 +225,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.77927,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Scroll_CAPFT",
+      "eirft": "WaterCooled_Scroll_EIRFT",
+      "eirfplr": "WaterCooled_Scroll_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -242,9 +242,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.74922,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Scroll_CAPFT",
+      "eirft": "WaterCooled_Scroll_EIRFT",
+      "eirfplr": "WaterCooled_Scroll_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -259,9 +259,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.67932,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Scroll_CAPFT",
+      "eirft": "WaterCooled_Scroll_EIRFT",
+      "eirfplr": "WaterCooled_Scroll_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -276,9 +276,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.62433,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Scroll_CAPFT",
+      "eirft": "WaterCooled_Scroll_EIRFT",
+      "eirfplr": "WaterCooled_Scroll_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -293,9 +293,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.58439,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Scroll_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Scroll_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Scroll_CAPFT",
+      "eirft": "WaterCooled_Scroll_EIRFT",
+      "eirfplr": "WaterCooled_Scroll_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -310,9 +310,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.77927,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Reciprocating_CAPFT",
+      "eirft": "WaterCooled_Reciprocating_EIRFT",
+      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -327,9 +327,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.74922,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Reciprocating_CAPFT",
+      "eirft": "WaterCooled_Reciprocating_EIRFT",
+      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -344,9 +344,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.67932,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Reciprocating_CAPFT",
+      "eirft": "WaterCooled_Reciprocating_EIRFT",
+      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -361,9 +361,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.62433,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Reciprocating_CAPFT",
+      "eirft": "WaterCooled_Reciprocating_EIRFT",
+      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -378,9 +378,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.58439,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Reciprocating_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Reciprocating_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Reciprocating_CAPFT",
+      "eirft": "WaterCooled_Reciprocating_EIRFT",
+      "eirfplr": "WaterCooled_Reciprocating_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -395,9 +395,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.77927,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Screw_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Screw_CAPFT",
+      "eirft": "WaterCooled_Screw_EIRFT",
+      "eirfplr": "WaterCooled_Screw_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -412,9 +412,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.74922,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Screw_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Screw_CAPFT",
+      "eirft": "WaterCooled_Screw_EIRFT",
+      "eirfplr": "WaterCooled_Screw_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -429,9 +429,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.67932,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Screw_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Screw_CAPFT",
+      "eirft": "WaterCooled_Screw_EIRFT",
+      "eirfplr": "WaterCooled_Screw_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -446,9 +446,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.62433,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Screw_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Screw_CAPFT",
+      "eirft": "WaterCooled_Screw_EIRFT",
+      "eirfplr": "WaterCooled_Screw_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -463,9 +463,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.58439,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Screw_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Screw_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Screw_CAPFT",
+      "eirft": "WaterCooled_Screw_EIRFT",
+      "eirfplr": "WaterCooled_Screw_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -480,9 +480,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.69434,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Centrifugal_CAPFT",
+      "eirft": "WaterCooled_Centrifugal_EIRFT",
+      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -497,9 +497,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.63435,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Centrifugal_CAPFT",
+      "eirft": "WaterCooled_Centrifugal_EIRFT",
+      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -514,9 +514,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.59436,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Centrifugal_CAPFT",
+      "eirft": "WaterCooled_Centrifugal_EIRFT",
+      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -531,9 +531,9 @@
       "end_date": "2999-09-09T00:00:00+00:00",
       "minimum_full_load_efficiency": 0.58439,
       "minimum_integrated_part_load_value": null,
-      "capft": "WaterCooled_Centrifugal_CAPFT_NECB2011",
-      "eirft": "WaterCooled_Centrifugal_EIRFT_NECB2011",
-      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
+      "capft": "WaterCooled_Centrifugal_CAPFT",
+      "eirft": "WaterCooled_Centrifugal_EIRFT",
+      "eirfplr": "WaterCooled_Centrifugal_EIRFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-K PATH B full-load COPc, converted to kW/ton (COP = 3.51685 / kWpt; verified against the printed table 2026-08-02, D-59). Capacity in tons (264/528/1055/2110 kW breaks; centrifugal 1407)."
     },
     {
@@ -570,11 +570,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -592,11 +592,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -614,11 +614,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -636,11 +636,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -658,11 +658,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -680,11 +680,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -702,11 +702,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A1"
     },
     {
@@ -724,11 +724,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -746,11 +746,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -768,11 +768,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -790,11 +790,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -812,11 +812,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -834,11 +834,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -856,11 +856,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -878,11 +878,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -900,11 +900,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -922,11 +922,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -944,11 +944,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -966,11 +966,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -988,11 +988,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": null,
       "ptac_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1011,11 +1011,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 11.9,
       "ptac_eer_coefficient_2": 0.0,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     },
     {
@@ -1034,11 +1034,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 11.9,
       "ptac_eer_coefficient_2": 0.0,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     },
     {
@@ -1057,11 +1057,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 14.1,
       "ptac_eer_coefficient_2": 0.3058,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     },
     {
@@ -1080,11 +1080,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 14.1,
       "ptac_eer_coefficient_2": 0.3058,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     },
     {
@@ -1103,11 +1103,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 9.5,
       "ptac_eer_coefficient_2": 0.0,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     },
     {
@@ -1126,11 +1126,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "ptac_eer_coefficient_1": 9.5,
       "ptac_eer_coefficient_2": 0.0,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-G"
     }
   ],
@@ -1150,11 +1150,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
@@ -1172,11 +1172,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
@@ -1194,11 +1194,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
@@ -1216,11 +1216,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15."
     },
     {
@@ -1238,11 +1238,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1260,11 +1260,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1282,11 +1282,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1304,11 +1304,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1326,11 +1326,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1348,11 +1348,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1370,11 +1370,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1392,11 +1392,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1414,11 +1414,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1436,11 +1436,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1458,11 +1458,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1480,11 +1480,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1502,11 +1502,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1524,11 +1524,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1546,11 +1546,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A"
     },
     {
@@ -1568,11 +1568,11 @@
       "minimum_integrated_energy_efficiency_ratio": null,
       "pthp_eer_coefficient_1": null,
       "pthp_eer_coefficient_2": null,
-      "cool_cap_ft": "DXCOOL-NECB2011-REF-CAPFT",
-      "cool_cap_fflow": "DXCOOL-NECB2011-REF-CAPFFLOW",
-      "cool_eir_ft": "DXCOOL-NECB2011-REF-COOLEIRFT",
-      "cool_eir_fflow": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
-      "cool_plf_fplr": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "cool_cap_ft": "DXCOOL-REF-CAPFT",
+      "cool_cap_fflow": "DXCOOL-REF-CAPFFLOW",
+      "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
+      "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
+      "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
       "notes": "From NECB 2020, Table 5.2.12.1.-A."
     }
   ],
@@ -1591,11 +1591,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-B"
     },
     {
@@ -1612,11 +1612,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-B"
     },
     {
@@ -1633,11 +1633,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1654,11 +1654,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1675,11 +1675,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1696,11 +1696,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1717,11 +1717,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1738,11 +1738,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1759,11 +1759,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     },
     {
@@ -1780,11 +1780,11 @@
       "minimum_energy_efficiency_ratio": null,
       "pthp_cop_coefficient_1": null,
       "pthp_cop_coefficient_2": null,
-      "heat_cap_ft": "DXHEAT-NECB2011-REF-CAPFT",
-      "heat_cap_fflow": "DXHEAT-NECB2011-REF-CAPFFLOW",
-      "heat_eir_ft": "DXHEAT-NECB2011-REF-EIRFT",
-      "heat_eir_fflow": "DXHEAT-NECB2011-REF-EIRFFLOW",
-      "heat_plf_fplr": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "heat_cap_ft": "DXHEAT-REF-CAPFT",
+      "heat_cap_fflow": "DXHEAT-REF-CAPFFLOW",
+      "heat_eir_ft": "DXHEAT-REF-EIRFT",
+      "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
+      "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
       "notes": "From NECB 2020, Table  5.2.12.1.-A"
     }
   ],
@@ -2008,7 +2008,7 @@
   ],
   "curves": [
     {
-      "name": "BOILER-EFFFPLR-NECB2011",
+      "name": "BOILER-EFFFPLR",
       "category": "Boiler",
       "form": "Cubic",
       "dependent_variable": "FIRRatio",
@@ -2030,10 +2030,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit."
+      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B)."
     },
     {
-      "name": "BOILER-EFFFPLR-COND-NECB2011",
+      "name": "BOILER-EFFFPLR-COND",
       "category": "Boiler",
       "form": "Cubic",
       "dependent_variable": "FIRRatio",
@@ -2055,10 +2055,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit."
+      "notes": "From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B)."
     },
     {
-      "name": "DXCOOL-NECB2011-REF-CAPFFLOW",
+      "name": "DXCOOL-REF-CAPFFLOW",
       "category": "DX Cooling Coil",
       "form": "Quadratic",
       "dependent_variable": "QRatio",
@@ -2080,10 +2080,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Cooling Coil."
+      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Cooling Coil.  Governing requirement in this edition: Article 8.4.5.4., which prescribes no flow-fraction curve; EnergyPlus requires one."
     },
     {
-      "name": "DXCOOL-NECB2011-REF-CAPFT",
+      "name": "DXCOOL-REF-CAPFT",
       "category": "DX Cooling Coil",
       "form": "BiQuadratic",
       "dependent_variable": "QRatio",
@@ -2105,10 +2105,10 @@
       "maximum_independent_variable_2": 46.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.4."
     },
     {
-      "name": "DXCOOL-NECB2011-REF-COOLEIRFFLOW",
+      "name": "DXCOOL-REF-COOLEIRFFLOW",
       "category": "DX Cooling Coil",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2130,10 +2130,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Cooling Coil."
+      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Cooling Coil.  Governing requirement in this edition: Article 8.4.5.4., which prescribes no flow-fraction curve; EnergyPlus requires one."
     },
     {
-      "name": "DXCOOL-NECB2011-REF-COOLEIRFT",
+      "name": "DXCOOL-REF-COOLEIRFT",
       "category": "DX Cooling Coil",
       "form": "BiQuadratic",
       "dependent_variable": "EIRRatio",
@@ -2155,10 +2155,10 @@
       "maximum_independent_variable_2": 46.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "Regenerated 2026-07-22 from NECB 2020 8.4.5.4.(7) == NECB 2025 8.4.6.4.(7) (coefficient sets verified identical across editions) via the exact degF->degC variable substitution; self-checks to ~1.0 at the 67F wb / 95F odb rating point. Replaces the legacy NECB 2011-derived surface whose twb terms deviated up to 1.95% off-rating (see scripts/necb_8_4_6_curve_probe.rb)."
+      "notes": "Regenerated 2026-07-22 from 8.4.5.4.(7) via the exact degF->degC variable substitution; self-checks to ~1.0 at the 67F wb / 95F odb rating point. Replaces the legacy NECB 2011-derived surface whose twb terms deviated up to 1.95% off-rating (see scripts/necb_8_4_6_curve_probe.rb).  Governing requirement in this edition: Article 8.4.5.4."
     },
     {
-      "name": "DXCOOL-NECB2011-REF-COOLPLFFPLR",
+      "name": "DXCOOL-REF-COOLPLFFPLR",
       "category": "DX Cooling Coil",
       "form": "Cubic",
       "dependent_variable": "EIRRatio",
@@ -2180,10 +2180,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": 0.7,
       "maximum_dependent_variable_output": 1.0,
-      "notes": "Refit 2026-07-22: least-squares cubic of PLF(PLR) = PLR / EIR_FPLR(PLR) over PLR 0.25-1.0, from the NECB 2020 8.4.5.4.(5) == 2025 8.4.6.4.(5) EIR_FPLR cubic (identical across editions). Output clamped to [0.7, 1.0] (PLF > 1 is nonphysical; E+ guidance floor 0.7). A cubic cannot represent the rational target exactly: max implied-EIR deviation ~2.0% (the structural floor; was 3.70% with the legacy 0.7-floored refit). See scripts/necb_8_4_6_curve_probe.rb."
+      "notes": "Refit 2026-07-22: least-squares cubic of PLF(PLR) = PLR / EIR_FPLR(PLR) over PLR 0.25-1.0, from the 8.4.5.4.(5) EIR_FPLR cubic. Output clamped to [0.7, 1.0] (PLF > 1 is nonphysical; E+ guidance floor 0.7). A cubic cannot represent the rational target exactly: max implied-EIR deviation ~2.0% (the structural floor; was 3.70% with the legacy 0.7-floored refit). See scripts/necb_8_4_6_curve_probe.rb.  Governing requirement in this edition: Article 8.4.5.4."
     },
     {
-      "name": "DXHEAT-NECB2011-REF-CAPFFLOW",
+      "name": "DXHEAT-REF-CAPFFLOW",
       "category": "DX Heating Coil",
       "form": "Cubic",
       "dependent_variable": "QRatio",
@@ -2205,10 +2205,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Heating Coil."
+      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Heating Coil.  Governing requirement in this edition: Article 8.4.5.7., which prescribes no flow-fraction curve; EnergyPlus requires one."
     },
     {
-      "name": "DXHEAT-NECB2011-REF-CAPFT",
+      "name": "DXHEAT-REF-CAPFT",
       "category": "DX Heating Coil",
       "form": "Cubic",
       "dependent_variable": "QRatio",
@@ -2230,10 +2230,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7."
     },
     {
-      "name": "DXHEAT-NECB2011-REF-EIRFFLOW",
+      "name": "DXHEAT-REF-EIRFFLOW",
       "category": "DX Cooling Coil",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2255,10 +2255,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Heating Coil."
+      "notes": "Not supplied by NECB 2011 but required for EnergyPlus.  Used default curve coefficients from OpenStudio 2.8.1 DX Single Speed Heating Coil.  Governing requirement in this edition: Article 8.4.5.7., which prescribes no flow-fraction curve; EnergyPlus requires one."
     },
     {
-      "name": "DXHEAT-NECB2011-REF-EIRFT",
+      "name": "DXHEAT-REF-EIRFT",
       "category": "DX Heating Coil",
       "form": "Cubic",
       "dependent_variable": "EIRRatio",
@@ -2280,10 +2280,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7."
     },
     {
-      "name": "DXHEAT-NECB2011-REF-PLFFPLR",
+      "name": "DXHEAT-REF-PLFFPLR",
       "category": "DX Heating Coil",
       "form": "Cubic",
       "dependent_variable": "EIRRatio",
@@ -2305,10 +2305,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit."
+      "notes": "From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7."
     },
     {
-      "name": "FURNACE-EFFPLR-NECB2011",
+      "name": "FURNACE-EFFPLR",
       "category": "Gas Heating Coil",
       "form": "Cubic",
       "dependent_variable": "FIRRatio",
@@ -2330,10 +2330,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit."
+      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.)."
     },
     {
-      "name": "FURNACE-EFFPLR-COND-NECB2011",
+      "name": "FURNACE-EFFPLR-COND",
       "category": "Gas Heating Coil",
       "form": "Cubic",
       "dependent_variable": "FIRRatio",
@@ -2355,10 +2355,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit."
+      "notes": "From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.)."
     },
     {
-      "name": "SWH-EFFFPLR-NECB2011",
+      "name": "SWH-EFFFPLR",
       "category": "Water Heater",
       "form": "Cubic",
       "dependent_variable": "FIRRatio",
@@ -2380,10 +2380,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-G (2).  Converted EIR curve to PLF via curve fit.  Note this is treating the Water Heater as a boiler not a tank."
+      "notes": "From NECB 2011 Table 8.4.4.21.-G (2).  Converted EIR curve to PLF via curve fit.  Note this is treating the Water Heater as a boiler not a tank.  Governing requirement in this edition: Article 8.4.5.9."
     },
     {
-      "name": "VarVolFan-AFBIFanCurve-NECB2011-FPLR",
+      "name": "VarVolFan-AFBIFanCurve-FPLR",
       "category": "Fan",
       "form": "Cubic",
       "dependent_variable": "PwrRatio",
@@ -2405,10 +2405,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.17. for airfoil or backward inclined riding fan curve.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve."
+      "notes": "From NECB 2011 Table 8.4.4.17. for airfoil or backward inclined riding fan curve.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve.  Governing requirement in this edition: Article 8.4.4.17.(2) (Table 8.4.4.17.)."
     },
     {
-      "name": "VarVolFan-AFBIInletVanes-NECB2011-FPLR",
+      "name": "VarVolFan-AFBIInletVanes-FPLR",
       "category": "Fan",
       "form": "Cubic",
       "dependent_variable": "PwrRatio",
@@ -2430,10 +2430,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.17. for airfoil or backward inclined with inlet vanes.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve."
+      "notes": "From NECB 2011 Table 8.4.4.17. for airfoil or backward inclined with inlet vanes.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve.  Governing requirement in this edition: Article 8.4.4.17.(2) (Table 8.4.4.17.)."
     },
     {
-      "name": "VarVolFan-FCInletVanes-NECB2011-FPLR",
+      "name": "VarVolFan-FCInletVanes-FPLR",
       "category": "Fan",
       "form": "Cubic",
       "dependent_variable": "PwrRatio",
@@ -2455,10 +2455,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.17. for forward curved with inlet vanes.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve."
+      "notes": "From NECB 2011 Table 8.4.4.17. for forward curved with inlet vanes.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve.  Governing requirement in this edition: Article 8.4.4.17.(2) (Table 8.4.4.17.)."
     },
     {
-      "name": "VarVolFan-VSD-NECB2011-FPLR",
+      "name": "VarVolFan-VSD-FPLR",
       "category": "Fan",
       "form": "Cubic",
       "dependent_variable": "PwrRatio",
@@ -2480,10 +2480,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.17. for variable speed drive.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve."
+      "notes": "From NECB 2011 Table 8.4.4.17. for variable speed drive.  Converted from quadratic F/Fr vs. P/Pr curve to cubic P/Pr vs. F/Fr curve.  Governing requirement in this edition: Article 8.4.4.17.(2) (Table 8.4.4.17.)."
     },
     {
-      "name": "WaterCooled_Centrifugal_CAPFT_NECB2011",
+      "name": "WaterCooled_Centrifugal_CAPFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "QRatio",
@@ -2505,10 +2505,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled centrifugal chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled centrifugal chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Centrifugal_EIRFPLR_NECB2011",
+      "name": "WaterCooled_Centrifugal_EIRFPLR",
       "category": "Electric Chiller",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2530,10 +2530,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller"
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Centrifugal_EIRFT_NECB2011",
+      "name": "WaterCooled_Centrifugal_EIRFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "EIRRatio",
@@ -2555,10 +2555,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled centrifugal chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled centrifugal chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Reciprocating_CAPFT_NECB2011",
+      "name": "WaterCooled_Reciprocating_CAPFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "QRatio",
@@ -2580,10 +2580,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled reciprocating chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled reciprocating chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Reciprocating_EIRFPLR_NECB2011",
+      "name": "WaterCooled_Reciprocating_EIRFPLR",
       "category": "Electric Chiller",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2605,10 +2605,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller"
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Reciprocating_EIRFT_NECB2011",
+      "name": "WaterCooled_Reciprocating_EIRFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "EIRRatio",
@@ -2630,10 +2630,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled reciprocating chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled reciprocating chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Screw_CAPFT_NECB2011",
+      "name": "WaterCooled_Screw_CAPFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "QRatio",
@@ -2655,10 +2655,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled screw chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled screw chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Screw_EIRFPLR_NECB2011",
+      "name": "WaterCooled_Screw_EIRFPLR",
       "category": "Electric Chiller",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2680,10 +2680,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Screw_EIRFT_NECB2011",
+      "name": "WaterCooled_Screw_EIRFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "EIRRatio",
@@ -2705,10 +2705,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled screw chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled screw chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Scroll_CAPFT_NECB2011",
+      "name": "WaterCooled_Scroll_CAPFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "QRatio",
@@ -2730,10 +2730,10 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled scroll chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (2) for water cooled scroll chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Scroll_EIRFPLR_NECB2011",
+      "name": "WaterCooled_Scroll_EIRFPLR",
       "category": "Electric Chiller",
       "form": "Quadratic",
       "dependent_variable": "EIRRatio",
@@ -2755,10 +2755,10 @@
       "maximum_independent_variable_2": null,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     },
     {
-      "name": "WaterCooled_Scroll_EIRFT_NECB2011",
+      "name": "WaterCooled_Scroll_EIRFT",
       "category": "Electric Chiller",
       "form": "BiQuadratic",
       "dependent_variable": "EIRRatio",
@@ -2780,7 +2780,7 @@
       "maximum_independent_variable_2": 35.0,
       "minimum_dependent_variable_output": null,
       "maximum_dependent_variable_output": null,
-      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled scroll chiller.  Converted coefficients for deg. F to deg. C."
+      "notes": "From NECB 2011 Table 8.4.4.21.-C (6) for water cooled scroll chiller.  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C)."
     }
   ]
 }

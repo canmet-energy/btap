@@ -18,11 +18,11 @@ def dx_cooling_single_speed(model, schedule, name='CoilCoolingDXSingleSpeed_dx')
     coil = openstudio.model.CoilCoolingDXSingleSpeed(
         model,
         schedule,
-        curves_mod.build(model, 'DXCOOL-NECB2011-REF-CAPFT'),
-        curves_mod.build(model, 'DXCOOL-NECB2011-REF-CAPFFLOW'),
-        curves_mod.build(model, 'DXCOOL-NECB2011-REF-COOLEIRFT'),
-        curves_mod.build(model, 'DXCOOL-NECB2011-REF-EIRFFLOW'),
-        curves_mod.build(model, 'DXCOOL-NECB2011-REF-COOLPLFFPLR'),
+        curves_mod.build(model, 'DXCOOL-REF-CAPFT'),
+        curves_mod.build(model, 'DXCOOL-REF-CAPFFLOW'),
+        curves_mod.build(model, 'DXCOOL-REF-COOLEIRFT'),
+        curves_mod.build(model, 'DXCOOL-REF-EIRFFLOW'),
+        curves_mod.build(model, 'DXCOOL-REF-COOLPLFFPLR'),
     )
     coil.setName(name)
     return coil
@@ -38,11 +38,11 @@ def dx_heating_single_speed(model, schedule, name='CoilHeatingDXSingleSpeed_dx')
     coil = openstudio.model.CoilHeatingDXSingleSpeed(
         model,
         schedule,
-        curves_mod.build(model, 'DXHEAT-NECB2011-REF-CAPFT'),
-        curves_mod.build(model, 'DXHEAT-NECB2011-REF-CAPFFLOW'),
-        curves_mod.build(model, 'DXHEAT-NECB2011-REF-EIRFT'),
-        curves_mod.build(model, 'DXHEAT-NECB2011-REF-EIRFFLOW'),
-        curves_mod.build(model, 'DXHEAT-NECB2011-REF-PLFFPLR'),
+        curves_mod.build(model, 'DXHEAT-REF-CAPFT'),
+        curves_mod.build(model, 'DXHEAT-REF-CAPFFLOW'),
+        curves_mod.build(model, 'DXHEAT-REF-EIRFT'),
+        curves_mod.build(model, 'DXHEAT-REF-EIRFFLOW'),
+        curves_mod.build(model, 'DXHEAT-REF-PLFFPLR'),
     )
     coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-10.0)
     coil.setName(name)
@@ -75,11 +75,11 @@ def dx_cooling_stage(model):
     """One CoilCoolingDXMultiSpeedStageData carrying the NECB reference curves.
     :return: openstudio.model.CoilCoolingDXMultiSpeedStageData"""
     stage = openstudio.model.CoilCoolingDXMultiSpeedStageData(model)
-    stage.setTotalCoolingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-NECB2011-REF-CAPFT'))
-    stage.setTotalCoolingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-NECB2011-REF-CAPFFLOW'))
-    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-NECB2011-REF-COOLEIRFT'))
-    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-NECB2011-REF-EIRFFLOW'))
-    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXCOOL-NECB2011-REF-COOLPLFFPLR'))
+    stage.setTotalCoolingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-REF-CAPFT'))
+    stage.setTotalCoolingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-REF-CAPFFLOW'))
+    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXCOOL-REF-COOLEIRFT'))
+    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXCOOL-REF-EIRFFLOW'))
+    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXCOOL-REF-COOLPLFFPLR'))
     stage.autosizeGrossRatedTotalCoolingCapacity()
     stage.autosizeGrossRatedSensibleHeatRatio()
     stage.autosizeRatedAirFlowRate()
@@ -123,11 +123,11 @@ def dx_heating_multi_speed(model, _schedule, stages=2, name='CoilHeatingDXMultiS
 def dx_heating_stage(model):
     """:return: openstudio.model.CoilHeatingDXMultiSpeedStageData"""
     stage = openstudio.model.CoilHeatingDXMultiSpeedStageData(model)
-    stage.setHeatingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-NECB2011-REF-CAPFT'))
-    stage.setHeatingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-NECB2011-REF-CAPFFLOW'))
-    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-NECB2011-REF-EIRFT'))
-    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-NECB2011-REF-EIRFFLOW'))
-    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXHEAT-NECB2011-REF-PLFFPLR'))
+    stage.setHeatingCapacityFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-REF-CAPFT'))
+    stage.setHeatingCapacityFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-REF-CAPFFLOW'))
+    stage.setEnergyInputRatioFunctionofTemperatureCurve(curves_mod.build(model, 'DXHEAT-REF-EIRFT'))
+    stage.setEnergyInputRatioFunctionofFlowFractionCurve(curves_mod.build(model, 'DXHEAT-REF-EIRFFLOW'))
+    stage.setPartLoadFractionCorrelationCurve(curves_mod.build(model, 'DXHEAT-REF-PLFFPLR'))
     stage.autosizeGrossRatedHeatingCapacity()
     stage.autosizeRatedAirFlowRate()
     return stage

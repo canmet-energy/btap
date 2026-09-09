@@ -105,7 +105,7 @@
    }
   },
   "part_load_curve": {
-   "name": "SWH-EFFFPLR-NECB2011",
+   "name": "SWH-EFFFPLR",
    "form": "Cubic",
    "coefficients": [
     0.7576,
@@ -126,7 +126,7 @@
      0.000543
     ]
    },
-   "derivation": "8.4.6.9.(2) writes a FUEL-RATIO curve: FHeatPLC = a + b(Qpl/Qdes) + c(Qpl/Qdes)^2, with Fuelpartload = Fueldesign x FHeatPLC. The EnergyPlus WaterHeater:Mixed 'Part Load Factor Curve Name' field is not that quantity — it is a DEGRADATION DIVISOR (fuel = Q_load / (eta x PLF)). The code curve therefore maps into the model field as PLF(x) = x / FHeatPLC(x), which is RATIONAL, not polynomial; the vendored cubic is its polynomial image and is probe-verified equivalent (max 0.98% over PLR 0.25-1.0, 1.47% down to PLR 0.10 — necb_8_4_6_curve_probe.rb, rake necb:curves). Vendoring the raw quadratic in the PLF field would invert the relation and overstate part-load fuel by +92% at half load and +253% at quarter load, and would double-count the a-term standby that E+ already carries as off-cycle parasitic fuel + tank UA. See D-53. The NECB2011-era NAME is retained deliberately for the legacy parity gate.",
+   "derivation": "8.4.6.9.(2) writes a FUEL-RATIO curve: FHeatPLC = a + b(Qpl/Qdes) + c(Qpl/Qdes)^2, with Fuelpartload = Fueldesign x FHeatPLC. The EnergyPlus WaterHeater:Mixed 'Part Load Factor Curve Name' field is not that quantity — it is a DEGRADATION DIVISOR (fuel = Q_load / (eta x PLF)). The code curve therefore maps into the model field as PLF(x) = x / FHeatPLC(x), which is RATIONAL, not polynomial; the vendored cubic is its polynomial image and is probe-verified equivalent (max 0.98% over PLR 0.25-1.0, 1.47% down to PLR 0.10 — necb_8_4_6_curve_probe.rb, rake necb:curves). Vendoring the raw quadratic in the PLF field would invert the relation and overstate part-load fuel by +92% at half load and +253% at quarter load, and would double-count the a-term standby that E+ already carries as off-cycle parasitic fuel + tank UA. See D-53.",
    "applies_to_note": "Fuel-fired only, and BOTH storage and instantaneous: the article is titled 'Fuel-Fired Service Water Heater' and governs 'the reference fuel-fired service water heater' without distinguishing storage from instantaneous. Electricity is outside the article's scope (D-53), not a silent skip."
   },
   "parasitic": {

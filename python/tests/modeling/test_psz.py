@@ -43,7 +43,7 @@ class TestPSZ(unittest.TestCase):
         # NECB curves on the DX coil
         coil = model.getCoilCoolingDXSingleSpeeds()[0]
         self.assertEqual(
-            'DXCOOL-NECB2011-REF-CAPFT',
+            'DXCOOL-REF-CAPFT',
             coil.totalCoolingCapacityFunctionOfTemperatureCurve().nameString())
         self.assertEqual('CoilCoolingDXSingleSpeed_dx', coil.nameString())
 
