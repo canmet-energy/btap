@@ -1267,3 +1267,45 @@ them would serialise anyway. Sonnet writes the registry's API tests from
 the spec in parallel (they fail until the implementation lands — the same
 gate-first pattern as the namespace test). The frozen lanes are the gate:
 byte-identical, no re-freeze.
+- **Registry API tests (Sonnet) delivered and verified** — branch
+  `worktree-agent-a6b7fa66710b38316` (`1978fe0`), `test_codes_ruleset.py`,
+  13 tests, all failing with ImportError on the pre-implementation tree as
+  intended; spec-exact (heat-pump key asserted present only; registry
+  separation asserted without equating the lists). Held for integration.
+- **Operational fact:** agent worktrees are created from **main**, not
+  from the current checkout. Sonnet found itself on the pre-rename tree
+  and fast-forwarded to `stage1-integration` itself; Opus's worktree was
+  verified to contain Stage 1 before it had written anything. Every
+  stacked-stage prompt from here says: "first `git merge --ff-only
+  <stage branch>` and prove it".
+- **Stage 2 (Opus) delivered and verified** — branch
+  `worktree-agent-a83c8f5a4b8d8c0e0` (`eaf0090`), 17 files. Registry
+  (`Ruleset`, `code_ids`, `editions`, `resolve`, `UnknownRuleset` that is
+  both KeyError and ValueError, manifests discovered by glob, no default
+  anywhere); manifests at `btap/codes/necb/data/necb20{20,25}/manifest.json`
+  (articles: `reference_subsection`, `lighting_subsection`,
+  `heat_pump_aux_fuel`; `literal_remaps` on 2025); all 14 live sites now
+  `prefix = Ruleset.from_edition(vintage).article(key)` with the f-strings
+  untouched; the dead `schedule_table_prefix` parameter removed from
+  `loads/apply.py` (its data key declared `non_rule_keys` to keep the
+  orphan gate green — a per-edition fact with no other home yet, flagged
+  for Stage 3/5); dead storage-garage ternary deleted; the scanner reads
+  the manifests off disk (stays stdlib-only for the `lint` job) and
+  **raises** on an undeclared or unneeded remap; `--vintage` help proven
+  byte-identical against the frozen `usage-no-model` stderr. **Verified
+  by Fable:** the only generated-doc movement is `#L`/`:N` source-line
+  anchors (token-classified: 960 differing tokens, every one an `L\d+` or
+  bare number; no inserted/deleted blocks); `git diff -- python/tests/`
+  against the base is empty (the four protected tests unchanged); the
+  registry API tests written from the spec pass against the
+  implementation. Out-of-scope findings recorded: `disposition_key_for`'s
+  cross-edition delta branch (Stage 4 territory); the HTML template's
+  hardcoded `*_2020`/`*_2025` placeholders and `Inputs.cache_20xx` fields
+  would silently drop a third edition (Stage 8 must close). Deviation
+  noted: agents' worktrees were handed over at main; both reset to the
+  stage branch before starting.
+- **Stage 2 integration** (`stage2-integration` = stage1 + Opus + Sonnet
+  + docstring refresh of `test_codes_registry.py` to `file#function`
+  addresses): registry tests 31 passed; full suite 894 passed; frozen
+  lanes python 32 / verify 3 / parity 4 **byte-identical, no re-freeze**;
+  lint-imports 3/3; ruff; orphan keys; TOC; docs regenerate to no diff.

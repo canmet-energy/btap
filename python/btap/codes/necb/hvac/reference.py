@@ -20,6 +20,7 @@ import openstudio
 
 from btap._compat import NullAudit, opt, ruby_round, sorted_by_name
 from btap.audit import emit_coverage
+from btap.codes import Ruleset
 from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
@@ -604,7 +605,7 @@ def _audit_terminal_secondary_split(zones, reference_system, vintage, audit):
     outdoor air into the supply stream instead of feeding it to the zone
     separately, so EnergyPlus has no equivalent accounting for them — declared,
     not silently assumed."""
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     article = f'{prefix}.9.(3); {prefix}.10.(7)'
     accounted = sum(1 for z in zones if z.sizingZone().accountforDedicatedOutdoorAirSystem())
     if accounted > 0:
@@ -926,7 +927,7 @@ def _apply_economizers(model, air_loops, reference_system, vintage, ruleset, aud
     routes systems 1/3/4/6 and all heat-pump systems to 5.2.2.8 (air economizer:
     up to 100% outdoor air, differential reversion) and systems 2/5 to 5.2.2.9
     (WATER-side economizer, built since D-56)."""
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     if reference_system in (2, 5):
         _apply_water_economizer(model, reference_system, vintage, ruleset, audit)
         return
@@ -993,7 +994,7 @@ def _array(x):
 # chilled-water return.
 
 def _apply_water_economizer(model, reference_system, vintage, ruleset, audit):
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     article = f'{prefix}.12. (Table -12 -> 5.2.2.9)'
     spec = ruleset['water_economizer']
     loops = _chilled_water_loops(model)
@@ -1217,7 +1218,8 @@ def _rebuild_humidification(reference, captured, ruleset, vintage, audit):
         return
 
     spec = ruleset['humidification']
-    table = 'Table 8.4.5.7.-B' if str(vintage) == '2025' else 'Table 8.4.4.7.-B'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
+    table = f'Table {prefix}.7.-B'
     article = f'{table} Note (1)'
     served = []
     for air_loop in sorted_by_name(reference.getAirLoopHVACs()):
@@ -1348,7 +1350,7 @@ DCV_METHODS = ('IndoorAirQualityProcedure', 'IndoorAirQualityProcedureGenericCon
 
 
 def _apply_dcv(air_loops, zones, proposed_dcv, vintage, audit):
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     article = f'{prefix}.15.(2)'
     sources = [proposed_dcv[z.nameString()] for z in zones
                if proposed_dcv.get(z.nameString()) is not None]

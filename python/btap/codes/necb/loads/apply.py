@@ -74,12 +74,10 @@ def apply_loads(model, vintage='2020', audit=None):
     type in the model. NO Lights, NO service water heating (sibling gems)."""
     if audit is None:
         audit = AuditLog()
-    rules = _loads.rules(vintage)
-    prefix = rules['schedule_table_prefix']
     applied = 0
 
     for space_type in sorted_by_name(model.getSpaceTypes()):
-        result = _apply_to_space_type(model, space_type, vintage, prefix, audit)
+        result = _apply_to_space_type(model, space_type, vintage, audit)
         if result:
             applied += 1
     audit.decision('loads', 'NECB internal loads applied (people, plug/gas equipment, '
@@ -92,7 +90,7 @@ def apply_loads(model, vintage='2020', audit=None):
     return audit
 
 
-def _apply_to_space_type(model, space_type, vintage, prefix, audit):
+def _apply_to_space_type(model, space_type, vintage, audit):
     name = space_type.nameString()
     standards_space_type = space_type.standardsSpaceType()
     if ('plenum' in name.lower()
@@ -119,7 +117,7 @@ def _apply_to_space_type(model, space_type, vintage, prefix, audit):
 
     apply_people(space_type, record, audit)
     apply_equipment(space_type, record, audit)
-    _apply_ventilation(space_type, record, prefix, audit)
+    _apply_ventilation(space_type, record, audit)
     _apply_infiltration(space_type, record, audit)
     apply_schedule_set(model, space_type, record, vintage, audit)
     apply_thermostat(model, space_type, record, vintage, audit)
@@ -200,7 +198,7 @@ def apply_equipment(space_type, record, audit):
                inputs={'btu_hr_ft2': gas}, article='8.4.3.2.(2)')
 
 
-def _apply_ventilation(space_type, record, prefix, audit):
+def _apply_ventilation(space_type, record, audit):
     """DesignSpecificationOutdoorAir (method Sum) with the legacy per-person
     RESCALE: the ventilation standard's occupant density differs from NECB's,
     so per-person is scaled by (ventilation occupancy)/(NECB occupancy) so the

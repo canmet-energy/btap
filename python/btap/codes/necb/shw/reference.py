@@ -13,13 +13,14 @@ from __future__ import annotations
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog, emit_coverage
+from btap.codes import Ruleset
 from btap.codes.necb import shw as SHW
 from btap.codes.necb.shw import efficiency as Efficiency
 
 
 def reference_shw(model, *, vintage="2020", audit=None):
     audit = audit if audit is not None else AuditLog()
-    prefix = "8.4.5" if str(vintage) == "2025" else "8.4.4"
+    prefix = Ruleset.from_edition(vintage).article("reference_subsection")
     heaters = sorted_by_name(model.getWaterHeaterMixeds())
     audit.info("shw_reference",
                "reference SWH storage capacity, power input and energy type identical to "

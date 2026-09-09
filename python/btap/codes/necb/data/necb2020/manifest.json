@@ -1,0 +1,12 @@
+{
+  "id": "necb2020",
+  "family": "necb",
+  "edition": "2020",
+  "label": "NECB 2020",
+  "articles": {
+    "reference_subsection": "8.4.4",
+    "lighting_subsection": "8.4.4",
+    "heat_pump_aux_fuel": "8.4.4.13.(2)(c)"
+  },
+  "literal_remaps": {}
+}

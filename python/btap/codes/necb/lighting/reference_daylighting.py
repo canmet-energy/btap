@@ -37,6 +37,7 @@ import openstudio
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import Ruleset
 from btap.codes.necb.lighting import daylighting as Daylighting
 
 REFLECTANCES = {'Floor': 0.15, 'Wall': 0.50, 'RoofCeiling': 0.80}
@@ -57,7 +58,7 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
         'necb2020' only — the default for an unresolvable Table 4.2.1.6. column
         (warns)"""
     audit = audit if audit is not None else AuditLog()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('lighting_subsection')
     # `placement` is the single selector; Daylighting owns its vocabulary
     # (including the 'necb_default' alias), so normalize through IT rather
     # than keeping a second copy of the mapping here, then pass it straight

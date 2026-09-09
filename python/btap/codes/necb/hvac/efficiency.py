@@ -24,6 +24,7 @@ from datetime import date, datetime
 import openstudio
 
 from btap._compat import NullAudit, ruby_round, sorted_by_name
+from btap.codes import Ruleset
 from btap.codes.necb.hvac.reference import RULES_DIR
 from btap.codes.necb.hvac.reference import rules as _rules
 from btap.modeling.hvac.components import coils as _coils
@@ -277,7 +278,7 @@ def apply_staging(model, rules, vintage, audit):
         — the appliers must bin on the measurement taken here, not on a re-read.
     """
     audit = audit if audit is not None else NullAudit()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     totals: dict = {}
     for unitary in sorted_by_name(model.getAirLoopHVACUnitarySystems()):
         _stage_multispeed_coil(unitary.coolingCoil(), rules.get('dx_staging'),
@@ -544,7 +545,7 @@ def _apply_fan_power_curve(fan, vintage, audit):
     fan.setFanPowerCoefficient5(0.0)
     fan.setFanPowerMinimumFlowRateInputMethod('Fraction')
     fan.setFanPowerMinimumFlowFraction(row['d'])
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     audit.decision('efficiency', f'VAV fan power curve set ({row_name})',
                    target=fan.nameString(),
                    inputs={'rated_kw': ruby_round(power_kw, 2),
@@ -569,7 +570,7 @@ def _apply_pump_rules(model, vintage, rule, audit, proposed=None):
     if rule is None:
         return
 
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = Ruleset.from_edition(vintage).article('reference_subsection')
     stats = _proposed_pump_stats(proposed)
     if proposed is None:
         audit.info('efficiency', f'no proposed model supplied — {prefix}.14.(1)-(3) pump power transfer '
@@ -842,7 +843,7 @@ def _align_heat_pump_heating_capacity(model, audit, requested_vintage='2020'):
 
     :param requested_vintage: the CODE edition ('2020'/'2025'), which decides
         whether the heat-pump article is numbered 8.4.4.13 or 8.4.5.13"""
-    hp_article = '8.4.5.13.(2)(c)' if str(requested_vintage) == '2025' else '8.4.4.13.(2)(c)'
+    hp_article = Ruleset.from_edition(requested_vintage).article('heat_pump_aux_fuel')
     for loop_ in sorted_by_name(model.getAirLoopHVACs()):
         comps = _coils.supply_components(loop_)
         staged_heat = next((c for c in comps if c.to_CoilHeatingDXMultiSpeed().is_initialized()), None)

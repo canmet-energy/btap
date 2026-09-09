@@ -14,21 +14,26 @@ The 15 sites (verified against the code, not against this file's own
 literals — computing the expected value the same way it is produced in
 product code would be circular):
 
- 1. ``btap/codes/compliance.py:321``               ``prefix``
- 2. ``btap/codes/necb/envelope/reference.py:57``         ``prefix``
- 3. ``btap/codes/necb/hvac/efficiency.py:280``           ``prefix`` (staging)
- 4. ``btap/codes/necb/hvac/efficiency.py:547``           ``prefix`` (fan curve)
- 5. ``btap/codes/necb/hvac/efficiency.py:572``           ``prefix`` (pump rules)
- 6. ``btap/codes/necb/hvac/efficiency.py:845``           ``hp_article``
- 7. ``btap/codes/necb/hvac/reference.py:607``            ``prefix`` (terminal/secondary split)
- 8. ``btap/codes/necb/hvac/reference.py:929``            ``prefix`` (air economizer)
- 9. ``btap/codes/necb/hvac/reference.py:996``            ``prefix`` (water economizer)
-10. ``btap/codes/necb/hvac/reference.py:1220``           ``table``/``article`` (humidification)
-11. ``btap/codes/necb/hvac/reference.py:1351``           ``prefix`` (DCV)
-12. ``btap/codes/necb/lighting/reference.py:40``         ``prefix``
-13. ``btap/codes/necb/lighting/reference_daylighting.py:60``  ``prefix``
-14. ``btap/codes/necb/shw/reference.py:22``              ``prefix``
-15. ``btap/codes/necb/loads/apply.py:78``                ``rules['schedule_table_prefix']``
+ 1. ``btap/codes/compliance.py#_build_reference``                     ``prefix`` (lighting_subsection)
+ 2. ``btap/codes/necb/envelope/reference.py#apply``                   ``prefix``
+ 3. ``btap/codes/necb/hvac/efficiency.py#apply_staging``              ``prefix``
+ 4. ``btap/codes/necb/hvac/efficiency.py#_apply_fan_power_curve``     ``prefix``
+ 5. ``btap/codes/necb/hvac/efficiency.py#_apply_pump_rules``          ``prefix``
+ 6. ``btap/codes/necb/hvac/efficiency.py#_align_heat_pump_heating_capacity``  ``hp_article`` (heat_pump_aux_fuel)
+ 7. ``btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split``  ``prefix``
+ 8. ``btap/codes/necb/hvac/reference.py#_apply_economizers``          ``prefix``
+ 9. ``btap/codes/necb/hvac/reference.py#_apply_water_economizer``     ``prefix``
+10. ``btap/codes/necb/hvac/reference.py#_rebuild_humidification``    ``prefix`` (Table {prefix}.7.-B)
+11. ``btap/codes/necb/hvac/reference.py#_apply_dcv``                 ``prefix``
+12. ``btap/codes/necb/lighting/reference.py#reference_lighting``      ``prefix`` (lighting_subsection)
+13. ``btap/codes/necb/lighting/reference_daylighting.py#apply``       ``prefix`` (lighting_subsection)
+14. ``btap/codes/necb/shw/reference.py#reference_shw``               ``prefix``
+15. ``btap/codes/necb/loads/apply.py#_apply_ventilation``            edition-invariant citation (the
+    ``schedule_table_prefix`` data key was a dead parameter, removed in Stage 2)
+
+Since Stage 2 each ``prefix`` is ``Ruleset.from_edition(vintage).article(key)``
+from the edition manifest — no ternary remains — and this table is what
+proves the data says exactly what the ternaries used to.
 
 Site 15 is a genuine finding: the ``prefix`` local in ``apply_loads`` is
 threaded into ``_apply_ventilation`` as a parameter but that function's own

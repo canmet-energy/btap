@@ -18,6 +18,17 @@ DEFAULT_COVERAGE_DATA = REPO_ROOT / "python" / "btap" / "codes" / "data" / "cove
 DEFAULT_CACHE_2020 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2020.json"
 DEFAULT_CACHE_2025 = DEFAULT_COVERAGE_DATA / "necb_8_4_articles_2025.json"
 DEFAULT_DISPOSITION = DEFAULT_COVERAGE_DATA / "necb_8_4_disposition.json"
+# The per-edition ruleset manifests btap.codes discovers (multi-edition plan,
+# Stage 2). This generator is run by the `lint` CI job with a bare `python3`
+# and NO install, so it reads the same files off disk by the same path
+# convention rather than importing `btap.codes.editions()`.
+DEFAULT_EDITION_DATA = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+# The article numbering the SOURCE citation literals are written in. A rule
+# module writing `article="8.4.4.13.(2)(g)"` means "the reference subsection as
+# NECB 2020 numbers it"; each edition's manifest says how THAT edition numbers
+# it (`literal_remaps`). This is a property of the source text, not of any one
+# edition, which is why it is not a manifest key.
+LITERAL_REFERENCE_SUBSECTION = "8.4.4"
 PYTHON_INPUT_MODE = "python"
 DEFAULT_INPUT_MODE = PYTHON_INPUT_MODE
 REPO_URL = "https://github.com/canmet-energy/openstudio-necb-gems"
@@ -92,6 +103,58 @@ def esc(text: object) -> str:
     ).replace(">", "&gt;").replace('"', "&quot;")
 
 
+def edition_manifests(root: Path = DEFAULT_EDITION_DATA) -> dict[str, dict]:
+    """Every edition manifest under ``root``, keyed by edition ("2020")."""
+    manifests = {}
+    for path in sorted(root.glob("*/manifest.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        manifests[str(data["edition"])] = data
+    if not manifests:
+        raise ValueError(
+            f"no edition manifests under {root}/*/manifest.json — this "
+            "generator's edition list comes from btap.codes' manifests"
+        )
+    return manifests
+
+
+def manifest_article(manifest: dict, key: str) -> str:
+    """One edition-specific article number from a manifest.
+
+    Raises rather than defaulting: a coverage document that silently prints
+    NECB 2020 article ids for a third edition is the exact defect this tool
+    exists to expose.
+    """
+    articles = manifest.get("articles") or {}
+    if key not in articles:
+        raise ValueError(
+            f"NECB {manifest.get('edition')} declares no article key {key!r} — "
+            f"add it to btap/codes/necb/data/{manifest.get('id')}/manifest.json "
+            f"(it declares {sorted(articles)})"
+        )
+    return articles[key]
+
+
+def remap_citation_literal(ref: str, remaps: dict[str, str]) -> str:
+    """Rewrite a citation literal from the numbering the SOURCE is written in
+    into this edition's numbering, per the manifest's ``literal_remaps``.
+
+    An edition with no remaps keeps the literal — it already numbers the
+    article that way. An edition WITH remaps that cover none of the literal
+    raises: no fallback, no default.
+    """
+    for source, target in sorted(remaps.items(), key=lambda item: -len(item[0])):
+        if ref.startswith(source):
+            return ref.replace(source, target, 1)
+    if remaps:
+        raise ValueError(
+            f"citation literal {ref!r} is written in the "
+            f"{LITERAL_REFERENCE_SUBSECTION} numbering and this edition "
+            f"renumbers it, but its literal_remaps ({sorted(remaps)}) cover "
+            "none of it"
+        )
+    return ref
+
+
 def split_ref(ref: object) -> tuple[str | None, int | None]:
     match = re.match(r"(8\.4\.\d+\.\d+)\.?\s*(?:\((\d+)\))?", str(ref or ""))
     if match is None:
@@ -154,6 +217,7 @@ def manifest_domain(path: Path) -> str:
 class CoverageGenerator:
     def __init__(self, inputs: Inputs):
         self.inputs = inputs
+        self.editions = edition_manifests()
         self.raw_citations = self._scan_citations()
         self.dispositions_2025 = json.loads(
             inputs.disposition.read_text(encoding="utf-8")
@@ -193,20 +257,57 @@ class CoverageGenerator:
         return citations
 
     def citations_for(self, vintage: str, articles: dict) -> dict[str, list[dict]]:
-        reference_prefix = "8.4.4" if vintage == "2020" else "8.4.5"
+        """Resolve every scanned citation site onto ``vintage``'s article ids.
+
+        Every edition-specific number comes from that edition's manifest:
+        ``reference_subsection`` for the ``{prefix}`` the rule modules
+        interpolate, ``literal_remaps`` for citations written as literals in
+        another edition's numbering. There is no hardcoded fallback rung — an
+        edition whose manifest cannot answer raises, so the next
+        coverage-enabled edition cannot recreate, inside the tool that
+        documents the defect, the defect itself.
+        """
+        manifest = self.editions[vintage]
+        reference_prefix = manifest_article(manifest, "reference_subsection")
+        remaps = dict(manifest.get("literal_remaps") or {})
+        legacy = LITERAL_REFERENCE_SUBSECTION + "."
+        # Does this edition number the reference subsection the way the source
+        # literals do? That fact and the manifest's remaps must agree, or a
+        # literal would silently land on another edition's article.
+        renumbered = reference_prefix != LITERAL_REFERENCE_SUBSECTION
+        if renumbered and legacy not in remaps:
+            raise ValueError(
+                f"NECB {vintage} numbers the reference subsection "
+                f"{reference_prefix}, but btap/codes/necb/data/"
+                f"{manifest.get('id')}/manifest.json has no literal_remaps "
+                f"entry for {legacy!r} — every {legacy} literal in the rule "
+                "modules would be published under the wrong article"
+            )
+        if not renumbered and remaps:
+            raise ValueError(
+                f"NECB {vintage} numbers the reference subsection "
+                f"{reference_prefix} — the numbering the source literals "
+                f"already use — yet its manifest declares literal_remaps "
+                f"{sorted(remaps)}"
+            )
         citations: dict[str, list[dict]] = defaultdict(list)
         for citation in self.raw_citations:
-            if (vintage == "2020" and citation["gem"] == "necb"
-                    and any(token.startswith("8.4.4.") for token in citation["tokens"])):
+            # In the umbrella (compliance.py, editions/) a LITERAL 8.4.4.
+            # citation is the EUI path, which exists only in the editions that
+            # moved the reference subsection off 8.4.4 — it is not one of this
+            # edition's articles at all.
+            umbrella = citation["gem"] == "necb"
+            if (umbrella and not renumbered
+                    and any(token.startswith(legacy) for token in citation["tokens"])):
                 continue
             for token in citation["tokens"]:
                 ref = token.replace("PREFIX", reference_prefix, 1)
-                if ref.startswith("8.4.4."):
-                    if citation["gem"] == "necb":
-                        if vintage == "2020":
+                if ref.startswith(legacy):
+                    if umbrella:
+                        if not renumbered:
                             continue
-                    elif vintage == "2025":
-                        ref = ref.replace("8.4.4.", "8.4.5.", 1)
+                    else:
+                        ref = remap_citation_literal(ref, remaps)
                 article, _sentence = split_ref(ref)
                 if article and article in articles:
                     candidate = {key: citation[key] for key in ("file", "line", "kind")}
@@ -616,7 +717,7 @@ class CoverageGenerator:
         }
 
     def render(self) -> tuple[str, dict[str, dict]]:
-        parts = {vintage: self.vintage_part(vintage) for vintage in ("2020", "2025")}
+        parts = {vintage: self.vintage_part(vintage) for vintage in sorted(self.editions)}
         if not self.inputs.audit_dirs:
             run_note = (
                 'No run evidence supplied (set NECB_AUDIT_JSONS to one or more run directories '
