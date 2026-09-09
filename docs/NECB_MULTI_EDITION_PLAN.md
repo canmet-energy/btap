@@ -1834,3 +1834,17 @@ Everything else (chiller curves, daylighting 2025, equipment efficiencies,
 schedules' other 5 178 cells, space types' matched cells) is identical to
 the edition and becomes checked provenance in step 2 with no output change.
 **Nothing in this table changes until Sol's review and D-89.**
+- **Step 2 (provenance-only adoption)** on `phase-b-step2` (`64ef29b`+):
+  every inherited entry now carries `verified_against` records (99 over the
+  91 archived own-edition payloads, each hashed) and an `inherited_reason`;
+  necb2025's daylighting-control table re-sourced to `mcp:necb:2025` (the
+  one file step 1 proved identical to its own edition — and step 2 found
+  the three "renamed rows" are a stale join label in the shipped file's
+  `table_row` field, present identically in necb2020's copy, not a value
+  difference: left for D-89's step 3); rule (h) in
+  `test_edition_provenance.py` (15 problems before, 0 after);
+  `verify-source` checks the records. No shipped rule or table changed;
+  no `result_sha256` moved; wheel +12 KB (the manifests). Verified: full
+  suite 954 passed; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical**; gates and docs clean. **Phase B pauses here** until
+  Sol's review of PRs #43/#44/#45 and the D-89 proposal.
