@@ -10,6 +10,15 @@ every test here is EXPECTED TO FAIL until that lands (the missing-block
 failure in ``test_provenance_block_covers_exactly_the_declared_outputs`` is
 the expected shape of that failure).
 
+Phase B of the same plan adds rule **(h)**: an entry whose ``source`` is not
+this edition's own text — the pinned oracle, or another edition's MCP
+retrieval — must SAY so, with a non-empty ``inherited_reason``, and must
+record at least one ``verified_against`` check against this edition's own
+published tables. Each such check names a retained payload inside THIS
+edition's own ``provenance/`` directory and pins its hash, so the rule stays
+self-contained under the one-edition removability gate. Phase B ends when the
+inherited set is empty.
+
 Also exports :func:`check_provenance`, callable from the Stage 3 removability
 gate's subprocess script (``tests/necb/test_edition_independence.py``) so the
 provenance contract is proven under a one-edition-only temp tree too — the
@@ -35,11 +44,19 @@ REQUIRED_ENTRY_KEYS = {
 #: Keys an entry MAY carry in addition to the required ones.
 # `note` is the entry's own disclosure of what source_sha256 does NOT cover
 # (mixed-origin files, self-archived caches) — optional, free text.
-OPTIONAL_ENTRY_KEYS = {"byte_identical_to", "note"}
+# `inherited_reason` and `verified_against` are the Phase B step 2 pair that
+# rule (h) below requires of every entry whose `source` is not this edition's
+# own text (see the multi-edition plan's Phase B and the data README).
+OPTIONAL_ENTRY_KEYS = {"byte_identical_to", "note",
+                       "inherited_reason", "verified_against"}
 ALLOWED_ENTRY_KEYS = REQUIRED_ENTRY_KEYS | OPTIONAL_ENTRY_KEYS
 
 METHODS = {"transcribed", "copied", "generated"}
 SOURCE_VERIFICATIONS = {"archived", "revision_addressable", "current_only", "manual"}
+
+#: Keys every ``verified_against`` item MUST carry, and the verdict vocabulary.
+VERIFIED_AGAINST_KEYS = {"table", "edition", "payload", "sha256", "verdict", "detail"}
+VERDICTS = {"identical", "differs", "partial"}
 
 #: Manifest top-level keys, besides `rules`/`tables`/`coverage_text`, that
 #: name a declared OUTPUT file rather than metadata. Today only the 2025
@@ -239,6 +256,101 @@ def _check_copied_own_fields(code_id: str, name: str, entry: dict) -> list[str]:
     return problems
 
 
+def _is_own_edition_source(code_id: str, entry: dict) -> bool:
+    """Does this entry's ``source`` name THIS snapshot's own edition text?
+
+    Own: ``mcp:necb:<this edition>`` and any ``self:`` or ``printed:<this
+    edition>`` declaration. Not own: the pinned oracle (whose lineage is
+    another edition's), and ``mcp:necb:<other>``.
+    """
+    source = entry.get("source") or ""
+    own_edition = code_id.removeprefix("necb")
+    if source.startswith("mcp:necb:"):
+        return source == f"mcp:necb:{own_edition}"
+    if source.startswith("printed:"):
+        return own_edition in source
+    return source.startswith("self:")
+
+
+def _check_verified_against(code_id: str, manifest_dir: Path, name: str, entry: dict) -> list[str]:
+    """Shape and payload check for ``verified_against``, wherever it appears.
+
+    Each item names one archived payload of THIS edition's own source text —
+    inside this edition's own directory, so the check stays self-contained
+    under the one-edition removability gate — and pins its hash.
+    """
+    records = entry.get("verified_against")
+    if records is None:
+        return []
+    if not isinstance(records, list) or not records:
+        return [f"{code_id}: provenance[{name!r}].verified_against must be a "
+                "non-empty list"]
+    problems = []
+    for index, record in enumerate(records):
+        where = f"{code_id}: provenance[{name!r}].verified_against[{index}]"
+        if not isinstance(record, dict):
+            problems.append(f"{where} is not an object")
+            continue
+        for key in sorted(VERIFIED_AGAINST_KEYS - set(record)):
+            problems.append(f"{where} missing required key {key!r}")
+        for key in sorted(set(record) - VERIFIED_AGAINST_KEYS):
+            problems.append(f"{where} has unknown key {key!r}")
+        if record.get("verdict") not in VERDICTS:
+            problems.append(f"{where}.verdict {record.get('verdict')!r} not in "
+                            f"{sorted(VERDICTS)}")
+        if record.get("edition") != code_id.removeprefix("necb"):
+            problems.append(
+                f"{where}.edition {record.get('edition')!r} is not this "
+                f"snapshot's own edition — verification is against the "
+                f"edition's OWN published text, never another's")
+        payload = record.get("payload") or ""
+        if not isinstance(payload, str) or not payload.startswith("provenance/") \
+                or ".." in payload.split("/"):
+            problems.append(
+                f"{where}.payload {payload!r} must be a relative path under "
+                "this edition's own provenance/ directory")
+            continue
+        payload_path = manifest_dir / payload
+        if not payload_path.is_file():
+            problems.append(f"{where}.payload is missing at {payload_path}")
+            continue
+        digest = _sha256(payload_path)
+        if digest != record.get("sha256"):
+            problems.append(f"{where}.payload hashes {digest!r}, recorded "
+                            f"{record.get('sha256')!r}")
+    return problems
+
+
+def _check_inherited_source(code_id: str, manifest_dir: Path, name: str, entry: dict) -> list[str]:
+    """(h) an inherited source must SAY it is inherited, and be checked.
+
+    Phase B: a ``source`` naming the pinned oracle, or another edition's MCP
+    retrieval, is a problem UNLESS the entry carries a non-empty
+    ``inherited_reason`` AND at least one ``verified_against`` item — a
+    retained payload of this edition's own text, which
+    :func:`_check_verified_against` has already proven exists and hashes.
+    Phase B ends when this set is empty.
+    """
+    problems = list(_check_verified_against(code_id, manifest_dir, name, entry))
+    if _is_own_edition_source(code_id, entry):
+        if entry.get("inherited_reason"):
+            problems.append(
+                f"{code_id}: provenance[{name!r}] carries an 'inherited_reason' "
+                f"but its source {entry.get('source')!r} is this edition's own text")
+        return problems
+    if not (entry.get("inherited_reason") or "").strip():
+        problems.append(
+            f"{code_id}: provenance[{name!r}] source {entry.get('source')!r} is "
+            "not this edition's own text and the entry declares no "
+            "'inherited_reason'")
+    if not entry.get("verified_against"):
+        problems.append(
+            f"{code_id}: provenance[{name!r}] source {entry.get('source')!r} is "
+            "not this edition's own text and the entry records no "
+            "'verified_against' check against this edition's own tables")
+    return problems
+
+
 def check_manifest(manifest_dir: Path, data_root: Path, present_ids: set[str]) -> list[str]:
     """Every Stage 4 provenance problem for ONE edition's manifest."""
     code_id = manifest_dir.name
@@ -260,6 +372,7 @@ def check_manifest(manifest_dir: Path, data_root: Path, present_ids: set[str]) -
         problems.extend(_check_revision_addressable(code_id, name, entry))
         problems.extend(_check_byte_identical_to(code_id, data_root, manifest_dir, present_ids, name, entry))
         problems.extend(_check_copied_own_fields(code_id, name, entry))
+        problems.extend(_check_inherited_source(code_id, manifest_dir, name, entry))
     return problems
 
 
@@ -282,7 +395,8 @@ def check_provenance(data_root) -> list[str]:
 
 
 class TestEditionProvenance(unittest.TestCase):
-    """One test method per Stage 4 spec letter (a)-(g), each iterating every
+    """One test method per spec letter — Stage 4's (a)-(g) plus Phase B's
+    (h) — each iterating every
     registered code id so a failure names both the id and the exact problem.
     """
 
@@ -368,6 +482,20 @@ class TestEditionProvenance(unittest.TestCase):
                 for name, entry in sorted(provenance.items()):
                     if isinstance(entry, dict):
                         problems.extend(_check_copied_own_fields(code_id, name, entry))
+                self.assertEqual([], problems, "\n".join(problems))
+
+    def test_h_inherited_sources_declare_a_reason_and_a_verification(self):
+        for code_id in codes.code_ids():
+            with self.subTest(code_id=code_id):
+                manifest_dir = necb_pkg._data_root() / code_id
+                manifest = _load_manifest(manifest_dir)
+                provenance = manifest.get("provenance")
+                self.assertIsInstance(provenance, dict, f"{code_id}: no 'provenance' block")
+                problems = []
+                for name, entry in sorted(provenance.items()):
+                    if isinstance(entry, dict):
+                        problems.extend(
+                            _check_inherited_source(code_id, manifest_dir, name, entry))
                 self.assertEqual([], problems, "\n".join(problems))
 
     def test_check_provenance_helper_matches_the_packaged_tree(self):

@@ -8,7 +8,7 @@ The comparison runs offline against payloads retrieved from the building-codes M
 
 ## Matrix
 
-The rows are derived from the manifests, not listed by hand: an output appears here when its `provenance` entry's `source` is neither `mcp:necb:<this edition>` nor a `self:` declaration — 7 in `necb2020` and 8 in `necb2025`. `necb2025`'s `efficiencies.json` is added explicitly: its EQUIPMENT tables are this edition's own retrieval, but its performance CURVES are inherited, and only those are compared.
+The rows are derived from the manifests, not listed by hand: an output appears here when its `provenance` entry's `source` is neither `mcp:necb:<this edition>` nor a `self:` declaration — 7 in `necb2020` and 7 in `necb2025`. `necb2025`'s `efficiencies.json` is added explicitly: its EQUIPMENT tables are this edition's own retrieval, but its performance CURVES are inherited, and only those are compared.
 
 **The verdict column is coarse on purpose.** `differs` means "not byte-for-byte what this edition publishes" and says nothing about the SIZE of the difference — which is what an adoption decision turns on. Read the counts and the differing leaves below before treating a row as a numeric change.
 
@@ -24,14 +24,13 @@ The rows are derived from the manifests, not listed by hand: an output appears h
 | `necb2025` | `efficiencies.json` | `mcp:necb:2025` | `8.4.6.2`, `8.4.6.3`, `8.4.6.5.-A`, `8.4.6.5.-B`, … (11 total) | **differs** |
 | `necb2025` | `lighting_rules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `4.2.1.6`, `4.3.2.10.-A`, `4.3.2.10.-B`, `section 4.2.2.2`, … (6 total) | **differs** |
 | `necb2025` | `shw_rules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `6.2.2.1`, `section 8.4.6.9` | **differs** |
-| `necb2025` | `tables/daylighting_controls_4_2_1_6.json` | `mcp:necb:2020` | `4.2.1.6` | **differs** |
 | `necb2025` | `tables/exterior_lighting.json` | `mcp:necb:2020` | `4.2.3.1.-A`, `4.2.3.1.-B`, `4.2.3.1.-C`, `4.2.3.1.-D`, `4.2.3.1.-E` | **differs** |
 | `necb2025` | `tables/led_lighting.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `4.2.1.6`, `4.2.1.5` | **differs** |
 | `necb2025` | `tables/schedules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(1)(b)-A`, `A-8.4.3.2.(1)(b)-B`, `A-8.4.3.2.(1)(b)-C`, `A-8.4.3.2.(1)(b)-D`, … (11 total) | **differs** |
 | `necb2025` | `tables/space_types.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(2)-A`, `A-8.4.3.2.(2)-B`, `4.2.1.6`, `4.2.1.5`, `4.3.2.10.-A` | **differs** |
 | `necb2025` | `tables/table_c1.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `C-1` | **differs** |
 
-Totals: **16** differs.
+Totals: **15** differs.
 
 ## Per file
 
@@ -984,30 +983,6 @@ Differing leaves by kind:
 | `efficiency.fuel_fired.uef_bins_208_to_380_l[1].draw_gal` | `38.0` | no rendering of this value appears in this edition's Table 6.2.2.1 |
 | `efficiency.fuel_fired.uef_bins_208_to_380_l[3].draw_gal` | `84.0` | no rendering of this value appears in this edition's Table 6.2.2.1 |
 | `efficiency.fuel_fired.large.ua_divisor_f` | `70.0` | no rendering of this value appears in this edition's Table 6.2.2.1 |
-
-</details>
-
-### `necb2025` — `tables/daylighting_controls_4_2_1_6.json`
-
-- **Verdict:** differs
-- **Recorded source:** `mcp:necb:2020`
-- **Edition tables fetched:** `4.2.1.6`
-- **Mapping:** the shipped file is keyed by NECB space-function CATALOG name and each entry names the Table 4.2.1.6 row it was mapped to in its own `table_row` field ("Space Category | Space Type"); that field is the join key. The entry's `sidelighting` / `toplighting` state is compared against the corresponding cell of THIS edition's Table 4.2.1.6 (`X` → `required`, `-` → `not_required`). Entries whose `table_row` is null — the file's own `residue` — are excluded by construction, not silently dropped
-
-| count | value |
-|---|---:|
-| shipped entries | 106 |
-| entries the file itself records as absent from 4.2.1.6 | 5 |
-| entries matched | 98 |
-| entries unmatched | 3 |
-| control states identical | 192 |
-| control states differing | 0 |
-
-<details><summary>Shipped rows with no edition counterpart (3)</summary>
-
-- `Health care facility exam/treatment room → Healthcare facility | Healthcare facility exam/treatment room imaging room`
-- `Health care facility imaging room → Healthcare facility | Healthcare facility exam/treatment room imaging room`
-- `Sales area → Sales area | Sales area⁷⁷`
 
 </details>
 

@@ -125,6 +125,13 @@ then need its own archived artifact, and so on).
   "method": "transcribed",            // transcribed | copied | generated
   "source_verification": "archived",  // archived | revision_addressable | current_only | manual
   "note": "…",
+  "inherited_reason": "…",            // REQUIRED when `source` is not this edition's own text
+  "verified_against": [               // what this edition's OWN tables say about the shipped file
+    {"table": "4.2.1.6", "edition": "2025",
+     "payload": "provenance/vintage_match/4.2.1.6.result.json",
+     "sha256": "…", "verdict": "identical",   // identical | differs | partial
+     "detail": "…"}
+  ],
   "result_sha256": "…"                // the SHIPPED file's bytes
 }
 ```
@@ -153,6 +160,34 @@ source side too:
 - **`manual`** — transcription with no retrievable artifact (the two umbrella
   self-declarations).
 
+**An inherited source must SAY it is inherited, and be checked** (Phase B of
+the multi-edition plan; rule (h) of `tests/necb/test_edition_provenance.py`).
+A `source` that names the pinned oracle — whose own lineage is an earlier
+edition's — or another edition's MCP retrieval is a problem UNLESS the entry
+carries both:
+
+- **`inherited_reason`** — one sentence saying what is holding the adoption
+  up: an engine-shaped table the Code does not publish column for column, a
+  normative difference awaiting adjudication, a constant with no code cell at
+  all. Not an apology; the reason a reader would need before trusting the
+  file.
+- **`verified_against`** — a non-empty list of what THIS edition's own tables
+  say about the shipped content. Each item names one retained payload
+  (`provenance/vintage_match/<table>.result.json`, in this edition's own
+  directory so the check survives `git rm -r` of the other), pins its
+  `sha256`, and records a `verdict` of `identical`, `differs` or `partial`
+  with the `detail` behind it. The gate re-hashes every payload; an entry
+  whose source IS this edition's own text may still carry
+  `verified_against` (2025's `efficiencies.json` does, for its inherited
+  curve block) but never `inherited_reason`.
+
+`docs/NECB_VINTAGE_MATCH.md` is the generated companion: it lists exactly the
+outputs still carrying an inherited `source`, so a re-source drops a file from
+that document and from rule (h)'s set together. Phase B ends when both are
+empty. Prose in these fields obeys the D-88 self-description rule like any
+other provenance text: state origin, never comparison, and never name a newer
+edition.
+
 **`byte_identical_to` is an annotation, never a dependency.** 2025's six shared
 tables are `copied` and carry their OWN `source_*` fields, because the copy was
 made from the same retained artifact and not from another edition's live file —
@@ -168,7 +203,10 @@ btap-necb-coverage verify-source necb2020 tables/space_types.json
 ```
 
 Exit 0 verified, 1 a hash mismatch, 3 not checkable on this machine (the oracle
-is not installed, or the entry is `current_only`/`manual`). The oracle checkout
+is not installed, or the entry is `current_only`/`manual`). It also prints the
+entry's `inherited_reason` and re-hashes every `verified_against` payload — a
+mismatch there is a 1 even when the source side is only a 3, because a retained
+payload that no longer hashes is a failure, not an absence. The oracle checkout
 comes from the ENVIRONMENT, never from an assumed repository layout — an
 installed wheel has no repository around it, and
 `tests/test_self_containment.py` keeps this package out of one:

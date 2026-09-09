@@ -48,9 +48,12 @@ ARCHIVE_DIRNAME = "vintage_match"
 # The spec: which of THIS edition's own tables answer for which shipped file.
 #
 # Keyed by manifest-declared output path. Each entry names, per edition, the
-# table numbers in THAT edition's numbering. An edition missing from an entry
-# ships the file from its own text already (necb2020's exterior_lighting and
-# daylighting_controls are ``mcp:necb:2020``) and is not compared.
+# table numbers in THAT edition's numbering. An entry stays here after its
+# file is adopted -- the mapping is what the adoption was checked against, and
+# ``--fetch`` still keeps the payload current -- but an edition that now ships
+# the file from its own text no longer appears in ``foreign_outputs`` and so is
+# not re-compared. ``tables/daylighting_controls_4_2_1_6.json`` is in that
+# state for both editions since the Phase B step 2 re-source.
 #
 # ``sections`` are get_section retrievals for constants that no table carries.
 # --------------------------------------------------------------------------
@@ -1852,6 +1855,14 @@ CURVE_VERDICTS = [
 ]
 
 
+def _foreign_counts() -> str:
+    """"7 in `necb2020` and 7 in `necb2025`" — counted, never hand-written, so
+    an adoption that re-sources a file drops its row AND its count together."""
+    parts = [f"{len(foreign_outputs(manifest))} in `{edition_id}`"
+             for edition_id, manifest in sorted(load_manifests().items())]
+    return " and ".join(parts)
+
+
 def render(results: list[FileResult], surface: dict) -> str:
     out: list[str] = []
     out.append("# NECB vintage match — inherited content vs the edition's own tables")
@@ -1882,8 +1893,8 @@ def render(results: list[FileResult], surface: dict) -> str:
     out.append(
         "The rows are derived from the manifests, not listed by hand: an output "
         "appears here when its `provenance` entry's `source` is neither "
-        "`mcp:necb:<this edition>` nor a `self:` declaration — 7 in `necb2020` "
-        "and 8 in `necb2025`. `necb2025`'s `efficiencies.json` is added "
+        "`mcp:necb:<this edition>` nor a `self:` declaration — "
+        + _foreign_counts() + ". `necb2025`'s `efficiencies.json` is added "
         "explicitly: its EQUIPMENT tables are this edition's own retrieval, but "
         "its performance CURVES are inherited, and only those are compared.")
     out.append("")
