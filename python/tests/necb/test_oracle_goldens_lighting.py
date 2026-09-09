@@ -120,7 +120,7 @@ def lights_model(lights_type):
         space_type.setName(f"{bt} {st}")
         space_type.setStandardsBuildingType(bt)
         space_type.setStandardsSpaceType(st)
-    lighting.apply_lights(model, vintage="2020", lights_type=lights_type)
+    lighting.apply_lights(model, code="necb2020", lights_type=lights_type)
     return model
 
 
@@ -184,7 +184,7 @@ def office_tagged(model):
     from btap.codes.necb import loads
 
     map_ = {s.nameString(): list(OFFICE) for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage="2020")
+    loads.assign_space_types(model, map_, code="necb2020")
     return model
 
 
@@ -279,7 +279,7 @@ class TestOracleGoldensLighting(unittest.TestCase):
                     if s.outsideBoundaryCondition() == "Outdoors" and s.surfaceType() == "Wall")
         wall.setWindowToWallRatio(0.4)
         audit = AuditLog()
-        created = lighting.add_daylighting_controls(model, vintage="2020",
+        created = lighting.add_daylighting_controls(model, code="necb2020",
                                                     placement="necb2011", audit=audit)
         actual = daylighting_controls_signature(model)
         legacy_controls = expected["controls_on_fixture"]
@@ -316,10 +316,10 @@ class TestOracleGoldensLighting(unittest.TestCase):
         self.assertIn("ONTARIO/TORONTO", expected["context"])
 
         model = office_tagged(load_raw_fixture())
-        lighting.apply_lights(model, vintage="2020", lights_type="LED")
+        lighting.apply_lights(model, code="necb2020", lights_type="LED")
         model.getBuilding().setStandardsTemplate("NECB2020")
 
-        report = lighting.cost(model, vintage="2020", city=CITY, province_state=PROVINCE)
+        report = lighting.cost(model, edition="2020", city=CITY, province_state=PROVINCE)
         legacy_total = expected["led_2020_total"]
         self.assertAlmostEqual(
             legacy_total, report.total, delta=max(abs(legacy_total) * 0.001, 0.05),

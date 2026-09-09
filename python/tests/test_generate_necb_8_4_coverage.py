@@ -54,8 +54,8 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
             "re-baselined explicitly (see test_citation_no_loss.py), not "
             "silently absorbed by a loose floor",
         )
-        for vintage, expected_articles in (("2020", 52), ("2025", 57)):
-            part = parts[vintage]
+        for edition, expected_articles in (("2020", 52), ("2025", 57)):
+            part = parts[edition]
             self.assertEqual(expected_articles, len(part["articles"]))
             self.assertEqual(expected_articles, sum(part["counts"].values()))
             self.assertGreater(sum(map(len, part["declarations"].values())), 40)
@@ -68,10 +68,19 @@ class TestGenerateNecb84Coverage(unittest.TestCase):
     def test_python_is_the_only_input_authority(self):
         self.assertEqual("python", coverage.DEFAULT_INPUT_MODE)
         self.assertEqual(REPO_ROOT / "docs" / "NECB_8_4_COVERAGE.html", coverage.DEFAULT_OUTPUT)
-        expected_data = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
-        self.assertEqual(expected_data / "necb_8_4_articles_2020.json", coverage.DEFAULT_CACHE_2020)
-        self.assertEqual(expected_data / "necb_8_4_articles_2025.json", coverage.DEFAULT_CACHE_2025)
-        self.assertEqual(expected_data / "necb_8_4_disposition.json", coverage.DEFAULT_DISPOSITION)
+        # Stage 3 of the multi-edition plan moved each edition's Section 8.4
+        # article text INTO that edition's own snapshot (the D-86 correction
+        # recorded in the plan: the caches are per-edition NECB text). The
+        # disposition did NOT move: it is one curated responsibility map the
+        # generator reads across editions, so putting it inside necb2025 would
+        # make the 2020 document depend on the 2025 snapshot.
+        editions = REPO_ROOT / "python" / "btap" / "codes" / "necb" / "data"
+        neutral = REPO_ROOT / "python" / "btap" / "codes" / "data" / "coverage"
+        self.assertEqual(editions / "necb2020" / "coverage" / "articles_8_4.json",
+                         coverage.DEFAULT_CACHE_2020)
+        self.assertEqual(editions / "necb2025" / "coverage" / "articles_8_4.json",
+                         coverage.DEFAULT_CACHE_2025)
+        self.assertEqual(neutral / "necb_8_4_disposition.json", coverage.DEFAULT_DISPOSITION)
 
     def test_stale_source_root_fails_loudly(self):
         with tempfile.TemporaryDirectory() as tmp:

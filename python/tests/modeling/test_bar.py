@@ -121,12 +121,12 @@ class TestBar(unittest.TestCase):
         # wizard output carries no constructions; the envelope pass retargets existing ones
         self.seed_constructions(model)
         audit = AuditLog()
-        necb_loads.apply_loads(model, vintage='2020', audit=audit)
-        necb_lighting.apply_lights(model, vintage='2020', audit=audit)
-        necb_shw.apply_shw(model, vintage='2020', fuel='NaturalGas', audit=audit)
+        necb_loads.apply_loads(model, code='necb2020', audit=audit)
+        necb_lighting.apply_lights(model, code='necb2020', audit=audit)
+        necb_shw.apply_shw(model, code='necb2020', fuel='NaturalGas', audit=audit)
         modeling.build_system(model, 'Baseboard gas boiler',
                               sorted_by_name(model.getThermalZones()))
-        necb_envelope.apply_prescriptive(model, vintage='2020', hdd=3890, audit=audit)
+        necb_envelope.apply_prescriptive(model, code='necb2020', hdd=3890, audit=audit)
 
         self.assertTrue(list(model.getPeoples()), 'loads live on bar geometry')
         self.assertTrue([light for st in model.getSpaceTypes() for light in st.lights()],

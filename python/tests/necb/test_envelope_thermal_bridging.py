@@ -31,7 +31,7 @@ class TestThermalBridging(unittest.TestCase):
 
     def test_not_requested_warns(self):
         model = load_raw_fixture()
-        audit = self.n.apply_prescriptive(model, vintage='2020', hdd=HDD)
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
         warning = next((w for w in audit.warnings
                         if 'thermal bridging not requested' in w['action']), None)
         self.assertIsNotNone(warning)
@@ -43,7 +43,7 @@ class TestThermalBridging(unittest.TestCase):
         os.environ['OPENSTUDIO_ENVELOPE_DISABLE_TBD'] = '1'
         try:
             audit = AuditLog()
-            result = self.n.thermal_bridging.apply(load_raw_fixture(), vintage='2020',
+            result = self.n.thermal_bridging.apply(load_raw_fixture(), code='necb2020',
                                                    hdd=HDD, audit=audit)
             self.assertEqual(False, result)
             self.assertTrue(any('NOT accounted' in w['action']
@@ -96,7 +96,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
         from btap.audit import AuditLog
 
         model = load_raw_fixture()
-        audit = self.n.apply_prescriptive(model, vintage='2020', hdd=HDD,
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD,
                                           thermal_bridging='efficient (BETBG)',
                                           audit=AuditLog())
 
@@ -143,7 +143,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
 
         model = load_raw_fixture()
         audit = AuditLog()
-        self.n.reference_envelope(model, vintage='2020', hdd=HDD,
+        self.n.reference_envelope(model, code='necb2020', hdd=HDD,
                                   thermal_bridging='efficient (BETBG)',
                                   audit=audit)
 
@@ -175,7 +175,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
 
         audit = AuditLog()
         with self.assertRaises(RuntimeError) as ctx:
-            self.n.thermal_bridging.apply(load_raw_fixture(), vintage='2020',
+            self.n.thermal_bridging.apply(load_raw_fixture(), code='necb2020',
                                           hdd=HDD, psi_set='no such set',
                                           audit=audit)
         self.assertIn('TBD FAILED', str(ctx.exception))
@@ -240,7 +240,7 @@ class TestThermalBridgingEngine(unittest.TestCase):
                         side_effect=RuntimeError('forced engine failure')):
             with self.assertRaises(RuntimeError) as ctx:
                 self.n.thermal_bridging.apply(load_raw_fixture(),
-                                              vintage='2020', hdd=HDD,
+                                              code='necb2020', hdd=HDD,
                                               audit=audit)
         self.assertIn('forced engine failure', str(ctx.exception))
         self.assertFalse(any('NOT accounted' in w['action']

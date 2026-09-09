@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 from btap.codes import performance_compliance
-from btap.codes.compliance import (
+from btap.codes.necb.path import (
     _bump_capacities,
     _next_sizing_factor,
 )
@@ -51,7 +51,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         model = proposed_with_hvac()
         with self.assertRaises(ValueError) as ctx:
             performance_compliance(
-                model, vintage="2020", simulate="annual",
+                model, code="necb2020", simulate="annual",
                 weather={"epw": str(EPW)},  # deliberately missing ddy
                 building=building_for(model), run_dir=dir)
         self.assertIn("ddy", str(ctx.exception),
@@ -83,7 +83,7 @@ class TestComplianceNoEngine(unittest.TestCase):
                 st.setStandardsSpaceType("Office - enclosed")  # legacy name
         with self.assertRaises(ValueError) as ctx:
             performance_compliance(
-                model, vintage="2020", simulate="none", hdd=3890,
+                model, code="necb2020", simulate="none", hdd=3890,
                 building=building_for(model), run_dir=dir)
         self.assertIn("pre-flight FAILED", str(ctx.exception))
         self.assertIn("Office - enclosed", str(ctx.exception),
@@ -96,7 +96,7 @@ class TestComplianceNoEngine(unittest.TestCase):
 
     def test_none_mode_transforms_without_simulation(self):
         result = performance_compliance(
-            proposed_with_hvac(), vintage="2020", simulate="none", hdd=3890,
+            proposed_with_hvac(), code="necb2020", simulate="none", hdd=3890,
             building=building_for(load_raw_fixture()),
             run_dir=tempfile.mkdtemp(prefix="osnecb-none-"))
 
@@ -198,13 +198,13 @@ class TestComplianceNoEngine(unittest.TestCase):
         dir = tempfile.mkdtemp(prefix="osnecb-input-")
         # missing file, named
         with self.assertRaises(ValueError) as ctx:
-            performance_compliance("/nope/missing.osm", vintage="2020",
+            performance_compliance("/nope/missing.osm", code="necb2020",
                                    simulate="none", hdd=3890, run_dir=dir)
         self.assertIn("/nope/missing.osm", str(ctx.exception))
 
         # structurally empty model
         with self.assertRaises(ValueError) as ctx:
-            performance_compliance(openstudio.model.Model(), vintage="2020",
+            performance_compliance(openstudio.model.Model(), code="necb2020",
                                    simulate="none", hdd=3890, run_dir=dir)
         self.assertIn("not simulate-able", str(ctx.exception))
 
@@ -214,7 +214,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         for z in bare.getThermalZones():
             z.resetThermostatSetpointDualSetpoint()
         with self.assertRaises(ValueError) as ctx:
-            performance_compliance(bare, vintage="2020", simulate="none",
+            performance_compliance(bare, code="necb2020", simulate="none",
                                    hdd=3890, run_dir=dir)
         self.assertIn("NO thermal zone carries a thermostat",
                       str(ctx.exception))
@@ -226,7 +226,7 @@ class TestComplianceNoEngine(unittest.TestCase):
             st.remove()
         no_storeys.getBuilding().resetStandardsNumberOfAboveGroundStories()
         with self.assertRaises(ValueError) as ctx:
-            performance_compliance(no_storeys, vintage="2020", simulate="none",
+            performance_compliance(no_storeys, code="necb2020", simulate="none",
                                    hdd=3890, run_dir=dir)
         self.assertIn("ABOVE-GROUND STOREY COUNT", str(ctx.exception))
         # the tagged variant with the override passes the pre-flight
@@ -238,7 +238,7 @@ class TestComplianceNoEngine(unittest.TestCase):
             if st.spaces():
                 st.setStandardsBuildingType("Space Function")
                 st.setStandardsSpaceType("Office enclosed > 25 m2")
-        result = performance_compliance(tagged, vintage="2020",
+        result = performance_compliance(tagged, code="necb2020",
                                         simulate="none", hdd=3890,
                                         building={"storeys": 1}, run_dir=dir)
         info = next(e for e in result.audit.entries
@@ -306,7 +306,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         global_cooling = model.getSizingParameters().coolingSizingFactor()
         trace = {}
         factors = _bump_capacities(model, "proposed", report,
-                                   {"heating": True, "cooling": True}, "2020",
+                                   {"heating": True, "cooling": True}, "necb2020",
                                    step=1.4, trace=trace)
 
         self.assertEqual("zonal", factors["mode"])
@@ -345,7 +345,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         factors = _bump_capacities(bare, "proposed",
                                    {"proposed": {}, "reference": {}},
                                    {"heating": True, "cooling": False},
-                                   "2020", step=1.4, trace={})
+                                   "necb2020", step=1.4, trace={})
         self.assertEqual("global", factors["mode"])
         self.assertAlmostEqual(bare_global * 1.4,
                                bare.getSizingParameters().heatingSizingFactor(),
@@ -364,7 +364,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         mixed_gc = mixed_model.getSizingParameters().coolingSizingFactor()
         mixed_gh = mixed_model.getSizingParameters().heatingSizingFactor()
         factors = _bump_capacities(mixed_model, "proposed", mixed_report,
-                                   {"heating": True, "cooling": True}, "2020",
+                                   {"heating": True, "cooling": True}, "necb2020",
                                    step=1.4, trace={})
         self.assertEqual("mixed", factors["mode"])
         self.assertIn("ZONE BAD", factors["zones"])
@@ -385,7 +385,7 @@ class TestComplianceNoEngine(unittest.TestCase):
         before = sorted(s.construction().get().nameString()
                         for s in model.getSurfaces())
         performance_compliance(
-            model, vintage="2020", simulate="none", hdd=3890,
+            model, code="necb2020", simulate="none", hdd=3890,
             building=building_for(model),
             run_dir=tempfile.mkdtemp(prefix="osnecb-mut-"))
         after = sorted(s.construction().get().nameString()
@@ -398,7 +398,7 @@ class TestComplianceWithEngine(unittest.TestCase):
     def test_sizing_mode_with_costing(self):
         dir = tempfile.mkdtemp(prefix="osnecb-sizing-")
         result = performance_compliance(
-            proposed_with_hvac(), vintage="2020", simulate="sizing",
+            proposed_with_hvac(), code="necb2020", simulate="sizing",
             weather=weather(), building=building_for(load_raw_fixture()),
             costing=True, run_dir=dir)
 
@@ -429,7 +429,7 @@ class TestComplianceWithEngine(unittest.TestCase):
 
         dir = tempfile.mkdtemp(prefix="osnecb-annual-")
         result = performance_compliance(
-            proposed_with_hvac(), vintage="2020", simulate="annual",
+            proposed_with_hvac(), code="necb2020", simulate="annual",
             weather=weather(), building=building_for(load_raw_fixture()),
             run_dir=dir, run_period=week())
 
@@ -501,7 +501,7 @@ class TestComplianceWithEngine(unittest.TestCase):
             proposed_with_hvac(
                 "PSZ RTU ASHP with Gas and ASHP with Gas Supp. Heat Coils "
                 "and Electric Baseboard"),
-            vintage="2020", simulate="annual", weather=weather(),
+            code="necb2020", simulate="annual", weather=weather(),
             building=building_for(load_raw_fixture()), run_dir=dir,
             run_period=week())
 
@@ -541,7 +541,7 @@ class TestComplianceWithEngine(unittest.TestCase):
         proposed.getSizingParameters().setHeatingSizingFactor(0.25)
 
         result = performance_compliance(
-            proposed, vintage="2020", simulate="annual", weather=weather(),
+            proposed, code="necb2020", simulate="annual", weather=weather(),
             building=building_for(proposed), run_dir=dir,
             max_capacity_iterations=3, capacity_step=3.0,
             run_period=week(end_day=28))
@@ -601,7 +601,7 @@ class TestComplianceWithEngine(unittest.TestCase):
                 for s in bare.getSpaces()}
         dir = tempfile.mkdtemp(prefix="osnecb-onramp-")
         result = performance_compliance(
-            bare, vintage="2020", simulate="sizing", weather=weather(),
+            bare, code="necb2020", simulate="sizing", weather=weather(),
             building=building_for(bare),
             necb_loads={"space_type_map": map_, "shw_fuel": "NaturalGas",
                         "hvac_system": "Baseboard gas boiler"},

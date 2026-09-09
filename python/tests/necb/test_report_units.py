@@ -76,7 +76,8 @@ def canned_audit():
 
 def canned_report():
     return {
-        "vintage": "2025", "hdd": 3890, "simulate": "annual", "annual": True,
+        "edition": "2025", "code": "necb2025", "code_label": "NECB 2025",
+        "hdd": 3890, "simulate": "annual", "annual": True,
         "compliant": True, "percent_of_target": 90.0, "tier": 1,
         "ghg": {"percent_of_ghg_target": 24.0, "level": "B"},
         "eui_path": {"bet_kwh": 120_000.0, "compliant": True,
@@ -147,7 +148,7 @@ class TestReportUnits(unittest.TestCase):
                         "every row anchors an audit entry")
 
         html = Sections.checklist({"checklist_rows": rows,
-                       "report": {"vintage": "2025"}})
+                       "report": {"code_label": "NECB 2025"}})
         self.assertIn('class="checklist"', html)
         self.assertIn('class="checklist-statement"', html)
         self.assertIn('<span>Evidence</span>', html)
@@ -197,7 +198,7 @@ class TestReportUnits(unittest.TestCase):
         self.assertIsNone(row.measured,
                   "internal coverage metadata is not measured evidence")
         html = Sections.checklist({"checklist_rows": [row],
-                       "report": {"vintage": "2020"}})
+                       "report": {"code_label": "NECB 2020"}})
         self.assertIn("<span>Applied</span> follows NECB 2020.", html)
         self.assertIn("<span>Gaps</span> roof monitors.", html)
         self.assertNotIn("2025", html)
@@ -206,7 +207,7 @@ class TestReportUnits(unittest.TestCase):
         tier = Checklist.Row("na", "10.1.2.1. (Table verified identical 2020/2025)",
                      "energy performance Tier 1 achieved", None, 4)
         html = Sections.checklist({"checklist_rows": [tier],
-                       "report": {"vintage": "2020"}})
+                       "report": {"code_label": "NECB 2020"}})
         self.assertIn(">10.1.2.1.</a>", html)
         self.assertNotIn("2025", html)
 

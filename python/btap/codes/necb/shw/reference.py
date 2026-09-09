@@ -13,25 +13,30 @@ from __future__ import annotations
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog, emit_coverage
-from btap.codes.necb import shw as SHW
+from btap.codes import resolve
 from btap.codes.necb.shw import efficiency as Efficiency
 
 
-def reference_shw(model, *, vintage="2020", audit=None):
+def reference_shw(model, *, code="necb2020", audit=None):
+    return _reference_shw(model, resolve(code), audit=audit)
+
+
+def _reference_shw(model, ruleset, audit=None):
+    """The 8.4.x.20 SHW reference against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
-    prefix = "8.4.5" if str(vintage) == "2025" else "8.4.4"
+    prefix = ruleset.article("reference_subsection")
     heaters = sorted_by_name(model.getWaterHeaterMixeds())
     audit.info("shw_reference",
                "reference SWH storage capacity, power input and energy type identical to "
                "proposed by construction (clone; no transform touches SWH sizing or fuel)",
                inputs={"water_heaters": len(heaters)}, article=f"{prefix}.20.(1)")
     for heater in heaters:
-        Efficiency.apply_efficiency(heater, vintage=vintage, audit=audit)
+        Efficiency._apply_efficiency(heater, ruleset, audit=audit)
     # Table 6.2.2.1 solar-thermal + pool-heater rows (D-63): apply-when-present.
-    Efficiency.apply_solar_pool_minimums(model, vintage=vintage, audit=audit)
-    _emit_article_coverage(vintage, audit)
+    Efficiency._apply_solar_pool_minimums(model, ruleset, audit=audit)
+    _emit_article_coverage(ruleset, audit)
     return audit
 
 
-def _emit_article_coverage(vintage, audit):
-    emit_coverage(SHW.rules(vintage)["article_coverage"], audit)
+def _emit_article_coverage(ruleset, audit):
+    emit_coverage(ruleset.rules("shw")["article_coverage"], audit)

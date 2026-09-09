@@ -153,6 +153,14 @@ ALLOWLIST = {
         "retires": "R6-oracle-boundary",
         "why": "enforces the permanent file-by-file verification disposition record",
     },
+    "python/tests/necb/test_runner_api_timeout.py": {
+        "refs": ["verification/"],
+        "retires": "N/A-scanner",
+        "why": ("the frozen-scenario runner's API-worker timeout path is "
+                "verification machinery (post-9a review Medium); the test "
+                "imports the runner to exercise it with a fake worker and "
+                "reads no cross-tree data"),
+    },
     "python/tests/test_no_legacy_namespace.py": {
         "refs": ["verification/"],
         "retires": "N/A-scanner",

@@ -13,28 +13,28 @@ from __future__ import annotations
 from btap.codes.necb import loads as _loads
 
 
-def record(building_type, space_type, vintage='2020'):
+def record(building_type, space_type, edition='2020'):
     """:return: the full 80-key record (raises on unknown pair)"""
-    row = find(building_type=building_type, space_type=space_type, vintage=vintage)
+    row = find(building_type=building_type, space_type=space_type, edition=edition)
     if row is None:
         raise ValueError(
-            f"no NECB {vintage} space type ['{building_type}', '{space_type}'] — "
-            f"see btap.codes.necb.loads.SpaceTypes.list_pairs(vintage='{vintage}')")
+            f"no NECB {edition} space type ['{building_type}', '{space_type}'] — "
+            f"see btap.codes.necb.loads.SpaceTypes.list_pairs(edition='{edition}')")
     return row
 
 
-def find(building_type, space_type, vintage='2020'):
+def find(building_type, space_type, edition='2020'):
     """:return: the record, or None"""
-    for r in _loads.table(vintage, 'space_types'):
+    for r in _loads.table(edition, 'space_types'):
         if r['building_type'] == building_type and r['space_type'] == space_type:
             return r
     return None
 
 
-def list_pairs(vintage='2020'):
+def list_pairs(edition='2020'):
     """:return: all (building_type, space_type) pairs"""
     return [[r['building_type'], r['space_type']]
-            for r in _loads.table(vintage, 'space_types')]
+            for r in _loads.table(edition, 'space_types')]
 
 
 def is_undefined(record):

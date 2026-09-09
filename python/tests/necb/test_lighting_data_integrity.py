@@ -13,16 +13,17 @@ from btap.codes.necb import lighting
 
 class TestDataIntegrity(unittest.TestCase):
     def test_led_table_matches_legacy_shape(self):
-        led = lighting.table("led_lighting_2020")
+        led = lighting.table("led_lighting", "2020")
         self.assertEqual(308, len(led))
         record = lighting.led_record(building_type="Space Function",
-                                     space_type="Office enclosed > 25 m2")
+                                     space_type="Office enclosed > 25 m2",
+                                     edition="2020")
         self.assertIsNotNone(record)
         self.assertGreater(float(record["lighting_per_area"]), 0)
         self.assertIn("lighting_fraction_radiant", record)
 
     def test_2025_space_function_table(self):
-        rows = lighting.table("lpd_space_functions_2025")
+        rows = lighting.table("lpd_space_functions", "2025")
         self.assertGreaterEqual(len(rows), 90)
         atrium = [r["lpd_w_per_m2"] for r in rows if r["space_category"] == "Atrium"]
         self.assertEqual([4.2, 5.2, 6.5], sorted(atrium), "2025 atrium bins == 2020 legacy values")
@@ -48,7 +49,7 @@ class TestDataIntegrity(unittest.TestCase):
                          "the per-space control matrix retains its requirement shapes")
 
     def test_2025_building_type_table(self):
-        rows = lighting.table("lpd_building_types_2025")
+        rows = lighting.table("lpd_building_types", "2025")
         self.assertEqual(32, len(rows))
         office = next(r for r in rows if r["building_type"] == "Office")
         self.assertAlmostEqual(6.9, office["lpd_w_per_m2"], delta=1e-9)
@@ -68,8 +69,8 @@ class TestDataIntegrity(unittest.TestCase):
                                        delta=0.05, msg=name)
 
     def test_rules_and_coverage_lint(self):
-        for vintage in ["2020", "2025"]:
-            rules = lighting.rules(vintage)
+        for edition in ["2020", "2025"]:
+            rules = lighting.rules(edition)
             self.assertAlmostEqual(0.799256505, rules["sensor_schedule_lpd_threshold_w_per_ft2"],
                                    delta=1e-9)
             self.assertEqual(5.0, rules["dwelling_unit_lpd_w_per_m2"])
@@ -81,7 +82,10 @@ class TestDataIntegrity(unittest.TestCase):
                               ["implemented", "partial", "not_implemented",
                                "satisfied_by_clone", "host_scope"])
                 self.assertTrue(article.get("how") or article.get("gaps"))
-        self.assertEqual("2020", lighting.data_vintage("2025"))
+        # Since Stage 3 every edition reads its OWN tables — 2025 no longer
+        # aliases 2020's, it ships byte-identical copies of them.
+        self.assertEqual(lighting.table("led_lighting", "2020"),
+                         lighting.table("led_lighting", "2025"))
         self.assertTrue(re.search(r"zero LPD differences|ZERO value differences",
                                   lighting.rules("2025")["provenance"]["method"],
                                   re.IGNORECASE))

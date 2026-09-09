@@ -22,6 +22,12 @@ and `verification/oracle/`.
   because report classification is case-sensitive.
 - Rules target NECB 2020 and 2025 only. Article-coverage manifests state every
   partial or missing sentence and emit the corresponding warning.
+- An edition is selected by CODE ID: `code="necb2020"` on every public
+  function, `--code necb2020` on the CLI (`btap.codes.code_ids()` is the
+  list, `necb2020` the default). The per-edition data accessors take
+  `edition="2020"`. `report.json` carries `edition`, `code` and
+  `code_label`; audit entries that record the ruleset carry `code` and
+  `edition` in `inputs` (D-87).
 - Python is authoritative. Intentional output changes include a clean-tree
   frozen-scenario re-freeze and reviewed baseline diff in the same change.
 
@@ -128,8 +134,11 @@ The two generated coverage documents are
 part of the evidence history; their inputs and code pointers are Python-owned
 after R6. Do not edit either output by hand.
 
-Section 8.4 source caches ship under `python/btap/codes/data/coverage/` for
-offline, versioned use. Refresh them only as a maintainer operation with
+Section 8.4 source caches ship inside each edition's own snapshot at
+`python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` for
+offline, versioned use; the Crown-copyright notice and the cross-edition
+disposition stay code-family-neutral in `python/btap/codes/data/coverage/`.
+Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 

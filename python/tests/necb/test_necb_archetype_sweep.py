@@ -75,7 +75,7 @@ def outcome(building_type, verdict):
         "verdict": verdict,
         "detail": "test",
         "mode": "annual",
-        "vintage": "2025",
+        "code": "necb2025",
         "location": "toronto",
         "fuel": "Electricity",
         "ecm": "NECB_Default",
@@ -108,7 +108,7 @@ class TestSelectionAndScheduling(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = sweep.SweepConfig(
                 mode="annual",
-                vintage="2025",
+                code="necb2025",
                 location="toronto",
                 workers=2,
                 cache_dir=Path(tmp),
@@ -124,7 +124,7 @@ class TestSelectionAndScheduling(unittest.TestCase):
         self.assertEqual(sys.executable, first_command[0])
         self.assertEqual(str(SCRIPT), first_command[1])
         self.assertEqual(
-            ["--mode", "annual", "--vintage", "2025", "--location", "toronto"],
+            ["--mode", "annual", "--code", "necb2025", "--location", "toronto"],
             first_command[4:10],
         )
         self.assertEqual(str(sweep.PYTHON_ROOT), first_kwargs["cwd"])
@@ -138,7 +138,7 @@ class TestSelectionAndScheduling(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = sweep.SweepConfig(
                 mode="sizing",
-                vintage="2020",
+                code="necb2020",
                 location="toronto",
                 workers=1,
                 cache_dir=Path(tmp),
@@ -149,7 +149,7 @@ class TestSelectionAndScheduling(unittest.TestCase):
                 "verdict": "PASS",
                 "detail": "cached",
                 "mode": "sizing",
-                "vintage": "2020",
+                "code": "necb2020",
                 "location": "toronto",
                 "fuel": "Electricity",
                 "ecm": "NECB_Default",
@@ -169,7 +169,7 @@ class TestOracleAndPipeline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = sweep.SweepConfig(
                 mode="sizing",
-                vintage="2020",
+                code="necb2020",
                 location="toronto",
                 workers=1,
                 cache_dir=Path(tmp),
@@ -244,7 +244,7 @@ class TestOracleAndPipeline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = sweep.SweepConfig(
                 mode="annual",
-                vintage="2025",
+                code="necb2025",
                 location="toronto",
                 workers=1,
                 cache_dir=Path(tmp),
@@ -261,7 +261,7 @@ class TestOracleAndPipeline(unittest.TestCase):
         self.assertEqual("PASS", outcome["verdict"])
         self.assertIs(model, captured["model"])
         self.assertEqual("annual", captured["simulate"])
-        self.assertEqual("2025", captured["vintage"])
+        self.assertEqual("necb2025", captured["code"])
         self.assertEqual(3890, captured["hdd"])
         self.assertEqual({"storeys": 4}, captured["building"])
         self.assertEqual(
@@ -293,7 +293,7 @@ class TestOracleAndPipeline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             config = sweep.SweepConfig(
                 mode="sizing",
-                vintage="2020",
+                code="necb2020",
                 location="toronto",
                 workers=1,
                 cache_dir=Path(tmp),

@@ -133,7 +133,7 @@ def run_checks() -> int:
                 st.setStandardsBuildingType("Space Function")
                 st.setStandardsSpaceType("Office enclosed > 25 m2")
         audit = AuditLog()
-        loads.apply_loads(model, vintage="2020", audit=audit)
+        loads.apply_loads(model, code="necb2020", audit=audit)
         assert model.getPeoples(), "apply_loads produced no occupancy"
         assert audit.entries, "apply_loads wrote nothing to the audit"
     check("a real domain operation runs end to end (necb loads on the packaged seed)",
@@ -311,6 +311,21 @@ def run_checks() -> int:
         assert proc.returncode == 0, f"--help exited {proc.returncode}: {proc.stderr[-500:]}"
         assert "--epw" in proc.stdout, "help does not document --epw"
     check("the btap-compliance console script answers --help", console_script_answers)
+
+    def console_script_reports_the_distribution_version():
+        # Post-9a review Medium: the CLI once asked package metadata for
+        # "btap" (the import name) and printed "dev" from a 0.3.0 wheel. The
+        # distribution is canmet-btap; --version must say what pip installed.
+        from importlib.metadata import version as dist_version
+        exe = Path(sys.executable).parent / "btap-compliance"
+        proc = subprocess.run([str(exe), "--version"], capture_output=True,
+                              text=True, timeout=120)
+        assert proc.returncode == 0, f"--version exited {proc.returncode}: {proc.stderr[-300:]}"
+        expected = dist_version("canmet-btap")
+        assert expected in proc.stdout + proc.stderr, (
+            f"--version printed {proc.stdout.strip()!r}, distribution is {expected}")
+    check("btap-compliance --version reports the canmet-btap version",
+          console_script_reports_the_distribution_version)
 
     def coverage_console_answers():
         exe = Path(sys.executable).parent / "btap-necb-coverage"

@@ -10,7 +10,7 @@ The generic machinery it drives lives in btap.modeling (``Geometry`` ->
 module; Python imports them where they are used.
 
 PORT NOTE (naming collision Ruby does not have): ``rules`` is BOTH the
-vintage-data loader defined here (Ruby ``Envelope.rules``) and the file name
+edition-data loader defined here (Ruby ``Envelope.rules``) and the file name
 of the lookup module (``rules.rb`` -> ``rules.py``). Importing the submodule
 rebinds the package attribute, so the loader is restored at the BOTTOM of
 this file, after the submodule imports. Internal callers reach it lazily
@@ -20,32 +20,17 @@ always happened by call time.
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
-RULES_DIR = Path(__file__).parent / "data"
-
-_RULES_CACHE: dict[str, dict] = {}
+from btap.codes.necb import code_id, rulesdata
 
 
-def _load_rules(vintage):
-    """Load the vendored envelope rules for a vintage ('2020', '2025')."""
-    key = str(vintage)
-    cached = _RULES_CACHE.get(key)
-    if cached is not None:
-        return cached
-
-    path = RULES_DIR / f"envelope_rules_{key}.json"
-    if not path.exists():
-        raise ValueError(
-            f"no NECB envelope rules for vintage '{key}' (expected {path})")
-    with open(path, encoding="utf-8") as handle:
-        _RULES_CACHE[key] = json.load(handle)
-    return _RULES_CACHE[key]
+def _load_rules(edition):
+    """This edition's envelope rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
+    return rulesdata.load("envelope", code_id(edition))
 
 
 #: Public name while the submodules below have not been imported yet — the
-#: lookup module calls ``envelope.rules(vintage)`` exactly as the Ruby does.
+#: lookup module calls ``envelope.rules(edition)`` exactly as the Ruby does.
 rules = _load_rules
 
 # The domain files, in the Ruby require order. Each defines its behaviour on
@@ -88,7 +73,6 @@ rules = _load_rules
 
 __all__ = [
     "BOUNDARIES",
-    "RULES_DIR",
     "SURFACE_TYPES",
     "U_FALLBACK",
     "apply_prescriptive",

@@ -18,8 +18,8 @@ import openstudio
 
 from btap._compat import NullAudit, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import resolve
 from btap.codes.necb import loads as necb_loads
-from btap.codes.necb import shw as SHW
 from btap.codes.necb.loads import schedules as loads_schedules
 from btap.codes.necb.loads import space_types as loads_space_types
 
@@ -40,16 +40,15 @@ def _to_f(value) -> float:
     return float(m.group(0)) if m else 0.0
 
 
-def _auto_size(model, *, vintage="2020", shw_scale=1.0, audit=None):
+def _auto_size(model, *, ruleset, shw_scale=1.0, audit=None):
     """Auto-size the SHW tank/plant from the space-type demand (legacy-exact).
 
     :return: dict of tank volume/capacity (SI), max temp, loop peak flow,
         parasitic loss, spaces_w_dhw
     """
     audit = audit if audit is not None else NullAudit()
-    rules = SHW.rules(vintage)["autosize"]
-    data_vintage = necb_loads.data_vintage(vintage)
-    schedules = necb_loads.table(data_vintage, "schedules")
+    rules = ruleset.rules("shw")["autosize"]
+    schedules = necb_loads.table(ruleset.edition, "schedules")
     if shw_scale is None or shw_scale == "none" or shw_scale == "NECB_Default":
         shw_scale = 1.0
     if isinstance(shw_scale, str):
@@ -71,7 +70,7 @@ def _auto_size(model, *, vintage="2020", shw_scale=1.0, audit=None):
 
         record = loads_space_types.find(
             building_type=space_type.standardsBuildingType().get(),
-            space_type=space_type.standardsSpaceType().get(), vintage=data_vintage)
+            space_type=space_type.standardsSpaceType().get(), edition=ruleset.edition)
         if record is None or loads_space_types.is_undefined(record):
             continue
         if (_to_f(record.get("service_water_heating_peak_flow_per_area")) == 0
@@ -164,7 +163,7 @@ def _auto_size(model, *, vintage="2020", shw_scale=1.0, audit=None):
             "parasitic_loss_w": parasitic, "spaces_w_dhw": spaces}
 
 
-def apply_shw(model, *, vintage="2020", fuel="NaturalGas", shw_scale=1.0, audit=None):
+def apply_shw(model, *, code="necb2020", fuel="NaturalGas", shw_scale=1.0, audit=None):
     """Build the full SHW system: auto-size, create the loop + water heater +
     pump, one WaterUseConnections/WaterUseEquipment per demanding space, apply
     Part 6 efficiency on the sized heater.
@@ -173,31 +172,36 @@ def apply_shw(model, *, vintage="2020", fuel="NaturalGas", shw_scale=1.0, audit=
         'HeatPump' builds an air-source WaterHeaterHeatPump (pumped condenser)
         around the tank, with the code EF/UEF floor as the coil's rated COP
     """
+    return _apply_shw(model, resolve(code), fuel=fuel,
+                      shw_scale=shw_scale, audit=audit)
+
+
+def _apply_shw(model, ruleset, *, fuel="NaturalGas", shw_scale=1.0, audit=None):
+    """The SHW build against ONE resolved edition (Stage 6)."""
     from btap.codes.necb.shw import efficiency as Efficiency
     from btap.codes.necb.shw import prescriptive as Prescriptive
 
     audit = audit if audit is not None else AuditLog()
-    sizing = _auto_size(model, vintage=vintage, shw_scale=shw_scale, audit=audit)
+    sizing = _auto_size(model, ruleset=ruleset, shw_scale=shw_scale, audit=audit)
     if sizing["loop_peak_flow_si"] == 0:
         audit.info("shw", "no space calls for service hot water — no SHW loop added "
                           "(legacy behavior)")
         return None
 
-    rules = SHW.rules(vintage)["autosize"]
-    data_vintage = necb_loads.data_vintage(vintage)
+    rules = ruleset.rules("shw")["autosize"]
     heat_pump = str(fuel) == "HeatPump"
     loop = _build_loop(model, sizing, "Electricity" if heat_pump else fuel, rules, audit)
 
     for entry in sizing["spaces_w_dhw"]:
-        _add_water_use(model, loop, entry, data_vintage, audit)
+        _add_water_use(model, loop, entry, ruleset, audit)
 
     tank = [c.to_WaterHeaterMixed().get() for c in loop.supplyComponents(
         openstudio.model.WaterHeaterMixed.iddObjectType())][0]
     if heat_pump:
         hpwh = _wrap_heat_pump(model, tank, sizing, audit)
-        Efficiency.apply_heat_pump_efficiency(hpwh, vintage=vintage, audit=audit)
+        Efficiency._apply_heat_pump_efficiency(hpwh, ruleset, audit=audit)
     else:
-        Efficiency.apply_efficiency(tank, vintage=vintage, audit=audit)
+        Efficiency._apply_efficiency(tank, ruleset, audit=audit)
     audit.decision("shw", "service water heating added",
                    inputs={"fuel": fuel, "spaces": len(sizing["spaces_w_dhw"])},
                    article="8.4.3.2. (SWH loads)")
@@ -278,7 +282,7 @@ def _build_loop(model, sizing, fuel, rules, audit):
     return loop
 
 
-def _add_water_use(model, loop, entry, data_vintage, audit):
+def _add_water_use(model, loop, entry, ruleset, audit):
     space = entry["space"]
     definition = openstudio.model.WaterUseEquipmentDefinition(model)
     definition.setName(f"{space.nameString().capitalize()} Water Use Def")
@@ -290,7 +294,7 @@ def _add_water_use(model, loop, entry, data_vintage, audit):
     equipment = openstudio.model.WaterUseEquipment(definition)
     equipment.setName(str(space.nameString().capitalize()))
     equipment.setSpace(space)
-    schedule = loads_schedules.add(model, entry["schedule"], vintage=data_vintage, audit=audit)
+    schedule = loads_schedules._add(model, entry["schedule"], ruleset, audit=audit)
     equipment.setFlowRateFractionSchedule(schedule)
 
     connections = openstudio.model.WaterUseConnections(model)

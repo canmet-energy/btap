@@ -34,7 +34,7 @@ class TestApplyLights(unittest.TestCase):
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
-        lighting.apply_lights(model, vintage="2020", audit=AuditLog())
+        lighting.apply_lights(model, code="necb2020", audit=AuditLog())
 
         record = SpaceTypes.record(building_type=OFFICE[0], space_type=OFFICE[1])
         lights = st.lights()[0]
@@ -62,7 +62,7 @@ class TestApplyLights(unittest.TestCase):
         model = openstudio.model.Model()
         st = tagged_space_type(model, *CONFERENCE)
         audit = AuditLog()
-        lighting.apply_lights(model, vintage="2020", audit=audit)
+        lighting.apply_lights(model, code="necb2020", audit=audit)
 
         record = SpaceTypes.record(building_type=CONFERENCE[0], space_type=CONFERENCE[1])
         self.assertGreater(float(record["lighting_per_area"]), 0.799256505,
@@ -101,8 +101,9 @@ class TestApplyLights(unittest.TestCase):
 
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
-        lighting.apply_lights(model, vintage="2020", lights_type="LED", audit=AuditLog())
-        led = lighting.led_record(building_type=OFFICE[0], space_type=OFFICE[1])
+        lighting.apply_lights(model, code="necb2020", lights_type="LED", audit=AuditLog())
+        led = lighting.led_record(building_type=OFFICE[0], space_type=OFFICE[1],
+                                  edition="2020")
         lights = st.lights()[0]
         expected = openstudio.convert(float(led["lighting_per_area"]), "W/ft^2", "W/m^2").get()
         self.assertAlmostEqual(expected, lights.lightsDefinition().wattsperSpaceFloorArea().get(),
@@ -119,7 +120,7 @@ class TestApplyLights(unittest.TestCase):
              for x, y, z in [(0, 0, 9), (0, 0, 0), (10, 0, 0), (10, 0, 9)]])
         openstudio.model.Surface(wall_points, atrium_model).setSpace(space)
         audit = AuditLog()
-        lighting.apply_lights(atrium_model, vintage="2020", lights_type="LED", audit=audit)
+        lighting.apply_lights(atrium_model, code="necb2020", lights_type="LED", audit=audit)
 
         atrium_decision = next((e for e in audit.entries if "LED atrium LPD" in e["action"]), None)
         self.assertIsNotNone(atrium_decision, "atrium equation exercised (legacy NameError path)")
@@ -140,7 +141,7 @@ class TestApplyLights(unittest.TestCase):
         model = openstudio.model.Model()
         st = tagged_space_type(model, *OFFICE)
         audit = AuditLog()
-        lighting.apply_lights(model, vintage="2020", lights_scale=0.5, audit=audit)
+        lighting.apply_lights(model, code="necb2020", lights_scale=0.5, audit=audit)
         record = SpaceTypes.record(building_type=OFFICE[0], space_type=OFFICE[1])
         expected = openstudio.convert(float(record["lighting_per_area"]) * 0.5,
                                       "W/ft^2", "W/m^2").get()

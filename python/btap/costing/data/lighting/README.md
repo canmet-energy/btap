@@ -6,7 +6,7 @@ by #2120), consumed by `costing/fixtures.rb`:
 
 - `lighting_sets.csv` — template × building_type × space_type × CFL/LED →
   fixture-type selection by average-ceiling-height bin. The `template`
-  column is the CSV's own vocabulary: it equals `"NECB" + vintage`
+  column is the CSV's own vocabulary: it equals `"NECB" + edition`
   (`NECB2020`), synthesized in `fixtures.rb`.
 - `lighting.csv` — fixture rows: id_layers × quantity multipliers.
 - `materials_lighting.csv` — the material rows those layers price through.

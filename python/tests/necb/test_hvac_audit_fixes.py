@@ -23,7 +23,7 @@ class TestAuditFixes(unittest.TestCase):
         model.getSizingParameters().setCoolingSizingFactor(1.0)
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage='2020',
+            model, code='necb2020',
             building={'storeys': 1,
                       'zone_types': {z.nameString(): 'Office - enclosed'
                                      for z in model.getThermalZones()}},
@@ -101,7 +101,7 @@ class TestAuditFixes(unittest.TestCase):
             self.skipTest('fixture system has no condenser loop/tower')
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         tower = model.getCoolingTowerSingleSpeeds()[0]
         total_rejection = sum(c.referenceCapacity().get() * (1.0 + 1.0 / c.referenceCOP())
@@ -127,7 +127,7 @@ class TestAuditFixes(unittest.TestCase):
         for c in model.getCoilHeatingDXSingleSpeeds():
             c.setRatedTotalHeatingCapacity(9_000.0)  # wrong on purpose
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
         hp = sorted_by_name(model.getCoilHeatingDXSingleSpeeds())[0]
         self.assertAlmostEqual(14_000.0, hp.ratedTotalHeatingCapacity().get(), delta=1.0,
                                msg='8.4.4.13.(2)(c): heating = cooling')
@@ -155,7 +155,7 @@ class TestOrphanedVrfOutdoorUnit(unittest.TestCase):
                         'the PROPOSED model really carries a VRF outdoor unit')
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage='2020',
+            model, code='necb2020',
             building={'storeys': 1,
                       'zone_types': {z.nameString(): 'Office - enclosed'
                                      for z in model.getThermalZones()}},

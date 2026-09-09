@@ -112,6 +112,19 @@ type = "forbidden"
 source_modules = ["btap.simulation"]
 forbidden_modules = ["btap.modeling", "btap.costing", "btap.codes"]
 
+# Stage 9a of the multi-edition plan: the determination lifecycle is
+# code-family-NEUTRAL. A code family (btap.codes.necb, and later an OBC or BC
+# Step Code sibling) may import btap.codes — the pipeline, the registry, the
+# report — but the pipeline reaches a family ONLY through the registry
+# (`Ruleset.path()`), never by importing one. Indirect chains count: a route
+# through btap.codes.compliance would put every NECB module back inside the
+# neutral lifecycle's import graph.
+[[tool.importlinter.contracts]]
+name = "the neutral pipeline never imports a code family"
+type = "forbidden"
+source_modules = ["btap.codes.pipeline"]
+forbidden_modules = ["btap.codes.necb"]
+
 [[tool.importlinter.contracts]]
 name = "audit is SDK-free and bottom of the family"
 type = "forbidden"

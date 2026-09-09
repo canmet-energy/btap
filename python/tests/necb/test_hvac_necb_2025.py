@@ -1,7 +1,7 @@
-"""NECB 2025 vintage: same reference-rule VALUES as 2020 but the performance path moved
+"""NECB 2025: same reference-rule VALUES as 2020 but the performance path moved
 from Subsection 8.4.4 to 8.4.5 (verified via the codes MCP edition diff). Selections
-must be identical across vintages while citations carry the 2025 article numbers.
-Efficiencies are native 2025 (efficiencies_2025.json, transcribed from Tables
+must be identical across editions while citations carry the 2025 article numbers.
+Efficiencies are native 2025 (necb2025/efficiencies.json, transcribed from Tables
 5.2.12.1.-K/-N/-O/-A): chillers/boilers/furnaces/unitary-AC/HP cooling ladders are
 verified identical to 2020; the real change is split-system HP heating HSPF 7.4 -> 7.8."""
 
@@ -27,11 +27,11 @@ def group(zones=None, heated=True, cooled=True, heat_fuels=None,
             'terminal_type': 'none', 'design_cooling_kw': cooling_kw, 'evidence': []}
 
 
-def select(groups, zone_types, storeys=1, vintage='2025'):
+def select(groups, zone_types, storeys=1, code='necb2025'):
     return hvac.select_reference_systems(
         facts={'built_by_gem': False, 'zone_groups': groups, 'plants': [],
                'purchased_energy': {'heating': False, 'cooling': False}},
-        building={'storeys': storeys, 'zone_types': zone_types}, vintage=vintage)
+        building={'storeys': storeys, 'zone_types': zone_types}, code=code)
 
 
 @needs_sdk
@@ -49,8 +49,8 @@ class TestNecb2025(unittest.TestCase):
              {'Z1': 'Multi-unit residential'}, 3),
         ]
         for groups, types_, storeys in scenarios:
-            a20 = select([dict(g) for g in groups], types_, storeys=storeys, vintage='2020')
-            a25 = select([dict(g) for g in groups], types_, storeys=storeys, vintage='2025')
+            a20 = select([dict(g) for g in groups], types_, storeys=storeys, code='necb2020')
+            a25 = select([dict(g) for g in groups], types_, storeys=storeys, code='necb2025')
             self.assertEqual([a.reference_system for a in a20],
                              [a.reference_system for a in a25],
                              f'selection diverged for {list(types_.values())[0]} @ {storeys} storeys')
@@ -69,17 +69,15 @@ class TestNecb2025(unittest.TestCase):
         rules = hvac.rules('2025')
         self.assertEqual('8.4.5.8.(1)-(2)', rules['oversizing']['article'])
         self.assertEqual('2025', rules['provenance']['edition'])
-        self.assertIsNone(rules['provenance'].get('efficiency_vintage_fallback'),
-                          'fallback lifted')
 
-    # end-to-end reference_hvac at vintage 2025: correct topology, native efficiencies,
+    # end-to-end reference_hvac at NECB 2025: correct topology, native efficiencies,
     # and NO fallback warning
     def test_reference_hvac_2025_native_efficiencies(self):
         model = load_fixture()
         modeling.build_system(model, 'Baseboard gas boiler', sorted_zones(model))
         types_ = {z.nameString(): 'Office - enclosed' for z in model.getThermalZones()}
 
-        result = hvac.reference_hvac(model, vintage='2025',
+        result = hvac.reference_hvac(model, code='necb2025',
                                      building={'storeys': 1, 'zone_types': types_})
 
         self.assertEqual([3], sorted({a.reference_system for a in result.assignments}))
@@ -90,16 +88,10 @@ class TestNecb2025(unittest.TestCase):
         self.assertEqual([], [w for w in result.audit.warnings if 'fall back' in w['action']],
                          '2025 efficiencies are native — no fallback warning')
 
-    def test_effective_vintage_native_for_both(self):
-        for v in ('2020', '2025'):
-            vintage, reason = hvac.efficiency.effective_vintage(v)
-            self.assertEqual(v, vintage)
-            self.assertIsNone(reason)
-
     # Table 5.2.12.1.-A specifies SEER 15 for the small HP cooling class in both editions.
     def test_small_heat_pump_cooling_is_seer_15_in_both_editions(self):
         cops = {}
-        for vintage in ('2020', '2025'):
+        for code in ('necb2020', 'necb2025'):
             model = load_fixture()
             modeling.build_system(
                 model,
@@ -109,14 +101,14 @@ class TestNecb2025(unittest.TestCase):
                 c.setRatedTotalCoolingCapacity(12_000.0)
             for c in model.getCoilHeatingDXSingleSpeeds():
                 c.setRatedTotalHeatingCapacity(12_000.0)
-            hvac.apply_efficiencies(model, vintage=vintage)
+            hvac.apply_efficiencies(model, code=code)
             coil = sorted_by_name(model.getCoilCoolingDXSingleSpeeds())[0]
             value = coil.ratedCOP()
-            cops[vintage] = value.get() if hasattr(value, 'is_initialized') else value
+            cops[code] = value.get() if hasattr(value, 'is_initialized') else value
         # seer_to_cop_no_fan(15) = -0.0076*225 + 0.3796*15 = 3.984
-        self.assertAlmostEqual(3.984, cops['2020'], delta=0.01)
-        self.assertAlmostEqual(3.984, cops['2025'], delta=0.01)
-        # heating side unchanged: 7.4 HSPF (Single Package) both vintages
+        self.assertAlmostEqual(3.984, cops['necb2020'], delta=0.01)
+        self.assertAlmostEqual(3.984, cops['necb2025'], delta=0.01)
+        # heating side unchanged: 7.4 HSPF (Single Package) both editions
 
     def test_2025_boiler_and_chiller_values_unchanged(self):
         model = load_fixture()
@@ -127,7 +119,7 @@ class TestNecb2025(unittest.TestCase):
             b.setNominalCapacity(100_000.0)
         for c in model.getChillerElectricEIRs():
             c.setReferenceCapacity(200_000.0)
-        hvac.apply_efficiencies(model, vintage='2025')
+        hvac.apply_efficiencies(model, code='necb2025')
 
         primary = next(b for b in model.getBoilerHotWaters() if 'Primary' in b.nameString())
         # -N: AFUE 90, unchanged

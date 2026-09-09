@@ -4,34 +4,21 @@ Per-space demand + the auto-sized plant, Part 6 performance
 (Table 6.2.2.1, the NECB2020 UEF procedure), prescriptive checks (booster
 heaters, field-verified declarations), and the 8.4.4.20 reference.
 
-The vendored data lives in ``data/`` beside this module, byte-identical to
-the gem's ``lib/btap_necb/shw/data/`` (Ruby's ``SHW::DATA_DIR``): the
-per-vintage rules manifests carrying the Table 6.2.2.1 coefficients'
-provenance, the autosize constants, the part-load-curve spec, the D-63 solar
-and pool minimums, and the article-coverage manifest.
+Each edition's rules manifest lives in that edition's own snapshot
+(``btap/codes/necb/data/<code id>/shw_rules.json``): the Table 6.2.2.1
+coefficients' provenance, the autosize constants, the part-load-curve spec, the
+D-63 solar and pool minimums, and the article-coverage manifest.
 """
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
-DATA_DIR = Path(__file__).parent / "data"
-
-_RULES: dict[str, dict] = {}
+from btap.codes.necb import code_id, rulesdata
 
 
-def rules(vintage):
-    """The parsed shw ruleset for a vintage, memoized (Ruby ``@rules``)."""
-    key = str(vintage)
-    if key not in _RULES:
-        path = DATA_DIR / f"shw_rules_{key}.json"
-        if not path.exists():
-            raise ValueError(
-                f"no NECB shw rules for vintage '{key}' (expected {path})")
-        with open(path, encoding="utf-8") as f:
-            _RULES[key] = json.load(f)
-    return _RULES[key]
+def rules(edition):
+    """This edition's shw rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
+    return rulesdata.load("shw", code_id(edition))
 
 
 # Demand + plant: see demand.apply_shw.

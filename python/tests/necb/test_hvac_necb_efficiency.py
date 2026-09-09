@@ -29,7 +29,7 @@ class TestNecbEfficiency(unittest.TestCase):
             c.setReferenceCapacity(200_000.0)  # ~57 tons: first scroll bin
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         # NECB 2020 gas boiler < 300 kBtu/hr: 0.90 AFUE -> thermal efficiency 0.90
         primary = next(b for b in model.getBoilerHotWaters() if 'Primary' in b.nameString())
@@ -72,7 +72,7 @@ class TestNecbEfficiency(unittest.TestCase):
             c.setReferenceCapacity(200_000.0)
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         entry = next(e for e in audit.entries if e['action'] == 'chiller efficiency applied')
         chiller = sorted_by_name(model.getChillerElectricEIRs())[0]
@@ -89,7 +89,7 @@ class TestNecbEfficiency(unittest.TestCase):
         for c in model.getCoilHeatingGass():
             c.setNominalCapacity(20_000.0)
 
-        hvac.apply_efficiencies(model, vintage='2020')
+        hvac.apply_efficiencies(model, code='necb2020')
 
         # gas heat on the loop -> 'All Other' heating type; 15 kW (~51 kBtu/hr) bin
         coil = sorted_by_name(model.getCoilCoolingDXSingleSpeeds())[0]
@@ -98,7 +98,7 @@ class TestNecbEfficiency(unittest.TestCase):
         self.assertGreater(cop, 2.5)
         self.assertRegex(coil.nameString(), r'SEER|EER')
         # Exact value, hand-derived the same way as the ASHP heating COP below:
-        # efficiencies_2020.json's unitary_acs table, AirCooled/All Other/Single
+        # necb2020/efficiencies.json's unitary_acs table, AirCooled/All Other/Single
         # Package, 0-65000 Btu/hr bin (15 kW = ~51,182 Btu/hr) declares SEER 15.0;
         # seer_to_cop_no_fan(seer) = -0.0076*seer^2 + 0.3796*seer (efficiency.py).
         self.assertAlmostEqual((-0.0076 * 15.0 * 15.0) + (0.3796 * 15.0), cop, delta=1e-6,
@@ -121,7 +121,7 @@ class TestNecbEfficiency(unittest.TestCase):
             c.setRatedTotalCoolingCapacity(12_000.0)
         for c in model2.getCoilHeatingDXSingleSpeeds():
             c.setRatedTotalHeatingCapacity(12_000.0)
-        hvac.apply_efficiencies(model2, vintage='2020')
+        hvac.apply_efficiencies(model2, code='necb2020')
         hp = sorted_by_name(model2.getCoilHeatingDXSingleSpeeds())[0]
         # 7.4 HSPF -> -0.0296*7.4^2 + 0.7134*7.4 = 3.658
         self.assertAlmostEqual(3.658, hp.ratedCOP(), delta=0.01)
@@ -131,7 +131,7 @@ class TestNecbEfficiency(unittest.TestCase):
         modeling.build_system(model, 'PSZ RTU Gas and DX Coils and Electric Baseboard',
                               sorted_zones(model))
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
         self.assertTrue(any('not sized' in w['action'] for w in audit.warnings))
 
     def test_air_source_vrf_uses_table_i_minimums_and_audits(self):
@@ -144,7 +144,7 @@ class TestNecbEfficiency(unittest.TestCase):
         unit.setRatedHeatingCOP(5.0)
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(10.8, 20_000.0),
                                unit.grossRatedCoolingCOP(), delta=1e-6)
@@ -181,7 +181,7 @@ class TestNecbEfficiency(unittest.TestCase):
         unit.setGrossRatedCoolingCOP(5.0)
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertAlmostEqual(hvac.efficiency.eer_to_cop_no_fan(11.2, 20_000.0),
                                unit.grossRatedCoolingCOP(), delta=1e-6)
@@ -198,7 +198,7 @@ class TestNecbEfficiency(unittest.TestCase):
         unit.setGrossRatedHeatingCapacity(20_000.0)
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         decision = next(entry for entry in audit.entries
                         if entry['action'] == 'VRF minimum efficiency applied')
@@ -220,7 +220,7 @@ class TestNecbEfficiency(unittest.TestCase):
         unit.setGrossRatedCoolingCOP(5.0)
 
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertAlmostEqual(5.0, unit.grossRatedCoolingCOP(), delta=1e-9,
                                msg='no Table-I row may be applied without evidence of the class')
@@ -239,7 +239,7 @@ class TestNecbEfficiency(unittest.TestCase):
         unit.setGrossRatedCoolingCOP(1.0)
         unit.setRatedHeatingCOP(1.0)
 
-        hvac.apply_efficiencies(model, vintage='2020')
+        hvac.apply_efficiencies(model, code='necb2020')
 
         self.assertAlmostEqual(hvac.efficiency.seer_to_cop_no_fan(15.0),
                                unit.grossRatedCoolingCOP(), delta=1e-6)
@@ -251,7 +251,7 @@ class TestNecbEfficiency(unittest.TestCase):
         modeling.build_system(model, 'VRF', sorted_zones(model))
         audit = AuditLog()
 
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         self.assertTrue(any('VRF cooling capacity unavailable' in warning['action']
                             and warning.get('article') == 'NECB 2020 Table 5.2.12.1.-I'

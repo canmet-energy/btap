@@ -62,6 +62,11 @@ jobs:
           git diff --exit-code -- docs/NECB_COVERAGE.md \
                                   docs/NECB_8_4_COVERAGE.html \
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
+      # docs/NECB_EDITION_DELTAS.md is GENERATED from the same per-edition
+      # manifests (multi-edition plan, Stage 4) — same drift contract, its own
+      # --check flag (the generate_decisions_toc.py --check contract).
+      - name: NECB edition delta doc matches the manifests
+        run: python3 python/scripts/generate_necb_edition_delta.py --check
       # The Python registry is canonical after R6. Run its document, TOC, id,
       # and runtime-citation gates explicitly; the retired Ruby-copy sync test
       # is intentionally not part of this lane.

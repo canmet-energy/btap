@@ -53,7 +53,7 @@ space_map = {s.nameString(): ('Space Function', 'Office enclosed > 25 m2')
              for s in model.getSpaces()}
 
 result = performance_compliance(
-    model, vintage='2020',
+    model, code='necb2020',
     weather={'epw': 'toronto.epw', 'ddy': 'toronto.ddy'},
     building={'storeys': 1},
     necb_loads={'space_type_map': space_map, 'shw_fuel': 'NaturalGas',
@@ -85,7 +85,10 @@ is never modified; the translation is recorded in the audit).
 
 ## What the pipeline does
 
-The step numbers match the `# N.` markers in `compliance.py` — that list is
+The lifecycle is `pipeline.py` (code-family-neutral) calling NECB's
+`necb/path.py` through the `CodePath` hooks; the entry point and the
+evidence-bearing phase functions stay in `compliance.py`. The step numbers
+below match the `# N.` markers across those three files — that list is
 canonical.
 
 1. Load + validate the input model — on-ramp for bare geometry, simulate-ability
@@ -143,7 +146,7 @@ reference building is generated or simulated; the target is
 
 ```python
 result = performance_compliance(
-    model, vintage='2025', path='eui',
+    model, code='necb2025', path='eui',
     archetypes={'Office': 'all'},          # archetype -> 'all' | [space names]
     process_loads_kwh=0,
     weather={'epw': ..., 'ddy': ...}, run_dir='runs/eui')
@@ -193,9 +196,11 @@ verdict compares — not EUI, which is shown alongside it.
 ## Packaged reference data
 
 `btap.codes.coverage` reads the NECB 2020/2025 Section 8.4 article caches that
-ship with the wheel, offline; `btap-necb-coverage` is its console entry
-point. The Crown NECB text is attributed in `data/coverage/ATTRIBUTION.md`
-and is explicitly outside the LGPL that covers the code.
+ship with the wheel, offline; `btap-necb-coverage` is its console entry point.
+Each edition's article text lives in that edition's own snapshot
+(`necb/data/necb2025/coverage/articles_8_4.json`). The Crown NECB text is
+attributed in `data/coverage/ATTRIBUTION.md` — one notice covering all cached
+text — and is explicitly outside the LGPL that covers the code.
 
 ## Tests
 

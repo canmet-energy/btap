@@ -54,7 +54,7 @@ def reference(model, **kwargs):
     from btap.codes.necb import envelope
 
     audit = AuditLog()
-    envelope.reference_envelope(model, vintage='2020', hdd=HDD, audit=audit, **kwargs)
+    envelope.reference_envelope(model, code='necb2020', hdd=HDD, audit=audit, **kwargs)
     return audit
 
 
@@ -115,7 +115,7 @@ class TestReferenceEnvelope(unittest.TestCase):
     # fresh MasslessOpaqueMaterial without copying solar/thermal/visible
     # absorptance from the original layer. The SDK's own default
     # solarAbsorptance for a new MasslessOpaqueMaterial is 0.7 — IDENTICAL to
-    # roof_absorptance_if_actual_used in envelope_rules_2020.json — so the
+    # roof_absorptance_if_actual_used in necb2020/envelope_rules.json — so the
     # reference roof absorptance ended up at 0.7 EVEN WHEN THE FLAG WAS FALSE,
     # which happened to look correct only because the NECB target and the SDK
     # default coincide. A hostile 0.3 proves it: 8.4.4.3.(2)(a) says the
@@ -317,11 +317,11 @@ class TestReferenceEnvelope(unittest.TestCase):
         types = {z.nameString(): 'Office - enclosed' for z in proposed.getThermalZones()}
 
         audit = AuditLog()
-        result = reference_hvac(proposed, vintage='2020',
+        result = reference_hvac(proposed, code='necb2020',
                                 building={'storeys': 1, 'zone_types': types,
                                           'winter_design_temp_c': -20},
                                 audit=audit)
-        envelope.reference_envelope(result.model, vintage='2020', hdd=HDD, audit=audit)
+        envelope.reference_envelope(result.model, code='necb2020', hdd=HDD, audit=audit)
 
         steps = list(dict.fromkeys(e['step'] for e in audit.entries))
         for s in ('selection', 'build', 'rules', 'efficiency', 'coverage',

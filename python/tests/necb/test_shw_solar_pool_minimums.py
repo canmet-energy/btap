@@ -54,7 +54,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
 
         model, heater = self.pool_model("NaturalGas")
         audit = AuditLog()
-        efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=audit)
+        efficiency.apply_solar_pool_minimums(model, code="necb2020", audit=audit)
         self.assertAlmostEqual(0.82, heater.heaterThermalEfficiency().get(), delta=1e-9)
         entry = next((e for e in audit.entries
                       if "pool heater set to the Table 6.2.2.1 minimum" in e["action"]), None)
@@ -66,12 +66,12 @@ class TestSolarPoolMinimums(unittest.TestCase):
         from btap.codes.necb.shw import efficiency
 
         model, heater = self.pool_model("FuelOilNo2")
-        efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=AuditLog())
+        efficiency.apply_solar_pool_minimums(model, code="necb2020", audit=AuditLog())
         self.assertAlmostEqual(0.78, heater.heaterThermalEfficiency().get(), delta=1e-9)
 
         model, heater = self.pool_model("Electricity")
         audit = AuditLog()
-        efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=audit)
+        efficiency.apply_solar_pool_minimums(model, code="necb2020", audit=audit)
         self.assertAlmostEqual(0.95, heater.heaterThermalEfficiency().get(), delta=1e-9,
                                msg="no printed electric pool row — left as cloned")
         self.assertTrue(any("no Table 6.2.2.1 pool row" in e["action"]
@@ -86,7 +86,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
         model = openstudio.model.Model()
         openstudio.model.SolarCollectorFlatPlateWater(model)
         audit = AuditLog()
-        efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=audit)
+        efficiency.apply_solar_pool_minimums(model, code="necb2020", audit=audit)
         entry = next((e for e in audit.entries if "Solar Energy" in e["action"]), None)
         self.assertIsNotNone(entry, "solar SEF determination recorded")
         self.assertIn("RATING", entry["action"])
@@ -101,7 +101,7 @@ class TestSolarPoolMinimums(unittest.TestCase):
         model = openstudio.model.Model()
         openstudio.model.WaterHeaterMixed(model)
         audit = AuditLog()
-        efficiency.apply_solar_pool_minimums(model, vintage="2020", audit=audit)
+        efficiency.apply_solar_pool_minimums(model, code="necb2020", audit=audit)
         self.assertEqual([], [e for e in audit.entries
                               if "D-63" in str(e.get("ruling") or "")],
                          "apply-when-present: silent no-op")

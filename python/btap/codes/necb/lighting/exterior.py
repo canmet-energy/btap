@@ -15,20 +15,22 @@ import openstudio
 
 from btap._compat import ruby_round
 from btap.audit import AuditLog
-from btap.codes.necb import lighting as _lighting
+from btap.codes import resolve
+from btap.codes.necb import _data_root, edition_file
 
-_data_cache = None
-
-
-def _data():
-    global _data_cache
-    if _data_cache is None:
-        path = _lighting.DATA_DIR / 'exterior_lighting_2020.json'
-        _data_cache = json.loads(path.read_text(encoding='utf-8'))
-    return _data_cache
+#: Cached per (data root, edition) — each edition reads its own copy.
+_data_cache: dict[tuple, dict] = {}
 
 
-def allowance(zone, quantities, vintage='2020', audit=None):
+def _data(edition):
+    key = (_data_root(), str(edition))
+    if key not in _data_cache:
+        path = edition_file(edition, 'tables', 'exterior_lighting.json')
+        _data_cache[key] = json.loads(path.read_text(encoding='utf-8'))
+    return _data_cache[key]
+
+
+def allowance(zone, quantities, code='necb2020', audit=None):
     """Compute the exterior lighting power allowance.
 
     :param zone: exterior lighting zone 0..4 (Table -A)
@@ -36,8 +38,12 @@ def allowance(zone, quantities, vintage='2020', audit=None):
         unit), e.g. {'parking_and_drives_m2': 500, 'entrances_exits_m': 12}
     :return: {'basic_site_w', 'tradable_w', 'non_tradable_w', 'total_w', 'lines'}
     """
+    return _allowance(zone, quantities, resolve(code), audit=audit)
+
+
+def _allowance(zone, quantities, ruleset, audit=None):
     audit = audit if audit is not None else AuditLog()
-    data = _data()
+    data = _data(ruleset.edition)
     zone_key = str(zone)
     if zone_key not in data['basic_site_allowance_w']:
         raise ValueError(f"unknown exterior lighting zone '{zone}' (0..4)")

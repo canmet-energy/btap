@@ -243,7 +243,7 @@ class TestEnvelopeCosting(unittest.TestCase):
 
         model = load_fixture()
         audit = AuditLog()
-        necb_envelope.reference_envelope(model, vintage="2020", hdd=3890, audit=audit)
+        necb_envelope.reference_envelope(model, code="necb2020", hdd=3890, audit=audit)
         envelope.cost(
             model, city=CITY, province_state=PROVINCE,
             tb_tallies={"parapet": {"BTAP-ExteriorWall-SteelFramed-1 good": 10.0}},

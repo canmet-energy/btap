@@ -73,7 +73,7 @@ class TestNecbE2ERun(unittest.TestCase):
 
         # efficiencies on the now-sized reference: no 'not sized' warnings, values applied
         audit = AuditLog()
-        hvac.apply_efficiencies(result.model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(result.model, code='necb2020', audit=audit)
         self.assertEqual([], [w for w in audit.warnings if 'not sized' in w['action']],
                          'all components sized after the reference E+ run')
         # D-46: the sys3 reference furnace is a STAGED Coil:Heating:Gas:MultiStage
@@ -101,7 +101,7 @@ class TestNecbE2ERun(unittest.TestCase):
 
         self.run_energyplus(result.model, 'purchased_cooling_reference')
         audit = AuditLog()
-        hvac.apply_efficiencies(result.model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(result.model, code='necb2020', audit=audit)
 
         chillers = result.model.getChillerElectricEIRs()
         self.assertTrue(chillers)
@@ -118,7 +118,7 @@ class TestNecbE2ERun(unittest.TestCase):
 
         self.run_energyplus(model, 'vrf_sizing')
         audit = AuditLog()
-        hvac.apply_efficiencies(model, vintage='2020', audit=audit)
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
 
         unit = model.getAirConditionerVariableRefrigerantFlows()[0]
         decision = next(entry for entry in audit.entries
@@ -151,7 +151,7 @@ class TestNecbE2ERun(unittest.TestCase):
         self.assert_zones_conditioned(result.model, 'ASHP reference week',
                                       max_heating_hours=24, max_cooling_hours=6)
 
-        hvac.apply_efficiencies(result.model, vintage='2020')
+        hvac.apply_efficiencies(result.model, code='necb2020')
         staged = sorted_by_name(result.model.getCoilHeatingDXMultiSpeeds())
         self.assertTrue(staged, 'staged reference ASHP builds a multispeed heating coil')
         hp = staged[0]

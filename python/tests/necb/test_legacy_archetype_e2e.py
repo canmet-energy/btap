@@ -191,7 +191,7 @@ class TestLegacyArchetypeE2E(unittest.TestCase):
         self.addCleanup(shutil.rmtree, run_dir, True)
 
         result = performance_compliance(
-            model, vintage="2020", simulate="annual",
+            model, code="necb2020", simulate="annual",
             weather={"epw": str(EPW), "ddy": str(DDY)},
             building={"storeys": cost_geometry.above_ground_storeys(model)},
             run_period={"begin_month": 1, "begin_day": 1,

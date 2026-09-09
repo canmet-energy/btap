@@ -30,9 +30,10 @@ import openstudio
 
 from btap._compat import opt, opt_or, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog, emit_coverage
+from btap.codes import resolve
 from btap.codes.necb.envelope import climate
 from btap.codes.necb.envelope import prescriptive as Prescriptive
-from btap.codes.necb.envelope.rules import max_fdwr, max_srr
+from btap.codes.necb.envelope.rules import _max_fdwr, _max_srr
 from btap.modeling.envelope import geometry as Geometry
 
 AIR_LEAKAGE_I75 = 1.50   # L/(s.m2) @ 75 Pa, 8.4.3.3.(3)
@@ -49,24 +50,32 @@ LIGHTWEIGHT_THICKNESS_M = 0.15
 _GROUND_OR_FOUNDATION_RE = re.compile(r"Ground|Foundation", re.IGNORECASE)
 
 
-def apply(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
+def apply(model, *, code, hdd=None, actual_roof_absorptance_used=False,
           thermal_bridging=None, audit=None):
-    from btap.codes.necb import envelope
+    return _apply(model, resolve(code), hdd=hdd,
+                  actual_roof_absorptance_used=actual_roof_absorptance_used,
+                  thermal_bridging=thermal_bridging, audit=audit)
 
+
+def _apply(model, ruleset, *, hdd=None, actual_roof_absorptance_used=False,
+           thermal_bridging=None, audit=None):
+    """The 8.4.4.3/.4 envelope transform against ONE resolved edition — the
+    reference subsection, the prescriptive pass under it and the coverage
+    emission all read the same :class:`btap.codes.Ruleset` (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
-    prefix = "8.4.5" if str(vintage) == "2025" else "8.4.4"
-    hdd = climate.hdd18(model, hdd=hdd, audit=audit)
+    prefix = ruleset.article("reference_subsection")
+    hdd = climate.hdd18(model, edition=ruleset.edition, hdd=hdd, audit=audit)
     if hdd is None:
         raise ValueError("HDD unresolvable: pass hdd: explicitly or set a weather file")
 
     # 1. prescriptive Section 3.2 on the reference (no window rebuild here)
-    Prescriptive.apply(model, vintage=vintage, hdd=hdd,
+    Prescriptive._apply(model, ruleset=ruleset, hdd=hdd,
                        thermal_bridging=thermal_bridging, audit=audit)
     audit.decision("reference", "reference envelope meets prescriptive Section 3.2",
                    inputs={"hdd": hdd}, article=f"{prefix}.1.(2)")
 
-    _scale_fenestration_to_limits(model, vintage, hdd, prefix, audit)
-    roof_absorptance = (envelope.rules(vintage)["reference_envelope"]
+    _scale_fenestration_to_limits(model, ruleset, hdd, prefix, audit)
+    roof_absorptance = (ruleset.rules("envelope")["reference_envelope"]
                         ["roof_absorptance_if_actual_used"])
     _apply_roof_absorptance(model, actual_roof_absorptance_used, roof_absorptance,
                             prefix, audit)
@@ -75,18 +84,18 @@ def apply(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
                "fenestration optics (SHGC/VT) preserved — only U changed by construction "
                "of the prescriptive transform",
                article=f"{prefix}.3.(8)")
-    _apply_lightweight_construction(model, vintage, hdd, prefix, audit)
+    _apply_lightweight_construction(model, ruleset, hdd, prefix, audit)
     apply_air_leakage_default(model, prefix, audit)
-    _emit_article_coverage(vintage, audit)
+    _emit_article_coverage(ruleset, audit)
     return audit
 
 
-def _scale_fenestration_to_limits(model, vintage, hdd, prefix, audit):
+def _scale_fenestration_to_limits(model, ruleset, hdd, prefix, audit):
     """8.4.4.3.(3): where the proposed FDWR/SRR exceeds the 3.2.1.4 limits,
     scale the EXISTING fenestration proportionally (per orientation — a
     uniform ratio on every wall preserves each orientation's share)."""
     walls = Geometry.exposed_walls(model)
-    limit = max_fdwr(vintage=vintage, hdd=hdd)
+    limit = _max_fdwr(ruleset=ruleset, hdd=hdd)
     if walls["fdwr"] is not None and walls["fdwr"] > limit:
         ratio = limit / walls["fdwr"]
         for w in walls["walls"]:
@@ -110,7 +119,7 @@ def _scale_fenestration_to_limits(model, vintage, hdd, prefix, audit):
                    article=f"{prefix}.3.(3)")
 
     roofs = Geometry.exposed_roofs(model)
-    srr_limit = max_srr(vintage=vintage)
+    srr_limit = _max_srr(ruleset=ruleset)
     if not (roofs["srr"] is not None and roofs["srr"] > srr_limit):
         return
 
@@ -182,7 +191,7 @@ def _strip_shading(model, prefix, audit):
                    article=f"{prefix}.3.(4)-(5)")
 
 
-def _apply_lightweight_construction(model, vintage, hdd, prefix, audit):
+def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
     """8.4.4.4.(1): reference envelope thermal characteristics = lightweight
     construction. Implemented by rebuilding each exterior/ground opaque
     assembly as a single MASSLESS layer at the identical (already-prescriptive)
@@ -453,16 +462,14 @@ def apply_air_leakage_default(model, prefix, audit):
                    article=f"{prefix}.3.(6); 8.4.3.3.(3); 8.4.2.9.(2)", ruling="D-19 D-21")
 
 
-def _emit_article_coverage(vintage, audit):
+def _emit_article_coverage(ruleset, audit):
     """Completeness accounting (same contract as the hvac domain)."""
-    from btap.codes.necb import envelope
-
-    emit_coverage(envelope.rules(vintage).get("article_coverage"), audit)
+    emit_coverage(ruleset.rules("envelope").get("article_coverage"), audit)
 
 
-def reference_envelope(model, *, vintage, hdd=None, actual_roof_absorptance_used=False,
+def reference_envelope(model, *, code, hdd=None, actual_roof_absorptance_used=False,
                        thermal_bridging=None, audit=None):
     """Facade: reference envelope IN PLACE on the caller's clone."""
-    return apply(model, vintage=vintage, hdd=hdd,
-                 actual_roof_absorptance_used=actual_roof_absorptance_used,
-                 thermal_bridging=thermal_bridging, audit=audit)
+    return _apply(model, resolve(code), hdd=hdd,
+                  actual_roof_absorptance_used=actual_roof_absorptance_used,
+                  thermal_bridging=thermal_bridging, audit=audit)

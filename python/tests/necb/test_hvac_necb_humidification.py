@@ -69,10 +69,10 @@ class TestNecbHumidification(unittest.TestCase):
             manager.addToNode(node)
         return humidifier
 
-    def reference(self, model, types, storeys=3, vintage='2020'):
+    def reference(self, model, types, storeys=3, code='necb2020'):
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage=vintage,
+            model, code=code,
             building={'storeys': storeys,
                       'zone_types': {z.nameString(): types for z in model.getThermalZones()}},
             audit=audit)
@@ -208,7 +208,7 @@ class TestNecbHumidification(unittest.TestCase):
         self.assertIsNotNone(retained)
         self.assertEqual('info', retained['level'])
 
-    # ---- merged systems and vintages ----
+    # ---- merged systems and editions ----
 
     # D-28 merges multizone selection groups onto one reference system. Where the
     # merged blocks disagree on energy source, note (1) can only be satisfied for one.
@@ -232,7 +232,7 @@ class TestNecbHumidification(unittest.TestCase):
 
     def test_2025_cites_the_renumbered_table(self):
         _, audit = self.reference(self.humidified_office(kind='gas'), 'Office - open plan',
-                                  vintage='2025')
+                                  code='necb2025')
         entry = next((e for e in self.d55(audit)
                       if 'reference humidification rebuilt' in e['action']), None)
         self.assertIsNotNone(entry)

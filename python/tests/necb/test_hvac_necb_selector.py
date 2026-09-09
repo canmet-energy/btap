@@ -33,7 +33,7 @@ def select(groups, zone_types, storeys=1, audit=None, **building_extra):
     building = {'storeys': storeys, 'zone_types': zone_types}
     building.update(building_extra)
     return hvac.select_reference_systems(facts=facts_for(*groups), building=building,
-                                         vintage='2020', audit=audit)
+                                         code='necb2020', audit=audit)
 
 
 class TestNecbSelector(unittest.TestCase):

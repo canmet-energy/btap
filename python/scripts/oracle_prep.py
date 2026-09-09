@@ -77,7 +77,7 @@ def first_outdoor_wall_sdk_order(model):
 def office_tagged(model):
     mapping = {s.nameString(): OFFICE
                for s in sorted(model.getSpaces(), key=lambda s: s.nameString())}
-    loads.assign_space_types(model, mapping, vintage="2020", audit=AuditLog())
+    loads.assign_space_types(model, mapping, code="necb2020", audit=AuditLog())
     return model
 
 
@@ -101,18 +101,18 @@ def save(model, out_dir, name):
 
 def build_tbd_rsi(out_dir):
     model = load_model(seed_path())
-    envelope.apply_prescriptive(model, vintage="2020", hdd=3890, audit=AuditLog())
+    envelope.apply_prescriptive(model, code="necb2020", hdd=3890, audit=AuditLog())
     wall = first_outdoor_wall_sdk_order(model)
     wall_name = wall.nameString()
     wall.setWindowToWallRatio(0.3)
-    envelope.apply_prescriptive(model, vintage="2020", hdd=3890, audit=AuditLog())
+    envelope.apply_prescriptive(model, code="necb2020", hdd=3890, audit=AuditLog())
     path = save(model, out_dir, "tbd_rsi.osm")
     return path, {
         "operations": [
-            "apply_prescriptive(vintage='2020', hdd=3890)",
+            "apply_prescriptive(code='necb2020', hdd=3890)",
             f"setWindowToWallRatio(0.3) on first outdoor wall in SDK "
             f"iteration order = {wall_name!r}",
-            "apply_prescriptive(vintage='2020', hdd=3890)",
+            "apply_prescriptive(code='necb2020', hdd=3890)",
         ],
         "operation_gates": [
             "python/tests/necb/test_oracle_goldens_envelope.py (prescriptive conductances)",
@@ -134,7 +134,7 @@ def build_daylighting_controls(out_dir):
     return path, {
         "operations": [
             "assign_space_types(all spaces -> Space Function/Office enclosed "
-            "> 25 m2, vintage='2020')",
+            "> 25 m2, code='necb2020')",
             f"setWindowToWallRatio(0.4) on first outdoor wall in SDK "
             f"iteration order = {wall_name!r}",
         ],
@@ -150,15 +150,15 @@ def build_daylighting_controls(out_dir):
 
 def build_lighting_costing(out_dir):
     model = office_tagged(load_model(seed_path()))
-    lighting.apply_lights(model, vintage="2020", lights_type="LED",
+    lighting.apply_lights(model, code="necb2020", lights_type="LED",
                           audit=AuditLog())
     model.getBuilding().setStandardsTemplate("NECB2020")
     path = save(model, out_dir, "lighting_costing.osm")
     return path, {
         "operations": [
             "assign_space_types(all spaces -> Space Function/Office enclosed "
-            "> 25 m2, vintage='2020')",
-            "apply_lights(vintage='2020', lights_type='LED')",
+            "> 25 m2, code='necb2020')",
+            "apply_lights(code='necb2020', lights_type='LED')",
             "Building.setStandardsTemplate('NECB2020')",
         ],
         "operation_gates": [
@@ -177,7 +177,7 @@ def build_shw(out_dir):
     return path, {
         "operations": [
             "assign_space_types(all spaces -> Space Function/Office enclosed "
-            "> 25 m2, vintage='2020')",
+            "> 25 m2, code='necb2020')",
         ],
         "operation_gates": [
             "python/tests/necb/test_loads_apply_loads.py (assign_space_types)",

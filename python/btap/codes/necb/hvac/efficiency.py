@@ -1,7 +1,7 @@
 """Vintage efficiency application (port of btap-necb's hvac/efficiency.rb) — a
 faithful, SDK-only port of the NECB subset of openstudio-standards'
 model_apply_hvac_efficiency_standard, driven entirely by the vendored
-data/efficiencies_<vintage>.json (NECB Table 5.2.12.1 values + performance curves).
+each edition's own efficiencies.json (NECB Table 5.2.12.1 values + performance curves).
 
 Covered components: hot-water boilers (incl. NECB primary/secondary staging),
 electric chillers (incl. 2100 kW split + cooling-tower sizing rules), single-speed
@@ -16,7 +16,6 @@ Requires a SIZED model (capacities read from hard or autosized values).
 
 from __future__ import annotations
 
-import json
 import math
 import re
 from datetime import date, datetime
@@ -24,67 +23,39 @@ from datetime import date, datetime
 import openstudio
 
 from btap._compat import NullAudit, ruby_round, sorted_by_name
-from btap.codes.necb.hvac.reference import RULES_DIR
-from btap.codes.necb.hvac.reference import rules as _rules
+from btap.codes import resolve
+from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
 
-_DATA: dict[str, dict] = {}
+
+def data(edition):
+    """This edition's minimum-efficiency tables — a shim over the family's ONE
+    loader (:func:`btap.codes.necb.rulesdata.load`), which owns the cache."""
+    return rulesdata.load("hvac_efficiencies", code_id(edition))
 
 
-def data(vintage):
-    key = str(vintage)
-    if key not in _DATA:
-        path = RULES_DIR / f'efficiencies_{key}.json'
-        if not path.exists():
-            raise ValueError(
-                f"no NECB efficiency data for vintage '{key}' (expected {path})")
-        with open(path, encoding='utf-8') as f:
-            _DATA[key] = json.load(f)
-    return _DATA[key]
-
-
-def effective_vintage(vintage):
-    """The efficiency vintage to actually apply: the requested vintage when its tables
-    are vendored, else the fallback its rules file declares (e.g. NECB 2025 falls
-    back to 2020 until the restructured Table 5.2.12.1 series is transcribed).
-
-    :param vintage: requested NECB vintage (e.g. '2020', '2025')
-    :return: (effective vintage, fallback reason or None)
-    """
-    if (RULES_DIR / f'efficiencies_{vintage}.json').exists():
-        return str(vintage), None
-
-    provenance = _rules(vintage)['provenance']
-    fallback = provenance.get('efficiency_vintage_fallback')
-    if fallback is None:
-        raise ValueError(
-            f"no NECB efficiency data for vintage '{vintage}' and no declared fallback")
-
-    return (str(fallback),
-            provenance.get('efficiency_fallback_reason') or f'vintage {vintage} tables not vendored')
-
-
-def apply(model, vintage='2020', audit=None, proposed=None):
+def apply(model, code='necb2020', audit=None, proposed=None):
     """Apply NECB minimum-performance values + curves to every supported component.
 
     :param model: sized openstudio.model.Model
-    :param vintage: e.g. '2020'
+    :param code: the code id, e.g. 'necb2020'
     :param audit: AuditLog or None
     :param proposed: SIZED proposed model, enabling the 8.4.4.14.(1)-(3) pump power transfer
     :return: True
     """
+    return _apply(model, resolve(code), audit=audit, proposed=proposed)
+
+
+def _apply(model, ruleset, audit=None, proposed=None):
+    """The minimum-performance pass against ONE resolved edition — the
+    efficiency tables, the plant staging rules and every article number under
+    them come from this same :class:`btap.codes.Ruleset` (Stage 6)."""
     audit = audit if audit is not None else NullAudit()
-    requested_vintage = str(vintage)
-    vintage, fallback_reason = effective_vintage(vintage)
-    if fallback_reason:
-        audit.warn('efficiency', f'efficiency tables fall back to NECB {vintage} values: {fallback_reason}',
-                   article='Table 5.2.12.1')
-    tables = data(vintage)
+    tables = ruleset.rules("hvac_efficiencies")
     # Boiler/chiller staging thresholds (8.4.4.9.(6)/8.4.4.10.(6)) live in the
-    # reference ruleset (heating_plant/cooling_plant), not the efficiencies table —
-    # fetched by the originally requested vintage since reference_rules_<vintage>.json
-    # is vendored for every supported vintage (no efficiency-style fallback needed).
-    plant_rules = _rules(requested_vintage)
+    # reference ruleset (heating_plant/cooling_plant), not the efficiencies
+    # table — but in the SAME edition's snapshot, like everything else.
+    plant_rules = ruleset.rules("hvac")
     heating_plant = plant_rules['heating_plant']
     cooling_plant = plant_rules['cooling_plant']
     for b in sorted_by_name(model.getBoilerHotWaters()):
@@ -96,7 +67,7 @@ def apply(model, vintage='2020', audit=None, proposed=None):
     # 8.4.4.9.(7)/8.4.4.10.(8) stage COUNTS first: the multispeed appliers bin
     # by TOP-stage capacity, and the top stage is unchanged by re-staging, but
     # the per-stage values must land on the stages the staging pass leaves behind.
-    totals = apply_staging(model, plant_rules, requested_vintage, audit)
+    totals = _apply_staging(model, plant_rules, ruleset, audit)
     for c in sorted_by_name(model.getCoilCoolingDXSingleSpeeds()):
         _apply_dx_cooling(c, tables, audit)
     for c in sorted_by_name(model.getCoilCoolingDXMultiSpeeds()):
@@ -110,19 +81,14 @@ def apply(model, vintage='2020', audit=None, proposed=None):
     for c in sorted_by_name(model.getCoilHeatingGasMultiStages()):
         _apply_gas_multi(c, tables, audit, totals.get(str(c.handle())))
     for unit in sorted_by_name(model.getAirConditionerVariableRefrigerantFlows()):
-        _apply_vrf(unit, tables, requested_vintage, audit)
+        _apply_vrf(unit, tables, ruleset, audit)
     for f in sorted_by_name(model.getFanVariableVolumes()):
-        _apply_fan_power_curve(f, vintage, audit)
-    _apply_pump_rules(model, requested_vintage, plant_rules.get('hydronic_pumps'), audit,
+        _apply_fan_power_curve(f, ruleset, audit)
+    _apply_pump_rules(model, ruleset, plant_rules.get('hydronic_pumps'), audit,
                       proposed=proposed)
-    # requested_vintage, NOT vintage: the latter has been remapped to the
-    # effective DATA vintage (2020 tables can back a 2025 run), and the
-    # article number must follow the code edition being complied with. Using
-    # the data vintage would cite 8.4.4.13 on a 2025 run whenever the tables
-    # fall back — the very bug this argument exists to fix.
-    _align_heat_pump_heating_capacity(model, audit, requested_vintage)
+    _align_heat_pump_heating_capacity(model, audit, ruleset)
     audit.info('efficiency', 'NECB efficiency pass complete',
-               inputs={'vintage': vintage,
+               inputs={'code': ruleset.id, 'edition': ruleset.edition,
                        'boilers': len(model.getBoilerHotWaters()),
                        'chillers': len(model.getChillerElectricEIRs()),
                        'dx_cooling': len(model.getCoilCoolingDXSingleSpeeds()),
@@ -165,7 +131,7 @@ def _vrf_class(unit):
     return 'air_conditioner'
 
 
-def _apply_vrf(unit, tables, vintage, audit):
+def _apply_vrf(unit, tables, ruleset, audit):
     """Apply the air-cooled AC or air-source HP rows of Table 5.2.12.1.-I.
 
     OpenStudio's classic VRF object distinguishes only AirCooled, WaterCooled,
@@ -176,7 +142,7 @@ def _apply_vrf(unit, tables, vintage, audit):
     serving no terminals at all is INDETERMINATE and warns. Code minimums are
     assigned exactly, consistently with the other equipment appliers.
     """
-    article = f'NECB {vintage} Table 5.2.12.1.-I'
+    article = f'NECB {ruleset.edition} Table 5.2.12.1.-I'
     if unit.condenserType() != 'AirCooled':
         return audit.warn(
             'efficiency',
@@ -256,7 +222,7 @@ def _apply_vrf(unit, tables, vintage, audit):
 MAX_STAGES = 4
 
 
-def apply_staging(model, rules, vintage, audit):
+def apply_staging(model, rules, code, audit):
     """Post-sizing stage-COUNT pass. Sentence (7)/(8) read the same way: at or
     below the two-stage threshold the equipment is modelled as two equal
     stages; above it, as equal stages of the stage size (rounded up). Only
@@ -269,15 +235,19 @@ def apply_staging(model, rules, vintage, audit):
     :param model: sized openstudio.model.Model (modified in place)
     :param rules: the reference ruleset (dx_staging / furnace_staging /
         economizer_dx_staging blocks)
-    :param vintage: NECB vintage ('2020' or '2025')
+    :param code: the code id ('necb2020' or 'necb2025')
     :param audit: AuditLog or None
     :return: dict {coil handle -> the TOTAL capacity measured before re-staging}.
         Growing a coil appends a stage EnergyPlus has never sized, so the new top
         stage reads back None and shrinking one leaves a stale partial value behind
         — the appliers must bin on the measurement taken here, not on a re-read.
     """
+    return _apply_staging(model, rules, resolve(code), audit)
+
+
+def _apply_staging(model, rules, ruleset, audit):
     audit = audit if audit is not None else NullAudit()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = ruleset.article('reference_subsection')
     totals: dict = {}
     for unitary in sorted_by_name(model.getAirLoopHVACUnitarySystems()):
         _stage_multispeed_coil(unitary.coolingCoil(), rules.get('dx_staging'),
@@ -519,7 +489,7 @@ FAN_CURVES = {
 }
 
 
-def _apply_fan_power_curve(fan, vintage, audit):
+def _apply_fan_power_curve(fan, ruleset, audit):
     flow = fan.maximumFlowRate().get() if fan.maximumFlowRate().is_initialized() else None
     if flow is None:
         flow = (fan.autosizedMaximumFlowRate().get()
@@ -544,7 +514,7 @@ def _apply_fan_power_curve(fan, vintage, audit):
     fan.setFanPowerCoefficient5(0.0)
     fan.setFanPowerMinimumFlowRateInputMethod('Fraction')
     fan.setFanPowerMinimumFlowFraction(row['d'])
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = ruleset.article('reference_subsection')
     audit.decision('efficiency', f'VAV fan power curve set ({row_name})',
                    target=fan.nameString(),
                    inputs={'rated_kw': ruby_round(power_kw, 2),
@@ -554,13 +524,13 @@ def _apply_fan_power_curve(fan, vintage, audit):
                    article=f'{prefix}.17.(2)-(5); Table {prefix}.17.')
 
 
-def _apply_pump_rules(model, vintage, rule, audit, proposed=None):
+def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     """8.4.4.14 (2025: 8.4.5.14) hydronic pump power. Sentence (5) directs
     variable-flow pumps to be modeled as a pump riding its curve, so
     reference PumpVariableSpeeds get the Table's riding-curve row (identical
     coefficients to the 8.4.4.17 airfoil fan row — same DOE-2 lineage; the
     VSD row is vendored for completeness). Coefficients come from the
-    ruleset's hydronic_pumps.curves (Table 8.4.4.14., both vintages
+    ruleset's hydronic_pumps.curves (Table 8.4.4.14., both editions
     identical). E+ mapping: A/B/C -> part-load performance coefficients 1-3
     (4th = 0); the below-D floor (P = E x Prated) is approximated by the
     minimum-flow clamp at D x rated flow — the polynomial at D equals E
@@ -569,7 +539,7 @@ def _apply_pump_rules(model, vintage, rule, audit, proposed=None):
     if rule is None:
         return
 
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = ruleset.article('reference_subsection')
     stats = _proposed_pump_stats(proposed)
     if proposed is None:
         audit.info('efficiency', f'no proposed model supplied — {prefix}.14.(1)-(3) pump power transfer '
@@ -832,7 +802,7 @@ def _proposed_pump_stats(proposed):
     return {k: s for k, s in stats.items() if s['flow_l_s'] != 0}
 
 
-def _align_heat_pump_heating_capacity(model, audit, requested_vintage='2020'):
+def _align_heat_pump_heating_capacity(model, audit, ruleset):
     """T4 (audit 2026-07-25) 8.4.4.13.(2)(c): "the heat pump's heating capacity
     at an outdoor air temperature of 8.3 C shall be identical to its cooling
     capacity". The vendored CAP_FT cubic evaluates ~1.0 at 8.3 C, so pinning
@@ -840,9 +810,9 @@ def _align_heat_pump_heating_capacity(model, audit, requested_vintage='2020'):
     sentence (the -8.3 C 50% point comes from the same curve). Post-sizing:
     both capacities must be readable; paired coils only (same air loop).
 
-    :param requested_vintage: the CODE edition ('2020'/'2025'), which decides
+    :param ruleset: the resolved edition, which decides
         whether the heat-pump article is numbered 8.4.4.13 or 8.4.5.13"""
-    hp_article = '8.4.5.13.(2)(c)' if str(requested_vintage) == '2025' else '8.4.4.13.(2)(c)'
+    hp_article = ruleset.article('heat_pump_aux_fuel')
     for loop_ in sorted_by_name(model.getAirLoopHVACs()):
         comps = _coils.supply_components(loop_)
         staged_heat = next((c for c in comps if c.to_CoilHeatingDXMultiSpeed().is_initialized()), None)
@@ -1702,12 +1672,13 @@ def electric_or_no_heating(coil):
 
 # ---------------- the HVAC-module facades ----------------
 
-def apply_efficiencies(model, vintage='2020', audit=None, proposed=None):
+def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
     """Facade: apply NECB minimum efficiencies to a sized model. Pass the sized
     PROPOSED model via proposed= to enable the 8.4.4.14.(1)-(3) pump power
     transfer (combined W/(L/s) by loop type); without it the Table 8.4.4.14
     curves still apply and the skip is noted in the audit."""
-    return apply(model, vintage=vintage, audit=audit, proposed=proposed)
+    return _apply(model, resolve(code), audit=audit,
+                  proposed=proposed)
 
 
 def prepare_for_resizing(model, audit=None):

@@ -11,6 +11,31 @@ from pathlib import Path
 PYTHON_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = PYTHON_ROOT / "btap"
 META_KEYS = {"provenance", "article_coverage", "non_rule_keys"}
+#: Manifest `rules` keys this gate deliberately does NOT scan. `efficiencies`
+#: is a transcribed code TABLE (the Table 5.2.12.1 series), not a rule
+#: manifest, and has never been in scope — before the multi-edition plan's
+#: Stage 3 the glob was `*_rules_*.json`, which its name does not match.
+#: Keeping the scope identical keeps the gate's meaning identical.
+NON_RULE_MANIFESTS = {"hvac_efficiencies"}
+
+
+def rule_manifests(package_root: Path) -> list[Path]:
+    """Every edition's declared rule files, MANIFEST-driven.
+
+    Since Stage 3 of the multi-edition plan the rule files no longer carry the
+    edition in their names, so a filename grammar cannot find them. Each
+    edition's `manifest.json` enumerates its own files; this tool runs under a
+    bare `python3` in the `lint` job and so reads them off disk rather than
+    importing `btap.codes`.
+    """
+    found = []
+    for manifest_path in sorted(package_root.glob("**/data/*/manifest.json")):
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        for key, filename in sorted((manifest.get("rules") or {}).items()):
+            if key in NON_RULE_MANIFESTS:
+                continue
+            found.append(manifest_path.parent / filename)
+    return found
 
 
 def _consumed(key: str, source: str) -> bool:
@@ -19,7 +44,7 @@ def _consumed(key: str, source: str) -> bool:
 
 
 def findings(package_root: Path = PACKAGE_ROOT) -> tuple[list[dict], int, int]:
-    manifests = sorted(package_root.glob("**/data/**/*_rules_*.json"))
+    manifests = rule_manifests(package_root)
     sources = sorted(path for path in package_root.glob("**/*.py")
                      if "data" not in path.parts)
     if not manifests:

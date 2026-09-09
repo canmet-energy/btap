@@ -39,10 +39,10 @@ class TestNecbDcv(unittest.TestCase):
                 mech.setSystemOutdoorAirMethod(method)
         return model
 
-    def reference(self, model, vintage='2020'):
+    def reference(self, model, code='necb2020'):
         audit = AuditLog()
         result = hvac.reference_hvac(
-            model, vintage=vintage,
+            model, code=code,
             building={'storeys': 1,
                       'zone_types': {z.nameString(): 'Office - enclosed'
                                      for z in model.getThermalZones()}},
@@ -139,7 +139,7 @@ class TestNecbDcv(unittest.TestCase):
                          'the peak-rate method is NOT copied')
 
     def test_2025_cites_the_renumbered_article(self):
-        _, audit = self.reference(self.proposed(dcv=True), vintage='2025')
+        _, audit = self.reference(self.proposed(dcv=True), code='necb2025')
         entry = next((e for e in audit.entries
                       if 'demand-controlled ventilation strategy copied' in e['action']), None)
         self.assertIsNotNone(entry)

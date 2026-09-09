@@ -2,9 +2,10 @@
 LPD allowances, the LED alternative, daylighting (4.2.1.6 + storage garages
 4.2.2.2), exterior lighting, and the 8.4.4.5 reference treatment.
 
-The vendored data lives in ``data/`` beside this module, byte-identical to the
-gem's ``lib/btap_necb/lighting/data/``: the per-vintage rules manifests, the
-merged LED table, the 2025 LPD tables and the Table 4.2.1.6. control matrix.
+The vendored data lives in each edition's own snapshot
+(``btap/codes/necb/data/<code id>/``): that edition's rules manifest, its copy
+of the merged LED table, and — for 2025 — the LPD tables and the Table 4.2.1.6.
+control matrix. Nothing reads another edition's files (Stage 3).
 
 Port layout (D-79). Ruby's ``Lighting::ApplyLights`` etc. are one module per
 file here, imported at the BOTTOM the way lighting.rb ``require_relative``s
@@ -22,50 +23,46 @@ stay reachable as ``lighting.ApplyLights`` / ``lighting.ReferenceDaylighting``
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from btap.audit import AuditLog  # the family's ONE AuditLog (Ruby's alias)
+from btap.codes.necb import _data_root, code_id, edition_file, rulesdata
 from btap.costing.lighting import report as Costing  # Ruby: Costing = BtapCosting::Lighting
 
-__all__ = ["DATA_DIR", "AuditLog", "Costing", "rules", "data_vintage", "table",
+__all__ = ["AuditLog", "Costing", "rules", "table",
            "led_record", "cost", "apply_lights", "add_daylighting_controls",
            "reference_lighting", "reference_daylighting",
            "ApplyLights", "Exterior", "Reference", "DaylightedAreas",
            "DaylightControlRequirement", "Daylighting", "StorageGarage",
            "ReferenceDaylighting"]
 
-DATA_DIR = Path(__file__).parent / "data"
-
-_rules: dict[str, dict] = {}
-_tables: dict[str, list] = {}
-
-
-def rules(vintage):
-    key = str(vintage)
-    if key not in _rules:
-        path = DATA_DIR / f"lighting_rules_{key}.json"
-        if not path.exists():
-            raise ValueError(
-                f"no NECB lighting rules for vintage '{vintage}' (expected {path})")
-        _rules[key] = json.loads(path.read_text(encoding="utf-8"))
-    return _rules[key]
+#: Table cache keyed by (data root, edition, table) — see loads/__init__.py.
+#: The rule files are cached once for the whole family in ``necb.rulesdata``.
+_tables: dict[tuple, list] = {}
 
 
-def data_vintage(vintage):
-    return rules(vintage).get("data_vintage_alias") or str(vintage)
+def rules(edition):
+    """This edition's lighting rules — a shim over the family's ONE loader
+    (:func:`btap.codes.necb.rulesdata.load`); the NAME is an address."""
+    return rulesdata.load("lighting", code_id(edition))
 
 
-def table(name):
-    if name not in _tables:
-        path = DATA_DIR / f"{name}.json"
-        _tables[name] = json.loads(path.read_text(encoding="utf-8"))["table"]
-    return _tables[name]
+def table(name, edition):
+    """One transcribed lighting table out of ``edition``'s own snapshot.
+
+    ``edition`` is REQUIRED: before Stage 3 the edition was baked into the file
+    name (``led_lighting_2020``) and every edition read the 2020 file.
+    """
+    key = (_data_root(), str(edition), name)
+    if key not in _tables:
+        path = edition_file(edition, "tables", f"{name}.json")
+        _tables[key] = json.loads(path.read_text(encoding="utf-8"))["table"]
+    return _tables[key]
 
 
-def led_record(building_type, space_type):
+def led_record(building_type, space_type, edition):
     """The merged LED alternative table (lighting_per_area W/ft2 + heat
-    fractions)."""
-    for r in table("led_lighting_2020"):
+    fractions), from ``edition``'s own copy."""
+    for r in table("led_lighting", edition):
         if r["building_type"] == building_type and r["space_type"] == space_type:
             return r
     return None

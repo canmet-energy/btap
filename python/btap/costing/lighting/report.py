@@ -25,7 +25,7 @@ class Report:
 
 # Cost a model's lighting fixtures. Same location/injection contract as the
 # sibling domains' costing facades.
-def cost(model, *, vintage="2020", city=None, province_state=None,
+def cost(model, *, edition="2020", city=None, province_state=None,
          costs_csv=None, local_factors_csv=None, audit=None, daylighting_areas=None):
     if audit is None:
         audit = AuditLog()
@@ -44,7 +44,7 @@ def cost(model, *, vintage="2020", city=None, province_state=None,
         audit.info("costing_lighting", "cost location resolved from the model site",
                    value=f"{city}, {province_state}")
 
-    section = fixtures.cost(model, database=database, vintage=vintage,
+    section = fixtures.cost(model, database=database, edition=edition,
                             province_state=province_state, city=city, audit=audit,
                             daylighting_areas=daylighting_areas)
     for w in database.warnings:

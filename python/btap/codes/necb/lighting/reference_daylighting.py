@@ -37,12 +37,13 @@ import openstudio
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import resolve
 from btap.codes.necb.lighting import daylighting as Daylighting
 
 REFLECTANCES = {'Floor': 0.15, 'Wall': 0.50, 'RoofCeiling': 0.80}
 
 
-def apply(reference, vintage='2020', proposed=None, placement='necb2020',
+def apply(reference, code='necb2020', proposed=None, placement='necb2020',
           office_match='any_enclosed_office', unknown_control_requirement='required', audit=None):
     """Apply reference daylighting to a reference model (after the envelope
     reference transform). Set-points come from the proposed model's controls
@@ -56,8 +57,17 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
     :param unknown_control_requirement: 'required' | 'not_required' —
         'necb2020' only — the default for an unresolvable Table 4.2.1.6. column
         (warns)"""
+    return _apply(reference, resolve(code), proposed=proposed,
+                  placement=placement, office_match=office_match,
+                  unknown_control_requirement=unknown_control_requirement, audit=audit)
+
+
+def _apply(reference, ruleset, proposed=None, placement='necb2020',
+           office_match='any_enclosed_office',
+           unknown_control_requirement='required', audit=None):
+    """The 8.4.x.5.(9)-(12) daylighting transform against ONE resolved edition."""
     audit = audit if audit is not None else AuditLog()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = ruleset.article('lighting_subsection')
     # `placement` is the single selector; Daylighting owns its vocabulary
     # (including the 'necb_default' alias), so normalize through IT rather
     # than keeping a second copy of the mapping here, then pass it straight
@@ -74,7 +84,7 @@ def apply(reference, vintage='2020', proposed=None, placement='necb2020',
 
             proposed_setpoints[control.space().get().nameString()] = control.illuminanceSetpoint()
 
-    created = Daylighting.add_controls(reference, vintage=vintage, placement=placement,
+    created = Daylighting._add_controls(reference, ruleset, placement=placement,
                                        office_match=office_match,
                                        unknown_control_requirement=unknown_control_requirement,
                                        audit=audit)

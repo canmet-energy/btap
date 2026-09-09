@@ -11,6 +11,78 @@ reference transforms; ONE AuditLog spans everything.
 
 [README.md](README.md) is the API guide. This file is the traps.
 
+## Three modules, one determination (Stage 9a)
+
+`compliance.performance_compliance` is still the entry point, but the
+determination is split by OWNERSHIP, not by convenience:
+
+- **`pipeline.py`** — code-family-NEUTRAL lifecycle only: the `_Run` context,
+  phase ordering, the `run_dir` layout, the input-simulate-ability gate,
+  coverage emission, `report.json`/`audit.json`/`audit.txt`, the failure
+  flush, and the `CodePath` protocol. **It imports no code family** — an
+  import contract enforces that, indirect chains included — and reaches one
+  only through `Ruleset.path()`, which resolves the module the edition's
+  manifest names (`"path": "btap.codes.necb.path"`), exactly as `behaviours`
+  are resolved.
+- **`necb/path.py`** — NECB's `CodePath`: `validate` (on-ramp, space-type
+  pre-flight), `climate` (Table C-1 HDD), `prepare_annual`/`consume_annual`
+  (the heat-pump election variables around the pipeline's EnergyPlus call),
+  `determine` (reference build → sizing → 8.4.1.2 verdicts → GHG → costing →
+  EUI supplement), `abort` (the failure-flush citation, 8.4.2.1),
+  `citations`, `report_sections`, and `alternate_path` (the 8.4.4
+  archetype-EUI path, whose phase sequence is genuinely not this one).
+- **`compliance.py`** — the entry point plus the six symbols the Section 8.4
+  coverage `code` pointers name. `_build_reference`, `_evaluate` and
+  `_evaluate_unmet` are FORWARDING functions **on the executed call path**:
+  the family calls them and they delegate back through the registry. A dead
+  stub that resolved the pointer without running would make the evidence
+  technically valid and substantively false — `tests/necb/test_code_path.py`
+  is the gate. Never "tidy" a forwarder away, and never let `compliance.py`
+  or `pipeline.py` import `btap.codes.necb`.
+
+**Full compliance does not imply a reference building.** `Verdict` carries
+what a regime produces (`compliant` + the report it filled in); the report
+renders what is present. A future absolute-metric regime compares against
+thresholds and builds no reference at all.
+
+### What 9a is, stated narrowly: an NECB-PRESERVING scaffold
+
+The lifecycle and the family boundary are REAL — the `CodePath` protocol, the
+manifest `path` key resolved through `Ruleset.path()`, the forwarders on the
+executed call path, and the import-linter contract that keeps
+`pipeline.py` free of `btap.codes.necb`. Nothing in the neutral pipeline
+writes a NECB citation into an audit trail any more:
+`tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` fails on any
+`article=` keyword or `[58].x.y` literal reaching an audit call in
+`pipeline.py`.
+
+**Three things 9a does NOT deliver — deferred to 9b/9c, where a second family
+makes the neutral shape testable rather than speculative. Do not describe them
+as done, and do not "just neutralize" one in passing: each moves a report
+leaf.**
+
+1. **`report/sections.py` hardcodes NECB Section 8.4 article paths — 13
+   sites, in four functions**: `verdict_banner` (6), `path_declaration` (2),
+   `energy` (3), `hvac_building_block` (2). The renderer takes the code NAME
+   from `report['code_label']`; the article NUMBERS are still literals.
+   `TestDeferredRendererInventory` pins the inventory, so changing it is a
+   deliberate act with a plan entry behind it.
+2. **`citations()` and `report_sections()` have no product call site.** They
+   are declared, implemented and unit-tested, and nothing calls them. Wiring
+   either needs the ruleset plumbed into the render context and new manifest
+   article keys (`render_all` composes from its own fixed `ORDER`, a different
+   list from `report_sections()`'s report keys) — a report change.
+3. **`pipeline._validate_input_model` still RAISES NECB prose** (Table
+   8.4.4.7.-A, the 8.4.1.2 determination). Exceptions, not audit entries, and
+   the rev-7 ownership table keeps the neutral model-loading half here — but
+   the text is NECB's.
+
+**The abort citation must stay a literal `article=` in family source.** The
+Section 8.4 scanner reads `article=` constants by AST, so routing 8.4.2.1
+through `citations()` or a module constant drops the
+`(edition, 8.4.2.1, warn)` count to zero and breaks the citation no-loss
+gate. That constraint is why `abort` is a hook rather than a lookup.
+
 ## Pipeline (`compliance.performance_compliance`)
 
 clone → on-ramp → **space-type pre-flight** (every floor-area space type must
@@ -48,8 +120,10 @@ schedules and occupancy/receptacle loads stay identical-by-clone (8.4.3.2);
 lighting power and SHW efficiencies ARE regenerated to code on the reference.
 
 - Modes `simulate='annual' | 'sizing' | 'none'` — only `'annual'` determines.
-- `path='eui'` (2025 only) — the 8.4.4 archetype-EUI path via
-  `necb/editions/necb2025/eui_archetypes.py`. Areas are COMPUTED from the
+- `path='eui'` (2025 only) — the 8.4.4 archetype-EUI path, reached through the
+  edition's `behaviours.archetype_eui_path` binding, never by importing
+  `necb/editions/necb2025/eui_archetypes.py`; an edition that binds nothing
+  has no such path. Areas are COMPUTED from the
   model per 8.4.4.1.(3), unmapped area pro-rata per (4); <90% coverage or
   HDD ≥ 9000 HARD-REFUSE.
   The proposed is CHECKED against Table 8.4.4.2 and, when non-conformant,
@@ -95,25 +169,60 @@ learns *why* we read the article that way.
 - `step='coverage'` entries are deliberately untagged (manifest boilerplate
   would swamp the appendix fire counts — why D-09 is `runtime_unwired`).
 
-## Two directories named `data` — the rule INVERTED at R6
+## Two directories named `data` — and data lives by EDITION
 
-- **`btap/codes/necb/data/`** ships in the wheel: the NECB rules manifests,
-  EUI targets and GHG factors — everything that belongs to the NECB code
-  family specifically.
+- **`btap/codes/necb/data/<code id>/`** ships in the wheel: ONE INDEPENDENT
+  SNAPSHOT PER EDITION (`necb2020/`, `necb2025/`) — that edition's manifest,
+  its seven rule files, its `tables/` and its `coverage/articles_8_4.json`.
+  Multi-edition Stage 3 moved data here from the domain directories: code
+  lives by domain, data by edition. **Nothing at runtime reads another
+  edition's files** — no `extends`, no alias, no fallback rung; a missing file
+  raises naming the edition and the path. Two editions verified identical ship
+  two byte-identical copies. `git rm -r necb2020/` is the removal operation.
+  Each manifest also carries a **checked `provenance` block** over exactly its
+  declared outputs (never itself, never `provenance/`), pinning the SOURCE side
+  as well as the result: `archived` entries retain the canonical MCP payload in
+  that edition's `provenance/`, `revision_addressable` ones name the oracle
+  revision and file. `btap-necb-coverage verify-source <code id> <file>`
+  re-checks one (0 verified, 1 mismatch, 3 not checkable here). A `copied`
+  file carries its OWN source fields; `byte_identical_to` is an annotation,
+  never a dependency.
 - **`btap/codes/data/`** holds what is code-family-NEUTRAL: `decisions.json`
-  and `coverage/`. Adding a second family must not move them again.
-- **`btap/codes/data/coverage/`** ALSO ships now — the NECB 8.4 article-text
-  caches plus `ATTRIBUTION.md`. Before R6 this material sat outside the
-  packaged files and was script-only input. It is now versioned, offline
-  reference data with a packaged read API (`btap.codes.coverage`) and a
-  console entry point (`btap-necb-coverage`). The Crown NECB text is
-  attributed and explicitly outside the LGPL that covers the code — keep
-  `ATTRIBUTION.md` beside it.
+  and `coverage/`. Adding a second family must not move them again. What is
+  left in `coverage/` is `necb_8_4_disposition.json` (one curated
+  responsibility map the generator reads ACROSS editions — putting it inside
+  `necb2025/` would make the 2020 document depend on the 2025 snapshot) and
+  `ATTRIBUTION.md` (one Crown-copyright notice covering all cached NECB text;
+  `coverage.attribution()` takes no edition). Keep them there.
+- The NECB 8.4 article text is versioned, offline reference data with a
+  packaged read API (`btap.codes.coverage`) and a console entry point
+  (`btap-necb-coverage`). The Crown NECB text is attributed and explicitly
+  outside the LGPL that covers the code.
 - The HBIX fetch that refreshes those caches stays an explicit **maintainer**
   operation. Ordinary runtime is offline.
+- **Every loader resolves through `btap.codes.necb._data_root()` at CALL
+  time**, and every cache is keyed by that root. `_set_data_root(path,
+  _testing=True)` is the TEST-ONLY hook; it is deliberately not an environment
+  variable, because a production override would let a deployed run silently
+  replace adjudicated package data. Never build a data path from
+  `Path(__file__)` in a loader again.
 
 ## Key facts / traps
 
+- **One selector, one spelling: `code="necb2020"` / `--code necb2020`**
+  (D-87). `resolve(code)` is the only way to a `Ruleset`; there is no
+  `from_edition` and no edition-string fallback. `ruleset.id` is what a
+  public argument and an audit `inputs.code` carry, `ruleset.edition` is
+  what the per-edition DATA accessors (`loads.table`, `lighting.table`,
+  `SpaceTypes.*`, `efficiency.data`, the six `rules` shims,
+  `climate.hdd18`) take as `edition=`. Passing one where the other
+  belongs raises in the registry's voice rather than reading the wrong
+  edition's data.
+- **The report renderer names the code from the report, never from a
+  literal.** `report['code_label']` ('NECB 2020') drives every heading,
+  title, declaration and Part 11 label; `sections.code_family` peels the
+  family name off it for the sentences that cite an article without an
+  edition. A second code family renders itself with no renderer edit.
 - **The CLI logic is `cli.py`; the console script is
   `btap-compliance = btap.codes.cli:main`.** `run(argv, out=, err=)` returns
   an int and never exits, so a 40-minute pipeline is testable in-process

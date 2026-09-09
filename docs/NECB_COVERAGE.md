@@ -4,14 +4,14 @@
 # NECB coverage across the Python btap package
 
 Rollup of every Python domain's NECB `article_coverage` manifest, one collapsible
-section per vintage, each in that code edition's own article numbering.
+section per edition, each in that code edition's own article numbering.
 Statuses: **implemented** / **partial** (warns every run) /
 **not_implemented** (warns every run) / **satisfied_by_clone** /
 **host_scope** (delegated to the umbrella or a sibling Python domain); entries with
 `gap_owner: "modeller"` are field/document-verified scope notes and do
 not warn (D-09, D-76). Each Python domain emits its section of this accounting into
 the shared AuditLog on every run — including the umbrella, whose manifest
-is emitted by `compliance.py#_emit_article_coverage` from the epilogue both
+is emitted by `pipeline.py#_emit_article_coverage` from the epilogue both
 compliance paths share — so nothing is silently missed.
 
 ## At a glance

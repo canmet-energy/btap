@@ -21,7 +21,7 @@ import re
 
 from btap._compat import sorted_by_name
 from btap.audit import AuditLog
-from btap.codes.necb import lighting as _lighting
+from btap.codes import resolve
 from btap.codes.necb.lighting import apply_lights as ApplyLights
 
 
@@ -30,14 +30,20 @@ def _inspect(value):
     return 'nil' if value is None else f'"{value}"'
 
 
-def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
+def reference_lighting(model, code='necb2020', daylighting=False, audit=None):
     """:param daylighting: whether the caller ALSO runs reference_daylighting
     on this model. When it does, (5)-(12) are modeled and audited there, so
     this transform stays silent about them; when it does not, the gap is
     shouted here. Defaults to False so a caller that never runs the
     daylighting transform still gets the loud gap without opting in."""
+    return _reference_lighting(model, resolve(code),
+                               daylighting=daylighting, audit=audit)
+
+
+def _reference_lighting(model, ruleset, daylighting=False, audit=None):
+    """The 8.4.x.5 lighting transform against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
-    prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'
+    prefix = ruleset.article('lighting_subsection')
 
     # HARD GATE: apply_lights silently skips space types with no NECB
     # catalog record, and the reference is a clone — so an unmatched type
@@ -47,7 +53,7 @@ def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
     # function is a human judgement (4.2.1.6.(1)(b): "most closely
     # represents the proposed use"), so no fallback value is invented here:
     # the transform refuses, loudly, before a wrong reference can exist.
-    unmatched = ApplyLights.unmatched_space_types(model, vintage)
+    unmatched = ApplyLights._unmatched_space_types(model, ruleset)
     if unmatched:
         pairs = [f"'{u['name']}' [{_inspect(u['building_type'])}, {_inspect(u['space_type'])}]"
                  for u in unmatched]
@@ -58,18 +64,19 @@ def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
                        'reference lighting allowance cannot be established for it',
                        article=f"{prefix}.5.(1); 4.2.1.6.")
         raise ValueError(
-            f"reference lighting ABORTED: {len(unmatched)} space type(s) have no NECB {vintage} catalog "
+            f"reference lighting ABORTED: {len(unmatched)} space type(s) have no NECB {ruleset.edition} catalog "
             f"record, so the {prefix}.5.(1) interior lighting allowance cannot be established: "
             f"{'; '.join(pairs)}. Tag the model with NECB space functions "
             '(btap.codes.necb.loads assign_space_types, or correct standardsBuildingType/standardsSpaceType) — '
             'proceeding would silently keep the proposed lighting power in the reference.')
 
-    ApplyLights.apply_lights(model, vintage=vintage, lights_type='NECB_Default', audit=audit)
+    ApplyLights._apply_lights(model, ruleset, lights_type='NECB_Default',
+                              audit=audit)
     audit.decision('lighting_reference',
                    'reference interior lighting set to the Part 4 allowance (space-type LPDs)',
                    article=f"{prefix}.5.(1)")
 
-    _apply_dwelling_rule(model, vintage, prefix, audit)
+    _apply_dwelling_rule(model, ruleset, prefix, audit)
     audit.info('lighting_reference',
                'occupancy/personal-control factors applied via the sensor-schedule synthesis '
                '(schedule modulation of the Table 4.3.2.10 factors — legacy NECB2015+ interpretation '
@@ -86,9 +93,9 @@ def reference_lighting(model, vintage='2020', daylighting=False, audit=None):
     return audit
 
 
-def _apply_dwelling_rule(model, vintage, prefix, audit):
+def _apply_dwelling_rule(model, ruleset, prefix, audit):
     """8.4.4.5.(2): dwelling units at 5 W/m2."""
-    lpd = float(_lighting.rules(vintage)['dwelling_unit_lpd_w_per_m2'])
+    lpd = float(ruleset.rules("lighting")['dwelling_unit_lpd_w_per_m2'])
     changed = 0
     for space_type in sorted_by_name(model.getSpaceTypes()):
         optional = space_type.standardsSpaceType()

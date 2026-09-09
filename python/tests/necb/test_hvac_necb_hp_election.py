@@ -118,13 +118,13 @@ class TestNecbHpElectionWiring(unittest.TestCase):
                   'zones': zone_data}
 
         audit = AuditLog()
-        result = hvac.reference_hvac(model, vintage='2020', audit=audit, proposed_annual=annual)
+        result = hvac.reference_hvac(model, code='necb2020', audit=audit, proposed_annual=annual)
         hp = next((a for a in result.assignments if a.reference_system == 'hp'), None)
         self.assertIsNotNone(hp, 'the ASHP proposed redirects to the hp reference')
         self.assertEqual('electric', hp.energy_type,
                          'annual election (electric baseboards dominate) overrides the '
                          'structural gas proxy')
-        without = hvac.reference_hvac(self.load_and_build(), vintage='2020', audit=AuditLog())
+        without = hvac.reference_hvac(self.load_and_build(), code='necb2020', audit=AuditLog())
         proxy = next(a for a in without.assignments if a.reference_system == 'hp')
         self.assertEqual('gas', proxy.energy_type,
                          'control: the structural proxy elects gas without annual data')

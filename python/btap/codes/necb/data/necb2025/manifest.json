@@ -1,0 +1,719 @@
+{
+  "id": "necb2025",
+  "family": "necb",
+  "edition": "2025",
+  "label": "NECB 2025",
+  "articles": {
+    "reference_subsection": "8.4.5",
+    "lighting_subsection": "8.4.5",
+    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)"
+  },
+  "literal_remaps": {
+    "8.4.4.": "8.4.5."
+  },
+  "path": "btap.codes.necb.path",
+  "behaviours": {
+    "archetype_eui_path": "btap.codes.necb.editions.necb2025.eui_archetypes",
+    "part11_ghg": "btap.codes.necb.editions.necb2025.part11_ghg"
+  },
+  "rules": {
+    "umbrella": "necb_rules.json",
+    "envelope": "envelope_rules.json",
+    "hvac": "reference_rules.json",
+    "hvac_efficiencies": "efficiencies.json",
+    "lighting": "lighting_rules.json",
+    "loads": "loads_rules.json",
+    "shw": "shw_rules.json"
+  },
+  "tables": [
+    "tables/space_types.json",
+    "tables/schedules.json",
+    "tables/led_lighting.json",
+    "tables/exterior_lighting.json",
+    "tables/table_c1.json",
+    "tables/daylighting_controls_4_2_1_6.json",
+    "tables/lpd_building_types.json",
+    "tables/lpd_space_functions.json"
+  ],
+  "coverage_text": "coverage/articles_8_4.json",
+  "eui_targets": "eui_targets.json",
+  "ghg_factors": "ghg_factors.json",
+  "provenance": {
+    "necb_rules.json": {
+      "source": "self:btap.codes.compliance Part 8 Section 8.4 coverage declaration",
+      "request": null,
+      "source_revision": null,
+      "source_sha256": null,
+      "extractor": "manual (maintainer-authored coverage declaration)",
+      "retrieved": "2026-07-22",
+      "method": "transcribed",
+      "source_verification": "manual",
+      "note": "As for 2020, with this edition's numbering: the reference-building subsection is 8.4.5 and 8.4.4 is the new Energy Use Intensity path. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
+      "result_sha256": "f66564420f5599ac83bb0392bd34676a7d047fb66d0d54e65dd991b9966dd184"
+    },
+    "envelope_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.3"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.2.4"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "3.2.3.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.1.1.7"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "3.2.1.4"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.3"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.4"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "97d6344c91d3ba1fac0b0d7e04df9e70cc50e4ea6e687de1aa785859a06a9f38",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "2025 splits the door requirements out into Table 3.2.2.4. All values were verified identical to the 2020 snapshot (the door table equals the 2020 door row) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). Performance-path articles renumbered 8.4.4.x to 8.4.5.x.",
+      "result_sha256": "23e8e964566e368dda4bfee5dc06487980edf654a2ffafdf5406d6db3bb12290"
+    },
+    "reference_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.7.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.5.13"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.6"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.7"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.8"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.9"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.10"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.13"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.14"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.5.18"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "78c9c86d756357d1cc9c1c17e1c421270ca58db52fc2e1338189409ed793656a",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "2025 renumbered the performance path: the reference-building rules moved from Subsection 8.4.4 to 8.4.5 and the part-load curves to 8.4.6. All rule values were verified identical to the 2020 snapshot; only the citations differ, plus one wording change (the supply-fan rule now reads HVAC systems 1 to 5).",
+      "result_sha256": "82e058d7af706b38d540c594302e4af2ea3dafb08c8790f44bf0e45336168876"
+    },
+    "efficiencies.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-G"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-I"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-K"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-M"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-N"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.1.-O"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "5.2.12.2"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "0b1a844e239ad721c8ec3714bc5b62833530436086b021cb72fea3d445dfdbb3",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "The archived set is the 2025 letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). Real 2025 change: split-system heat-pump heating HSPF 7.4 -> 7.8. The performance CURVES in this file have no 2025 code source: they are the vendored legacy NECB curves (see the 2020 snapshot's oracle entry) and are not covered by source_sha256.",
+      "result_sha256": "0f0979506931e01cd0c3f00b811bbe1a61f0dba2206cdfc03110154db915c5e6"
+    },
+    "lighting_rules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/lighting.rb",
+          "sha256": "e91f8885ef4f620bd2525b3364d558cfb327ef7fd22aea246a219d4408d7ca5a"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/necb_2017.rb",
+          "sha256": "f4e311d8921eb713a6bd53dfdda38ac485d80d4fad2ede9f9657b4f267d11089"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "4812c1c506f012a528ee32999696a7a09d5e3a6a4dca8f439db59864f3855a12",
+      "extractor": "manual (constants transcribed from the pinned oracle)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "revision_addressable",
+      "note": "The three constants this file carries are the same legacy-derived values as the 2020 snapshot's (verified equal while writing this block); only the article_coverage prose differs, which is why the file is not byte-identical to 2020's. NECB 2025 Table 4.2.1.6 was transcribed in full into tables/lpd_space_functions.json — 162 exact name matches against the 2020 space-type records with ZERO LPD differences — and has its own archived entry. dwelling_unit_lpd_w_per_m2 = 5.0 is code text (8.4.5.5.(2)) and is not covered by source_sha256.",
+      "result_sha256": "f5a0b970b2d385506f56c74d3cf687fd41d9c504289d4ddb28a8880f1e6bd990"
+    },
+    "loads_rules.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "A-8.4.3.2.(1)(b)-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "A-8.4.3.2.(2)-B"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "3812e0f203f97ee76b2d3231aa98582fe1b6476fbafa8a97b8cf3f21f0201b01",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "Article 8.4.3.2 was reorganized into clauses in 2025 and the schedule tables renumbered A-8.4.3.2.(1)-X -> A-8.4.3.2.(1)(b)-X; the values are identical to 2020 (all 89 space functions compared row by row). This file carries only the numbering and the coverage manifest.",
+      "result_sha256": "debe18c034d00d6992b2dbcae8ed349b1392b155967f4e4d5c2da2f755161bdc"
+    },
+    "shw_rules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/service_water_heating.rb",
+          "sha256": "979436e237d1a7e2c13e9b831852ba4fa57577269931e73c8088232361ca6464"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/service_water_heating.rb",
+          "sha256": "7e7a9c078938052fb0b3a1bc58c25a078a4ac6ef20e7c210d32f079cd3f62321"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "00e476ddd9e4a03dde648c87878402398105fd94d5c87d7f8de569ea67cda2f0",
+      "extractor": "manual (algorithm parameters transcribed from the pinned oracle)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "revision_addressable",
+      "note": "NECB 2025 Table 6.2.2.1 was retrieved in full via the MCP and compared to 2020: every formula this package implements is identical, so this edition's parameters are the same legacy-derived values, with the citations renumbered (8.4.5.20, 8.4.6.9). The one substantive 2025 change — storage-type heat-pump water heaters, EF >= 2.1 -> UEF >= 2.23 — is an equipment class this package does not model and is recorded in the file. The printed-table comparison is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
+      "result_sha256": "0b385e0acfecd2364f3ea4acc8ce25b2aab79c77e4a1197480e301f633d8dd81"
+    },
+    "tables/space_types.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/space_types.json",
+          "sha256": "66f0ab94c5ce4b43939eeb8d6fdbe213371d37e6f3f5d6dd14a2c4ab3a569ea6"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/space_types.json",
+          "sha256": "1598980860dbbb4ed85cb31002790e98acd3cf1c0ad46f716c82e8d39bd92dab"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/data/space_types.json",
+          "sha256": "53039aec90c40bc6927d06a0b1e293ccafcbfb8823c8e1cc068aa96e122c6664"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/data/space_types.json",
+          "sha256": "76b75d5e41c6ce43c43d0b67e241bf539c60c7ea8a4bce92946b0d534fd008bf"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "e71d06b3a362072217b06a2e35a5aa82a8846b495432a3bb504b0733dddebc19",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/space_types.json",
+      "note": "NECB 2025 Table A-8.4.3.2.(2)-B was retrieved in full and compared row by row against 2020 — all 89 space functions identical in occupant density, receptacle load, SWH load, schedule letter and illuminance — so this edition ships its own copy of the same retained merge rather than aliasing 2020's file. The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json and the remaining 22 differ only by keys inherited from the earlier vintages. Units are IP as in legacy.",
+      "result_sha256": "2487b3c0cc2875fcd20ce78b21d8a5b680ff6ed8ddcb59443d61723e1b2a5388"
+    },
+    "tables/schedules.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/schedules.json",
+          "sha256": "a01d01275a9063559d57174609c05ff77401043207eef1ae3a3c837d57c6e747"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/schedules.json",
+          "sha256": "32ebad859d32dae979014fa22c37206fc16551d09004a8623346035cc4021c9b"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "523279226b66461f102f6792c4b1465c6cadffc62d8968a159d209d43f085667",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/schedules.json",
+      "note": "NECB 2025 renumbers the schedule tables to A-8.4.3.2.(1)(b)-A..K; set A was cell-verified identical to 2020's A-8.4.3.2.(1)-A, so this edition ships its own copy of the same retained source rather than aliasing 2020's file. NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's: checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against printed Table A-8.4.3.2.(1)-A via the MCP (see loads_rules.json).",
+      "result_sha256": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47"
+    },
+    "tables/led_lighting.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": [
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2011/data/led_lighting_data.json",
+          "sha256": "e5fca5ebc6613d78c2cf93a87c29c18f4c7bd96d3564959de1e35801cdade151"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2015/data/led_lighting_data.json",
+          "sha256": "4dff01e4e42fec44015b6f9d7c8230a9a62760c91df4f822e0e53646211fb79a"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2017/data/led_lighting_data.json",
+          "sha256": "5b3125bcc9e8fe70bf4cb2c5566b181e78730d3142dbbca918a0335382e8f704"
+        },
+        {
+          "path": "lib/openstudio-standards/standards/necb/NECB2020/data/led_lighting_data.json",
+          "sha256": "46beeed60cd3f6fd37d29dbad21df6c60d4921059e6efb203be4be244b71ab8c"
+        }
+      ],
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "1ebe86f4ecbfc3903badf14c7c3a6f7c4c340a66c7adf07c951c6016c2d10a90",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/led_lighting.json",
+      "note": "The LED alternative table is legacy data with no 2025 counterpart in the code; this edition ships its own copy of the same retained merge. The merged legacy led_lighting_data table (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json.",
+      "result_sha256": "cbcdbe4d3010cf6f14af3c63b23e3973fe8bd535db02b90e184df1f38be07bc4"
+    },
+    "tables/exterior_lighting.json": {
+      "source": "mcp:necb:2020",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-B"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-C"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-D"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2020",
+          "division": "B",
+          "table_number": "4.2.3.1.-E"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "ccb9cdeec56cf7f3d8b09b0dd1307f2ca5badd19d295fa74dd8ab068823dfa8d",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "archived",
+      "byte_identical_to": "necb2020/tables/exterior_lighting.json",
+      "note": "NECB 2025 Tables 4.2.3.1.-A..-E were diffed value-for-value against 2020's (2026-08-02, D-61 amendment): identical but for m2 unicode cosmetics inside 2025 cells, so this edition ships its own copy of the 2020 transcription and the archived payload travels with it. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61), and the 2025 edition's five tables were diffed value-for-value against these (identical but for m2 unicode cosmetics). Table -C rows other than facades are merged cells in the source extraction and were transcribed with their applicable zones.",
+      "result_sha256": "09b61ee9068fcc3775fd0e299ec9835b311c89b78f199ac65942831d3c3983f1"
+    },
+    "tables/table_c1.json": {
+      "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "request": {
+        "path": "lib/openstudio-standards/standards/necb/NECB2011/data/necb_2015_table_c1.json"
+      },
+      "source_revision": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+      "source_sha256": "8beb548fcc3df2818fd7380da2482287f05be761c76ba59bf0b635ff9455a59e",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-12",
+      "method": "copied",
+      "source_verification": "revision_addressable",
+      "byte_identical_to": "necb2020/tables/table_c1.json",
+      "note": "NECB 2025 Table C-1 (680 rows) exists on the MCP as a future refresh source; this edition ships its own copy of the corrected 2015-lineage table the nearest-city HDD lookup runs on, and the seven corrected British Columbia values were read from the code for BOTH editions. Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values the 2020/2025 editions revised (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
+      "result_sha256": "4e07564e39efc33c3b11b89c1f05119d63f56467e8d1c3cb9027a054e1d88fdd"
+    },
+    "tables/daylighting_controls_4_2_1_6.json": {
+      "source": "mcp:necb:2020",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2020",
+        "division": "B",
+        "table_number": "4.2.1.6"
+      },
+      "source_revision": null,
+      "source_sha256": "b23d91540c87abcd2a9c269674bf99ef4cf46e6dbc11b32233a6179cc35421b1",
+      "extractor": "manual (this edition's copy of the same retained source artifact)",
+      "retrieved": "2026-07-30",
+      "method": "copied",
+      "source_verification": "archived",
+      "byte_identical_to": "necb2020/tables/daylighting_controls_4_2_1_6.json",
+      "note": "The nine control columns of Table 4.2.1.6 agree exactly between the 2020 and 2025 editions — 0 differing cells of 909, asserted at generation time — so this edition ships its own byte-identical copy and the archived 2020 payload travels with it. Identical today is a finding about two snapshots, never a dependency between them. Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The 2025 edition's own 4.2.1.6 payload was compared at generation time — 0 differing cells of 909 — which is why the two editions ship byte-identical files; that is a finding, not a dependency.",
+      "result_sha256": "ed8fee6ede317df15a86be829427f21cecedde63e80bdb8ad067dfab671705dc"
+    },
+    "tables/lpd_building_types.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "table_number": "4.2.1.5"
+      },
+      "source_revision": null,
+      "source_sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Table 4.2.1.5, the building-type method LPD in W/m2.",
+      "result_sha256": "99503854353164ebaa7a55dd82edb7ace2d17d4f36a17e241516d67d2ddf9517"
+    },
+    "tables/lpd_space_functions.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_table",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "table_number": "4.2.1.6"
+      },
+      "source_revision": null,
+      "source_sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Table 4.2.1.6 in full: LPD in W/m2 plus the per-row 4.2.2.1 lighting-control requirement matrix new in 2025 (X = required, A/B = alternative groups). Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "268c4a38d794d7e4c94b61af703c691482c88d2986e451761c29bfab2a72f839"
+    },
+    "coverage/articles_8_4.json": {
+      "source": "mcp:necb:2025",
+      "request": {
+        "tool": "get_section",
+        "code": "necb",
+        "edition": "2025",
+        "division": "B",
+        "include_sentences": false,
+        "section_numbers": [
+          "8.4.1.1",
+          "8.4.1.2",
+          "8.4.1.3",
+          "8.4.1.4",
+          "8.4.1.5",
+          "8.4.2.1",
+          "8.4.2.2",
+          "8.4.2.3",
+          "8.4.2.4",
+          "8.4.2.5",
+          "8.4.2.6",
+          "8.4.2.7",
+          "8.4.2.8",
+          "8.4.2.9",
+          "8.4.2.10",
+          "8.4.2.11",
+          "8.4.2.12",
+          "8.4.3.1",
+          "8.4.3.2",
+          "8.4.3.3",
+          "8.4.3.4",
+          "8.4.3.5",
+          "8.4.3.6",
+          "8.4.3.7",
+          "8.4.3.8",
+          "8.4.3.9",
+          "8.4.4.1",
+          "8.4.4.2",
+          "8.4.5.1",
+          "8.4.5.2",
+          "8.4.5.3",
+          "8.4.5.4",
+          "8.4.5.5",
+          "8.4.5.6",
+          "8.4.5.7",
+          "8.4.5.8",
+          "8.4.5.9",
+          "8.4.5.10",
+          "8.4.5.11",
+          "8.4.5.12",
+          "8.4.5.13",
+          "8.4.5.14",
+          "8.4.5.15",
+          "8.4.5.16",
+          "8.4.5.17",
+          "8.4.5.18",
+          "8.4.5.19",
+          "8.4.5.20",
+          "8.4.6.1",
+          "8.4.6.2",
+          "8.4.6.3",
+          "8.4.6.4",
+          "8.4.6.5",
+          "8.4.6.6",
+          "8.4.6.7",
+          "8.4.6.8",
+          "8.4.6.9"
+        ]
+      },
+      "source_revision": null,
+      "source_sha256": "b834e80d0bcfe754f13343985c366dd3456ae7f58319e66c51736c239fd7ab57",
+      "extractor": "fetch_necb_8_4_text.rb@9d69093",
+      "retrieved": "2026-07-22",
+      "method": "generated",
+      "source_verification": "archived",
+      "note": "THE CACHE IS THE RETAINED ARTIFACT, so source_sha256 == result_sha256 and no separate payload is stored: this document is the canonicalised output of one get_section call per Section 8.4 article, with page furniture stripped and each article parsed into a sentence/clause tree under strict sanity checks. What is NOT retained is the raw per-article JSON-RPC result; re-fetching reproduces the cache, not a byte-identical payload set. Written by the Ruby fetcher at 9d69093 (2026-07-22), which the current python/scripts/fetch_necb_8_4_text.py ports with cache-schema parity; the Ruby original retired with the gems under D-84 and is reachable at that commit.",
+      "result_sha256": "b834e80d0bcfe754f13343985c366dd3456ae7f58319e66c51736c239fd7ab57"
+    },
+    "eui_targets.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.4.2"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.4.1"
+        },
+        {
+          "tool": "get_section",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "section_number": "8.4.4.2"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "2c7ee2a7e41f28e6647fa7aa9919e4d32bf0c1a61dd3030312615e36293c6216",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "The NEW 2025 compliance path inserted at Subsection 8.4.4 (the 2020 reference-building articles renumbered to 8.4.5): archetype EUI targets, the applicability thresholds of 8.4.4.1, and the Table 8.4.4.2 receptacle defaults that fix the process-load excess. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "e805c7a068db98077c6ce782dbc43f4d9918ca6ccfc5e758467aabd267bf7b41"
+    },
+    "ghg_factors.json": {
+      "source": "mcp:necb:2025",
+      "request": [
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.1.1"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-A"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "11.4.2.1.-B"
+        }
+      ],
+      "source_revision": null,
+      "source_sha256": "8b3b9890b7805c167cd8648fa0c37ce4cbe97b53bbe895221d74b8e51deb5721",
+      "extractor": "manual (transcription from the archived MCP payloads)",
+      "retrieved": "2026-07-12",
+      "method": "transcribed",
+      "source_verification": "archived",
+      "note": "NECB 2025 Part 11 operational GHG emissions: performance levels A-F and the provincial electricity / utility gas / fuel emission factors. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61).",
+      "result_sha256": "feb064c470bd394e8b2e253f9822a0baa2e46676e76bbd0829aa9ff5a444fe00"
+    }
+  }
+}

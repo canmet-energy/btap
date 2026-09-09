@@ -10,31 +10,37 @@ from __future__ import annotations
 import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
-from btap.codes.necb.hvac.reference import optional_flow, rules
+from btap.codes import resolve
+from btap.codes.necb.hvac.reference import optional_flow
 
 
-def apply_energy_recovery(model, vintage='2020', *, hdd, audit=None):
+def apply_energy_recovery(model, code='necb2020', *, hdd, audit=None):
     """8.4.4.19 (2020) / 8.4.5.19 (2025): where Subsection 5.2.10 applies, the
     reference system shall be modeled with energy recovery, used to preheat
     the outside air — via NECB 2020/2025 Tables 5.2.10.1.-A/-B: the
     airflow-threshold trigger, evaluated POST-SIZING (it needs the sized
     supply and minimum-OA flows), called by the umbrella after the reference
     sizing run. Replaces the NECB 2011 150 kW exhaust-heat-content trigger
-    previously implemented here — wrong vintage, and divergent exactly where
+    previously implemented here — wrong edition, and divergent exactly where
     it matters: a small high-%OA system is "R (required at all flow rates)"
     under 2020 while the 2011 formula waves it through (permissive).
     Idempotent: loops already carrying an HX are skipped.
 
     :param model: SIZED openstudio.model.Model (needs supply/OA flows; modified in place)
-    :param vintage: NECB vintage ('2020' or '2025')
+    :param code: the code id ('necb2020' or 'necb2025')
     :param hdd: heating degree-days below 18 degC for the location
     :param audit: AuditLog or None (a new one is created if None)
     :return: AuditLog — carrying the per-loop 5.2.10.1 determinations
     """
+    return _apply_energy_recovery(model, resolve(code),
+                                  hdd=hdd, audit=audit)
+
+
+def _apply_energy_recovery(model, ruleset, *, hdd, audit=None):
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
-    rule = rules(vintage).get('energy_recovery')
+    rule = ruleset.rules("hvac").get('energy_recovery')
     if rule is None:
         return audit
 

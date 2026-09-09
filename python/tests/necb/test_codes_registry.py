@@ -1,7 +1,7 @@
 """Stage 0 item 0.3b (docs/NECB_MULTI_EDITION_PLAN.md): a literal
 ``(edition, site) -> article`` table for the 15 article-renumbering sites
 surveyed across the domain modules — each a
-``prefix = '8.4.5' if str(vintage) == '2025' else '8.4.4'`` ternary (or, for
+``prefix = '8.4.5' if str(edition) == '2025' else '8.4.4'`` ternary (or, for
 ``loads/apply.py``, a data-driven ``rules['schedule_table_prefix']``) that
 feeds an f-string ``article=`` on an :class:`btap.audit.AuditLog` entry.
 
@@ -14,21 +14,26 @@ The 15 sites (verified against the code, not against this file's own
 literals — computing the expected value the same way it is produced in
 product code would be circular):
 
- 1. ``btap/codes/compliance.py:321``               ``prefix``
- 2. ``btap/codes/necb/envelope/reference.py:57``         ``prefix``
- 3. ``btap/codes/necb/hvac/efficiency.py:280``           ``prefix`` (staging)
- 4. ``btap/codes/necb/hvac/efficiency.py:547``           ``prefix`` (fan curve)
- 5. ``btap/codes/necb/hvac/efficiency.py:572``           ``prefix`` (pump rules)
- 6. ``btap/codes/necb/hvac/efficiency.py:845``           ``hp_article``
- 7. ``btap/codes/necb/hvac/reference.py:607``            ``prefix`` (terminal/secondary split)
- 8. ``btap/codes/necb/hvac/reference.py:929``            ``prefix`` (air economizer)
- 9. ``btap/codes/necb/hvac/reference.py:996``            ``prefix`` (water economizer)
-10. ``btap/codes/necb/hvac/reference.py:1220``           ``table``/``article`` (humidification)
-11. ``btap/codes/necb/hvac/reference.py:1351``           ``prefix`` (DCV)
-12. ``btap/codes/necb/lighting/reference.py:40``         ``prefix``
-13. ``btap/codes/necb/lighting/reference_daylighting.py:60``  ``prefix``
-14. ``btap/codes/necb/shw/reference.py:22``              ``prefix``
-15. ``btap/codes/necb/loads/apply.py:78``                ``rules['schedule_table_prefix']``
+ 1. ``btap/codes/necb/path.py#build_reference``                       ``prefix`` (lighting_subsection)
+ 2. ``btap/codes/necb/envelope/reference.py#apply``                   ``prefix``
+ 3. ``btap/codes/necb/hvac/efficiency.py#apply_staging``              ``prefix``
+ 4. ``btap/codes/necb/hvac/efficiency.py#_apply_fan_power_curve``     ``prefix``
+ 5. ``btap/codes/necb/hvac/efficiency.py#_apply_pump_rules``          ``prefix``
+ 6. ``btap/codes/necb/hvac/efficiency.py#_align_heat_pump_heating_capacity``  ``hp_article`` (heat_pump_aux_fuel)
+ 7. ``btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split``  ``prefix``
+ 8. ``btap/codes/necb/hvac/reference.py#_apply_economizers``          ``prefix``
+ 9. ``btap/codes/necb/hvac/reference.py#_apply_water_economizer``     ``prefix``
+10. ``btap/codes/necb/hvac/reference.py#_rebuild_humidification``    ``prefix`` (Table {prefix}.7.-B)
+11. ``btap/codes/necb/hvac/reference.py#_apply_dcv``                 ``prefix``
+12. ``btap/codes/necb/lighting/reference.py#reference_lighting``      ``prefix`` (lighting_subsection)
+13. ``btap/codes/necb/lighting/reference_daylighting.py#apply``       ``prefix`` (lighting_subsection)
+14. ``btap/codes/necb/shw/reference.py#reference_shw``               ``prefix``
+15. ``btap/codes/necb/loads/apply.py#_apply_ventilation``            edition-invariant citation (the
+    ``schedule_table_prefix`` data key was a dead parameter, removed in Stage 2)
+
+Since Stage 2 each ``prefix`` is ``resolve(code).article(key)``
+from the edition manifest — no ternary remains — and this table is what
+proves the data says exactly what the ternaries used to.
 
 Site 15 is a genuine finding: the ``prefix`` local in ``apply_loads`` is
 threaded into ``_apply_ventilation`` as a parameter but that function's own
@@ -100,6 +105,10 @@ EXPECTED = {
 
 SITE_IDS = sorted({site for _edition, site in EXPECTED})
 
+#: (edition, code id) pairs. EXPECTED is keyed by the EDITION the article
+#: numbering belongs to; the product API selects by code id (Stage 7).
+EDITION_CODES = (("2020", "necb2020"), ("2025", "necb2025"))
+
 
 def tagged_space_type(model, building_type, space_type):
     """A bare SpaceType tagged with real NECB catalog names, no spaces attached
@@ -111,7 +120,7 @@ def tagged_space_type(model, building_type, space_type):
     return st
 
 
-def windowed_office_model(vintage):
+def windowed_office_model(code):
     """A raw-fixture proposed model tagged office-everywhere, windowed, with
     lights applied — the minimal fixture reference_daylighting needs (ported
     from tests/necb/test_lighting_reference_daylighting.py's helper)."""
@@ -120,11 +129,11 @@ def windowed_office_model(vintage):
     model = load_raw_fixture()
     map_ = {s.nameString(): ["Space Function", "Office enclosed > 25 m2"]
             for s in model.getSpaces()}
-    loads.assign_space_types(model, map_, vintage=vintage)
+    loads.assign_space_types(model, map_, code=code)
     for w in model.getSurfaces():
         if w.outsideBoundaryCondition() == "Outdoors" and w.surfaceType() == "Wall":
             w.setWindowToWallRatio(0.4)
-    lighting.apply_lights(model, vintage=vintage)
+    lighting.apply_lights(model, code=code)
     return model
 
 
@@ -151,12 +160,12 @@ class TestCodesRegistry(unittest.TestCase):
         from tests.necb.support import proposed_with_hvac, zone_types_for
 
         site = "compliance.reference_daylighting_gap"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 building = {"storeys": 1, "zone_types": zone_types_for(load_raw_fixture()),
                            "winter_design_temp_c": -20}
                 result = performance_compliance(
-                    proposed_with_hvac(), vintage=edition, simulate="none", hdd=HDD,
+                    proposed_with_hvac(), code=code, simulate="none", hdd=HDD,
                     building=building,
                     run_dir=tempfile.mkdtemp(prefix="codes-registry-compliance-"))
                 entry = find_entry(
@@ -172,11 +181,11 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb import envelope
 
         site = "envelope.reference.prescriptive"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = load_raw_fixture()
                 audit = AuditLog()
-                envelope.reference_envelope(model, vintage=edition, hdd=HDD, audit=audit)
+                envelope.reference_envelope(model, code=code, hdd=HDD, audit=audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: e["action"] == "reference envelope meets prescriptive Section 3.2")
@@ -193,7 +202,7 @@ class TestCodesRegistry(unittest.TestCase):
 
         site = "hvac.efficiency.staging_dx_cooling"
         gas_psz = "PSZ RTU Gas and DX Coils and Electric Baseboard"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = load_fixture()
                 zones = sorted_zones(model)
@@ -205,7 +214,7 @@ class TestCodesRegistry(unittest.TestCase):
                 for i, s in enumerate(coil.stages()):
                     s.setGrossRatedTotalCoolingCapacity(100_000.0 * (i + 1) / n)
                 audit = AuditLog()
-                efficiency.apply_staging(model, hvac.rules(edition), edition, audit)
+                efficiency.apply_staging(model, hvac.rules(edition), code, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: e["action"].startswith("DX cooling modelled as"))
@@ -217,7 +226,7 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.fan_power_curve"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 always_on = model.alwaysOnDiscreteSchedule()
@@ -226,7 +235,7 @@ class TestCodesRegistry(unittest.TestCase):
                 fan.setPressureRise(1000.0)
                 fan.setFanTotalEfficiency(0.6)
                 audit = AuditLog()
-                efficiency.apply(model, vintage=edition, audit=audit)
+                efficiency.apply(model, code=code, audit=audit)
                 entry = find_entry(audit.entries, lambda e: "VAV fan power curve set" in e["action"])
                 self.assertIsNotNone(entry, f"{edition}: VAV fan power curve decision emitted")
                 self.assertEqual(EXPECTED[(edition, site)], entry["article"])
@@ -236,7 +245,7 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.pump_riding_curve"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 loop_ = openstudio.model.PlantLoop(model)
@@ -245,7 +254,7 @@ class TestCodesRegistry(unittest.TestCase):
                 pump.setRatedFlowRate(0.5)
                 loop_.sizingPlant().setLoopType("Heating")
                 audit = AuditLog()
-                efficiency.apply(model, vintage=edition, audit=audit)
+                efficiency.apply(model, code=code, audit=audit)
                 entry = find_entry(audit.entries,
                                    lambda e: "riding its curve" in e["action"])
                 self.assertIsNotNone(entry, f"{edition}: pump riding-curve decision emitted")
@@ -256,7 +265,7 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import efficiency
 
         site = "hvac.efficiency.heat_pump_capacity_alignment"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 loop_ = openstudio.model.AirLoopHVAC(model)
@@ -267,7 +276,7 @@ class TestCodesRegistry(unittest.TestCase):
                 cool.setRatedTotalCoolingCapacity(12_000.0)
                 heat.setRatedTotalHeatingCapacity(5_000.0)
                 audit = AuditLog()
-                efficiency.apply(model, vintage=edition, audit=audit)
+                efficiency.apply(model, code=code, audit=audit)
                 entry = find_entry(audit.entries,
                                    lambda e: "pinned to cooling capacity" in e["action"]
                                    and "staged" not in e["action"])
@@ -279,13 +288,13 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.terminal_secondary_split"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 zone = openstudio.model.ThermalZone(model)
                 zone.sizingZone().setAccountforDedicatedOutdoorAirSystem(True)
                 audit = AuditLog()
-                reference._audit_terminal_secondary_split([zone], 1, edition, audit)
+                reference._audit_terminal_secondary_split([zone], 1, code, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: e["action"] == "terminal/secondary capacity split accounted at zone sizing")
@@ -297,11 +306,11 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.economizer_air"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 audit = AuditLog()
-                reference._apply_economizers(model, [], 1, edition, {}, audit)
+                reference._apply_economizers(model, [], 1, code, {}, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "economizer not applicable" in e["action"])
@@ -313,11 +322,11 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.economizer_water"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 audit = AuditLog()
-                reference._apply_water_economizer(model, 2, edition, {"water_economizer": {}}, audit)
+                reference._apply_water_economizer(model, 2, code, {"water_economizer": {}}, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "5.2.2.9 water economizer" in e["action"])
@@ -329,13 +338,13 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.humidification"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 captured = {"Zone1": {"air_loop": "AHU1", "kind": "gas",
                                       "name": "Humidifier1", "scheduled_setpoint": None}}
                 audit = AuditLog()
-                reference._rebuild_humidification(model, captured, {"humidification": {}}, edition, audit)
+                reference._rebuild_humidification(model, captured, {"humidification": {}}, code, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "NO reference loop to carry" in e["action"])
@@ -347,7 +356,7 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         site = "hvac.reference.dcv"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 air_loop = openstudio.model.AirLoopHVAC(model)
@@ -355,7 +364,7 @@ class TestCodesRegistry(unittest.TestCase):
                 oa_system = openstudio.model.AirLoopHVACOutdoorAirSystem(model, oa_controller)
                 oa_system.addToNode(air_loop.supplyInletNode())
                 audit = AuditLog()
-                reference._apply_dcv([air_loop], [], {}, edition, audit)
+                reference._apply_dcv([air_loop], [], {}, code, audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "no demand-controlled ventilation" in e["action"])
@@ -367,12 +376,12 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb import lighting
 
         site = "lighting.reference.part4_allowance"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
                 audit = AuditLog()
-                lighting.reference_lighting(model, vintage=edition, audit=audit)
+                lighting.reference_lighting(model, code=code, audit=audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "Part 4 allowance" in e["action"])
@@ -384,12 +393,12 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb import lighting
 
         site = "lighting.reference_daylighting.reflectances"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
-                proposed = windowed_office_model(edition)
+                proposed = windowed_office_model(code)
                 reference = proposed.clone(True).to_Model()
                 audit = AuditLog()
-                lighting.reference_daylighting(reference, vintage=edition, placement="all", audit=audit)
+                lighting.reference_daylighting(reference, code=code, placement="all", audit=audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: "reflectances set" in e["action"])
@@ -401,11 +410,11 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb import shw
 
         site = "shw.reference.identical_to_proposed"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 audit = AuditLog()
-                shw.reference_shw(model, vintage=edition, audit=audit)
+                shw.reference_shw(model, code=code, audit=audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: e["step"] == "shw_reference"
@@ -418,12 +427,12 @@ class TestCodesRegistry(unittest.TestCase):
         from btap.codes.necb import loads
 
         site = "loads.apply.ventilation"
-        for edition in ("2020", "2025"):
+        for edition, code in EDITION_CODES:
             with self.subTest(edition=edition):
                 model = openstudio.model.Model()
                 tagged_space_type(model, "Space Function", "Office enclosed > 25 m2")
                 audit = AuditLog()
-                loads.apply_loads(model, vintage=edition, audit=audit)
+                loads.apply_loads(model, code=code, audit=audit)
                 entry = find_entry(
                     audit.entries,
                     lambda e: e["action"] == "ventilation outdoor air set")

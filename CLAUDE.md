@@ -28,11 +28,18 @@ unless a moved link itself is wrong.
   `btap.codes` → `btap.costing` → `btap.modeling` → `btap.audit`, with
   `btap.simulation` beside and depending only on audit. Import-linter enforces
   this D-77 contract.
-- **Code families live under `btap.codes`.** `btap.codes.necb` holds the five
-  NECB rule domains, the NECB rule tables in `btap/codes/necb/data/`, and
+- **Code families live under `btap.codes`; data lives by EDITION.**
+  `btap.codes.necb` holds the five NECB rule domains and
   `btap/codes/necb/editions/necb2025/` for what exists in one edition only.
-  Code-family-neutral data — `decisions.json` and the Section 8.4 caches —
-  sits in `btap/codes/data/`.
+  Every edition is an independent, complete snapshot under
+  `btap/codes/necb/data/<code id>/` (rule files, `tables/`,
+  `coverage/articles_8_4.json`, and the `manifest.json` that drives
+  discovery). Nothing at runtime reads another edition's files — no `extends`,
+  no alias, no fallback. Loaders resolve through
+  `btap.codes.necb._data_root()`; `_set_data_root(..., _testing=True)` is a
+  test-only hook, never an environment variable. Code-family-neutral data —
+  `decisions.json`, the Section 8.4 disposition and `ATTRIBUTION.md` — stays
+  in `btap/codes/data/`.
 - **One AuditLog schema:**
   `{step, target, action, inputs, value, article, ruling, evidence, building, level}`.
   Levels are `decision`, `info`, and `warning`; warnings are never silent.
@@ -41,6 +48,12 @@ unless a moved link itself is wrong.
   `inputs`.
 - **Audit text is case-sensitive.** Violations are SHOUTED and passes are
   lowercase because the report checklist classifier relies on that distinction.
+- **One public selector: the code id.** `performance_compliance(model, *,
+  code="necb2020", …)` and `btap-compliance --code necb2020` (D-87). Every
+  public function takes `code=`; only the per-edition DATA accessors take
+  `edition=` (`'2020'`). `vintage` is retired everywhere — argument,
+  `report.json` (`edition` + `code` + `code_label`) and audit `inputs`
+  (`code` + `edition`). An unregistered id raises `UnknownRuleset`.
 - **NECB 2020 and 2025 only.** Do not imply support for 2011–2017.
 - **Python is authoritative.** Behaviour changes are Python-only and require a
   clean-tree frozen-scenario re-freeze in the same change when outputs move.
@@ -59,6 +72,7 @@ python3 -m venv .venv
 python3 python/scripts/necb_orphan_keys.py
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
+python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_decisions_toc.py --check
 python3 python/scripts/legacy_whatsnew.py
 ```
@@ -88,8 +102,9 @@ split a uniformly implemented article merely to inflate coverage. Use
 Generated coverage documents live in `docs/`; regenerate both and review their
 diffs rather than hand-editing them.
 
-The Section 8.4 caches live under `python/btap/codes/data/coverage/` and ship in
-the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
+The Section 8.4 article caches live in each edition's snapshot at
+`python/btap/codes/necb/data/necb<edition>/coverage/articles_8_4.json` and ship
+in the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
 
 ## Verification

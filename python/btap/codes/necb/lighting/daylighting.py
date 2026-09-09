@@ -53,6 +53,7 @@ import openstudio
 
 from btap._compat import ruby_div, ruby_round, ruby_str, sorted_by_name
 from btap.audit import AuditLog
+from btap.codes import resolve
 from btap.codes.necb.lighting import daylight_control_requirement as DaylightControlRequirement
 from btap.codes.necb.lighting import daylighted_areas as DaylightedAreas
 
@@ -79,7 +80,7 @@ STEPPED_STEPS_2020 = 3  # 4.2.2.1.(11)(a)(i) / (14)(a)(i): 67% / 33% / off
 PLACEMENTS = ['all', 'necb2020', 'necb2011']
 
 
-def add_controls(model, vintage='2020', placement=None, option=None,
+def add_controls(model, code='necb2020', placement=None, option=None,
                  office_match='legacy', unknown_control_requirement='required', audit=None):
     """:param placement: 'all' | 'necb2020' | 'necb2011' — THE selection knob,
         which spaces get a sensor. 'all' (DEFAULT) = every space with exterior
@@ -106,11 +107,18 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         DaylightControlRequirement.evaluate
     :return: number of controls created
     """
-    from btap.codes.necb import loads
+    return _add_controls(model, resolve(code), placement=placement,
+                         option=option, office_match=office_match,
+                         unknown_control_requirement=unknown_control_requirement,
+                         audit=audit)
 
+
+def _add_controls(model, ruleset, placement=None, option=None,
+                  office_match='legacy', unknown_control_requirement='required',
+                  audit=None):
+    """The photocontrol placement against ONE resolved edition (Stage 6)."""
     audit = audit if audit is not None else AuditLog()
     placement = resolve_placement(placement, option, audit)
-    data_vintage = loads.data_vintage(vintage)
     created = 0
     fractions = {}
 
@@ -118,7 +126,7 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         eligible = _necb_default_spaces(model, office_match, audit)
         rule = 'NECB 2011 (legacy-exact)'
     elif placement == 'necb2020':
-        eligible, fractions = _necb2020_spaces(model, audit, unknown_control_requirement)
+        eligible, fractions = _necb2020_spaces(model, ruleset.edition, audit, unknown_control_requirement)
         rule = 'NECB 2020/2025 4.2.2.1.(10)-(15)'
     else:
         eligible = [s for s in sorted_by_name(model.getSpaces()) if _is_daylighted(s)]
@@ -133,7 +141,7 @@ def add_controls(model, vintage='2020', placement=None, option=None,
         if zone.primaryDaylightingControl().is_initialized():
             continue
 
-        setpoint = _illuminance_setpoint(space, data_vintage)
+        setpoint = _illuminance_setpoint(space, ruleset)
         if setpoint is None:
             audit.warn('daylighting',
                        'no target_illuminance_setpoint for this space type — no sensor placed',
@@ -251,7 +259,7 @@ def _zone_fraction(space, zone, controlled_area_m2):
     return max(min(controlled_area_m2 / denominator, 1.0), 0.0)
 
 
-def _necb2020_spaces(model, audit, unknown_control_requirement):
+def _necb2020_spaces(model, edition, audit, unknown_control_requirement):
     """NECB 2020/2025 4.2.2.1.(10)-(15) selection. Sidelighting and toplighting
     are evaluated INDEPENDENTLY and unioned — a space qualifies on either.
 
@@ -289,7 +297,7 @@ def _necb2020_spaces(model, audit, unknown_control_requirement):
             continue
 
         verdict = DaylightControlRequirement.evaluate(
-            space, audit=audit, unknown_default=unknown_control_requirement,
+            space, edition=edition, audit=audit, unknown_default=unknown_control_requirement,
             shading_surfaces=shading, seen=seen)
         areas = verdict['areas']
         side = verdict['sidelighting']['required']
@@ -478,7 +486,7 @@ def _is_daylighted(space):
                for sub in surface.subSurfaces())
 
 
-def _illuminance_setpoint(space, data_vintage):
+def _illuminance_setpoint(space, ruleset):
     from btap.codes.necb.loads import space_types as SpaceTypes
 
     if not space.spaceType().is_initialized():
@@ -491,7 +499,7 @@ def _illuminance_setpoint(space, data_vintage):
 
     record = SpaceTypes.find(building_type=space_type.standardsBuildingType().get(),
                              space_type=space_type.standardsSpaceType().get(),
-                             vintage=data_vintage)
+                             edition=ruleset.edition)
     if record is None:
         return None
 

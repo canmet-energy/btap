@@ -35,7 +35,7 @@ class TestE2ERun(unittest.TestCase):
         from btap.simulation import run
 
         model = attach_weather(load_raw_fixture())
-        audit = envelope.apply_prescriptive(model, vintage='2020',
+        audit = envelope.apply_prescriptive(model, code='necb2020',
                                             apply_fdwr=True, apply_srr=True)
         self.assertTrue(audit.entries)
 

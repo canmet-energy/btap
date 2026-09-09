@@ -20,6 +20,17 @@ from datetime import date
 from pathlib import Path
 
 from btap._compat import opt, ruby_round, ruby_str
+from btap.codes import code_ids, resolve
+
+#: The code edition a run selects when the caller names none. A literal is
+#: deliberate: the default must not move when a NEW edition is registered.
+DEFAULT_CODE = "necb2020"
+
+
+def family_label():
+    """The code family name for help text ('NECB'), read off the registered
+    editions rather than hardcoded — Stage 9's second family renders itself."""
+    return "/".join(sorted({resolve(c).label.split(" ")[0] for c in code_ids()}))
 
 #: Exit codes are load-bearing: "your building fails the code", "your file is
 #: not NECB-tagged" and "EnergyPlus crashed" have three different fixes, and a
@@ -106,7 +117,7 @@ def run(argv, out=None, err=None):
 
 def parse(argv, out, err):
     """:return: (options, None) or (None, early exit code)"""
-    o = {"vintage": "2020", "simulate": "annual", "report_html": True,
+    o = {"code": DEFAULT_CODE, "simulate": "annual", "report_html": True,
          "backend": "local", "report_options": {}, "necb_loads": {}}
     parser = build_parser()
     try:
@@ -115,7 +126,7 @@ def parse(argv, out, err):
         if unknown_flags:
             raise _UsageError(f"invalid option: {' '.join(unknown_flags)}")
     except argparse.ArgumentError as e:
-        # exit_on_error=False surfaces bad values (e.g. an unknown --vintage)
+        # exit_on_error=False surfaces bad values (e.g. an unknown --code)
         # as ArgumentError instead of routing them through Parser.error.
         print(f"ERROR: {e}", file=err)
         print(parser.format_help(), file=err)
@@ -164,7 +175,7 @@ def build_parser():
     p = _Parser(
         prog="btap-compliance", add_help=False, exit_on_error=False,
         usage="btap-compliance MODEL.osm --epw FILE [options]",
-        description=("NECB Part 8 performance-path compliance: runs the "
+        description=(f"{family_label()} Part 8 performance-path compliance: runs the "
                      "proposed and reference\nbuildings and reports the "
                      "8.4.1.2 determination."),
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -181,8 +192,9 @@ def build_parser():
                    help="list the weather files this install carries")
     p.add_argument("-o", "--out", dest="run_dir", metavar="DIR",
                    help="run directory (default: ./necb_run_<model>)")
-    p.add_argument("--vintage", choices=["2020", "2025"], default="2020",
-                   help="NECB vintage: 2020 or 2025 (default 2020)")
+    p.add_argument("--code", choices=code_ids(), default=DEFAULT_CODE,
+                   help=f"code edition: {' or '.join(code_ids())} "
+                        f"(default {DEFAULT_CODE})")
     p.add_argument("--storeys", type=int, metavar="N",
                    help="above-ground storey count override")
     p.add_argument("--simulate", choices=["annual", "sizing", "none"],
@@ -232,7 +244,7 @@ _HEADER_KEYS = {"project": "project_name", "address": "address",
 def _collect(o, namespace):
     """argparse namespace -> the Ruby-shaped options dict."""
     ns = vars(namespace)
-    for key in ("epw", "ddy", "hdd", "city", "run_dir", "vintage", "storeys",
+    for key in ("epw", "ddy", "hdd", "city", "run_dir", "code", "storeys",
                 "simulate", "quick", "backend", "report_html", "json", "quiet",
                 "space_type", "space_type_map", "costs_csv"):
         if ns.get(key) is not None:
@@ -250,7 +262,7 @@ def _collect(o, namespace):
 def _version():
     try:
         from importlib.metadata import version
-        return version("btap")
+        return version("canmet-btap")  # the DISTRIBUTION name, not the import name
     except Exception:
         return "dev"
 
@@ -296,7 +308,7 @@ def validate(o):
 def compliance_kwargs(o):
     """:return: (model, kwargs) — `model` is positional on
     performance_compliance, so it cannot ride in the kwargs dict."""
-    kw = {"vintage": o["vintage"], "run_dir": o["run_dir"],
+    kw = {"code": o["code"], "run_dir": o["run_dir"],
           "simulate": o["simulate"], "report_html": o["report_html"],
           "report_options": default_report_options(o)}
     if o.get("epw"):
@@ -431,7 +443,8 @@ def json_payload(result, o):
                    if e.get("level") == "warning")
     return {"compliant": result.compliant, "annual": rep.get("annual"),
             "determination": determination(result, rep),
-            "vintage": rep.get("vintage"), "hdd": rep.get("hdd"),
+            "edition": rep.get("edition"), "code": rep.get("code"),
+            "hdd": rep.get("hdd"),
             "tier": rep.get("tier"),
             "percent_of_target": rep.get("percent_of_target"),
             "proposed": slice_energy(rep.get("proposed")),
@@ -533,7 +546,7 @@ def verdict_block(result, rep):
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
     return "\n".join([
-        "", f"  VERDICT: {verdict}   (NECB {rep.get('vintage')}, Division B, "
+        "", f"  VERDICT: {verdict}   ({rep.get('code_label')}, Division B, "
             "Article 8.4.1.2)", rule])
 
 

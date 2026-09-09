@@ -19,6 +19,7 @@ from datetime import datetime
 import openstudio
 
 from btap._compat import NullAudit, sorted_by_name
+from btap.codes import resolve
 from btap.codes.necb import loads as _loads
 
 DAY_TOKENS = ['Wkdy', 'Wknd', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -29,9 +30,19 @@ _TOKEN_DAYS = {'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
                'Sun': 'Sunday'}
 
 
-def add(model, name, vintage='2020', audit=None):
+def add(model, name, code='necb2020', audit=None):
     """:param name: e.g. 'NECB-A-Occupancy'
     :return: the ruleset (or the always-on fallback)"""
+    return _add(model, name, resolve(code), audit=audit)
+
+
+def _add(model, name, edition_rules, audit=None):
+    """``edition_rules`` is this edition's :class:`btap.codes.Ruleset`. It is
+    NOT named ``ruleset`` here because the OpenStudio object this builds is a
+    ScheduleRuleset, and the domain has called that ``ruleset`` since the
+    port — one name for two unrelated things in one 30-line function is how
+    a later edit picks the wrong one. Nor ``code``, which since Stage 7 is the
+    public API's code id."""
     audit = audit if audit is not None else NullAudit()
     if name is None or str(name) == '':
         return None
@@ -41,10 +52,12 @@ def add(model, name, vintage='2020', audit=None):
     if existing is not None:
         return existing
 
-    rows = [r for r in _loads.table(vintage, 'schedules') if r['name'] == name]
+    rows = [r for r in _loads.table(edition_rules.edition, 'schedules')
+            if r['name'] == name]
     if not rows:
         audit.warn('schedules',
-                   f"no NECB {vintage} schedule data named '{name}' — falling back to Always On "
+                   f"no NECB {edition_rules.edition} schedule data named '{name}' — "
+                   'falling back to Always On '
                    '(legacy fails silently here)',
                    target=name)
         return model.alwaysOnDiscreteSchedule()

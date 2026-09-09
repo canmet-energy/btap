@@ -31,7 +31,7 @@ class TestPrescriptive(unittest.TestCase):
 
     def applied_model(self, **kwargs):
         model = load_raw_fixture()
-        audit = self.n.apply_prescriptive(model, vintage='2020', hdd=HDD, **kwargs)
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD, **kwargs)
         return model, audit
 
     def test_walls_and_roofs_hit_table_values(self):
@@ -113,7 +113,7 @@ class TestPrescriptive(unittest.TestCase):
 
         model, kiva, floor = build()
         slab_before = floor.construction().get().nameString()
-        audit = self.n.apply_prescriptive(model, vintage='2020', hdd=HDD)  # zone 5 -> strip
+        audit = self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)  # zone 5 -> strip
         self.assertEqual(slab_before, floor.construction().get().nameString(),
                          'strip zone: slab field construction untouched')
         ins = kiva.interiorHorizontalInsulationMaterial()
@@ -130,7 +130,7 @@ class TestPrescriptive(unittest.TestCase):
         self.assertTrue(any('3.2.3.3' in str(e.get('article', '')) for e in audit.entries))
 
         model8, kiva8, floor8 = build()
-        self.n.apply_prescriptive(model8, vintage='2020', hdd=8170)  # zone 8 -> full area
+        self.n.apply_prescriptive(model8, code='necb2020', hdd=8170)  # zone 8 -> full area
         full_target = 1.0 / ((1.0 / 0.379) - Constructions.film_r('floor', 'ground'))
         self.assertAlmostEqual(
             full_target,
@@ -155,7 +155,7 @@ class TestPrescriptive(unittest.TestCase):
         model, audit = self.applied_model(apply_fdwr=True, apply_srr=True)
         census = Geometry.exposed_walls(model)
         # (2000-778)/3000 = 0.4074
-        limit = self.n.max_fdwr(vintage='2020', hdd=HDD)
+        limit = self.n.max_fdwr(code='necb2020', hdd=HDD)
         self.assertAlmostEqual(limit, census['fdwr'], delta=0.03,
                                msg='windows rebuilt to the FDWR limit')
         for wall in census['walls']:
@@ -232,7 +232,7 @@ class TestPrescriptive(unittest.TestCase):
                     and s.outsideBoundaryCondition() == 'Outdoors')
         deck_before = deck.construction().get().nameString()
 
-        self.n.apply_prescriptive(model, vintage='2020', hdd=HDD)
+        self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
 
         self.assertEqual(deck_before, deck.construction().get().nameString(),
                          'attic deck is not envelope — construction untouched')
@@ -269,7 +269,7 @@ class TestPrescriptive(unittest.TestCase):
             ss.setSubSurfaceType('FixedWindow')
             ss.setConstruction(construction)
 
-        self.n.apply_prescriptive(model, vintage='2020', hdd=HDD)
+        self.n.apply_prescriptive(model, code='necb2020', hdd=HDD)
         ss = wall.subSurfaces()[0]
         new_glazing = ss.construction().get().to_Construction().get() \
             .layers()[0].to_SimpleGlazing().get()
@@ -280,7 +280,7 @@ class TestPrescriptive(unittest.TestCase):
 
     def test_unresolvable_hdd_raises(self):
         with self.assertRaises(ValueError):
-            self.n.apply_prescriptive(load_raw_fixture(), vintage='2020')
+            self.n.apply_prescriptive(load_raw_fixture(), code='necb2020')
 
 
 if __name__ == '__main__':
