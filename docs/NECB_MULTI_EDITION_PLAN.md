@@ -1801,3 +1801,36 @@ own text. R-N next.
   id and scenario field unchanged. **No numeric value moved.** The plan's
   R-N contract said `report.json` unchanged — wrong: the report carries the
   coverage sentences in `warnings[]`; corrected here, same category.
+
+## Phase B — step 1 done; D-89 proposal for Sol (2026-09-09)
+
+**Step 1** (`phase-b-step1`, PR #44, read-only): every inherited snapshot
+file verified against the edition's own tables on the MCP — 91 payloads
+archived, `docs/NECB_VINTAGE_MATCH.md` generated with a `--check` gate.
+Phase A's dispatch run 34390249900 is green (PR #43).
+
+**Corrections the verification forced on the plan's own findings:**
+DF-2's "chiller CAP_FT/EIR_FT differ outright" is **withdrawn** — they are
+the same surfaces in °C (shipped) vs °F (the code's tables), 4.2e-06
+relative after the closed-form transform, and the snapshot matches the
+code service's errata corrections for two rows. Table C-1's HDD18 and
+design temperatures are identical for every matched city.
+
+**User decision:** provenance-only adoptions now (step 2, in flight);
+the numeric set goes to Sol as D-89's proposal before any R-O freeze.
+
+### D-89 proposal — the numeric set (each a normative difference, sized)
+
+| item | what the edition says | what ships | size | open question |
+|---|---|---|---|---|
+| Boiler/furnace part-load | `FHeatPLC = a + b·PLR + c·PLR²` (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3) | EnergyPlus efficiency multiplier as a cubic fit of PLR/FHeatPLC (2011 coefficients) | ≤2.67 % (non-condensing boiler), 1.16 % (atmospheric furnace), 0.49 % (condensing) | implement FHeatPLC exactly (per-edition curve *form*; 2025's condensing boiler is **bivariate** in PLR and return-water °F — new form); 2025 adds a Modulating row |
+| Schedule I fan | `NECB-I-Fan` hourly = `On` | 0.0 in all 33 cells | 33 cells, one schedule set | is this an inherited oracle defect? any building using schedule set I has its reference fan off |
+| Exterior lighting 2025 | loading docks zones 1/3/4 | 2020 values | 3 cells | the 2025 MCP extraction returns empty cells (merged-cell); needs the printed page to settle |
+| Space types / LED | medical supply room row | documented cross-reference to Storage Room | 4 + 1 cells | adopt the edition's own row or keep the documented cross-reference |
+| Table C-1 row set | 680 rows (each edition), July Future columns (2025) | 679 rows from NECB 2015 | row set; unread columns | nearest-city HDD lookup could move for locations near the 4–7 unmatched cities |
+| Heat rejection | Table 5.2.12.2 | ASHRAE 90.1 values (24 rows) | whole block | the code publishes its own table |
+
+Everything else (chiller curves, daylighting 2025, equipment efficiencies,
+schedules' other 5 178 cells, space types' matched cells) is identical to
+the edition and becomes checked provenance in step 2 with no output change.
+**Nothing in this table changes until Sol's review and D-89.**
