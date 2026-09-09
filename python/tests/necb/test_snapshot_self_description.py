@@ -118,9 +118,21 @@ def _in_provenance_key_set(path: list) -> bool:
             continue
         if seg in PROVENANCE_SEGMENTS:
             return True
-        if seg.endswith("note"):
+        if seg.endswith("note") or seg.endswith("_provenance"):
             return True
     return False
+
+
+#: "byte-identical to NECB2015/data/schedules.json" is an ORIGIN statement: it
+#: says the shipped rows are an unmodified copy of that oracle file. The
+#: comparative word is the only honest way to say so, so this one shape is
+#: exempt from (c) when the token sits inside an oracle data path.
+_ORIGIN_IDENTITY_RE = re.compile(r"(byte-)?identical to (legacy )?(openstudio-standards )?NECB20\d\d/(data|lighting)")
+
+
+def _is_origin_identity(text: str, start: int) -> bool:
+    window = text[max(0, start - 60):start + 40]
+    return bool(_ORIGIN_IDENTITY_RE.search(window))
 
 
 def _excerpt(text: str, start: int, end: int) -> str:
@@ -168,8 +180,12 @@ def _check_string(
             # not a reference to "another" edition, so it is not a problem.
             if named_year is None or named_year != own_year:
                 problems_b.append(loc)
-        elif _has_nearby_comparative_word(text, match.start(), match.end()):
-            # (c) no comparison in provenance.
+        elif (named_year is None or named_year != own_year) \
+                and _has_nearby_comparative_word(text, match.start(), match.end()) \
+                and not _is_origin_identity(text, match.start()):
+            # (c) no comparison in provenance -- for OTHER editions only:
+            # a snapshot verifying itself against its own edition's
+            # printed table is provenance, not comparison.
             problems_c.append(loc)
 
 

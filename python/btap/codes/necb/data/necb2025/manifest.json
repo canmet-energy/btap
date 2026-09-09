@@ -132,7 +132,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition states the door requirements in their own Table 3.2.2.4. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The performance-path articles this file cites are in Subsection 8.4.5.",
-      "result_sha256": "3982dafddc0276236c657db28b8cc4b93d20a0e81851ec8eeb672f04d53d3bb6"
+      "result_sha256": "74713f008e3c939ab484566bcca0a6870bd35f7cf1e5dce4b6e6c81de74a41af"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2025",
@@ -222,7 +222,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This edition carries the reference-building rules at Subsection 8.4.5 and the part-load curves at 8.4.6; the archived set is the three tables this file's provenance names plus the articles in its own `articles` list. The category keywords extending the Table 8.4.5.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "d2a01f109ceda94a355c5dc399c65d6ac458bae7bab90cc2e8f5191b5da5a120"
+      "result_sha256": "68b64c950cf7093cf7656f35b97c8c8e055a63017d7ec5e0f5a67bdc2fccbf48"
     },
     "efficiencies.json": {
       "source": "mcp:necb:2025",
@@ -291,7 +291,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256.",
-      "result_sha256": "f4a388a7d1908dc439487dff51bd154b5d752d4cf1109a1e7a138f4ef65c75a8"
+      "result_sha256": "9d33481fc2136b3389fa1cacf790accc7952d76b24d216ffb760da8e0bc727ee"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -360,7 +360,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2025 Table 6.2.2.1 via the MCP, with this edition's citations (8.4.5.20, 8.4.6.9). This edition's storage-type heat-pump water heater requirement, UEF >= 2.23, is an equipment class this package does not model and is recorded in the file. The printed-table side is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
-      "result_sha256": "ab79d108cbf480aceb4cd17d510e80df2851fa1c05c848a7257c464e7a648542"
+      "result_sha256": "dbf5cec4b37893c8c4abcf64d26b32306c8044342f3d4ad7b9284a5b64490d01"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

@@ -116,7 +116,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is exactly the tables and articles this file's own provenance block names. Values were additionally cross-checked cell-by-cell against the legacy openstudio-standards NECB2020/data/surface_thermal_transmittance.json (exact match) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The MCP server exposes no build id, so source_revision is null; the archived payloads are the retained artifact.",
-      "result_sha256": "71a5fcd721f29b6f22171c42cf4024ecb770bdabf8b9b89ec87bd8cd63fee5ac"
+      "result_sha256": "60687cd8ae819364dfd92cacc73833307465f329ad9148933c07935cf69f238a"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2020",
@@ -206,7 +206,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "974e86a38cc625cffa2bb95a1dc79f964c97ba66a78204179cc86774b89ad872"
+      "result_sha256": "756ebd79375fcf955b4ba4ee7b22892a9837684fea8ec12372a2c4790e89affe"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -299,7 +299,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "This file carries only this edition's schedule-table numbering and the Subsection 8.4.3 coverage manifest; the load data itself lives in tables/space_types.json and tables/schedules.json, each with its own entry. The archived payloads are the two tables this file's own verification block names.",
-      "result_sha256": "2f63448c62a1dccd07e76bf5060594b30c309929345a27e82b3742face8155d5"
+      "result_sha256": "2d23b9ed5bf210a679eea6bed966159ef38291e4b4da0148acf69bba0caa5416"
     },
     "shw_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

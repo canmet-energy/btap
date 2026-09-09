@@ -104,7 +104,7 @@
   "article": "3.2.3.3.(3); Table 3.2.3.1.",
   "full_area_min_hdd": 7000,
   "strip_width_m": 1.2,
-  "note": "Table 3.2.3.1 floors row reads '0.757 for 1.2 m' in zones 4-7B — a perimeter strip per 3.2.3.3.(3); the slab FIELD carries no prescriptive maximum below zone 8 — vs '0.379 for full area' in zone 8. The strip/full-area U is the u_values.ground.floor bin at the building HDD (u_values itself is structurally pinned to the legacy JSON, so the extent lives here). Verified against the printed table via the codes MCP (necb 2020 and 2025 identical)."
+  "note": "Table 3.2.3.1 floors row reads '0.757 for 1.2 m' in zones 4-7B — a perimeter strip per 3.2.3.3.(3); the slab FIELD carries no prescriptive maximum below zone 8 — vs '0.379 for full area' in zone 8. The strip/full-area U is the u_values.ground.floor bin at the building HDD (u_values itself is structurally pinned to the legacy JSON, so the extent lives here). Verified against the printed table via the codes MCP."
  },
  "fdwr": {
   "article": "3.2.1.4.(1)",

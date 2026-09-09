@@ -309,8 +309,8 @@
    "purchased_cooling": {
     "article": "8.4.4.6.(2)",
     "text": "one air-cooled electric chiller ... shall be used to represent the purchased energy equipment",
-        "chiller_source": "air_cooled",
-        "reference_cop": 2.802
+    "chiller_source": "air_cooled",
+    "reference_cop": 2.802
    }
   }
  },
@@ -480,7 +480,7 @@
   "table_article": "Table 8.4.4.14.",
   "power_caps_w_per_kw": {
    "article": "5.2.6.3.(1); Table 5.2.6.3.",
-   "note": "D-38 (A3 ruled min-wins, phylroy 2026-07-28): the reference must also MEET Part 5 prescriptive (8.4.4.1.(2)) - after the pump-power transfer, each hydronic loop's COMBINED pump motor power is clamped at these W per kW of the loop's peak thermal demand at design. Values verified against the printed 2020 AND 2025 tables via MCP (identical).",
+   "note": "D-38 (A3 ruled min-wins, phylroy 2026-07-28): the reference must also MEET Part 5 prescriptive (8.4.4.1.(2)) - after the pump-power transfer, each hydronic loop's COMBINED pump motor power is clamped at these W per kW of the loop's peak thermal demand at design. Values verified against the printed table via the codes MCP.",
    "Heating": 4.5,
    "Cooling": 14.0,
    "Heat rejection": 12.0,
@@ -520,7 +520,7 @@
    "modeling_note": "frost_control/threshold_temperature_c/defrost fractions are EnergyPlus equipment-modeling assumptions (E+ defaults; -23.3 C = -10 F), NOT NECB values — 5.2.10.1 is silent on frost control. Sentence (5) test-method certification and the sentence (3) specialized-exhaust exemption are modeller/equipment scope."
   },
   "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system.",
-  "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), retrieved via codes MCP get_table 2026-07-22. Replaces the NECB 2011 150 kW exhaust-heat-content trigger previously implemented here — divergent for small high-%OA systems, where this edition requires energy recovery and NECB 2011 does not.",
+  "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), retrieved via codes MCP get_table 2026-07-22.",
   "continuous_hours_per_year": 8000,
   "oa_bands_pct": [
    10,

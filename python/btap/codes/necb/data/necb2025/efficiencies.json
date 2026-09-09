@@ -2,7 +2,7 @@
   "provenance": {
     "code": "NECB",
     "edition": "2025",
-    "source": "NECB 2025 Table 5.2.12.1 series, retrieved via the building-codes MCP (necb:2025); performance curves vendored from openstudio-standards NECB2011/data/curves.json. RE-VERIFIED against the post-hbix#88 MCP extraction 2026-08-02 (D-60): the letter map is -A unitary ACs & HPs, -G PTAC/PTHP, -K chillers, -N boilers, -O furnaces, -I VRF, -M plant heat pumps heating. The earlier map in this block (\"-C PTAC/PTHP\") came from a corrupted pre-fix extraction; -C is the water/evaporatively-cooled unitary table.",
+    "source": "NECB 2025 Table 5.2.12.1 series, retrieved via the building-codes MCP (necb:2025). RE-VERIFIED against the post-hbix#88 MCP extraction 2026-08-02 (D-60): the letter map is -A unitary ACs & HPs, -G PTAC/PTHP, -K chillers, -N boilers, -O furnaces, -I VRF, -M plant heat pumps heating. The earlier map in this block (\"-C PTAC/PTHP\") came from a corrupted pre-fix extraction; -C is the water/evaporatively-cooled unitary table. Performance curves: vendored from openstudio-standards NECB2011/data/curves.json (origin; see curves[].notes).",
     "generated": "2026-07-12",
     "articles": [
       "5.2.12.1",

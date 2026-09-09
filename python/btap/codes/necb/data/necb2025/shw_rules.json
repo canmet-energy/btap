@@ -1,12 +1,12 @@
 {
  "solar_pool_minimums": {
-  "article": "Table 6.2.2.1 (solar thermal + pool heater rows; printed values recovered by hbix's table audit 2026-08-02 - the extraction had LOST these sections when the values were vendored, so they were taken from hbix's page audit (services/codes/docs/table-audit-necb-2020-2025.md); re-checked 2026-09-01, the service now returns both sections and all five printed minimums MATCH the vendored values exactly)",
+  "article": "Table 6.2.2.1",
   "pool_gas_thermal_efficiency": 0.82,
   "pool_oil_thermal_efficiency": 0.78,
   "pool_heat_pump_cop": 4.0,
   "solar_sef_aux_electric": 1.4,
   "solar_sef_aux_gas": 0.9,
-  "note": "Pool-heater minimums are SET on detected pool-serving heaters (apply-when-present; no archetype carries one). Solar SEF is an equipment RATING with no EnergyPlus field: detected solar-thermal equipment gets an audited determination citing the printed minimums, with the collectors modeled physically as cloned."
+  "note": "Pool-heater minimums are SET on detected pool-serving heaters (apply-when-present; no archetype carries one). Solar SEF is an equipment RATING with no EnergyPlus field: detected solar-thermal equipment gets an audited determination citing the printed minimums, with the collectors modeled physically as cloned. Source trail: (solar thermal + pool heater rows; printed values recovered by hbix's table audit 2026-08-02 - the extraction had LOST these sections when the values were vendored, so they were taken from hbix's page audit (services/codes/docs/the hbix table audit); re-checked 2026-09-01, the service now returns both sections and all five printed minimums MATCH the vendored values exactly)"
  },
  "provenance": {
   "vintage": "2025",
