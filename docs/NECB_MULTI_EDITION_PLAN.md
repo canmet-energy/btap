@@ -1710,3 +1710,21 @@ Gate: `tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` now
 asserts that **no audit-surface call in `btap/codes/pipeline.py` cites a code
 article** — no `article=` keyword, no `[58].x.y` literal in a message — which
 is the property "the pipeline emits nothing NECB" reduces to.
+- **Review fixes integrated on `stage9a-review`:** finding 2 (Sonnet,
+  `fa36e9d`: union diff, whole-file added/removed/renamed, value equality
+  before "renumbering", 14 generator tests, `--data-root`; the document
+  now lists the four 2025-only files as added, all leaf counts unchanged);
+  finding 4 (Opus, `50ef7c1`: both NECB sentences moved into the family
+  at audit index 3→3 with a 233-entry dump sha-identical before/after; a
+  new `CodePath.abort` hook because the `8.4.2.1` citation must stay a
+  literal `article=` for the scanner and the no-loss gate; nothing wired
+  that would move a leaf; the claim narrowed with the 13-site renderer
+  inventory pinned by test, plus a self-found third deferral —
+  `_validate_input_model`'s NECB prose in the pipeline); findings 1/3/5
+  (Fable, `cf6d0ab`). **R-M** (`a33369c`): machinery-only, **no baseline
+  file changed**, provenance gained the three hashes and moved
+  commit/freezer/runner/gate. Verification: full suite 950 passed after one
+  self-containment allowlist entry for the timeout test; frozen lanes
+  python 32 / verify 3 / parity 4 green; targeted 48; 4 contracts kept;
+  gates and docs clean. Remaining from the review: the four-job dispatch
+  on this head (network permitting).
