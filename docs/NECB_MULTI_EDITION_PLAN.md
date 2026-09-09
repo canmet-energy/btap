@@ -1384,3 +1384,72 @@ where Stage 3 puts them (the decisions registry stays neutral).
   agent after taking over its work made it run a full suite concurrently
   with the integration verification; its runs were killed by PID (after a
   pattern-based kill matched my own shell — trap recorded in memory).
+
+## Stage 4 — opened 2026-09-08
+
+Stacked on `stage3-integration` (`c5661db`). Facts fixed before spawning:
+every rule file and table already carries an in-file `provenance` block
+(source, method, generated date, MCP verification prose) — the manifest
+provenance is transcription + hashing, not reconstruction; the MCP codes
+server's `get_code_info` exposes no build/revision id, so MCP-sourced
+entries are `current_only` unless the canonical payload is archived
+(`archived`); oracle-vendored 2020 files are `revision_addressable`
+through `legacy_pin/REF`. Opus — manifest `provenance` blocks for every
+manifest-declared output, archived canonical payloads where the in-file
+provenance names a specific MCP table, `verify-source` subcommand;
+Sonnet — `test_edition_provenance.py` and `generate_necb_edition_delta.py`
++ `docs/NECB_EDITION_DELTAS.md` + lint wiring, spec-first. Gate: frozen
+lanes byte-identical, no re-freeze; the provenance test must also pass
+under the removability gate with one edition present.
+- **Provenance test + delta generator (Sonnet) delivered** —
+  `worktree-agent-af3f1911fecf5cd73` (`6dc2d91`), 6 files: the (a)–(g)
+  provenance test with `check_provenance(data_root)` called from the
+  removability gate's SDK-free subprocess; `generate_necb_edition_delta.py`
+  (stdlib, `--check`, wired into `lint` and `CLAUDE.md`) and
+  `docs/NECB_EDITION_DELTAS.md`. **Finding worth keeping:** the survey's
+  "2 distinct rules genuinely differ" was about Python conditionals; the
+  *data* delta 2020→2025 is: envelope 1 renumbered; hvac reference rules
+  23 renumbered + 1 added; hvac efficiencies 6 changed / 96 added / 4
+  removed (HSPF 7.4→7.8, low-temperature heat-pump COP columns, plant
+  heat-pump rows); shw 1 renumbered + 2 added; the six shared tables
+  43,796 identical leaves. That is the review artifact the principle asked
+  for. Held for integration with the provenance branch.
+- **Checked provenance (Opus) delivered and reviewed** — `stage4-provenance`
+  (`0f42b64`), 22 files, +1591/−4: 32 entries = exactly the declared
+  outputs (14 + 18); **17 archived, 13 revision_addressable with real
+  hashes against the user's `bundle install` of the oracle at REF, 2
+  manual, 0 current_only**; 15 payloads (440 KB raw, +69 KB in the wheel);
+  68 MCP requests replayed through `btap._mcp.MCPClient`, one cross-checked
+  against the tool result; `verify-source` demoed for all four classes
+  and a corrupted payload; oracle located from the environment only after
+  `test_self_containment` caught a repo-relative locator. Schema
+  extensions accepted: multi-file oracle sources as a `request` list with
+  per-file hashes; a `note` disclosing what the hash does not cover; the
+  two 8.4 caches archived as themselves.
+- **Stage 4 integration** (`stage4-integration`, `4d34d8a`): the two halves
+  disagreed at exactly the schema extensions — the test rejected `note`,
+  demanded a payload file for the self-archived caches, and required
+  `source_revision` on copied MCP entries (which honestly have none).
+  All three were the test being stricter than the plan in the wrong place;
+  corrected with the conditions spelled out (self-archived only with
+  matching hashes and a note; revision only where check (e) requires it).
+  **Verified:** provenance + removability + registry tests 50 passed;
+  full suite 905 passed; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; lint-imports 3/3; ruff; orphan keys;
+  TOC; `NECB_EDITION_DELTAS.md --check` current; docs regenerate to no
+  diff. **Stage 4 complete.**
+
+## Stage 5 — opened 2026-09-08
+
+Stacked on `stage4-integration` (`8c5b222`). One Opus agent: manifest
+`behaviours` binding for `archetype_eui_path` and `part11_ghg`,
+`Ruleset.behaviour()`, the exact four-site dispatch in `compliance.py`
+(rev-7 table), the direct `eui_archetypes` import deleted, the two
+hardcoded floors to data, the behaviour-orphan gate, and the removability
+gate extended to the binding. Gate: frozen lanes byte-identical — the
+`api-eui-path-necb2025` and determination scenarios are the witnesses.
+**Verification change (user's question):** per-stage verification now
+runs the suite at 16 workers concurrently with the three lanes (~20
+processes, ~8 GB) — ~6 min instead of ~17; agents keep the one-run rule.
+Splitting the python lane's 32 scenarios across workers would move the
+gate hash, so it rides R-C.
