@@ -67,6 +67,13 @@ jobs:
       # --check flag (the generate_decisions_toc.py --check contract).
       - name: NECB edition delta doc matches the manifests
         run: python3 python/scripts/generate_necb_edition_delta.py --check
+      # docs/NECB_VINTAGE_MATCH.md compares each snapshot's INHERITED content
+      # against the edition's own tables, entirely from the payloads archived
+      # under necb<edition>/provenance/vintage_match/ — offline, stdlib, and so
+      # the same --check drift contract. Refreshing the archive is a maintainer
+      # MCP operation (--fetch) and never runs in CI.
+      - name: NECB vintage-match doc matches the archived payloads
+        run: python3 python/scripts/generate_necb_vintage_match.py --check
       # The Python registry is canonical after R6. Run its document, TOC, id,
       # and runtime-citation gates explicitly; the retired Ruby-copy sync test
       # is intentionally not part of this lane.

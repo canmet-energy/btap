@@ -73,6 +73,7 @@ python3 python/scripts/necb_orphan_keys.py
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
+python3 python/scripts/generate_necb_vintage_match.py --check
 python3 python/scripts/generate_decisions_toc.py --check
 python3 python/scripts/legacy_whatsnew.py
 ```
