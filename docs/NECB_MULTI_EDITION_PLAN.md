@@ -1267,3 +1267,477 @@ them would serialise anyway. Sonnet writes the registry's API tests from
 the spec in parallel (they fail until the implementation lands — the same
 gate-first pattern as the namespace test). The frozen lanes are the gate:
 byte-identical, no re-freeze.
+- **Registry API tests (Sonnet) delivered and verified** — branch
+  `worktree-agent-a6b7fa66710b38316` (`1978fe0`), `test_codes_ruleset.py`,
+  13 tests, all failing with ImportError on the pre-implementation tree as
+  intended; spec-exact (heat-pump key asserted present only; registry
+  separation asserted without equating the lists). Held for integration.
+- **Operational fact:** agent worktrees are created from **main**, not
+  from the current checkout. Sonnet found itself on the pre-rename tree
+  and fast-forwarded to `stage1-integration` itself; Opus's worktree was
+  verified to contain Stage 1 before it had written anything. Every
+  stacked-stage prompt from here says: "first `git merge --ff-only
+  <stage branch>` and prove it".
+- **Stage 2 (Opus) delivered and verified** — branch
+  `worktree-agent-a83c8f5a4b8d8c0e0` (`eaf0090`), 17 files. Registry
+  (`Ruleset`, `code_ids`, `editions`, `resolve`, `UnknownRuleset` that is
+  both KeyError and ValueError, manifests discovered by glob, no default
+  anywhere); manifests at `btap/codes/necb/data/necb20{20,25}/manifest.json`
+  (articles: `reference_subsection`, `lighting_subsection`,
+  `heat_pump_aux_fuel`; `literal_remaps` on 2025); all 14 live sites now
+  `prefix = Ruleset.from_edition(vintage).article(key)` with the f-strings
+  untouched; the dead `schedule_table_prefix` parameter removed from
+  `loads/apply.py` (its data key declared `non_rule_keys` to keep the
+  orphan gate green — a per-edition fact with no other home yet, flagged
+  for Stage 3/5); dead storage-garage ternary deleted; the scanner reads
+  the manifests off disk (stays stdlib-only for the `lint` job) and
+  **raises** on an undeclared or unneeded remap; `--vintage` help proven
+  byte-identical against the frozen `usage-no-model` stderr. **Verified
+  by Fable:** the only generated-doc movement is `#L`/`:N` source-line
+  anchors (token-classified: 960 differing tokens, every one an `L\d+` or
+  bare number; no inserted/deleted blocks); `git diff -- python/tests/`
+  against the base is empty (the four protected tests unchanged); the
+  registry API tests written from the spec pass against the
+  implementation. Out-of-scope findings recorded: `disposition_key_for`'s
+  cross-edition delta branch (Stage 4 territory); the HTML template's
+  hardcoded `*_2020`/`*_2025` placeholders and `Inputs.cache_20xx` fields
+  would silently drop a third edition (Stage 8 must close). Deviation
+  noted: agents' worktrees were handed over at main; both reset to the
+  stage branch before starting.
+- **Stage 2 integration** (`stage2-integration` = stage1 + Opus + Sonnet
+  + docstring refresh of `test_codes_registry.py` to `file#function`
+  addresses): registry tests 31 passed; full suite 894 passed; frozen
+  lanes python 32 / verify 3 / parity 4 **byte-identical, no re-freeze**;
+  lint-imports 3/3; ruff; orphan keys; TOC; docs regenerate to no diff.
+
+## Stage 3 — opened 2026-09-08
+
+Stacked on `stage2-integration` (`fdd25fe`). Sequence: Opus — data by
+edition (rule files and tables into `necb/data/necb20{20,25}/`, 2025's own
+copies of the six shared tables, `data_vintage_alias`/`data_vintage()` and
+their seven callers removed, the dormant `efficiency_vintage_fallback` rung
+and the `requested_vintage` split deleted, envelope `articles`→`article`,
+`_data_root()`/`_set_data_root(_testing=True)` hook, every loader through
+it, the registry's manifest discovery through it, the four discovery sites
+manifest-driven, per-edition `coverage/articles_8_4.json`) ‖ Sonnet — the
+removability gate `test_edition_independence.py` from the spec (fresh
+subprocess, temp tree with one edition). Then Sonnet — edition through
+`climate.hdd18` (5 sites) and the daylight chain (4 functions + callers),
+which needs the per-edition `table_c1`/daylighting tables in place. Gate:
+frozen lanes byte-identical, no re-freeze. **Correction to D-86 recorded
+here:** it called the Section 8.4 caches "not NECB-specific"; they are
+per-edition NECB text and belong in each edition's snapshot, which is
+where Stage 3 puts them (the decisions registry stays neutral).
+- **Removability gate (Sonnet) delivered** — `stage3-test-edition-independence`
+  (`b042cfd`), one file, 6 tests all failing on `_set_data_root` missing as
+  intended. Calls: `code_ids/editions/resolve`, `loads/lighting/envelope/
+  hvac/shw.rules(edition)`, `compliance._emit_article_coverage` (umbrella),
+  `climate.table_c1()`, `DaylightControlRequirement.table()`,
+  `coverage.get_article/editions`, `performance_compliance(simulate="none")`.
+  Deviation accepted: every domain package imports `openstudio` at module
+  scope, so the full 7-step subprocess test is SDK-gated and a second
+  SDK-free test covers registry + coverage independence. Held for
+  integration; loader names to be confirmed against the data branch.
+- **Data by edition (Opus) delivered and reviewed** — `stage3-data-by-edition`
+  (`6c026f8`), 83 files: every move a `git mv` rename with 0–3 changed
+  lines; 2025's six table copies verified byte-identical to 2020's by
+  sha256; hook API exact and guarded; registry discovery now per family
+  root, caches keyed by `(root, …)`; full suite 885 passed; frozen python
+  lane byte-identical; wheel carries all 38 data files. Judgment calls
+  accepted: `necb_8_4_disposition.json` + `ATTRIBUTION.md` stay neutral
+  (the disposition is read for both editions via the cross-edition branch
+  Stage 4 owns — moving it would create the dependency Stage 3 removes);
+  five domain data READMEs folded into one `necb/data/README.md`; orphan
+  gate scope pinned by an explicit `NON_RULE_MANIFESTS`; `lighting.table`
+  and `led_record` now take a required vintage (the filename used to bake
+  in 2020 — the substrate defect itself); `_emit_article_coverage` raises
+  on a missing umbrella file instead of returning silently. **Handoff
+  item recorded:** `necb2025/lighting_rules.json:38`'s `how` text still
+  names `lpd_building_types_2025.json` because that string is emitted into
+  the frozen audit — correctable only in a re-freeze (R-C). The one
+  protected-test edit (`test_generate_necb_8_4_coverage.py`, the cache
+  path assertion) is the deliverable itself; the 52/57 counts untouched.
+  Two `_INTERIM_EDITION` constants left for the threading agent (Sonnet,
+  spawned on this branch).
+- **Threading (Sonnet) delivered; acceptance taken over by Fable.** The
+  agent stalled twice waiting on a background run the harness had
+  stopped; its tree held the complete diff (10 files, +74/−78): `hdd18(model,
+  *, edition, …)` through the five sites, `table_c1(edition)`, the daylight
+  chain `table/residue/requirement/evaluate` all edition-keyed, caches per
+  `(root, edition)`, both `_INTERIM_EDITION` constants gone, docstring
+  reframed as two independent snapshots. Read in full by Fable; committed
+  as `stage3-threading` (`7e394a7`) once its own test run had finished.
+- **Stage 3 integration** (`stage3-integration` = stage2 + data + threading
+  + gate; gate's two loader calls adapted to the new signatures):
+  `test_edition_independence` **4 passed / 4 subtests** — each edition
+  loads everything from a one-edition tree in a fresh subprocess, the
+  registry and coverage report only that edition, the other edition's
+  rules raise naming edition and path, the hook refuses without
+  `_testing=True`. Full verification running detached.
+- **Stage 3 verified and complete** on `stage3-integration` (`4c13b52`):
+  removability gate 4/4; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; full suite 897 passed (a single
+  failure in the first pass was not reproducible; the one document moved
+  by 8 anchor tokens and is now committed, which is the document-drift
+  test's condition — the same trap the Stage 2 agent hit); lint-imports
+  3/3; ruff, orphan keys, TOC clean. **Incident:** resuming the threading
+  agent after taking over its work made it run a full suite concurrently
+  with the integration verification; its runs were killed by PID (after a
+  pattern-based kill matched my own shell — trap recorded in memory).
+
+## Stage 4 — opened 2026-09-08
+
+Stacked on `stage3-integration` (`c5661db`). Facts fixed before spawning:
+every rule file and table already carries an in-file `provenance` block
+(source, method, generated date, MCP verification prose) — the manifest
+provenance is transcription + hashing, not reconstruction; the MCP codes
+server's `get_code_info` exposes no build/revision id, so MCP-sourced
+entries are `current_only` unless the canonical payload is archived
+(`archived`); oracle-vendored 2020 files are `revision_addressable`
+through `legacy_pin/REF`. Opus — manifest `provenance` blocks for every
+manifest-declared output, archived canonical payloads where the in-file
+provenance names a specific MCP table, `verify-source` subcommand;
+Sonnet — `test_edition_provenance.py` and `generate_necb_edition_delta.py`
++ `docs/NECB_EDITION_DELTAS.md` + lint wiring, spec-first. Gate: frozen
+lanes byte-identical, no re-freeze; the provenance test must also pass
+under the removability gate with one edition present.
+- **Provenance test + delta generator (Sonnet) delivered** —
+  `worktree-agent-af3f1911fecf5cd73` (`6dc2d91`), 6 files: the (a)–(g)
+  provenance test with `check_provenance(data_root)` called from the
+  removability gate's SDK-free subprocess; `generate_necb_edition_delta.py`
+  (stdlib, `--check`, wired into `lint` and `CLAUDE.md`) and
+  `docs/NECB_EDITION_DELTAS.md`. **Finding worth keeping:** the survey's
+  "2 distinct rules genuinely differ" was about Python conditionals; the
+  *data* delta 2020→2025 is: envelope 1 renumbered; hvac reference rules
+  23 renumbered + 1 added; hvac efficiencies 6 changed / 96 added / 4
+  removed (HSPF 7.4→7.8, low-temperature heat-pump COP columns, plant
+  heat-pump rows); shw 1 renumbered + 2 added; the six shared tables
+  43,796 identical leaves. That is the review artifact the principle asked
+  for. Held for integration with the provenance branch.
+- **Checked provenance (Opus) delivered and reviewed** — `stage4-provenance`
+  (`0f42b64`), 22 files, +1591/−4: 32 entries = exactly the declared
+  outputs (14 + 18); **17 archived, 13 revision_addressable with real
+  hashes against the user's `bundle install` of the oracle at REF, 2
+  manual, 0 current_only**; 15 payloads (440 KB raw, +69 KB in the wheel);
+  68 MCP requests replayed through `btap._mcp.MCPClient`, one cross-checked
+  against the tool result; `verify-source` demoed for all four classes
+  and a corrupted payload; oracle located from the environment only after
+  `test_self_containment` caught a repo-relative locator. Schema
+  extensions accepted: multi-file oracle sources as a `request` list with
+  per-file hashes; a `note` disclosing what the hash does not cover; the
+  two 8.4 caches archived as themselves.
+- **Stage 4 integration** (`stage4-integration`, `4d34d8a`): the two halves
+  disagreed at exactly the schema extensions — the test rejected `note`,
+  demanded a payload file for the self-archived caches, and required
+  `source_revision` on copied MCP entries (which honestly have none).
+  All three were the test being stricter than the plan in the wrong place;
+  corrected with the conditions spelled out (self-archived only with
+  matching hashes and a note; revision only where check (e) requires it).
+  **Verified:** provenance + removability + registry tests 50 passed;
+  full suite 905 passed; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical, no re-freeze**; lint-imports 3/3; ruff; orphan keys;
+  TOC; `NECB_EDITION_DELTAS.md --check` current; docs regenerate to no
+  diff. **Stage 4 complete.**
+
+## Stage 5 — opened 2026-09-08
+
+Stacked on `stage4-integration` (`8c5b222`). One Opus agent: manifest
+`behaviours` binding for `archetype_eui_path` and `part11_ghg`,
+`Ruleset.behaviour()`, the exact four-site dispatch in `compliance.py`
+(rev-7 table), the direct `eui_archetypes` import deleted, the two
+hardcoded floors to data, the behaviour-orphan gate, and the removability
+gate extended to the binding. Gate: frozen lanes byte-identical — the
+`api-eui-path-necb2025` and determination scenarios are the witnesses.
+**Verification change (user's question):** per-stage verification now
+runs the suite at 16 workers concurrently with the three lanes (~20
+processes, ~8 GB) — ~6 min instead of ~17; agents keep the one-run rule.
+Splitting the python lane's 32 scenarios across workers would move the
+gate hash, so it rides R-C.
+- **Stage 5 (Opus) delivered, integrated and verified** —
+  `stage5-behaviour-binding` (`0669138`) → `stage5-integration`
+  (`a51e998`), 18 files. Binding through `behaviours` (2025) / `{}`
+  (2020, explicit); `BEHAVIOURS` vocabulary in code so a 2020-only install
+  answers `None` rather than crashing (two-way test keeps it equal to the
+  manifests and the call sites); the four dispatch sites exactly per the
+  rev-7 table, no direct import, zero `"2025"` literals left in
+  `compliance.py`; both floors to data with explicit `0.0` for 2020 and no
+  `.get` default; provenance hashes refreshed with notes. Verified
+  (parallel form, 6 min): full suite 913 passed; frozen lanes python 32 /
+  verify 3 / parity 4 **byte-identical** — `api-eui-path-necb2025` and the
+  determination are the witnesses of exactly this code; provenance,
+  binding, removability 20 passed; light gates clean; docs no diff.
+  Finding recorded: `necb2025/shw_rules.json`'s prose still says the HPWH
+  class is "not modeled" though `apply_heat_pump_efficiency` models it —
+  adjudicated prose, left for a deliberate edit. **Stage 5 complete.**
+  Stage 6 (Opus, one loader + private `Ruleset` implementations behind
+  the 97 public wrappers) spawned on it.
+- **GitHub caught up (evening 2026-09-08):** Stage 1 = **PR #34**, dispatch
+  run 34263068213 **all four jobs green** (the R-B baselines reproduced on
+  a fresh runner); Stage 2 = **PR #35** (base `stage1-integration`),
+  dispatch run 34266662144 watched; `stage2/3/4-integration` pushed;
+  `stage5-integration` queued for push. Stages 3–5 PRs are not opened
+  yet — they stack, and the user chose local progress over PR ceremony;
+  they can be opened in one pass when the link holds.
+- **Stage 6 (Opus) delivered, integrated and verified** —
+  `stage6-ruleset-threading` (`b5f374a`, 9 commits, one per domain) →
+  `stage6-integration` (`28e8466`), 28 files. `rulesdata.load(domain,
+  code_id)` with one cache and one error; six named shims;
+  `Ruleset.rules()` live. **Inventory correction:** 57 public functions
+  carry `vintage` (the plan's 97 counted every `def` line mentioning it);
+  57 before and after; 65 private `_f(…, ruleset, …)` behind them;
+  `performance_compliance` resolves the edition once. Eight helpers keep
+  `vintage` because protected tests call them with the edition string —
+  Stage 7 moves those call sites. The agent's own string-token checker
+  caught a regex pass renaming the audit KEY `inputs['vintage']` (reverted)
+  and a `ruleset` name colliding with OpenStudio's `ScheduleRuleset`
+  inside a per-space-type loop (renamed to `code` there). `article_coverage:
+  null` deliberately NOT added: the key is in no frozen baseline and the
+  silent return it targeted no longer exists since Stage 3. Verified
+  (parallel, 6 min): full suite 915 passed; frozen lanes python 32 /
+  verify 3 / parity 4 **byte-identical**; targeted 43 passed; light gates
+  and docs clean. Audit emitters intact (14 `'vintage':` key sites).
+  **Stage 6 complete.** Stages 2–6 landed with zero re-freezes, as the
+  matrix promised.
+
+## Stage 7 — opened 2026-09-08 (R-C, behavioural)
+
+Stacked on `stage6-integration` (`7b0ac69`). Opus — the whole public
+surface: `code=` on `performance_compliance` and every public wrapper (57
+after the Stage 6 count; plus the eight helpers that kept `vintage` for
+protected tests, whose call sites move in the same change), the five
+costing `vintage=`→`edition=` renames, every test/script call site,
+`--code` in the CLI with `necb2020` default, `Ruleset.from_edition`
+deleted, `vintage` out of every output (report `edition`+`code`+
+`code_label`; audit `inputs.code`/`edition`; the 13 `"NECB"` literals),
+the synthetic verdict report in `runner.py`, the coverage-gen run filter,
+the 2025 scenarios' argv and the three API scenarios' `api_call.code` +
+their asserts, D-87, docs. Sonnet — `test_no_vintage_parameter.py` (AST
+gate over tracked `.py` under `python/`), spec-first. Then **R-C by
+Fable**: clean-tree freeze, content-aligned attribution against the
+matrix row's categories, anything else a finding.
+- **Stage 2 dispatch run 34266662144: all four jobs green.** Stage
+  branches through 5 on origin; 6 queued.
+- **No-vintage AST gate (Sonnet) delivered** — `worktree-agent-a60660760595ddbeb`
+  (`5df398d`), one file, allowlist = itself only (no genuinely historical
+  `.py` fixture exists). Pre-migration inventory: **398 hits** —
+  `btap/codes` 95, `btap/costing` 3, `scripts` 22, `tests` 278 (the plan's
+  "277 call sites" was right to within one). CLI parser test fails on
+  `--vintage` as designed. Held for integration.
+- **Stage 7 (Opus) delivered and reviewed** — `stage7-public-api`
+  (`10918c5`, 6 commits), 128 files, +984/−848: 88 `vintage` parameters
+  and 304 keyword call sites → 0, plus the positional edition-string
+  sites; `code=` everywhere public, `edition=` on pure catalog accessors
+  (a code id selects a ruleset, an edition string addresses data);
+  `Ruleset.from_edition` gone; `--code {necb2020,necb2025}` default
+  `necb2020`; report `edition`+`code`+`code_label`; audit
+  `inputs.code`/`edition`; `sections.code_label()` for the literals except
+  the one `"(2025)"` that names the edition which *introduced* the EUI
+  path (honest on 2020 reports); the three Stage-6 helpers whose Ruleset
+  parameter was named `code` renamed `edition_rules`; **D-87** adjudicates
+  R-C. `test_codes_registry` EXPECTED and `citation_counts_baseline`
+  byte-unchanged; full suite 906 passed; frozen python lane failed on
+  exactly the predicted categories before the freeze.
+- **Integration** (`stage7-integration`): AST gate merged — its docstring
+  tripped the namespace gate (one docstring fix); all six gates green.
+- **R-C executed** from clean tree `14f3575`, all 39 scenarios, every
+  assert held. **Attribution by script (`attribute_rc.py`): no findings.**
+  83 files / 29 scenarios: audit.json 351 leaves = 117 entries
+  `inputs.vintage → code + edition`; audit.txt the same 117 lines;
+  report.json 108 leaves = 27 × (`vintage` → `edition`, +`code`,
+  +`code_label`); usage stderr 8 lines. Manifest: `provenance.commit`,
+  `defs_sha256`, `runner_sha256`; 29 `baseline_sha256`; `argv` ×2,
+  `api_call` ×3, `asserts` ×4; `gate/freezer/spec_sha256`, counts, ids
+  unchanged. Parallel verification of the frozen tree running.
+- **Stage 7 verified on the frozen tree:** full suite 917 passed; frozen
+  lanes python 32 / verify 3 / parity 4 green; the two namespace/vintage
+  gates, citation table, removability and provenance 34 passed; light
+  gates and docs clean. **Stage 7 complete — Stages 0–7 done.** Three
+  re-freezes in total (R-A, R-B, R-C), each single-cause and attributed
+  with no findings; every stage between them byte-identical. `vintage`
+  no longer exists as a parameter anywhere under `python/`.
+
+## Milestone — Stages 0–7 complete (2026-09-08)
+
+What the tree now is: `btap.codes` with `btap.codes.necb`; two
+independent edition snapshots under `necb/data/necb20{20,25}/` with
+checked provenance (17 archived / 13 revision-addressable / 2 manual);
+citations, floors and behaviours from the manifests through a `Ruleset`
+registry; one loader; `code="necb2020"` / `--code` as the only selector;
+gates that make the properties permanent (namespace, no-vintage,
+citation table, no-loss, removability with provenance, behaviour
+binding, edition delta). Open items: Sol's review of the whole; PRs for
+Stages 3–7 (stacked, queued); `.wslconfig`; DF-1; the HPWH prose
+finding; Stage 8 is per-edition content work under its own template
+(and must close the HTML template's hardcoded 2020/2025 placeholders);
+9a next; 9b/9c are new implementation plans.
+
+## Stage 9a — opened 2026-09-08
+Stacked on `stage7-integration` (`b8cf6ae`). Opus: `btap/codes/pipeline.py`
+(lifecycle mechanics only) + `CodePath` protocol + `btap/codes/necb/path.py`
++ `manifest.path`, with the six evidence-bearing symbols owned per the
+rev-7 table and forwarding functions on the executed call path.
+Byte-identical: no re-freeze.
+- **Stage 9a (Opus) delivered, integrated and verified** —
+  `stage9a-code-path` (`3c4f929`, 3 commits) → `stage9a-integration`,
+  17 files, +2090/−1484. `btap/codes/pipeline.py` (lifecycle only),
+  `CodePath` protocol, `btap/codes/necb/path.py`, `manifest.path` on both
+  editions, `Ruleset.path()`; the six evidence-bearing symbols owned per
+  the table: `performance_compliance`, `_load_and_validate` (neutral half)
+  and `_run_annual` stay executed in `compliance.py`; `_build_reference`,
+  `_evaluate`, `_evaluate_unmet` are forwarders that the family module
+  calls back through — Fable's own `sys.settrace` run confirmed
+  `performance_compliance → _load_and_validate → path.validate →
+  path.determine → compliance._build_reference` on a no-simulation run,
+  and `test_code_path.py` covers the two annual-only forwarders and a
+  real determination. Coverage `code` pointers unchanged (the "pointer
+  refresh" commit is the manifest `path` key + regenerated docs). New
+  import-linter contract: `btap.codes.pipeline` may not import
+  `btap.codes.necb` — **4 kept / 0 broken**. Verified: full suite 929
+  passed; frozen lanes python 32 / verify 3 / parity 4 **byte-identical,
+  no re-freeze**; targeted 32 passed; light gates and docs clean. The
+  agent backgrounded its suite against instructions and stalled on a
+  watcher; stopped by TaskStop, work committed on its own branch
+  (`stage9a-code-path`, not the worktree branch — checked). **Stage 9a
+  complete.**
+
+## Executable plan complete (2026-09-08)
+
+Stages 0–7 and 9a are done. What remains is not executable without
+decisions: Stage 8 (one plan per back-catalogue edition, transcription
+and engineering review), 9b (OBC SB-10, a new domain), 9c (BC Step Code,
+absolute metrics). Open for the user: Sol's review; `.wslconfig`; DF-1;
+the HPWH prose; merging the stacked PRs (#34, #35, and 3–7 + 9a queued).
+
+## Sol's review of Stages 0–9a (2026-09-09)
+
+Five findings, **all verified against the code before acting** (finding 5
+was worse locally: the venv's console script still pointed at
+`btap.necb.cli` because the editable install's entry points predated the
+rename — refreshed with `pip install -e . --no-deps`):
+
+1. **High — machinery not fully pinned.** Confirmed: `freeze.py` hashed
+   freezer/defs/runner/gate/spec only; `api_worker.py`, `compare_runs.py`,
+   `audit_scenario.py` unpinned. Fixed by Fable: three hashes added at
+   freeze time and in the integrity test → **machinery-only re-freeze
+   (R-M)** with baselines expected byte-identical.
+2. **High — edition delta omits 2025-only files and misclassifies moved
+   leaves.** Confirmed (`pair_files` intersects; the renumbering pairing
+   never compares values). Sonnet: union of manifest outputs, whole-file
+   added/removed/renamed, value equality required for "renumbering",
+   direct generator tests, `--data-root` for fixtures.
+3. **Medium — timeout path crashes on bytes.** Reproduced (`TimeoutExpired.
+   stdout` is bytes under `text=True` on 3.12). Fixed by Fable: worker in
+   its own session, process group killed on timeout, output decoded,
+   `test_runner_api_timeout.py` with a grandchild-survival check.
+4. **Medium — 9a is an NECB-preserving scaffold.** Confirmed: `citations()`
+   / `report_sections()` have no product call sites; `pipeline.py` emits
+   the `5.2.10.1` and `8.4.2.1` NECB text; `sections.py` hardcodes 13
+   Section 8.4 sites. Opus: move the two emissions into the family hook at
+   the same phase point (byte-identical), wire the hooks only where output
+   is unchanged, and **narrow the claim explicitly** with the 9b/9c
+   inventory pinned by a test.
+5. **Medium — `--version` prints "dev".** Confirmed (`version("btap")` vs
+   distribution `canmet-btap`). Fixed by Fable + wheel-smoke assertion.
+Also required: a four-job dispatch on the final head.
+
+
+## 9a scope, corrected — 2026-09-09
+
+Review of the delivered Stage 9a found the claim wider than the code. The
+finding, verified: `CodePath.citations()` and `report_sections()` had **no
+product call sites** (tests only); the shared pipeline still spoke NECB in
+its own voice (the `5.2.10.1` energy-recovery sentence in `_size_proposed`
+and the `article="8.4.2.1."` emission in `_flush_on_failure`); and the shared
+renderer `report/sections.py` writes NECB Section 8.4 article paths as
+literals in 13 places. NECB was not regressed, but OBC or BCBC could not have
+arrived as a sibling package plus a manifest line alone.
+
+**What 9a delivers, stated narrowly: an NECB-PRESERVING scaffold.** The
+lifecycle and the family boundary are real — the `CodePath` protocol, the
+manifest `path` key resolved through `Ruleset.path()`, the forwarders on the
+executed call path, and the import-linter contract that keeps
+`btap.codes.pipeline` free of `btap.codes.necb` (4 kept). Everything a second
+family would need in order to render and cite *itself* is **deferred to
+9b/9c**, where a real second family makes the neutral shape testable rather
+than speculative.
+
+**Moved in the correction** (byte-identical; no re-freeze, and
+`verification/scenarios/` untouched):
+
+| emission | was | now | order proof |
+|---|---|---|---|
+| the `simulate: :none` warning naming data-centre kW thresholds, capacity-binned efficiencies and the 5.2.10.1 energy-recovery determination | `pipeline._size_proposed` | `necb.path.determine`, guarded on `simulate == "none"`, before `compliance._build_reference` | index **3** of a 233-entry `simulate="none"` trail before and after; nothing audits between the skipped sizing phase and `determine` |
+| `run ABORTED before completion: …`, `article="8.4.2.1."` | `pipeline._flush_on_failure` | `necb.path.abort`, called by `_flush_on_failure` immediately before `_write_outputs` | index **3** of the 4-entry flushed failure trail before and after; still the trail's last entry |
+
+`CodePath` gained one hook, `abort(audit, error)`, for the second of those.
+It takes the audit and the exception rather than a run because the failure
+flush also serves `alternate_path`, which has no pipeline `_Run`. The NECB
+citation had to stay a **literal `article=` keyword in family source**: the
+Section 8.4 scanner (`generate_necb_8_4_coverage.py::_scan_citations`) reads
+`article=` constants by AST, so routing 8.4.2.1 through `citations()` or a
+module constant would have dropped the `(2020|2025, 8.4.2.1, warn)` count to
+zero and broken the no-loss gate. `docs/NECB_8_4_COVERAGE.html` regenerated:
+the 8.4.2.1 citation now resolves to `necb/path.py:203` instead of
+`pipeline.py:410`, plus line shifts on seven sites in the same file.
+
+**Deferred to 9b/9c, explicitly not delivered by 9a:**
+
+1. **`report/sections.py`'s hardcoded 8.4 paths — 13 sites, by function:**
+   `verdict_banner` (6: the `EUI PATH (8.4.4)` badges and the shortened-run
+   `8.4.1.2` strip), `path_declaration` (2: the `8.4.1.2` and `8.4.4` rows of
+   the path-declaration table), `energy` (3: the `BET (8.4.4)` target row, the
+   Table 8.4.4.1 heading, and the `8.4.1.2.(5)` capacity-iteration caption),
+   `hvac_building_block` (2, prose). The renderer already takes its code NAME
+   from `report['code_label']` (`sections.code_family`); the article NUMBERS
+   are still NECB literals. `tests/necb/test_code_path.py::
+   TestDeferredRendererInventory` pins this inventory so a later edit is
+   deliberate.
+2. **The `citations()` and `report_sections()` hooks stay unwired.** Wiring
+   either today would add or move a report leaf: the renderer is handed a
+   report dict, not a `_Run` and not a `Ruleset`, and `render_all` composes
+   from its own fixed `ORDER` of section functions, which is a different list
+   from `report_sections()`'s report keys. Neutralizing them means plumbing
+   the ruleset into the render context and adding article keys to the
+   manifests — a report change, and 9b/9c's work.
+3. **Failure-citation text on the neutral side.** `pipeline.
+   _validate_input_model` still RAISES NECB-specific prose (Table 8.4.4.7.-A
+   System 3-vs-6, the 8.4.1.2 determination). Those are exceptions, not audit
+   entries, and the rev-7 ownership table deliberately keeps the neutral
+   model-loading half in the pipeline — but the text is NECB's, and a second
+   family will need it parameterized.
+
+Gate: `tests/necb/test_code_path.py::TestTheFamilySpeaksForTheCode` now
+asserts that **no audit-surface call in `btap/codes/pipeline.py` cites a code
+article** — no `article=` keyword, no `[58].x.y` literal in a message — which
+is the property "the pipeline emits nothing NECB" reduces to.
+- **Review fixes integrated on `stage9a-review`:** finding 2 (Sonnet,
+  `fa36e9d`: union diff, whole-file added/removed/renamed, value equality
+  before "renumbering", 14 generator tests, `--data-root`; the document
+  now lists the four 2025-only files as added, all leaf counts unchanged);
+  finding 4 (Opus, `50ef7c1`: both NECB sentences moved into the family
+  at audit index 3→3 with a 233-entry dump sha-identical before/after; a
+  new `CodePath.abort` hook because the `8.4.2.1` citation must stay a
+  literal `article=` for the scanner and the no-loss gate; nothing wired
+  that would move a leaf; the claim narrowed with the 13-site renderer
+  inventory pinned by test, plus a self-found third deferral —
+  `_validate_input_model`'s NECB prose in the pipeline); findings 1/3/5
+  (Fable, `cf6d0ab`). **R-M** (`a33369c`): machinery-only, **no baseline
+  file changed**, provenance gained the three hashes and moved
+  commit/freezer/runner/gate. Verification: full suite 950 passed after one
+  self-containment allowlist entry for the timeout test; frozen lanes
+  python 32 / verify 3 / parity 4 green; targeted 48; 4 contracts kept;
+  gates and docs clean. Remaining from the review: the four-job dispatch
+  on this head (network permitting).
+- **Final-head dispatch 34314583564 failed in `verify`** on the new
+  timeout test: in the CI container nothing reaps orphans, the killed
+  grandchild lingers as a zombie, and `os.kill(pid, 0)` succeeds on a
+  zombie. The test now reads the state from `/proc` (`cb8581c`); 953 other
+  tests passed in that run. Re-dispatched as 34346550719; **#41 retargeted
+  to `stage7-integration`** (it carries 9a). User: "do it" → merge #34–#41
+  bottom up **with merge commits** (three manifests' `provenance.commit`
+  name freeze commits; a squash would orphan them), each PR retargeted to
+  main first, gated on the re-dispatch being green (`merge_stack.sh`).
+- **Re-dispatch 34346550719: all four jobs green. #34–#41 merged bottom
+  up with merge commits, 11:50–11:51 on 2026-09-09; `origin/main` =
+  `d64eaca`, tree identical to `stage9a-review`.** The multi-edition
+  refactor, Stages 0–7 and 9a plus Sol's post-9a fixes, is on main.
