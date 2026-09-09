@@ -11,9 +11,21 @@ reported separately from a genuine VALUE change. `provenance`,
 is a review artifact over rule VALUES, not the citation renumbering the
 coverage documents already track.
 
+Before the leaf-level tables, whole-file ADDED / REMOVED / RENAMED is
+reported over the union of every manifest-declared output — an output
+declared by only one edition, or renamed between editions, is called out
+there rather than silently dropped from the comparison.
+
 ## Summary
 
 ### necb2020 → necb2025
+
+**Whole-file changes**
+
+- added: `eui_targets.json` (eui_targets)
+- added: `ghg_factors.json` (ghg_factors)
+- added: `tables/lpd_building_types.json` (tables/lpd_building_types)
+- added: `tables/lpd_space_functions.json` (tables/lpd_space_functions)
 
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
