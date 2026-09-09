@@ -113,6 +113,7 @@ def check_required_python_engines(scenarios):
         return
     try:
         import tbd
+
         from btap.codes.necb.envelope import thermal_bridging
     except ImportError as error:
         raise ValueError(
@@ -417,6 +418,13 @@ def main():
             "freezer_sha256": runner.sha256(__file__),
             "defs_sha256": runner.sha256(HERE / "scenario_defs.py"),
             "runner_sha256": runner.sha256(HERE / "runner.py"),
+            # The API worker, the comparison semantics and the audit-scenario
+            # constructor execute or shape frozen runs too (post-9a review
+            # High): pinned with the rest of the machinery.
+            "api_worker_sha256": runner.sha256(HERE / "api_worker.py"),
+            "compare_runs_sha256": runner.sha256(
+                REPO_ROOT / "verification" / "compare_runs.py"),
+            "audit_scenario_sha256": runner.sha256(HERE / "audit_scenario.py"),
             "gate_sha256": runner.sha256(
                 runner.PYTHON_ROOT / "tests" / "necb"
                 / "test_frozen_scenarios.py"),

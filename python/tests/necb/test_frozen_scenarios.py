@@ -71,6 +71,9 @@ class TestFrozenScenarios(unittest.TestCase):
             "freezer_sha256": SCENARIOS_DIR / "freeze.py",
             "defs_sha256": SCENARIOS_DIR / "scenario_defs.py",
             "runner_sha256": SCENARIOS_DIR / "runner.py",
+            "api_worker_sha256": SCENARIOS_DIR / "api_worker.py",
+            "compare_runs_sha256": REPO_ROOT / "verification" / "compare_runs.py",
+            "audit_scenario_sha256": SCENARIOS_DIR / "audit_scenario.py",
             "gate_sha256": Path(__file__),
         }
         for key, path in machinery.items():
