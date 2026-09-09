@@ -162,17 +162,20 @@ class Ruleset:
         return None if dotted is None else _import_behaviour(dotted)
 
     def rules(self, domain: str) -> dict:
-        """The rule tables for one domain ('hvac', 'envelope', …).
+        """This edition's rule tables for one domain ('hvac', 'envelope', …).
 
-        STAGE 6 of the multi-edition plan moves the per-edition rule files
-        under this edition's directory and makes this the single loader.
-        Until then the domains load their own tables and this raises.
+        ``domain`` is a key of the manifest's ``rules`` map — ``umbrella``,
+        ``envelope``, ``hvac``, ``hvac_efficiencies``, ``lighting``,
+        ``loads``, ``shw``. The edition's manifest says which file each one
+        lives in, so the file name is a per-edition fact rather than a
+        constant baked into a domain module (multi-edition plan, Stage 6).
+
+        The SAME memoized dict comes back every call — read it, never mutate
+        it. A domain this edition does not declare, or a declared file that is
+        absent, raises :class:`ValueError` naming the edition, the domain and
+        the path: no other edition's rules are ever substituted.
         """
-        raise NotImplementedError(
-            "Ruleset.rules() lands in Stage 6 of the multi-edition plan; "
-            f"load {self.family} {domain} rules through the domain module "
-            "until then"
-        )
+        return _rules_loader(self.family).load(domain, self.id)
 
     @classmethod
     def from_edition(cls, edition: str) -> "Ruleset":
@@ -233,6 +236,26 @@ def _import_behaviour(dotted: str):
             f"a manifest binds the behaviour module {dotted!r}, which does not "
             f"import: {exc}"
         ) from exc
+
+
+@lru_cache(maxsize=None)
+def _rules_loader(family: str):
+    """The module that loads one family's per-edition rule files.
+
+    Resolved through the family table for the same reason :func:`_family_roots`
+    is: Stage 9's second family adds a line to ``_FAMILY_MODULES``, not a
+    branch here.
+    """
+    from importlib import import_module
+
+    try:
+        module = _FAMILY_MODULES[family]
+    except KeyError:
+        raise UnknownRuleset(
+            f"no code family {family!r} is registered — known families: "
+            f"{sorted(_FAMILY_MODULES)}"
+        ) from None
+    return import_module(f"{module}.rulesdata")
 
 
 def _family_roots() -> tuple[tuple[str, Path], ...]:

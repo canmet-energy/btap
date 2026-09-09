@@ -1478,3 +1478,42 @@ gate hash, so it rides R-C.
   `stage5-integration` queued for push. Stages 3–5 PRs are not opened
   yet — they stack, and the user chose local progress over PR ceremony;
   they can be opened in one pass when the link holds.
+- **Stage 6 (Opus) delivered, integrated and verified** —
+  `stage6-ruleset-threading` (`b5f374a`, 9 commits, one per domain) →
+  `stage6-integration` (`28e8466`), 28 files. `rulesdata.load(domain,
+  code_id)` with one cache and one error; six named shims;
+  `Ruleset.rules()` live. **Inventory correction:** 57 public functions
+  carry `vintage` (the plan's 97 counted every `def` line mentioning it);
+  57 before and after; 65 private `_f(…, ruleset, …)` behind them;
+  `performance_compliance` resolves the edition once. Eight helpers keep
+  `vintage` because protected tests call them with the edition string —
+  Stage 7 moves those call sites. The agent's own string-token checker
+  caught a regex pass renaming the audit KEY `inputs['vintage']` (reverted)
+  and a `ruleset` name colliding with OpenStudio's `ScheduleRuleset`
+  inside a per-space-type loop (renamed to `code` there). `article_coverage:
+  null` deliberately NOT added: the key is in no frozen baseline and the
+  silent return it targeted no longer exists since Stage 3. Verified
+  (parallel, 6 min): full suite 915 passed; frozen lanes python 32 /
+  verify 3 / parity 4 **byte-identical**; targeted 43 passed; light gates
+  and docs clean. Audit emitters intact (14 `'vintage':` key sites).
+  **Stage 6 complete.** Stages 2–6 landed with zero re-freezes, as the
+  matrix promised.
+
+## Stage 7 — opened 2026-09-08 (R-C, behavioural)
+
+Stacked on `stage6-integration` (`7b0ac69`). Opus — the whole public
+surface: `code=` on `performance_compliance` and every public wrapper (57
+after the Stage 6 count; plus the eight helpers that kept `vintage` for
+protected tests, whose call sites move in the same change), the five
+costing `vintage=`→`edition=` renames, every test/script call site,
+`--code` in the CLI with `necb2020` default, `Ruleset.from_edition`
+deleted, `vintage` out of every output (report `edition`+`code`+
+`code_label`; audit `inputs.code`/`edition`; the 13 `"NECB"` literals),
+the synthetic verdict report in `runner.py`, the coverage-gen run filter,
+the 2025 scenarios' argv and the three API scenarios' `api_call.code` +
+their asserts, D-87, docs. Sonnet — `test_no_vintage_parameter.py` (AST
+gate over tracked `.py` under `python/`), spec-first. Then **R-C by
+Fable**: clean-tree freeze, content-aligned attribution against the
+matrix row's categories, anything else a finding.
+- **Stage 2 dispatch run 34266662144: all four jobs green.** Stage
+  branches through 5 on origin; 6 queued.

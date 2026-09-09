@@ -22,9 +22,10 @@ import re
 import openstudio
 
 from btap._compat import ruby_round, sorted_by_name
+from btap.codes import Ruleset
 from btap.codes.necb.hvac import efficiency as _efficiency
 from btap.codes.necb.hvac.energy_recovery import annual_availability_hours, erv_threshold_verdict
-from btap.codes.necb.hvac.reference import optional_flow, rules
+from btap.codes.necb.hvac.reference import optional_flow
 from btap.modeling.hvac.components import coils as _coils
 
 TOLERANCE = 1e-3
@@ -37,12 +38,17 @@ def check_part5(model, vintage='2020', building=None, hdd=None, audit=None):
         trigger read winter_design_temp_c from it)
     :return: AuditLog
     """
+    return _check_part5(model, Ruleset.from_edition(vintage), building=building,
+                        hdd=hdd, audit=audit)
+
+
+def _check_part5(model, ruleset, building=None, hdd=None, audit=None):
     from btap.audit import AuditLog
 
     audit = audit if audit is not None else AuditLog()
     check_economizers(model, audit)
-    check_heat_recovery(model, vintage, hdd, audit)
-    check_minimum_efficiencies(model, vintage, audit)
+    _check_heat_recovery(model, ruleset, hdd, audit)
+    _check_minimum_efficiencies(model, ruleset, audit)
     audit.decision('check_part5', 'Part 5 prescriptive QAQC complete (economizers, heat recovery, '
                                   'minimum efficiencies; duct/pipe insulation, fan power limits and '
                                   'controls are outside this slice)',
@@ -112,12 +118,16 @@ def water_economizer_loops(air_loop):
 
 def check_heat_recovery(model, vintage, hdd, audit):
     """5.2.10.1: same Table 5.2.10.1.-A/-B trigger as the reference ERV rule."""
+    return _check_heat_recovery(model, Ruleset.from_edition(vintage), hdd, audit)
+
+
+def _check_heat_recovery(model, ruleset, hdd, audit):
     if hdd is None:
         audit.info('check_part5', '5.2.10.1 heat-recovery check skipped — pass hdd: to evaluate the '
                                   'Table 5.2.10.1.-A/-B airflow thresholds')
         return
 
-    rule = rules(vintage).get('energy_recovery')
+    rule = ruleset.rules("hvac").get('energy_recovery')
     if rule is None:
         return
 
@@ -162,8 +172,12 @@ def check_minimum_efficiencies(model, vintage, audit):
     BELOW the applied value is below the code minimum. Capacity-binned
     rows need SIZED equipment — unsized items are skipped by the pass
     (run a sizing run first for full coverage)."""
+    return _check_minimum_efficiencies(model, Ruleset.from_edition(vintage), audit)
+
+
+def _check_minimum_efficiencies(model, ruleset, audit):
     clone = model.clone(True).to_Model()
-    _efficiency.apply(clone, vintage=vintage)
+    _efficiency._apply(clone, ruleset=ruleset)
     unsized = sum(1 for c in model.getCoilCoolingDXSingleSpeeds()
                   if c.ratedTotalCoolingCapacity().empty()
                   and not c.autosizedRatedTotalCoolingCapacity().is_initialized())
@@ -210,7 +224,7 @@ def check_minimum_efficiencies(model, vintage, audit):
                 continue
 
             audit.warn('check_part5',
-                       f'{label} {ruby_round(current, 3)} is BELOW the NECB {vintage} minimum '
+                       f'{label} {ruby_round(current, 3)} is BELOW the NECB {ruleset.edition} minimum '
                        f'{ruby_round(floor, 3)}',
                        target=proposed.nameString(), article='5.2.12.; Table 5.2.12.1.')
 
