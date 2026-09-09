@@ -130,6 +130,8 @@ result["coverage_article_has_text"] = bool(article.get("raw"))
 result["coverage_editions"] = list(coverage.editions())
 from tests.necb.test_edition_provenance import check_provenance
 result["provenance_problems"] = check_provenance(Path({tmp!r}))
+from tests.necb.test_snapshot_self_description import check_self_description
+result["self_description_problems"] = check_self_description(Path({tmp!r}))
 # Stage 5: the edition-bound behaviours answer correctly with only THIS
 # edition present -- the absent edition's binding must be an honest None,
 # not a crash, or a one-edition install could not run at all.
@@ -221,6 +223,11 @@ class TestEditionIndependence(unittest.TestCase):
                     # edition present -- no cross-edition dependency in validation.
                     self.assertEqual([], summary["provenance_problems"],
                                      f"{code_id}: {summary['provenance_problems']}")
+                    # Snapshot self-description (docs/NECB_MULTI_EDITION_PLAN.md
+                    # follow-up plan, "The gate"): holds with only this one
+                    # edition present too.
+                    self.assertEqual([], summary["self_description_problems"],
+                                     f"{code_id}: {summary['self_description_problems'][:10]}")
                     # Stage 5 behaviour binding, per edition: a 2020-only tree
                     # answers None for both (2020 owns no edition-specific
                     # code); a 2025-only tree resolves both modules.
