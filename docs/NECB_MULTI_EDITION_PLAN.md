@@ -1791,3 +1791,13 @@ within 0.5–1.9 % of FHeatPLC; DX/fan/SWH have no edition table) and
 D-89 — the user chose Phase A first. Vintage-match matrix: 7 of 14 (2020)
 and 8 of 18 (2025) files are inherited or copied rather than the edition's
 own text. R-N next.
+- **R-N executed** from clean tree `f39b67a`, 39 scenarios, every assert
+  held. **Attribution by script (`attribute_rn.py`), no findings:** 78
+  baseline files in 26 of 39 scenarios — `audit.json` 151 coverage-sentence
+  leaves + 82 curve-identifier leaves (suffix strip only), `audit.txt` the
+  same 151 + 82 lines, `report.json` 112 `warnings[]` entries that echo the
+  rewritten coverage sentences (no warnings list changed length); manifest
+  `provenance.commit` + 26 `baseline_sha256`; every machinery hash, count,
+  id and scenario field unchanged. **No numeric value moved.** The plan's
+  R-N contract said `report.json` unchanged — wrong: the report carries the
+  coverage sentences in `warnings[]`; corrected here, same category.
