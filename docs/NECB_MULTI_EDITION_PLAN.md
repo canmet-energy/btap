@@ -1741,3 +1741,12 @@ is the property "the pipeline emits nothing NECB" reduces to.
   up with merge commits, 11:50–11:51 on 2026-09-09; `origin/main` =
   `d64eaca`, tree identical to `stage9a-review`.** The multi-edition
   refactor, Stages 0–7 and 9a plus Sol's post-9a fixes, is on main.
+- **Correction to the entry above:** the merge script's `gh pr edit --base
+  main` step had its output silenced and failed on the flaky API, so
+  #35–#41 merged into their *intermediate* base branches; only #34 reached
+  main. Caught by diffing main's tree against the final head (292 files).
+  Fixed with **PR #42** (`stage9a-integration` → main, tree byte-identical
+  to the reviewed head `cb8581c`), merge commit `ac2bdde` on 2026-09-09.
+  **`origin/main` now equals the final reviewed tree.** Lesson recorded:
+  never silence the output of a step whose failure changes what the next
+  step does; verify the tree, not the log.
