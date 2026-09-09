@@ -9,6 +9,7 @@
     "heat_pump_aux_fuel": "8.4.4.13.(2)(c)"
   },
   "literal_remaps": {},
+  "behaviours": {},
   "rules": {
     "umbrella": "necb_rules.json",
     "envelope": "envelope_rules.json",
@@ -37,8 +38,8 @@
       "retrieved": "2026-07-22",
       "method": "transcribed",
       "source_verification": "manual",
-      "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json.",
-      "result_sha256": "a6a5ec49473422fffb4af0b8aafbb9de2f03d5f576a7edd1c2b0b8750b1fce17"
+      "note": "The umbrella carries only article_coverage: what the pipeline itself determines. Article numbers and titles were transcribed from NECB 2020 Division B Section 8.4 and cross-checked against the building-codes MCP; the status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The code pointers are checked by tests/test_coverage_code_refs.py, the article text by the packaged coverage/articles_8_4.json. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
+      "result_sha256": "72594c074f5c3cdab3e8e0ad2253c03adba98009de8854ccad0b6fcfed495834"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2020",
@@ -317,8 +318,8 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "revision_addressable",
-      "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2020 Table 6.2.2.1 via the MCP, and the solar/pool minimums re-verified 2026-08 (D-61/D-63). The printed-table side is a cross-check, not the origin, and is not archived here. The formula strings in the file are documentation; the live coefficients are named constants in shw/efficiency.py.",
-      "result_sha256": "ba7dbb05ae5fc0d686c2a00a1e5bd07286dede1ce85ba7a5acf57feeb304d5f4"
+      "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2020 Table 6.2.2.1 via the MCP, and the solar/pool minimums re-verified 2026-08 (D-61/D-63). The printed-table side is a cross-check, not the origin, and is not archived here. The formula strings in the file are documentation; the live coefficients are named constants in shw/efficiency.py. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
+      "result_sha256": "5e5a4746e7a353cd562e3cec1e929ec2f475c2a38fc7aac656222918b393e48e"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

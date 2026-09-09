@@ -1453,3 +1453,28 @@ runs the suite at 16 workers concurrently with the three lanes (~20
 processes, ~8 GB) — ~6 min instead of ~17; agents keep the one-run rule.
 Splitting the python lane's 32 scenarios across workers would move the
 gate hash, so it rides R-C.
+- **Stage 5 (Opus) delivered, integrated and verified** —
+  `stage5-behaviour-binding` (`0669138`) → `stage5-integration`
+  (`a51e998`), 18 files. Binding through `behaviours` (2025) / `{}`
+  (2020, explicit); `BEHAVIOURS` vocabulary in code so a 2020-only install
+  answers `None` rather than crashing (two-way test keeps it equal to the
+  manifests and the call sites); the four dispatch sites exactly per the
+  rev-7 table, no direct import, zero `"2025"` literals left in
+  `compliance.py`; both floors to data with explicit `0.0` for 2020 and no
+  `.get` default; provenance hashes refreshed with notes. Verified
+  (parallel form, 6 min): full suite 913 passed; frozen lanes python 32 /
+  verify 3 / parity 4 **byte-identical** — `api-eui-path-necb2025` and the
+  determination are the witnesses of exactly this code; provenance,
+  binding, removability 20 passed; light gates clean; docs no diff.
+  Finding recorded: `necb2025/shw_rules.json`'s prose still says the HPWH
+  class is "not modeled" though `apply_heat_pump_efficiency` models it —
+  adjudicated prose, left for a deliberate edit. **Stage 5 complete.**
+  Stage 6 (Opus, one loader + private `Ruleset` implementations behind
+  the 97 public wrappers) spawned on it.
+- **GitHub caught up (evening 2026-09-08):** Stage 1 = **PR #34**, dispatch
+  run 34263068213 **all four jobs green** (the R-B baselines reproduced on
+  a fresh runner); Stage 2 = **PR #35** (base `stage1-integration`),
+  dispatch run 34266662144 watched; `stage2/3/4-integration` pushed;
+  `stage5-integration` queued for push. Stages 3–5 PRs are not opened
+  yet — they stack, and the user chose local progress over PR ceremony;
+  they can be opened in one pass when the link holds.

@@ -29,8 +29,8 @@ grammar in `btap.codes`' registry, both coverage generators, the orphan-key lint
 and `tests/test_coverage_code_refs.py`. It also carries this edition's
 `articles` (the edition-specific article numbers rules cite) and
 `literal_remaps` (how this edition renumbers article literals the source is
-written in). Adding an edition means adding a directory with a manifest, not
-widening a fallback.
+written in) and, since Stage 5, its `behaviours`. Adding an edition means adding
+a directory with a manifest, not widening a fallback.
 
 Product code never builds these paths itself: every loader resolves through
 `btap.codes.necb._data_root()` at call time and caches keyed by that root, so a
@@ -41,6 +41,54 @@ adjudicated package data.
 
 **Runtime never contacts the MCP.** These files are generated/verified offline;
 when a new edition lands, regenerate its snapshot and diff.
+
+---
+
+## `manifest.json`'s `behaviours` block — edition-specific CODE
+
+Most of what separates two editions is data, and belongs in the files below.
+What genuinely cannot be is bound here: `behaviours` maps a stable behaviour
+name to the dotted module that implements it for THIS edition.
+
+```json
+"behaviours": {
+  "archetype_eui_path": "btap.codes.necb.editions.necb2025.eui_archetypes",
+  "part11_ghg":         "btap.codes.necb.editions.necb2025.part11_ghg"
+}
+```
+
+`necb2020` declares `"behaviours": {}` — an **explicit empty declaration**, not
+an omitted key, so the manifest states positively that this edition binds no
+code of its own. (The reader treats an absent key the same way; the empty
+object is the documented form.)
+
+`Ruleset.behaviour(name)` returns the imported module, or `None` when this
+edition binds nothing under that name — and every call site reads `None` as
+"this edition has no such feature". That is how NECB 2020 has no 8.4.4
+archetype-EUI path and no Part 11 GHG scoring without a single `vintage ==
+"2025"` test surviving in `compliance.py`.
+
+Three rules hold the binding together, all gated by
+`python/tests/necb/test_behaviour_binding.py`:
+
+- The name vocabulary is `btap.codes.BEHAVIOURS`, in CODE, and an unknown name
+  raises. It is deliberately not derived from the manifests present on disk: a
+  one-edition install must still answer `None` for a behaviour another edition
+  owns instead of crashing. The gate keeps the vocabulary equal, in both
+  directions, to the union of what the manifests bind and what product code
+  asks for — so a binding nobody reads, and a call site nobody implements, are
+  both build failures.
+- A manifest binding a name outside the vocabulary is refused when the manifest
+  is read.
+- Every bound module must import.
+
+**Promotion rule.** When a later edition shares the logic, MOVE the module out
+of `editions/<id>/` into the shared tree and point BOTH manifests at the new
+dotted name — never bind one edition to another edition's module, and never
+copy the code. Promotion changes what the shared tree means, so it **requires a
+D-XX entry** recording why the two editions are now one implementation.
+(Stage 5 itself needs no new decision: it binds code that was already
+2025-only, with no change in behaviour.)
 
 ---
 
@@ -129,9 +177,17 @@ update `source_sha256`. Ordinary runtime stays offline.
 
 ## `necb_rules.json` — the umbrella
 
-Carries ONLY `article_coverage`: the umbrella has no rule data of its own
-(verdicts and iteration logic live in `compliance.py`, EUI arithmetic in
-`tiers.py` / `editions/necb2025/`).
+Carries `article_coverage` (verdicts and iteration logic live in
+`compliance.py`, EUI arithmetic in `tiers.py` / `editions/necb2025/`) plus one
+rule the umbrella itself needs per edition:
+
+- `unmet_cooling.minimum_allowance_h` — the absolute floor, in hours, under
+  8.4.1.2.(4)'s cooling unmet-hours allowance (`+10%` of the reference **or**
+  this, whichever is greater). 2025 declares `20.0`; 2020, whose wording has no
+  floor, declares `0.0`. **Every edition declares it**, and the reader takes it
+  with no default: an edition that forgot the key must fail, because a silent
+  `0.0` where the code meant `20.0` is a wrong determination, not a missing
+  feature.
 
 ## `envelope_rules.json`
 
@@ -242,9 +298,12 @@ clauses and the schedule tables renumbered `A-8.4.3.2.(1)-X` →
 
 Top keys: `autosize` (tank/loop sizing parameters), `efficiency` (Table 6.2.2.1
 performance: electric standby-loss inputs, gas/oil UEF bins, large-equipment Et,
-parasitic fractions, the 8.4.5.9/8.4.6.9 part-load curve spec),
-`solar_pool_minimums` (D-63: solar SEF + pool-heater minimums, applied only when
-the model carries the equipment), `article_coverage` and `provenance`.
+parasitic fractions, the 8.4.5.9/8.4.6.9 part-load curve spec, and
+`heat_pump` — the storage-type heat-pump water heater floor applied as the DX
+coil's rated COP, `minimum_cop` with the `metric` label the audit prints, 2020
+`EF >= 2.1` / 2025 `UEF >= 2.23`), `solar_pool_minimums` (D-63: solar SEF +
+pool-heater minimums, applied only when the model carries the equipment),
+`article_coverage` and `provenance`.
 
 **The formula strings are documentation, not configuration.** Rows like
 `"sl_w_small_low_volume": "40 + 0.2 x V_litres (V < 270, bottom inlet)"` record

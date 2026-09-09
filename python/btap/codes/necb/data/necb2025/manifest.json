@@ -11,6 +11,10 @@
   "literal_remaps": {
     "8.4.4.": "8.4.5."
   },
+  "behaviours": {
+    "archetype_eui_path": "btap.codes.necb.editions.necb2025.eui_archetypes",
+    "part11_ghg": "btap.codes.necb.editions.necb2025.part11_ghg"
+  },
   "rules": {
     "umbrella": "necb_rules.json",
     "envelope": "envelope_rules.json",
@@ -43,8 +47,8 @@
       "retrieved": "2026-07-22",
       "method": "transcribed",
       "source_verification": "manual",
-      "note": "As for 2020, with this edition's numbering: the reference-building subsection is 8.4.5 and 8.4.4 is the new Energy Use Intensity path. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch.",
-      "result_sha256": "61f670026c88f45182fc72e5996187ced962c5aadf0e2367fc878deb78036304"
+      "note": "As for 2020, with this edition's numbering: the reference-building subsection is 8.4.5 and 8.4.4 is the new Energy Use Intensity path. The status/how/code fields are the pipeline's self-declaration and have no external source to re-fetch. The 20 h floor under 8.4.1.2.(4)'s cooling unmet-hours allowance moved from a code literal in compliance.py into this file (unmet_cooling.minimum_allowance_h) on 2026-09-08, multi-edition plan Stage 5; the value is unchanged and the source is unchanged.",
+      "result_sha256": "f66564420f5599ac83bb0392bd34676a7d047fb66d0d54e65dd991b9966dd184"
     },
     "envelope_rules.json": {
       "source": "mcp:necb:2025",
@@ -354,8 +358,8 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "revision_addressable",
-      "note": "NECB 2025 Table 6.2.2.1 was retrieved in full via the MCP and compared to 2020: every formula this package implements is identical, so this edition's parameters are the same legacy-derived values, with the citations renumbered (8.4.5.20, 8.4.6.9). The one substantive 2025 change — storage-type heat-pump water heaters, EF >= 2.1 -> UEF >= 2.23 — is an equipment class this package does not model and is recorded in the file. The printed-table comparison is a cross-check, not the origin, and is not archived here.",
-      "result_sha256": "80c3a292bb99ee409e0fd57f637230d8ab99918ac3b79d0545869373d1767aac"
+      "note": "NECB 2025 Table 6.2.2.1 was retrieved in full via the MCP and compared to 2020: every formula this package implements is identical, so this edition's parameters are the same legacy-derived values, with the citations renumbered (8.4.5.20, 8.4.6.9). The one substantive 2025 change — storage-type heat-pump water heaters, EF >= 2.1 -> UEF >= 2.23 — is an equipment class this package does not model and is recorded in the file. The printed-table comparison is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
+      "result_sha256": "0b385e0acfecd2364f3ea4acc8ce25b2aab79c77e4a1197480e301f633d8dd81"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

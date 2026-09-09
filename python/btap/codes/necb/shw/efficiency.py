@@ -194,10 +194,14 @@ def _apply_instantaneous(water_heater, rules, fuel, capacity, audit):
 def apply_heat_pump_efficiency(hpwh, *, vintage="2020", audit=None):
     """Heat-pump water heater performance: the code floor (2020: EF >= 2.1;
     2025: UEF >= 2.23) applied as the DX coil's rated COP — CONSERVATIVE
-    (rated COP >= EF in practice since EF includes tank standby), audited."""
+    (rated COP >= EF in practice since EF includes tank standby), audited.
+
+    Floor and metric come from THIS edition's ``shw_rules.json``
+    (``efficiency.heat_pump``), not from an edition test in the code."""
     audit = audit if audit is not None else AuditLog()
-    floor = 2.23 if str(vintage) == "2025" else 2.1
-    metric = "UEF" if str(vintage) == "2025" else "EF"
+    heat_pump = SHW.rules(vintage)["efficiency"]["heat_pump"]
+    floor = heat_pump["minimum_cop"]
+    metric = heat_pump["metric"]
     coil = hpwh.dXCoil().to_CoilWaterHeatingAirToWaterHeatPump()
     if coil.empty():
         audit.warn("shw_efficiency",
