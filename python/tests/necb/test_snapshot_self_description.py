@@ -143,9 +143,28 @@ TOKEN_RE = re.compile(
 #: field.
 PROVENANCE_SEGMENTS = {"provenance", "_provenance", "derivation", "non_rule_keys_note"}
 
-COMPARATIVE_WORDS = (
-    "identical", "verified", "compared", "comparison", "renumber",
-    "same as", "differs", "changed vs", "changes_vs", "mirrors", "cross-check",
+#: Comparative-word STEMS, matched with a word-boundary regex rather than a
+#: literal substring list -- a literal list catches only the exact inflection
+#: someone happened to type. ``differs`` in a literal list, for instance,
+#: silently lets ``differ``/``differing``/``different``/``difference(s)``
+#: through: "...byte-identical to NECB2015/data/x.json but differ from
+#: NECB2011 values." must be caught exactly like the "differs" spelling is.
+#: Each entry here is a prefix matched against `\w*` so every inflection of
+#: the stem counts: ``differ`` covers differ/differs/differing/different/
+#: difference/differences; ``compar`` covers compare/compared/comparison/
+#: comparing; ``verif`` covers verify/verified/verification; ``renumb``
+#: covers renumber/renumbered/renumbering.
+COMPARATIVE_WORD_STEMS = ("differ", "compar", "verif", "renumb")
+
+#: Comparative phrases that are not simple word-stems -- matched literally.
+COMPARATIVE_LITERAL_PHRASES = (
+    "identical", "same as", "changed vs", "changes_vs", "mirrors", "cross-check",
+)
+
+_COMPARATIVE_WORD_RE = re.compile(
+    r"\b(?:" + "|".join(COMPARATIVE_WORD_STEMS) + r")\w*"
+    r"|" + "|".join(re.escape(phrase) for phrase in COMPARATIVE_LITERAL_PHRASES),
+    re.IGNORECASE,
 )
 
 #: What a clean origin sentence looks like (documentation only — see module
@@ -256,6 +275,32 @@ def _is_origin_identity_token(sentence: str, token_start: int, token_end: int) -
     )
 
 
+def _sentence_has_non_identity_other_edition_token(sentence: str, own_year: int) -> bool:
+    """Whether ``sentence`` contains an other-edition token (a token that
+    would itself enter the rule (c) branch: not this snapshot's own edition,
+    ``vintage`` included) that is NOT the object of an identity phrase.
+
+    This is what distinguishes the two shapes the identity-token exemption
+    must tell apart. "Rows are byte-identical to NECB2015/data/x.json but
+    differ from NECB2011 values." carries a second, non-identity token
+    (NECB2011) that already absorbs the sentence's one (c) finding, so the
+    identity object (NECB2015) stays exempt. The real necb2025 manifest
+    sentence for ``tables/space_types.json`` -- "...286 of the 308 records
+    are byte-identical to NECB2020/data/space_types.json and the remaining
+    22 differ only by keys..." -- names no OTHER edition at all: NECB2020 is
+    simultaneously the identity object AND the only token the comparative
+    word ``differ`` could possibly be describing, so it must not get a free
+    pass just because it also happens to sit inside the identity clause.
+    """
+    for match in TOKEN_RE.finditer(sentence):
+        named_year = _named_year(match)
+        if named_year is not None and named_year == own_year:
+            continue
+        if not _is_origin_identity_token(sentence, match.start(), match.end()):
+            return True
+    return False
+
+
 def _mask_identity_phrases(sentence: str) -> str:
     """``sentence`` with every full origin-identity phrase match (e.g.
     "byte-identical to NECB2015/data", comparative word and all) blanked out.
@@ -299,8 +344,7 @@ def _named_year(match: re.Match) -> int | None:
 
 
 def _has_comparative_word_in_sentence(sentence: str) -> bool:
-    lowered = sentence.lower()
-    return any(word in lowered for word in COMPARATIVE_WORDS)
+    return _COMPARATIVE_WORD_RE.search(sentence) is not None
 
 
 def _check_string(
@@ -335,14 +379,28 @@ def _check_string(
             sentence = text[sentence_start:sentence_end]
             token_start = match.start() - sentence_start
             token_end = match.end() - sentence_start
-            # The identity-phrase's own object token is exempt outright --
-            # it IS the "(byte-)identical to NECB20xx/data/..." clause's
-            # subject, not a reference to "another" edition. For every OTHER
-            # token, the comparative-word check runs against the sentence
-            # with any identity phrase(s) masked out: `identical` inside the
-            # identity clause itself must not count, but an unrelated
-            # comparative word elsewhere in the same sentence still does.
-            if _is_origin_identity_token(sentence, token_start, token_end):
+            # The identity-phrase's own object token is exempt from the
+            # comparative word its own clause is built from ("identical"),
+            # but that exemption is scoped to the identity CLAUSE, not
+            # broadcast to the whole sentence: a comparative word OUTSIDE
+            # the clause is still examined against every other-edition
+            # token in the sentence, including the identity object's own
+            # token, whenever it is the only such token there to answer for
+            # it. If another, non-identity other-edition token is also
+            # present in the sentence, that token already absorbs the
+            # finding, so the identity object stays exempt (the mixed
+            # sentence "Rows are byte-identical to NECB2015/data/x.json but
+            # differ from NECB2011 values." yields exactly one (c) finding,
+            # for NECB2011, not two). But when the identity object is the
+            # ONLY other-edition token in the sentence -- the real
+            # necb2025/necb2020 manifest shape "...286 of the 308 records
+            # are byte-identical to NECB2020/data/space_types.json and the
+            # remaining 22 differ only by keys..." -- there is no other
+            # token to absorb the comparison the sentence is plainly making
+            # about that same NECB2020 data, so the identity object is
+            # examined like any other token.
+            is_identity = _is_origin_identity_token(sentence, token_start, token_end)
+            if is_identity and _sentence_has_non_identity_other_edition_token(sentence, own_year):
                 pass
             elif _has_comparative_word_in_sentence(_mask_identity_phrases(sentence)):
                 problems_c.append(loc)
@@ -524,6 +582,20 @@ _FIXTURE_RULES_NECB2020 = {
             "note": "All 240 records are byte-identical to NECB2015/data/schedules.json."
         }
     },
+    # (c) word-STEM regression: the exact "but differ from" sentence a prior
+    # negative fixture silently rewrote to "differs" (the inflection the old
+    # literal `COMPARATIVE_WORDS` list happened to contain), which let the
+    # underlying bug -- `differ`/`differing`/`different`/`difference(s)` never
+    # matching at all -- go unpinned. Must yield exactly one (c) finding, for
+    # the NECB2011 token: NECB2015 is the identity phrase's own object and a
+    # second, non-identity other-edition token (NECB2011) is present to
+    # absorb the comparison, so NECB2015 stays exempt exactly as it does in
+    # ``scenario_mixed_identity_and_reference`` above.
+    "scenario_differ_stem_no_s": {
+        "provenance": {
+            "note": "Rows are byte-identical to NECB2015/data/x.json but differ from NECB2011 values."
+        }
+    },
     # (a) rule (a) must catch a forward reference to an edition that isn't
     # even enumerated yet -- TOKEN_RE's `NECB`-prefixed form has to accept
     # any `20\d\d`, not just the five enumerated editions, or a genuine
@@ -532,12 +604,36 @@ _FIXTURE_RULES_NECB2020 = {
     "scenario_unenumerated_edition_glued": {"article": "See NECB2030 for details"},
 }
 
+#: The exact pre-rewrite necb2020/necb2025 ``manifest.json``
+#: ``tables/space_types.json`` provenance sentence (see this module's
+#: ``TestGateCatchesKnownShapes.test_real_pre_rewrite_sentence_fails_rule_c``):
+#: NECB2020 is simultaneously the identity phrase's own object AND the only
+#: other-edition token in the sentence, so the ``differ`` clause has no OTHER
+#: token to answer for it -- the identity object itself must be examined
+#: normally, not given a blanket pass. Fixed in the real manifests by
+#: splitting the identity clause and the residue statement into separate
+#: sentences (see ``docs`` -- kept here only as the shape the gate must still
+#: catch if it ever regresses).
+_REAL_PRE_REWRITE_SPACE_TYPES_SENTENCE = (
+    "Checked against the oracle at REF while writing this block: 286 of the "
+    "308 records are byte-identical to NECB2020/data/space_types.json and "
+    "the remaining 22 differ only by keys inherited from the earlier "
+    "vintages."
+)
+
 _FIXTURE_RULES_NECB2025 = {
     # (b) `notes` OUTSIDE curves[] carrying another (older, non-forward)
     # edition -- the exact necb2025 efficiencies.json shape this review
     # found and fixed (equipment-row `notes` citing "NECB 2020" when the
     # row's own edition is 2025).
     "unitary_acs": [{"notes": "From NECB 2020, Table 5.2.12.1.-A"}],
+    # (c) the real pre-rewrite necb2025 manifest sentence: NECB2020 is both
+    # the identity object and the sentence's only other-edition token, so it
+    # must fail once the identity-token exemption is properly scoped to the
+    # identity clause rather than the whole sentence.
+    "scenario_real_pre_rewrite_sentence": {
+        "provenance": {"note": _REAL_PRE_REWRITE_SPACE_TYPES_SENTENCE}
+    },
 }
 
 
@@ -637,6 +733,48 @@ class TestGateCatchesKnownShapes(unittest.TestCase):
         schedules.json." -- the only other-edition token in the sentence is
         the identity phrase's own object, so no problem in any bucket."""
         self._assert_no_problem_mentions("scenario_byte_identical_multi_record")
+
+    def test_differ_stem_without_s_fails_rule_c(self):
+        """"Rows are byte-identical to NECB2015/data/x.json but differ from
+        NECB2011 values." (note: ``differ``, not ``differs``) -- the exact
+        sentence a prior negative fixture silently rewrote to the inflection
+        the old literal ``COMPARATIVE_WORDS`` list happened to contain,
+        which let the real bug (no stem match for ``differ``) through
+        ungated. Exactly one (c) finding, for the NECB2011 token -- NECB2015
+        stays exempt because NECB2011 is a second, non-identity other-edition
+        token present to absorb the comparison."""
+        matches = [
+            loc for loc in self._problems["c"]
+            if "scenario_differ_stem_no_s.provenance.note" in loc
+        ]
+        self.assertEqual(
+            len(matches), 1,
+            f"expected exactly one (c) finding, got: {matches}",
+        )
+        self.assertIn("NECB2011", matches[0])
+
+    def test_real_pre_rewrite_space_types_sentence_fails_rule_c(self):
+        """The REAL (pre-rewrite) necb2025 manifest sentence for
+        ``tables/space_types.json``: "...286 of the 308 records are
+        byte-identical to NECB2020/data/space_types.json and the remaining
+        22 differ only by keys inherited from the earlier vintages." NECB2020
+        is simultaneously the identity phrase's own object AND the sentence's
+        only other-edition token -- there is no other token to absorb the
+        ``differ`` comparison, so the identity object itself must fail.
+        Exactly one (c) finding, for the NECB2020 token; the unconditional
+        identity-token exemption let this whole sentence through with zero
+        problems, which is what the real manifests shipped before this fix
+        rewrote the prose into a clean origin sentence plus a token-free
+        residue statement."""
+        matches = [
+            loc for loc in self._problems["c"]
+            if "scenario_real_pre_rewrite_sentence.provenance.note" in loc
+        ]
+        self.assertEqual(
+            len(matches), 1,
+            f"expected exactly one (c) finding, got: {matches}",
+        )
+        self.assertIn("NECB2020", matches[0])
 
     def test_unenumerated_necb_edition_spaced_fails_rule_a(self):
         """"NECB 2030" in a 2020 snapshot -- TOKEN_RE's `NECB`-prefixed form
