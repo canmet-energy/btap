@@ -20,7 +20,7 @@ The rows are derived from the manifests, not listed by hand: an output appears h
 | `necb2020` | `lighting_rules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `4.2.1.6`, `4.3.2.10.-A`, `4.3.2.10.-B`, `section 4.2.2.2`, … (6 total) | **differs** |
 | `necb2020` | `shw_rules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `6.2.2.1`, `section 8.4.5.9` | **differs** |
 | `necb2020` | `tables/led_lighting.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `4.2.1.6`, `4.2.1.5` | **differs** |
-| `necb2020` | `tables/schedules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(1)-A`, `A-8.4.3.2.(1)-B`, `A-8.4.3.2.(1)-C`, `A-8.4.3.2.(1)-D`, … (11 total) | **differs** |
+| `necb2020` | `tables/schedules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(1)-A`, `A-8.4.3.2.(1)-B`, `A-8.4.3.2.(1)-C`, `A-8.4.3.2.(1)-D`, … (11 total) | **identical** |
 | `necb2020` | `tables/space_types.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(2)-A`, `A-8.4.3.2.(2)-B`, `4.2.1.6`, `4.2.1.5`, `4.3.2.10.-A` | **differs** |
 | `necb2020` | `tables/table_c1.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `C-1` | **differs** |
 | `necb2025` | `efficiencies.json` | `mcp:necb:2025` | `8.4.6.2`, `8.4.6.3`, `8.4.6.5.-A`, `8.4.6.5.-B`, … (11 total) | **differs** |
@@ -28,11 +28,11 @@ The rows are derived from the manifests, not listed by hand: an output appears h
 | `necb2025` | `shw_rules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `6.2.2.1`, `section 8.4.6.9` | **differs** |
 | `necb2025` | `tables/exterior_lighting.json` | `mcp:necb:2020` | `4.2.3.1.-A`, `4.2.3.1.-B`, `4.2.3.1.-C`, `4.2.3.1.-D`, `4.2.3.1.-E` | **differs** |
 | `necb2025` | `tables/led_lighting.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `4.2.1.6`, `4.2.1.5` | **differs** |
-| `necb2025` | `tables/schedules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(1)(b)-A`, `A-8.4.3.2.(1)(b)-B`, `A-8.4.3.2.(1)(b)-C`, `A-8.4.3.2.(1)(b)-D`, … (11 total) | **differs** |
+| `necb2025` | `tables/schedules.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(1)(b)-A`, `A-8.4.3.2.(1)(b)-B`, `A-8.4.3.2.(1)(b)-C`, `A-8.4.3.2.(1)(b)-D`, … (11 total) | **identical** |
 | `necb2025` | `tables/space_types.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `A-8.4.3.2.(2)-A`, `A-8.4.3.2.(2)-B`, `4.2.1.6`, `4.2.1.5`, `4.3.2.10.-A` | **differs** |
 | `necb2025` | `tables/table_c1.json` | `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0` | `C-1` | **differs** |
 
-Totals: **15** differs.
+Totals: **2** identical, **13** differs.
 
 ## Per file
 
@@ -306,7 +306,7 @@ Totals: **15** differs.
 
 ### `necb2020` — `tables/schedules.json`
 
-- **Verdict:** differs
+- **Verdict:** identical
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `A-8.4.3.2.(1)-A`, `A-8.4.3.2.(1)-B`, `A-8.4.3.2.(1)-C`, `A-8.4.3.2.(1)-D`, `A-8.4.3.2.(1)-E`, `A-8.4.3.2.(1)-F`, `A-8.4.3.2.(1)-G`, `A-8.4.3.2.(1)-H`, `A-8.4.3.2.(1)-I`, `A-8.4.3.2.(1)-J`, `A-8.4.3.2.(1)-K`
 - **Mapping:** each shipped `NECB-<letter>-<what>` Hourly record is joined to this edition's operating-schedule table for that LETTER by (Category, Day) — `Occupancy`→`Occupants, fraction occupied`, `Lighting`→`Lighting, fraction ON`, `Electric-Equipment`→`Receptacle Equipment, fraction of load`, `FAN`→`Fans`, `Service Water Heating`→`Service Water Heating System, fraction of load`, and the two `Thermostat Setpoint-*` records → `Cooling System, °C` / `Heating System, °C`; `Default|Wkdy`→`Mon-Fri`, `Sat`→`Sat`, `Sun|Hol`→`Sun`. The 24 `values` are compared against the 24 hourly columns in clock order (`12p` noon, `12a` midnight, per the server's documented column-label collision)
@@ -317,8 +317,8 @@ Totals: **15** differs.
 | shipped Constant records (no edition row exists) | 9 |
 | records matched | 231 |
 | records unmatched | 0 |
-| cells identical | 5178 |
-| cells differing | 33 |
+| cells identical | 5211 |
+| cells differing | 0 |
 | cells the edition states as a word, not a number | 333 |
 | Schedule I `Fans` cells this edition prints `On` | 33 |
 | Schedule I `Fans` cells this edition prints `Off` | 39 |
@@ -327,47 +327,7 @@ Totals: **15** differs.
 
 > 9 Constant records (the `NECB-*-…` design-day defaults and `Always On`) have no counterpart in the operating-schedule tables at all: the edition publishes hourly fractions only
 
-> **Schedule I is DORMANT DATA, not a live difference.** This edition's Schedule I `Fans` row prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun; the shipped `NECB-I-Fan` carries 0.0 in all 72, so the 39 `Off` cells agree and the 33 `On` cells are the entire difference. Nothing in product Python consumes it: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. **These cells are NOT changed here**: a data correction is a D-89 adoption step, not a matcher fix
-
-<details><summary>Every differing leaf (33)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `NECB-I-Fan [Default|Wkdy] hour 1 (12a)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 15 (2p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 16 (3p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 17 (4p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 18 (5p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 19 (6p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 20 (7p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 21 (8p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 22 (9p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 23 (10p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 24 (11p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 1 (12a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 11 (10a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 12 (11a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 13 (12p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 14 (1p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 15 (2p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 16 (3p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 17 (4p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 18 (5p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 19 (6p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 20 (7p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 21 (8p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 22 (9p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 23 (10p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 24 (11p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 8 (7a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 9 (8a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 10 (9a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 11 (10a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 12 (11a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 13 (12p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 14 (1p)` | `0.0` | `On` |
-
-</details>
+> **Schedule I's `Fans` row now carries this edition's own values — a DORMANT data correction.** The edition prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun. The shipped `NECB-I-Fan` carried 0.0 in all 72 until **2026-09-10**, when the 33 `On` cells were set to 1.0 — the value every other shipped fan schedule uses for an on fan — from this edition's archived payload; the 39 `Off` cells were already 0.0 and did not move. No output moved with them — nothing in product Python consumes the row: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. Wiring a fan to these cells is a separate decision, not a data correction
 
 ### `necb2020` — `tables/space_types.json`
 
@@ -1151,7 +1111,7 @@ Differing leaves by kind:
 
 ### `necb2025` — `tables/schedules.json`
 
-- **Verdict:** differs
+- **Verdict:** identical
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `A-8.4.3.2.(1)(b)-A`, `A-8.4.3.2.(1)(b)-B`, `A-8.4.3.2.(1)(b)-C`, `A-8.4.3.2.(1)(b)-D`, `A-8.4.3.2.(1)(b)-E`, `A-8.4.3.2.(1)(b)-F`, `A-8.4.3.2.(1)(b)-G`, `A-8.4.3.2.(1)(b)-H`, `A-8.4.3.2.(1)(b)-I`, `A-8.4.3.2.(1)(b)-J`, `A-8.4.3.2.(1)(b)-K`
 - **Mapping:** each shipped `NECB-<letter>-<what>` Hourly record is joined to this edition's operating-schedule table for that LETTER by (Category, Day) — `Occupancy`→`Occupants, fraction occupied`, `Lighting`→`Lighting, fraction ON`, `Electric-Equipment`→`Receptacle Equipment, fraction of load`, `FAN`→`Fans`, `Service Water Heating`→`Service Water Heating System, fraction of load`, and the two `Thermostat Setpoint-*` records → `Cooling System, °C` / `Heating System, °C`; `Default|Wkdy`→`Mon-Fri`, `Sat`→`Sat`, `Sun|Hol`→`Sun`. The 24 `values` are compared against the 24 hourly columns in clock order (`12p` noon, `12a` midnight, per the server's documented column-label collision)
@@ -1162,8 +1122,8 @@ Differing leaves by kind:
 | shipped Constant records (no edition row exists) | 9 |
 | records matched | 231 |
 | records unmatched | 0 |
-| cells identical | 5178 |
-| cells differing | 33 |
+| cells identical | 5211 |
+| cells differing | 0 |
 | cells the edition states as a word, not a number | 333 |
 | Schedule I `Fans` cells this edition prints `On` | 33 |
 | Schedule I `Fans` cells this edition prints `Off` | 39 |
@@ -1172,47 +1132,7 @@ Differing leaves by kind:
 
 > 9 Constant records (the `NECB-*-…` design-day defaults and `Always On`) have no counterpart in the operating-schedule tables at all: the edition publishes hourly fractions only
 
-> **Schedule I is DORMANT DATA, not a live difference.** This edition's Schedule I `Fans` row prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun; the shipped `NECB-I-Fan` carries 0.0 in all 72, so the 39 `Off` cells agree and the 33 `On` cells are the entire difference. Nothing in product Python consumes it: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. **These cells are NOT changed here**: a data correction is a D-89 adoption step, not a matcher fix
-
-<details><summary>Every differing leaf (33)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `NECB-I-Fan [Default|Wkdy] hour 1 (12a)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 15 (2p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 16 (3p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 17 (4p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 18 (5p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 19 (6p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 20 (7p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 21 (8p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 22 (9p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 23 (10p)` | `0.0` | `On` |
-| `NECB-I-Fan [Default|Wkdy] hour 24 (11p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 1 (12a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 11 (10a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 12 (11a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 13 (12p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 14 (1p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 15 (2p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 16 (3p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 17 (4p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 18 (5p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 19 (6p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 20 (7p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 21 (8p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 22 (9p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 23 (10p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sat] hour 24 (11p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 8 (7a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 9 (8a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 10 (9a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 11 (10a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 12 (11a)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 13 (12p)` | `0.0` | `On` |
-| `NECB-I-Fan [Sun|Hol] hour 14 (1p)` | `0.0` | `On` |
-
-</details>
+> **Schedule I's `Fans` row now carries this edition's own values — a DORMANT data correction.** The edition prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun. The shipped `NECB-I-Fan` carried 0.0 in all 72 until **2026-09-10**, when the 33 `On` cells were set to 1.0 — the value every other shipped fan schedule uses for an on fan — from this edition's archived payload; the 39 `Off` cells were already 0.0 and did not move. No output moved with them — nothing in product Python consumes the row: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. Wiring a fan to these cells is a separate decision, not a data correction
 
 ### `necb2025` — `tables/space_types.json`
 

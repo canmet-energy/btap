@@ -1476,21 +1476,40 @@ def compare_schedules(res: FileResult, numbers: list[str]) -> None:
     if on_cells or off_cells:
         res.counts["Schedule I `Fans` cells this edition prints `On`"] = on_cells
         res.counts["Schedule I `Fans` cells this edition prints `Off`"] = off_cells
-        res.notes.append(
-            f"**Schedule I is DORMANT DATA, not a live difference.** This "
-            f"edition's Schedule I `Fans` row prints **{on_cells} `On`** cells "
-            f"and **{off_cells} `Off`** cells across Mon-Fri / Sat / Sun; the "
-            f"shipped `NECB-I-Fan` carries 0.0 in all {on_cells + off_cells}, so "
-            f"the {off_cells} `Off` cells agree and the {on_cells} `On` cells are "
-            "the entire difference. Nothing in product Python consumes it: no "
-            "module reads `exhaust_schedule`, the reference air loops inherit "
-            "the PROPOSED system's operating schedule instead "
-            "(`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the "
-            "space-type references spell the name `NECB-I-FAN` while the "
-            "schedule table defines `NECB-I-Fan` — a case mismatch that would "
-            "have to be resolved before any reader could find it. **These cells "
-            "are NOT changed here**: a data correction is a D-89 adoption step, "
-            "not a matcher fix")
+        # Whether the shipped row still disagrees is MEASURED, never assumed:
+        # the 33 `On` cells were corrected on 2026-09-10 and the note must say
+        # so while staying truthful if they ever drift back.
+        outstanding = [leaf for leaf, _a, _b in res.differences
+                       if leaf.startswith("NECB-I-Fan ")]
+        dormant = (
+            "nothing in product Python consumes the row: no module reads "
+            "`exhaust_schedule`, the reference air loops inherit the PROPOSED "
+            "system's operating schedule instead (`hvac/reference.py:~843-866`, "
+            "D-14, Article 8.4.3.2.(1)), and the space-type references spell the "
+            "name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a "
+            "case mismatch that would have to be resolved before any reader "
+            "could find it. Wiring a fan to these cells is a separate decision, "
+            "not a data correction")
+        if outstanding:
+            res.notes.append(
+                f"**Schedule I is DORMANT DATA, not a live difference.** This "
+                f"edition's Schedule I `Fans` row prints **{on_cells} `On`** "
+                f"cells and **{off_cells} `Off`** cells across Mon-Fri / Sat / "
+                f"Sun; the shipped `NECB-I-Fan` carries 0.0 in "
+                f"{len(outstanding)} cell(s) this edition states as `On`, which "
+                "is the entire difference. " + dormant[0].upper() + dormant[1:])
+        else:
+            res.notes.append(
+                f"**Schedule I's `Fans` row now carries this edition's own "
+                f"values — a DORMANT data correction.** The edition prints "
+                f"**{on_cells} `On`** cells and **{off_cells} `Off`** cells "
+                f"across Mon-Fri / Sat / Sun. The shipped `NECB-I-Fan` carried "
+                f"0.0 in all {on_cells + off_cells} until **2026-09-10**, when "
+                f"the {on_cells} `On` cells were set to 1.0 — the value every "
+                f"other shipped fan schedule uses for an on fan — from this "
+                f"edition's archived payload; the {off_cells} `Off` cells were "
+                f"already 0.0 and did not move. No output moved with them — "
+                + dormant)
 
 
 # --------------------------------------------------------------------------
