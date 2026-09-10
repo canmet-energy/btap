@@ -625,7 +625,7 @@
           "detail": "the part-load article: this edition's own quadratic FHeatPLC coefficients [0.021826, 0.97763, 0.000543] are already carried verbatim in the file as code_fheatplc, and the shipped cubic is the probe-verified image of PLF(x) = x / FHeatPLC(x) for the EnergyPlus degradation-divisor field (D-53); this edition publishes no table for the curve itself"
         }
       ],
-      "result_sha256": "7c35a243dda0919edf7162c4eccb3913934fd89476b890183787f8c3f45c52fe"
+      "result_sha256": "f6a3a8719a47493560097af9952e03228f0e66f7f1fa9245089c2e9b281f9ba3"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

@@ -72,7 +72,7 @@
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -87,7 +87,7 @@
       "minimum_thermal_efficiency": 0.9,
       "minimum_combustion_efficiency": null,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -102,7 +102,7 @@
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.9,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -117,7 +117,7 @@
       "minimum_thermal_efficiency": 1.0,
       "minimum_combustion_efficiency": null,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -132,7 +132,7 @@
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -147,7 +147,7 @@
       "minimum_thermal_efficiency": 0.87,
       "minimum_combustion_efficiency": null,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     },
     {
       "fluid_type": "Hot Water",
@@ -162,7 +162,7 @@
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": 0.88,
       "efffplr": "BOILER-EFFFPLR",
-      "notes": "From NECB 2020 (first printing) Table 5.2.12.1.-N"
+      "notes": "NECB 2025 Table 5.2.12.1.-N"
     }
   ],
   "furnaces": [
@@ -179,7 +179,7 @@
       "minimum_thermal_efficiency": null,
       "minimum_combustion_efficiency": null,
       "efffplr": "FURNACE-EFFPLR",
-      "notes": "From NECB 2020 Table 5.2.12.1.-O"
+      "notes": "NECB 2025 Table 5.2.12.1.-O"
     },
     {
       "fluid_type": "Air",
@@ -194,7 +194,7 @@
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
       "efffplr": "FURNACE-EFFPLR",
-      "notes": "From NECB 2020 Table 5.2.12.1.-O"
+      "notes": "NECB 2025 Table 5.2.12.1.-O"
     },
     {
       "fluid_type": "Air",
@@ -209,7 +209,7 @@
       "minimum_thermal_efficiency": 0.81,
       "minimum_combustion_efficiency": null,
       "efffplr": "FURNACE-EFFPLR",
-      "notes": "Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O"
+      "notes": "Added to capture any capacities outside the range specified in NECB 2025 Table 5.2.12.1.-O"
     }
   ],
   "chillers": [
@@ -1570,7 +1570,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1592,7 +1592,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1614,7 +1614,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1636,7 +1636,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1658,7 +1658,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1680,7 +1680,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1702,7 +1702,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A1"
+      "notes": "NECB 2025 Table 5.2.12.1.-A1"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1724,7 +1724,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1746,7 +1746,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1768,7 +1768,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1790,7 +1790,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1812,7 +1812,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1834,7 +1834,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1856,7 +1856,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1878,7 +1878,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1900,7 +1900,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1922,7 +1922,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1944,7 +1944,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1966,7 +1966,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -1988,7 +1988,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "PTAC",
@@ -2011,7 +2011,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "PTAC",
@@ -2034,7 +2034,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "PTAC",
@@ -2057,7 +2057,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "PTAC",
@@ -2080,7 +2080,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "PTAC",
@@ -2103,7 +2103,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "PTAC",
@@ -2126,7 +2126,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-G"
+      "notes": "NECB 2025 Table 5.2.12.1.-G"
     },
     {
       "equipment_type": "Air Conditioners",
@@ -2282,7 +2282,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2304,7 +2304,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2326,7 +2326,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2348,7 +2348,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2370,7 +2370,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2392,7 +2392,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2414,7 +2414,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2436,7 +2436,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2458,7 +2458,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2480,7 +2480,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2502,7 +2502,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2524,7 +2524,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2546,7 +2546,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2568,7 +2568,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2590,7 +2590,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2612,7 +2612,7 @@
       "cool_eir_ft": "DXCOOL-REF-COOLEIRFT",
       "cool_eir_fflow": "DXCOOL-REF-COOLEIRFFLOW",
       "cool_plf_fplr": "DXCOOL-REF-COOLPLFFPLR",
-      "notes": "From NECB 2020, Table 5.2.12.1.-A."
+      "notes": "NECB 2025 Table 5.2.12.1.-A."
     }
   ],
   "heat_pumps_heating": [
@@ -2635,7 +2635,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-B"
+      "notes": "NECB 2025 Table 5.2.12.1.-A"
     },
     {
       "equipment_type": "Heat Pumps",
@@ -2677,7 +2677,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.25,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2700,7 +2700,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.25,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2723,7 +2723,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2746,7 +2746,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2769,7 +2769,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2792,7 +2792,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2815,7 +2815,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     },
@@ -2838,7 +2838,7 @@
       "heat_eir_ft": "DXHEAT-REF-EIRFT",
       "heat_eir_fflow": "DXHEAT-REF-EIRFFLOW",
       "heat_plf_fplr": "DXHEAT-REF-PLFFPLR",
-      "notes": "From NECB 2020, Table  5.2.12.1.-A",
+      "notes": "NECB 2025 Table 5.2.12.1.-A",
       "minimum_coefficient_of_performance_heating_low_temp": 2.05,
       "low_temp_note": "COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational)"
     }

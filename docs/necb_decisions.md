@@ -120,7 +120,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-85** — VRF Table-I class selection and exact minimum assignment _(runtime)_
 - **D-86** — R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition _(process)_
 - **D-87** — R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output _(process)_
-- **D-88** — A snapshot names another edition only as its origin; neutral performance-curve identifiers (R-N) _(process)_
+- **D-88** — A snapshot names another edition only as its origin; source-neutral performance-curve identifiers (R-N) _(process)_
 
 <!-- TOC END -->
 
@@ -4911,7 +4911,8 @@ citation surface survived the rename.
 
 **Decided:** 2026-09-09. An edition's data snapshot names another edition
 only as its ORIGIN, never comparatively and never forward; and the
-performance curves carry edition-neutral identifiers.
+performance curves carry source-neutral identifiers (amended 2026-09-10 —
+see "Amendment" below).
 
 **The policy** (enforced by `tests/necb/test_snapshot_self_description.py`):
 
@@ -4966,3 +4967,46 @@ change and waits for D-89.
 This decision supersedes the gem-split entry's remark that renaming the
 curves was churn with no behavioural payoff: the payoff is that an NECB 2025
 determination no longer emits objects named after NECB 2011.
+
+**Amendment (2026-09-10, Sol's review of PRs #43/#44/#45, item 4).** "Edition-
+neutral" overstated what Phase A actually proved: the 31 curves and the SWH
+curve were renamed name-only, with no coefficient check gating the rename,
+and `hvac/efficiency.py`'s `curve()` (around line 1009) reuses ANY existing
+model curve matching by name, unvalidated — Sol's probe showed an existing
+`BOILER-EFFFPLR` carrying a diverged coefficient (99.0) is returned
+unchanged rather than rebuilt. A neutral name is therefore safe only for as
+long as the underlying curve is actually the same object across the
+editions that share it; nothing in Phase A enforced that once the two
+catalogs (snapshot and `btap.modeling`'s own DX catalog) can drift
+independently.
+
+The corrected policy: **a curve keeps a neutral name only while it is
+VERIFIED IDENTICAL across the editions that share it.** A curve whose
+coefficients or form diverge between editions must either (a) take a
+code-qualified name (`BOILER-EFFFPLR-necb2025`, not the bare
+`BOILER-EFFFPLR`), so the two catalogs cannot silently collide under one
+identifier, OR (b) have its loader validate form, coefficients and bounds
+before reusing an existing model object of the same name, so a name match
+alone is never sufficient. Option (b) — the loader change — is D-89's
+behavioural item, and it also CLOSES deferred finding DF-4: until it lands,
+`hvac/efficiency.py:1009-1017` is the plain, unvalidated by-name lookup
+described above, and this is the tree's actual current behaviour, not a
+theoretical risk. The two rules are complementary, not a choice made once:
+even after D-89's loader validates on reuse, a curve already known to
+diverge (per the Phase B coefficient verification, above) still gets a
+code-qualified name, because the loader validating on REUSE does not by
+itself stop a divergent curve from being *authored* under the shared bare
+name in the first place.
+
+This amendment supersedes only the word "edition-neutral" in this decision's
+own title and body; it changes no coefficient and no curve name shipped by
+Phase A. As of this amendment the two snapshots' curve blocks are still
+byte-identical to each other (both retain the same NECB 2011-origin values
+Phase A merely renamed), so no curve needs a code-qualified name TODAY — the
+Phase B divergences quoted above are each edition's inherited value against
+its OWN printed table, not yet a divergence between the two snapshots.
+Adopting Phase B (D-89) is exactly the event that would make some of these
+curves diverge from each other for the first time, which is why the loader
+validation or the code-qualified naming has to be in place before, not
+after, that re-freeze lands. This amendment changes no other part of the
+D-88 policy (origin-only, no forward references, no emitted comparison).
