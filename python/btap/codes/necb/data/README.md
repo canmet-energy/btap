@@ -91,8 +91,10 @@ D-XX entry** recording why the two editions are now one implementation.
 2025-only, with no change in behaviour.)
 
 **Self-description rule (D-88).** A snapshot names another edition ONLY as
-its origin, in provenance fields (`provenance`, `notes`, `derivation`,
-`*_note`, `*_provenance`), never comparatively ("identical to 2020",
+its origin, in provenance fields (`provenance`, `_provenance`,
+`derivation`, `*_note`, `*_provenance`, and `curves[].notes` specifically —
+NOT every `notes` key: an equipment row's own `notes` is not provenance and
+must cite its own edition), never comparatively ("identical to 2020",
 "renumbered from") and never forward (a 2020 file does not know 2025
 exists). Everything the snapshot emits, consumes or displays — curve
 identifiers, `article_coverage` prose, table columns, rule keys — speaks in
@@ -101,6 +103,20 @@ its own numbering. Comparisons belong in the generated
 `byte_identical_to`. `tests/necb/test_snapshot_self_description.py`
 enforces it; `scripts/refresh_provenance_hashes.py` refreshes the result
 hashes after any data edit.
+
+**Curve identifiers are SOURCE-neutral, not edition-neutral.** A performance
+curve keeps one neutral name (`BOILER-EFFFPLR`, no edition suffix) only
+while it is VERIFIED IDENTICAL across every edition that shares it. A curve
+whose coefficients or form diverge between editions must either take a
+code-qualified name (`BOILER-EFFFPLR-necb2025`) or have its loader validate
+form, coefficients and bounds before reusing an existing model object of
+the same name — that loader change is D-89's behavioural item. **Today's
+limitation:** `hvac/efficiency.py`'s `curve()` (around line 1009) reuses
+ANY existing model curve that matches by name, unvalidated — an existing
+`BOILER-EFFFPLR` with a diverged coefficient is returned unchanged (deferred
+finding DF-4). Until D-89 lands, do not rely on curve-name matching alone
+once an edition's coefficients are known to diverge; name it distinctly
+instead.
 
 ---
 

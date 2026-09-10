@@ -16,17 +16,25 @@ JSON numbers are excluded by construction — walking ``str`` nodes only):
     A token naming the snapshot's OWN edition is never a (b) problem — that
     is self-identification, not a reference to "another" edition.
 (c) **no comparison in provenance** — inside the provenance key set, a
-    token within 80 characters of a comparative word (``identical``,
+    token in the same SENTENCE as a comparative word (``identical``,
     ``verified``, ``compared``, ``comparison``, ``renumber``, ``same as``,
     ``differs``, ``changed vs``, ``changes_vs``, ``mirrors``,
-    ``cross-check``) is a problem. The plan's origin-phrase allowlist
-    (``vendored from``, ``inherited from``, ``From NECB 2011 Table``,
-    ``deep merge along``, ``retrieved via``, ``oracle``) is NOT applied as
-    an override: a comparative word right next to it is still a problem — a
-    sentence can carry both an origin clause and a comparison clause, and
-    the comparison half is what this rule forbids. The allowlist is kept
-    here only as a record of what a clean origin sentence looks like (one
-    with no comparative word in it at all).
+    ``cross-check``) is a problem, where a sentence ends at a ``.`` or
+    ``;`` followed by whitespace or the end of the string (see
+    ``_sentence_span``). A fixed character window can miss a comparative
+    word in a long sentence or catch one from an unrelated neighbouring
+    sentence; the sentence boundary is the actual unit of meaning. The
+    plan's origin-phrase allowlist (``vendored from``, ``inherited from``,
+    ``From NECB 2011 Table``, ``deep merge along``, ``retrieved via``,
+    ``oracle``) is NOT applied as an override: a comparative word anywhere
+    in the same sentence is still a problem — a sentence can carry both an
+    origin clause and a comparison clause, and the comparison half is what
+    this rule forbids. The allowlist is kept here only as a record of what
+    a clean origin sentence looks like (one with no comparative word in it
+    at all). The one exception is the origin-identity shape (see
+    ``_ORIGIN_IDENTITY_RE``): "byte-identical to NECB20xx/data/..." is the
+    only honest way to state an unmodified-copy fact, so a token sharing
+    its sentence with that exact phrase is not a (c) problem.
 
 Two keys are flagged by NAME, not by token content, because their existence
 is the problem regardless of what they say: a key literally named
@@ -46,17 +54,22 @@ gate's SDK-free subprocess script
 :func:`check_provenance`, so the self-description contract is proven to hold
 with only one edition's snapshot present too.
 
-Expected to FAIL on today's tree with a large inventory (curve identifiers
-carrying the ``-NECB2011`` suffix, dead vendored columns naming another
-edition, comparative provenance prose, and a handful of necb2020 forward
-references to 2025) until the snapshot cleanup in the plan's deliverables
-1-3 lands.
+Passes on today's tree: the R-N re-freeze (deliverables 1-3 of the plan)
+already stripped the ``-NECB2011`` curve-identifier suffix, the dead
+vendored columns and the comparative provenance prose; the Sol review
+follow-up (items 4-5 of "Sol's review of PRs #43/#44/#45") narrowed the
+``notes`` exemption to ``curves[].notes``, rewrote the resulting exposure
+(the necb2025 equipment rows' stale "From NECB 2020" citations), switched
+rule (c) to a sentence-level check, and fixed the necb2020
+``solar_pool_minimums`` forward reference to ``table-audit-necb-2020-
+2025.md``.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -66,15 +79,30 @@ import btap.codes.necb as necb_pkg
 #: `NECB2020`, `NECB 2020`, or a bare `2020` not glued to another digit or a
 #: `.` (so table numbers like `8.4.5.2` and dates like `2026-07-22` never
 #: match), plus the bare legacy word `vintage`.
+#:
+#: The trailing guard is `(?!\d|\.\d)`, not a plain `(?![\d.])`: a year is
+#: excluded only when followed by another digit, OR by a `.` that itself is
+#: followed by a digit (a table/article number like `8.4.4.2020.1`). A `.`
+#: followed by anything else -- end of string, a letter, another `.` -- does
+#: NOT exclude the year, so `2025.md` and a bare trailing `2025.` both match.
+#: Without this split, the old `(?![\d.])` rejected a bare year merely for
+#: having *any* `.` after it, which silently let a forward reference like
+#: "...-2020-2025.md" through ungated for its 2025 half.
 TOKEN_RE = re.compile(
     r"NECB ?20(?P<necb_yr>11|15|17|20|25)"
-    r"|(?<![\d.])20(?P<bare_yr>11|15|17|20|25)(?![\d.])"
+    r"|(?<![\d.])20(?P<bare_yr>11|15|17|20|25)(?!\d|\.\d)"
     r"|\b(?P<vintage>vintage)\b",
     re.IGNORECASE,
 )
 
 #: Path segments that put a string inside the provenance key set.
-PROVENANCE_SEGMENTS = {"provenance", "_provenance", "notes", "derivation", "non_rule_keys_note"}
+#: ``notes`` is deliberately NOT listed here: D-88 names ``curves[].notes``
+#: specifically, not every ``notes`` key. A bare ``curves`` segment followed
+#: by an integer index is handled separately in ``_in_provenance_key_set``;
+#: an equipment row's own ``notes`` (``unitary_acs[].notes``, and so on) is
+#: NOT provenance and must speak in its own edition's terms like any other
+#: field.
+PROVENANCE_SEGMENTS = {"provenance", "_provenance", "derivation", "non_rule_keys_note"}
 
 COMPARATIVE_WORDS = (
     "identical", "verified", "compared", "comparison", "renumber",
@@ -93,7 +121,12 @@ COMPARATIVE_ALLOWLIST = (
 NAMED_COMPARISON_KEYS_UNDER_PROVENANCE = ("verification",)
 NAMED_COMPARISON_KEY_PREFIXES_UNDER_PROVENANCE = ("changes_vs_",)
 
-COMPARATIVE_RADIUS = 80
+#: A sentence boundary: `.` or `;` immediately followed by whitespace or the
+#: end of the string. Table/article numbers (`8.4.5.2`) and dotted paths
+#: never trigger this -- their `.` is always followed by another digit or a
+#: path segment character, never whitespace or end-of-string.
+_SENTENCE_BOUNDARY_RE = re.compile(r"[.;](?=\s|$)")
+
 EXCERPT_RADIUS = 60
 
 
@@ -113,8 +146,14 @@ def _path_str(path: list) -> str:
 
 
 def _in_provenance_key_set(path: list) -> bool:
-    for seg in path:
+    for i, seg in enumerate(path):
         if not isinstance(seg, str):
+            continue
+        if seg == "notes":
+            # `curves[*].notes` only -- the segment directly before this
+            # one is a list index, and the one before THAT is `curves`.
+            if i >= 2 and path[i - 2] == "curves" and isinstance(path[i - 1], int):
+                return True
             continue
         if seg in PROVENANCE_SEGMENTS:
             return True
@@ -126,13 +165,34 @@ def _in_provenance_key_set(path: list) -> bool:
 #: "byte-identical to NECB2015/data/schedules.json" is an ORIGIN statement: it
 #: says the shipped rows are an unmodified copy of that oracle file. The
 #: comparative word is the only honest way to say so, so this one shape is
-#: exempt from (c) when the token sits inside an oracle data path.
+#: exempt from (c) when it sits in the same SENTENCE as the token (see
+#: ``_sentence_span`` -- a sentence, not a fixed character window, because a
+#: long origin sentence can legitimately name several other editions before
+#: ever reaching the "byte-identical to NECB20xx/..." clause that justifies
+#: them, e.g. "NECB2017 and NECB2020 ship no schedules table, so the merge
+#: resolves to NECB2015's: ... all 240 shipped records are byte-identical to
+#: NECB2015/data/schedules.json.").
 _ORIGIN_IDENTITY_RE = re.compile(r"(byte-)?identical to (legacy )?(openstudio-standards )?NECB20\d\d/(data|lighting)")
 
 
-def _is_origin_identity(text: str, start: int) -> bool:
-    window = text[max(0, start - 60):start + 40]
-    return bool(_ORIGIN_IDENTITY_RE.search(window))
+def _sentence_span(text: str, pos: int) -> tuple[int, int]:
+    """The ``[start, end)`` span of the sentence containing character
+    ``pos``, where a sentence ends at a ``.`` or ``;`` followed by
+    whitespace or the end of the string (see ``_SENTENCE_BOUNDARY_RE``)."""
+    start = 0
+    end = len(text)
+    for m in _SENTENCE_BOUNDARY_RE.finditer(text):
+        boundary_end = m.end()
+        if boundary_end <= pos:
+            start = boundary_end
+        elif boundary_end > pos:
+            end = boundary_end
+            break
+    return start, end
+
+
+def _is_origin_identity(sentence: str) -> bool:
+    return bool(_ORIGIN_IDENTITY_RE.search(sentence))
 
 
 def _excerpt(text: str, start: int, end: int) -> str:
@@ -152,11 +212,9 @@ def _named_year(match: re.Match) -> int | None:
     return None  # the bare word "vintage" -- names no specific edition
 
 
-def _has_nearby_comparative_word(text: str, start: int, end: int) -> bool:
-    lo = max(0, start - COMPARATIVE_RADIUS)
-    hi = min(len(text), end + COMPARATIVE_RADIUS)
-    window = text[lo:hi].lower()
-    return any(word in window for word in COMPARATIVE_WORDS)
+def _has_comparative_word_in_sentence(sentence: str) -> bool:
+    lowered = sentence.lower()
+    return any(word in lowered for word in COMPARATIVE_WORDS)
 
 
 def _check_string(
@@ -180,13 +238,18 @@ def _check_string(
             # not a reference to "another" edition, so it is not a problem.
             if named_year is None or named_year != own_year:
                 problems_b.append(loc)
-        elif (named_year is None or named_year != own_year) \
-                and _has_nearby_comparative_word(text, match.start(), match.end()) \
-                and not _is_origin_identity(text, match.start()):
+        elif named_year is None or named_year != own_year:
             # (c) no comparison in provenance -- for OTHER editions only:
-            # a snapshot verifying itself against its own edition's
-            # printed table is provenance, not comparison.
-            problems_c.append(loc)
+            # a snapshot verifying itself against its own edition's printed
+            # table is provenance, not comparison. Sentence-level, not a
+            # fixed character window: a comparative word ANYWHERE in the
+            # same sentence as the token is a problem, so a long sentence
+            # can't smuggle a comparison past a narrow radius.
+            sentence_start, sentence_end = _sentence_span(text, match.start())
+            sentence = text[sentence_start:sentence_end]
+            if _has_comparative_word_in_sentence(sentence) \
+                    and not _is_origin_identity(sentence):
+                problems_c.append(loc)
 
 
 def _check_named_comparison_key(key: str, path: list, rel_file: str, problems_b: list[str]) -> None:
@@ -294,6 +357,133 @@ class TestSnapshotSelfDescription(unittest.TestCase):
             expected["a"] + expected["b"] + expected["c"], problems,
             "check_self_description must match find_problems' concatenation",
         )
+
+
+#: The two fixture snapshots for ``TestGateCatchesKnownShapes``, keyed by
+#: code id exactly as ``find_problems`` expects (directory name == manifest
+#: ``id`` == what ``own_year = int(code_id[-4:])`` reads). ``necb2020``
+#: carries every scenario whose own edition is 2020; ``necb2025`` carries
+#: the one scenario (stale equipment-row ``notes``) whose own edition needs
+#: to be NEWER than the referenced 2020, so it cannot also be a forward
+#: reference under rule (a).
+_FIXTURE_MANIFEST = {
+    "necb2020": {"id": "necb2020", "family": "necb", "edition": "2020", "label": "NECB 2020 (fixture)"},
+    "necb2025": {"id": "necb2025", "family": "necb", "edition": "2025", "label": "NECB 2025 (fixture)"},
+}
+
+#: A sentence with the comparative word "verified" more than 80 characters
+#: after the "NECB 2011" token, no `.`/`;` in between -- proves the (c)
+#: check is sentence-level, not the old fixed 80-character radius (which
+#: would have missed this one).
+_LONG_SENTENCE = (
+    "From NECB 2011 Table 8.4.4.21 the regenerated coefficients were "
+    "transcribed from the original vendored source tables without any "
+    "period in between and eventually this record was verified against "
+    "the printed edition."
+)
+
+_FIXTURE_RULES_NECB2020 = {
+    # (a) a forward reference: "2025.md" in a 2020 snapshot's `article`.
+    "scenario_forward_ref": {"article": "See 2025.md for details"},
+    # A table/article number shaped like a year -- must NOT match at all.
+    "scenario_table_number": {"article": "Per 8.4.4.2020.1, this applies"},
+    # (c) sentence-level: "verified" is >80 chars from the token, same
+    # sentence, no origin-identity phrase -- must still be a problem.
+    "scenario_long_sentence": {"provenance": {"note": _LONG_SENTENCE}},
+    # The kept origin-identity exception: "byte-identical to NECB20xx/data/
+    # ..." is the one honest way to state an unmodified-copy fact.
+    "scenario_byte_identical": {
+        "provenance": {"note": "All rows are byte-identical to NECB2015/data/x.json."}
+    },
+    # A token naming the snapshot's OWN edition next to "verified" is
+    # self-identification, never a (b) or (c) problem.
+    "scenario_own_edition_verified": {
+        "provenance": {"note": "NECB 2020 Table 8.4.5.2 was verified against the printed edition."}
+    },
+}
+
+_FIXTURE_RULES_NECB2025 = {
+    # (b) `notes` OUTSIDE curves[] carrying another (older, non-forward)
+    # edition -- the exact necb2025 efficiencies.json shape this review
+    # found and fixed (equipment-row `notes` citing "NECB 2020" when the
+    # row's own edition is 2025).
+    "unitary_acs": [{"notes": "From NECB 2020, Table 5.2.12.1.-A"}],
+}
+
+
+class TestGateCatchesKnownShapes(unittest.TestCase):
+    """Table-driven negative tests (Sol's review of PRs #43/#44/#45, item 4):
+    small fixture snapshots in a temp data root, driving ``find_problems``
+    directly against known-bad and known-good shapes so the gate's actual
+    catch/pass behaviour is pinned, not just today's real snapshots."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmpdir = tempfile.TemporaryDirectory(prefix="self-description-fixture-")
+        tmp_path = Path(cls._tmpdir.name)
+        for code_id, manifest in _FIXTURE_MANIFEST.items():
+            snapshot_dir = tmp_path / code_id
+            snapshot_dir.mkdir(parents=True)
+            (snapshot_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        (tmp_path / "necb2020" / "rules.json").write_text(
+            json.dumps(_FIXTURE_RULES_NECB2020), encoding="utf-8"
+        )
+        (tmp_path / "necb2025" / "rules.json").write_text(
+            json.dumps(_FIXTURE_RULES_NECB2025), encoding="utf-8"
+        )
+        cls._data_root = tmp_path
+        necb_pkg._set_data_root(tmp_path, _testing=True)
+        cls._problems = find_problems(tmp_path)
+
+    @classmethod
+    def tearDownClass(cls):
+        necb_pkg._set_data_root(None, _testing=True)
+        cls._tmpdir.cleanup()
+
+    def _assert_bucket_has(self, bucket: str, needle: str):
+        matches = [loc for loc in self._problems[bucket] if needle in loc]
+        self.assertTrue(
+            matches, f"expected {needle!r} in problems[{bucket!r}], got: {self._problems[bucket]}"
+        )
+
+    def _assert_no_problem_mentions(self, needle: str):
+        for bucket in ("a", "b", "c"):
+            matches = [loc for loc in self._problems[bucket] if needle in loc]
+            self.assertFalse(
+                matches, f"expected no problem for {needle!r}, got ({bucket}): {matches}"
+            )
+
+    def test_bare_year_forward_reference_fails_rule_a(self):
+        """"2025.md" in a 2020 snapshot's `article` -- a forward reference,
+        the exact shape the old `(?![\\d.])` trailing guard let through."""
+        self._assert_bucket_has("a", "scenario_forward_ref.article")
+
+    def test_table_article_number_is_not_a_token(self):
+        """"8.4.4.2020.1"-style numbers must never match -- a `.` followed
+        by a digit is a table/article number, not a bare year."""
+        self._assert_no_problem_mentions("scenario_table_number")
+
+    def test_notes_outside_curves_fails_rule_b(self):
+        """`notes` on an equipment row (not `curves[].notes`) carrying
+        another edition is a (b) problem -- D-88 names `curves[].notes`
+        specifically, not every `notes` key."""
+        self._assert_bucket_has("b", "unitary_acs[0].notes")
+
+    def test_long_sentence_comparative_word_fails_rule_c(self):
+        """A comparative word more than 80 characters from the token, same
+        sentence, no origin-identity phrase -- the sentence-level rule
+        catches what the old fixed-radius rule would have missed."""
+        self._assert_bucket_has("c", "scenario_long_sentence.provenance.note")
+
+    def test_byte_identical_to_oracle_path_passes(self):
+        """"byte-identical to NECB2015/data/x.json" is the kept origin
+        exception -- no problem in any bucket."""
+        self._assert_no_problem_mentions("scenario_byte_identical")
+
+    def test_own_edition_token_next_to_verified_passes(self):
+        """A token naming the snapshot's OWN edition next to "verified" is
+        self-identification, not a comparison -- no problem in any bucket."""
+        self._assert_no_problem_mentions("scenario_own_edition_verified")
 
 
 if __name__ == "__main__":

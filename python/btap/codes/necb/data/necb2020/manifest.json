@@ -320,7 +320,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2020 Table 6.2.2.1 via the MCP, and the solar/pool minimums re-verified 2026-08 (D-61/D-63). The printed-table side is a cross-check, not the origin, and is not archived here. The formula strings in the file are documentation; the live coefficients are named constants in shw/efficiency.py. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
-      "result_sha256": "7c35a243dda0919edf7162c4eccb3913934fd89476b890183787f8c3f45c52fe"
+      "result_sha256": "f6a3a8719a47493560097af9952e03228f0e66f7f1fa9245089c2e9b281f9ba3"
     },
     "tables/space_types.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

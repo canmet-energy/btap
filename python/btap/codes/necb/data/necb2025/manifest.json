@@ -291,7 +291,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256.",
-      "result_sha256": "9d33481fc2136b3389fa1cacf790accc7952d76b24d216ffb760da8e0bc727ee"
+      "result_sha256": "40c7cd93583ed3934a5f333ea563e50f8b7294f6e5c2c611bae556b9eef337b9"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
