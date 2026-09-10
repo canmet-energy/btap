@@ -1851,7 +1851,11 @@ inferred.
 - **Declared in the data.** Every `boilers` and `furnaces` row gains
   `part_load_class` ∈ {`non_condensing`, `condensing`, `modulating`}, and
   every part-load curve row declares the class and the edition table it
-  implements. The existing `condensing` / `condensing_control` columns are
+  implements. The enum is shared by boilers and furnaces with an explicit
+  furnace mapping: the Code's **atmospheric** furnace is `non_condensing`
+  (Table 8.4.5.3 / 8.4.6.3 row "Atmospheric"), its **condensing** furnace is
+  `condensing`, and its modulating furnace is `modulating` (Table 8.4.5.2.-B
+  in 2020, the Modulating row of 8.4.6.3 in 2025). The existing `condensing` / `condensing_control` columns are
   `null` on all ten rows in both editions and carry no class: D-89 either
   populates them or removes them — they are never read as a class while they
   are null.
@@ -1878,8 +1882,13 @@ all the same kind of claim, and R-O's attribution must not mix them.
   purchased-heating path elects a modulating boiler and that boiler receives
   `BOILER-EFFFPLR`, so the multiplier is **33.5 % (2020) / 35.3 % (2025)**
   away from the modulating requirement in every reference building whose
-  heating energy is purchased. Non-condensing 2.67 % and atmospheric furnace
-  1.16 % are likewise live, on every other boiler and furnace.
+  heating energy is purchased. **That is the only demonstrated figure.**
+  The non-condensing 2.67 % and atmospheric-furnace 1.16 % figures are NOT
+  demonstrated either: no shipped row carries a class today, so they are
+  what the current curve costs against the requirement that WOULD apply
+  once a row is classified non-condensing or atmospheric — conditional,
+  exactly like the condensing figures, until D-89 assigns each row
+  explicitly.
 - **Conditional:** the condensing figures — **45.5 % (2020) / 48.4 % (2025)**
   for boilers and 23.3 % for furnaces. No shipped row is classified
   condensing, so nothing today is subject to the condensing requirement;
@@ -1899,16 +1908,25 @@ variable.**
   implementation domain, and set the curve's minimum/maximum x and y to them
   so the engine cannot extrapolate past what was adjudicated.
 - **The error bound depends on the form chosen, and the SDK is not the
-  blocker.** `Boiler:HotWater` accepts a bivariate normalized-efficiency
-  curve: `Biquadratic = C1 + C2·PLR + C3·PLR² + C4·T + C5·T² + C6·PLR·T` —
-  the edition's `a`…`f` in that order — and OS:Boiler:HotWater's "Normalized
-  Boiler Efficiency Curve Name" field takes `BivariateFunctions` (verified
-  against the OpenStudio 3.11.0 IDD). Implemented in that form the only error
-  is the unit basis: T is °C in the SDK and °F in the Code, the same
-  closed-form affine transform the chiller biquadratics already reproduced to
-  4.2e-06. If instead the implementation keeps a PLR-only curve, the best
-  possible PLR-only fit over the assumed box still misses by **≥ 8.83 % at
-  PLR 0.10 and ≥ 4.7 % at every PLR** (the required PLF spans 0.9062–1.0924
+  blocker — but the printed coefficients cannot be copied in.** The
+  edition's `a`…`f` evaluate **FHeatPLC(p, T)**, the fuel-input ratio.
+  EnergyPlus's normalized boiler efficiency curve must supply the
+  multiplier **η_norm(p, T) = p / FHeatPLC(p, T)** — a RATIONAL surface,
+  not the polynomial. Populating a `Curve:Biquadratic` with `a`…`f`
+  directly (with only the °F→°C basis changed) is therefore wrong: against
+  the required surface it errs by **91.62 % at PLR 0.10 / 80 °F, 51.55 % at
+  0.50 / 80 °F and 21.77 % at 1.00 / 180 °F**. The affine temperature
+  transform that reproduced the chiller biquadratics cannot perform a
+  reciprocal. What the SDK does accept is the FORM: OS:Boiler:HotWater's
+  "Normalized Boiler Efficiency Curve Name" takes `BivariateFunctions`
+  (verified against the OpenStudio 3.11.0 IDD), so D-89 chooses one of:
+  (i) a **bounded 2-D fit** of p/FHeatPLC(p, T) over the adjudicated box —
+  a `Curve:Biquadratic` or `Table:Lookup` — with the fit's maximum error
+  over the box published and the curve's x/y limits set to the box; or
+  (ii) **EMS** evaluating the rational expression exactly each timestep.
+  If instead the implementation keeps a PLR-only curve, the best possible
+  PLR-only fit over the assumed box still misses by **≥ 8.83 % at PLR 0.10
+  and ≥ 4.7 % at every PLR** (the required multiplier spans 0.9062–1.0924
   across the box, so no curve in PLR alone can hold it) — that fallback is
   either rejected or ships with this bound published.
 - **How T is evaluated.** The `Efficiency Curve Temperature Evaluation
@@ -1985,3 +2003,18 @@ product Python and no `verification/scenarios/` touched:
    condensing figures are conditional on a classification no row carries
    today, and 2025's bivariate domain must be sourced or adjudicated with its
    error bound and `EnteringBoiler` evaluation stated.
+- **Sol's third pass (2026-09-10), verified:** rule (c) still bypassed —
+  `differ` vs `differs` (my negative fixture had quietly changed the
+  sentence), and the identity-object token exempted before the rest of
+  the sentence is examined, so the real 2025 space-types note passes
+  (0/0/0 probe reproduced) → Sonnet: stem matching, clause-scoped
+  exemption, the real sentence as a negative test, the manifest prose
+  rewritten, plus a standing "no reader" test for the dormant Schedule I.
+  **D-89's bivariate mapping was wrong**: `a`…`f` evaluate FHeatPLC, the
+  engine needs the rational surface p/FHeatPLC — direct population errs
+  91.6 % at 0.1/80 °F; corrected to a bounded 2-D fit/lookup or EMS. Class
+  attribution narrowed: only purchased heating's modulating figure is
+  demonstrated; the furnace `atmospheric → non_condensing` mapping stated.
+  Housekeeping done in the open: #44 closed, #45 rebased onto #43 via the
+  REST endpoint (the GraphQL `gh pr edit` failed silently behind a
+  deprecation warning — the silenced-step trap, again).
