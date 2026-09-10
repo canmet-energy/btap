@@ -33,8 +33,25 @@ JSON numbers are excluded by construction — walking ``str`` nodes only):
     a clean origin sentence looks like (one with no comparative word in it
     at all). The one exception is the origin-identity shape (see
     ``_ORIGIN_IDENTITY_RE``): "byte-identical to NECB20xx/data/..." is the
-    only honest way to state an unmodified-copy fact, so a token sharing
-    its sentence with that exact phrase is not a (c) problem.
+    only honest way to state an unmodified-copy fact. Two things follow from
+    that, both scoped to the identity CLAUSE itself, never broadcast to the
+    whole sentence: (i) the edition token that IS the object of that exact
+    phrase (the `NECB20xx` inside the `.../data/...` path, see
+    ``_identity_token_spans``) is never itself a (c) problem; (ii) the
+    comparative word ``identical`` that the phrase is built from is masked
+    out of the sentence (see ``_mask_identity_phrases``) before checking
+    every OTHER token for a comparative word, so that one unavoidable word
+    doesn't make an otherwise-clean origin narrative read as a comparison —
+    a long origin sentence can legitimately name several other editions
+    before ever reaching the clause that justifies them (e.g. "NECB2017 and
+    NECB2020 ship no schedules table, so the merge resolves to NECB2015's:
+    ... all 240 shipped records are byte-identical to
+    NECB2015/data/schedules.json."). An unrelated comparative word elsewhere
+    in the sentence still catches every non-identity-object token normally:
+    `Rows are byte-identical to NECB2015/data/x.json but differs from
+    NECB2011 values.` yields exactly one (c) problem, for the `NECB2011`
+    token — `differs` is outside the identity clause and the masking does
+    not touch it.
 
 Two keys are flagged by NAME, not by token content, because their existence
 is the problem regardless of what they say: a key literally named
@@ -62,7 +79,19 @@ follow-up (items 4-5 of "Sol's review of PRs #43/#44/#45") narrowed the
 (the necb2025 equipment rows' stale "From NECB 2020" citations), switched
 rule (c) to a sentence-level check, and fixed the necb2020
 ``solar_pool_minimums`` forward reference to ``table-audit-necb-2020-
-2025.md``.
+2025.md``. A further PR #43 review round narrowed the origin-identity
+exemption from a whole-sentence bypass to the identity clause itself: the
+phrase's own edition token is never a (c) problem, and only the
+``identical`` it necessarily carries is masked out of the sentence before
+checking every OTHER token for a comparative word -- so a mixed sentence
+that also carries an unrelated other-edition comparison still gets its (c)
+problem, while a genuinely long origin narrative naming several other
+editions before its "byte-identical to NECB20xx/..." clause (the real
+necb2020/necb2025 ``manifest.json`` ``tables/schedules.json`` note) still
+passes. It also widened rule (a)'s ``NECB``-prefixed token to any
+``20\\d\\d`` year rather than the five enumerated editions (so a snapshot
+catches a forward reference to an edition that isn't enumerated yet, e.g.
+``NECB 2030`` in a 2020 snapshot).
 """
 
 from __future__ import annotations
@@ -76,9 +105,19 @@ from pathlib import Path
 import btap.codes as codes
 import btap.codes.necb as necb_pkg
 
-#: `NECB2020`, `NECB 2020`, or a bare `2020` not glued to another digit or a
-#: `.` (so table numbers like `8.4.5.2` and dates like `2026-07-22` never
+#: `NECB20xx` for ANY two-digit year (not just the five enumerated editions),
+#: or a bare `2020` restricted to those five and not glued to another digit or
+#: a `.` (so table numbers like `8.4.5.2` and dates like `2026-07-22` never
 #: match), plus the bare legacy word `vintage`.
+#:
+#: The `NECB`-prefixed form deliberately accepts any `20\d\d`, not the
+#: enumerated list: a snapshot must catch a forward reference to an edition
+#: that does not exist yet either (`NECB 2030` in a 2020 snapshot), and an
+#: enumerated alternation can only ever be as current as the last edition
+#: added to it. A bare, unprefixed year stays restricted to the enumerated
+#: five -- `NECB` is what disambiguates a bare `20xx` reading as an edition
+#: at all, so a bare `2030` is deliberately left too ambiguous with other
+#: four-digit numbers to accept broadly.
 #:
 #: The trailing guard is `(?!\d|\.\d)`, not a plain `(?![\d.])`: a year is
 #: excluded only when followed by another digit, OR by a `.` that itself is
@@ -89,7 +128,7 @@ import btap.codes.necb as necb_pkg
 #: having *any* `.` after it, which silently let a forward reference like
 #: "...-2020-2025.md" through ungated for its 2025 half.
 TOKEN_RE = re.compile(
-    r"NECB ?20(?P<necb_yr>11|15|17|20|25)"
+    r"NECB ?20(?P<necb_yr>\d\d)"
     r"|(?<![\d.])20(?P<bare_yr>11|15|17|20|25)(?!\d|\.\d)"
     r"|\b(?P<vintage>vintage)\b",
     re.IGNORECASE,
@@ -164,15 +203,23 @@ def _in_provenance_key_set(path: list) -> bool:
 
 #: "byte-identical to NECB2015/data/schedules.json" is an ORIGIN statement: it
 #: says the shipped rows are an unmodified copy of that oracle file. The
-#: comparative word is the only honest way to say so, so this one shape is
-#: exempt from (c) when it sits in the same SENTENCE as the token (see
-#: ``_sentence_span`` -- a sentence, not a fixed character window, because a
-#: long origin sentence can legitimately name several other editions before
-#: ever reaching the "byte-identical to NECB20xx/..." clause that justifies
-#: them, e.g. "NECB2017 and NECB2020 ship no schedules table, so the merge
-#: resolves to NECB2015's: ... all 240 shipped records are byte-identical to
-#: NECB2015/data/schedules.json.").
-_ORIGIN_IDENTITY_RE = re.compile(r"(byte-)?identical to (legacy )?(openstudio-standards )?NECB20\d\d/(data|lighting)")
+#: comparative word is the only honest way to say so, so the edition token
+#: that is the OBJECT of this exact phrase -- the `NECB20\d\d` captured as
+#: ``oracle_path`` below, e.g. the `NECB2015` in "...identical to
+#: NECB2015/data/..." -- is exempt from (c). This exemption is scoped to
+#: that one token, not to the sentence around it: a sentence can legitimately
+#: carry both a valid identity clause AND an unrelated comparative reference
+#: to some other edition, e.g. "Rows are byte-identical to NECB2015/data/
+#: x.json but differs from NECB2011 values." -- the `NECB2015` there is the
+#: honest origin statement, but the `NECB2011` is a bare comparison the
+#: allowlist was never meant to launder. See ``_identity_token_spans`` /
+#: ``_is_origin_identity_token``, which test containment of the CANDIDATE
+#: token's own span against the identity phrase's captured object span,
+#: rather than asking only whether the phrase occurs anywhere in the
+#: sentence.
+_ORIGIN_IDENTITY_RE = re.compile(
+    r"(byte-)?identical to (legacy )?(openstudio-standards )?(?P<oracle_path>NECB20\d\d)/(data|lighting)"
+)
 
 
 def _sentence_span(text: str, pos: int) -> tuple[int, int]:
@@ -191,8 +238,47 @@ def _sentence_span(text: str, pos: int) -> tuple[int, int]:
     return start, end
 
 
-def _is_origin_identity(sentence: str) -> bool:
-    return bool(_ORIGIN_IDENTITY_RE.search(sentence))
+def _identity_token_spans(sentence: str) -> list[tuple[int, int]]:
+    """``[start, end)`` spans, within ``sentence``, of the `NECB20\\d\\d`
+    token that is the OBJECT of a "(byte-)identical to NECB20xx/data/..."
+    identity phrase -- the only part of the sentence exempt from rule (c),
+    per ``_ORIGIN_IDENTITY_RE``'s ``oracle_path`` group."""
+    return [m.span("oracle_path") for m in _ORIGIN_IDENTITY_RE.finditer(sentence)]
+
+
+def _is_origin_identity_token(sentence: str, token_start: int, token_end: int) -> bool:
+    """Whether the token spanning ``[token_start, token_end)`` within
+    ``sentence`` IS the object of an identity phrase -- not whether the
+    phrase merely occurs somewhere else in the same sentence."""
+    return any(
+        token_start >= span_start and token_end <= span_end
+        for span_start, span_end in _identity_token_spans(sentence)
+    )
+
+
+def _mask_identity_phrases(sentence: str) -> str:
+    """``sentence`` with every full origin-identity phrase match (e.g.
+    "byte-identical to NECB2015/data", comparative word and all) blanked out.
+
+    The comparative word ``identical`` inside ``(byte-)identical to
+    NECB20xx/data/...`` is the honest way to state an unmodified-copy fact,
+    so it must not itself make the REST of the sentence read as carrying a
+    comparison -- a long origin sentence can legitimately name several other
+    editions before ever reaching the clause that justifies them (e.g.
+    "NECB2017 and NECB2020 ship no schedules table, so the merge resolves to
+    NECB2015's: ... all 240 shipped records are byte-identical to
+    NECB2015/data/schedules.json."). Masking, rather than a whole-sentence
+    boolean, keeps this local to the identity clause itself: a genuinely
+    unrelated comparative word elsewhere in the same sentence (e.g.
+    "differs") still makes every non-identity-object token in it a (c)
+    problem."""
+    if not sentence:
+        return sentence
+    chars = list(sentence)
+    for start, end in (m.span() for m in _ORIGIN_IDENTITY_RE.finditer(sentence)):
+        for i in range(start, end):
+            chars[i] = " "
+    return "".join(chars)
 
 
 def _excerpt(text: str, start: int, end: int) -> str:
@@ -247,8 +333,18 @@ def _check_string(
             # can't smuggle a comparison past a narrow radius.
             sentence_start, sentence_end = _sentence_span(text, match.start())
             sentence = text[sentence_start:sentence_end]
-            if _has_comparative_word_in_sentence(sentence) \
-                    and not _is_origin_identity(sentence):
+            token_start = match.start() - sentence_start
+            token_end = match.end() - sentence_start
+            # The identity-phrase's own object token is exempt outright --
+            # it IS the "(byte-)identical to NECB20xx/data/..." clause's
+            # subject, not a reference to "another" edition. For every OTHER
+            # token, the comparative-word check runs against the sentence
+            # with any identity phrase(s) masked out: `identical` inside the
+            # identity clause itself must not count, but an unrelated
+            # comparative word elsewhere in the same sentence still does.
+            if _is_origin_identity_token(sentence, token_start, token_end):
+                pass
+            elif _has_comparative_word_in_sentence(_mask_identity_phrases(sentence)):
                 problems_c.append(loc)
 
 
@@ -400,6 +496,30 @@ _FIXTURE_RULES_NECB2020 = {
     "scenario_own_edition_verified": {
         "provenance": {"note": "NECB 2020 Table 8.4.5.2 was verified against the printed edition."}
     },
+    # (c) mixed sentence: a valid identity clause (NECB2015, exempt because
+    # it IS the object of "byte-identical to NECB2015/data/...") sharing a
+    # sentence with an unrelated comparative reference to a DIFFERENT other
+    # edition (NECB2011, "differs from"). The old sentence-wide exemption
+    # let the whole sentence through zero-problem; the fix scopes the
+    # exemption to the identity phrase's own token, so NECB2011 still fails.
+    "scenario_mixed_identity_and_reference": {
+        "provenance": {
+            "note": "Rows are byte-identical to NECB2015/data/x.json but differs from NECB2011 values."
+        }
+    },
+    # The positive counterpart: the only other-edition token in the sentence
+    # IS the identity phrase's object -- no problem in any bucket.
+    "scenario_byte_identical_multi_record": {
+        "provenance": {
+            "note": "All 240 records are byte-identical to NECB2015/data/schedules.json."
+        }
+    },
+    # (a) rule (a) must catch a forward reference to an edition that isn't
+    # even enumerated yet -- TOKEN_RE's `NECB`-prefixed form has to accept
+    # any `20\d\d`, not just the five enumerated editions, or a genuine
+    # forward reference like this goes ungated. Spaced and glued forms.
+    "scenario_unenumerated_edition_spaced": {"article": "See NECB 2030 for details"},
+    "scenario_unenumerated_edition_glued": {"article": "See NECB2030 for details"},
 }
 
 _FIXTURE_RULES_NECB2025 = {
@@ -484,6 +604,41 @@ class TestGateCatchesKnownShapes(unittest.TestCase):
         """A token naming the snapshot's OWN edition next to "verified" is
         self-identification, not a comparison -- no problem in any bucket."""
         self._assert_no_problem_mentions("scenario_own_edition_verified")
+
+    def test_mixed_sentence_other_edition_token_outside_identity_phrase_fails_rule_c(self):
+        """"Rows are byte-identical to NECB2015/data/x.json but differs from
+        NECB2011 values." -- the NECB2015 token IS the identity phrase's
+        object (exempt), but NECB2011 is a bare comparison the exemption
+        must not launder. Exactly one (c) finding, for the NECB2011 token;
+        the old sentence-wide exemption let this whole sentence through
+        with zero problems."""
+        matches = [
+            loc for loc in self._problems["c"]
+            if "scenario_mixed_identity_and_reference.provenance.note" in loc
+        ]
+        self.assertEqual(
+            len(matches), 1,
+            f"expected exactly one (c) finding, got: {matches}",
+        )
+        self.assertIn("NECB2011", matches[0])
+
+    def test_byte_identical_multi_record_sentence_passes(self):
+        """"All 240 records are byte-identical to NECB2015/data/
+        schedules.json." -- the only other-edition token in the sentence is
+        the identity phrase's own object, so no problem in any bucket."""
+        self._assert_no_problem_mentions("scenario_byte_identical_multi_record")
+
+    def test_unenumerated_necb_edition_spaced_fails_rule_a(self):
+        """"NECB 2030" in a 2020 snapshot -- TOKEN_RE's `NECB`-prefixed form
+        must accept any `20\\d\\d`, not just the five enumerated editions,
+        or a forward reference to an edition that doesn't exist yet goes
+        ungated."""
+        self._assert_bucket_has("a", "scenario_unenumerated_edition_spaced.article")
+
+    def test_unenumerated_necb_edition_glued_fails_rule_a(self):
+        """Same as above with no space between `NECB` and the year:
+        "NECB2030"."""
+        self._assert_bucket_has("a", "scenario_unenumerated_edition_glued.article")
 
 
 if __name__ == "__main__":
