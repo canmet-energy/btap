@@ -298,7 +298,7 @@
           "payload": "provenance/vintage_match/8.4.6.2.result.json",
           "sha256": "3e7947d7d80d2b6ba012d7457873cbef6f9463a6bd60805dec1b4cfa0cd4a49c",
           "verdict": "differs",
-          "detail": "boiler FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the cubic EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) - worst departure 2.67 % non-condensing over PLR 0.10-1.00; the condensing row is BIVARIATE here (PLR and the boiler return-hot-water temperature, °F, six coefficients) and a univariate curve cannot express it, and the Modulating row has no shipped counterpart - pending D-89"
+          "detail": "boiler FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. Non-condensing: `BOILER-EFFFPLR` deviates 2.67 % over PLR 0.10-1.00. MODULATING: this edition states the modulating requirement as a polynomial row here, where 2020 stated the same requirement as the ten printed points of Table 8.4.5.2.-B - a change of FORM, not a new class of equipment; against it `BOILER-EFFFPLR` deviates by up to 35.26 %, and no shipped curve is named for the class. CONDENSING: BIVARIATE here, stated over PLR and the boiler return-hot-water temperature T_w,return in degrees F with six coefficients. Over the declared box PLR 0.10-1.00 by T_w,return 80-180 F the required PLF ranges 0.9062 to 1.0924, so a normalised- efficiency curve in PLR alone cannot hold it exactly at any T_w; the assigned `BOILER-EFFFPLR` deviates by up to 48.41 % and even `BOILER-EFFFPLR-COND` by 13.44 %. Equipment-class selection is what makes this large: `hvac/efficiency.py` gives EVERY `boilers` row `BOILER-EFFFPLR` and every `furnaces` row `FURNACE-EFFPLR`, so naming a curve `-COND` does not assign it - no row references either condensing curve. The reference building elects modulating equipment: `hvac/reference.py` represents purchased heating by a gas-fired MODULATING boiler, which receives `BOILER-EFFFPLR` like every other. Pending D-89"
         },
         {
           "table": "8.4.6.3",
@@ -306,7 +306,7 @@
           "payload": "provenance/vintage_match/8.4.6.3.result.json",
           "sha256": "a3422bb5801644db57b05ab34f0925c5a8d76c2a35c0d986a0bd8a7823a240ff",
           "verdict": "differs",
-          "detail": "furnace FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the cubic EnergyPlus efficiency multiplier; worst departure over PLR 0.10-1.00 is 1.16 % atmospheric and 0.49 % condensing, and the Modulating row has no shipped counterpart - pending D-89"
+          "detail": "furnace FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. `FURNACE-EFFPLR` deviates 1.16 % (atmospheric), 23.25 % (condensing) and up to 10.27 % against the MODULATING row - which states as a polynomial what 2020 published as the ten points of Table 8.4.5.2.-B, a change of form rather than a new class. `FURNACE-EFFPLR-COND`, named for the condensing class, would deviate 0.49 % but no row uses it. Pending D-89"
         },
         {
           "table": "8.4.6.5.-A",
@@ -550,7 +550,7 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/space_types.json",
       "note": "This edition ships its own copy of the retained merge. The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json and the remaining 22 differ only by keys inherited from the earlier vintages. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
-      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all; 1 documented cross-reference row differs - pending D-89",
+      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all, and `service_water_heating_peak_flow_per_area` is derived rather than transcribed; every cell that does have a source is identical - pending D-89",
       "verified_against": [
         {
           "table": "A-8.4.3.2.(2)-B",
@@ -558,7 +558,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(2)-B.result.json",
           "sha256": "f0f1b700e4aaeb309d3aa94a688334b7527bd4950785500560fb17d40375827a",
           "verdict": "partial",
-          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 301 of the 308 shipped records join a row here and 1 170 of the compared cells are identical; the 4 differing cells all sit on the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 301 of the 308 shipped records join a row here and all 1176 compared cells are identical - **0 differing**. The four cells previously reported as differing on the `Health care facility medical supply room` row were a matcher defect, not a data difference: the join imported Table 4.2.1.6's control-only cross-reference to the Storage Room rows and reused it for loads and LPD. This edition publishes an explicit medical-supply row of its own (schedule H, illuminance 400 lx, occupant density 20 m2/occupant, peak receptacle 1 W/m2) and the shipped values match it, so the cross-reference is now used for control states only"
         },
         {
           "table": "A-8.4.3.2.(2)-A",
@@ -573,8 +573,8 @@
           "edition": "2025",
           "payload": "provenance/vintage_match/4.2.1.6.result.json",
           "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
-          "verdict": "partial",
-          "detail": "space-by-space LPD: the shipped lighting_per_area agrees with this table for every joined record except the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "verdict": "identical",
+          "detail": "space-by-space LPD: the shipped `lighting_per_area` agrees with this table for every joined record, including the `Health care facility medical supply room` row once the control-only cross-reference is kept out of the loads join"
         },
         {
           "table": "4.2.1.5",
@@ -615,7 +615,7 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/schedules.json",
       "note": "This edition numbers the schedule tables A-8.4.3.2.(1)(b)-A..K and ships its own copy of the retained source. NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's: checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against the printed schedule table via the MCP (see loads_rules.json).",
-      "inherited_reason": "the 33-cell difference is normative - pending D-89",
+      "inherited_reason": "the 33-cell `NECB-I-Fan` difference is normative but DORMANT - no product Python consumes it today - pending D-89",
       "verified_against": [
         {
           "table": "A-8.4.3.2.(1)(b)-A",
@@ -623,7 +623,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-A.result.json",
           "sha256": "abcbcd5667524011d7e7fbe2dac1d022694576aa348e9eb4b12364357019ff60",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-B",
@@ -631,7 +631,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-B.result.json",
           "sha256": "4a0616150320c84221ba3fc754aa3de298cfac2105496dbdd8442576f9f112e0",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-C",
@@ -639,7 +639,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-C.result.json",
           "sha256": "134228d07d7a167141111803740b39c865f4eae2959e2140fde76a4da6d6ca69",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-D",
@@ -647,7 +647,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-D.result.json",
           "sha256": "d24fc877fd7ffed04c79a58e9d338a86db53d434bc44d30b300605ebf4471eff",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-E",
@@ -655,7 +655,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-E.result.json",
           "sha256": "41934a4a97738a048cc9406119f7b6e70bfcce3f220786e3f9e61f4ccc9850ba",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-F",
@@ -663,7 +663,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-F.result.json",
           "sha256": "63eb5a5871c64b36c04e44c25e1c717f9e246cc1bb55ea38602de60c6d17fbef",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-G",
@@ -671,7 +671,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-G.result.json",
           "sha256": "de9190a61fced33a2839bef550b81b0130908056f0d98fe45fa0a8cd2c6262f1",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-H",
@@ -679,7 +679,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-H.result.json",
           "sha256": "a653c39e72b7c35778a80e0b0befa6727bc8ee283c7a21a624e2b7c57e1d7042",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-I",
@@ -687,7 +687,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-I.result.json",
           "sha256": "14a1221f844bd13079e1011b0961d2f11dca963d05aa55e7e0d17af55baefa5a",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-J",
@@ -695,7 +695,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-J.result.json",
           "sha256": "8b47a67e1564d22983bdf85f513cfc46744f5d15aa79e1ad90b493884f0405a1",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)(b)-K",
@@ -703,7 +703,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-K.result.json",
           "sha256": "136f896da01b36b5702bd6285a019447b157357cdd1f2a82b590c3a8e4efa289",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         }
       ],
       "result_sha256": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47"
@@ -736,7 +736,7 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/led_lighting.json",
       "note": "The LED alternative table is legacy data with no counterpart in this edition's code text; this edition ships its own copy of the retained merge (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json. The vendored lighting_standard template column was removed 2026-09-09; no reader (D-88).",
-      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all, 3 shipped columns have no edition source, and 1 documented cross-reference row differs - pending D-89",
+      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all and 3 shipped columns have no edition source; every LPD that can be compared is consistent with this edition's published maximum - pending D-89",
       "verified_against": [
         {
           "table": "4.2.1.6",
@@ -744,7 +744,7 @@
           "payload": "provenance/vintage_match/4.2.1.6.result.json",
           "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
           "verdict": "partial",
-          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 298 of the 308 shipped records join a row and 297 are consistent with this table; the single differing record is the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 298 of the 308 shipped records join a row and all 298 are consistent with this table - **0 differing**. The single record previously reported as differing was the `Health care facility medical supply room` row, which the join had steered through Table 4.2.1.6's control-only cross-reference; against this edition's own medical-supply row (6.7 W/m2, i.e. 0.622450368 W/ft2) the shipped value agrees"
         },
         {
           "table": "4.2.1.5",
@@ -862,7 +862,7 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/table_c1.json",
       "note": "This edition ships its own copy of the corrected 2015-lineage table the nearest-city HDD lookup runs on. Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values this edition revises (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
-      "inherited_reason": "row-set and unread-column adoption pending D-89 (the nearest-city HDD lookup could move)",
+      "inherited_reason": "row-set and unread-column adoption pending D-89: 39 shipped and 40 edition rows do not join even keyed by (city, province), and this edition's table carries no coordinates, which is half of what runtime reads",
       "verified_against": [
         {
           "table": "C-1",
@@ -870,7 +870,7 @@
           "payload": "provenance/vintage_match/C-1.result.json",
           "sha256": "f3dd1ff89cfd618c0405ec40d6c4c946392e153e0527d83b3e46a69d764501ae",
           "verdict": "partial",
-          "detail": "climatic data: 633 rows join by normalised city name and every degree-days-below-18 value and every design temperature is identical; 1 232 of the 1 236 differing cells are hourly wind pressures (627 at 1/50, 605 at 1/10 - no reader in this package) and 4 are degree-days-below-15 values. The row sets differ: this edition prints 680 rows, the snapshot ships 679, and this edition additionally prints July 2.5 % Future Dry and Future Wet columns that nothing shipped carries"
+          "detail": "climatic data, keyed by (normalised city, PROVINCE) - the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two places in two provinces. 640 rows join, and every degree-days-below-18 value and every design temperature among them is identical. 1250 cells differ: hourly wind pressures (612 at 1/10 and 634 at 1/50), which no reader in this package consumes, and 4 degree-days-below-15 values. The residue is 39 unmatched shipped rows and 40 unmatched edition rows, every one of them listed with its nearest candidate in the alias/unmatched ledger of docs/NECB_VINTAGE_MATCH.md; the row sets differ (this edition prints 680 rows resolving to 680 distinct keys, the snapshot ships 679), and this edition additionally prints July Future dry and wet columns that nothing shipped carries. What runtime reads from this file is lat_long and degree_days_below_18_c, and this edition's table publishes no coordinates at all, so its row set cannot supply the column the nearest-city lookup keys on"
         }
       ],
       "result_sha256": "ffd0ba3e3fccbc1c61ae0b00a696b155f3adc542b1e4a967bd3a6d19653720fd"

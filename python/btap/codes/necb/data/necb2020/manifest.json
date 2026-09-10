@@ -251,7 +251,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Verified against the oracle at REF while writing this block: boilers, furnaces, unitary_acs and heat_rejection are VERBATIM; chillers differ in the notes column only; heat_pumps carries the D-59 correction (SEER 15 for the small air-cooled class, per printed Table 5.2.12.1.-A); heat_pumps_heating differs only in capacity-boundary rounding (64831 -> 64830 W); two of the 31 curve rows were regenerated 2026-07-22 from NECB 2020 8.4.5.4.(7). The vrf_air_source_heat_pumps and vrf_air_conditioners blocks have NO oracle counterpart: they were transcribed from printed Table 5.2.12.1.-I via the MCP (D-60) and are not covered by source_sha256. Checked against this edition's own tables 2026-09-09; the archived payloads and the per-table verdicts are in verified_against. The 15 DX cooling, DX heating, VAV fan and SWH curves have no table in this edition at all, so their origin is retained and stated rather than adopted.",
-      "inherited_reason": "engine-shaped table (Btu/h, tons, capacity sentinels, ASHRAE heat rejection) verified cell-for-cell against this edition's tables; curve adoption pending D-89",
+      "inherited_reason": "engine-shaped table (Btu/h, tons, capacity sentinels, ASHRAE heat rejection) mapped family by family to this edition's own rows and columns: 8 of the 9 shipped families map, 93 of their 94 rows join an edition row and all 102 mapped cells are identical with 0 differing; `heat_rejection` (24 rows) is UNMAPPED and reported as such. What remains unresolved is what this edition publishes and the snapshot does not carry (52 IEER and IPLV minima) and the part-load CURVES, where equipment-class selection makes the modulating requirement the largest gap - pending D-89",
       "verified_against": [
         {
           "table": "5.2.12.1.-A",
@@ -259,7 +259,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-A.result.json",
           "sha256": "e037881f7d0bdf2b9538212fa620a373d3bb77dcde5f665f578c28978c5e09c1",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima, mapped explicitly: `unitary_acs` air-cooled rows (row `Small air conditioners and heat pumps` by Equipment Subcategory for SEER below 19 kW, row `Large air conditioners and heat pumps ... in cooling mode` by Rating Conditions for EER above it), `heat_pumps` cooling mode on the same two rows, and `heat_pumps_heating` (HSPF V below 19 kW, COPh at the 8.3 C rating point above it). 56 rows all matched, 62 mapped cells identical, 0 differing; capacity bands converted Btu/h to kW line up with the printed kW bands within the conversion's rounding. Partial because this table also publishes IEER for 32 of those rows and the snapshot carries no IEER value at all"
         },
         {
           "table": "5.2.12.1.-B",
@@ -267,7 +267,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-B.result.json",
           "sha256": "6050ac6f93dad800094b023b368a5d7e5492f6fa7619cc001c95ead75742340e",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (single-package vertical air conditioners and heat pumps). Note that the `heat_pumps_heating` rows' own `notes` cite this table for their HSPF V = 7.4, which is Table 5.2.12.1.-A's small air-cooled value - a provenance-note error, reported, not fixed"
         },
         {
           "table": "5.2.12.1.-C",
@@ -275,7 +275,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-C.result.json",
           "sha256": "3b9dc1a51a80a23518c77173299d5b4b95351ec4a656231384b1fde0d372815a",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (water-cooled and evaporatively cooled unitary air conditioners)"
         },
         {
           "table": "5.2.12.1.-D",
@@ -283,7 +283,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-D.result.json",
           "sha256": "ec07c20ec568f164e03edaf03ecc2086878cc4365037c7393fe75127e9295e7e",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (condensing units)"
         },
         {
           "table": "5.2.12.1.-E",
@@ -291,7 +291,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-E.result.json",
           "sha256": "98ee3894da6f4eeecaa8f167e3bcb42722739b1270d430aefaf4317884813b2f",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (water-source unitary heat pumps)"
         },
         {
           "table": "5.2.12.1.-F",
@@ -299,15 +299,15 @@
           "payload": "provenance/vintage_match/5.2.12.1.-F.result.json",
           "sha256": "3e34a8867d0d40c20361f339ad0f79eb38488dfa9b1d6e45cce03e880f3d3807",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (direct-expansion ground-source heat pumps)"
         },
         {
           "table": "5.2.12.1.-G",
           "edition": "2020",
           "payload": "provenance/vintage_match/5.2.12.1.-G.result.json",
           "sha256": "283158b2ec7d7834fe33d96c363d2ab8136777de9997153f6c02f41201454823",
-          "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "verdict": "identical",
+          "detail": "equipment minima, mapped explicitly: the six `unitary_acs` PTAC rows against row `PTAC and PTHP in cooling mode, standard and non-standard sizes`, capacity bands converted Btu/h to kW. All 6 matched, all 12 mapped cells identical, 0 differing - including the sliding minimum EER = 14.1 - (1.0435 x Capkw), whose slope the snapshot stores per kBtu/h (1.0435 / 3.412142 = 0.3058)"
         },
         {
           "table": "5.2.12.1.-H",
@@ -315,15 +315,15 @@
           "payload": "provenance/vintage_match/5.2.12.1.-H.result.json",
           "sha256": "aa08f0c98c3992b1d02b3e5f815cb4e3ca22cf025868206c31f8b318849ceedf",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (computer room air conditioners)"
         },
         {
           "table": "5.2.12.1.-I",
           "edition": "2020",
           "payload": "provenance/vintage_match/5.2.12.1.-I.result.json",
           "sha256": "7eda1143ff7d86b8cd932649e6eefeb15170f19bcd4c581b28ce86871e5950fd",
-          "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "verdict": "identical",
+          "detail": "equipment minima, mapped explicitly: the four `vrf_air_conditioners` and four `vrf_air_source_heat_pumps` rows against rows `Air-cooled air conditioners and heat pumps, with or without heat recovery`, `Air-cooled air conditioners` and `Air-source heat pumps, with or without heat recovery`; capacity bands are already in kW. All 8 matched, all 12 mapped cells identical, 0 differing. The heat-pump rows print two COPh minima in one cell and the mapping names the 8.3 C rating point, telling it from the -8.3 C one by sign"
         },
         {
           "table": "5.2.12.1.-J",
@@ -331,7 +331,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-J.result.json",
           "sha256": "cd259f8d867e0bcd5be454f9a3f222c8ad2de6bc4950f713016b194d512dcc81",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (direct-expansion dedicated outdoor air systems)"
         },
         {
           "table": "5.2.12.1.-K",
@@ -339,7 +339,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-K.result.json",
           "sha256": "495befc79db587a6e4d6ab72e5c7f919dc1603e1653bd35f87633b0e333e61b0",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima, mapped explicitly: all 20 `chillers` rows against rows `Water-cooled, rotary screw, scroll, or reciprocating compressor`, `Water-cooled, centrifugal compressor` and `Air-cooled, with or without remote condensers, all types of compressors`, column `Minimum Performance Path B` (the path the rows' own notes declare), COPc converted to kW/ton as 3.51685 / COP, capacity bands converted tons to kW. All 20 matched, all 20 mapped cells identical, 0 differing. Partial because this table also publishes an IPLV for every one of those rows and the snapshot's `minimum_integrated_part_load_value` is null in all 20"
         },
         {
           "table": "5.2.12.1.-L",
@@ -347,7 +347,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-L.result.json",
           "sha256": "3b14c1ee263389d35ed6da7b1c5e2a9cc06431afd61e62e6aa77ede77fa97093",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (heat pumps and heat recovery chiller packages)"
         },
         {
           "table": "5.2.12.1.-M",
@@ -355,7 +355,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-M.result.json",
           "sha256": "00d9a6c8134825c2ec66e5705dc42883d8cefa2fb3fb56654738cb6ca9e5b95b",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (heat pumps and heat-recovery chiller packages by leaving water temperature)"
         },
         {
           "table": "5.2.12.1.-N",
@@ -363,7 +363,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-N.result.json",
           "sha256": "e3a573d76e8241fbc7ab2e53054bad72cd7407eeefbdcd0b86563dcd2fb8e0cb",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima, mapped explicitly: all 7 `boilers` rows against rows `Gas-fired`, `Oil-fired` and `Electric`, capacity bands converted Btu/h to kW, and the water-side metric named per band - AFUE below 88 kW, thermal efficiency 88 to 733 kW, combustion efficiency 733 to 2 930 kW, each read from the `(water)` value and never the `(steam)` one. All 7 matched, 6 mapped cells identical, 0 differing. Partial for one cell: the electric row publishes no numeric minimum at all (it requires automatic water temperature control) while the snapshot carries thermal efficiency 1.0"
         },
         {
           "table": "5.2.12.1.-O",
@@ -371,7 +371,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-O.result.json",
           "sha256": "b9271ae942910c1e89a9df4d8dd61e3477ce82ebd42a9a109f6ad572863c5fb3",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima, mapped explicitly: the `furnaces` rows against row `Gas-fired warm-air furnaces`, capacity bands converted Btu/h to kW, with the rating condition preferred in the declared order (`Without integrated cooling`, then `See standard`). 2 of 3 rows matched and both mapped cells identical, 0 differing: AFUE 95% at or below 66 kW and thermal efficiency 81% from 66 to 117 kW. The third row starts at 117 kW, above where this table's gas warm-air furnace class ends; its own notes say it was added to catch capacities outside the Code's range, so it has no edition row by construction"
         },
         {
           "table": "5.2.12.1.-P",
@@ -379,7 +379,7 @@
           "payload": "provenance/vintage_match/5.2.12.1.-P.result.json",
           "sha256": "9fcadfc2395663b89b68b109a914ffa7e370a0d9bf03547564d97d9dd530ee56",
           "verdict": "partial",
-          "detail": "equipment minima, one of the 16 tables in this edition's 5.2.12.1 series: across the series 254 of 259 shipped values are corroborated once the documented unit renderings are applied (Btu/h to kW 112, tons to kW 44, percent to fraction 12, kW/ton to COP 5, as published 81); the 5 misses are engine capacity sentinels (9999.0 tons) closing a bin the Code writes with no upper bound"
+          "detail": "equipment minima: no shipped efficiency family maps to this table. The snapshot models none of the equipment it governs, so there is no row or column to compare and nothing here is claimed as verified (fireplaces, stoves, solid-fuel boilers and infrared heaters)"
         },
         {
           "table": "5.2.12.2",
@@ -387,7 +387,7 @@
           "payload": "provenance/vintage_match/5.2.12.2.result.json",
           "sha256": "df16414f6b88b1752158f6efb2b262f360372b74bbc1b7478065f35e3d9395cf",
           "verdict": "differs",
-          "detail": "heat rejection: the shipped heat_rejection block cites ASHRAE 90.1 in its own notes and nothing in it is transcribed from this edition's own table for the same equipment - pending D-89"
+          "detail": "heat rejection: the shipped `heat_rejection` block (24 rows) is UNMAPPED against this table and is reported as such, never as corroborated. Its own `notes` cite ASHRAE 90.1-2004 Table 6.8.1G and its `template` column names DOE reference vintages; its `minimum_performance` is an ASHRAE gpm-per-hp figure while this table publishes a fan-power RATIO (electrical kW per thermal kW, e.g. at most 0.013 for a propeller-fan open tower). Two different quantities on two different bases: there is no row-and-column mapping to make. The block is vestigial - the runtime applies the 0.013 ratio separately - so this is data hygiene, not a behavioural item"
         },
         {
           "table": "8.4.5.2.-A",
@@ -395,15 +395,15 @@
           "payload": "provenance/vintage_match/8.4.5.2.-A.result.json",
           "sha256": "130c3210766a9434117c17c86972cd126b98ef97e1e84944b99279b41be3fa07",
           "verdict": "differs",
-          "detail": "boiler FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the cubic EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR); worst departure over PLR 0.10-1.00 is 2.67 % non-condensing and 0.49 % condensing - a functional-form change, pending D-89"
+          "detail": "boiler FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the EnergyPlus efficiency multiplier PLF = PLR / FHeatPLC(PLR), compared as functions over PLR 0.10-1.00. Against the requirement each class is actually subject to, the curve its rows are GIVEN deviates by 2.67 % (non-condensing) and 45.54 % (condensing). Equipment-class selection is what makes this large: `hvac/efficiency.py` gives EVERY `boilers` row `BOILER-EFFFPLR` and every `furnaces` row `FURNACE-EFFPLR`, so naming a curve `-COND` does not assign it - no row references either condensing curve. The reference building elects modulating equipment: `hvac/reference.py` represents purchased heating by a gas-fired MODULATING boiler, which receives `BOILER-EFFFPLR` like every other. `BOILER-EFFFPLR-COND`, the curve NAMED for the condensing class, would deviate by only 0.49 % - but no row uses it. Pending D-89"
         },
         {
           "table": "8.4.5.2.-B",
           "edition": "2020",
           "payload": "provenance/vintage_match/8.4.5.2.-B.result.json",
           "sha256": "7cfc7f5a6a13e9f2c764bf769e0a16073ffd2c3220400e0721005bd6e9ba00b3",
-          "verdict": "partial",
-          "detail": "modulating boilers and furnaces: this table states Qpartload, Qrated, Qdesign and FHeatPLC for a class the snapshot does not model, so no shipped curve corresponds to its rows"
+          "verdict": "differs",
+          "detail": "MODULATING boilers and furnaces: this table is now CONSUMED, and it is the largest part-load finding in this edition. It states FHeatPLC as ten printed (PLR, FHeatPLC) points, so the requirement is PLF = PLR / FHeatPLC at each of them. Against it the curve every boiler row is given, `BOILER-EFFFPLR`, deviates by up to 33.51 %, and the curve every furnace row is given, `FURNACE-EFFPLR`, by up to 11.32 %; the snapshot ships no curve named for the modulating class at all. Equipment-class selection is what makes this large: `hvac/efficiency.py` gives EVERY `boilers` row `BOILER-EFFFPLR` and every `furnaces` row `FURNACE-EFFPLR`, so naming a curve `-COND` does not assign it - no row references either condensing curve. The reference building elects modulating equipment: `hvac/reference.py` represents purchased heating by a gas-fired MODULATING boiler, which receives `BOILER-EFFFPLR` like every other. Pending D-89"
         },
         {
           "table": "8.4.5.3",
@@ -411,7 +411,7 @@
           "payload": "provenance/vintage_match/8.4.5.3.result.json",
           "sha256": "fa9d15dc7eeb2c78d5094b866fe022fec37bb8cacadebe8b934cc607dd640cc4",
           "verdict": "differs",
-          "detail": "furnace FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the cubic EnergyPlus efficiency multiplier; worst departure over PLR 0.10-1.00 is 1.16 % atmospheric and 0.49 % condensing - a functional-form change, pending D-89"
+          "detail": "furnace FHeatPLC: this table writes a fuel-ratio quadratic while the shipped curve is the EnergyPlus efficiency multiplier PLF = PLR / FHeatPLC(PLR). Against the requirement each class is actually subject to, `FURNACE-EFFPLR` - which every `furnaces` row is given - deviates by 1.16 % (atmospheric) and 23.25 % (condensing); `FURNACE-EFFPLR-COND`, named for the condensing class, would deviate by 0.49 % but no row uses it. This edition's modulating furnace requirement is Table 8.4.5.2.-B, recorded there. Pending D-89"
         },
         {
           "table": "8.4.5.5.-A",
@@ -654,7 +654,7 @@
       "method": "generated",
       "source_verification": "revision_addressable",
       "note": "The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json and the remaining 22 differ only by keys inherited from the earlier vintages. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
-      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all; 1 documented cross-reference row differs - pending D-89",
+      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all, and `service_water_heating_peak_flow_per_area` is derived rather than transcribed; every cell that does have a source is identical - pending D-89",
       "verified_against": [
         {
           "table": "A-8.4.3.2.(2)-B",
@@ -662,7 +662,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(2)-B.result.json",
           "sha256": "28a3a4118db778177744a30234a82e61d4bbc07b5b187e307e654d9ededd4232",
           "verdict": "partial",
-          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 288 of the 308 shipped records join a row here and 1 146 of the compared cells are identical; the 4 differing cells all sit on the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 288 of the 308 shipped records join a row here and all 1152 compared cells are identical - **0 differing**. The four cells previously reported as differing on the `Health care facility medical supply room` row were a matcher defect, not a data difference: the join imported Table 4.2.1.6's control-only cross-reference to the Storage Room rows and reused it for loads and LPD. This edition publishes an explicit medical-supply row of its own (schedule H, illuminance 400 lx, occupant density 20 m2/occupant, peak receptacle 1 W/m2) and the shipped values match it, so the cross-reference is now used for control states only"
         },
         {
           "table": "A-8.4.3.2.(2)-A",
@@ -677,8 +677,8 @@
           "edition": "2020",
           "payload": "provenance/vintage_match/4.2.1.6.result.json",
           "sha256": "b23d91540c87abcd2a9c269674bf99ef4cf46e6dbc11b32233a6179cc35421b1",
-          "verdict": "partial",
-          "detail": "space-by-space LPD: the shipped lighting_per_area agrees with this table for every joined record except the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "verdict": "identical",
+          "detail": "space-by-space LPD: the shipped `lighting_per_area` agrees with this table for every joined record, including the `Health care facility medical supply room` row once the control-only cross-reference is kept out of the loads join"
         },
         {
           "table": "4.2.1.5",
@@ -718,7 +718,7 @@
       "method": "generated",
       "source_verification": "revision_addressable",
       "note": "NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's: checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against printed Table A-8.4.3.2.(1)-A via the MCP (see loads_rules.json).",
-      "inherited_reason": "the 33-cell difference is normative - pending D-89",
+      "inherited_reason": "the 33-cell `NECB-I-Fan` difference is normative but DORMANT - no product Python consumes it today - pending D-89",
       "verified_against": [
         {
           "table": "A-8.4.3.2.(1)-A",
@@ -726,7 +726,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-A.result.json",
           "sha256": "73f55a762665de6d2f9b36c12d91abd456ee627f89c9984cd951db9bfe4bfe2d",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-B",
@@ -734,7 +734,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-B.result.json",
           "sha256": "6eeda933e747f43b17929eba2741f2003397f457b064bcae03b31c1f26382d6b",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-C",
@@ -742,7 +742,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-C.result.json",
           "sha256": "ecacef78b1b0b0858df867727f461108f85605fced5149654811c4b6a5d46b33",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-D",
@@ -750,7 +750,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-D.result.json",
           "sha256": "1c2cab6621862a25f5749956e5f27a52a310c2cb6efdd6cf4e249adceed0fa58",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-E",
@@ -758,7 +758,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-E.result.json",
           "sha256": "3e02f1bf5f0ab8cf9077e2f5f3b0bdfd4fc00534f7a5de0d8c941b9c4d1b629a",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-F",
@@ -766,7 +766,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-F.result.json",
           "sha256": "2acfa78abb1f2a645b5fd4118eebf9f1931c662b384915e5aa5474508e52c50a",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-G",
@@ -774,7 +774,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-G.result.json",
           "sha256": "c88f25d0e054bdd59c39731454d35ce5980ea2c470b18bd4b1493619e22bb76f",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-H",
@@ -782,7 +782,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-H.result.json",
           "sha256": "0fe3361a361fd82cc2f0030bc835936a9897988ef94b6a65ba27bbd4b3adfb47",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-I",
@@ -790,7 +790,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-I.result.json",
           "sha256": "51e12ad3186bda6030244afda222ab994c47f75104c8330811cac1e887c923c9",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-J",
@@ -798,7 +798,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-J.result.json",
           "sha256": "410c5e379ee30bc80fdc42a0cfec943fec3a689e84e5721510c88cee4f2625e0",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         },
         {
           "table": "A-8.4.3.2.(1)-K",
@@ -806,7 +806,7 @@
           "payload": "provenance/vintage_match/A-8.4.3.2.(1)-K.result.json",
           "sha256": "8d67491eb2c9e48e0e6bffd541112e8305081052a94d9777a41f475ae8771f93",
           "verdict": "differs",
-          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree; the 33 that do not are all NECB-I-Fan, where this edition prints On and the snapshot carries 0.0 - normative, pending D-89. A further 333 cells this edition states as a word (On/Off, and the two thermostat rows' Off against the engine's 35 °C / 5 °C sentinels) are an encoding difference, not a value difference"
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and 5 178 of the 5 211 compared cells agree. The 33 that do not are all `NECB-I-Fan`, where Schedule I's `Fans` row prints `On` and the snapshot carries 0.0; the same row's 39 `Off` cells agree with that 0.0, so the 33 `On` cells are the entire difference. This is DORMANT DATA, not a live difference: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan`. A data correction, with no runtime effect today - pending D-89. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
         }
       ],
       "result_sha256": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47"
@@ -838,7 +838,7 @@
       "method": "generated",
       "source_verification": "revision_addressable",
       "note": "The merged legacy led_lighting_data table (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json. The vendored lighting_standard template column was removed 2026-09-09; no reader (D-88).",
-      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all, 3 shipped columns have no edition source, and 1 documented cross-reference row differs - pending D-89",
+      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all and 3 shipped columns have no edition source; every LPD that can be compared is consistent with this edition's published maximum - pending D-89",
       "verified_against": [
         {
           "table": "4.2.1.6",
@@ -846,7 +846,7 @@
           "payload": "provenance/vintage_match/4.2.1.6.result.json",
           "sha256": "b23d91540c87abcd2a9c269674bf99ef4cf46e6dbc11b32233a6179cc35421b1",
           "verdict": "partial",
-          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 274 of the 308 shipped records join a row and 273 are consistent with this table; the single differing record is the Health care facility medical supply room row, which this edition defers to the Storage Room rows - a documented cross-reference, pending D-89"
+          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 274 of the 308 shipped records join a row and all 274 are consistent with this table - **0 differing**. The single record previously reported as differing was the `Health care facility medical supply room` row, which the join had steered through Table 4.2.1.6's control-only cross-reference; against this edition's own medical-supply row (6.7 W/m2, i.e. 0.622450368 W/ft2) the shipped value agrees"
         },
         {
           "table": "4.2.1.5",
@@ -919,7 +919,7 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values this edition revises (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
-      "inherited_reason": "row-set and unread-column adoption pending D-89 (the nearest-city HDD lookup could move)",
+      "inherited_reason": "row-set and unread-column adoption pending D-89: 43 shipped and 42 edition rows do not join even keyed by (city, province), and this edition's table carries no coordinates, which is half of what runtime reads",
       "verified_against": [
         {
           "table": "C-1",
@@ -927,7 +927,7 @@
           "payload": "provenance/vintage_match/C-1.result.json",
           "sha256": "f16a3297d4d2fadd959a87edd570be3615d010828c8136c341ed989ae0ff7ebe",
           "verdict": "partial",
-          "detail": "climatic data: 629 rows join by normalised city name and every degree-days-below-18 value and every design temperature is identical; the 365 differing cells are hourly wind pressures (302 at 1/10, 52 at 1/50 - no reader in this package) and 11 degree-days-below-15 values. The row sets differ: this edition prints 680 rows, the snapshot ships 679"
+          "detail": "climatic data, keyed by (normalised city, PROVINCE) - the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two places in two provinces. 636 rows join, and every degree-days-below-18 value and every design temperature among them is identical. 365 cells differ: hourly wind pressures (302 at 1/10 and 52 at 1/50), which no reader in this package consumes, and 11 degree-days-below-15 values. The residue is 43 unmatched shipped rows and 42 unmatched edition rows, every one of them listed with its nearest candidate in the alias/unmatched ledger of docs/NECB_VINTAGE_MATCH.md; the row sets differ (this edition prints 680 rows resolving to 678 distinct keys, the snapshot ships 679). What runtime reads from this file is lat_long and degree_days_below_18_c, and this edition's table publishes no coordinates at all, so its row set cannot supply the column the nearest-city lookup keys on"
         }
       ],
       "result_sha256": "ffd0ba3e3fccbc1c61ae0b00a696b155f3adc542b1e4a967bd3a6d19653720fd"

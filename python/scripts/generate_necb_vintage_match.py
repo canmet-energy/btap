@@ -22,8 +22,15 @@ Refreshing the archive is a maintainer MCP operation, deliberately explicit::
     python3 python/scripts/generate_necb_vintage_match.py --fetch
     python3 python/scripts/generate_necb_vintage_match.py
 
-``--fetch`` is the ONLY path that imports ``btap._mcp``; generation and
-``--check`` are stdlib-only and never touch the network.
+``--fetch`` skips a payload that is already archived; add ``--refresh`` to
+re-retrieve and overwrite one. ``--fetch`` is the ONLY path that imports
+``btap._mcp``; generation and ``--check`` are stdlib-only and never touch the
+network.
+
+Generation and ``--check`` both begin with a COMPLETENESS gate: every payload
+the matrix declares must exist. A missing payload is a failure, never a line of
+prose — with the payload absent the comparison it drives silently does not
+happen while its file still reports a verdict.
 
 Nothing here edits product data. A verdict of ``differs`` is a FINDING for the
 D-89 adjudication, never a fix applied in passing.
@@ -32,6 +39,7 @@ D-89 adjudication, never a fix applied in passing.
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import re
 import sys
@@ -217,13 +225,16 @@ def numbers_equal(a: float, b: float, tol: float = 1e-9) -> bool:
 
 
 # --------------------------------------------------------------------------
-# Corroborating a shipped NUMBER against an edition table
+# Loose numeric probing — SHW rule leaves ONLY
 #
-# The shipped rule files are ENGINE tables: capacities in Btu/h or tons,
-# efficiencies as fractions or kW/ton. The Code publishes kW bins, percentages
-# and COPs. A literal string search would report almost everything as absent
-# and prove nothing, so a value is corroborated when ANY of its documented
-# unit renderings appears among the numbers the edition's own table prints.
+# ``shw_rules.json``'s consumed leaves are scalar constants scattered through a
+# single small table with no row structure to join on, so "does this number
+# appear in this edition's Table 6.2.2.1 at all" is the honest question there.
+# It is NOT the question for equipment minima: a scan that accepts any nearby
+# number under any unit conversion preserves no equipment class, no table, no
+# row, no capacity band and no metric, and so cannot support a claim about the
+# shipped efficiency tables. Those go through the explicit per-family
+# row-and-column mapping below instead.
 # --------------------------------------------------------------------------
 BTU_PER_H_PER_KW = 3412.142
 KW_PER_TON = 3.51685
@@ -279,6 +290,774 @@ def corroborate(value: float, corpus: list[float], tol: float = 5e-3):
 
 
 # --------------------------------------------------------------------------
+# Equipment minima: an EXPLICIT per-family row-and-column mapping
+#
+# Every shipped efficiency family names, per edition, the table it comes from,
+# the row that governs each of its rows (equipment class + capacity band, with
+# the band bounds converted out of the engine's units), and the column and
+# METRIC the value is supposed to be. Nothing is inferred from proximity: a
+# shipped number is compared against one identified cell or it is reported as
+# having no mapping. A family with no faithful mapping is declared UNMAPPED and
+# never counted as agreeing with anything.
+# --------------------------------------------------------------------------
+
+#: Subscripted metric letters as the codes service serves them.
+_SUBSCRIPT_LETTERS = {"ₕ": "h", "ₜ": "t", "ᵥ": "v", "ₑ": "e",
+                      "ₓ": "x", "ₐ": "a", "ₘ": "m", "ᶜ": "c"}
+
+#: The metric tokens the 5.2.12.x series prints, LONGEST FIRST so that `IEER`
+#: is never read as `EER` nor `HSPF V` as `HSPF`.
+METRIC_TOKENS = ("ISMRE", "ISCOP", "HSPF V", "HSPF", "SCOP", "IEER", "CEER",
+                 "SEER", "IPLV", "AFUE", "COPc", "COPh", "COP", "EER", "FER",
+                 "NRE", "Et", "Ec", "FE")
+
+_METRIC_RE = re.compile(
+    r"(?P<token>" + "|".join(re.escape(t) for t in METRIC_TOKENS) + r")"
+    r"\s*(?:=|≥|>=|≤|<=)\s*"
+    r"(?P<value>\d+(?:\.\d+)?)\s*(?P<pct>%)?"
+    r"(?P<tail>[^A-Z]*)")
+
+#: `EER = 14.1 - (1.0435 × Capkw)` — the PTAC/PTHP sliding minimum. The slope is
+#: per kW of capacity; the snapshot stores it per kBtu/h.
+_SLOPE_RE = re.compile(r"-\s*\(?\s*(\d+(?:\.\d+)?)\s*[×x*]")
+
+
+def _desubscript(text: str) -> str:
+    return "".join(_SUBSCRIPT_LETTERS.get(c, c) for c in str(text or ""))
+
+
+def norm_qualifier(text) -> str:
+    """Lower-cased and whitespace-collapsed, but SIGNS AND DECIMAL POINTS KEPT.
+
+    Table 5.2.12.1.-A's heating-mode rows are told apart only by `at 8.3°C`
+    versus `at -8.3°C`; :func:`norm_name` folds both to the same key, so a
+    qualifier must not go through it.
+    """
+    s = unicodedata.normalize("NFKD", _desubscript(text))
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return _WS.sub(" ", s.replace("−", "-").lower()).strip()
+
+
+def parse_metrics(cell) -> list[dict]:
+    """Every `TOKEN = value` a performance cell prints, in printed order.
+
+    ``qualifier`` is the text that follows the value up to the next token — the
+    `(water)` / `(steam)` of a boiler row, the `evaluated at 8.3°C db` of a VRF
+    heat-pump row — kept so a column mapping can name which of two same-token
+    values it means.
+    """
+    text = _desubscript(cell).replace("\n", " ")
+    out = []
+    for match in _METRIC_RE.finditer(text):
+        tail = match.group("tail") or ""
+        slope = _SLOPE_RE.search(tail)
+        out.append({
+            "token": match.group("token"),
+            "value": float(match.group("value")),
+            "percent": bool(match.group("pct")),
+            "qualifier": norm_qualifier(tail),
+            "slope": float(slope.group(1)) if slope else None,
+        })
+    return out
+
+
+_BAND_TOKEN = re.compile(r"(?P<op>≥|>=|≤|<=|<|>)\s*"
+                         r"(?P<value>\d[\d    ]*(?:\.\d+)?)")
+
+
+def parse_band(text) -> tuple[float | None, float | None] | None:
+    """A printed capacity band as ``(lo, hi)`` in kW; ``None`` means open.
+
+    ``All capacities`` is ``(None, None)``. The bound the operator excludes is
+    still the bound: `< 19` and `≤ 19` both close at 19 for the purpose of
+    lining a band up with a converted engine bin, whose bounds are rounded
+    anyway (65 000 Btu/h is 19.05 kW, not 19).
+    """
+    raw = str(text or "")
+    if not raw.strip():
+        return None
+    if "all capacit" in raw.lower():
+        return (None, None)
+    lo = hi = None
+    found = False
+    for match in _BAND_TOKEN.finditer(raw):
+        found = True
+        value = float(re.sub(r"[    ]", "", match.group("value")))
+        if match.group("op") in ("≥", ">=", ">"):
+            lo = value
+        else:
+            hi = value
+    return (lo, hi) if found else None
+
+
+#: Engine values that close a bin the Code writes with no upper bound at all.
+CAPACITY_SENTINELS = (9999.0, 9999999.0, 9.999999999e9, 999999999.0)
+
+CAPACITY_UNITS = {
+    "btu_per_h": (lambda v: v / BTU_PER_H_PER_KW, "Btu/h → kW"),
+    "ton": (lambda v: v * KW_PER_TON, "tons → kW"),
+    "kw": (lambda v: v, "kW (as published)"),
+}
+
+#: How a shipped value relates to the metric the Code prints.
+METRIC_TRANSFORMS = {
+    "identity": (lambda printed, _: printed, "as published"),
+    "percent_to_fraction": (lambda printed, _: printed / 100.0, "% → fraction"),
+    "cop_to_kw_per_ton": (lambda printed, _: KW_PER_TON / printed
+                          if printed else None, "COP → kW/ton"),
+    "slope_per_kw_to_per_kbtu_per_h":
+        (lambda printed, m: (m["slope"] / (BTU_PER_H_PER_KW / 1000.0))
+         if m.get("slope") is not None else None, "per kW → per kBtu/h"),
+}
+
+#: Bands are compared after a unit conversion whose inputs are rounded engine
+#: numbers (65 000 Btu/h for the Code's 19 kW is 0.26 % high), so a bound counts
+#: as the same bound within 2 %.
+BAND_TOL = 0.02
+
+EQUIPMENT_BLOCKS: dict[str, list[dict]] = {
+    "necb2020": [
+        # ---- unitary air conditioners ------------------------------------
+        {
+            "family": "unitary_acs",
+            "block": "air-cooled unitary air conditioners < 19 kW (seasonal)",
+            "when": {"equipment_type": ("Air Conditioners",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_seasonal_energy_efficiency_ratio",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": "Small air conditioners and heat pumps",
+            "qualifier": {"column": "Equipment Subcategory", "from": "subcategory",
+                          "map": {"Single Package": "single-package, others",
+                                  "Split System": "split system, others"}},
+            "columns": {
+                "minimum_seasonal_energy_efficiency_ratio":
+                    {"metric": "SEER", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+        },
+        {
+            "family": "unitary_acs",
+            "block": "air-cooled unitary air conditioners ≥ 19 kW (full load)",
+            "when": {"equipment_type": ("Air Conditioners",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_energy_efficiency_ratio",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": ("Large air conditioners and heat pumps, split and "
+                         "single-package, all electrical phases, in cooling mode"),
+            "qualifier": {
+                "column": "Rating Conditions", "from": "heating_type",
+                "map": {"Electric Resistance or None":
+                        "electric resistance heating section or no heating section",
+                        "All Other": "other types of heating sections"}},
+            "columns": {
+                "minimum_energy_efficiency_ratio":
+                    {"metric": "EER", "column": "Minimum Performance",
+                     "transform": "identity"},
+                "minimum_integrated_energy_efficiency_ratio":
+                    {"metric": "IEER", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+        },
+        {
+            "family": "unitary_acs",
+            "block": "packaged terminal air conditioners (PTAC), cooling mode",
+            "when": {"equipment_type": ("PTAC",)},
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-G",
+            "row_column": "Equipment Category",
+            "row_name": ("PTAC and PTHP in cooling mode, standard and "
+                         "non-standard sizes"),
+            "columns": {
+                "ptac_eer_coefficient_1":
+                    {"metric": "EER", "column": "Minimum Performance",
+                     "transform": "identity"},
+                "ptac_eer_coefficient_2":
+                    {"metric": "EER", "column": "Minimum Performance",
+                     "transform": "slope_per_kw_to_per_kbtu_per_h",
+                     "zero_when_no_slope": True},
+            },
+        },
+        # ---- heat pumps, cooling mode -------------------------------------
+        {
+            "family": "heat_pumps",
+            "block": "air-cooled heat pumps < 19 kW, cooling mode (seasonal)",
+            "when": {"equipment_type": ("Heat Pumps",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_seasonal_efficiency",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": "Small air conditioners and heat pumps",
+            "qualifier": {"column": "Equipment Subcategory", "from": "subcategory",
+                          "map": {"Single Package": "single-package, others",
+                                  "Split System": "split system, others"}},
+            "columns": {
+                "minimum_seasonal_efficiency":
+                    {"metric": "SEER", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+        },
+        {
+            "family": "heat_pumps",
+            "block": "air-cooled heat pumps ≥ 19 kW, cooling mode (full load)",
+            "when": {"equipment_type": ("Heat Pumps",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_full_load_efficiency",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": ("Large air conditioners and heat pumps, split and "
+                         "single-package, all electrical phases, in cooling mode"),
+            "qualifier": {
+                "column": "Rating Conditions", "from": "heating_type",
+                "map": {"Electric Resistance or None":
+                        "electric resistance heating section or no heating section",
+                        "All Other": "other types of heating sections"}},
+            "columns": {
+                "minimum_full_load_efficiency":
+                    {"metric": "EER", "column": "Minimum Performance",
+                     "transform": "identity"},
+                "minimum_integrated_energy_efficiency_ratio":
+                    {"metric": "IEER", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+        },
+        # ---- heat pumps, heating mode -------------------------------------
+        {
+            "family": "heat_pumps_heating",
+            "block": "air-cooled heat pumps < 19 kW, heating mode (seasonal)",
+            "when": {"equipment_type": ("Heat Pumps",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_heating_seasonal_performance_factor",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": "Small air conditioners and heat pumps",
+            "qualifier": {"column": "Equipment Subcategory", "from": "subcategory",
+                          "map": {"Single Package": "single-package, others",
+                                  "Split System": "split system, others"}},
+            "columns": {
+                "minimum_heating_seasonal_performance_factor":
+                    {"metric": "HSPF V", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+            "note": ("the shipped rows' own `notes` cite Table 5.2.12.1.-B "
+                     "(single-package VERTICAL units); the HSPF V = 7.4 they "
+                     "carry is Table 5.2.12.1.-A's small air-cooled row, which "
+                     "is the table mapped here — a provenance-note error, "
+                     "reported, not fixed"),
+        },
+        {
+            "family": "heat_pumps_heating",
+            "block": "air-cooled heat pumps ≥ 19 kW, heating mode (COP at 8.3 °C)",
+            "when": {"equipment_type": ("Heat Pumps",),
+                     "cooling_type": ("AirCooled",)},
+            "requires": ("minimum_coefficient_of_performance_heating",),
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-A",
+            "row_column": "Equipment Category",
+            "row_name": ("Large heat pumps, split and single-package, all "
+                         "electrical phases, in heating mode"),
+            "qualifier": {"column": "Rating Conditions", "fixed": ("at 8.3°c",)},
+            "columns": {
+                "minimum_coefficient_of_performance_heating":
+                    {"metric": "COPh", "column": "Minimum Performance",
+                     "transform": "identity"},
+            },
+        },
+        # ---- chillers ------------------------------------------------------
+        {
+            "family": "chillers",
+            "block": "water-cooled positive-displacement chillers, Path B",
+            "when": {"cooling_type": ("WaterCooled",),
+                     "compressor_type": ("Scroll", "Reciprocating", "Rotary Screw")},
+            "capacity_unit": "ton",
+            "table": "5.2.12.1.-K",
+            "row_column": "Type of Equipment",
+            "row_name": "Water-cooled, rotary screw, scroll, or reciprocating compressor",
+            "columns": {
+                "minimum_full_load_efficiency":
+                    {"metric": "COPc", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+                "minimum_integrated_part_load_value":
+                    {"metric": "IPLV", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+            },
+        },
+        {
+            "family": "chillers",
+            "block": "water-cooled centrifugal chillers, Path B",
+            "when": {"cooling_type": ("WaterCooled",),
+                     "compressor_type": ("Centrifugal",)},
+            "capacity_unit": "ton",
+            "table": "5.2.12.1.-K",
+            "row_column": "Type of Equipment",
+            "row_name": "Water-cooled, centrifugal compressor",
+            "columns": {
+                "minimum_full_load_efficiency":
+                    {"metric": "COPc", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+                "minimum_integrated_part_load_value":
+                    {"metric": "IPLV", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+            },
+        },
+        {
+            "family": "chillers",
+            "block": "air-cooled chillers, Path B",
+            "when": {"cooling_type": ("AirCooled",)},
+            "capacity_unit": "ton",
+            "table": "5.2.12.1.-K",
+            "row_column": "Type of Equipment",
+            "row_name": ("Air-cooled, with or without remote condensers, all "
+                         "types of compressors"),
+            "columns": {
+                "minimum_full_load_efficiency":
+                    {"metric": "COPc", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+                "minimum_integrated_part_load_value":
+                    {"metric": "IPLV", "column": "Minimum Performance Path B",
+                     "transform": "cop_to_kw_per_ton"},
+            },
+        },
+        # ---- boilers -------------------------------------------------------
+        {
+            "family": "boilers",
+            "block": "gas-fired hot-water boilers",
+            "when": {"fuel_type": ("Gas",), "fluid_type": ("Hot Water",)},
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-N",
+            "row_column": "Equipment Category",
+            "row_name": "Gas-fired",
+            "columns": {
+                "minimum_annual_fuel_utilization_efficiency":
+                    {"metric": "AFUE", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+                "minimum_thermal_efficiency":
+                    {"metric": "Et", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+                "minimum_combustion_efficiency":
+                    {"metric": "Ec", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+            },
+        },
+        {
+            "family": "boilers",
+            "block": "oil-fired hot-water boilers",
+            "when": {"fuel_type": ("Oil",), "fluid_type": ("Hot Water",)},
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-N",
+            "row_column": "Equipment Category",
+            "row_name": "Oil-fired",
+            "columns": {
+                "minimum_annual_fuel_utilization_efficiency":
+                    {"metric": "AFUE", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+                "minimum_thermal_efficiency":
+                    {"metric": "Et", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+                "minimum_combustion_efficiency":
+                    {"metric": "Ec", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction", "metric_qualifier": "(water)"},
+            },
+        },
+        {
+            "family": "boilers",
+            "block": "electric hot-water boilers",
+            "when": {"fuel_type": ("Electric",), "fluid_type": ("Hot Water",)},
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-N",
+            "row_column": "Equipment Category",
+            "row_name": "Electric",
+            "columns": {
+                "minimum_thermal_efficiency":
+                    {"metric": "Et", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction"},
+            },
+        },
+        # ---- furnaces ------------------------------------------------------
+        {
+            "family": "furnaces",
+            "block": "gas-fired warm-air furnaces",
+            "when": {"fuel_type": ("Gas",), "fluid_type": ("Air",)},
+            "capacity_unit": "btu_per_h",
+            "table": "5.2.12.1.-O",
+            "row_column": "Type of Equipment",
+            "row_name": "Gas-fired warm-air furnaces",
+            "qualifier": {"column": "Rating Conditions",
+                          "fixed": ("without integrated cooling", "see standard")},
+            "columns": {
+                "minimum_annual_fuel_utilization_efficiency":
+                    {"metric": "AFUE", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction"},
+                "minimum_thermal_efficiency":
+                    {"metric": "Et", "column": "Minimum Performance",
+                     "transform": "percent_to_fraction"},
+            },
+        },
+        # ---- variable refrigerant flow -------------------------------------
+        {
+            "family": "vrf_air_conditioners",
+            "block": "VRF air-cooled air conditioners < 19 kW (seasonal)",
+            "when": {},
+            "requires": ("minimum_seer",),
+            "capacity_unit": "kw",
+            "capacity_keys": ("minimum_capacity_kw", "maximum_capacity_kw"),
+            "table": "5.2.12.1.-I",
+            "row_column": "Equipment Type",
+            "row_name": ("Air-cooled air conditioners and heat pumps, with or "
+                         "without heat recovery"),
+            "columns": {
+                "minimum_seer": {"metric": "SEER", "column": "Minimum Performance",
+                                 "transform": "identity"},
+            },
+        },
+        {
+            "family": "vrf_air_conditioners",
+            "block": "VRF air-cooled air conditioners ≥ 19 kW (full load)",
+            "when": {},
+            "requires": ("minimum_eer",),
+            "capacity_unit": "kw",
+            "capacity_keys": ("minimum_capacity_kw", "maximum_capacity_kw"),
+            "table": "5.2.12.1.-I",
+            "row_column": "Equipment Type",
+            "row_name": "Air-cooled air conditioners",
+            "columns": {
+                "minimum_eer": {"metric": "EER", "column": "Minimum Performance",
+                                "transform": "identity"},
+            },
+        },
+        {
+            "family": "vrf_air_source_heat_pumps",
+            "block": "VRF air-source heat pumps < 19 kW (seasonal)",
+            "when": {},
+            "requires": ("minimum_seer",),
+            "capacity_unit": "kw",
+            "capacity_keys": ("minimum_capacity_kw", "maximum_capacity_kw"),
+            "table": "5.2.12.1.-I",
+            "row_column": "Equipment Type",
+            "row_name": ("Air-cooled air conditioners and heat pumps, with or "
+                         "without heat recovery"),
+            "columns": {
+                "minimum_seer": {"metric": "SEER", "column": "Minimum Performance",
+                                 "transform": "identity"},
+                "minimum_hspf": {"metric": "HSPF V", "column": "Minimum Performance",
+                                 "transform": "identity"},
+            },
+        },
+        {
+            "family": "vrf_air_source_heat_pumps",
+            "block": "VRF air-source heat pumps ≥ 19 kW (EER, COP at 8.3 °C)",
+            "when": {},
+            "requires": ("minimum_eer",),
+            "capacity_unit": "kw",
+            "capacity_keys": ("minimum_capacity_kw", "maximum_capacity_kw"),
+            "table": "5.2.12.1.-I",
+            "row_column": "Equipment Type",
+            "row_name": "Air-source heat pumps, with or without heat recovery",
+            "columns": {
+                "minimum_eer": {"metric": "EER", "column": "Minimum Performance",
+                                "transform": "identity"},
+                # Table 5.2.12.1.-I prints two COPh minima in one cell, at
+                # 8.3 °C db and at -8.3 °C db. The snapshot carries the warmer
+                # rating point, so the mapping names it; the sign is what tells
+                # the two apart, which is why a qualifier keeps its sign.
+                "minimum_heating_cop":
+                    {"metric": "COPh", "column": "Minimum Performance",
+                     "transform": "identity",
+                     "metric_qualifier": "evaluated at 8.3"},
+            },
+        },
+    ],
+}
+
+#: Families with no faithful mapping to this edition's own tables. Reported as
+#: UNMAPPED — never as corroborated, and never counted among the agreeing cells.
+UNMAPPED_FAMILIES = {
+    "heat_rejection": (
+        "the block's own `notes` cite ASHRAE 90.1-2004 Table 6.8.1G and its "
+        "`template` column names DOE reference vintages; its "
+        "`minimum_performance` is an ASHRAE gpm-per-hp figure, while this "
+        "edition's Table 5.2.12.2 publishes a fan-power RATIO (electrical kW "
+        "per thermal kW, e.g. ≤ 0.013 for a propeller-fan open tower). Two "
+        "different quantities on two different bases: there is no row-and-column "
+        "mapping to make, and the block is vestigial — the runtime applies the "
+        "0.013 ratio separately"),
+}
+
+#: Metric-bearing keys a family carries that no block declares are listed rather
+#: than silently ignored; these engine bookkeeping keys are not metrics at all.
+NON_METRIC_KEYS = {
+    "start_date", "end_date", "notes", "equipment_type", "cooling_type",
+    "heating_type", "subcategory", "compressor_type", "condenser_type",
+    "absorption_type", "variable_speed_drive", "fluid_type", "fuel_type",
+    "condensing", "condensing_control", "template", "fan_type",
+    "minimum_capacity", "maximum_capacity", "minimum_capacity_kw",
+    "maximum_capacity_kw", "capft", "eirft", "eirfplr", "efffplr",
+    "cool_cap_ft", "cool_cap_fflow", "cool_eir_ft", "cool_eir_fflow",
+    "cool_plf_fplr", "heat_cap_ft", "heat_cap_fflow", "heat_eir_ft",
+    "heat_eir_fflow", "heat_plf_fplr", "condition",
+}
+
+
+def _capacity_bounds(row: dict, block: dict) -> tuple[float | None, float | None, str]:
+    """The shipped row's band, converted into kW, with sentinels opened out."""
+    lo_key, hi_key = block.get("capacity_keys", ("minimum_capacity", "maximum_capacity"))
+    convert, label = CAPACITY_UNITS[block["capacity_unit"]]
+
+    def bound(value):
+        number = as_number(value)
+        if number is None:
+            return None
+        if number in CAPACITY_SENTINELS:
+            return None
+        return convert(number)
+
+    return bound(row.get(lo_key)), bound(row.get(hi_key)), label
+
+
+def _bands_align(shipped: tuple, printed: tuple) -> bool:
+    """Do the two bands describe the same bin, within the conversion's rounding?"""
+    for a, b in zip(shipped, printed):
+        if (a is None) != (b is None):
+            return False
+        if a is not None and abs(a - b) > BAND_TOL * max(1.0, abs(b)):
+            return False
+    return True
+
+
+def _bands_overlap(shipped: tuple, printed: tuple) -> bool:
+    lo_a, hi_a = shipped
+    lo_b, hi_b = printed
+    if hi_a is not None and lo_b is not None and hi_a <= lo_b * (1 + BAND_TOL):
+        return False
+    if hi_b is not None and lo_a is not None and hi_b <= lo_a * (1 + BAND_TOL):
+        return False
+    return True
+
+
+def _fmt_band(band) -> str:
+    lo, hi = band
+    if lo is None and hi is None:
+        return "all capacities"
+    if lo is None:
+        return f"< {hi:.4g} kW"
+    if hi is None:
+        return f"≥ {lo:.4g} kW"
+    return f"≥ {lo:.4g} and < {hi:.4g} kW"
+
+
+def _block_applies(row: dict, block: dict) -> bool:
+    for key, wanted in block["when"].items():
+        if row.get(key) not in wanted:
+            return False
+    required = block.get("requires")
+    if required and not any(row.get(k) is not None for k in required):
+        return False
+    return True
+
+
+def _pick_metric(cell, spec: dict):
+    """The one metric this column mapping names, or ``None``."""
+    wanted = spec["metric"]
+    qualifier = spec.get("metric_qualifier")
+    candidates = [m for m in parse_metrics(cell) if m["token"] == wanted]
+    if qualifier:
+        exact = [m for m in candidates
+                 if norm_qualifier(qualifier) in m["qualifier"]]
+        if exact:
+            return exact[0]
+        return None
+    return candidates[0] if candidates else None
+
+
+def compare_equipment_families(res: FileResult, tables: dict) -> dict:
+    """Cell-by-cell, family by family, against the identified row and column."""
+    shipped = _shipped(res.edition_id, "efficiencies.json")
+    blocks = EQUIPMENT_BLOCKS.get(res.edition_id, [])
+    families: dict[str, dict] = {}
+
+    def bucket(name: str) -> dict:
+        return families.setdefault(name, {
+            "rows": 0, "matched": 0, "unmatched": 0, "identical": 0,
+            "differing": 0, "no_edition_value": 0, "no_shipped_value": 0,
+            "mappings": [], "tables": set(), "undeclared": set(),
+            "unmapped_reason": None,
+        })
+
+    for family, reason in sorted(UNMAPPED_FAMILIES.items()):
+        rows = shipped.get(family)
+        if isinstance(rows, list):
+            entry = bucket(family)
+            entry["rows"] = len(rows)
+            entry["unmapped_reason"] = reason
+
+    declared_families = {b["family"] for b in blocks}
+    for family in sorted(declared_families):
+        rows = shipped.get(family)
+        if isinstance(rows, list):
+            bucket(family)["rows"] = len(rows)
+
+    for family in sorted(shipped):
+        rows = shipped.get(family)
+        if family in {"curves", "provenance", "_provenance"} or not isinstance(rows, list):
+            continue
+        if family in UNMAPPED_FAMILIES:
+            continue
+        entry = bucket(family)
+        entry["rows"] = len(rows)
+        if family not in declared_families:
+            entry["unmapped_reason"] = (
+                "no block of the mapping claims this family in this edition")
+            continue
+        for index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            block = next((b for b in blocks
+                          if b["family"] == family and _block_applies(row, b)), None)
+            declared = set()
+            if block is None:
+                entry["unmatched"] += 1
+                res.differences.append(
+                    (f"{family}[{index}]", _fmt(row.get("equipment_type")
+                                                or row.get("fuel_type") or ""),
+                     "no block of the mapping claims this row"))
+            else:
+                declared = set(block["columns"])
+                entry["tables"].add(block["table"])
+                _compare_one_equipment_row(res, entry, family, index, row, block,
+                                           tables)
+            for key, value in sorted(row.items()):
+                if key in NON_METRIC_KEYS or key in declared or value is None:
+                    continue
+                entry["undeclared"].add(key)
+
+    for block in blocks:
+        entry = families.get(block["family"])
+        if entry is None:
+            continue
+        line = (f"{block['block']} → Table {block['table']}, row "
+                f"`{block['row_name']}` ({block['row_column']}), band in "
+                f"{CAPACITY_UNITS[block['capacity_unit']][1]}, column(s) " +
+                "; ".join(f"`{k}` ← {v['metric']} in `{v['column']}`"
+                          f"{' [' + v['metric_qualifier'] + ']' if v.get('metric_qualifier') else ''}"
+                          f" ({METRIC_TRANSFORMS[v['transform']][1]})"
+                          for k, v in sorted(block["columns"].items())))
+        if block.get("qualifier"):
+            qualifier = block["qualifier"]
+            line += (f"; row qualifier `{qualifier['column']}` from "
+                     + (f"`{qualifier['from']}`" if qualifier.get("from")
+                        else "the declared preference order "
+                        + ", ".join(f"`{q}`" for q in qualifier["fixed"])))
+        entry["mappings"].append(line)
+        if block.get("note"):
+            entry["mappings"].append("note: " + block["note"])
+    return families
+
+
+def _compare_one_equipment_row(res, entry, family, index, row, block, tables):
+    table = tables.get(block["table"])
+    if table is None:
+        entry["unmatched"] += 1
+        return
+    band = _capacity_bounds(row, block)
+    shipped_band, unit_label = (band[0], band[1]), band[2]
+    wanted_name = norm_name(block["row_name"])
+    qualifier = block.get("qualifier")
+    wanted_qualifiers: tuple = ()
+    if qualifier:
+        if qualifier.get("fixed"):
+            wanted_qualifiers = tuple(norm_qualifier(q) for q in qualifier["fixed"])
+        else:
+            mapped = qualifier["map"].get(row.get(qualifier["from"]))
+            wanted_qualifiers = (norm_qualifier(mapped),) if mapped else ()
+
+    def rows_for(qualifier_key):
+        out = []
+        for printed in table.get("rows", []):
+            name = norm_name(printed.get(block["row_column"]))
+            if not name.startswith(wanted_name):
+                continue
+            if qualifier and qualifier_key is not None:
+                if qualifier_key not in norm_qualifier(printed.get(qualifier["column"])):
+                    continue
+            printed_band = parse_band(printed.get("Cooling or Heating Capacity, kW"))
+            if printed_band is None:
+                continue
+            out.append((printed, printed_band))
+        return out
+
+    # A declared qualifier list is a PREFERENCE order, not a filter: Table
+    # 5.2.12.1.-O prints three rating conditions for gas warm-air furnaces
+    # ≤ 66 kW and only "See standard" above it, so the first qualifier that
+    # yields a row for THIS band wins, not merely the first that yields a row.
+    exact: list = []
+    spanning: list = []
+    for qualifier_key in (wanted_qualifiers or (None,)):
+        candidates = rows_for(qualifier_key)
+        exact = [c for c in candidates if _bands_align(shipped_band, c[1])]
+        spanning = [c for c in candidates if _bands_overlap(shipped_band, c[1])]
+        if exact or spanning:
+            break
+    hits = exact or spanning
+    if not hits:
+        entry["unmatched"] += 1
+        res.differences.append(
+            (f"{family}[{index}] {_fmt_band(shipped_band)} ({unit_label})",
+             _fmt(block["row_name"]),
+             f"Table {block['table']} publishes no row of this class for this "
+             "capacity band"))
+        return
+    entry["matched"] += 1
+    band_note = "" if exact else " (shipped bin spans several printed bands)"
+    for own_key, spec in sorted(block["columns"].items()):
+        value = as_number(row.get(own_key))
+        printed_values = []
+        for printed, _band in hits:
+            metric = _pick_metric(printed.get(spec["column"]), spec)
+            if metric is None:
+                continue
+            transform = METRIC_TRANSFORMS[spec["transform"]][0](metric["value"], metric)
+            if transform is None and spec.get("zero_when_no_slope"):
+                transform = 0.0
+            if transform is not None:
+                printed_values.append((transform, metric))
+        if value is None:
+            if printed_values:
+                entry["no_shipped_value"] += 1
+                res.differences.append(
+                    (f"{family}[{index}] . {own_key} (Table {block['table']})",
+                     "_(no shipped value)_",
+                     f"`{spec['metric']} = {printed_values[0][1]['value']:g}` — "
+                     "this edition publishes a minimum the snapshot does not carry"))
+            continue
+        if not printed_values:
+            entry["no_edition_value"] += 1
+            res.differences.append(
+                (f"{family}[{index}] . {own_key} (Table {block['table']})",
+                 _fmt(row.get(own_key)),
+                 f"this edition's row prints no `{spec['metric']}` value at all"))
+            continue
+        if all(numbers_equal(value, expected, 2e-3)
+               for expected, _m in printed_values):
+            entry["identical"] += 1
+        else:
+            entry["differing"] += 1
+            expected, metric = printed_values[0]
+            res.differences.append(
+                (f"{family}[{index}] . {own_key} (Table {block['table']}, "
+                 f"{_fmt_band(shipped_band)}){band_note}",
+                 _fmt(row.get(own_key)),
+                 f"`{spec['metric']} = {metric['value']:g}"
+                 f"{'%' if metric['percent'] else ''}` → "
+                 f"{expected:.6g} ({METRIC_TRANSFORMS[spec['transform']][1]})"))
+
+
+# --------------------------------------------------------------------------
 # Result types
 # --------------------------------------------------------------------------
 class FileResult:
@@ -298,6 +1077,7 @@ class FileResult:
         self.unmatched_edition: list[str] = []
         self.no_source_columns: list[str] = []
         self.curves: list[dict] = []
+        self.families: dict[str, dict] = {}   # equipment family -> mapped counts
         self.verdict = "not comparable without a mapping"
 
     def settle(self) -> None:
@@ -358,6 +1138,80 @@ def _resolve_columns(headers: list[str], wanted: dict[str, list[str]]):
     return resolved, unclaimed
 
 
+#: The shipped two-letter province code -> the province NAME this edition's
+#: Table C-1 prints in its ``Province`` column. Declared rather than inferred:
+#: a city name alone is NOT a key. Alma appears in both QC and NB, Princeton in
+#: BC and ON, Waterloo in ON and QC, Windsor in ON and QC, so keying on the city
+#: silently drops one of each pair and compares the other against whichever row
+#: the dict happened to keep. ``Quebec``/``Québec`` differ between the two
+#: editions' extractions and both fold to the same key after accent folding.
+PROVINCE_NAMES = {
+    "AB": "Alberta",
+    "BC": "British Columbia",
+    "MB": "Manitoba",
+    "NB": "New Brunswick",
+    "NF": "Newfoundland and Labrador",
+    "NS": "Nova Scotia",
+    "NT": "Northwest Territories",
+    "NU": "Nunavut",
+    "ON": "Ontario",
+    "PE": "Prince Edward Island",
+    "QC": "Quebec",
+    "SK": "Saskatchewan",
+    "YT": "Yukon",
+}
+
+
+def _province_key(text) -> str:
+    """The comparable province key for either side's spelling.
+
+    The shipped side prints a two-letter code, the edition side a full name;
+    both reduce to the normalised full name. An unrecognised token normalises to
+    itself so it shows up in the ledger instead of vanishing.
+    """
+    raw = str(text or "").strip()
+    return norm_name(PROVINCE_NAMES.get(raw.upper(), raw))
+
+
+#: How close two city names must read before the ledger offers one as the
+#: other's candidate. Deliberately loose: the ledger's job is to make every
+#: unmatched row a question someone can answer, and a wrong suggestion is
+#: visibly wrong while a blank line says nothing.
+NAME_SIMILARITY = 0.6
+
+
+def _nearest(key: tuple[str, str], pool: dict[tuple[str, str], list],
+             label) -> str:
+    """The most plausible counterpart for an unmatched (city, province) key.
+
+    A same-city row in another province is named first — that is the shape a
+    real alias takes here. Then a name one side spells with an extra part (the
+    snapshot writes "Arviat / Eskimo Point" and "Coppermine (Kugluktuk)" where
+    the Code prints one of the two names), then the closest spelling in the same
+    province, then the closest anywhere.
+    """
+    city, province = key
+    same_city = sorted(p for p in pool if p[0] == city)
+    if same_city:
+        return f"{label(pool[same_city[0]][0])} — same city, different province"
+    for scope, note in ((lambda p: p[1] == province, "same province"),
+                        (lambda p: True, "another province")):
+        names = [p for p in pool if scope(p)]
+        contained = sorted(
+            (p for p in names
+             if len(p[0]) > 3 and (p[0] in city or city in p[0])),
+            key=lambda p: -len(p[0]))
+        if contained:
+            return (f"{label(pool[contained[0]][0])} — one name contains the "
+                    f"other, {note}")
+        match = difflib.get_close_matches(city, [p[0] for p in names], n=1,
+                                          cutoff=NAME_SIMILARITY)
+        if match:
+            best = next(p for p in names if p[0] == match[0])
+            return f"{label(pool[best][0])} — closest spelling, {note}"
+    return f"no candidate within {NAME_SIMILARITY:g} name similarity"
+
+
 def compare_table_c1(res: FileResult) -> None:
     table = read_payload(res.edition_id, "get_table", "C-1")
     if table is None:
@@ -366,24 +1220,31 @@ def compare_table_c1(res: FileResult) -> None:
     res.tables.append("C-1")
     columns, unclaimed = _resolve_columns(table["headers"], C1_COLUMNS)
     res.mapping = (
-        "rows matched by normalised city name (case, accents, punctuation and "
-        "whitespace folded); every column this edition prints that the shipped "
-        "record also carries is compared — " +
+        "rows matched by (normalised city name, PROVINCE) — the city alone is "
+        "not a key, because Alma, Princeton, Waterloo and Windsor each name two "
+        "different places in two different provinces; the shipped two-letter "
+        "code is resolved to this edition's printed province name through a "
+        "declared 13-entry map. Every column this edition prints that the "
+        "shipped record also carries is compared — " +
         ", ".join(f"`{k}` ← `{v}`" for k, v in sorted(columns.items())) +
-        ". The shipped `lat_long` pair has no C-1 column and is excluded"
+        ". The shipped `lat_long` pair has no C-1 column at all and is excluded"
     )
     shipped_rows = _shipped(res.edition_id, "tables/table_c1.json")["table"]
-    by_name: dict[str, list] = {}
+    by_key: dict[tuple[str, str], list] = {}
     for row in shipped_rows:
-        by_name.setdefault(norm_name(row.get("city")), []).append(row)
-    edition_by_name: dict[str, list] = {}
+        by_key.setdefault(
+            (norm_name(row.get("city")), _province_key(row.get("province"))),
+            []).append(row)
+    edition_by_key: dict[tuple[str, str], list] = {}
     for row in table["rows"]:
-        edition_by_name.setdefault(norm_name(row.get("Location")), []).append(row)
+        edition_by_key.setdefault(
+            (norm_name(row.get("Location")), _province_key(row.get("Province"))),
+            []).append(row)
 
     matched = identical = differing = 0
-    for key in sorted(set(by_name) & set(edition_by_name)):
-        ship = by_name[key][0]
-        edn = edition_by_name[key][0]
+    for key in sorted(set(by_key) & set(edition_by_key)):
+        ship = by_key[key][0]
+        edn = edition_by_key[key][0]
         matched += 1
         for own_key, column in sorted(columns.items()):
             a, b = ship.get(own_key), edn.get(column)
@@ -397,30 +1258,56 @@ def compare_table_c1(res: FileResult) -> None:
                 res.differences.append(
                     (f"{ship.get('city')} ({ship.get('province')}) . {own_key}",
                      _fmt(a), _fmt(b)))
+
+    def ship_label(row) -> str:
+        return f"{row.get('city')} ({row.get('province')})"
+
+    def edn_label(row) -> str:
+        return f"{row.get('Location')} ({row.get('Province')})"
+
     res.unmatched_shipped = sorted(
-        f"{by_name[k][0].get('city')} ({by_name[k][0].get('province')})"
-        for k in set(by_name) - set(edition_by_name))
+        f"{ship_label(by_key[k][0])} → nearest in this edition: "
+        f"{_nearest(k, edition_by_key, edn_label)}"
+        for k in set(by_key) - set(edition_by_key))
     res.unmatched_edition = sorted(
-        f"{edition_by_name[k][0].get('Location')} ({edition_by_name[k][0].get('Province')})"
-        for k in set(edition_by_name) - set(by_name))
-    dup_ship = sorted(k for k, v in by_name.items() if len(v) > 1)
-    dup_edn = sorted(k for k, v in edition_by_name.items() if len(v) > 1)
+        f"{edn_label(edition_by_key[k][0])} → nearest in the snapshot: "
+        f"{_nearest(k, by_key, ship_label)}"
+        for k in set(edition_by_key) - set(by_key))
+    dup_ship = sorted(k for k, v in by_key.items() if len(v) > 1)
+    dup_edn = sorted(k for k, v in edition_by_key.items() if len(v) > 1)
     if dup_ship or dup_edn:
         res.notes.append(
-            f"duplicate normalised city names: {len(dup_ship)} shipped, "
-            f"{len(dup_edn)} in the edition table; the first occurrence is compared")
+            f"(city, province) keys that still address more than one row: "
+            f"{len(dup_ship)} shipped, {len(dup_edn)} in the edition table; the "
+            "first occurrence is compared and the rest are counted below")
     unclaimed = [h for h in unclaimed if h not in ("Location", "Province")]
     if unclaimed:
         res.no_source_columns = []
         res.notes.append(
             "columns THIS EDITION prints that nothing shipped carries: " +
             ", ".join(f"`{h}`" for h in unclaimed))
+    res.notes.append(
+        "**What runtime actually reads from this file is `lat_long` and "
+        "`degree_days_below_18_c`** — the nearest-city search is by coordinates "
+        "and the climate zone comes from HDD18. The edition's own Table C-1 "
+        "publishes NO coordinates at all, so adopting its row set cannot supply "
+        "the column the lookup keys on; every other shipped column is either "
+        "compared above or has no reader in this package")
+    res.notes.append(
+        "the unmatched ledger below lists EVERY unmatched row on both sides "
+        f"({len(res.unmatched_shipped)} shipped, {len(res.unmatched_edition)} "
+        "edition) with its nearest candidate, so the residue is nameable rather "
+        "than a count")
     res.counts = {
         "shipped rows": len(shipped_rows),
         "edition rows": len(table["rows"]),
+        "distinct (city, province) keys shipped": len(by_key),
+        "distinct (city, province) keys in the edition": len(edition_by_key),
         "rows matched": matched,
         "rows unmatched (shipped)": len(res.unmatched_shipped),
         "rows unmatched (edition)": len(res.unmatched_edition),
+        "duplicate keys (shipped)": len(dup_ship),
+        "duplicate keys (edition)": len(dup_edn),
         "columns compared": len(columns),
         "edition columns with no shipped counterpart": len(unclaimed),
         "cells identical": identical,
@@ -505,6 +1392,17 @@ def compare_schedules(res: FileResult, numbers: list[str]) -> None:
     setpoint_sentinels: set = set()
     unmatched: list[str] = []
     constant_records = 0
+    # Counted from the archived payloads, never asserted in prose.
+    fan_words: dict[str, int] = {}
+    for letter, by_key in edition_rows.items():
+        for (category, _day), row in by_key.items():
+            if category != SCHEDULE_CATEGORIES["fan"]:
+                continue
+            for column in HOUR_COLUMNS:
+                word = norm_name(row.get(column))
+                if word in SCHEDULE_WORDS:
+                    key = f"{letter}:{word}"
+                    fan_words[key] = fan_words.get(key, 0) + 1
     for rec in shipped:
         name = rec.get("name", "")
         parts = name.split("-", 2)
@@ -573,6 +1471,26 @@ def compare_schedules(res: FileResult, numbers: list[str]) -> None:
             "defaults and `Always On`) have no counterpart in the "
             "operating-schedule tables at all: the edition publishes hourly "
             "fractions only")
+    on_cells = fan_words.get("I:on", 0)
+    off_cells = fan_words.get("I:off", 0)
+    if on_cells or off_cells:
+        res.counts["Schedule I `Fans` cells this edition prints `On`"] = on_cells
+        res.counts["Schedule I `Fans` cells this edition prints `Off`"] = off_cells
+        res.notes.append(
+            f"**Schedule I is DORMANT DATA, not a live difference.** This "
+            f"edition's Schedule I `Fans` row prints **{on_cells} `On`** cells "
+            f"and **{off_cells} `Off`** cells across Mon-Fri / Sat / Sun; the "
+            f"shipped `NECB-I-Fan` carries 0.0 in all {on_cells + off_cells}, so "
+            f"the {off_cells} `Off` cells agree and the {on_cells} `On` cells are "
+            "the entire difference. Nothing in product Python consumes it: no "
+            "module reads `exhaust_schedule`, the reference air loops inherit "
+            "the PROPOSED system's operating schedule instead "
+            "(`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the "
+            "space-type references spell the name `NECB-I-FAN` while the "
+            "schedule table defines `NECB-I-Fan` — a case mismatch that would "
+            "have to be resolved before any reader could find it. **These cells "
+            "are NOT changed here**: a data correction is a D-89 adoption step, "
+            "not a matcher fix")
 
 
 # --------------------------------------------------------------------------
@@ -589,7 +1507,18 @@ _SCH_SUFFIX = re.compile(r"-sch-[A-Z]$")
 
 
 def catalog_bridge(edition_id: str) -> dict[str, str]:
-    """``{normalised catalog name: normalised "category | type" row key}``."""
+    """``{normalised catalog name: normalised "category | type" row key}``.
+
+    This is the CONTROL bridge and nothing else. Some of its entries are
+    Table 4.2.1.6's own control CROSS-REFERENCES: the medical-supply-room row
+    prints an LPD and a Note reading "See Storage Room under Common Space Types
+    for applicable control requirements", so the daylighting file maps it to the
+    Storage Room row and marks the entry ``mapping:
+    cross_reference_storage_room``. That pointer answers "which row states this
+    space's controls" and NOT "which row states its loads or its LPD" — both
+    editions publish a medical-supply-room row of their own for those. Loads and
+    LPD therefore go through :func:`loads_bridge`.
+    """
     data = _shipped(edition_id, "tables/daylighting_controls_4_2_1_6.json")
     out = {}
     for name, entry in (data.get("space_types") or {}).items():
@@ -597,6 +1526,48 @@ def catalog_bridge(edition_id: str) -> dict[str, str]:
         if row:
             out[norm_name(name)] = norm_name(row.replace("|", " "))
     return out
+
+
+def control_cross_references(edition_id: str) -> dict[str, str]:
+    """``{normalised catalog name: the declared cross-reference}``.
+
+    Read from the daylighting file's own ``mapping`` field, not guessed: an
+    entry whose mapping begins ``cross_reference`` says, in the snapshot's own
+    words, that its ``table_row`` was chosen for CONTROLS.
+    """
+    data = _shipped(edition_id, "tables/daylighting_controls_4_2_1_6.json")
+    out = {}
+    for name, entry in (data.get("space_types") or {}).items():
+        mapping = entry.get("mapping") if isinstance(entry, dict) else None
+        if isinstance(mapping, str) and mapping.startswith("cross_reference"):
+            out[norm_name(name)] = mapping
+    return out
+
+
+#: Catalog names whose OWN row exists in the edition tables under a spelling the
+#: normaliser cannot reach. Declared in data, one line per case, exactly like
+#: ``EXTERIOR_ALIASES`` — never a fuzzy match. Today there is one: the catalog
+#: writes "Health care facility", both editions print "Healthcare facility".
+SPACE_TYPE_ALIASES = {
+    "health care facility medical supply room":
+        "healthcare facility medical supply room",
+}
+
+
+def loads_bridge(edition_id: str) -> dict[str, str]:
+    """The catalog-name translation to use for LOADS and LPD.
+
+    The control bridge minus every entry the snapshot itself declares to be a
+    control cross-reference; those names are aimed instead at the edition row
+    that carries the space's own published loads and LPD.
+    """
+    bridge = dict(catalog_bridge(edition_id))
+    for name in control_cross_references(edition_id):
+        bridge.pop(name, None)
+        alias = SPACE_TYPE_ALIASES.get(name)
+        if alias:
+            bridge[name] = alias
+    return bridge
 
 
 def catalog_name(record: dict) -> str:
@@ -689,16 +1660,18 @@ def compare_space_types(res: FileResult, numbers: list[str]) -> None:
         tables[number] = table
     if not tables:
         return
-    bridge = catalog_bridge(res.edition_id)
+    bridge = loads_bridge(res.edition_id)
     res.mapping = (
         "the shipped catalog name (`space_type` with its `-sch-<letter>` suffix "
         "stripped, or `building_type` for `WholeBuilding` rows) is translated to "
         "a Table 4.2.1.6 row through the snapshot's OWN authored mapping — the "
         "`table_row` field of every `tables/daylighting_controls_4_2_1_6.json` "
-        "entry (D-57, hand-mapped and LPD-cross-checked) — and that row key is "
-        "then looked up in each edition table by normalised "
-        "\"Space Category / Space Type\" name. Building-area rows resolve "
-        "against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is "
+        "entry (D-57, hand-mapped and LPD-cross-checked) — **minus the entries "
+        "that file marks as control CROSS-REFERENCES**, which point at the row "
+        "governing another space's controls and say nothing about this space's "
+        "loads or LPD. That row key is then looked up in each edition table by "
+        "normalised \"Space Category / Space Type\" name. Building-area rows "
+        "resolve against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is "
         "inverted (m²/occupant → occupant/1000·m²), receptacle load and LPD "
         "converted W/m² → W/ft² as the shipped units require"
     )
@@ -807,6 +1780,13 @@ def compare_space_types(res: FileResult, numbers: list[str]) -> None:
         "shipped columns with an edition source": len(compared_columns),
         "shipped columns with NO edition source at all": len(res.no_source_columns),
     }
+    for name, mapping in sorted(control_cross_references(res.edition_id).items()):
+        res.notes.append(
+            f"`{name}` carries the daylighting file's `{mapping}` marker: Table "
+            "4.2.1.6 refers it to another row for CONTROLS only. That pointer is "
+            "excluded from this comparison — this edition publishes the space's "
+            "own row in A-8.4.3.2.(2)-B and 4.2.1.6, and the shipped loads and "
+            "LPD are compared against it")
     res.notes.append(
         "Table A-8.4.3.2.(2)-B's `Space Category` column is served LAGGED by the "
         "extraction — continuation rows repeat the previous category — so rows "
@@ -826,11 +1806,12 @@ def compare_led_lighting(res: FileResult, numbers: list[str]) -> None:
     if not tables:
         return
     shipped = _shipped(res.edition_id, "tables/led_lighting.json")["table"]
-    bridge = catalog_bridge(res.edition_id)
+    bridge = loads_bridge(res.edition_id)
     res.mapping = (
         "the shipped table is the legacy LED-ALTERNATIVE LPD set (NREL 63807 "
         "retrofit assumptions), not a code table; each row is joined by the same "
-        "catalog-name bridge `tables/space_types.json` uses and its "
+        "loads bridge `tables/space_types.json` uses — the authored catalog-name "
+        "mapping with the control cross-references removed — and its "
         "`lighting_per_area` (W/ft²) compared against this edition's published "
         "LPD in Table 4.2.1.6 (space-by-space) or 4.2.1.5 (building-area), "
         "converted W/m² → W/ft²"
@@ -1037,64 +2018,54 @@ def compare_efficiencies(res: FileResult, numbers: list[str],
     shipped = _shipped(res.edition_id, "efficiencies.json")
     equipment_tables = [n for n in res.tables if n.startswith("5.2.")]
     res.mapping = (
-        "two independent comparisons. (a) EQUIPMENT: every numeric minimum in "
-        "the shipped capacity bins is searched for in the edition's own "
-        "5.2.12.1 series cells. (b) CURVES: each shipped `curves[]` entry is "
+        "two independent comparisons. (a) EQUIPMENT: an explicit per-family "
+        "row-and-column mapping — each shipped family names the edition table, "
+        "the equipment-class row, the capacity band (with the band bounds "
+        "converted out of the engine's Btu/h or tons) and the METRIC column its "
+        "value is supposed to be, and each cell is compared against that one "
+        "identified cell; a family with no faithful mapping is reported "
+        "UNMAPPED, never as agreeing. (b) CURVES: each shipped `curves[]` entry "
         "matched to the edition curve table that publishes the same quantity "
         "and compared in the independent variables each source states — see "
         "the dedicated curve section below"
     )
     if equipment_tables:
-        corpus = numeric_corpus([read_payload(res.edition_id, "get_table", n)
-                                 for n in equipment_tables])
-        found = absent = 0
-        renderings: dict[str, int] = {}
-        for section, rows in sorted(shipped.items()):
-            if section in {"curves", "provenance", "_provenance"} or not isinstance(rows, list):
-                continue
-            if section == "heat_rejection":
-                # This section's own ``notes`` cite ASHRAE 90.1 tables, not the
-                # NECB: a source outside the Code entirely, which the edition's
-                # own 5.2.12.2 could replace. Reported, not silently counted.
-                res.notes.append(
-                    "`heat_rejection` (%d rows) cites ASHRAE 90.1 tables in its own "
-                    "`notes`, not the NECB at all; this edition publishes Table "
-                    "5.2.12.2 for the same equipment" % len(rows))
-                continue
-            for index, row in enumerate(rows):
-                if not isinstance(row, dict):
-                    continue
-                for key, value in sorted(row.items()):
-                    number = as_number(value)
-                    if number is None or number in (0.0,):
-                        continue
-                    hit = corroborate(number, corpus)
-                    if hit:
-                        found += 1
-                        renderings[hit[0]] = renderings.get(hit[0], 0) + 1
-                    else:
-                        absent += 1
-                        res.differences.append(
-                            (f"{section}[{index}].{key}", _fmt(value),
-                             "no rendering of this value appears in the edition's "
-                             "5.2.12.1 series"))
+        tables = {n: read_payload(res.edition_id, "get_table", n)
+                  for n in equipment_tables}
+        res.families = compare_equipment_families(res, tables)
+        totals = {"rows": 0, "matched": 0, "unmatched": 0, "identical": 0,
+                  "differing": 0, "no_edition_value": 0, "no_shipped_value": 0}
+        unmapped_rows = 0
+        for entry in res.families.values():
+            for key in totals:
+                totals[key] += entry[key]
+            if entry["unmapped_reason"]:
+                unmapped_rows += entry["rows"]
         res.counts.update({
-            "equipment values checked": found + absent,
-            "corroborated by an edition cell": found,
-            "NOT found in any edition cell": absent,
+            "equipment families": len(res.families),
+            "equipment families UNMAPPED": sum(
+                1 for e in res.families.values() if e["unmapped_reason"]),
+            "equipment rows in an unmapped family": unmapped_rows,
+            "equipment rows mapped to an edition row": totals["matched"],
+            "equipment rows with no edition row under the mapping": totals["unmatched"],
+            "equipment cells identical to the mapped cell": totals["identical"],
+            "equipment cells differing from the mapped cell": totals["differing"],
+            "mapped cells this edition prints no value for": totals["no_edition_value"],
+            "edition minima the snapshot carries no value for": totals["no_shipped_value"],
         })
+        res.notes.append(
+            "equipment minima are NOT probed by value. The superseded pass "
+            "accepted any nearby number under any unit conversion and so "
+            "preserved no equipment class, table, row, capacity band, metric or "
+            "column; its count supported nothing. Each family below states its "
+            "mapping explicitly and is compared cell by cell against the one "
+            "cell that mapping names")
         res.notes.append(
             "the shipped capacity bins close with engine SENTINELS "
             "(`9999.0` tons, `9999999.0` Btu/h, `9.999999999E9`) where the Code "
-            "simply writes \u201c\u2265 \u2026\u201d with no upper bound; those have no "
-            "edition cell by construction, not by disagreement")
-        if renderings:
-            res.notes.append(
-                "the shipped file is an ENGINE table and the Code publishes SI "
-                "bins, so each value is looked for in every documented unit "
-                "rendering; the renderings that actually matched were " +
-                ", ".join(f"{label} ({n})"
-                          for label, n in sorted(renderings.items())))
+            "writes \u201c\u2265 \u2026\u201d with no upper bound. A sentinel is read as an "
+            "OPEN bound and never compared as a number, so it is no longer "
+            "counted as a miss")
     else:
         res.notes.append(
             "the equipment tables ARE this edition's own MCP retrieval "
@@ -1232,6 +2203,215 @@ CHILLER_POINTS = ((6.67, 29.44), (6.67, 35.0), (10.0, 24.0), (5.0, 24.0))
 PLR_POINTS = tuple(round(0.1 + 0.05 * i, 2) for i in range(19))
 
 
+# --------------------------------------------------------------------------
+# Boiler and furnace FHeatPLC — per EQUIPMENT CLASS, not per curve name
+#
+# The snapshot ships four part-load curves and names two of them `-COND`, which
+# invites the reading that a condensing boiler gets the condensing curve. It
+# does not: every row of `boilers` carries ``efffplr: BOILER-EFFFPLR`` and every
+# row of `furnaces` carries ``FURNACE-EFFPLR``, so the non-condensing /
+# atmospheric curve is what EVERY boiler and furnace in a reference building
+# actually receives — including the gas-fired MODULATING boiler the reference
+# selects to represent purchased heating. The comparison therefore reports, per
+# class, the requirement that class is subject to and the deviation of the curve
+# its rows are actually given, alongside the deviation of the curve whose NAME
+# suggests it was meant for that class.
+# --------------------------------------------------------------------------
+
+#: kind -> (shipped family, the row key naming the part-load curve it is GIVEN).
+FHEATPLC_ASSIGNMENT = {"boiler_plc": ("boilers", "efffplr"),
+                       "furnace_plc": ("furnaces", "efffplr")}
+
+#: kind -> {edition class name: the curve whose NAME says it is for that class}.
+FHEATPLC_NOMINAL = {
+    "boiler_plc": {"Non-condensing": "BOILER-EFFFPLR",
+                   "Condensing": "BOILER-EFFFPLR-COND",
+                   "Modulating": None},
+    "furnace_plc": {"Atmospheric": "FURNACE-EFFPLR",
+                    "Condensing": "FURNACE-EFFPLR-COND",
+                    "Modulating": None},
+}
+
+#: Boiler return-hot-water temperatures the 2025 bivariate condensing surface is
+#: evaluated over. The Code prints NO bounds for T_w,return, so the box is
+#: declared here and stated in the document: 80–180 °F spans a condensing return
+#: (a boiler stops condensing well above it) to a conventional 180 °F return.
+T_W_RETURN_F = tuple(range(80, 181, 10))
+
+
+def _plf_from_ratio(coefficients, plr):
+    """PLF = PLR / FHeatPLC(PLR) — the EnergyPlus efficiency multiplier."""
+    fheatplc = poly(coefficients, plr)
+    return plr / fheatplc if fheatplc else None
+
+
+def _requirement_points(requirement):
+    """[(label, plr, required PLF)] over this requirement's own domain."""
+    out = []
+    if requirement["form"] == "tabulated":
+        for plr in sorted(requirement["points"]):
+            fheatplc = requirement["points"][plr]
+            if fheatplc:
+                out.append((f"PLR {plr:g}", plr, plr / fheatplc))
+        return out
+    if requirement["form"] == "bivariate":
+        a, b, c, d, e, f = requirement["coefficients"]
+        for t_w in T_W_RETURN_F:
+            for plr in PLR_POINTS:
+                value = (a + b * plr + c * plr * plr + d * t_w
+                         + e * t_w * t_w + f * plr * t_w)
+                if value:
+                    out.append((f"PLR {plr:g} / T_w {t_w} °F", plr, plr / value))
+        return out
+    for plr in PLR_POINTS:
+        value = _plf_from_ratio(requirement["coefficients"], plr)
+        if value is not None:
+            out.append((f"PLR {plr:g}", plr, value))
+    return out
+
+
+def _worst_against(curve, requirement):
+    """(worst relative deviation, sample points) of a shipped curve."""
+    worst = 0.0
+    samples = []
+    wanted = {0.1, 0.25, 0.5, 0.75, 1.0}
+    for label, plr, required in _requirement_points(requirement):
+        got = poly(curve, plr)
+        worst = max(worst, abs(got - required) / abs(required))
+        if plr in wanted and len(samples) < 8:
+            samples.append((label, got, required, got / required))
+    return worst, samples
+
+
+def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
+    payload = read_payload(edition_id, "get_table", CURVE_TABLES[kind][edition_id])
+    number = CURVE_TABLES[kind][edition_id]
+    if payload is None:
+        return []
+    label_key = "Type of Boiler" if kind == "boiler_plc" else "Type of Furnace"
+    equipment = label_key.split()[-1].lower()
+
+    requirements: list[tuple[str, str, dict]] = []
+    for row in payload.get("rows", []):
+        klass = row.get(label_key)
+        if not klass:
+            continue
+        printed3 = _row_coefficients(row, "abc")
+        printed6 = _row_coefficients(row, "abcdef")
+        if printed6 is not None and any(abs(v) > 0 for v in printed6[3:]):
+            requirements.append((klass, number,
+                                 {"form": "bivariate", "coefficients": printed6,
+                                  "points": {}}))
+        elif printed3 is not None:
+            requirements.append((klass, number,
+                                 {"form": "quadratic", "coefficients": printed3,
+                                  "points": {}}))
+
+    # 2020 prints the modulating requirement in a SEPARATE table, as ten
+    # (PLR, FHeatPLC) points covering modulating boilers AND furnaces; 2025
+    # folds a Modulating row into the same coefficient table. Injected only
+    # when the class table itself has no Modulating row, so 2025 is not
+    # double-counted.
+    if not any(klass == "Modulating" for klass, _n, _r in requirements):
+        modulating_number = CURVE_TABLES["boiler_modulating"][edition_id]
+        modulating = read_payload(edition_id, "get_table", modulating_number)
+        points = {}
+        for row in (modulating or {}).get("rows", []):
+            plr = next((as_number(v) for k, v in row.items()
+                        if "part-load ratio" in k.lower()), None)
+            fheatplc = as_number(row.get("FHeatPLC"))
+            if plr is not None and fheatplc is not None:
+                points[plr] = fheatplc
+        if points:
+            requirements.append(("Modulating", modulating_number,
+                                 {"form": "tabulated", "coefficients": None,
+                                  "points": points}))
+
+    family, curve_key = FHEATPLC_ASSIGNMENT[kind]
+    rows = _shipped(edition_id, "efficiencies.json").get(family) or []
+    assigned_names: dict[str, int] = {}
+    for row in rows:
+        if isinstance(row, dict) and row.get(curve_key):
+            assigned_names[row[curve_key]] = assigned_names.get(row[curve_key], 0) + 1
+    assigned_name = max(assigned_names, key=assigned_names.get) if assigned_names else None
+    assigned_curve = (
+        [c for c in _coeffs(curves[assigned_name], 4) if c is not None]
+        if assigned_name and curves.get(assigned_name) else None)
+
+    records = []
+    for klass, source_number, requirement in requirements:
+        nominal_name = FHEATPLC_NOMINAL[kind].get(klass)
+        nominal_curve = (
+            [c for c in _coeffs(curves[nominal_name], 4) if c is not None]
+            if nominal_name and curves.get(nominal_name) else None)
+        domain = ("the ten printed PLR points 0.1–1.0"
+                  if requirement["form"] == "tabulated"
+                  else "PLR 0.10–1.00" if requirement["form"] == "quadratic"
+                  else (f"PLR 0.10–1.00 × T_w,return "
+                        f"{T_W_RETURN_F[0]}–{T_W_RETURN_F[-1]} °F"))
+        assigned_worst = samples = None
+        if assigned_curve:
+            assigned_worst, samples = _worst_against(assigned_curve, requirement)
+        nominal_worst = None
+        if nominal_curve and nominal_name != assigned_name:
+            nominal_worst, _ = _worst_against(nominal_curve, requirement)
+
+        if requirement["form"] == "bivariate":
+            relation = ("BIVARIATE: FHeatPLC is stated over PLR **and** the "
+                        "boiler return-hot-water temperature T_w,return (°F, six "
+                        "coefficients)")
+        elif requirement["form"] == "tabulated":
+            relation = (f"TABULATED: Table {source_number} states the requirement "
+                        "as ten (PLR, FHeatPLC) points, not as coefficients")
+        else:
+            relation = ("functional-form change: the requirement is a fuel RATIO "
+                        "quadratic; the shipped curve is the EnergyPlus "
+                        "efficiency multiplier PLR / FHeatPLC(PLR)")
+
+        detail_parts = []
+        if assigned_worst is None:
+            detail_parts.append(
+                f"no shipped curve is assigned to any {family} row at all")
+            verdict = "no inherited curve"
+        else:
+            detail_parts.append(
+                f"every `{family}` row is GIVEN `{assigned_name}` "
+                f"({assigned_names[assigned_name]}/{len(rows)} rows); against "
+                f"this class's requirement it deviates by up to "
+                f"**{assigned_worst * 100:.2f} %** over {domain}")
+            verdict = ("identical to rounding" if assigned_worst <= ROUNDING_TOL
+                       else "differs")
+        if nominal_worst is not None:
+            detail_parts.append(
+                f"the curve NAMED for this class, `{nominal_name}`, would deviate "
+                f"by {nominal_worst * 100:.2f} % — but no row references it")
+        elif nominal_name is None:
+            detail_parts.append(
+                "the snapshot ships no curve named for this class at all")
+        if requirement["form"] == "bivariate":
+            plfs = [p for _l, _p, p in _requirement_points(requirement)]
+            detail_parts.append(
+                f"the required PLF ranges {min(plfs):.4f}–{max(plfs):.4f} across "
+                "that box, so a single normalised-efficiency curve in PLR alone "
+                "cannot hold it exactly at any T_w")
+
+        records.append({
+            "klass": "FHeatPLC", "name": assigned_name,
+            "label": f"{klass} ({equipment})",
+            "table": source_number, "relation": relation,
+            "verdict": verdict, "detail": "; ".join(detail_parts),
+            "shipped": assigned_curve,
+            "edition": requirement["coefficients"] or sorted(requirement["points"].items()),
+            "converted": None, "errata": [], "deviation": assigned_worst,
+            "points": samples or [],
+            "equipment_class": klass, "equipment": equipment,
+            "assigned_name": assigned_name, "assigned_deviation": assigned_worst,
+            "nominal_name": nominal_name, "nominal_deviation": nominal_worst,
+            "requirement_form": requirement["form"], "domain": domain,
+        })
+    return records
+
+
 def curve_records(edition_id: str) -> list[dict]:
     """One record per curve class the edition publishes or the snapshot ships."""
     curves = _curve_index(edition_id)
@@ -1331,83 +2511,9 @@ def curve_records(edition_id: str) -> list[dict]:
                 "errata": [], "deviation": dev, "points": [],
             })
 
-    # -- boiler / furnace FHeatPLC: a functional-form change ---------------
-    for kind, rows_wanted in (("boiler_plc", {"Non-condensing": "BOILER-EFFFPLR",
-                                              "Condensing": "BOILER-EFFFPLR-COND",
-                                              "Modulating": None}),
-                              ("furnace_plc", {"Atmospheric": "FURNACE-EFFPLR",
-                                               "Condensing": "FURNACE-EFFPLR-COND",
-                                               "Modulating": None})):
-        payload = table(kind)
-        number = CURVE_TABLES[kind][edition_id]
-        if payload is None:
-            continue
-        label_key = "Type of Boiler" if kind == "boiler_plc" else "Type of Furnace"
-        for row in payload.get("rows", []):
-            kindname = row.get(label_key)
-            name = rows_wanted.get(kindname, _ABSENT)
-            if name is _ABSENT:
-                continue
-            printed3 = _row_coefficients(row, "abc")
-            printed6 = _row_coefficients(row, "abcdef")
-            bivariate = printed6 is not None and any(abs(v) > 0 for v in printed6[3:])
-            if name is None or curves.get(name) is None:
-                records.append({
-                    "klass": "FHeatPLC", "name": None,
-                    "label": f"{kindname} ({label_key.split()[-1].lower()})",
-                    "table": number, "relation": "—",
-                    "verdict": "no inherited curve",
-                    "detail": ("this edition publishes a curve for this equipment "
-                               "class and the snapshot ships none"),
-                    "shipped": None, "edition": printed6 or printed3,
-                    "converted": None, "errata": [], "deviation": None, "points": [],
-                })
-                continue
-            ship = [c for c in _coeffs(curves[name], 4) if c is not None]
-            if bivariate:
-                records.append({
-                    "klass": "FHeatPLC", "name": name,
-                    "label": f"{kindname} ({label_key.split()[-1].lower()})",
-                    "table": number,
-                    "relation": "not comparable — the edition's FHeatPLC is BIVARIATE",
-                    "verdict": "differs",
-                    "detail": ("this edition defines FHeatPLC over PLR **and** the "
-                               "boiler return-hot-water temperature T_w,return (°F, "
-                               "six coefficients); the shipped curve is univariate "
-                               "in PLR and cannot express the second variable at all"),
-                    "shipped": ship, "edition": printed6, "converted": None,
-                    "errata": [], "deviation": None, "points": [],
-                })
-                continue
-            if printed3 is None:
-                continue
-            worst = 0.0
-            points = []
-            for plr in PLR_POINTS:
-                fheatplc = poly(printed3, plr)
-                if fheatplc == 0:
-                    continue
-                edition_eff = plr / fheatplc
-                shipped_eff = poly(ship, plr)
-                rel = abs(shipped_eff - edition_eff) / abs(edition_eff)
-                worst = max(worst, rel)
-                if plr in (0.1, 0.25, 0.5, 0.75, 1.0):
-                    points.append((f"PLR {plr}", shipped_eff, edition_eff,
-                                   shipped_eff / edition_eff))
-            records.append({
-                "klass": "FHeatPLC", "name": name,
-                "label": f"{kindname} ({label_key.split()[-1].lower()})",
-                "table": number,
-                "relation": ("functional-form change: the edition's FHeatPLC is a "
-                             "fuel RATIO; the shipped curve is the EnergyPlus "
-                             "efficiency multiplier PLR / FHeatPLC(PLR)"),
-                "verdict": "identical to rounding" if worst <= ROUNDING_TOL else "differs",
-                "detail": (f"the shipped cubic APPROXIMATES the edition's quadratic: "
-                           f"worst deviation {worst * 100:.2f} % over PLR 0.10–1.00 "
-                           "— close, not exact"),
-                "shipped": ship, "edition": printed3, "converted": None,
-                "errata": [], "deviation": worst, "points": points,
-            })
+    # -- boiler / furnace FHeatPLC, per EQUIPMENT CLASS --------------------
+    for kind in ("boiler_plc", "furnace_plc"):
+        records.extend(fheatplc_records(edition_id, kind, curves))
 
     # -- absorption chillers: published, never modelled --------------------
     for kind, quantity in (("absorption_capft", "CAP_FTAC"),
@@ -1728,7 +2834,37 @@ def foreign_outputs(manifest: dict) -> dict[str, str]:
 # --------------------------------------------------------------------------
 # Fetch (the only MCP path)
 # --------------------------------------------------------------------------
-def fetch(only: str | None = None) -> int:
+def declared_payloads() -> list[tuple[str, str, str]]:
+    """Every ``(edition, kind, number)`` the matrix declares, archived or not."""
+    out = []
+    for edition_id in sorted(load_manifests()):
+        for spec in SPEC.values():
+            for kind, key in (("get_table", "tables"), ("get_section", "sections")):
+                for number in spec.get(key, {}).get(edition_id, []):
+                    out.append((edition_id, kind, number))
+    return sorted(set(out))
+
+
+def missing_payloads() -> list[str]:
+    """The declared payloads that are not on disk.
+
+    A missing payload is a FAILURE, not a line of prose in the document: with
+    the payload absent the comparison it was meant to drive silently does not
+    happen, and the file it belongs to still reports a verdict. The gate makes
+    that impossible to publish.
+    """
+    out = []
+    for edition_id, kind, number in declared_payloads():
+        if read_payload(edition_id, kind, number) is not None:
+            continue
+        path = archive_path(edition_id, kind, number)
+        # A synthetic DATA_ROOT in a test lives outside the repository.
+        shown = path.relative_to(REPO_ROOT) if path.is_relative_to(REPO_ROOT) else path
+        out.append(f"{edition_id} {kind} {number} ({shown})")
+    return out
+
+
+def fetch(only: str | None = None, refresh: bool = False) -> int:
     sys.path.insert(0, str(REPO_ROOT / "python"))
     from btap._mcp import MCPClient, MCPError  # noqa: PLC0415
 
@@ -1741,7 +2877,7 @@ def fetch(only: str | None = None) -> int:
             for kind, key in (("get_table", "tables"), ("get_section", "sections")):
                 for number in spec.get(key, {}).get(edition_id, []):
                     target = archive_path(edition_id, kind, number)
-                    if target.is_file():
+                    if target.is_file() and not refresh:
                         continue
                     args = {"code": "necb", "edition": edition_of(edition_id),
                             "division": "B"}
@@ -1757,8 +2893,15 @@ def fetch(only: str | None = None) -> int:
                         continue
                     write_payload(target, request_key(kind, edition_id, number), result)
                     wrote += 1
-                    print(f"{edition_id} {kind} {number}: archived")
+                    print(f"{edition_id} {kind} {number}: "
+                          + ("refreshed" if refresh else "archived"))
     print(f"\n{wrote} payload(s) written under */provenance/{ARCHIVE_DIRNAME}/")
+    still_missing = missing_payloads()
+    if still_missing:
+        print(f"\n{len(still_missing)} declared payload(s) still missing:")
+        for item in still_missing:
+            print(f"  {item}")
+        return 1
     return 0
 
 
@@ -1826,35 +2969,6 @@ def run() -> list[FileResult]:
     return results
 
 
-CURVE_VERDICTS = [
-    ("chiller `EIR_FPLR` \u00d74 (water-cooled)", "8.4.5.5.-B / 8.4.6.5.-B",
-     "identical to rounding",
-     "the shipped coefficients carry 6 decimal places, the edition table 8; "
-     "every term agrees on the digits both publish"),
-    ("chiller `CAP_FT` \u00d74, `EIR_FT` \u00d74", "8.4.5.5.-A / -C, 8.4.6.5.-A / -C",
-     "differs outright",
-     "the shipped surfaces are EnergyPlus BiQuadratic curves in \u00b0C; the edition "
-     "table's coefficients are the same curve family stated on a DIFFERENT "
-     "independent-variable basis \u2014 see the surface evaluation below"),
-    ("boiler non-condensing / condensing, furnace atmospheric / condensing",
-     "8.4.5.2.-A, 8.4.5.3 / 8.4.6.2, 8.4.6.3", "differs",
-     "the edition defines FHeatPLC = a + b\u00b7PLR + c\u00b7PLR\u00b2 (a fuel RATIO); the "
-     "shipped curve is a cubic FIR(PLR) the oracle converted from NECB 2011. "
-     "The shipped cubic APPROXIMATES the edition's quadratic within 1.9 % / "
-     "0.5 % / 1.0 % / 0.5 % \u2014 close, not exact"),
-    ("2025 boiler `Modulating` row; 2025 condensing boiler (6 coefficients)",
-     "8.4.6.2", "no inherited curve",
-     "new in this edition; nothing shipped corresponds"),
-    ("absorption chillers", "8.4.5.8 / 8.4.6.8", "no inherited curve",
-     "the edition publishes CAP_FTAC / FIR_FPLR / FIR_FT for absorption "
-     "machines; the engine does not model them"),
-    ("DX cooling / heating \u00d710, VAV fan \u00d74, SWH \u00d71", "\u2014",
-     "no edition table",
-     "neither edition publishes a table for these; the NECB 2011 origin is "
-     "legitimately retained and must be stated as such in provenance"),
-]
-
-
 def _foreign_counts() -> str:
     """"7 in `necb2020` and 7 in `necb2025`" — counted, never hand-written, so
     an adoption that re-sources a file drops its row AND its count together."""
@@ -1886,6 +3000,12 @@ def render(results: list[FileResult], surface: dict) -> str:
         "`necb<edition>/provenance/vintage_match/<table>.result.json`. "
         "**No product data value changes here.** A `differs` verdict is a "
         "finding for the D-89 adjudication, never a fix applied in passing.")
+    out.append("")
+    out.append(
+        f"**Completeness is a gate, not a caveat.** All {len(declared_payloads())} "
+        "payloads the matrix declares are archived; generation refuses to run "
+        "with any of them missing, so no comparison can silently not happen and "
+        "still leave its file carrying a verdict.")
     out.append("")
 
     out.append("## Matrix")
@@ -1945,6 +3065,45 @@ def render(results: list[FileResult], surface: dict) -> str:
             out.append("")
         for note in res.notes:
             out.append(f"> {note}")
+            out.append("")
+        if res.families:
+            out.append("**Equipment families — the explicit mapping and what it "
+                       "proves.** Every row is joined to ONE identified edition "
+                       "row (equipment class + capacity band, the band bounds "
+                       "converted out of the engine's units) and every declared "
+                       "cell compared against ONE identified column and metric. "
+                       "A family with no faithful mapping is **unmapped** and "
+                       "contributes no agreeing cells.")
+            out.append("")
+            out.append("| family | rows | edition table(s) | rows mapped | rows "
+                       "unmapped | cells identical | cells differing | edition "
+                       "prints no value | snapshot carries no value |")
+            out.append("|---|---:|---|---:|---:|---:|---:|---:|---:|")
+            for name, entry in sorted(res.families.items()):
+                if entry["unmapped_reason"]:
+                    out.append(f"| `{name}` | {entry['rows']} | **unmapped** | — "
+                               "| — | — | — | — | — |")
+                    continue
+                tables = ", ".join(f"`{t}`" for t in sorted(entry["tables"])) or "—"
+                out.append(
+                    f"| `{name}` | {entry['rows']} | {tables} | "
+                    f"{entry['matched']} | {entry['unmatched']} | "
+                    f"{entry['identical']} | {entry['differing']} | "
+                    f"{entry['no_edition_value']} | {entry['no_shipped_value']} |")
+            out.append("")
+            for name, entry in sorted(res.families.items()):
+                if entry["unmapped_reason"]:
+                    reason = entry["unmapped_reason"]
+                    out.append(f"- `{name}` — **UNMAPPED.** "
+                               f"{reason[:1].upper()}{reason[1:]}")
+                    continue
+                out.append(f"- `{name}`:")
+                for line in entry["mappings"]:
+                    out.append(f"  - {line}")
+                if entry["undeclared"]:
+                    out.append("  - metric-bearing keys NO block declares: " +
+                               ", ".join(f"`{k}`"
+                                         for k in sorted(entry["undeclared"])))
             out.append("")
         if res.differences:
             # A "row . column" leaf groups usefully by column; a leaf that is
@@ -2017,6 +3176,76 @@ def render(results: list[FileResult], surface: dict) -> str:
                    + ".")
         out.append("")
 
+    out.append("### Boiler and furnace `FHeatPLC` — by EQUIPMENT CLASS, "
+               "including modulating")
+    out.append("")
+    out.append(
+        "**Naming is not assignment.** The snapshot ships four part-load curves "
+        "and names two of them `-COND`, but no row references them: every row of "
+        "`boilers` carries `efffplr: BOILER-EFFFPLR` (the NON-condensing curve) "
+        "and every row of `furnaces` carries `FURNACE-EFFPLR` (the ATMOSPHERIC "
+        "curve), at `hvac/efficiency.py:~1137-1154`. So the deviation that "
+        "matters for a class is the deviation of the curve its rows are actually "
+        "GIVEN, not of the curve whose name suggests it was meant for them. This "
+        "bites hardest on modulating equipment, which the reference building "
+        "elects: `hvac/reference.py:~1733` represents purchased heating by a "
+        "gas-fired **modulating** boiler, and that boiler receives "
+        "`BOILER-EFFFPLR` like every other.")
+    out.append("")
+    out.append(
+        "**2025 does not “add” modulating equipment.** NECB 2020 already "
+        "requires it: Table 8.4.5.2.-B publishes `FHeatPLC` for modulating "
+        "boilers **and furnaces** as ten printed (PLR, FHeatPLC) points. What "
+        "2025 changes is the FORM — the ten-point table is retired and a "
+        "`Modulating` row joins the coefficient tables 8.4.6.2 and 8.4.6.3 as a "
+        "polynomial. Both editions state the same kind of requirement; only "
+        "2025 states it as coefficients.")
+    out.append("")
+    out.append(
+        "PLF is the EnergyPlus normalised-efficiency multiplier, PLF(PLR) = "
+        "PLR / FHeatPLC(PLR), so the two sources are compared as FUNCTIONS over "
+        "the PLR grid rather than as coefficients.")
+    out.append("")
+    for res in results:
+        classes = [r for r in res.curves if r.get("equipment_class")]
+        if not classes:
+            continue
+        out.append(f"#### `{res.edition_id}`")
+        out.append("")
+        out.append("| equipment class | requirement table | requirement form | "
+                   "curve every row is GIVEN | its worst PLF deviation | curve "
+                   "NAMED for the class | its worst PLF deviation | domain |")
+        out.append("|---|---|---|---|---:|---|---:|---|")
+        for rec in classes:
+            assigned = f"`{rec['assigned_name']}`" if rec["assigned_name"] else "_(none)_"
+            nominal = (f"`{rec['nominal_name']}`" if rec["nominal_name"]
+                       else "_(none shipped)_")
+            nominal_dev = ("same curve" if rec["nominal_name"] == rec["assigned_name"]
+                           else f"{rec['nominal_deviation'] * 100:.2f} %"
+                           if rec["nominal_deviation"] is not None else "—")
+            assigned_dev = (f"**{rec['assigned_deviation'] * 100:.2f} %**"
+                            if rec["assigned_deviation"] is not None else "—")
+            out.append(
+                f"| {rec['label']} | `{rec['table']}` | {rec['requirement_form']} "
+                f"| {assigned} | {assigned_dev} | {nominal} | {nominal_dev} | "
+                f"{rec['domain']} |")
+        out.append("")
+        bivariate = [r for r in classes if r["requirement_form"] == "bivariate"]
+        for rec in bivariate:
+            out.append(
+                f"> `{rec['label']}` is **bivariate**: `{rec['table']}` states "
+                "FHeatPLC over PLR *and* the boiler return-hot-water temperature "
+                "T_w,return in °F, with six coefficients. The Code prints no "
+                "bounds for T_w,return, so the box evaluated here is declared: "
+                f"{rec['domain']} — a condensing return at the low end (below "
+                "which a boiler is not condensing) to a conventional 180 °F "
+                "return at the high end. T" + rec["detail"].split("; ")[-1][1:] +
+                ". Representing this surface needs a per-edition curve FORM — a "
+                "bounded fit or table over both variables, or EMS — with the "
+                "domain and the fit error pinned; it is not a new coefficient "
+                "for the existing univariate curve.")
+            out.append("")
+
     out.append("### The chiller `CAP_FT` / `EIR_FT` surfaces — same curve, different basis?")
     out.append("")
     out.extend(surface["prose"])
@@ -2029,7 +3258,10 @@ def render(results: list[FileResult], surface: dict) -> str:
             out.append("| {name} | {point} | {a} | {b} | {ratio} |".format(**row))
         out.append("")
     out.append(surface["conclusion"])
-    out.append("")
+    # One trailing newline, never a blank line at EOF: `git diff --check`
+    # rejects the latter.
+    while out and not out[-1].strip():
+        out.pop()
     return "\n".join(out) + "\n"
 
 
@@ -2129,13 +3361,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--fetch", action="store_true",
                         help="maintainer MCP operation: archive any missing payload")
+    parser.add_argument("--refresh", action="store_true",
+                        help="with --fetch, re-retrieve and OVERWRITE payloads "
+                             "that are already archived (--fetch alone skips them)")
     parser.add_argument("--only", help="with --fetch, restrict to one declared output path")
     parser.add_argument("--check", action="store_true",
                         help="regenerate to a temp file and fail if it differs from --output")
     args = parser.parse_args(argv)
 
     if args.fetch:
-        return fetch(args.only)
+        return fetch(args.only, refresh=args.refresh)
+    if args.refresh:
+        parser.error("--refresh is only meaningful with --fetch")
+
+    missing = missing_payloads()
+    if missing:
+        print(f"{len(missing)} declared payload(s) are NOT archived — the "
+              "comparisons they drive would silently not happen:")
+        for item in missing:
+            print(f"  {item}")
+        print("run: python3 python/scripts/generate_necb_vintage_match.py --fetch")
+        return 1
 
     if args.check:
         current = args.output.read_text(encoding="utf-8") if args.output.exists() else ""

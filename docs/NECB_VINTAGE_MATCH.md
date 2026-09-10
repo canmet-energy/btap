@@ -6,6 +6,8 @@ Each edition snapshot under `python/btap/codes/necb/data/necb<edition>/` is mean
 
 The comparison runs offline against payloads retrieved from the building-codes MCP and retained beside each snapshot at `necb<edition>/provenance/vintage_match/<table>.result.json`. **No product data value changes here.** A `differs` verdict is a finding for the D-89 adjudication, never a fix applied in passing.
 
+**Completeness is a gate, not a caveat.** All 91 payloads the matrix declares are archived; generation refuses to run with any of them missing, so no comparison can silently not happen and still leave its file carrying a verdict.
+
 ## Matrix
 
 The rows are derived from the manifests, not listed by hand: an output appears here when its `provenance` entry's `source` is neither `mcp:necb:<this edition>` nor a `self:` declaration — 7 in `necb2020` and 7 in `necb2025`. `necb2025`'s `efficiencies.json` is added explicitly: its EQUIPMENT tables are this edition's own retrieval, but its performance CURVES are inherited, and only those are compared.
@@ -39,38 +41,136 @@ Totals: **15** differs.
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `5.2.12.1.-A`, `5.2.12.1.-B`, `5.2.12.1.-C`, `5.2.12.1.-D`, `5.2.12.1.-E`, `5.2.12.1.-F`, `5.2.12.1.-G`, `5.2.12.1.-H`, `5.2.12.1.-I`, `5.2.12.1.-J`, `5.2.12.1.-K`, `5.2.12.1.-L`, `5.2.12.1.-M`, `5.2.12.1.-N`, `5.2.12.1.-O`, `5.2.12.1.-P`, `5.2.12.2`, `8.4.5.2.-A`, `8.4.5.2.-B`, `8.4.5.3`, `8.4.5.5.-A`, `8.4.5.5.-B`, `8.4.5.5.-C`, `8.4.5.8.-A`, `8.4.5.8.-B`, `8.4.5.8.-C`, `section 8.4.5.2`, `section 8.4.5.3`, `section 8.4.5.5`
-- **Mapping:** two independent comparisons. (a) EQUIPMENT: every numeric minimum in the shipped capacity bins is searched for in the edition's own 5.2.12.1 series cells. (b) CURVES: each shipped `curves[]` entry is matched to the edition curve table that publishes the same quantity and compared in the independent variables each source states — see the dedicated curve section below
+- **Mapping:** two independent comparisons. (a) EQUIPMENT: an explicit per-family row-and-column mapping — each shipped family names the edition table, the equipment-class row, the capacity band (with the band bounds converted out of the engine's Btu/h or tons) and the METRIC column its value is supposed to be, and each cell is compared against that one identified cell; a family with no faithful mapping is reported UNMAPPED, never as agreeing. (b) CURVES: each shipped `curves[]` entry matched to the edition curve table that publishes the same quantity and compared in the independent variables each source states — see the dedicated curve section below
 
 | count | value |
 |---|---:|
-| equipment values checked | 259 |
-| corroborated by an edition cell | 254 |
-| NOT found in any edition cell | 5 |
+| equipment families | 9 |
+| equipment families UNMAPPED | 1 |
+| equipment rows in an unmapped family | 24 |
+| equipment rows mapped to an edition row | 93 |
+| equipment rows with no edition row under the mapping | 1 |
+| equipment cells identical to the mapped cell | 102 |
+| equipment cells differing from the mapped cell | 0 |
+| mapped cells this edition prints no value for | 1 |
+| edition minima the snapshot carries no value for | 52 |
 | shipped curves | 31 |
 | curves — identical to rounding | 12 |
-| curves — differs | 4 |
+| curves — differs | 6 |
 | curves — no edition table | 15 |
 | curves — no inherited curve | 10 |
 
-> `heat_rejection` (24 rows) cites ASHRAE 90.1 tables in its own `notes`, not the NECB at all; this edition publishes Table 5.2.12.2 for the same equipment
+> equipment minima are NOT probed by value. The superseded pass accepted any nearby number under any unit conversion and so preserved no equipment class, table, row, capacity band, metric or column; its count supported nothing. Each family below states its mapping explicitly and is compared cell by cell against the one cell that mapping names
 
-> the shipped capacity bins close with engine SENTINELS (`9999.0` tons, `9999999.0` Btu/h, `9.999999999E9`) where the Code simply writes “≥ …” with no upper bound; those have no edition cell by construction, not by disagreement
+> the shipped capacity bins close with engine SENTINELS (`9999.0` tons, `9999999.0` Btu/h, `9.999999999E9`) where the Code writes “≥ …” with no upper bound. A sentinel is read as an OPEN bound and never compared as a number, so it is no longer counted as a miss
 
-> the shipped file is an ENGINE table and the Code publishes SI bins, so each value is looked for in every documented unit rendering; the renderings that actually matched were Btu/h → kW (112), as a percentage (12), as published (81), kW/ton → COP (5), tons → kW (44)
+**Equipment families — the explicit mapping and what it proves.** Every row is joined to ONE identified edition row (equipment class + capacity band, the band bounds converted out of the engine's units) and every declared cell compared against ONE identified column and metric. A family with no faithful mapping is **unmapped** and contributes no agreeing cells.
 
-<details><summary>Every differing leaf (19)</summary>
+| family | rows | edition table(s) | rows mapped | rows unmapped | cells identical | cells differing | edition prints no value | snapshot carries no value |
+|---|---:|---|---:|---:|---:|---:|---:|---:|
+| `boilers` | 7 | `5.2.12.1.-N` | 7 | 0 | 6 | 0 | 1 | 0 |
+| `chillers` | 20 | `5.2.12.1.-K` | 20 | 0 | 20 | 0 | 0 | 20 |
+| `furnaces` | 3 | `5.2.12.1.-O` | 2 | 1 | 2 | 0 | 0 | 0 |
+| `heat_pumps` | 20 | `5.2.12.1.-A` | 20 | 0 | 20 | 0 | 0 | 16 |
+| `heat_pumps_heating` | 10 | `5.2.12.1.-A` | 10 | 0 | 10 | 0 | 0 | 0 |
+| `heat_rejection` | 24 | **unmapped** | — | — | — | — | — | — |
+| `unitary_acs` | 26 | `5.2.12.1.-A`, `5.2.12.1.-G` | 26 | 0 | 32 | 0 | 0 | 16 |
+| `vrf_air_conditioners` | 4 | `5.2.12.1.-I` | 4 | 0 | 4 | 0 | 0 | 0 |
+| `vrf_air_source_heat_pumps` | 4 | `5.2.12.1.-I` | 4 | 0 | 8 | 0 | 0 | 0 |
+
+- `boilers`:
+  - gas-fired hot-water boilers → Table 5.2.12.1.-N, row `Gas-fired` (Equipment Category), band in Btu/h → kW, column(s) `minimum_annual_fuel_utilization_efficiency` ← AFUE in `Minimum Performance` [(water)] (% → fraction); `minimum_combustion_efficiency` ← Ec in `Minimum Performance` [(water)] (% → fraction); `minimum_thermal_efficiency` ← Et in `Minimum Performance` [(water)] (% → fraction)
+  - oil-fired hot-water boilers → Table 5.2.12.1.-N, row `Oil-fired` (Equipment Category), band in Btu/h → kW, column(s) `minimum_annual_fuel_utilization_efficiency` ← AFUE in `Minimum Performance` [(water)] (% → fraction); `minimum_combustion_efficiency` ← Ec in `Minimum Performance` [(water)] (% → fraction); `minimum_thermal_efficiency` ← Et in `Minimum Performance` [(water)] (% → fraction)
+  - electric hot-water boilers → Table 5.2.12.1.-N, row `Electric` (Equipment Category), band in Btu/h → kW, column(s) `minimum_thermal_efficiency` ← Et in `Minimum Performance` (% → fraction)
+- `chillers`:
+  - water-cooled positive-displacement chillers, Path B → Table 5.2.12.1.-K, row `Water-cooled, rotary screw, scroll, or reciprocating compressor` (Type of Equipment), band in tons → kW, column(s) `minimum_full_load_efficiency` ← COPc in `Minimum Performance Path B` (COP → kW/ton); `minimum_integrated_part_load_value` ← IPLV in `Minimum Performance Path B` (COP → kW/ton)
+  - water-cooled centrifugal chillers, Path B → Table 5.2.12.1.-K, row `Water-cooled, centrifugal compressor` (Type of Equipment), band in tons → kW, column(s) `minimum_full_load_efficiency` ← COPc in `Minimum Performance Path B` (COP → kW/ton); `minimum_integrated_part_load_value` ← IPLV in `Minimum Performance Path B` (COP → kW/ton)
+  - air-cooled chillers, Path B → Table 5.2.12.1.-K, row `Air-cooled, with or without remote condensers, all types of compressors` (Type of Equipment), band in tons → kW, column(s) `minimum_full_load_efficiency` ← COPc in `Minimum Performance Path B` (COP → kW/ton); `minimum_integrated_part_load_value` ← IPLV in `Minimum Performance Path B` (COP → kW/ton)
+- `furnaces`:
+  - gas-fired warm-air furnaces → Table 5.2.12.1.-O, row `Gas-fired warm-air furnaces` (Type of Equipment), band in Btu/h → kW, column(s) `minimum_annual_fuel_utilization_efficiency` ← AFUE in `Minimum Performance` (% → fraction); `minimum_thermal_efficiency` ← Et in `Minimum Performance` (% → fraction); row qualifier `Rating Conditions` from the declared preference order `without integrated cooling`, `see standard`
+- `heat_pumps`:
+  - air-cooled heat pumps < 19 kW, cooling mode (seasonal) → Table 5.2.12.1.-A, row `Small air conditioners and heat pumps` (Equipment Category), band in Btu/h → kW, column(s) `minimum_seasonal_efficiency` ← SEER in `Minimum Performance` (as published); row qualifier `Equipment Subcategory` from `subcategory`
+  - air-cooled heat pumps ≥ 19 kW, cooling mode (full load) → Table 5.2.12.1.-A, row `Large air conditioners and heat pumps, split and single-package, all electrical phases, in cooling mode` (Equipment Category), band in Btu/h → kW, column(s) `minimum_full_load_efficiency` ← EER in `Minimum Performance` (as published); `minimum_integrated_energy_efficiency_ratio` ← IEER in `Minimum Performance` (as published); row qualifier `Rating Conditions` from `heating_type`
+- `heat_pumps_heating`:
+  - air-cooled heat pumps < 19 kW, heating mode (seasonal) → Table 5.2.12.1.-A, row `Small air conditioners and heat pumps` (Equipment Category), band in Btu/h → kW, column(s) `minimum_heating_seasonal_performance_factor` ← HSPF V in `Minimum Performance` (as published); row qualifier `Equipment Subcategory` from `subcategory`
+  - note: the shipped rows' own `notes` cite Table 5.2.12.1.-B (single-package VERTICAL units); the HSPF V = 7.4 they carry is Table 5.2.12.1.-A's small air-cooled row, which is the table mapped here — a provenance-note error, reported, not fixed
+  - air-cooled heat pumps ≥ 19 kW, heating mode (COP at 8.3 °C) → Table 5.2.12.1.-A, row `Large heat pumps, split and single-package, all electrical phases, in heating mode` (Equipment Category), band in Btu/h → kW, column(s) `minimum_coefficient_of_performance_heating` ← COPh in `Minimum Performance` (as published); row qualifier `Rating Conditions` from the declared preference order `at 8.3°c`
+- `heat_rejection` — **UNMAPPED.** The block's own `notes` cite ASHRAE 90.1-2004 Table 6.8.1G and its `template` column names DOE reference vintages; its `minimum_performance` is an ASHRAE gpm-per-hp figure, while this edition's Table 5.2.12.2 publishes a fan-power RATIO (electrical kW per thermal kW, e.g. ≤ 0.013 for a propeller-fan open tower). Two different quantities on two different bases: there is no row-and-column mapping to make, and the block is vestigial — the runtime applies the 0.013 ratio separately
+- `unitary_acs`:
+  - air-cooled unitary air conditioners < 19 kW (seasonal) → Table 5.2.12.1.-A, row `Small air conditioners and heat pumps` (Equipment Category), band in Btu/h → kW, column(s) `minimum_seasonal_energy_efficiency_ratio` ← SEER in `Minimum Performance` (as published); row qualifier `Equipment Subcategory` from `subcategory`
+  - air-cooled unitary air conditioners ≥ 19 kW (full load) → Table 5.2.12.1.-A, row `Large air conditioners and heat pumps, split and single-package, all electrical phases, in cooling mode` (Equipment Category), band in Btu/h → kW, column(s) `minimum_energy_efficiency_ratio` ← EER in `Minimum Performance` (as published); `minimum_integrated_energy_efficiency_ratio` ← IEER in `Minimum Performance` (as published); row qualifier `Rating Conditions` from `heating_type`
+  - packaged terminal air conditioners (PTAC), cooling mode → Table 5.2.12.1.-G, row `PTAC and PTHP in cooling mode, standard and non-standard sizes` (Equipment Category), band in Btu/h → kW, column(s) `ptac_eer_coefficient_1` ← EER in `Minimum Performance` (as published); `ptac_eer_coefficient_2` ← EER in `Minimum Performance` (per kW → per kBtu/h)
+- `vrf_air_conditioners`:
+  - VRF air-cooled air conditioners < 19 kW (seasonal) → Table 5.2.12.1.-I, row `Air-cooled air conditioners and heat pumps, with or without heat recovery` (Equipment Type), band in kW (as published), column(s) `minimum_seer` ← SEER in `Minimum Performance` (as published)
+  - VRF air-cooled air conditioners ≥ 19 kW (full load) → Table 5.2.12.1.-I, row `Air-cooled air conditioners` (Equipment Type), band in kW (as published), column(s) `minimum_eer` ← EER in `Minimum Performance` (as published)
+- `vrf_air_source_heat_pumps`:
+  - VRF air-source heat pumps < 19 kW (seasonal) → Table 5.2.12.1.-I, row `Air-cooled air conditioners and heat pumps, with or without heat recovery` (Equipment Type), band in kW (as published), column(s) `minimum_hspf` ← HSPF V in `Minimum Performance` (as published); `minimum_seer` ← SEER in `Minimum Performance` (as published)
+  - VRF air-source heat pumps ≥ 19 kW (EER, COP at 8.3 °C) → Table 5.2.12.1.-I, row `Air-source heat pumps, with or without heat recovery` (Equipment Type), band in kW (as published), column(s) `minimum_eer` ← EER in `Minimum Performance` (as published); `minimum_heating_cop` ← COPh in `Minimum Performance` [evaluated at 8.3] (as published)
+
+<details><summary>Every differing leaf (70)</summary>
 
 | leaf | shipped | this edition |
 |---|---|---|
-| `chillers[4].maximum_capacity` | `9999.0` | no rendering of this value appears in the edition's 5.2.12.1 series |
-| `chillers[9].maximum_capacity` | `9999.0` | no rendering of this value appears in the edition's 5.2.12.1 series |
-| `chillers[14].maximum_capacity` | `9999.0` | no rendering of this value appears in the edition's 5.2.12.1 series |
-| `chillers[18].maximum_capacity` | `9999.0` | no rendering of this value appears in the edition's 5.2.12.1 series |
-| `chillers[19].maximum_capacity` | `9999.0` | no rendering of this value appears in the edition's 5.2.12.1 series |
-| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 1.16 % over PLR 0.10–1.00 — close, not exact |
-| `curves[BOILER-EFFFPLR-COND]` | `[1.0186, 0.2426, -0.5059, 0.2465]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| `curves[FURNACE-EFFPLR-COND]` | `[1.0186, 0.2426, -0.5059, 0.2465]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 2.67 % over PLR 0.10–1.00 — close, not exact |
+| `boilers[3] . minimum_thermal_efficiency (Table 5.2.12.1.-N)` | `1.0` | this edition's row prints no `Et` value at all |
+| `chillers[0] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.041` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[1] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.184` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[2] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.001` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[3] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.586` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[4] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 9.264` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[5] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.041` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[6] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.184` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[7] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.001` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[8] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.586` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[9] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 9.264` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[10] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.041` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[11] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 7.184` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[12] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.001` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[13] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.586` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[14] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 9.264` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[15] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.001` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[16] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 8.801` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[17] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 9.027` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[18] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 9.264` — this edition publishes a minimum the snapshot does not carry |
+| `chillers[19] . minimum_integrated_part_load_value (Table 5.2.12.1.-K)` | _(no shipped value)_ | `IPLV = 4.669` — this edition publishes a minimum the snapshot does not carry |
+| `furnaces[2] ≥ 117 kW (Btu/h → kW)` | `Gas-fired warm-air furnaces` | Table 5.2.12.1.-O publishes no row of this class for this capacity band |
+| `heat_pumps[4] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.9` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[5] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.7` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[6] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.9` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[7] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.7` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[8] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.4` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[9] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.2` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[10] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.4` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[11] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.2` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[12] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.6` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[13] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.4` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[14] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.6` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[15] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.4` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[16] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.2` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[17] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[18] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.2` — this edition publishes a minimum the snapshot does not carry |
+| `heat_pumps[19] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[4] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.9` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[5] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.7` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[6] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.9` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[7] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.7` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[8] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.4` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[9] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.2` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[10] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.4` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[11] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 12.2` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[12] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.6` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[13] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.4` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[14] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.6` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[15] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.4` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[16] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.2` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[17] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[18] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11.2` — this edition publishes a minimum the snapshot does not carry |
+| `unitary_acs[19] . minimum_integrated_energy_efficiency_ratio (Table 5.2.12.1.-A)` | _(no shipped value)_ | `IEER = 11` — this edition publishes a minimum the snapshot does not carry |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **1.16 %** over PLR 0.10–1.00 |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **45.54 %** over PLR 0.10–1.00; the curve NAMED for this class, `BOILER-EFFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **23.25 %** over PLR 0.10–1.00; the curve NAMED for this class, `FURNACE-EFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **33.51 %** over the ten printed PLR points 0.1–1.0; the snapshot ships no curve named for this class at all |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **11.32 %** over the ten printed PLR points 0.1–1.0; the snapshot ships no curve named for this class at all |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **2.67 %** over PLR 0.10–1.00 |
 | `curves[Air-cooled Reciprocating EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | `curves[Air-cooled Screw EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | `curves[Air-cooled Scroll EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
@@ -144,26 +244,18 @@ Totals: **15** differs.
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `4.2.1.6`, `4.2.1.5`
-- **Mapping:** the shipped table is the legacy LED-ALTERNATIVE LPD set (NREL 63807 retrofit assumptions), not a code table; each row is joined by the same catalog-name bridge `tables/space_types.json` uses and its `lighting_per_area` (W/ft²) compared against this edition's published LPD in Table 4.2.1.6 (space-by-space) or 4.2.1.5 (building-area), converted W/m² → W/ft²
+- **Mapping:** the shipped table is the legacy LED-ALTERNATIVE LPD set (NREL 63807 retrofit assumptions), not a code table; each row is joined by the same loads bridge `tables/space_types.json` uses — the authored catalog-name mapping with the control cross-references removed — and its `lighting_per_area` (W/ft²) compared against this edition's published LPD in Table 4.2.1.6 (space-by-space) or 4.2.1.5 (building-area), converted W/m² → W/ft²
 
 | count | value |
 |---|---:|
 | shipped records | 308 |
 | records matched | 274 |
 | records unmatched | 34 |
-| LPD values equal to the edition's | 273 |
-| LPD values differing | 1 |
+| LPD values equal to the edition's | 274 |
+| LPD values differing | 0 |
 | shipped columns with NO edition source at all | 3 |
 
 > A difference here is EXPECTED and is not a transcription error: an LED alternative LPD is deliberately lower than the Code's allowance. What the count says is how far the shipped alternatives sit below this edition's published maxima, and whether any exceeds one
-
-<details><summary>Every differing leaf (1)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `Health care facility medical supply room . lighting_per_area (Table 4.2.1.6)` | `0.62245097` | `4.1 W/m² → 0.380902` |
-
-</details>
 
 <details><summary>Shipped rows with no edition counterpart (34)</summary>
 
@@ -228,10 +320,14 @@ Totals: **15** differs.
 | cells identical | 5178 |
 | cells differing | 33 |
 | cells the edition states as a word, not a number | 333 |
+| Schedule I `Fans` cells this edition prints `On` | 33 |
+| Schedule I `Fans` cells this edition prints `Off` | 39 |
 
 > 333 cells are stated as a WORD in this edition's table where the snapshot carries a number: the fan rows print `On`/`Off` (compared as 1/0) and the two thermostat rows print `Off` where the engine encodes a disabled setpoint as a far sentinel (`35.0 °C`). An encoding difference, not a value difference
 
 > 9 Constant records (the `NECB-*-…` design-day defaults and `Always On`) have no counterpart in the operating-schedule tables at all: the edition publishes hourly fractions only
+
+> **Schedule I is DORMANT DATA, not a live difference.** This edition's Schedule I `Fans` row prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun; the shipped `NECB-I-Fan` carries 0.0 in all 72, so the 39 `Off` cells agree and the 33 `On` cells are the entire difference. Nothing in product Python consumes it: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. **These cells are NOT changed here**: a data correction is a D-89 adoption step, not a matcher fix
 
 <details><summary>Every differing leaf (33)</summary>
 
@@ -278,15 +374,15 @@ Totals: **15** differs.
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `A-8.4.3.2.(2)-A`, `A-8.4.3.2.(2)-B`, `4.2.1.6`, `4.2.1.5`, `4.3.2.10.-A`
-- **Mapping:** the shipped catalog name (`space_type` with its `-sch-<letter>` suffix stripped, or `building_type` for `WholeBuilding` rows) is translated to a Table 4.2.1.6 row through the snapshot's OWN authored mapping — the `table_row` field of every `tables/daylighting_controls_4_2_1_6.json` entry (D-57, hand-mapped and LPD-cross-checked) — and that row key is then looked up in each edition table by normalised "Space Category / Space Type" name. Building-area rows resolve against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is inverted (m²/occupant → occupant/1000·m²), receptacle load and LPD converted W/m² → W/ft² as the shipped units require
+- **Mapping:** the shipped catalog name (`space_type` with its `-sch-<letter>` suffix stripped, or `building_type` for `WholeBuilding` rows) is translated to a Table 4.2.1.6 row through the snapshot's OWN authored mapping — the `table_row` field of every `tables/daylighting_controls_4_2_1_6.json` entry (D-57, hand-mapped and LPD-cross-checked) — **minus the entries that file marks as control CROSS-REFERENCES**, which point at the row governing another space's controls and say nothing about this space's loads or LPD. That row key is then looked up in each edition table by normalised "Space Category / Space Type" name. Building-area rows resolve against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is inverted (m²/occupant → occupant/1000·m²), receptacle load and LPD converted W/m² → W/ft² as the shipped units require
 
 | count | value |
 |---|---:|
 | shipped records | 308 |
 | records matched | 288 |
 | records unmatched | 20 |
-| cells identical | 1146 |
-| cells differing | 4 |
+| cells identical | 1152 |
+| cells differing | 0 |
 | shipped columns with an edition source | 7 |
 | shipped columns with NO edition source at all | 68 |
 
@@ -294,18 +390,9 @@ Totals: **15** differs.
 
 > `necb_schedule_type` was skipped on 99 records: the catalog clones every space function across all eleven schedule letters (`…-sch-A` … `…-sch-K`) while the edition assigns exactly one letter per row, so only the un-cloned building-area records carry a comparable letter
 
+> `health care facility medical supply room` carries the daylighting file's `cross_reference_storage_room` marker: Table 4.2.1.6 refers it to another row for CONTROLS only. That pointer is excluded from this comparison — this edition publishes the space's own row in A-8.4.3.2.(2)-B and 4.2.1.6, and the shipped loads and LPD are compared against it
+
 > Table A-8.4.3.2.(2)-B's `Space Category` column is served LAGGED by the extraction — continuation rows repeat the previous category — so rows are addressed by `Space Type` as well as by the pair, and anything that still fails to resolve is listed rather than guessed at
-
-<details><summary>Every differing leaf (4)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `Health care facility medical supply room . occupancy_per_area (Table A-8.4.3.2.(2)-B)` | `4.646840148698885` | `100 m²/occ → 0.92903 occ/1000 ft²` |
-| `Health care facility medical supply room . necb_schedule_type (Table A-8.4.3.2.(2)-B)` | `H` | `*` |
-| `Health care facility medical supply room . target_illuminance_setpoint (Table A-8.4.3.2.(2)-B)` | `400` | `100` |
-| `Health care facility medical supply room . lighting_per_area (Table 4.2.1.6)` | `0.62245097` | `4.1 W/m² → 0.380902` |
-
-</details>
 
 <details><summary>Shipped rows with no edition counterpart (20)</summary>
 
@@ -403,21 +490,29 @@ Totals: **15** differs.
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `C-1`
-- **Mapping:** rows matched by normalised city name (case, accents, punctuation and whitespace folded); every column this edition prints that the shipped record also carries is compared — `degree_days_below_15_c` ← `Degree-Days Below 15°C`, `degree_days_below_18_c` ← `Degree-Days Below 18°C`, `design_temp_jan_1p` ← `January 1% (°C)`, `design_temp_jan_2_5p` ← `January 2.5% (°C)`, `design_temp_july_2_5p_dry` ← `July 2.5% Dry (°C)`, `design_temp_july_2_5p_wet` ← `July 2.5% Wet (°C)`, `elevation` ← `Elevation (m)`, `hourly_wind_pressures_one_fiftyth` ← `Hourly Wind Pressures 1/50 (kPa)`, `hourly_wind_pressures_one_tenth` ← `Hourly Wind Pressures 1/10 (kPa)`. The shipped `lat_long` pair has no C-1 column and is excluded
+- **Mapping:** rows matched by (normalised city name, PROVINCE) — the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two different places in two different provinces; the shipped two-letter code is resolved to this edition's printed province name through a declared 13-entry map. Every column this edition prints that the shipped record also carries is compared — `degree_days_below_15_c` ← `Degree-Days Below 15°C`, `degree_days_below_18_c` ← `Degree-Days Below 18°C`, `design_temp_jan_1p` ← `January 1% (°C)`, `design_temp_jan_2_5p` ← `January 2.5% (°C)`, `design_temp_july_2_5p_dry` ← `July 2.5% Dry (°C)`, `design_temp_july_2_5p_wet` ← `July 2.5% Wet (°C)`, `elevation` ← `Elevation (m)`, `hourly_wind_pressures_one_fiftyth` ← `Hourly Wind Pressures 1/50 (kPa)`, `hourly_wind_pressures_one_tenth` ← `Hourly Wind Pressures 1/10 (kPa)`. The shipped `lat_long` pair has no C-1 column at all and is excluded
 
 | count | value |
 |---|---:|
 | shipped rows | 679 |
 | edition rows | 680 |
-| rows matched | 629 |
+| distinct (city, province) keys shipped | 679 |
+| distinct (city, province) keys in the edition | 678 |
+| rows matched | 636 |
 | rows unmatched (shipped) | 43 |
 | rows unmatched (edition) | 42 |
+| duplicate keys (shipped) | 0 |
+| duplicate keys (edition) | 2 |
 | columns compared | 9 |
 | edition columns with no shipped counterpart | 0 |
-| cells identical | 5296 |
+| cells identical | 5359 |
 | cells differing | 365 |
 
-> duplicate normalised city names: 7 shipped, 9 in the edition table; the first occurrence is compared
+> (city, province) keys that still address more than one row: 0 shipped, 2 in the edition table; the first occurrence is compared and the rest are counted below
+
+> **What runtime actually reads from this file is `lat_long` and `degree_days_below_18_c`** — the nearest-city search is by coordinates and the climate zone comes from HDD18. The edition's own Table C-1 publishes NO coordinates at all, so adopting its row set cannot supply the column the lookup keys on; every other shipped column is either compared above or has no reader in this package
+
+> the unmatched ledger below lists EVERY unmatched row on both sides (43 shipped, 42 edition) with its nearest candidate, so the residue is nameable rather than a count
 
 Differing leaves by kind:
 
@@ -799,96 +894,96 @@ Differing leaves by kind:
 
 <details><summary>Shipped rows with no edition counterpart (43)</summary>
 
-- `Ancienne-Lorette (QC)`
-- `Arviat / Eskimo Point (NU)`
-- `Big Trout Lake (Kitchenuhmay-koosib) (ON)`
-- `CFB Borden (ON)`
-- `Cambridge Bay/Iqaluktuuttiaq (NU)`
-- `Channel-Port aux Basques (NF)`
-- `Chesterfield Inlet/Igluligaarjuk (NU)`
-- `Clyde River /Kanngiqtugaapik (NU)`
-- `Coppermine (Kugluktuk) (NU)`
-- `Coral Harbour /Salliq (NU)`
-- `Gasp? (QC)`
-- `Haldimand (Caledonia) (ON)`
-- `Haldimand (Hagersville) (ON)`
-- `Havre-St-Pierre (QC)`
-- `Holman/Ulukhaqtuuq (NT)`
-- `L?ry (QC)`
-- `La Pocati?re (QC)`
-- `Lac-M?gantic (QC)`
-- `Louisburg (NS)`
-- `Monts Sutton (QC)`
-- `Rae-Edzo (NT)`
-- `Rankin Inlet (Kangiqiniq) (NU)`
-- `Saguenay (Jonqui?re) (QC)`
-- `Saint George (NB)`
-- `Sept-?les (QC)`
-- `St-F?licien (QC)`
-- `St-Georges-de-Cacouna (QC)`
-- `St-Hubert (QC)`
-- `St-Hyacinthe (QC)`
-- `St-Jerome (QC)`
-- `St-Jovite (QC)`
-- `St-Lambert (QC)`
-- `St-Laurent (QC)`
-- `St-Lazare-Hudson (QC)`
-- `St-Nicolas (QC)`
-- `St. Mary's (ON)`
-- `Ste-Agathe-des- (QC)`
-- `Ste-Anne-de-Bellevue (QC)`
-- `Ste-Foy (QC)`
-- `Trois-Rivi?res (QC)`
-- `Vancouver (City Hall) (BC)`
-- `Vancouver (Granville & 41 Ave) (BC)`
-- `Verch?res (QC)`
+- `Ancienne-Lorette (QC) → nearest in this edition: Ancienne- (Québec) — one name contains the other, same province`
+- `Arviat / Eskimo Point (NU) → nearest in this edition: Arviat (Nunavut) — one name contains the other, same province`
+- `Big Trout Lake (Kitchenuhmay-koosib) (ON) → nearest in this edition: no candidate within 0.6 name similarity`
+- `CFB Borden (ON) → nearest in this edition: Borden (CFB) (Ontario) — closest spelling, same province`
+- `Cambridge Bay/Iqaluktuuttiaq (NU) → nearest in this edition: Cambridge (Ontario) — one name contains the other, another province`
+- `Channel-Port aux Basques (NF) → nearest in this edition: Channel-Port (Newfoundland and Labrador) — one name contains the other, same province`
+- `Chesterfield Inlet/Igluligaarjuk (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Clyde River /Kanngiqtugaapik (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Coppermine (Kugluktuk) (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Coral Harbour /Salliq (NU) → nearest in this edition: Salliq / Coral Harbour (Nunavut) — closest spelling, same province`
+- `Gasp? (QC) → nearest in this edition: Gaspé (Quebec) — one name contains the other, same province`
+- `Haldimand (Caledonia) (ON) → nearest in this edition: Haldimand (Ontario) — one name contains the other, same province`
+- `Haldimand (Hagersville) (ON) → nearest in this edition: Haldimand (Ontario) — one name contains the other, same province`
+- `Havre-St-Pierre (QC) → nearest in this edition: Havre-Saint-Pierre (Quebec) — closest spelling, same province`
+- `Holman/Ulukhaqtuuq (NT) → nearest in this edition: no candidate within 0.6 name similarity`
+- `L?ry (QC) → nearest in this edition: Léry (Quebec) — closest spelling, same province`
+- `La Pocati?re (QC) → nearest in this edition: La Pocatière (Quebec) — closest spelling, same province`
+- `Lac-M?gantic (QC) → nearest in this edition: Lac-Mégantic (Quebec) — closest spelling, same province`
+- `Louisburg (NS) → nearest in this edition: Louisbourg (Nova Scotia) — closest spelling, same province`
+- `Monts Sutton (QC) → nearest in this edition: Sutton (Québec) — one name contains the other, same province`
+- `Rae-Edzo (NT) → nearest in this edition: Behchoko / Rae-Edzo (Northwest Territories) — one name contains the other, same province`
+- `Rankin Inlet (Kangiqiniq) (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Saguenay (Jonqui?re) (QC) → nearest in this edition: Saguenay (Québec) — one name contains the other, same province`
+- `Saint George (NB) → nearest in this edition: St. George (New Brunswick) — closest spelling, same province`
+- `Sept-?les (QC) → nearest in this edition: Sept-lles (Québec) — closest spelling, same province`
+- `St-F?licien (QC) → nearest in this edition: Saint-Félicien (Québec) — closest spelling, same province`
+- `St-Georges-de-Cacouna (QC) → nearest in this edition: Saint-Georges-de- Cacouna (Québec) — closest spelling, same province`
+- `St-Hubert (QC) → nearest in this edition: Saint-Hubert (Québec) — closest spelling, same province`
+- `St-Hyacinthe (QC) → nearest in this edition: Saint-Hyacinthe (Québec) — closest spelling, same province`
+- `St-Jerome (QC) → nearest in this edition: Saint-Jérôme (Québec) — closest spelling, same province`
+- `St-Jovite (QC) → nearest in this edition: Saint-Jovite (Québec) — closest spelling, same province`
+- `St-Lambert (QC) → nearest in this edition: Saint-Lambert (Québec) — closest spelling, same province`
+- `St-Laurent (QC) → nearest in this edition: Saint-Laurent (Québec) — closest spelling, same province`
+- `St-Lazare-Hudson (QC) → nearest in this edition: Saint-Lazare / Hudson (Québec) — closest spelling, same province`
+- `St-Nicolas (QC) → nearest in this edition: Saint-Nicolas (Québec) — closest spelling, same province`
+- `St. Mary's (ON) → nearest in this edition: St. Marys (Ontario) — closest spelling, same province`
+- `Ste-Agathe-des- (QC) → nearest in this edition: Sainte-Agathe- des-Monts (Québec) — closest spelling, same province`
+- `Ste-Anne-de-Bellevue (QC) → nearest in this edition: Sainte-Anne-de- Bellevue (Québec) — closest spelling, same province`
+- `Ste-Foy (QC) → nearest in this edition: Sainte-Foy (Québec) — closest spelling, same province`
+- `Trois-Rivi?res (QC) → nearest in this edition: Trois-Rivières (Québec) — closest spelling, same province`
+- `Vancouver (City Hall) (BC) → nearest in this edition: Vancouver (British Columbia) — one name contains the other, same province`
+- `Vancouver (Granville & 41 Ave) (BC) → nearest in this edition: Vancouver (British Columbia) — one name contains the other, same province`
+- `Verch?res (QC) → nearest in this edition: Verchères (Québec) — closest spelling, same province`
 
 </details>
 
 <details><summary>Edition rows with no shipped counterpart (42)</summary>
 
-- `Ancienne- (Québec)`
-- `Arviat (Nunavut)`
-- `Behchoko / Rae-Edzo (Northwest Territories)`
-- `Boiestown (New Brunswick)`
-- `Borden (CFB) (Ontario)`
-- `Channel-Port (Newfoundland and Labrador)`
-- `Gaspé (Quebec)`
-- `Haldimand (Ontario)`
-- `Havre-Saint-Pierre (Quebec)`
-- `Igluligaarjuk / Chesterfield Inlet (Nunavut)`
-- `Iqaluktuuttiaq / Cambridge Bay (Nunavut)`
-- `Kangiqiniq / Rankin Inlet (Nunavut)`
-- `Kanngiqtugaapik / Clyde River (Nunavut)`
-- `Kitchenuhmaykoosib / Big Trout Lake (Ontario)`
-- `Kugluktuk / Coppermine (Nunavut)`
-- `La Pocatière (Quebec)`
-- `Lac-Mégantic (Quebec)`
-- `Louisbourg (Nova Scotia)`
-- `Léry (Quebec)`
-- `Saguenay (Jonquière) (Québec)`
-- `Saint-Félicien (Québec)`
-- `Saint-Georges-de- Cacouna (Québec)`
-- `Saint-Hubert (Québec)`
-- `Saint-Hyacinthe (Québec)`
-- `Saint-Jovite (Québec)`
-- `Saint-Jérôme (Québec)`
-- `Saint-Lambert (Québec)`
-- `Saint-Laurent (Québec)`
-- `Saint-Lazare / Hudson (Québec)`
-- `Saint-Nicolas (Québec)`
-- `Sainte-Agathe- des-Monts (Québec)`
-- `Sainte-Anne-de- Bellevue (Québec)`
-- `Sainte-Foy (Québec)`
-- `Salliq / Coral Harbour (Nunavut)`
-- `Sept-lles (Québec)`
-- `St. George (New Brunswick)`
-- `St. Marys (Ontario)`
-- `Sutton (Québec)`
-- `Trois-Rivières (Québec)`
-- `Ulukhaktok / Holman (Northwest Territories)`
-- `Vancouver (British Columbia)`
-- `Verchères (Québec)`
+- `Ancienne- (Québec) → nearest in the snapshot: Ancienne-Lorette (QC) — one name contains the other, same province`
+- `Arviat (Nunavut) → nearest in the snapshot: Arviat / Eskimo Point (NU) — one name contains the other, same province`
+- `Behchoko / Rae-Edzo (Northwest Territories) → nearest in the snapshot: Rae-Edzo (NT) — one name contains the other, same province`
+- `Boiestown (New Brunswick) → nearest in the snapshot: Rosetown (SK) — closest spelling, another province`
+- `Borden (CFB) (Ontario) → nearest in the snapshot: CFB Borden (ON) — closest spelling, same province`
+- `Channel-Port (Newfoundland and Labrador) → nearest in the snapshot: Channel-Port aux Basques (NF) — one name contains the other, same province`
+- `Gaspé (Quebec) → nearest in the snapshot: Gasp? (QC) — one name contains the other, same province`
+- `Haldimand (Ontario) → nearest in the snapshot: Haldimand (Hagersville) (ON) — one name contains the other, same province`
+- `Havre-Saint-Pierre (Quebec) → nearest in the snapshot: Havre-St-Pierre (QC) — closest spelling, same province`
+- `Igluligaarjuk / Chesterfield Inlet (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Iqaluktuuttiaq / Cambridge Bay (Nunavut) → nearest in the snapshot: Cambridge (ON) — one name contains the other, another province`
+- `Kangiqiniq / Rankin Inlet (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kanngiqtugaapik / Clyde River (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kitchenuhmaykoosib / Big Trout Lake (Ontario) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kugluktuk / Coppermine (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `La Pocatière (Quebec) → nearest in the snapshot: La Pocati?re (QC) — closest spelling, same province`
+- `Lac-Mégantic (Quebec) → nearest in the snapshot: Lac-M?gantic (QC) — closest spelling, same province`
+- `Louisbourg (Nova Scotia) → nearest in the snapshot: Louisburg (NS) — closest spelling, same province`
+- `Léry (Quebec) → nearest in the snapshot: Sillery (QC) — one name contains the other, same province`
+- `Saguenay (Jonquière) (Québec) → nearest in the snapshot: Saguenay (QC) — one name contains the other, same province`
+- `Saint-Félicien (Québec) → nearest in the snapshot: St-F?licien (QC) — closest spelling, same province`
+- `Saint-Georges-de- Cacouna (Québec) → nearest in the snapshot: St-Georges-de-Cacouna (QC) — closest spelling, same province`
+- `Saint-Hubert (Québec) → nearest in the snapshot: Saint-Hubert-de-Riviere-du-Loup (QC) — one name contains the other, same province`
+- `Saint-Hyacinthe (Québec) → nearest in the snapshot: St-Hyacinthe (QC) — closest spelling, same province`
+- `Saint-Jovite (Québec) → nearest in the snapshot: St-Jovite (QC) — closest spelling, same province`
+- `Saint-Jérôme (Québec) → nearest in the snapshot: St-Jerome (QC) — closest spelling, same province`
+- `Saint-Lambert (Québec) → nearest in the snapshot: St-Lambert (QC) — closest spelling, same province`
+- `Saint-Laurent (Québec) → nearest in the snapshot: St-Laurent (QC) — closest spelling, same province`
+- `Saint-Lazare / Hudson (Québec) → nearest in the snapshot: St-Lazare-Hudson (QC) — closest spelling, same province`
+- `Saint-Nicolas (Québec) → nearest in the snapshot: St-Nicolas (QC) — closest spelling, same province`
+- `Sainte-Agathe- des-Monts (Québec) → nearest in the snapshot: Ste-Agathe-des- (QC) — closest spelling, same province`
+- `Sainte-Anne-de- Bellevue (Québec) → nearest in the snapshot: Ste-Anne-de-Bellevue (QC) — closest spelling, same province`
+- `Sainte-Foy (Québec) → nearest in the snapshot: Ste-Foy (QC) — closest spelling, same province`
+- `Salliq / Coral Harbour (Nunavut) → nearest in the snapshot: Coral Harbour /Salliq (NU) — closest spelling, same province`
+- `Sept-lles (Québec) → nearest in the snapshot: Sept-?les (QC) — closest spelling, same province`
+- `St. George (New Brunswick) → nearest in the snapshot: Saint George (NB) — closest spelling, same province`
+- `St. Marys (Ontario) → nearest in the snapshot: St. Mary's (ON) — closest spelling, same province`
+- `Sutton (Québec) → nearest in the snapshot: Monts Sutton (QC) — one name contains the other, same province`
+- `Trois-Rivières (Québec) → nearest in the snapshot: Trois-Rivi?res (QC) — closest spelling, same province`
+- `Ulukhaktok / Holman (Northwest Territories) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Vancouver (British Columbia) → nearest in the snapshot: Vancouver (Granville & 41 Ave) (BC) — one name contains the other, same province`
+- `Verchères (Québec) → nearest in the snapshot: Verch?res (QC) — closest spelling, same province`
 
 </details>
 
@@ -897,15 +992,15 @@ Differing leaves by kind:
 - **Verdict:** differs
 - **Recorded source:** `mcp:necb:2025`
 - **Edition tables fetched:** `8.4.6.2`, `8.4.6.3`, `8.4.6.5.-A`, `8.4.6.5.-B`, `8.4.6.5.-C`, `8.4.6.8.-A`, `8.4.6.8.-B`, `8.4.6.8.-C`, `section 8.4.6.2`, `section 8.4.6.3`, `section 8.4.6.5`
-- **Mapping:** two independent comparisons. (a) EQUIPMENT: every numeric minimum in the shipped capacity bins is searched for in the edition's own 5.2.12.1 series cells. (b) CURVES: each shipped `curves[]` entry is matched to the edition curve table that publishes the same quantity and compared in the independent variables each source states — see the dedicated curve section below
+- **Mapping:** two independent comparisons. (a) EQUIPMENT: an explicit per-family row-and-column mapping — each shipped family names the edition table, the equipment-class row, the capacity band (with the band bounds converted out of the engine's Btu/h or tons) and the METRIC column its value is supposed to be, and each cell is compared against that one identified cell; a family with no faithful mapping is reported UNMAPPED, never as agreeing. (b) CURVES: each shipped `curves[]` entry matched to the edition curve table that publishes the same quantity and compared in the independent variables each source states — see the dedicated curve section below
 
 | count | value |
 |---|---:|
 | shipped curves | 31 |
 | curves — identical to rounding | 12 |
-| curves — differs | 4 |
+| curves — differs | 6 |
 | curves — no edition table | 15 |
-| curves — no inherited curve | 12 |
+| curves — no inherited curve | 10 |
 
 > the equipment tables ARE this edition's own MCP retrieval (`mcp:necb:2025`) and are not re-compared here; only the inherited performance CURVES are
 
@@ -913,12 +1008,12 @@ Differing leaves by kind:
 
 | leaf | shipped | this edition |
 |---|---|---|
-| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 1.16 % over PLR 0.10–1.00 — close, not exact |
-| `curves[BOILER-EFFFPLR-COND]` | `[1.0186, 0.2426, -0.5059, 0.2465]` | this edition defines FHeatPLC over PLR **and** the boiler return-hot-water temperature T_w,return (°F, six coefficients); the shipped curve is univariate in PLR and cannot express the second variable at all |
-| `curves[FURNACE-EFFPLR-COND]` | `[1.0186, 0.2426, -0.5059, 0.2465]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| `curves[Modulating (boiler)]` | _(absent)_ | this edition publishes a curve for this equipment class and the snapshot ships none |
-| `curves[Modulating (furnace)]` | _(absent)_ | this edition publishes a curve for this equipment class and the snapshot ships none |
-| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 2.67 % over PLR 0.10–1.00 — close, not exact |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **1.16 %** over PLR 0.10–1.00 |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **48.41 %** over PLR 0.10–1.00 × T_w,return 80–180 °F; the curve NAMED for this class, `BOILER-EFFFPLR-COND`, would deviate by 13.44 % — but no row references it; the required PLF ranges 0.9062–1.0924 across that box, so a single normalised-efficiency curve in PLR alone cannot hold it exactly at any T_w |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **23.25 %** over PLR 0.10–1.00; the curve NAMED for this class, `FURNACE-EFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **35.26 %** over PLR 0.10–1.00; the snapshot ships no curve named for this class at all |
+| `curves[FURNACE-EFFPLR]` | `[0.722, 0.8211, -1.0396, 0.5]` | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **10.27 %** over PLR 0.10–1.00; the snapshot ships no curve named for this class at all |
+| `curves[BOILER-EFFFPLR]` | `[0.3831, 2.0567, -2.6469, 1.2148]` | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **2.67 %** over PLR 0.10–1.00 |
 | `curves[Air-cooled Reciprocating EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | `curves[Air-cooled Screw EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | `curves[Air-cooled Scroll EIR_FPLR]` | _(absent)_ | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
@@ -1018,26 +1113,18 @@ Differing leaves by kind:
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `4.2.1.6`, `4.2.1.5`
-- **Mapping:** the shipped table is the legacy LED-ALTERNATIVE LPD set (NREL 63807 retrofit assumptions), not a code table; each row is joined by the same catalog-name bridge `tables/space_types.json` uses and its `lighting_per_area` (W/ft²) compared against this edition's published LPD in Table 4.2.1.6 (space-by-space) or 4.2.1.5 (building-area), converted W/m² → W/ft²
+- **Mapping:** the shipped table is the legacy LED-ALTERNATIVE LPD set (NREL 63807 retrofit assumptions), not a code table; each row is joined by the same loads bridge `tables/space_types.json` uses — the authored catalog-name mapping with the control cross-references removed — and its `lighting_per_area` (W/ft²) compared against this edition's published LPD in Table 4.2.1.6 (space-by-space) or 4.2.1.5 (building-area), converted W/m² → W/ft²
 
 | count | value |
 |---|---:|
 | shipped records | 308 |
 | records matched | 298 |
 | records unmatched | 10 |
-| LPD values equal to the edition's | 297 |
-| LPD values differing | 1 |
+| LPD values equal to the edition's | 298 |
+| LPD values differing | 0 |
 | shipped columns with NO edition source at all | 3 |
 
 > A difference here is EXPECTED and is not a transcription error: an LED alternative LPD is deliberately lower than the Code's allowance. What the count says is how far the shipped alternatives sit below this edition's published maxima, and whether any exceeds one
-
-<details><summary>Every differing leaf (1)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `Health care facility medical supply room . lighting_per_area (Table 4.2.1.6)` | `0.62245097` | `4.1 W/m² → 0.380902` |
-
-</details>
 
 <details><summary>Shipped rows with no edition counterpart (10)</summary>
 
@@ -1078,10 +1165,14 @@ Differing leaves by kind:
 | cells identical | 5178 |
 | cells differing | 33 |
 | cells the edition states as a word, not a number | 333 |
+| Schedule I `Fans` cells this edition prints `On` | 33 |
+| Schedule I `Fans` cells this edition prints `Off` | 39 |
 
 > 333 cells are stated as a WORD in this edition's table where the snapshot carries a number: the fan rows print `On`/`Off` (compared as 1/0) and the two thermostat rows print `Off` where the engine encodes a disabled setpoint as a far sentinel (`35.0 °C`). An encoding difference, not a value difference
 
 > 9 Constant records (the `NECB-*-…` design-day defaults and `Always On`) have no counterpart in the operating-schedule tables at all: the edition publishes hourly fractions only
+
+> **Schedule I is DORMANT DATA, not a live difference.** This edition's Schedule I `Fans` row prints **33 `On`** cells and **39 `Off`** cells across Mon-Fri / Sat / Sun; the shipped `NECB-I-Fan` carries 0.0 in all 72, so the 39 `Off` cells agree and the 33 `On` cells are the entire difference. Nothing in product Python consumes it: no module reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule instead (`hvac/reference.py:~843-866`, D-14, Article 8.4.3.2.(1)), and the space-type references spell the name `NECB-I-FAN` while the schedule table defines `NECB-I-Fan` — a case mismatch that would have to be resolved before any reader could find it. **These cells are NOT changed here**: a data correction is a D-89 adoption step, not a matcher fix
 
 <details><summary>Every differing leaf (33)</summary>
 
@@ -1128,15 +1219,15 @@ Differing leaves by kind:
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `A-8.4.3.2.(2)-A`, `A-8.4.3.2.(2)-B`, `4.2.1.6`, `4.2.1.5`, `4.3.2.10.-A`
-- **Mapping:** the shipped catalog name (`space_type` with its `-sch-<letter>` suffix stripped, or `building_type` for `WholeBuilding` rows) is translated to a Table 4.2.1.6 row through the snapshot's OWN authored mapping — the `table_row` field of every `tables/daylighting_controls_4_2_1_6.json` entry (D-57, hand-mapped and LPD-cross-checked) — and that row key is then looked up in each edition table by normalised "Space Category / Space Type" name. Building-area rows resolve against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is inverted (m²/occupant → occupant/1000·m²), receptacle load and LPD converted W/m² → W/ft² as the shipped units require
+- **Mapping:** the shipped catalog name (`space_type` with its `-sch-<letter>` suffix stripped, or `building_type` for `WholeBuilding` rows) is translated to a Table 4.2.1.6 row through the snapshot's OWN authored mapping — the `table_row` field of every `tables/daylighting_controls_4_2_1_6.json` entry (D-57, hand-mapped and LPD-cross-checked) — **minus the entries that file marks as control CROSS-REFERENCES**, which point at the row governing another space's controls and say nothing about this space's loads or LPD. That row key is then looked up in each edition table by normalised "Space Category / Space Type" name. Building-area rows resolve against Tables A-8.4.3.2.(2)-A and 4.2.1.5. Occupant density is inverted (m²/occupant → occupant/1000·m²), receptacle load and LPD converted W/m² → W/ft² as the shipped units require
 
 | count | value |
 |---|---:|
 | shipped records | 308 |
 | records matched | 301 |
 | records unmatched | 7 |
-| cells identical | 1170 |
-| cells differing | 4 |
+| cells identical | 1176 |
+| cells differing | 0 |
 | shipped columns with an edition source | 7 |
 | shipped columns with NO edition source at all | 68 |
 
@@ -1144,18 +1235,9 @@ Differing leaves by kind:
 
 > `necb_schedule_type` was skipped on 99 records: the catalog clones every space function across all eleven schedule letters (`…-sch-A` … `…-sch-K`) while the edition assigns exactly one letter per row, so only the un-cloned building-area records carry a comparable letter
 
+> `health care facility medical supply room` carries the daylighting file's `cross_reference_storage_room` marker: Table 4.2.1.6 refers it to another row for CONTROLS only. That pointer is excluded from this comparison — this edition publishes the space's own row in A-8.4.3.2.(2)-B and 4.2.1.6, and the shipped loads and LPD are compared against it
+
 > Table A-8.4.3.2.(2)-B's `Space Category` column is served LAGGED by the extraction — continuation rows repeat the previous category — so rows are addressed by `Space Type` as well as by the pair, and anything that still fails to resolve is listed rather than guessed at
-
-<details><summary>Every differing leaf (4)</summary>
-
-| leaf | shipped | this edition |
-|---|---|---|
-| `Health care facility medical supply room . occupancy_per_area (Table A-8.4.3.2.(2)-B)` | `4.646840148698885` | `100 m²/occ → 0.92903 occ/1000 ft²` |
-| `Health care facility medical supply room . necb_schedule_type (Table A-8.4.3.2.(2)-B)` | `H` | `*` |
-| `Health care facility medical supply room . target_illuminance_setpoint (Table A-8.4.3.2.(2)-B)` | `400` | `100` |
-| `Health care facility medical supply room . lighting_per_area (Table 4.2.1.6)` | `0.62245097` | `4.1 W/m² → 0.380902` |
-
-</details>
 
 <details><summary>Shipped rows with no edition counterpart (7)</summary>
 
@@ -1240,31 +1322,37 @@ Differing leaves by kind:
 - **Verdict:** differs
 - **Recorded source:** `oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0`
 - **Edition tables fetched:** `C-1`
-- **Mapping:** rows matched by normalised city name (case, accents, punctuation and whitespace folded); every column this edition prints that the shipped record also carries is compared — `degree_days_below_15_c` ← `Degree-Days Below 15°C`, `degree_days_below_18_c` ← `Degree-Days Below 18°C`, `design_temp_jan_1p` ← `January 1% °C`, `design_temp_jan_2_5p` ← `January 2.5% °C`, `design_temp_july_2_5p_dry` ← `July 2.5% Historical Dry °C`, `design_temp_july_2_5p_wet` ← `July 2.5% Historical Wet °C`, `elevation` ← `Elevation (m)`, `hourly_wind_pressures_one_fiftyth` ← `Hourly Wind Pressures 1/50 kPa`, `hourly_wind_pressures_one_tenth` ← `Hourly Wind Pressures 1/10 kPa`. The shipped `lat_long` pair has no C-1 column and is excluded
+- **Mapping:** rows matched by (normalised city name, PROVINCE) — the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two different places in two different provinces; the shipped two-letter code is resolved to this edition's printed province name through a declared 13-entry map. Every column this edition prints that the shipped record also carries is compared — `degree_days_below_15_c` ← `Degree-Days Below 15°C`, `degree_days_below_18_c` ← `Degree-Days Below 18°C`, `design_temp_jan_1p` ← `January 1% °C`, `design_temp_jan_2_5p` ← `January 2.5% °C`, `design_temp_july_2_5p_dry` ← `July 2.5% Historical Dry °C`, `design_temp_july_2_5p_wet` ← `July 2.5% Historical Wet °C`, `elevation` ← `Elevation (m)`, `hourly_wind_pressures_one_fiftyth` ← `Hourly Wind Pressures 1/50 kPa`, `hourly_wind_pressures_one_tenth` ← `Hourly Wind Pressures 1/10 kPa`. The shipped `lat_long` pair has no C-1 column at all and is excluded
 
 | count | value |
 |---|---:|
 | shipped rows | 679 |
 | edition rows | 680 |
-| rows matched | 633 |
+| distinct (city, province) keys shipped | 679 |
+| distinct (city, province) keys in the edition | 680 |
+| rows matched | 640 |
 | rows unmatched (shipped) | 39 |
 | rows unmatched (edition) | 40 |
+| duplicate keys (shipped) | 0 |
+| duplicate keys (edition) | 0 |
 | columns compared | 9 |
 | edition columns with no shipped counterpart | 2 |
-| cells identical | 4461 |
-| cells differing | 1236 |
-
-> duplicate normalised city names: 7 shipped, 7 in the edition table; the first occurrence is compared
+| cells identical | 4510 |
+| cells differing | 1250 |
 
 > columns THIS EDITION prints that nothing shipped carries: `July 2.5% Future Dry °C`, `July 2.5% Future Wet °C`
 
+> **What runtime actually reads from this file is `lat_long` and `degree_days_below_18_c`** — the nearest-city search is by coordinates and the climate zone comes from HDD18. The edition's own Table C-1 publishes NO coordinates at all, so adopting its row set cannot supply the column the lookup keys on; every other shipped column is either compared above or has no reader in this package
+
+> the unmatched ledger below lists EVERY unmatched row on both sides (39 shipped, 40 edition) with its nearest candidate, so the residue is nameable rather than a count
+
 Differing leaves by kind:
 
-- `hourly_wind_pressures_one_fiftyth` — 627
-- `hourly_wind_pressures_one_tenth` — 605
+- `hourly_wind_pressures_one_fiftyth` — 634
+- `hourly_wind_pressures_one_tenth` — 612
 - `degree_days_below_15_c` — 4
 
-<details><summary>Every differing leaf (1236)</summary>
+<details><summary>Every differing leaf (1250)</summary>
 
 | leaf | shipped | this edition |
 |---|---|---|
@@ -1292,6 +1380,8 @@ Differing leaves by kind:
 | `Alexandria (ON) . hourly_wind_pressures_one_tenth` | `0.31` | `0.34` |
 | `Alliston (ON) . hourly_wind_pressures_one_fiftyth` | `0.36` | `0.40` |
 | `Alliston (ON) . hourly_wind_pressures_one_tenth` | `0.28` | `0.31` |
+| `Alma (NB) . hourly_wind_pressures_one_fiftyth` | `0.48` | `0.53` |
+| `Alma (NB) . hourly_wind_pressures_one_tenth` | `0.37` | `0.41` |
 | `Alma (QC) . hourly_wind_pressures_one_fiftyth` | `0.35` | `0.37` |
 | `Alma (QC) . hourly_wind_pressures_one_tenth` | `0.27` | `0.28` |
 | `Almonte (ON) . hourly_wind_pressures_one_fiftyth` | `0.41` | `0.45` |
@@ -1666,98 +1756,96 @@ Differing leaves by kind:
 | `Gimli (MB) . hourly_wind_pressures_one_tenth` | `0.31` | `0.34` |
 | `Glacier (BC) . hourly_wind_pressures_one_fiftyth` | `0.32` | `0.34` |
 | `Glencoe (ON) . hourly_wind_pressures_one_fiftyth` | `0.43` | `0.47` |
-| `Glencoe (ON) . hourly_wind_pressures_one_tenth` | `0.33` | `0.37` |
-| `Goderich (ON) . hourly_wind_pressures_one_fiftyth` | `0.55` | `0.53` |
-| _… and 836 more_ | | |
+| _… and 850 more_ | | |
 
 </details>
 
 <details><summary>Shipped rows with no edition counterpart (39)</summary>
 
-- `Arviat / Eskimo Point (NU)`
-- `Asbestos (QC)`
-- `Big Trout Lake (Kitchenuhmay-koosib) (ON)`
-- `CFB Borden (ON)`
-- `Cambridge Bay/Iqaluktuuttiaq (NU)`
-- `Chesterfield Inlet/Igluligaarjuk (NU)`
-- `Clyde River /Kanngiqtugaapik (NU)`
-- `Coppermine (Kugluktuk) (NU)`
-- `Coral Harbour /Salliq (NU)`
-- `Gasp? (QC)`
-- `Havre-St-Pierre (QC)`
-- `Holman/Ulukhaqtuuq (NT)`
-- `L?ry (QC)`
-- `La Pocati?re (QC)`
-- `Lac-M?gantic (QC)`
-- `Louisburg (NS)`
-- `Monts Sutton (QC)`
-- `Rae-Edzo (NT)`
-- `Rankin Inlet (Kangiqiniq) (NU)`
-- `Saguenay (Jonqui?re) (QC)`
-- `Saint George (NB)`
-- `Sept-?les (QC)`
-- `St-F?licien (QC)`
-- `St-Georges-de-Cacouna (QC)`
-- `St-Hubert (QC)`
-- `St-Hyacinthe (QC)`
-- `St-Jerome (QC)`
-- `St-Jovite (QC)`
-- `St-Lambert (QC)`
-- `St-Laurent (QC)`
-- `St-Lazare-Hudson (QC)`
-- `St-Nicolas (QC)`
-- `St. Mary's (ON)`
-- `Ste-Agathe-des- (QC)`
-- `Ste-Anne-de-Bellevue (QC)`
-- `Ste-Foy (QC)`
-- `Trois-Rivi?res (QC)`
-- `Vancouver (Granville & 41 Ave) (BC)`
-- `Verch?res (QC)`
+- `Arviat / Eskimo Point (NU) → nearest in this edition: Arviat (Nunavut) — one name contains the other, same province`
+- `Asbestos (QC) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Big Trout Lake (Kitchenuhmay-koosib) (ON) → nearest in this edition: no candidate within 0.6 name similarity`
+- `CFB Borden (ON) → nearest in this edition: Borden (CFB) (Ontario) — closest spelling, same province`
+- `Cambridge Bay/Iqaluktuuttiaq (NU) → nearest in this edition: Cambridge (Ontario) — one name contains the other, another province`
+- `Chesterfield Inlet/Igluligaarjuk (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Clyde River /Kanngiqtugaapik (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Coppermine (Kugluktuk) (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Coral Harbour /Salliq (NU) → nearest in this edition: Salliq / Coral Harbour (Nunavut) — closest spelling, same province`
+- `Gasp? (QC) → nearest in this edition: Gaspé (Québec) — one name contains the other, same province`
+- `Havre-St-Pierre (QC) → nearest in this edition: Havre-Saint-Pierre (Québec) — closest spelling, same province`
+- `Holman/Ulukhaqtuuq (NT) → nearest in this edition: no candidate within 0.6 name similarity`
+- `L?ry (QC) → nearest in this edition: Léry (Québec) — closest spelling, same province`
+- `La Pocati?re (QC) → nearest in this edition: La Pocatière (Québec) — closest spelling, same province`
+- `Lac-M?gantic (QC) → nearest in this edition: Lac-Mégantic (Québec) — closest spelling, same province`
+- `Louisburg (NS) → nearest in this edition: Louisbourg (Nova Scotia) — closest spelling, same province`
+- `Monts Sutton (QC) → nearest in this edition: Sutton (Québec) — one name contains the other, same province`
+- `Rae-Edzo (NT) → nearest in this edition: Behchoko / Rae-Edzo (Northwest Territories) — one name contains the other, same province`
+- `Rankin Inlet (Kangiqiniq) (NU) → nearest in this edition: no candidate within 0.6 name similarity`
+- `Saguenay (Jonqui?re) (QC) → nearest in this edition: Saguenay (Québec) — one name contains the other, same province`
+- `Saint George (NB) → nearest in this edition: St. George (New Brunswick) — closest spelling, same province`
+- `Sept-?les (QC) → nearest in this edition: Sept-lles (Québec) — closest spelling, same province`
+- `St-F?licien (QC) → nearest in this edition: Saint-Félicien (Québec) — closest spelling, same province`
+- `St-Georges-de-Cacouna (QC) → nearest in this edition: Saint-Georges-de-Cacouna (Québec) — closest spelling, same province`
+- `St-Hubert (QC) → nearest in this edition: Saint-Hubert (Québec) — closest spelling, same province`
+- `St-Hyacinthe (QC) → nearest in this edition: Saint-Hyacinthe (Québec) — closest spelling, same province`
+- `St-Jerome (QC) → nearest in this edition: Saint-Jérôme (Québec) — closest spelling, same province`
+- `St-Jovite (QC) → nearest in this edition: Saint-Jovite (Québec) — closest spelling, same province`
+- `St-Lambert (QC) → nearest in this edition: Saint-Lambert (Québec) — closest spelling, same province`
+- `St-Laurent (QC) → nearest in this edition: Saint-Laurent (Québec) — closest spelling, same province`
+- `St-Lazare-Hudson (QC) → nearest in this edition: Saint-Lazare / Hudson (Québec) — closest spelling, same province`
+- `St-Nicolas (QC) → nearest in this edition: Saint-Nicolas (Québec) — closest spelling, same province`
+- `St. Mary's (ON) → nearest in this edition: St. Marys (Ontario) — closest spelling, same province`
+- `Ste-Agathe-des- (QC) → nearest in this edition: Sainte-Agathe-des-Monts (Québec) — closest spelling, same province`
+- `Ste-Anne-de-Bellevue (QC) → nearest in this edition: Sainte-Anne-de-Bellevue (Québec) — closest spelling, same province`
+- `Ste-Foy (QC) → nearest in this edition: Sainte-Foy (Québec) — closest spelling, same province`
+- `Trois-Rivi?res (QC) → nearest in this edition: Trois-Rivières (Québec) — closest spelling, same province`
+- `Vancouver (Granville & 41 Ave) (BC) → nearest in this edition: Vancouver (Granville St. & 41st Ave) (British Columbia) — closest spelling, same province`
+- `Verch?res (QC) → nearest in this edition: Verchères (Québec) — closest spelling, same province`
 
 </details>
 
 <details><summary>Edition rows with no shipped counterpart (40)</summary>
 
-- `Arviat (Nunavut)`
-- `Behchoko / Rae-Edzo (Northwest Territories)`
-- `Boiestown (New Brunswick)`
-- `Borden (CFB) (Ontario)`
-- `Gaspé (Québec)`
-- `Havre-Saint-Pierre (Québec)`
-- `Igluligaarjuk / Chesterfield Inlet (Nunavut)`
-- `Iqaluktuuttiaq / Cambridge Bay (Nunavut)`
-- `Kangiqiniq / Rankin Inlet (Nunavut)`
-- `Kanngiqtugaapik / Clyde River (Nunavut)`
-- `Kitchenuhmaykoosib / Big Trout Lake (Ontario)`
-- `Kugluktuk / Coppermine (Nunavut)`
-- `La Pocatière (Québec)`
-- `Lac-Mégantic (Québec)`
-- `Louisbourg (Nova Scotia)`
-- `Léry (Québec)`
-- `Saguenay (Jonquière) (Québec)`
-- `Saint-Félicien (Québec)`
-- `Saint-Georges-de-Cacouna (Québec)`
-- `Saint-Hubert (Québec)`
-- `Saint-Hyacinthe (Québec)`
-- `Saint-Jovite (Québec)`
-- `Saint-Jérôme (Québec)`
-- `Saint-Lambert (Québec)`
-- `Saint-Laurent (Québec)`
-- `Saint-Lazare / Hudson (Québec)`
-- `Saint-Nicolas (Québec)`
-- `Sainte-Agathe-des-Monts (Québec)`
-- `Sainte-Anne-de-Bellevue (Québec)`
-- `Sainte-Foy (Québec)`
-- `Salliq / Coral Harbour (Nunavut)`
-- `Sept-lles (Québec)`
-- `St. George (New Brunswick)`
-- `St. Marys (Ontario)`
-- `Sutton (Québec)`
-- `Trois-Rivières (Québec)`
-- `Ulukhaktok / Holman (Northwest Territories)`
-- `Val-des-Sources (Québec)`
-- `Vancouver (Granville St. & 41st Ave) (British Columbia)`
-- `Verchères (Québec)`
+- `Arviat (Nunavut) → nearest in the snapshot: Arviat / Eskimo Point (NU) — one name contains the other, same province`
+- `Behchoko / Rae-Edzo (Northwest Territories) → nearest in the snapshot: Rae-Edzo (NT) — one name contains the other, same province`
+- `Boiestown (New Brunswick) → nearest in the snapshot: Rosetown (SK) — closest spelling, another province`
+- `Borden (CFB) (Ontario) → nearest in the snapshot: CFB Borden (ON) — closest spelling, same province`
+- `Gaspé (Québec) → nearest in the snapshot: Gasp? (QC) — one name contains the other, same province`
+- `Havre-Saint-Pierre (Québec) → nearest in the snapshot: Havre-St-Pierre (QC) — closest spelling, same province`
+- `Igluligaarjuk / Chesterfield Inlet (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Iqaluktuuttiaq / Cambridge Bay (Nunavut) → nearest in the snapshot: Cambridge (ON) — one name contains the other, another province`
+- `Kangiqiniq / Rankin Inlet (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kanngiqtugaapik / Clyde River (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kitchenuhmaykoosib / Big Trout Lake (Ontario) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Kugluktuk / Coppermine (Nunavut) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `La Pocatière (Québec) → nearest in the snapshot: La Pocati?re (QC) — closest spelling, same province`
+- `Lac-Mégantic (Québec) → nearest in the snapshot: Lac-M?gantic (QC) — closest spelling, same province`
+- `Louisbourg (Nova Scotia) → nearest in the snapshot: Louisburg (NS) — closest spelling, same province`
+- `Léry (Québec) → nearest in the snapshot: Sillery (QC) — one name contains the other, same province`
+- `Saguenay (Jonquière) (Québec) → nearest in the snapshot: Saguenay (QC) — one name contains the other, same province`
+- `Saint-Félicien (Québec) → nearest in the snapshot: St-F?licien (QC) — closest spelling, same province`
+- `Saint-Georges-de-Cacouna (Québec) → nearest in the snapshot: St-Georges-de-Cacouna (QC) — closest spelling, same province`
+- `Saint-Hubert (Québec) → nearest in the snapshot: Saint-Hubert-de-Riviere-du-Loup (QC) — one name contains the other, same province`
+- `Saint-Hyacinthe (Québec) → nearest in the snapshot: St-Hyacinthe (QC) — closest spelling, same province`
+- `Saint-Jovite (Québec) → nearest in the snapshot: St-Jovite (QC) — closest spelling, same province`
+- `Saint-Jérôme (Québec) → nearest in the snapshot: St-Jerome (QC) — closest spelling, same province`
+- `Saint-Lambert (Québec) → nearest in the snapshot: St-Lambert (QC) — closest spelling, same province`
+- `Saint-Laurent (Québec) → nearest in the snapshot: St-Laurent (QC) — closest spelling, same province`
+- `Saint-Lazare / Hudson (Québec) → nearest in the snapshot: St-Lazare-Hudson (QC) — closest spelling, same province`
+- `Saint-Nicolas (Québec) → nearest in the snapshot: St-Nicolas (QC) — closest spelling, same province`
+- `Sainte-Agathe-des-Monts (Québec) → nearest in the snapshot: Ste-Agathe-des- (QC) — closest spelling, same province`
+- `Sainte-Anne-de-Bellevue (Québec) → nearest in the snapshot: Ste-Anne-de-Bellevue (QC) — closest spelling, same province`
+- `Sainte-Foy (Québec) → nearest in the snapshot: Ste-Foy (QC) — closest spelling, same province`
+- `Salliq / Coral Harbour (Nunavut) → nearest in the snapshot: Coral Harbour /Salliq (NU) — closest spelling, same province`
+- `Sept-lles (Québec) → nearest in the snapshot: Sept-?les (QC) — closest spelling, same province`
+- `St. George (New Brunswick) → nearest in the snapshot: Saint George (NB) — closest spelling, same province`
+- `St. Marys (Ontario) → nearest in the snapshot: St. Mary's (ON) — closest spelling, same province`
+- `Sutton (Québec) → nearest in the snapshot: Monts Sutton (QC) — one name contains the other, same province`
+- `Trois-Rivières (Québec) → nearest in the snapshot: Trois-Rivi?res (QC) — closest spelling, same province`
+- `Ulukhaktok / Holman (Northwest Territories) → nearest in the snapshot: no candidate within 0.6 name similarity`
+- `Val-des-Sources (Québec) → nearest in the snapshot: Val-d'Or (QC) — closest spelling, same province`
+- `Vancouver (Granville St. & 41st Ave) (British Columbia) → nearest in the snapshot: Vancouver (Granville & 41 Ave) (BC) — closest spelling, same province`
+- `Verchères (Québec) → nearest in the snapshot: Verch?res (QC) — closest spelling, same province`
 
 </details>
 
@@ -1781,10 +1869,12 @@ Differing leaves by kind:
 | `WaterCooled_Reciprocating_EIRFT`<br/>Water-cooled Reciprocating EIRFT | `8.4.5.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 3.4e-06); reached only after applying the codes service's own published errata for this row (b: -0.0882156 → -0.00882156) — the shipped curve matches the CORRECTED value, so the printed misprint is the source's, not the snapshot's |
 | `WaterCooled_Screw_EIRFT`<br/>Water-cooled Screw EIRFT | `8.4.5.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 1.3e-06) |
 | `WaterCooled_Scroll_EIRFT`<br/>Water-cooled Scroll EIRFT | `8.4.5.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 2.1e-06); reached only after applying the codes service's own published errata for this row (d: -0.0128136 → -0.00128136) — the shipped curve matches the CORRECTED value, so the printed misprint is the source's, not the snapshot's |
-| `FURNACE-EFFPLR`<br/>Atmospheric (furnace) | `8.4.5.3` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 1.16 % over PLR 0.10–1.00 — close, not exact |
-| `BOILER-EFFFPLR-COND`<br/>Condensing (boiler) | `8.4.5.2.-A` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| `FURNACE-EFFPLR-COND`<br/>Condensing (furnace) | `8.4.5.3` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| `BOILER-EFFFPLR`<br/>Non-condensing (boiler) | `8.4.5.2.-A` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 2.67 % over PLR 0.10–1.00 — close, not exact |
+| `FURNACE-EFFPLR`<br/>Atmospheric (furnace) | `8.4.5.3` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **1.16 %** over PLR 0.10–1.00 |
+| `BOILER-EFFFPLR`<br/>Condensing (boiler) | `8.4.5.2.-A` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **45.54 %** over PLR 0.10–1.00; the curve NAMED for this class, `BOILER-EFFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `FURNACE-EFFPLR`<br/>Condensing (furnace) | `8.4.5.3` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **23.25 %** over PLR 0.10–1.00; the curve NAMED for this class, `FURNACE-EFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `BOILER-EFFFPLR`<br/>Modulating (boiler) | `8.4.5.2.-B` | TABULATED: Table 8.4.5.2.-B states the requirement as ten (PLR, FHeatPLC) points, not as coefficients | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **33.51 %** over the ten printed PLR points 0.1–1.0; the snapshot ships no curve named for this class at all |
+| `FURNACE-EFFPLR`<br/>Modulating (furnace) | `8.4.5.2.-B` | TABULATED: Table 8.4.5.2.-B states the requirement as ten (PLR, FHeatPLC) points, not as coefficients | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **11.32 %** over the ten printed PLR points 0.1–1.0; the snapshot ships no curve named for this class at all |
+| `BOILER-EFFFPLR`<br/>Non-condensing (boiler) | `8.4.5.2.-A` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **2.67 %** over PLR 0.10–1.00 |
 | `DXCOOL-REF-CAPFFLOW`<br/>DXCOOL-REF-CAPFFLOW | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
 | `DXCOOL-REF-CAPFT`<br/>DXCOOL-REF-CAPFT | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
 | `DXCOOL-REF-COOLEIRFFLOW`<br/>DXCOOL-REF-COOLEIRFFLOW | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
@@ -1811,7 +1901,7 @@ Differing leaves by kind:
 | _(none shipped)_<br/>Steam-driven, single-effect FIR_FPLR | `8.4.5.8.-B` | — | **no inherited curve** | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | _(none shipped)_<br/>Steam-driven, single-effect FIR_FT | `8.4.5.8.-C` | — | **no inherited curve** | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 
-Tally: **4** differs, **12** identical to rounding, **15** no edition table, **10** no inherited curve.
+Tally: **6** differs, **12** identical to rounding, **15** no edition table, **10** no inherited curve.
 
 ### `necb2025` curves
 
@@ -1829,12 +1919,12 @@ Tally: **4** differs, **12** identical to rounding, **15** no edition table, **1
 | `WaterCooled_Reciprocating_EIRFT`<br/>Water-cooled Reciprocating EIRFT | `8.4.6.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 3.4e-06); reached only after applying the codes service's own published errata for this row (b: -0.0882156 → -0.00882156) — the shipped curve matches the CORRECTED value, so the printed misprint is the source's, not the snapshot's |
 | `WaterCooled_Screw_EIRFT`<br/>Water-cooled Screw EIRFT | `8.4.6.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 1.3e-06) |
 | `WaterCooled_Scroll_EIRFT`<br/>Water-cooled Scroll EIRFT | `8.4.6.5.-C` | °F→°C affine transform of a biquadratic | **identical to rounding** | the shipped °C coefficients are the exact affine °F→°C image of this edition's own row (max relative deviation 2.1e-06); reached only after applying the codes service's own published errata for this row (d: -0.0128136 → -0.00128136) — the shipped curve matches the CORRECTED value, so the printed misprint is the source's, not the snapshot's |
-| `FURNACE-EFFPLR`<br/>Atmospheric (furnace) | `8.4.6.3` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 1.16 % over PLR 0.10–1.00 — close, not exact |
-| `BOILER-EFFFPLR-COND`<br/>Condensing (boiler) | `8.4.6.2` | not comparable — the edition's FHeatPLC is BIVARIATE | **differs** | this edition defines FHeatPLC over PLR **and** the boiler return-hot-water temperature T_w,return (°F, six coefficients); the shipped curve is univariate in PLR and cannot express the second variable at all |
-| `FURNACE-EFFPLR-COND`<br/>Condensing (furnace) | `8.4.6.3` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 0.49 % over PLR 0.10–1.00 — close, not exact |
-| _(none shipped)_<br/>Modulating (boiler) | `8.4.6.2` | — | **no inherited curve** | this edition publishes a curve for this equipment class and the snapshot ships none |
-| _(none shipped)_<br/>Modulating (furnace) | `8.4.6.3` | — | **no inherited curve** | this edition publishes a curve for this equipment class and the snapshot ships none |
-| `BOILER-EFFFPLR`<br/>Non-condensing (boiler) | `8.4.6.2` | functional-form change: the edition's FHeatPLC is a fuel RATIO; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | the shipped cubic APPROXIMATES the edition's quadratic: worst deviation 2.67 % over PLR 0.10–1.00 — close, not exact |
+| `FURNACE-EFFPLR`<br/>Atmospheric (furnace) | `8.4.6.3` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **1.16 %** over PLR 0.10–1.00 |
+| `BOILER-EFFFPLR`<br/>Condensing (boiler) | `8.4.6.2` | BIVARIATE: FHeatPLC is stated over PLR **and** the boiler return-hot-water temperature T_w,return (°F, six coefficients) | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **48.41 %** over PLR 0.10–1.00 × T_w,return 80–180 °F; the curve NAMED for this class, `BOILER-EFFFPLR-COND`, would deviate by 13.44 % — but no row references it; the required PLF ranges 0.9062–1.0924 across that box, so a single normalised-efficiency curve in PLR alone cannot hold it exactly at any T_w |
+| `FURNACE-EFFPLR`<br/>Condensing (furnace) | `8.4.6.3` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **23.25 %** over PLR 0.10–1.00; the curve NAMED for this class, `FURNACE-EFFPLR-COND`, would deviate by 0.49 % — but no row references it |
+| `BOILER-EFFFPLR`<br/>Modulating (boiler) | `8.4.6.2` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **35.26 %** over PLR 0.10–1.00; the snapshot ships no curve named for this class at all |
+| `FURNACE-EFFPLR`<br/>Modulating (furnace) | `8.4.6.3` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `furnaces` row is GIVEN `FURNACE-EFFPLR` (3/3 rows); against this class's requirement it deviates by up to **10.27 %** over PLR 0.10–1.00; the snapshot ships no curve named for this class at all |
+| `BOILER-EFFFPLR`<br/>Non-condensing (boiler) | `8.4.6.2` | functional-form change: the requirement is a fuel RATIO quadratic; the shipped curve is the EnergyPlus efficiency multiplier PLR / FHeatPLC(PLR) | **differs** | every `boilers` row is GIVEN `BOILER-EFFFPLR` (7/7 rows); against this class's requirement it deviates by up to **2.67 %** over PLR 0.10–1.00 |
 | `DXCOOL-REF-CAPFFLOW`<br/>DXCOOL-REF-CAPFFLOW | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
 | `DXCOOL-REF-CAPFT`<br/>DXCOOL-REF-CAPFT | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
 | `DXCOOL-REF-COOLEIRFFLOW`<br/>DXCOOL-REF-COOLEIRFFLOW | `—` | — | **no edition table** | neither edition publishes a table for this quantity; the NECB 2011 origin is legitimately retained and must be STATED in provenance, not silently inherited |
@@ -1861,7 +1951,39 @@ Tally: **4** differs, **12** identical to rounding, **15** no edition table, **1
 | _(none shipped)_<br/>Steam-driven, single-effect FIR_FPLR | `8.4.6.8.-B` | — | **no inherited curve** | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 | _(none shipped)_<br/>Steam-driven, single-effect FIR_FT | `8.4.6.8.-C` | — | **no inherited curve** | this edition publishes coefficients for this class and the snapshot ships no corresponding curve |
 
-Tally: **4** differs, **12** identical to rounding, **15** no edition table, **12** no inherited curve.
+Tally: **6** differs, **12** identical to rounding, **15** no edition table, **10** no inherited curve.
+
+### Boiler and furnace `FHeatPLC` — by EQUIPMENT CLASS, including modulating
+
+**Naming is not assignment.** The snapshot ships four part-load curves and names two of them `-COND`, but no row references them: every row of `boilers` carries `efffplr: BOILER-EFFFPLR` (the NON-condensing curve) and every row of `furnaces` carries `FURNACE-EFFPLR` (the ATMOSPHERIC curve), at `hvac/efficiency.py:~1137-1154`. So the deviation that matters for a class is the deviation of the curve its rows are actually GIVEN, not of the curve whose name suggests it was meant for them. This bites hardest on modulating equipment, which the reference building elects: `hvac/reference.py:~1733` represents purchased heating by a gas-fired **modulating** boiler, and that boiler receives `BOILER-EFFFPLR` like every other.
+
+**2025 does not “add” modulating equipment.** NECB 2020 already requires it: Table 8.4.5.2.-B publishes `FHeatPLC` for modulating boilers **and furnaces** as ten printed (PLR, FHeatPLC) points. What 2025 changes is the FORM — the ten-point table is retired and a `Modulating` row joins the coefficient tables 8.4.6.2 and 8.4.6.3 as a polynomial. Both editions state the same kind of requirement; only 2025 states it as coefficients.
+
+PLF is the EnergyPlus normalised-efficiency multiplier, PLF(PLR) = PLR / FHeatPLC(PLR), so the two sources are compared as FUNCTIONS over the PLR grid rather than as coefficients.
+
+#### `necb2020`
+
+| equipment class | requirement table | requirement form | curve every row is GIVEN | its worst PLF deviation | curve NAMED for the class | its worst PLF deviation | domain |
+|---|---|---|---|---:|---|---:|---|
+| Atmospheric (furnace) | `8.4.5.3` | quadratic | `FURNACE-EFFPLR` | **1.16 %** | `FURNACE-EFFPLR` | same curve | PLR 0.10–1.00 |
+| Condensing (boiler) | `8.4.5.2.-A` | quadratic | `BOILER-EFFFPLR` | **45.54 %** | `BOILER-EFFFPLR-COND` | 0.49 % | PLR 0.10–1.00 |
+| Condensing (furnace) | `8.4.5.3` | quadratic | `FURNACE-EFFPLR` | **23.25 %** | `FURNACE-EFFPLR-COND` | 0.49 % | PLR 0.10–1.00 |
+| Modulating (boiler) | `8.4.5.2.-B` | tabulated | `BOILER-EFFFPLR` | **33.51 %** | _(none shipped)_ | — | the ten printed PLR points 0.1–1.0 |
+| Modulating (furnace) | `8.4.5.2.-B` | tabulated | `FURNACE-EFFPLR` | **11.32 %** | _(none shipped)_ | — | the ten printed PLR points 0.1–1.0 |
+| Non-condensing (boiler) | `8.4.5.2.-A` | quadratic | `BOILER-EFFFPLR` | **2.67 %** | `BOILER-EFFFPLR` | same curve | PLR 0.10–1.00 |
+
+#### `necb2025`
+
+| equipment class | requirement table | requirement form | curve every row is GIVEN | its worst PLF deviation | curve NAMED for the class | its worst PLF deviation | domain |
+|---|---|---|---|---:|---|---:|---|
+| Atmospheric (furnace) | `8.4.6.3` | quadratic | `FURNACE-EFFPLR` | **1.16 %** | `FURNACE-EFFPLR` | same curve | PLR 0.10–1.00 |
+| Condensing (boiler) | `8.4.6.2` | bivariate | `BOILER-EFFFPLR` | **48.41 %** | `BOILER-EFFFPLR-COND` | 13.44 % | PLR 0.10–1.00 × T_w,return 80–180 °F |
+| Condensing (furnace) | `8.4.6.3` | quadratic | `FURNACE-EFFPLR` | **23.25 %** | `FURNACE-EFFPLR-COND` | 0.49 % | PLR 0.10–1.00 |
+| Modulating (boiler) | `8.4.6.2` | quadratic | `BOILER-EFFFPLR` | **35.26 %** | _(none shipped)_ | — | PLR 0.10–1.00 |
+| Modulating (furnace) | `8.4.6.3` | quadratic | `FURNACE-EFFPLR` | **10.27 %** | _(none shipped)_ | — | PLR 0.10–1.00 |
+| Non-condensing (boiler) | `8.4.6.2` | quadratic | `BOILER-EFFFPLR` | **2.67 %** | `BOILER-EFFFPLR` | same curve | PLR 0.10–1.00 |
+
+> `Condensing (boiler)` is **bivariate**: `8.4.6.2` states FHeatPLC over PLR *and* the boiler return-hot-water temperature T_w,return in °F, with six coefficients. The Code prints no bounds for T_w,return, so the box evaluated here is declared: PLR 0.10–1.00 × T_w,return 80–180 °F — a condensing return at the low end (below which a boiler is not condensing) to a conventional 180 °F return at the high end. The required PLF ranges 0.9062–1.0924 across that box, so a single normalised-efficiency curve in PLR alone cannot hold it exactly at any T_w. Representing this surface needs a per-edition curve FORM — a bounded fit or table over both variables, or EMS — with the domain and the fit error pinned; it is not a new coefficient for the existing univariate curve.
 
 ### The chiller `CAP_FT` / `EIR_FT` surfaces — same curve, different basis?
 
@@ -1905,4 +2027,3 @@ Two rows needed the codes service's own published errata first. Its archived `kn
 | `WaterCooled_Scroll_EIRFT` | 5.0 °C / 24.0 °C | 0.913902 | 0.913902 | 1.000000 |
 
 **Conclusion: the same surface in different units.** Evaluated on its own °F basis, this edition's table reproduces the shipped °C surface at every one of the 32 matched operating points (worst ratio departure from 1.000000 is 6.3e-06), and the closed-form °F→°C transform of the edition coefficients matches the shipped coefficients to 4.2e-06 relative — pure rounding at the 6 significant figures the snapshot publishes. The coefficient difference DF-2 saw is a unit-basis restatement, **not a physics change**. Adopting the edition's own numbers for these eight curves is therefore an output-identical provenance change, not an R-O numeric one — with the single caveat that the two errata rows must be adopted in their CORRECTED form, since the printed Code values fail their own rating-point normalisation.
-
