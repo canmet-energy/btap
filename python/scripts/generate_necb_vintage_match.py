@@ -2233,10 +2233,21 @@ FHEATPLC_NOMINAL = {
 }
 
 #: Boiler return-hot-water temperatures the 2025 bivariate condensing surface is
-#: evaluated over. The Code prints NO bounds for T_w,return, so the box is
-#: declared here and stated in the document: 80–180 °F spans a condensing return
-#: (a boiler stops condensing well above it) to a conventional 180 °F return.
+#: evaluated over. This box is an IMPLEMENTATION DOMAIN ASSUMED BY THIS
+#: COMPARISON, not a Code requirement: the edition publishes the six
+#: coefficients and NO bounds on T_w,return, so nothing normative fixes where
+#: the surface is valid. 80 °F is a deep-condensing return and 180 °F a
+#: conventional non-condensing one; condensing happens at the LOW end, below the
+#: flue-gas dew point (roughly 130 °F for natural gas), and the gain is largest
+#: there. Labelled as assumed everywhere it is printed, and to be sourced or
+#: adjudicated in D-89.
 T_W_RETURN_F = tuple(range(80, 181, 10))
+
+#: The label every printed use of the box carries, so no reader can mistake the
+#: comparison's own choice for a published bound.
+T_W_DOMAIN_CAVEAT = ("implementation domain assumed by this comparison; the "
+                     "Code publishes no return-water bounds — to be adjudicated "
+                     "in D-89")
 
 
 def _plf_from_ratio(coefficients, plr):
@@ -2348,7 +2359,8 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
                   if requirement["form"] == "tabulated"
                   else "PLR 0.10–1.00" if requirement["form"] == "quadratic"
                   else (f"PLR 0.10–1.00 × T_w,return "
-                        f"{T_W_RETURN_F[0]}–{T_W_RETURN_F[-1]} °F"))
+                        f"{T_W_RETURN_F[0]}–{T_W_RETURN_F[-1]} °F "
+                        f"({T_W_DOMAIN_CAVEAT})"))
         assigned_worst = samples = None
         if assigned_curve:
             assigned_worst, samples = _worst_against(assigned_curve, requirement)
@@ -3235,15 +3247,21 @@ def render(results: list[FileResult], surface: dict) -> str:
             out.append(
                 f"> `{rec['label']}` is **bivariate**: `{rec['table']}` states "
                 "FHeatPLC over PLR *and* the boiler return-hot-water temperature "
-                "T_w,return in °F, with six coefficients. The Code prints no "
-                "bounds for T_w,return, so the box evaluated here is declared: "
-                f"{rec['domain']} — a condensing return at the low end (below "
-                "which a boiler is not condensing) to a conventional 180 °F "
-                "return at the high end. T" + rec["detail"].split("; ")[-1][1:] +
+                "T_w,return in °F, with six coefficients. The Code publishes no "
+                "bounds for T_w,return, so the box evaluated here is THIS "
+                f"COMPARISON'S OWN ASSUMPTION, not a Code requirement: {rec['domain']}. "
+                "A boiler condenses at LOW return-water temperature — below the "
+                "flue-gas dew point, roughly 130 °F on natural gas — so the 80 °F "
+                "end of the box is where the condensing gain is largest, and "
+                "ABOVE the dew point, towards the conventional 180 °F return at "
+                "the high end, the boiler is not condensing at all. T"
+                + rec["detail"].split("; ")[-1][1:] +
                 ". Representing this surface needs a per-edition curve FORM — a "
                 "bounded fit or table over both variables, or EMS — with the "
                 "domain and the fit error pinned; it is not a new coefficient "
-                "for the existing univariate curve.")
+                "for the existing univariate curve. The domain itself must be "
+                "SOURCED or ADJUDICATED in D-89 before it can be implemented: "
+                "nothing here is normative.")
             out.append("")
 
     out.append("### The chiller `CAP_FT` / `EIR_FT` surfaces — same curve, different basis?")
