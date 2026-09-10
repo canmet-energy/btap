@@ -1819,21 +1819,30 @@ design temperatures are identical for every matched city.
 **User decision:** provenance-only adoptions now (step 2, in flight);
 the numeric set goes to Sol as D-89's proposal before any R-O freeze.
 
-### D-89 proposal — the numeric set (each a normative difference, sized)
+### D-89 proposal — the numeric set, as corrected after Sol's review (2026-09-10)
 
-| item | what the edition says | what ships | size | open question |
+Sol's review of the first proposal (2026-09-10) found the matcher unsafe as
+a basis; the matcher was rebuilt (explicit per-family equipment mapping,
+city+province Table C-1 keys, the daylighting bridge used for control
+states only, the modulating tables consumed, 62 synthetic tests, a payload
+completeness gate). The proposal below is what the corrected matcher
+proves. **Nothing here changes until Sol approves D-89.**
+
+| item | what the edition says | what ships | size | recommendation |
 |---|---|---|---|---|
-| Boiler/furnace part-load | `FHeatPLC = a + b·PLR + c·PLR²` (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3) | EnergyPlus efficiency multiplier as a cubic fit of PLR/FHeatPLC (2011 coefficients) | ≤2.67 % (non-condensing boiler), 1.16 % (atmospheric furnace), 0.49 % (condensing) | implement FHeatPLC exactly (per-edition curve *form*; 2025's condensing boiler is **bivariate** in PLR and return-water °F — new form); 2025 adds a Modulating row |
-| Schedule I fan | `NECB-I-Fan` hourly = `On` | 0.0 in all 33 cells | 33 cells, one schedule set | is this an inherited oracle defect? any building using schedule set I has its reference fan off |
-| Exterior lighting 2025 | loading docks zones 1/3/4 | 2020 values | 3 cells | the 2025 MCP extraction returns empty cells (merged-cell); needs the printed page to settle |
-| Space types / LED | medical supply room row | documented cross-reference to Storage Room | 4 + 1 cells | adopt the edition's own row or keep the documented cross-reference |
-| Table C-1 row set | 680 rows (each edition), July Future columns (2025) | 679 rows from NECB 2015 | row set; unread columns | nearest-city HDD lookup could move for locations near the 4–7 unmatched cities |
-| Heat rejection | Table 5.2.12.2 | ASHRAE 90.1 values (24 rows) | whole block | the code publishes its own table |
+| **Boiler/furnace part-load — by equipment CLASS** | FHeatPLC per class: non-condensing/condensing quadratics (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3), **modulating** as a ten-point table in 2020 (8.4.5.2.-B, boilers AND furnaces) and polynomial rows in 2025; 2025 condensing boiler **bivariate** in PLR and return-water °F (domain 0.10–1.00 × 80–180 °F, PLF 0.906–1.092) | every boiler/furnace row receives the non-condensing curve; the shipped `-COND` curves are referenced by **no row**; no modulating curve ships; purchased heating selects a *modulating* boiler (`reference.py:1733`) | non-condensing 2.67 %; **condensing boiler 45.5 % (2020) / 48.4 % (2025)**; **modulating boiler 33.5 % / 35.3 %**; condensing furnace 23.3 %; modulating furnace 11.3 % / 10.3 % | **rewrite and split**: per-class curve selection in the data (rows reference the class's curve), PLF = PLR/FHeatPLC translated from each edition's own table, 2025's bivariate condensing surface as a bounded 2-D fit/table or EMS with domain and error pinned; per-edition curve FORM, not just coefficients; cite the chiller errata rows |
+| Schedule I fan | `NECB-I-Fan` 33 `On`, 39 `Off` | 72 zeros | 33 cells | **data correction only** — dormant today (nothing reads `exhaust_schedule`; reference loops inherit the proposed schedule; `NECB-I-FAN` vs `NECB-I-Fan`); no runtime impact claimed; wiring fans is a separate decision |
+| Exterior lighting 2025 | loading docks zones 1/3/4 | 2020 values | 3 cells | **defer** — both editions' extraction puts 3.8 in zone 2 with blank neighbours (a merged span); verify printed Table 4.2.3.1.-D |
+| Medical supply | — | — | — | **removed** — matcher artifact; the row matches its own edition (0 differing cells) |
+| Table C-1 | 680 rows; 2025 adds July Future columns | 679 rows from NECB 2015 | 636/640 matched by (city, province), HDD18 and design temps identical; 39–43 unmatched each side (ledger published) | **defer wholesale adoption** — runtime reads only coordinates + HDD18, the edition's table carries no coordinates; resolve the ledger first |
+| Heat rejection | Table 5.2.12.2 | 24-row ASHRAE block | whole block | **out of the behavioural set** — vestigial; runtime applies the edition's 0.013 separately; delete or re-source as data hygiene |
+| Equipment efficiencies (2020) | 5.2.12.1.-A…O | oracle tables | 8 of 9 families mapped row-and-column: 93/94 rows, **102/102 mapped cells identical**; 52 IEER/IPLV minima the snapshot has no value for; `heat_pumps_heating` notes cite `-B` while the values live in `-A` | provenance upgrade candidate (own-edition verified) once the note citation is fixed; the 52 missing minima are a coverage finding, not a difference |
 
-Everything else (chiller curves, daylighting 2025, equipment efficiencies,
-schedules' other 5 178 cells, space types' matched cells) is identical to
-the edition and becomes checked provenance in step 2 with no output change.
-**Nothing in this table changes until Sol's review and D-89.**
+**DF-4 (curve reuse by name) is folded into the first item:** the loader
+must validate form, coefficients and bounds before reusing an existing
+model object, or divergent curves take code-qualified names (D-88 as
+amended).
+
 - **Step 2 (provenance-only adoption)** on `phase-b-step2` (`64ef29b`+):
   every inherited entry now carries `verified_against` records (99 over the
   91 archived own-edition payloads, each hashed) and an `inherited_reason`;
@@ -1848,3 +1857,16 @@ the edition and becomes checked provenance in step 2 with no output change.
   suite 954 passed; frozen lanes python 32 / verify 3 / parity 4
   **byte-identical**; gates and docs clean. **Phase B pauses here** until
   Sol's review of PRs #43/#44/#45 and the D-89 proposal.
+- **Sol's review of #43/#44/#45 (2026-09-10) — all seven checkable findings
+  verified and fixed.** #43: gate regex, `notes` scope (exposed 61 stale
+  2020 citations in 2025's equipment notes — fixed), sentence-level rule (c),
+  six negative tests, the 2020 SHW article, D-88 → "source-neutral". #44/#45:
+  the matcher rebuilt — modulating tables consumed per equipment class
+  (Sol's 33.5 / 35.3 % reproduced; and **condensing rows get the
+  non-condensing curve: 45.5 / 48.4 %**, the `-COND` curves unreferenced),
+  medical supply resolved (0 differing), equipment mapped per family
+  (102/102 identical, heat rejection UNMAPPED), C-1 by (city, province)
+  636/640 with a ledger, Schedule I stated dormant, 62 synthetic tests,
+  payload completeness gate, `--refresh`, EOF fixed; step-2 records
+  re-worded to what is proven. D-89 proposal rewritten above. Stack merged
+  forward to `phase-b-top`; manifests reconciled by hash refresh.
