@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "f39b67a37e75fc1c01ea9105b007b9f30903ac6c",
+  "commit": "f52a9f2241ece8b12ed6c942bf354c0ccd4e5295",
   "dirty": false,
   "freezer_sha256": "ec2e87647b2de6eab1cd2a449c791c9da23ce65e67f09611366cb8e0b0f66227",
-  "defs_sha256": "2584dfc3ce189be83cfae166430561f7a175d70e54562b6b30d95aca5dcafdb7",
+  "defs_sha256": "db7e5fbfb83b2908cc8207b03b9c73e0e237405f6524c48a660d2f341d034148",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -14,7 +14,7 @@
   "openstudio_cli": "3.11.0+241b8abb4d",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 8
+   "python-only": 10
   },
   "retired_seals": {
    "ruby": 29,
@@ -33,8 +33,8 @@
  },
  "counts": {
   "python": 32,
-  "verify": 3,
-  "parity": 4
+  "verify": 4,
+  "parity": 5
  },
  "scenarios": [
   {
@@ -1133,6 +1133,111 @@
     "report.json": "1e118b0fe508c416ca7bbc494a8b79b4364747fe67bb4d1389d54fb9004e1ef1",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "513bd21a870184060c6ba05d32c02b29828b1d4b0548caea2689299df042c5f8"
+   }
+  },
+  {
+   "id": "corpus-sizing-13-district-heating",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/13-district-heating.osm",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen at D-89 step 3 (R-O-a) \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "baseline_sha256": {
+    "audit.json": "4c0fdff7b3b47870a7a085dd3d3fbc6967947d611f24f672492e6776eeac6bf7",
+    "audit.txt": "f31433658950c4becfe6b6200c87639df69e439c5bc7259779dab2cba965a1ee",
+    "report.json": "970f0993e9930938d6724bb721888efba9a7599e488bde261b7182e407039a0e",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "aab18c816ca970cd42b29eb8194153f00619e8520d06b01d675649e8923707ec"
+   }
+  },
+  {
+   "id": "corpus-annual-13-district-heating",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "argv": [
+    "<CORPUS>/13-district-heating.osm",
+    "--simulate",
+    "annual",
+    "--quick",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen at D-89 step 3 (R-O-a) \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "ca0ff01d970ff9eebbb2660d4008253872120c58ab79c5897122f94046c9a5f5",
+    "audit.txt": "0b96c21673b793ae07b76d200eb1e7bc578705d08c2679c826fd6e9900cc82e1",
+    "report.json": "08adf46bfce5dd4ff20df7c79757f31924c0c1db4d2475b45e91a8a60df2eacb",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "ab63954b5c88ce7d0bfb38fa90725850e5ca5b66309a5d24c994514c6119e70d"
    }
   },
   {
