@@ -1882,6 +1882,40 @@ inferred.
   | purchased heating (8.4.4.6.(1)) | `modulating` | the only class the Code selects, propagated from the decision — never a row property |
   | condensing equipment | `condensing` **only by explicit selection** — a D-XX, or a declared class on the proposed building's equipment carried into the reference — or by duplicated class-variant rows; **never inferred from the minimum** | — |
 
+  **Sol's D-89 decision (2026-09-11): APPROVED with a narrowed, binding
+  implementation contract**, which supersedes the wording above where they
+  differ:
+  1. The field is **`part_load_curve_class`**, in the Code's own taxonomy:
+     ordinary fuel-fired boilers `non_condensing`; ordinary furnaces
+     **`atmospheric`** (not "non_condensing" — that loses the Code's
+     taxonomy); electric boilers **`not_applicable`** as a REAL enum value
+     (not nullable); the purchased-heating boiler `modulating`;
+     `condensing` unreachable in D-89 unless a separate explicit decision
+     selects it.
+  2. The ordinary assignments are an **adjudicated legacy default**, not an
+     NECB-derived technology: the Code's Tables 5.2.12.1.-N/-O, Article
+     5.2.12.1 and Note A-5.2.12.1.(1) give minima and certification
+     guidance, no class rule; the pinned oracle selects by fuel, fluid and
+     capacity and applies each row's fixed curve (`hvac_systems.rb:539-600,
+     855-877`); its 0.90/0.86 ECM thresholds are marked "Assumption",
+     unused on the NECB path, and contradicted by its own 85 %/88 %
+     "Condensing Boiler" packages.
+  3. **No automatic proposed-to-reference condensing propagation.** D-89
+     propagates `modulating` for purchased heating because the Code requires
+     it; any condensing propagation needs its own D-XX. Condensing
+     coefficients remain retained evidence; the condensing deviations remain
+     conditional.
+  4. **The electric-boiler change is behavioural and rides R-O.** Electric
+     boilers currently receive `BOILER-EFFFPLR` (multiplier 0.5635 at PLR
+     0.10 → 1.0077 at 1.00); D-89 removes/resets that curve (constant PLF =
+     1), adds a focused electric-boiler test, quantifies the output effect,
+     and attributes it in the same clean-tree R-O re-freeze.
+  5. **Implement only the reachable classes now**: own-edition PLR/FHeatPLC
+     representations for non-condensing boilers, atmospheric furnaces and
+     the purchased-heating modulating boiler. The 2025 condensing rational
+     surface stays deferred until a decision selects condensing equipment
+     and sources or adjudicates its return-water domain.
+
   **Consequence for the figures.** Once the ordinary rows are explicitly
   `non_condensing`, the boiler 2.67 % and atmospheric-furnace 1.16 %
   deviations become **demonstrated** (the class is assigned and the curve
