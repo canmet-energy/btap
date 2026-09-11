@@ -2111,3 +2111,10 @@ product Python and no `verification/scenarios/` touched:
   explicit selection or class-variant rows. Consequence: 2.67 % / 1.16 %
   become demonstrated once assigned; condensing stays conditional.
   Dispatch 34604452661 green — python 994/41/111, verify 1033/2/113.
+- **Merged (2026-09-11, user: "merge the stack"):** #43 → main at
+  `b580afb`, #45 retargeted to main and merged at `d0cef0e`; main's tree
+  equals the reviewed top `a56e395`. On main now: D-88 and R-N, the
+  vintage-match verification and its 91 archived payloads, checked
+  provenance with rule (h), the Schedule I correction, D-89 approved with
+  Sol's binding contract. Step 3 (D-89 implementation + R-O) starts from
+  main.
