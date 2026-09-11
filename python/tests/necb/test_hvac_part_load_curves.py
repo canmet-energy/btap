@@ -481,14 +481,20 @@ class TestCurveLoaderValidatesBeforeReuse(unittest.TestCase):
         self._build(model, row, 'BOILER-PLF-NONCONDENSING',
                     mutate=lambda pts: pts[50].__setitem__(1, 0.5))
 
+        audit = AuditLog()
         first = efficiency.curve(model, tables, 'BOILER-PLF-NONCONDENSING',
-                                 audit=AuditLog(), target='probe')
+                                 audit=audit, target='probe')
         second = efficiency.curve(model, tables, 'BOILER-PLF-NONCONDENSING',
-                                  audit=AuditLog(), target='probe')
+                                  audit=audit, target='probe 2')
 
         self.assertEqual(first.handle(), second.handle())
         self.assertEqual(1, len([c for c in model.getCurves()
                                  if c.nameString().endswith('(D-89)')]))
+        # The foreign object is reported ONCE per model, when the ruleset's
+        # own curve is built — not again for every component that reuses it
+        # (a reference with five DX coils would otherwise carry 40 copies).
+        self.assertEqual(1, len([w for w in audit.warnings
+                                 if 'NOT adopted' in w['action']]))
 
     def test_an_object_of_another_curve_type_never_matches(self):
         """A Quadratic spec must not be smuggled through as a cubic with a zero

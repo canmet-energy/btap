@@ -1257,16 +1257,19 @@ def curve(model, tables, name, audit=None, target=None):
                 else _build_polynomial(model, row, spec, name))
 
     own_name = f'{name} (D-89)'
+    found = getattr(model, spec['find'])(own_name)
+    mine = found.get() if found.is_initialized() else None
+    if mine is not None and curve_matches(mine, row):
+        # The foreign object was already reported when the ruleset's own
+        # curve was first built for this model; every later component that
+        # needs the same row reuses it without repeating the warning.
+        return mine
     audit.warn('efficiency',
                f"model object named '{name}' does not state this edition's "
                f"{form} catalogue row — it is NOT adopted; the ruleset's own "
                f"curve is applied as '{own_name}'",
                target=target, inputs={'curve': name, 'form': form,
                                       'applied': own_name})
-    found = getattr(model, spec['find'])(own_name)
-    mine = found.get() if found.is_initialized() else None
-    if mine is not None and curve_matches(mine, row):
-        return mine
     return (_build_lookup(model, row, own_name) if form == 'TableLookup'
             else _build_polynomial(model, row, spec, own_name))
 
