@@ -2375,3 +2375,25 @@ Sol reviews the attribution before the stack merges.
   rule for `part_load_curve_class`.
 Agents run targeted tests only; one heavy job at a time (the freeze is
 Fable's). Merge commits, not squash.
+
+### Step 3 progress — R-O-a done (Fable, 2026-09-11)
+
+- **R-O-a frozen on `d89-step3` (`1ed97f8`).** 41 scenarios (python 32,
+  verify 4, parity 5). `_corpus` gained a `seal` override; the two
+  purchased-heating scenarios carry `python-only:first frozen at D-89 step 3
+  (R-O-a) …` with no attestation fields (31 transitioned seals unchanged).
+  Attribution (`attribute_ro.py`): 10 new files in 2 new scenarios, 0
+  changed files in the 39 existing; manifest moved only `counts`,
+  `provenance.{commit,defs_sha256,active_seals}`. Manifest gates green.
+- **The new annual baseline records the defect D-89 fixes:** the reference
+  built for `13-district-heating` elects the modulating boiler
+  (8.4.4.6.(1)), sizes the Primary Boiler at 64.8 kW and applies
+  `BOILER-EFFFPLR` (the non-condensing 2011 cubic); reference natural gas
+  1569.4 kWh, site 3022.2 kWh, unmet heating 29.25 h. R-O's modulating delta
+  is measured against these numbers.
+- **Sonnet hygiene delivered** (`worktree-agent-aeb392b059e5de005`
+  `ab7913a`): the three stale daylighting `table_row` labels fixed in both
+  copies from the archived Table 4.2.1.6 payload (0 values moved; 101/101
+  join, 198/198 control states agree), vintage-match unmatched counts down
+  by exactly those rows, README subsection for the class rule. Held for
+  integration.
