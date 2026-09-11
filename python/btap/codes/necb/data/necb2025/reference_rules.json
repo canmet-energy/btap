@@ -305,7 +305,8 @@
    "purchased_heating": {
     "article": "8.4.5.6.(1)",
     "text": "one gas-fired modulating boiler complying with Section 5.2. shall be used to represent the purchased energy equipment",
-    "energy_type": "NaturalGas"
+    "energy_type": "NaturalGas",
+    "part_load_curve_class": "modulating"
    },
    "purchased_cooling": {
     "article": "8.4.5.6.(2)",

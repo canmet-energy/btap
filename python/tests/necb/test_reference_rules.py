@@ -93,6 +93,19 @@ class TestReferenceRules(unittest.TestCase):
             self.assertEqual(["NaturalGas"],
                              sorted({b.fuelType() for b in boilers}),
                              "8.4.4.6.(1)(a) names a GAS-fired boiler")
+            # D-89: the sentence says MODULATING, so the class rides the
+            # boiler as a feature the efficiency pass reads back (the full
+            # propagation contract is in test_reference_part_load_class.py;
+            # this pins it on the CORPUS model too).
+            stamped = [(b.nameString(),
+                        b.additionalProperties()
+                        .getFeatureAsString("btap_part_load_curve_class"))
+                       for b in boilers]
+            self.assertEqual(
+                [], [name for name, value in stamped
+                     if not value.is_initialized() or value.get() != "modulating"],
+                "every reference boiler must carry the modulating class: "
+                f"{[(n, v.get() if v.is_initialized() else None) for n, v in stamped]}")
 
             self.assertTrue(article(r, "8.4.4.6"),
                             "the purchased-energy decision must be audited")
