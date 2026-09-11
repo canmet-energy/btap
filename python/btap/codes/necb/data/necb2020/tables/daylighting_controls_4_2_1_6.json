@@ -328,14 +328,14 @@
       "evidence_toplighting": "Table 4.2.1.6 cell 'X'; the nine control columns are verified against the printed pages, re-read after canmet-energy/hbix#88"
     },
     "Health care facility exam/treatment room": {
-      "table_row": "Healthcare facility | Healthcare facility exam/treatment room imaging room",
+      "table_row": "Healthcare facility | exam/treatment room",
       "sidelighting": "required",
       "toplighting": "required",
       "evidence_sidelighting": "Table 4.2.1.6 cell 'X'; the nine control columns are verified against the printed pages, re-read after canmet-energy/hbix#88",
       "evidence_toplighting": "Table 4.2.1.6 cell 'X'; the nine control columns are verified against the printed pages, re-read after canmet-energy/hbix#88"
     },
     "Health care facility imaging room": {
-      "table_row": "Healthcare facility | Healthcare facility exam/treatment room imaging room",
+      "table_row": "Healthcare facility | imaging room",
       "sidelighting": "not_required",
       "toplighting": "not_required",
       "evidence_sidelighting": "Table 4.2.1.6 cell '-'; the nine control columns are verified against the printed pages, re-read after canmet-energy/hbix#88",
@@ -612,7 +612,7 @@
       "evidence_toplighting": "Table 4.2.1.6 cell 'X'; the nine control columns are verified against the printed pages, re-read after canmet-energy/hbix#88"
     },
     "Sales area": {
-      "table_row": "Sales area | Sales area⁷⁷",
+      "table_row": "Sales area⁷⁷ | Sales area⁷⁷",
       "sidelighting": "not_required",
       "toplighting": "required",
       "retail": true,

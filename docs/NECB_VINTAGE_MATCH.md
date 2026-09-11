@@ -249,15 +249,15 @@ Totals: **2** identical, **13** differs.
 | count | value |
 |---|---:|
 | shipped records | 308 |
-| records matched | 274 |
-| records unmatched | 34 |
-| LPD values equal to the edition's | 274 |
+| records matched | 277 |
+| records unmatched | 31 |
+| LPD values equal to the edition's | 277 |
 | LPD values differing | 0 |
 | shipped columns with NO edition source at all | 3 |
 
 > A difference here is EXPECTED and is not a transcription error: an LED alternative LPD is deliberately lower than the Code's allowance. What the count says is how far the shipped alternatives sit below this edition's published maxima, and whether any exceeds one
 
-<details><summary>Shipped rows with no edition counterpart (34)</summary>
+<details><summary>Shipped rows with no edition counterpart (31)</summary>
 
 - `Health care clinic / WholeBuilding`
 - `Long-term care - dwelling units / WholeBuilding`
@@ -267,10 +267,7 @@ Totals: **2** identical, **13** differs.
 - `Space Function / Classroom/Lecture hall/Training room - Penitentary`
 - `Space Function / Dwelling units general`
 - `Space Function / Dwelling units long-term`
-- `Space Function / Health care facility exam/treatment room`
-- `Space Function / Health care facility imaging room`
 - `Space Function / Office enclosed <= 25 m2`
-- `Space Function / Sales area`
 - `Space Function / Washroom - other-sch-A`
 - `Space Function / Washroom - other-sch-B`
 - `Space Function / Washroom - other-sch-C`
@@ -339,9 +336,9 @@ Totals: **2** identical, **13** differs.
 | count | value |
 |---|---:|
 | shipped records | 308 |
-| records matched | 288 |
-| records unmatched | 20 |
-| cells identical | 1152 |
+| records matched | 290 |
+| records unmatched | 18 |
+| cells identical | 1167 |
 | cells differing | 0 |
 | shipped columns with an edition source | 7 |
 | shipped columns with NO edition source at all | 68 |
@@ -354,7 +351,7 @@ Totals: **2** identical, **13** differs.
 
 > Table A-8.4.3.2.(2)-B's `Space Category` column is served LAGGED by the extraction — continuation rows repeat the previous category — so rows are addressed by `Space Type` as well as by the pair, and anything that still fails to resolve is listed rather than guessed at
 
-<details><summary>Shipped rows with no edition counterpart (20)</summary>
+<details><summary>Shipped rows with no edition counterpart (18)</summary>
 
 - `Health care clinic / WholeBuilding`
 - `Space Function / - undefined -`
@@ -362,8 +359,6 @@ Totals: **2** identical, **13** differs.
 - `Space Function / Classroom/Lecture hall/Training room - Penitentary`
 - `Space Function / Dwelling units general`
 - `Space Function / Dwelling units long-term`
-- `Space Function / Health care facility exam/treatment room`
-- `Space Function / Health care facility imaging room`
 - `Space Function / Office enclosed <= 25 m2`
 - `Space Function / Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-A`
 - `Space Function / Washroom - space designed to ANSI/IES RP-28 (used primarily by residents)-sch-B`
@@ -1078,15 +1073,15 @@ Differing leaves by kind:
 | count | value |
 |---|---:|
 | shipped records | 308 |
-| records matched | 298 |
-| records unmatched | 10 |
-| LPD values equal to the edition's | 298 |
+| records matched | 301 |
+| records unmatched | 7 |
+| LPD values equal to the edition's | 301 |
 | LPD values differing | 0 |
 | shipped columns with NO edition source at all | 3 |
 
 > A difference here is EXPECTED and is not a transcription error: an LED alternative LPD is deliberately lower than the Code's allowance. What the count says is how far the shipped alternatives sit below this edition's published maxima, and whether any exceeds one
 
-<details><summary>Shipped rows with no edition counterpart (10)</summary>
+<details><summary>Shipped rows with no edition counterpart (7)</summary>
 
 - `Health care clinic / WholeBuilding`
 - `Long-term care - dwelling units / WholeBuilding`
@@ -1095,9 +1090,6 @@ Differing leaves by kind:
 - `Space Function / Audience seating area permanent - convention centre`
 - `Space Function / Dwelling units general`
 - `Space Function / Dwelling units long-term`
-- `Space Function / Health care facility exam/treatment room`
-- `Space Function / Health care facility imaging room`
-- `Space Function / Sales area`
 
 </details>
 
@@ -1144,9 +1136,9 @@ Differing leaves by kind:
 | count | value |
 |---|---:|
 | shipped records | 308 |
-| records matched | 301 |
-| records unmatched | 7 |
-| cells identical | 1176 |
+| records matched | 303 |
+| records unmatched | 5 |
+| cells identical | 1191 |
 | cells differing | 0 |
 | shipped columns with an edition source | 7 |
 | shipped columns with NO edition source at all | 68 |
@@ -1159,15 +1151,13 @@ Differing leaves by kind:
 
 > Table A-8.4.3.2.(2)-B's `Space Category` column is served LAGGED by the extraction — continuation rows repeat the previous category — so rows are addressed by `Space Type` as well as by the pair, and anything that still fails to resolve is listed rather than guessed at
 
-<details><summary>Shipped rows with no edition counterpart (7)</summary>
+<details><summary>Shipped rows with no edition counterpart (5)</summary>
 
 - `Health care clinic / WholeBuilding`
 - `Space Function / - undefined -`
 - `Space Function / Audience seating area permanent - convention centre`
 - `Space Function / Dwelling units general`
 - `Space Function / Dwelling units long-term`
-- `Space Function / Health care facility exam/treatment room`
-- `Space Function / Health care facility imaging room`
 
 </details>
 

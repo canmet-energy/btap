@@ -948,7 +948,7 @@
       "method": "generated",
       "source_verification": "archived",
       "note": "Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree).",
-      "result_sha256": "28320de1e7109f994ed6b9e1c50c7632e72b3e98dd6a8318b87107dcec02130e"
+      "result_sha256": "14df921b3efece91e341f162c362db00616d85f03ea787f008d585f5074dc880"
     },
     "coverage/articles_8_4.json": {
       "source": "mcp:necb:2020",

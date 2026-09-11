@@ -331,6 +331,28 @@ deliberately leaves it out of scope (`necb_orphan_keys.NON_RULE_MANIFESTS`).
   coefficients) changed moderately in 2025; that coefficient path is not
   implemented by the engine (documented gap, same as 2020).
 
+### Part-load curve class (D-89)
+
+Every `boilers` / `furnaces` row declares `part_load_curve_class`, one of the
+enum `non_condensing | atmospheric | condensing | modulating |
+not_applicable`. This is the Code's own taxonomy, not an inference from a
+row's minimum efficiency: ordinary fuel-fired boilers are `non_condensing`,
+ordinary furnaces are `atmospheric`, electric boilers are `not_applicable`
+(no combustion part-load factor). The one class assigned outside a row's own
+declaration is `modulating`, given to the 8.4.4.6.(1) purchased-heating
+boiler by PROPAGATION from the reference-system selection at the point the
+system is elected — never carried as a property of the efficiency row
+itself. `condensing` is reachable only by an explicit decision; nothing
+infers it from capacity, fuel or a row's printed thermal efficiency.
+
+The class → curve mapping lives in `part_load_curves`; each edition's own
+printed FHeatPLC tables are transcribed in `part_load_fheatplc`, with the
+archived MCP payloads that back them under `provenance/`, in the same
+archived form every other table in this snapshot uses. The model curve for a
+class is PLF = PLR / FHeatPLC(PLR), fit or evaluated from that edition's own
+FHeatPLC table, and its `max_error_vs_exact` against the exact ratio is
+published alongside it — never silently assumed to be zero.
+
 ## `lighting_rules.json`
 
 Provenance, the sensor-schedule threshold (8.6 W/m²), the dwelling-unit LPD
