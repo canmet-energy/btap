@@ -166,19 +166,23 @@ class TestEfficiencyProvenance(unittest.TestCase):
                             f'{edition} {family} {group}: strict-min/inclusive-max lookup '
                             'requires adjacent bins to share their boundary')
 
-    # The heat_rejection family cites ASHRAE 90.1 and is VESTIGIAL for the
-    # reference path: apply_efficiencies never reads it (the tower fan comes from
-    # Table 5.2.12.2 via _apply_tower_rules, D-26). Pin the vestigiality so a
-    # future consumer has to face the 90.1 provenance deliberately.
-    def test_heat_rejection_family_is_declared_vestigial(self):
-        self.assertTrue(all(re.search(r'90\.1', str(r.get('notes') or ''))
-                            for r in DATA['heat_rejection']),
-                        'every heat_rejection row cites its 90.1 source')
+    # The heat_rejection family cited ASHRAE 90.1-2004 Table 6.8.1G and was
+    # VESTIGIAL for the reference path: apply_efficiencies never read it (the
+    # tower fan comes from Table 5.2.12.2 via _apply_tower_rules, D-26). D-89
+    # removed it from both snapshots. Pin the removal in BOTH directions: the
+    # block must stay gone, and no consumer may appear without someone putting
+    # NECB-sourced values back first.
+    def test_heat_rejection_family_is_not_shipped(self):
+        for edition, data in (('2020', DATA), ('2025', DATA_2025)):
+            self.assertNotIn('heat_rejection', data,
+                             f'{edition}: the 90.1-sourced heat_rejection block was '
+                             'removed under D-89 — the reference tower fan comes from '
+                             'Table 5.2.12.2 (D-26), not from this block')
         source = (PACKAGE_ROOT / 'hvac' / 'efficiency.py').read_text(encoding='utf-8')
         self.assertNotRegex(source, r'heat_rejection',
-                            'apply_efficiencies grew a heat_rejection consumer — re-verify its '
-                            'values against the printed NECB table first (they are 90.1 '
-                            'editions, D-59)')
+                            'apply_efficiencies grew a heat_rejection consumer — the block '
+                            'is no longer shipped, and any replacement must be transcribed '
+                            'from the printed NECB table, never from 90.1 (D-59/D-89)')
 
     # ==================== NECB 2025 (D-60) ====================
 
@@ -189,7 +193,7 @@ class TestEfficiencyProvenance(unittest.TestCase):
         def strip(rs):
             return [{k: v for k, v in r.items() if k != 'notes'} for r in rs]
 
-        for family in ('chillers', 'boilers', 'heat_rejection'):
+        for family in ('chillers', 'boilers'):
             self.assertEqual(strip(DATA[family]), strip(DATA_2025[family]),
                              f"{family}: printed 2025 tables are identical to 2020's — the "
                              'vendored data must match')

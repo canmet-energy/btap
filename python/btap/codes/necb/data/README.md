@@ -105,18 +105,20 @@ enforces it; `scripts/refresh_provenance_hashes.py` refreshes the result
 hashes after any data edit.
 
 **Curve identifiers are SOURCE-neutral, not edition-neutral.** A performance
-curve keeps one neutral name (`BOILER-EFFFPLR`, no edition suffix) only
-while it is VERIFIED IDENTICAL across every edition that shares it. A curve
-whose coefficients or form diverge between editions must either take a
-code-qualified name (`BOILER-EFFFPLR-necb2025`) or have its loader validate
-form, coefficients and bounds before reusing an existing model object of
-the same name — that loader change is D-89's behavioural item. **Today's
-limitation:** `hvac/efficiency.py`'s `curve()` (around line 1009) reuses
-ANY existing model curve that matches by name, unvalidated — an existing
-`BOILER-EFFFPLR` with a diverged coefficient is returned unchanged (deferred
-finding DF-4). Until D-89 lands, do not rely on curve-name matching alone
-once an edition's coefficients are known to diverge; name it distinctly
-instead.
+curve keeps one neutral name (`BOILER-PLF-NONCONDENSING`, no edition suffix)
+only while it is VERIFIED IDENTICAL across every edition that shares it. A
+curve whose coefficients, points or form diverge between editions takes a
+code-qualified name — `BOILER-PLF-MODULATING-necb2020` and
+`BOILER-PLF-MODULATING-necb2025` are the first pair, because 2020 publishes
+ten printed points where 2025 publishes a coefficient row. **Both belts are
+now fastened:** since D-89, `hvac/efficiency.py`'s `curve()` reuses an
+existing model object only through the TYPED lookup for the row's own form
+and only after its form, its coefficients or points and its declared bounds
+all state what the row states. A model object that merely shares the name is
+reported as foreign in the audit and the ruleset builds its own beside it
+under `<name> (D-89)` — never adopted, never silently. That closes deferred
+finding DF-4. Keep both halves: a diverged curve still gets a distinct name,
+so the audit reads honestly without needing the validator to catch it.
 
 ---
 
