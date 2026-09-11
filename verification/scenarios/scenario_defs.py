@@ -337,6 +337,10 @@ EDITION_SCENARIOS = [
     # capacity increases (8.4.1.2.(5)); the energy verdict itself passes
     # (76.0 % of target, tier 1); GHG level "F" at 95.3 % of the GHG
     # target. The asserts tie the pinned exit to that reason.
+    # R-O (D-89, 2026-09-11): the reference building's own-edition part-load
+    # curves raise its energy, so the proposed's ratio crosses the tier-2
+    # boundary and the GHG level moves one step; tier and level re-pinned
+    # from the R-O freeze run. exit and compliant unchanged.
     {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
@@ -360,10 +364,10 @@ EDITION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "json_equals", "file": "report.json", "path": "tier",
-          "value": 1},
+          "value": 2},
          {"op": "json_exists", "file": "report.json", "path": "ghg"},
          {"op": "json_equals", "file": "report.json", "path": "ghg.level",
-          "value": "F"},
+          "value": "E"},
          {"op": "audit_entry", "step": "compliance", "level": "decision",
           "action": "proposed does not exceed the building energy target",
           "article": "8.4.1.2.(2)", "count": 1},
