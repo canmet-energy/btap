@@ -2,7 +2,7 @@
  "provenance": {
   "code": "NECB",
   "edition": "2025",
-  "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors, split out in 2025), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). ALL VALUES VERIFIED IDENTICAL to NECB 2020 (opaque/fenestration/ground tables byte-match; 2025 door table equals the 2020 door row). Performance-path articles renumbered 8.4.4.x -> 8.4.5.x (verbatim text).",
+  "source": "NECB 2025 Division B: Tables 3.2.2.2, 3.2.2.3, 3.2.2.4 (doors), 3.2.3.1, Article 3.2.1.4 — retrieved via the building-codes MCP server (necb:2025). The performance-path articles this file cites are in Subsection 8.4.5.",
   "generated": "2026-07-12",
   "articles": [
    "3.1.1.6",
@@ -105,7 +105,7 @@
   "article": "3.2.3.3.(3); Table 3.2.3.1.",
   "full_area_min_hdd": 7000,
   "strip_width_m": 1.2,
-  "note": "Table 3.2.3.1 floors row reads '0.757 for 1.2 m' in zones 4-7B — a perimeter strip per 3.2.3.3.(3); the slab FIELD carries no prescriptive maximum below zone 8 — vs '0.379 for full area' in zone 8. The strip/full-area U is the u_values.ground.floor bin at the building HDD (u_values itself is structurally pinned to the legacy JSON, so the extent lives here). Verified against the printed table via the codes MCP (necb 2020 and 2025 identical)."
+  "note": "Table 3.2.3.1 floors row reads '0.757 for 1.2 m' in zones 4-7B — a perimeter strip per 3.2.3.3.(3); the slab FIELD carries no prescriptive maximum below zone 8 — vs '0.379 for full area' in zone 8. The strip/full-area U is the u_values.ground.floor bin at the building HDD (u_values itself is structurally pinned to the legacy JSON, so the extent lives here). Verified against the printed table via the codes MCP."
  },
  "fdwr": {
   "article": "3.2.1.4.(1)",
@@ -216,9 +216,9 @@
    },
    {
     "article": "3.2.2.4.",
-    "title": "Door U-values (2025 split-out table; 2020: within 3.2.2.x)",
+    "title": "Door U-values (Table 3.2.2.4)",
     "status": "implemented",
-    "how": "door values applied (2025 split-out table == 2020 door row)",
+    "how": "door values applied (Table 3.2.2.4)",
     "code": [
      "python/btap/codes/necb/envelope/prescriptive.py#_subsurface_target_construction"
     ]

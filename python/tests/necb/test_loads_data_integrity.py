@@ -32,7 +32,13 @@ class TestLoadsDataIntegrity(unittest.TestCase):
 
     def test_counts_and_keys(self):
         self.assertEqual(308, len(self.space_types))
-        self.assertEqual(80, len(self.space_types[0].keys()))
+        # 78, not the merge's 80: the two vendored template columns
+        # lighting_standard and target_illuminance_setpoint_ref were removed
+        # 2026-09-09 under D-88 (they labelled every row "NECB2020", in both
+        # snapshots, and nothing reads them).
+        self.assertEqual(78, len(self.space_types[0].keys()))
+        for dead in ('lighting_standard', 'target_illuminance_setpoint_ref'):
+            self.assertNotIn(dead, self.space_types[0])
         self.assertEqual(240, len(self.schedules))
         for key in ['building_type', 'space_type', 'occupancy_per_area',
                     'electric_equipment_per_area', 'ventilation_per_area',
@@ -138,7 +144,13 @@ class TestLoadsDataIntegrity(unittest.TestCase):
                          loads.table('2025', 'schedules'))
         self.assertEqual('A-8.4.3.2.(1)(b)', rules['schedule_table_prefix'])
         self.assertEqual('A-8.4.3.2.(1)', loads.rules('2020')['schedule_table_prefix'])
-        self.assertRegex(rules['provenance']['method'], 'row-by-row')
+        # The provenance states this edition's OWN retrieval, not a comparison
+        # with another edition's (D-88): the equality the old 'row-by-row'
+        # sentence asserted is proven structurally above, and the edition delta
+        # is generated into docs/NECB_EDITION_DELTAS.md.
+        self.assertRegex(rules['provenance']['method'], r'necb:2025')
+        self.assertRegex(rules['provenance']['method'], r'A-8\.4\.3\.2\.\(1\)\(b\)-A')
+        self.assertNotRegex(rules['provenance']['method'], r'IDENTICAL to 2020')
         self.assertEqual(len(loads.table('2020', 'space_types')),
                          len(loads.table('2025', 'space_types')))
 

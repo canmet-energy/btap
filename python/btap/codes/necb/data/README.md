@@ -90,6 +90,34 @@ D-XX entry** recording why the two editions are now one implementation.
 (Stage 5 itself needs no new decision: it binds code that was already
 2025-only, with no change in behaviour.)
 
+**Self-description rule (D-88).** A snapshot names another edition ONLY as
+its origin, in provenance fields (`provenance`, `_provenance`,
+`derivation`, `*_note`, `*_provenance`, and `curves[].notes` specifically —
+NOT every `notes` key: an equipment row's own `notes` is not provenance and
+must cite its own edition), never comparatively ("identical to 2020",
+"renumbered from") and never forward (a 2020 file does not know 2025
+exists). Everything the snapshot emits, consumes or displays — curve
+identifiers, `article_coverage` prose, table columns, rule keys — speaks in
+its own numbering. Comparisons belong in the generated
+`docs/NECB_EDITION_DELTAS.md`; identity in the manifest's
+`byte_identical_to`. `tests/necb/test_snapshot_self_description.py`
+enforces it; `scripts/refresh_provenance_hashes.py` refreshes the result
+hashes after any data edit.
+
+**Curve identifiers are SOURCE-neutral, not edition-neutral.** A performance
+curve keeps one neutral name (`BOILER-EFFFPLR`, no edition suffix) only
+while it is VERIFIED IDENTICAL across every edition that shares it. A curve
+whose coefficients or form diverge between editions must either take a
+code-qualified name (`BOILER-EFFFPLR-necb2025`) or have its loader validate
+form, coefficients and bounds before reusing an existing model object of
+the same name — that loader change is D-89's behavioural item. **Today's
+limitation:** `hvac/efficiency.py`'s `curve()` (around line 1009) reuses
+ANY existing model curve that matches by name, unvalidated — an existing
+`BOILER-EFFFPLR` with a diverged coefficient is returned unchanged (deferred
+finding DF-4). Until D-89 lands, do not rely on curve-name matching alone
+once an edition's coefficients are known to diverge; name it distinctly
+instead.
+
 ---
 
 ## `manifest.json`'s `provenance` block — and `provenance/`
@@ -328,10 +356,14 @@ Each edition holds its own copy of every table it uses.
 - `space_types.json` — the 308 NECB2020-lineage space-type records, vendored
   VERBATIM from the openstudio-standards **MERGED** standards_data (inheritance
   chain NECB2011←2015←2017←2020, later keys win — the raw per-vintage files are
-  partial; the merge is what legacy actually runs). Every record keeps all 80
-  keys, including `lighting_*` and `service_water_heating_*`. Units are IP as in
-  legacy (documented in the provenance block); the apply layer converts exactly
-  as legacy does.
+  partial; the merge is what legacy actually runs). Every record keeps 78 of the
+  merge's 80 keys, including `lighting_*` and `service_water_heating_*`; the two
+  it drops are the vendored template columns `lighting_standard` and
+  `target_illuminance_setpoint_ref`, removed 2026-09-09 under D-88 because they
+  labelled every row `NECB2020` in BOTH editions' copies and nothing read them
+  (`led_lighting.json` drops `lighting_standard` for the same reason). Units are
+  IP as in legacy (documented in the provenance block); the apply layer converts
+  exactly as legacy does.
 - `schedules.json` — the 240 `NECB-<letter>-<category>` schedule records (Hourly
   24-value rows per `day_types` token + Constant records), vendored from the
   merged standards_data (the schedules table is inherited from NECB2015 —

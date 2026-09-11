@@ -30,19 +30,19 @@ there rather than silently dropped from the comparison.
 | File | Identical | Renumbered | Changed | Added | Removed |
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 76 | 1 | 0 | 0 | 0 |
-| hvac (`reference_rules.json`) | 319 | 23 | 0 | 1 | 0 |
-| hvac_efficiencies (`efficiencies.json`) | 2423 | 0 | 6 | 96 | 4 |
+| hvac (`reference_rules.json`) | 319 | 23 | 1 | 1 | 0 |
+| hvac_efficiencies (`efficiencies.json`) | 2333 | 10 | 69 | 97 | 4 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
-| shw (`shw_rules.json`) | 75 | 1 | 3 | 2 | 0 |
+| shw (`shw_rules.json`) | 76 | 1 | 3 | 0 | 0 |
 | necb (`necb_rules.json`) | 0 | 0 | 2 | 0 | 0 |
 | tables/daylighting_controls_4_2_1_6 (`tables/daylighting_controls_4_2_1_6.json`) | 541 | 0 | 0 | 0 | 0 |
 | tables/exterior_lighting (`tables/exterior_lighting.json`) | 159 | 0 | 0 | 0 | 0 |
-| tables/led_lighting (`tables/led_lighting.json`) | 2156 | 0 | 0 | 0 | 0 |
+| tables/led_lighting (`tables/led_lighting.json`) | 1848 | 0 | 0 | 0 | 0 |
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
-| tables/space_types (`tables/space_types.json`) | 24640 | 0 | 0 | 0 | 0 |
+| tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46695** | **26** | **11** | **99** | **4** |
+| **Total** | **45682** | **36** | **75** | **98** | **4** |
 
 ## necb2020 → necb2025
 
@@ -58,7 +58,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac</b> (`reference_rules.json`) — 343 leaves: 319 identical, 23 renumbered, 0 changed, 1 added, 0 removed (click to expand)</summary>
+<summary><b>hvac</b> (`reference_rules.json`) — 344 leaves: 319 identical, 23 renumbered, 1 changed, 1 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -92,23 +92,102 @@ there rather than silently dropped from the comparison.
 
 | Path | Kind | Old → New |
 |---|---|---|
+| `energy_recovery.trigger_provenance` | changed | NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), retrieved via codes MCP get_table 2026-07-22. → NECB 2025 Tables 5.2.10.1.-A (p.149, non-continuous) / -B (continuous), retrieved via codes MCP get_table 2026-07-22. |
 | `fans.text_2025` | added | — → 8.4.5.18.(3): HVAC systems 1 to 5 -> supply 640 Pa @ 40%, no return fan; (4): system 6 -> 13C SAT, supply 1000 Pa @ 55%, return 250 Pa @ 30% |
 
 </details>
 
 <details>
-<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 2529 leaves: 2423 identical, 0 renumbered, 6 changed, 96 added, 4 removed (click to expand)</summary>
+<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 2513 leaves: 2333 identical, 10 renumbered, 69 changed, 97 added, 4 removed (click to expand)</summary>
+
+#### Renumbered
+
+| Old path | Old value | New path | New value |
+|---|---|---|---|
+| `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7. | `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.7. |
+| `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7. | `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.7. |
+| `curves.12.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.). | `curves.12.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.3. (Table 8.4.6.3.). |
+| `curves.13.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.). | `curves.13.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.3. (Table 8.4.6.3.). |
+| `curves.20.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.20.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.23.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.23.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.26.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.26.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.29.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.29.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.3.notes` | From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.4. | `curves.3.notes` | From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.4. |
+| `curves.8.notes` | From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7. | `curves.8.notes` | From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.7. |
 
 #### Changed / added / removed
 
 | Path | Kind | Old → New |
 |---|---|---|
-| `heat_pumps.0.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions. |
-| `heat_pumps.1.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions. |
-| `heat_pumps.2.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions. |
-| `heat_pumps.3.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15 in both editions. |
+| `boilers.0.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.1.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.2.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.3.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.4.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.5.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `boilers.6.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
+| `curves.0.notes` | changed | From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B). → From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.2. (Table 8.4.6.2.). |
+| `curves.1.notes` | changed | From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B). → From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.2. (Table 8.4.6.2.). |
+| `furnaces.0.notes` | changed | From NECB 2020 Table 5.2.12.1.-O → NECB 2025 Table 5.2.12.1.-O |
+| `furnaces.1.notes` | changed | From NECB 2020 Table 5.2.12.1.-O → NECB 2025 Table 5.2.12.1.-O |
+| `furnaces.2.notes` | changed | Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O → Added to capture any capacities outside the range specified in NECB 2025 Table 5.2.12.1.-O |
+| `heat_pumps.0.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
+| `heat_pumps.1.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
+| `heat_pumps.10.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.11.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.12.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.13.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.14.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.15.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.16.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.17.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.18.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.19.notes` | changed | From NECB 2020, Table 5.2.12.1.-A. → NECB 2025 Table 5.2.12.1.-A. |
+| `heat_pumps.2.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
+| `heat_pumps.3.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
+| `heat_pumps.4.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.5.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.6.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.7.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.8.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps.9.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.0.notes` | changed | From NECB 2020, Table  5.2.12.1.-B → NECB 2025 Table 5.2.12.1.-A |
 | `heat_pumps_heating.1.minimum_heating_seasonal_performance_factor` | changed | 7.4 → 7.8 |
-| `heat_pumps_heating.1.notes` | changed | From NECB 2020, Table  5.2.12.1.-B → NECB 2025 Table 5.2.12.1.-A: split-system others HSPF V = 7.8 (2020: 7.4). |
+| `heat_pumps_heating.1.notes` | changed | From NECB 2020, Table  5.2.12.1.-B → NECB 2025 Table 5.2.12.1.-A: split-system others HSPF V = 7.8. |
+| `heat_pumps_heating.2.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.3.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.4.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.5.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.6.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.7.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.8.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `heat_pumps_heating.9.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.0.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.1.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.10.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.11.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.12.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.13.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.14.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.15.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.16.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.17.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.18.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.19.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.2.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.20.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.21.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.22.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.23.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.24.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.25.notes` | changed | From NECB 2020, Table 5.2.12.1.-G → NECB 2025 Table 5.2.12.1.-G |
+| `unitary_acs.3.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.4.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.5.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.6.notes` | changed | From NECB 2020, Table 5.2.12.1.-A1 → NECB 2025 Table 5.2.12.1.-A1 |
+| `unitary_acs.7.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.8.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `unitary_acs.9.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `chillers.0.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.1.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.10.notes` | added | — → capacity in ton, full load eff in kW/ton |
@@ -165,6 +244,7 @@ there rather than silently dropped from the comparison.
 | `plant_heat_pumps_heating.3.minimum_cop_lwt_40c` | added | — → 5.06 |
 | `plant_heat_pumps_heating.3.minimum_cop_lwt_50c` | added | — → 3.88 |
 | `plant_heat_pumps_heating.3.minimum_cop_lwt_60c` | added | — → 2.95 |
+| `plant_heat_pumps_heating_note` | added | — → NECB 2025 Table 5.2.12.1.-M: plant AWHP/W2W heating COPs by leaving water temperature. Informational - not yet consumed by the engine (candidate for hs12/15/16 plant HP efficiency application). |
 | `unitary_acs.26.cooling_type` | added | — → AirCooled |
 | `unitary_acs.26.end_date` | added | — → 2999-09-09T00:00:00+00:00 |
 | `unitary_acs.26.equipment_type` | added | — → Air Conditioners |
@@ -231,7 +311,7 @@ _No renumbering or value changes — every leaf is identical._
 </details>
 
 <details>
-<summary><b>shw</b> (`shw_rules.json`) — 81 leaves: 75 identical, 1 renumbered, 3 changed, 2 added, 0 removed (click to expand)</summary>
+<summary><b>shw</b> (`shw_rules.json`) — 80 leaves: 76 identical, 1 renumbered, 3 changed, 0 added, 0 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -245,9 +325,7 @@ _No renumbering or value changes — every leaf is identical._
 |---|---|---|
 | `efficiency.heat_pump.metric` | changed | EF → UEF |
 | `efficiency.heat_pump.minimum_cop` | changed | 2.1 → 2.23 |
-| `efficiency.heat_pump.note` | changed | NECB 2020 Table 6.2.2.1 storage-type heat pump: EF >= 2.1. → NECB 2025 Table 6.2.2.1 storage-type heat pump: UEF >= 2.23 (the one substantive 2025 change to this table). |
-| `changes_vs_2020.heat_pump_storage_water_heater` | added | — → EF >= 2.1 (2020) -> UEF >= 2.23 (2025); class not modeled |
-| `changes_vs_2020.implemented_formulas` | added | — → none changed |
+| `efficiency.heat_pump.note` | changed | NECB 2020 Table 6.2.2.1 storage-type heat pump: EF >= 2.1. → NECB 2025 Table 6.2.2.1 storage-type heat pump: UEF >= 2.23. |
 
 </details>
 
@@ -278,7 +356,7 @@ _No renumbering or value changes — every leaf is identical._
 </details>
 
 <details>
-<summary><b>tables/led_lighting</b> (`tables/led_lighting.json`) — 2156 leaves: 2156 identical, 0 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
+<summary><b>tables/led_lighting</b> (`tables/led_lighting.json`) — 1848 leaves: 1848 identical, 0 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
 
 _No renumbering or value changes — every leaf is identical._
 
@@ -292,7 +370,7 @@ _No renumbering or value changes — every leaf is identical._
 </details>
 
 <details>
-<summary><b>tables/space_types</b> (`tables/space_types.json`) — 24640 leaves: 24640 identical, 0 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
+<summary><b>tables/space_types</b> (`tables/space_types.json`) — 24024 leaves: 24024 identical, 0 renumbered, 0 changed, 0 added, 0 removed (click to expand)</summary>
 
 _No renumbering or value changes — every leaf is identical._
 

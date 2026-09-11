@@ -6,7 +6,7 @@ by tank volume and first-hour rating (FHR = 0.7 x V_litres + 151, the legacy
 rule of thumb), burner efficiency 0.82, RE/UA from the UEF test draw; large
 equipment: Et 0.9 + SL formula. The 8.4.5.9. (2025: 8.4.6.9.) part-load fuel
 curve is applied to fuel-fired heaters, storage and instantaneous alike, as
-the cubic SWH-EFFFPLR-NECB2011 — which is the PLF-domain image of the code's
+the cubic SWH-EFFFPLR — which is the PLF-domain image of the code's
 FHeatPLC quadratic, not a rival curve (D-53).
 """
 

@@ -2,9 +2,9 @@
  "provenance": {
   "code": "NECB",
   "edition": "2020",
-  "source": "btap-necb umbrella pipeline self-declaration — the compliance determination itself (Part 8 Section 8.4), which no domain gem can declare because it spans them. Article titles cross-checked against the building-codes MCP (necb:2025 Division B; 2020 uses the pre-renumbering 8.4.4 for the reference building).",
+  "source": "btap-necb umbrella pipeline self-declaration — the compliance determination itself (Part 8 Section 8.4), which no domain gem can declare because it spans them. Article titles cross-checked against the building-codes MCP; this edition carries the reference building at Subsection 8.4.4.",
   "generated": "2026-07-22",
-  "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.py; the 2025 EUI arithmetic lives in editions/necb2025/ and reads that edition's eui_targets.json)."
+  "note": "This file carries ONLY article_coverage — the umbrella has no rule data of its own (verdicts and iteration logic live in compliance.py)."
  },
  "unmet_cooling": {
   "minimum_allowance_h": 0.0,

@@ -1879,7 +1879,7 @@
  },
  {
   "step": "coverage",
-  "action": "Door U-values (2025 split-out table; 2020: within 3.2.2.x) \u2014 implemented: door values applied (2025 split-out table == 2020 door row)",
+  "action": "Door U-values (door row of Table 3.2.2.x) \u2014 implemented: door values applied (door row of Table 3.2.2.x)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 0,
@@ -2086,7 +2086,7 @@
  },
  {
   "step": "coverage",
-  "action": "Occupancy and scheduled-shutoff lighting controls \u2014 partial. Applied: modeled as the NECB2015-lineage lighting-schedule synthesis (hourly x (1 - rel_absence_occ x occ_sense - personal_control) when occupancy < rel_absence_occ) for space types with LPD > 8.6 W/m2, using the Table 4.3.2.10 factors carried in the space-type data. Gaps: control HARDWARE (sensors) is not modeled as objects; area-threshold occupancy-sensor space-type cloning is 2011-only machinery (no-op in 2015+, out of scope); renumbered from the former bogus 4.2.2.2. citation (4.2.2.2. is \"Lighting Controls in Storage Garages\" in NECB 2020/2025, not occupancy controls)",
+  "action": "Occupancy and scheduled-shutoff lighting controls \u2014 partial. Applied: modeled as the lighting-schedule synthesis (hourly x (1 - rel_absence_occ x occ_sense - personal_control) when occupancy < rel_absence_occ) for space types with LPD > 8.6 W/m2, using the Table 4.3.2.10 factors carried in the space-type data. Gaps: control HARDWARE (sensors) is not modeled as objects; area-threshold occupancy-sensor space-type cloning is not modeled; renumbered from the former bogus 4.2.2.2. citation (4.2.2.2. is \"Lighting Controls in Storage Garages\" in this edition, not occupancy controls)",
   "inputs": {
    "status": "partial",
    "decisions_citing": 0,
@@ -2115,7 +2115,7 @@
  },
  {
   "step": "coverage",
-  "action": "Interior lighting controls \u2014 daylighting \u2014 partial. Applied: daylighting photocontrol REQUIREMENT now follows the 2020/2025 code (D-57, placement: :necb2020, the default): Table 4.2.1.6.'s sidelighting/toplighting column gates each space type (daylighting_controls_4_2_1_6.json), then 4.2.2.1.(10) tests general-lighting INPUT POWER inside the primary sidelighted areas (>=150 W) or primary + secondary (>=300 W) and 4.2.2.1.(13) tests it inside the daylighted areas under skylights (>=150 W), the two INDEPENDENT. With a uniform space-level LPD that power is exactly LPD x daylighted_area. Exceptions honoured: (12)(a) obstruction ratio >=2 from ShadingSurfaces, (12)(b) glazing <2 m2, (12)(c) retail, (15)(b) skylight VT <0.4, (15)(c) >55 degN with <200 W. Daylighted AREAS per 4.2.2.3./4.2.2.5. with polygon UNION and NECB's primary > toplit > secondary precedence (DaylightedAreas), so overlaps are not double-counted. Sensors: Stepped x3 = 67%/33%/off per 4.2.2.1.(11)(a)(i)/(14)(a)(i), zone fraction = daylighted share of the zone floor area (not 1.0), space-type illuminance set-points, per-sensor costing BOM. The legacy NECB 2011 rule is still reachable as placement: :necb2011 (defects preserved and audited: any-single-criterion exception, skylight-only zero area, 2011-era office name) so the legacy parity gate stays callable. Gaps: 4.2.2.1.(15)(a) (>1 500 h/yr of blocked direct sun) needs an annual solar-obstruction study and is NOT evaluated \u2014 a WARNING every run; not applying an exception is the strict direction. 4.2.2.4. ROOF MONITORS are not a distinguishable object in an OpenStudio model, so toplighted area covers skylights only. The vertical-obstruction bounds in 4.2.2.3.(3)(b)/(4)(b)/(8)(b) and 4.2.2.5.(2)(c) are honoured only at the space enclosure (areas are clipped to the floor); obstructions inside a space are not in the model. 4.2.2.1.(11)(b)'s independent control of the secondary band is modelled as ONE zone control covering the combined daylighted fraction, not two. 3 catalog space types have NO ROW in Table 4.2.1.6 at all \u2014 the '- undefined -' sentinel, the legacy-only 'Audience seating area permanent - convention centre', and 'WholeBuilding' (whose LPD comes from the building-type method of Table 4.2.1.5, which identifies no 4.2.1.6 row) \u2014 so neither column can be read for them and each takes a documented conservative default with a LOUD warning. Dwelling units also have no row, but there the code answers it: 4.2.2.1.(10)/(13) reach only spaces requiring the control in accordance with Table 4.2.1.6., so they do not apply. All of this is structural, not an extraction limit: the table's nine control columns were re-read 2026-07-30 after the upstream fix and agree exactly between the 2020 and 2025 editions (0 differing cells of 909); the residue is enumerated in daylighting_controls_4_2_1_6.json",
+  "action": "Interior lighting controls \u2014 daylighting \u2014 partial. Applied: daylighting photocontrol REQUIREMENT follows this edition's Article 4.2.2.1. (D-57, the default placement rule): Table 4.2.1.6.'s sidelighting/toplighting column gates each space type (daylighting_controls_4_2_1_6.json), then 4.2.2.1.(10) tests general-lighting INPUT POWER inside the primary sidelighted areas (>=150 W) or primary + secondary (>=300 W) and 4.2.2.1.(13) tests it inside the daylighted areas under skylights (>=150 W), the two INDEPENDENT. With a uniform space-level LPD that power is exactly LPD x daylighted_area. Exceptions honoured: (12)(a) obstruction ratio >=2 from ShadingSurfaces, (12)(b) glazing <2 m2, (12)(c) retail, (15)(b) skylight VT <0.4, (15)(c) >55 degN with <200 W. Daylighted AREAS per 4.2.2.3./4.2.2.5. with polygon UNION and NECB's primary > toplit > secondary precedence (DaylightedAreas), so overlaps are not double-counted. Sensors: Stepped x3 = 67%/33%/off per 4.2.2.1.(11)(a)(i)/(14)(a)(i), zone fraction = daylighted share of the zone floor area (not 1.0), space-type illuminance set-points, per-sensor costing BOM. Gaps: 4.2.2.1.(15)(a) (>1 500 h/yr of blocked direct sun) needs an annual solar-obstruction study and is NOT evaluated \u2014 a WARNING every run; not applying an exception is the strict direction. 4.2.2.4. ROOF MONITORS are not a distinguishable object in an OpenStudio model, so toplighted area covers skylights only. The vertical-obstruction bounds in 4.2.2.3.(3)(b)/(4)(b)/(8)(b) and 4.2.2.5.(2)(c) are honoured only at the space enclosure (areas are clipped to the floor); obstructions inside a space are not in the model. 4.2.2.1.(11)(b)'s independent control of the secondary band is modelled as ONE zone control covering the combined daylighted fraction, not two. 3 catalog space types have NO ROW in Table 4.2.1.6 at all \u2014 the '- undefined -' sentinel, the legacy-only 'Audience seating area permanent - convention centre', and 'WholeBuilding' (whose LPD comes from the building-type method of Table 4.2.1.5, which identifies no 4.2.1.6 row) \u2014 so neither column can be read for them and each takes a documented conservative default with a LOUD warning. Dwelling units also have no row, but there the code answers it: 4.2.2.1.(10)/(13) reach only spaces requiring the control in accordance with Table 4.2.1.6., so they do not apply. All of this is structural, not an extraction limit: the table's nine control columns were re-read 2026-07-30 after the upstream fix; the residue is enumerated in daylighting_controls_4_2_1_6.json",
   "inputs": {
    "status": "partial",
    "decisions_citing": 0,
@@ -2189,7 +2189,7 @@
  },
  {
   "step": "coverage",
-  "action": "Occupancy/personal control factors in the reference \u2014 partial. Applied: applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier \u2014 interpretation consistent with legacy NECB2015+. Gaps: strict reading multiplies installed power by Focc x Fpers",
+  "action": "Occupancy/personal control factors in the reference \u2014 partial. Applied: applied via the sensor-schedule synthesis (schedule modulation) rather than a constant power multiplier. Gaps: strict reading multiplies installed power by Focc x Fpers",
   "inputs": {
    "status": "partial",
    "decisions_citing": 1,
@@ -2218,7 +2218,7 @@
  },
  {
   "step": "coverage",
-  "action": "Reference daylighting geometry + photocontrols \u2014 partial. Applied: reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available); WHERE 4.2.2 requires photocontrols is decided by the 2020/2025 rule 4.2.2.1.(10)-(15) as of D-57 \u2014 before that it was the NECB 2011 criteria, which are conjunctive and so placed NO photocontrols on window-only spaces (L-26) [D-51 D-57]. Gaps: sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction",
+  "action": "Reference daylighting geometry + photocontrols \u2014 partial. Applied: reference photocontrols are BUILT BY DEFAULT by the umbrella pipeline (D-51: reference_daylighting: true; a caller may opt out and is then warned) and evaluated by DETAILED E+ daylighting (reference_daylighting): (10)(b) reflectances 0.15/0.50/0.80 set on interior surfaces, (10)(d) VT identity by envelope optics preservation, (11) set-points from the proposed else space-type illuminance, (12) FDL fallback unnecessary (detailed daylighting available); WHERE 4.2.2 requires photocontrols is decided by this edition's Article 4.2.2.1.(10)-(15) (D-57) [D-51 D-57]. Gaps: sentences (5)-(8)' analytic single-centered-window/skylight AREA convention is replaced by the 4.2.2.3./4.2.2.5. threshold geometry on the actual scaled fenestration (audited interpretation); (11)(b)'s independent secondary-band control is modelled as one zone control over the combined daylighted fraction",
   "inputs": {
    "status": "partial",
    "decisions_citing": 1,
@@ -2553,7 +2553,7 @@
   "action": "part-load fuel curve applied to the fuel-fired water heater",
   "inputs": {
    "fuel": "NaturalGas",
-   "curve": "SWH-EFFFPLR-NECB2011",
+   "curve": "SWH-EFFFPLR",
    "form": "Cubic"
   },
   "value": [

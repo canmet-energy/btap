@@ -120,6 +120,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-85** — VRF Table-I class selection and exact minimum assignment _(runtime)_
 - **D-86** — R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition _(process)_
 - **D-87** — R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output _(process)_
+- **D-88** — A snapshot names another edition only as its origin; source-neutral performance-curve identifiers (R-N) _(process)_
 
 <!-- TOC END -->
 
@@ -4905,3 +4906,107 @@ ordering or count changes. `python/tests/necb/test_codes_registry.py`'s
 `python/tests/test_citation_no_loss.py` are unchanged; only the call sites
 are re-keyed to code ids, which is why that table is the proof that the
 citation surface survived the rename.
+
+## D-88
+
+**Decided:** 2026-09-09. An edition's data snapshot names another edition
+only as its ORIGIN, never comparatively and never forward; and the
+performance curves carry source-neutral identifiers (amended 2026-09-10 —
+see "Amendment" below).
+
+**The policy** (enforced by `tests/necb/test_snapshot_self_description.py`):
+
+1. *Origin only.* Inside a snapshot, another edition may be named only in
+   provenance fields — the manifest's `provenance` block, in-file
+   `provenance` blocks, `curves[].notes`, `derivation`, `*_note` and
+   `*_provenance` keys — and only to say where data came from. The oracle's
+   `NECB2011/…` paths are true origin and stay.
+2. *Nothing emitted, consumed or displayed names another edition.* Curve
+   identifiers, `article_coverage` prose, table columns and rule keys use
+   the snapshot's own numbering. Comparisons live in the generated
+   `docs/NECB_EDITION_DELTAS.md`; identity in the manifest's
+   `byte_identical_to`.
+3. *No forward references.* A snapshot never names a newer edition
+   anywhere, provenance included.
+
+Archived MCP payloads under `provenance/` are the server's own text and are
+exempt.
+
+**What changed (Phase A, name-only; re-freeze R-N).** The 31 performance
+curves and the SWH curve lose their `-NECB2011`/`_NECB2011` suffix in both
+snapshots AND in `btap.modeling`'s own DX catalog: the NECB efficiency pass
+reuses a curve by name when the proposed model already carries one, so the
+two catalogs must rename in lockstep. That pre-existing alias — the
+modeling layer's coefficients silently winning over the snapshot's — is
+deferred finding DF-4. Each curve's `notes` keeps its NECB 2011 origin and
+cites the edition's own article (2020: 8.4.5.2/3/4/5/7/9 and 8.4.4.17;
+2025: 8.4.6.2/3/4/5/7/9 and 8.4.5.17). Twenty-four `article_coverage`
+strings that explained a rule by reference to another edition are rewritten
+in the snapshot's own terms; the dead vendored columns `lighting_standard`
+and `target_illuminance_setpoint_ref` leave `space_types` and
+`led_lighting`; the `changes_vs_2020` and `provenance.verification`
+comparison blocks and every comparative or forward-referencing sentence
+leave the snapshots. No coefficient, article, status, count or numeric value
+moves. The accepted R-N diff is exactly: the curve-identifier suffix in
+audit text; the rewritten coverage sentences in `audit.json`, `audit.txt`
+and `report.json`'s `article_coverage`; `provenance.commit`; the affected
+`baseline_sha256`.
+
+**What this does not do (Phase B, under its own decision).** The
+verification of the inherited coefficients against the editions' own tables
+(fetched through the codes MCP) found: chiller EIR part-load curves are the
+edition's own numbers to rounding; chiller capacity and EIR temperature
+curves differ outright (possibly a unit basis, to be evaluated at matched
+temperatures); boiler and furnace curves approximate the edition's
+`FHeatPLC` within 0.5–1.9 %; NECB 2025 publishes new modulating and
+condensing rows; DX, fan and SWH curves have no edition table, so their
+NECB 2011 origin is legitimately retained. Both snapshots also carry NECB
+2015's Table C-1. Adopting each edition's own tables is a numeric behaviour
+change and waits for D-89.
+
+This decision supersedes the gem-split entry's remark that renaming the
+curves was churn with no behavioural payoff: the payoff is that an NECB 2025
+determination no longer emits objects named after NECB 2011.
+
+**Amendment (2026-09-10, Sol's review of PRs #43/#44/#45, item 4).** "Edition-
+neutral" overstated what Phase A actually proved: the 31 curves and the SWH
+curve were renamed name-only, with no coefficient check gating the rename,
+and `hvac/efficiency.py`'s `curve()` (around line 1009) reuses ANY existing
+model curve matching by name, unvalidated — Sol's probe showed an existing
+`BOILER-EFFFPLR` carrying a diverged coefficient (99.0) is returned
+unchanged rather than rebuilt. A neutral name is therefore safe only for as
+long as the underlying curve is actually the same object across the
+editions that share it; nothing in Phase A enforced that once the two
+catalogs (snapshot and `btap.modeling`'s own DX catalog) can drift
+independently.
+
+The corrected policy: **a curve keeps a neutral name only while it is
+VERIFIED IDENTICAL across the editions that share it.** A curve whose
+coefficients or form diverge between editions must either (a) take a
+code-qualified name (`BOILER-EFFFPLR-necb2025`, not the bare
+`BOILER-EFFFPLR`), so the two catalogs cannot silently collide under one
+identifier, OR (b) have its loader validate form, coefficients and bounds
+before reusing an existing model object of the same name, so a name match
+alone is never sufficient. Option (b) — the loader change — is D-89's
+behavioural item, and it also CLOSES deferred finding DF-4: until it lands,
+`hvac/efficiency.py:1009-1017` is the plain, unvalidated by-name lookup
+described above, and this is the tree's actual current behaviour, not a
+theoretical risk. The two rules are complementary, not a choice made once:
+even after D-89's loader validates on reuse, a curve already known to
+diverge (per the Phase B coefficient verification, above) still gets a
+code-qualified name, because the loader validating on REUSE does not by
+itself stop a divergent curve from being *authored* under the shared bare
+name in the first place.
+
+This amendment supersedes only the word "edition-neutral" in this decision's
+own title and body; it changes no coefficient and no curve name shipped by
+Phase A. As of this amendment the two snapshots' curve blocks are still
+byte-identical to each other (both retain the same NECB 2011-origin values
+Phase A merely renamed), so no curve needs a code-qualified name TODAY — the
+Phase B divergences quoted above are each edition's inherited value against
+its OWN printed table, not yet a divergence between the two snapshots.
+Adopting Phase B (D-89) is exactly the event that would make some of these
+curves diverge from each other for the first time, which is why the loader
+validation or the code-qualified naming has to be in place before, not
+after, that re-freeze lands. This amendment changes no other part of the
+D-88 policy (origin-only, no forward references, no emitted comparison).

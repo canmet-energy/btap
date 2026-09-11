@@ -14,8 +14,8 @@
    "8.4.5.14",
    "8.4.5.18"
   ],
-  "note": "NECB 2025 renumbered the performance path: reference-building HVAC rules moved from Subsection 8.4.4 (2020) to 8.4.5; part-load curves moved to 8.4.6. All rule VALUES verified identical to 2020 via MCP retrieval and edition diff (selection tables byte-identical; oversizing 30%/10%; fan specs 640Pa/40% and 1000Pa/55%+250Pa/30%; boiler staging 176/352 kW; furnace/DX staging 66 kW; chiller plant 2100 kW/7C/6C; tower 1750 kW cells; HP -10C cutoff). Wording change: the supply-fan rule now reads *HVAC systems 1 to 5* (2020: *1, 3, 4 and 5*) - same effective coverage.",
-  "efficiency_note": "Efficiency values ship in this edition's own efficiencies.json (transcribed/verified from NECB 2025 Tables 5.2.12.1.-K/-N/-O/-A via MCP; see its provenance.verification block for the per-table diff results). The 2020 fallback has been lifted — and since multi-edition Stage 3 no fallback rung exists at all.",
+  "note": "Rule values are transcriptions of the code text retrieved via the MCP: this edition carries the reference-building HVAC rules at Subsection 8.4.5 (selection tables; oversizing 30%/10%; fan specs 640Pa/40% and 1000Pa/55%+250Pa/30%; boiler staging 176/352 kW; furnace/DX staging 66 kW; chiller plant 2100 kW/7C/6C; tower 1750 kW cells; HP -10C cutoff) and the part-load curves at 8.4.6. The supply-fan rule reads *HVAC systems 1 to 5*. Runtime never contacts the MCP server; regenerate/verify this file against the code text when editions change.",
+  "efficiency_note": "Efficiency values ship in this edition's own efficiencies.json (transcribed from NECB 2025 Tables 5.2.12.1.-K/-N/-O/-A via the MCP; see its own provenance block). No fallback rung exists: every edition reads its own snapshot.",
   "non_rule_keys_note": "None: furnace_staging and dx_staging graduated to consumed rule blocks in D-46 (read by the efficiency pass's post-sizing staging pass), so the orphan-key exemption list is now empty."
  },
  "non_rule_keys": [],
@@ -310,8 +310,8 @@
    "purchased_cooling": {
     "article": "8.4.5.6.(2)",
     "text": "one air-cooled electric chiller ... shall be used to represent the purchased energy equipment",
-        "chiller_source": "air_cooled",
-        "reference_cop": 2.802
+    "chiller_source": "air_cooled",
+    "reference_cop": 2.802
    }
   }
  },
@@ -482,7 +482,7 @@
   "table_article": "Table 8.4.5.14.",
   "power_caps_w_per_kw": {
    "article": "5.2.6.3.(1); Table 5.2.6.3.",
-   "note": "D-38 (A3 ruled min-wins, phylroy 2026-07-28): the reference must also MEET Part 5 prescriptive (8.4.4.1.(2)) - after the pump-power transfer, each hydronic loop's COMBINED pump motor power is clamped at these W per kW of the loop's peak thermal demand at design. Values verified against the printed 2020 AND 2025 tables via MCP (identical).",
+   "note": "D-38 (A3 ruled min-wins, phylroy 2026-07-28): the reference must also MEET Part 5 prescriptive (8.4.4.1.(2)) - after the pump-power transfer, each hydronic loop's COMBINED pump motor power is clamped at these W per kW of the loop's peak thermal demand at design. Values verified against the printed table via the codes MCP.",
    "Heating": 4.5,
    "Cooling": 14.0,
    "Heat rejection": 12.0,
@@ -522,7 +522,7 @@
    "modeling_note": "frost_control/threshold_temperature_c/defrost fractions are EnergyPlus equipment-modeling assumptions (E+ defaults; -23.3 C = -10 F), NOT NECB values — 5.2.10.1 is silent on frost control. Sentence (5) test-method certification and the sentence (3) specialized-exhaust exemption are modeller/equipment scope."
   },
   "text": "Where Subsection 5.2.10. applies to a reference building HVAC system, that system shall be modeled with energy recovery capabilities that comply with Subsection 5.2.10.; energy recovered from exhaust air shall be used to preheat the outside air supplied by that system.",
-  "trigger_provenance": "NECB 2020 Tables 5.2.10.1.-A (p.147, non-continuous) / -B (p.148, continuous), verified identical in 2025; retrieved via codes MCP get_table 2026-07-22. Replaces the NECB 2011 150 kW exhaust-heat-content trigger previously implemented here (wrong vintage — divergent for small high-%OA systems, where 2020 requires and 2011 does not).",
+  "trigger_provenance": "NECB 2025 Tables 5.2.10.1.-A (p.149, non-continuous) / -B (continuous), retrieved via codes MCP get_table 2026-07-22.",
   "continuous_hours_per_year": 8000,
   "oa_bands_pct": [
    10,

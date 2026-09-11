@@ -29,6 +29,13 @@ from tests.support import needs_sdk, oracle_goldens_dir
 
 GOLDENS = oracle_goldens_dir()
 
+#: Vendored template columns the oracle's merged table carries and the snapshots
+#: deliberately do NOT ship (D-88, 2026-09-09): both labelled every row
+#: "NECB2020" in BOTH editions' copies, and no product code or gate read them.
+#: Dropped from the ORACLE side of the comparison here — the golden itself is
+#: never hand-edited.
+DROPPED_COLUMNS = frozenset({"lighting_standard", "target_illuminance_setpoint_ref"})
+
 #: OracleProbes::Loads::PAIRS — the space types the apply golden was frozen for.
 PAIRS = [
     ['Space Function', 'Office enclosed > 25 m2'],
@@ -152,10 +159,16 @@ class TestOracleGoldensLoads(unittest.TestCase):
         """test_loads_data_integrity.rb#test_structural_equality_vs_legacy_merged_tables,
         against the FROZEN merged runtime tables instead of the live oracle.
 
-        The 22 storage-room receptacle fields are the one adjudicated divergence:
-        the oracle transposes the < 5 m2 and >= 5 m2 Table A-8.4.3.2.(2)-B
-        values. Pin both sides of that correction before comparing everything
-        else exactly.
+        Two adjudicated divergences, both pinned here before everything else is
+        compared exactly:
+
+        1. The 22 storage-room receptacle fields: the oracle transposes the
+           < 5 m2 and >= 5 m2 Table A-8.4.3.2.(2)-B values.
+        2. DROPPED_COLUMNS: the two vendored template columns the snapshots no
+           longer ship (D-88, 2026-09-09). They labelled every row "NECB2020" in
+           BOTH editions' copies and nothing read them, so the snapshot is the
+           oracle merge MINUS these two keys — dropped from the oracle side here
+           rather than hand-edited out of the golden.
         """
         from btap.codes.necb import loads
         expected = golden('loads_merged_tables')
@@ -167,6 +180,9 @@ class TestOracleGoldensLoads(unittest.TestCase):
         schedules = loads.table('2020', 'schedules')
         self.assertEqual(len(expected['space_types']), len(space_types))
         self.assertEqual(len(expected['schedules']), len(schedules))
+        expected['space_types'] = [
+            {k: v for k, v in row.items() if k not in DROPPED_COLUMNS}
+            for row in expected['space_types']]
         # Key-set equality in BOTH directions, record by record.
         for oracle_row, row in zip(expected['space_types'], space_types, strict=True):
             self.assertEqual(set(oracle_row), set(row))
