@@ -789,13 +789,33 @@ UNMAPPED_FAMILIES = {
         "0.013 ratio separately"),
 }
 
+#: Families the mapping used to report and this edition NO LONGER SHIPS, so the
+#: document says "not shipped" rather than going silent about a block a reader
+#: of an older revision would look for.
+RETIRED_FAMILIES = {
+    "heat_rejection": (
+        "24 rows citing ASHRAE 90.1-2004 Table 6.8.1G, against an edition table "
+        "(5.2.12.2) that publishes a fan-power RATIO — two different quantities "
+        "on two different bases, so there was never a row-and-column mapping to "
+        "make. `apply_efficiencies` never read the block; the reference tower fan "
+        "comes from this edition's own Table 5.2.12.2 plus the cell rules (D-26). "
+        "D-89 removed it from both snapshots"),
+}
+
+#: Top-level keys of `efficiencies.json` that are NOT equipment families and so
+#: are never bucketed as one. `part_load_fheatplc` is a list, and would
+#: otherwise be reported as a family the mapping does not claim.
+NON_FAMILY_KEYS = {"curves", "provenance", "_provenance",
+                   "part_load_fheatplc", "part_load_curves"}
+
 #: Metric-bearing keys a family carries that no block declares are listed rather
 #: than silently ignored; these engine bookkeeping keys are not metrics at all.
 NON_METRIC_KEYS = {
     "start_date", "end_date", "notes", "equipment_type", "cooling_type",
     "heating_type", "subcategory", "compressor_type", "condenser_type",
     "absorption_type", "variable_speed_drive", "fluid_type", "fuel_type",
-    "condensing", "condensing_control", "template", "fan_type",
+    "condensing", "condensing_control", "part_load_curve_class",
+    "template", "fan_type",
     "minimum_capacity", "maximum_capacity", "minimum_capacity_kw",
     "maximum_capacity_kw", "capft", "eirft", "eirfplr", "efffplr",
     "cool_cap_ft", "cool_cap_fflow", "cool_eir_ft", "cool_eir_fflow",
@@ -904,7 +924,7 @@ def compare_equipment_families(res: FileResult, tables: dict) -> dict:
 
     for family in sorted(shipped):
         rows = shipped.get(family)
-        if family in {"curves", "provenance", "_provenance"} or not isinstance(rows, list):
+        if family in NON_FAMILY_KEYS or not isinstance(rows, list):
             continue
         if family in UNMAPPED_FAMILIES:
             continue
@@ -2093,13 +2113,14 @@ def compare_efficiencies(res: FileResult, numbers: list[str],
     records = curve_records(res.edition_id)
     res.curves = records
     for rec in records:
-        if rec["verdict"] in {"differs", "no inherited curve"}:
+        if rec["verdict"] in {"differs", "no inherited curve",
+                              "not implemented (D-89)"}:
             res.differences.append(
                 (f"curves[{rec['name']}]" if rec["name"] else f"curves[{rec['label']}]",
                  _fmt(rec["shipped"]), rec["detail"]))
     res.counts["shipped curves"] = len(shipped.get("curves", []))
     for verdict in ("identical to rounding", "differs", "no edition table",
-                    "no inherited curve"):
+                    "no inherited curve", "not implemented (D-89)"):
         n = sum(1 for r in records if r["verdict"] == verdict)
         if n:
             res.counts[f"curves — {verdict}"] = n
@@ -2223,33 +2244,32 @@ PLR_POINTS = tuple(round(0.1 + 0.05 * i, 2) for i in range(19))
 
 
 # --------------------------------------------------------------------------
-# Boiler and furnace FHeatPLC — per EQUIPMENT CLASS, not per curve name
+# Boiler and furnace FHeatPLC — per EQUIPMENT CLASS
 #
-# The snapshot ships four part-load curves and names two of them `-COND`, which
-# invites the reading that a condensing boiler gets the condensing curve. It
-# does not: every row of `boilers` carries ``efffplr: BOILER-EFFFPLR`` and every
-# row of `furnaces` carries ``FURNACE-EFFPLR``, so the non-condensing /
-# atmospheric curve is what EVERY boiler and furnace in a reference building
-# actually receives — including the gas-fired MODULATING boiler the reference
-# selects to represent purchased heating. The comparison therefore reports, per
-# class, the requirement that class is subject to and the deviation of the curve
-# its rows are actually given, alongside the deviation of the curve whose NAME
-# suggests it was meant for that class.
+# Until D-89 this comparison had to say "naming is not assignment": every row of
+# `boilers` carried ``efffplr: BOILER-EFFFPLR`` and every row of `furnaces`
+# ``FURNACE-EFFPLR``, so the non-condensing / atmospheric curve was what EVERY
+# boiler and furnace received, the reference building's modulating boiler
+# included, and the curves NAMED `-COND` went to nothing.
+#
+# D-89 replaced that with an explicit class: each row declares its
+# `part_load_curve_class`, `part_load_curves` maps a class to the curve that
+# REPRESENTS it, and a class the map does not carry is unrepresentable in that
+# edition rather than silently given the non-condensing curve. The comparison
+# now reports, per published class, the curve the snapshot actually applies and
+# how far that representation departs from the Code's own requirement — or, for
+# a class the snapshot does not implement, that it is not implemented and why.
 # --------------------------------------------------------------------------
 
-#: kind -> (shipped family, the row key naming the part-load curve it is GIVEN).
-FHEATPLC_ASSIGNMENT = {"boiler_plc": ("boilers", "efffplr"),
-                       "furnace_plc": ("furnaces", "efffplr")}
+#: kind -> (the shipped family, the equipment key of the class map).
+FHEATPLC_ASSIGNMENT = {"boiler_plc": ("boilers", "boiler"),
+                       "furnace_plc": ("furnaces", "furnace")}
 
-#: kind -> {edition class name: the curve whose NAME says it is for that class}.
-FHEATPLC_NOMINAL = {
-    "boiler_plc": {"Non-condensing": "BOILER-EFFFPLR",
-                   "Condensing": "BOILER-EFFFPLR-COND",
-                   "Modulating": None},
-    "furnace_plc": {"Atmospheric": "FURNACE-EFFPLR",
-                    "Condensing": "FURNACE-EFFPLR-COND",
-                    "Modulating": None},
-}
+#: The class names the editions PRINT -> the enum the snapshots declare.
+FHEATPLC_CLASS_ENUM = {"Non-condensing": "non_condensing",
+                       "Condensing": "condensing",
+                       "Atmospheric": "atmospheric",
+                       "Modulating": "modulating"}
 
 #: Boiler return-hot-water temperatures the 2025 bivariate condensing surface is
 #: evaluated over. This box is an IMPLEMENTATION DOMAIN ASSUMED BY THIS
@@ -2265,8 +2285,8 @@ T_W_RETURN_F = tuple(range(80, 181, 10))
 #: The label every printed use of the box carries, so no reader can mistake the
 #: comparison's own choice for a published bound.
 T_W_DOMAIN_CAVEAT = ("implementation domain assumed by this comparison; the "
-                     "Code publishes no return-water bounds — to be adjudicated "
-                     "in D-89")
+                     "Code publishes no return-water bounds, which is part of why "
+                     "D-89 left this class unimplemented")
 
 
 def _plf_from_ratio(coefficients, plr):
@@ -2300,13 +2320,33 @@ def _requirement_points(requirement):
     return out
 
 
+def _table_lookup(points, x):
+    """What the shipped `Table:Lookup` returns: Linear interpolation between the
+    published nodes, Constant extrapolation outside them."""
+    if x <= points[0][0]:
+        return points[0][1]
+    if x >= points[-1][0]:
+        return points[-1][1]
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        if x0 <= x <= x1:
+            return y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+    return points[-1][1]
+
+
+def _evaluate(curve, plr):
+    """The shipped representation at one PLR, whatever form it takes."""
+    if isinstance(curve, dict):  # a Table:Lookup row, evaluated as the engine would
+        return _table_lookup([tuple(p) for p in curve["points"]], plr)
+    return poly(curve, plr)
+
+
 def _worst_against(curve, requirement):
     """(worst relative deviation, sample points) of a shipped curve."""
     worst = 0.0
     samples = []
     wanted = {0.1, 0.25, 0.5, 0.75, 1.0}
     for label, plr, required in _requirement_points(requirement):
-        got = poly(curve, plr)
+        got = _evaluate(curve, plr)
         worst = max(worst, abs(got - required) / abs(required))
         if plr in wanted and len(samples) < 8:
             samples.append((label, got, required, got / required))
@@ -2357,23 +2397,28 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
                                  {"form": "tabulated", "coefficients": None,
                                   "points": points}))
 
-    family, curve_key = FHEATPLC_ASSIGNMENT[kind]
-    rows = _shipped(edition_id, "efficiencies.json").get(family) or []
-    assigned_names: dict[str, int] = {}
+    family, equipment_key = FHEATPLC_ASSIGNMENT[kind]
+    shipped = _shipped(edition_id, "efficiencies.json")
+    rows = shipped.get(family) or []
+    class_map = ((shipped.get("part_load_curves") or {}).get(equipment_key)
+                 or {}).get("classes") or {}
+    declared = {}
     for row in rows:
-        if isinstance(row, dict) and row.get(curve_key):
-            assigned_names[row[curve_key]] = assigned_names.get(row[curve_key], 0) + 1
-    assigned_name = max(assigned_names, key=assigned_names.get) if assigned_names else None
-    assigned_curve = (
-        [c for c in _coeffs(curves[assigned_name], 4) if c is not None]
-        if assigned_name and curves.get(assigned_name) else None)
+        if isinstance(row, dict) and row.get("part_load_curve_class"):
+            key = row["part_load_curve_class"]
+            declared[key] = declared.get(key, 0) + 1
+    published = {e.get("class"): e for e in (shipped.get("part_load_fheatplc") or [])
+                 if e.get("equipment") == equipment_key}
 
     records = []
     for klass, source_number, requirement in requirements:
-        nominal_name = FHEATPLC_NOMINAL[kind].get(klass)
-        nominal_curve = (
-            [c for c in _coeffs(curves[nominal_name], 4) if c is not None]
-            if nominal_name and curves.get(nominal_name) else None)
+        enum = FHEATPLC_CLASS_ENUM.get(klass)
+        assigned_name = class_map.get(enum)
+        shipped_curve = curves.get(assigned_name) if assigned_name else None
+        assigned_curve = (
+            shipped_curve if (shipped_curve or {}).get("form") == "TableLookup"
+            else [c for c in _coeffs(shipped_curve, 4) if c is not None]
+            if shipped_curve else None)
         domain = ("the ten printed PLR points 0.1–1.0"
                   if requirement["form"] == "tabulated"
                   else "PLR 0.10–1.00" if requirement["form"] == "quadratic"
@@ -2383,10 +2428,6 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
         assigned_worst = samples = None
         if assigned_curve:
             assigned_worst, samples = _worst_against(assigned_curve, requirement)
-        nominal_worst = None
-        if nominal_curve and nominal_name != assigned_name:
-            nominal_worst, _ = _worst_against(nominal_curve, requirement)
-
         if requirement["form"] == "bivariate":
             relation = ("BIVARIATE: FHeatPLC is stated over PLR **and** the "
                         "boiler return-hot-water temperature T_w,return (°F, six "
@@ -2397,28 +2438,45 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
         else:
             relation = ("functional-form change: the requirement is a fuel RATIO "
                         "quadratic; the shipped curve is the EnergyPlus "
-                        "efficiency multiplier PLR / FHeatPLC(PLR)")
+                        "part-load multiplier PLR / FHeatPLC(PLR)")
 
         detail_parts = []
-        if assigned_worst is None:
+        if assigned_name is None:
+            reason = (published.get(enum) or {}).get("deferred_reason")
             detail_parts.append(
-                f"no shipped curve is assigned to any {family} row at all")
-            verdict = "no inherited curve"
+                "**not implemented (D-89)** — this edition publishes the class and "
+                "`part_load_fheatplc` retains its requirement verbatim, but "
+                "`part_load_curves` maps no curve to it, so a model object "
+                "carrying the class is audited as unrepresentable rather than "
+                "given another class's curve. "
+                + (reason or "no deferred_reason is recorded").rstrip("."))
+            verdict = "not implemented (D-89)"
+        elif assigned_worst is None:
+            detail_parts.append(
+                f"`{assigned_name}` is mapped to this class but does not ship")
+            verdict = "differs"
         else:
+            count = declared.get(enum, 0)
+            who = (f"{count}/{len(rows)} `{family}` rows declare this class"
+                   if count else
+                   f"no `{family}` row declares this class by default — it is "
+                   f"reached by propagation from the reference selection")
+            published_error = ((shipped_curve or {}).get("implements")
+                               or {}).get("max_error_vs_exact")
             detail_parts.append(
-                f"every `{family}` row is GIVEN `{assigned_name}` "
-                f"({assigned_names[assigned_name]}/{len(rows)} rows); against "
-                f"this class's requirement it deviates by up to "
-                f"**{assigned_worst * 100:.2f} %** over {domain}")
+                f"ADOPTED: `{assigned_name}` carries this class's own requirement "
+                f"through PLF = PLR / FHeatPLC(PLR) as a `Table:Lookup` "
+                f"({who}); evaluated as the engine would, it reproduces the "
+                f"requirement at the points the requirement itself states to "
+                f"within **{assigned_worst * 100:.2f} %** over {domain}")
+            if published_error is not None:
+                detail_parts.append(
+                    f"BETWEEN those points the representation interpolates, and "
+                    f"the snapshot publishes that interpolation's own worst error "
+                    f"against the exact requirement: {published_error * 100:.4f} % "
+                    f"over the curve's whole grid")
             verdict = ("identical to rounding" if assigned_worst <= ROUNDING_TOL
                        else "differs")
-        if nominal_worst is not None:
-            detail_parts.append(
-                f"the curve NAMED for this class, `{nominal_name}`, would deviate "
-                f"by {nominal_worst * 100:.2f} % — but no row references it")
-        elif nominal_name is None:
-            detail_parts.append(
-                "the snapshot ships no curve named for this class at all")
         if requirement["form"] == "bivariate":
             plfs = [p for _l, _p, p in _requirement_points(requirement)]
             detail_parts.append(
@@ -2431,13 +2489,18 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
             "label": f"{klass} ({equipment})",
             "table": source_number, "relation": relation,
             "verdict": verdict, "detail": "; ".join(detail_parts),
-            "shipped": assigned_curve,
+            "shipped": (
+                f"Table:Lookup, {len(assigned_curve['points'])} nodes over PLR "
+                f"{assigned_curve['points'][0][0]:g}-"
+                f"{assigned_curve['points'][-1][0]:g}"
+                if isinstance(assigned_curve, dict) else assigned_curve),
             "edition": requirement["coefficients"] or sorted(requirement["points"].items()),
             "converted": None, "errata": [], "deviation": assigned_worst,
             "points": samples or [],
             "equipment_class": klass, "equipment": equipment,
             "assigned_name": assigned_name, "assigned_deviation": assigned_worst,
-            "nominal_name": nominal_name, "nominal_deviation": nominal_worst,
+            "published_error": ((shipped_curve or {}).get("implements")
+                                or {}).get("max_error_vs_exact"),
             "requirement_form": requirement["form"], "domain": domain,
         })
     return records
@@ -3135,6 +3198,11 @@ def render(results: list[FileResult], surface: dict) -> str:
                     out.append("  - metric-bearing keys NO block declares: " +
                                ", ".join(f"`{k}`"
                                          for k in sorted(entry["undeclared"])))
+            for name, reason in sorted(RETIRED_FAMILIES.items()):
+                if name in res.families:
+                    continue
+                out.append(f"- `{name}` — **NOT SHIPPED.** "
+                           f"{reason[:1].upper()}{reason[1:]}.")
             out.append("")
         if res.differences:
             # A "row . column" leaf groups usefully by column; a leaf that is
@@ -3179,13 +3247,16 @@ def render(results: list[FileResult], surface: dict) -> str:
     out.append("## Performance curves")
     out.append("")
     out.append(
-        "`efficiencies.json` carries 31 curves and `shw_rules.json` one more, "
-        "every one of them the oracle's NECB 2011 set. Both editions publish "
-        "their own curve tables (2020: 8.4.5.2 / .3 / .5 / .8; 2025: 8.4.6.2 / "
-        ".3 / .5 / .8), and all 17 are archived here. Coefficients are NOT "
-        "compared naively: each class is compared in the independent variables "
-        "its own source declares, which is what makes \"same surface, different "
-        "units\" a decidable question rather than a guess.")
+        "Both editions publish their own curve tables (2020: 8.4.5.2 / .3 / .5 / "
+        ".8; 2025: 8.4.6.2 / .3 / .5 / .8), and all 17 are archived here. "
+        "Coefficients are NOT compared naively: each class is compared in the "
+        "independent variables its own source declares, which is what makes "
+        "\"same surface, different units\" a decidable question rather than a "
+        "guess. Since D-89 the BOILER and FURNACE part-load curves are each "
+        "edition's own — built from the tables below as `Table:Lookup` objects "
+        "carrying PLF = PLR / FHeatPLC(PLR) — so what remains inherited from the "
+        "oracle's NECB 2011 set is the DX cooling, DX heating, VAV fan and SWH "
+        "group, for which neither edition publishes a table at all.")
     out.append("")
     for res in results:
         if not res.curves:
@@ -3211,17 +3282,15 @@ def render(results: list[FileResult], surface: dict) -> str:
                "including modulating")
     out.append("")
     out.append(
-        "**Naming is not assignment.** The snapshot ships four part-load curves "
-        "and names two of them `-COND`, but no row references them: every row of "
-        "`boilers` carries `efffplr: BOILER-EFFFPLR` (the NON-condensing curve) "
-        "and every row of `furnaces` carries `FURNACE-EFFPLR` (the ATMOSPHERIC "
-        "curve), at `hvac/efficiency.py:~1137-1154`. So the deviation that "
-        "matters for a class is the deviation of the curve its rows are actually "
-        "GIVEN, not of the curve whose name suggests it was meant for them. This "
-        "bites hardest on modulating equipment, which the reference building "
-        "elects: `hvac/reference.py:~1733` represents purchased heating by a "
-        "gas-fired **modulating** boiler, and that boiler receives "
-        "`BOILER-EFFFPLR` like every other.")
+        "**The class is declared, and the map is the assignment (D-89).** Every "
+        "`boilers` and `furnaces` row carries a `part_load_curve_class`, "
+        "`part_load_curves` maps a class to the curve that represents it, and a "
+        "class the map does not carry is **unrepresentable** in that edition — a "
+        "model object carrying it is audited as such, never quietly given the "
+        "non-condensing curve. A class the rows never select by default is still "
+        "reachable by propagation: the reference building represents purchased "
+        "heating by a gas-fired **modulating** boiler and stamps that class onto "
+        "it, so the boiler receives its own edition's modulating curve.")
     out.append("")
     out.append(
         "**2025 does not “add” modulating equipment.** NECB 2020 already "
@@ -3244,21 +3313,19 @@ def render(results: list[FileResult], surface: dict) -> str:
         out.append(f"#### `{res.edition_id}`")
         out.append("")
         out.append("| equipment class | requirement table | requirement form | "
-                   "curve every row is GIVEN | its worst PLF deviation | curve "
-                   "NAMED for the class | its worst PLF deviation | domain |")
-        out.append("|---|---|---|---|---:|---|---:|---|")
+                   "curve the class is given | deviation at the requirement's "
+                   "own points | interpolation error between them | domain |")
+        out.append("|---|---|---|---|---:|---:|---|")
         for rec in classes:
-            assigned = f"`{rec['assigned_name']}`" if rec["assigned_name"] else "_(none)_"
-            nominal = (f"`{rec['nominal_name']}`" if rec["nominal_name"]
-                       else "_(none shipped)_")
-            nominal_dev = ("same curve" if rec["nominal_name"] == rec["assigned_name"]
-                           else f"{rec['nominal_deviation'] * 100:.2f} %"
-                           if rec["nominal_deviation"] is not None else "—")
+            assigned = (f"`{rec['assigned_name']}`" if rec["assigned_name"]
+                        else "_not implemented (D-89)_")
             assigned_dev = (f"**{rec['assigned_deviation'] * 100:.2f} %**"
                             if rec["assigned_deviation"] is not None else "—")
+            published = (f"{rec['published_error'] * 100:.4f} %"
+                         if rec.get("published_error") is not None else "—")
             out.append(
                 f"| {rec['label']} | `{rec['table']}` | {rec['requirement_form']} "
-                f"| {assigned} | {assigned_dev} | {nominal} | {nominal_dev} | "
+                f"| {assigned} | {assigned_dev} | {published} | "
                 f"{rec['domain']} |")
         out.append("")
         bivariate = [r for r in classes if r["requirement_form"] == "bivariate"]
@@ -3275,12 +3342,15 @@ def render(results: list[FileResult], surface: dict) -> str:
                 "ABOVE the dew point, towards the conventional 180 °F return at "
                 "the high end, the boiler is not condensing at all. T"
                 + rec["detail"].split("; ")[-1][1:] +
-                ". Representing this surface needs a per-edition curve FORM — a "
-                "bounded fit or table over both variables, or EMS — with the "
-                "domain and the fit error pinned; it is not a new coefficient "
-                "for the existing univariate curve. The domain itself must be "
-                "SOURCED or ADJUDICATED in D-89 before it can be implemented: "
-                "nothing here is normative.")
+                ". Representing this surface needs a curve FORM this ruleset "
+                "does not build today — a bounded fit or table over both "
+                "variables, or EMS — with the domain and the fit error pinned; "
+                "it is not a new coefficient for a univariate curve. D-89 "
+                "therefore leaves the class unimplemented and retains the "
+                "requirement verbatim in `part_load_fheatplc`: an object "
+                "carrying the class is audited as unrepresentable. The domain "
+                "must be SOURCED before it can be implemented; nothing here is "
+                "normative.")
             out.append("")
 
     out.append("### The chiller `CAP_FT` / `EIR_FT` surfaces — same curve, different basis?")

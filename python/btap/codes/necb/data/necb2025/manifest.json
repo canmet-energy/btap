@@ -282,6 +282,20 @@
           "edition": "2025",
           "division": "B",
           "table_number": "5.2.12.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.2"
+        },
+        {
+          "tool": "get_table",
+          "code": "necb",
+          "edition": "2025",
+          "division": "B",
+          "table_number": "8.4.6.3"
         }
       ],
       "source_revision": null,
@@ -290,23 +304,23 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "archived",
-      "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256. The curve block was checked against this edition's own part-load and chiller tables 2026-09-09: the archived payloads and the per-table verdicts are in verified_against. The 15 DX cooling, DX heating, VAV fan and SWH curves have no table in this edition at all, so their origin is retained and stated rather than adopted.",
+      "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256. The curve block was checked against this edition's own part-load and chiller tables 2026-09-09: the archived payloads and the per-table verdicts are in verified_against. The 15 DX cooling, DX heating, VAV fan and SWH curves have no table in this edition at all, so their origin is retained and stated rather than adopted. D-89 adopted this edition's own part-load requirement for the reference boiler and furnace and retired the four part-load cubics the curve block carried From NECB 2011 Table 8.4.4.21.-A: BOILER-EFFFPLR [0.3831, 2.0567, -2.6469, 1.2148] and BOILER-EFFFPLR-COND [1.0186, 0.2426, -0.5059, 0.2465] from its Sentence (2), FURNACE-EFFPLR [0.722, 0.8211, -1.0396, 0.5] and FURNACE-EFFPLR-COND [1.0186, 0.2426, -0.5059, 0.2465] from its Sentence (4), each an EIR curve refitted as a PLF cubic. In their place the block ships BOILER-PLF-NONCONDENSING, FURNACE-PLF-ATMOSPHERIC and the code-qualified modulating boiler curve as Table:Lookup objects transcribed from the part-load payloads listed in request, each carrying an implements block that names its table row, the transform PLF = PLR / FHeatPLC(PLR) and its own published interpolation error. The 90.1-sourced heat_rejection block left the snapshot in the same change: nothing read it, and the reference tower fan comes from Table 5.2.12.2 (D-26).",
       "verified_against": [
         {
           "table": "8.4.6.2",
           "edition": "2025",
           "payload": "provenance/vintage_match/8.4.6.2.result.json",
           "sha256": "3e7947d7d80d2b6ba012d7457873cbef6f9463a6bd60805dec1b4cfa0cd4a49c",
-          "verdict": "differs",
-          "detail": "boiler FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. Non-condensing: `BOILER-EFFFPLR` deviates 2.67 % over PLR 0.10-1.00. MODULATING: this edition states the modulating requirement as a polynomial row here, where 2020 stated the same requirement as the ten printed points of Table 8.4.5.2.-B - a change of FORM, not a new class of equipment; against it `BOILER-EFFFPLR` deviates by up to 35.26 %, and no shipped curve is named for the class. CONDENSING: BIVARIATE here, stated over PLR and the boiler return-hot-water temperature T_w,return in degrees F with six coefficients. Over an ASSUMED implementation box PLR 0.10-1.00 by T_w,return 80-180 F - the domain of this comparison, not a Code bound: the edition publishes the six coefficients and no bounds on T_w,return, to be sourced or adjudicated in D-89 - the required PLF ranges 0.9062 to 1.0924, so a normalised- efficiency curve in PLR alone cannot hold it exactly at any T_w; the assigned `BOILER-EFFFPLR` deviates by up to 48.41 % and even `BOILER-EFFFPLR-COND` by 13.44 %. Equipment-class selection is what makes this large: `hvac/efficiency.py` gives EVERY `boilers` row `BOILER-EFFFPLR` and every `furnaces` row `FURNACE-EFFPLR`, so naming a curve `-COND` does not assign it - no row references either condensing curve. The reference building elects modulating equipment: `hvac/reference.py` represents purchased heating by a gas-fired MODULATING boiler, which receives `BOILER-EFFFPLR` like every other. Pending D-89"
+          "verdict": "partial",
+          "detail": "boiler FHeatPLC, three classes. Non-condensing (a 0.082597, b 0.996764, c -0.079361) and Modulating (a 0.01798667, b 0.96742420, c 0.01545455) are ADOPTED under D-89: each row is carried through PLF = PLR / FHeatPLC(PLR), the transform Sentence (1) states, into a Table:Lookup on PLR 0.01-1.00 step 0.01 - BOILER-PLF-NONCONDENSING and BOILER-PLF-MODULATING-necb2025. Their published Linear-interpolation errors against the exact rationals are 1.4824 % and 2.8899 % over the whole span, 0.0550 % and 0.0291 % above PLR 0.10; the worst case sits in the first two intervals either way. The modulating curve's name is code-qualified (D-88): this edition states as a coefficient row what the previous one stated as printed points. Partial for the CONDENSING row, which this edition states over the part-load ratio AND the boiler return-hot-water temperature with six coefficients and no published bounds on that temperature: it is retained in part_load_fheatplc with its deferred_reason, since no reference rule elects condensing equipment and nothing normative fixes the surface's domain"
         },
         {
           "table": "8.4.6.3",
           "edition": "2025",
           "payload": "provenance/vintage_match/8.4.6.3.result.json",
           "sha256": "a3422bb5801644db57b05ab34f0925c5a8d76c2a35c0d986a0bd8a7823a240ff",
-          "verdict": "differs",
-          "detail": "furnace FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. `FURNACE-EFFPLR` deviates 1.16 % (atmospheric), 23.25 % (condensing) and up to 10.27 % against the MODULATING row - which states as a polynomial what 2020 published as the ten points of Table 8.4.5.2.-B, a change of form rather than a new class. `FURNACE-EFFPLR-COND`, named for the condensing class, would deviate 0.49 % but no row uses it. Pending D-89"
+          "verdict": "partial",
+          "detail": "furnace FHeatPLC, three classes. Atmospheric (a 0.0186100, b 1.0942090, c -0.1128190) is ADOPTED under D-89 as FURNACE-PLF-ATMOSPHERIC, a Table:Lookup on PLR 0.10-1.00 step 0.01 carrying PLF = PLR / FHeatPLC(PLR), published Linear-interpolation error 0.0268 %. The grid starts at 0.10 because EnergyPlus floors a fuel heating coil's part-load fraction at 0.7 and the rational crosses 0.7 near PLR 0.055; below 0.10 the Constant extrapolation holds 0.788005 and the departure is bounded by a x Fuel_rated = 1.86 % of rated fuel, stated in D-89. Partial for the Condensing and Modulating rows, both retained in part_load_fheatplc with their deferred_reason: the reference building elects neither"
         },
         {
           "table": "8.4.6.5.-A",
@@ -381,7 +395,7 @@
           "detail": "the governing article: it states the chiller surfaces over t_chws and t_cws in °F, which is what reconciles them with the shipped °C coefficients"
         }
       ],
-      "result_sha256": "40c7cd93583ed3934a5f333ea563e50f8b7294f6e5c2c611bae556b9eef337b9"
+      "result_sha256": "596ceb91c71b39b492121e85e2996f827872a361c30cc36528df37183a1533ec"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

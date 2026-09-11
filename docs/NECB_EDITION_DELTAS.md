@@ -31,7 +31,7 @@ there rather than silently dropped from the comparison.
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 76 | 1 | 0 | 0 | 0 |
 | hvac (`reference_rules.json`) | 320 | 23 | 1 | 1 | 0 |
-| hvac_efficiencies (`efficiencies.json`) | 2333 | 10 | 69 | 97 | 4 |
+| hvac_efficiencies (`efficiencies.json`) | 2545 | 25 | 112 | 289 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
 | shw (`shw_rules.json`) | 76 | 1 | 3 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **45683** | **36** | **75** | **98** | **4** |
+| **Total** | **45895** | **51** | **118** | **290** | **48** |
 
 ## necb2020 → necb2025
 
@@ -98,39 +98,79 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 2513 leaves: 2333 identical, 10 renumbered, 69 changed, 97 added, 4 removed (click to expand)</summary>
+<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3019 leaves: 2545 identical, 25 renumbered, 112 changed, 289 added, 48 removed (click to expand)</summary>
 
 #### Renumbered
 
 | Old path | Old value | New path | New value |
 |---|---|---|---|
+| `curves.0.implements.table` | 8.4.5.2.-B | `curves.0.implements.table` | 8.4.6.2 |
+| `curves.1.implements.table` | 8.4.5.2.-A | `curves.1.implements.table` | 8.4.6.2 |
 | `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7. | `curves.10.notes` | From NECB 2011 Table 8.4.4.21.-E (6).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.7. |
 | `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.7. | `curves.11.notes` | From NECB 2011 Table 8.4.4.21.-E (4).  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.7. |
-| `curves.12.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.). | `curves.12.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for atmospheric furnace.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.3. (Table 8.4.6.3.). |
-| `curves.13.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.3. (Table 8.4.5.3.). | `curves.13.notes` | From NECB 2011 Table 8.4.4.21.-A (4) for condensing furnaces.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.3. (Table 8.4.6.3.). |
-| `curves.20.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.20.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
-| `curves.23.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.23.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
-| `curves.26.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.26.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
-| `curves.29.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.29.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.12.implements.table` | 8.4.5.3 | `curves.12.implements.table` | 8.4.6.3 |
+| `curves.19.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.19.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled centrifugal chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.22.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.22.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled reciprocating chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.25.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.25.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled screw chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
+| `curves.28.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.5.5. (Tables 8.4.5.5.-A, -B and -C). | `curves.28.notes` | From NECB 2011 Table 8.4.4.21.-C (4) for water cooled scroll chiller.  Governing requirement in this edition: Article 8.4.6.5. (Tables 8.4.6.5.-A, -B and -C). |
 | `curves.3.notes` | From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.4. | `curves.3.notes` | From NECB 2011 Table 8.4.4.21.-B (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.4. |
 | `curves.8.notes` | From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.5.7. | `curves.8.notes` | From NECB 2011 Table 8.4.4.21.-E (2).  Converted coefficients for deg. F to deg. C.  Governing requirement in this edition: Article 8.4.6.7. |
+| `part_load_fheatplc.0.article` | 8.4.5.2. | `part_load_fheatplc.0.article` | 8.4.6.2. |
+| `part_load_fheatplc.0.table` | 8.4.5.2.-A | `part_load_fheatplc.0.table` | 8.4.6.2 |
+| `part_load_fheatplc.1.article` | 8.4.5.2. | `part_load_fheatplc.1.article` | 8.4.6.2. |
+| `part_load_fheatplc.1.table` | 8.4.5.2.-A | `part_load_fheatplc.1.table` | 8.4.6.2 |
+| `part_load_fheatplc.2.article` | 8.4.5.2. | `part_load_fheatplc.2.article` | 8.4.6.2. |
+| `part_load_fheatplc.2.table` | 8.4.5.2.-B | `part_load_fheatplc.2.table` | 8.4.6.2 |
+| `part_load_fheatplc.3.archived_payload` | provenance/vintage_match/8.4.5.3.result.json | `part_load_fheatplc.3.archived_payload` | provenance/vintage_match/8.4.6.3.result.json |
+| `part_load_fheatplc.3.article` | 8.4.5.3. | `part_load_fheatplc.3.article` | 8.4.6.3. |
+| `part_load_fheatplc.3.table` | 8.4.5.3 | `part_load_fheatplc.3.table` | 8.4.6.3 |
+| `part_load_fheatplc.4.archived_payload` | provenance/vintage_match/8.4.5.3.result.json | `part_load_fheatplc.4.archived_payload` | provenance/vintage_match/8.4.6.3.result.json |
+| `part_load_fheatplc.4.article` | 8.4.5.3. | `part_load_fheatplc.4.article` | 8.4.6.3. |
+| `part_load_fheatplc.4.table` | 8.4.5.3 | `part_load_fheatplc.4.table` | 8.4.6.3 |
+| `part_load_fheatplc.5.article` | 8.4.5.3. | `part_load_fheatplc.5.article` | 8.4.6.3. |
+| `part_load_fheatplc.5.table` | 8.4.5.2.-B | `part_load_fheatplc.5.table` | 8.4.6.3 |
 
 #### Changed / added / removed
 
 | Path | Kind | Old → New |
 |---|---|---|
-| `boilers.0.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.1.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.2.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.3.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.4.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.5.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `boilers.6.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N → NECB 2025 Table 5.2.12.1.-N |
-| `curves.0.notes` | changed | From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B). → From NECB 2011 Table 8.4.4.21.-A (2) for non-condensing boiler.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.2. (Table 8.4.6.2.). |
-| `curves.1.notes` | changed | From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.5.2. (Tables 8.4.5.2.-A and 8.4.5.2.-B). → From NECB 2011 Table 8.4.4.21.-A (2) for condensing boilers.  Converted EIR curve to PLF via curve fit.  Governing requirement in this edition: Article 8.4.6.2. (Table 8.4.6.2.). |
-| `furnaces.0.notes` | changed | From NECB 2020 Table 5.2.12.1.-O → NECB 2025 Table 5.2.12.1.-O |
-| `furnaces.1.notes` | changed | From NECB 2020 Table 5.2.12.1.-O → NECB 2025 Table 5.2.12.1.-O |
-| `furnaces.2.notes` | changed | Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O → Added to capture any capacities outside the range specified in NECB 2025 Table 5.2.12.1.-O |
+| `boilers.0.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.1.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.2.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.3.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.4.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.5.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `boilers.6.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
+| `curves.0.implements.grid` | changed | the ten printed points, PLR 0.10 to 1.00 step 0.10 → PLR 0.01 to 1.00, step 0.01 (100 nodes) |
+| `curves.0.implements.max_error_vs_exact` | changed | 0.0 → 0.028898647 |
+| `curves.0.implements.row` | changed | Qpartload/Qdesign 0.1 to 1.0 → Modulating |
+| `curves.0.maximum_dependent_variable_output` | changed | 1.0 → 0.999135 |
+| `curves.0.minimum_dependent_variable_output` | changed | 0.847458 → 0.361501 |
+| `curves.0.minimum_independent_variable_1` | changed | 0.1 → 0.01 |
+| `curves.0.name` | changed | BOILER-PLF-MODULATING-necb2020 → BOILER-PLF-MODULATING-necb2025 |
+| `curves.0.points.0.0` | changed | 0.1 → 0.01 |
+| `curves.0.points.0.1` | changed | 0.847458 → 0.361501 |
+| `curves.0.points.1.0` | changed | 0.2 → 0.02 |
+| `curves.0.points.1.1` | changed | 0.956938 → 0.535599 |
+| `curves.0.points.2.0` | changed | 0.3 → 0.03 |
+| `curves.0.points.2.1` | changed | 0.974026 → 0.637982 |
+| `curves.0.points.3.0` | changed | 0.4 → 0.04 |
+| `curves.0.points.3.1` | changed | 0.982801 → 0.705363 |
+| `curves.0.points.4.0` | changed | 0.5 → 0.05 |
+| `curves.0.points.4.1` | changed | 0.988142 → 0.753052 |
+| `curves.0.points.5.0` | changed | 0.6 → 0.06 |
+| `curves.0.points.5.1` | changed | 0.991736 → 0.788563 |
+| `curves.0.points.6.0` | changed | 0.7 → 0.07 |
+| `curves.0.points.6.1` | changed | 0.994318 → 0.816021 |
+| `curves.0.points.7.0` | changed | 0.8 → 0.08 |
+| `curves.0.points.7.1` | changed | 0.997506 → 0.837876 |
+| `curves.0.points.8.0` | changed | 0.9 → 0.09 |
+| `curves.0.points.8.1` | changed | 0.99889 → 0.855676 |
+| `curves.0.points.9.0` | changed | 1.0 → 0.1 |
+| `curves.0.points.9.1` | changed | 1.0 → 0.870446 |
+| `furnaces.0.notes` | changed | From NECB 2020 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). |
+| `furnaces.1.notes` | changed | From NECB 2020 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). |
+| `furnaces.2.notes` | changed | Added to capture any capacities outside the range specified in the NECB2020 codes Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). → Added to capture any capacities outside the range specified in NECB 2025 Table 5.2.12.1.-O. class: adjudicated legacy default (D-89). |
 | `heat_pumps.0.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
 | `heat_pumps.1.notes` | changed | NECB 2020 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. → NECB 2025 Table 5.2.12.1.-A: small air-cooled heat pumps are SEER 15. |
 | `heat_pumps.10.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
@@ -162,6 +202,24 @@ there rather than silently dropped from the comparison.
 | `heat_pumps_heating.7.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `heat_pumps_heating.8.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `heat_pumps_heating.9.notes` | changed | From NECB 2020, Table  5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
+| `part_load_curves.boiler.article` | changed | NECB 2020 Table 5.2.12.1.-N; 8.4.5.2. → NECB 2025 Table 5.2.12.1.-N; 8.4.6.2. |
+| `part_load_curves.boiler.classes.modulating` | changed | BOILER-PLF-MODULATING-necb2020 → BOILER-PLF-MODULATING-necb2025 |
+| `part_load_curves.furnace.article` | changed | NECB 2020 Table 5.2.12.1.-O; 8.4.5.3. → NECB 2025 Table 5.2.12.1.-O; 8.4.6.3. |
+| `part_load_fheatplc.0.archived_payload` | changed | provenance/vintage_match/8.4.5.2.-A.result.json → provenance/vintage_match/8.4.6.2.result.json |
+| `part_load_fheatplc.1.archived_payload` | changed | provenance/vintage_match/8.4.5.2.-A.result.json → provenance/vintage_match/8.4.6.2.result.json |
+| `part_load_fheatplc.1.coefficients.0` | changed | 0.00533 → -0.09438953 |
+| `part_load_fheatplc.1.coefficients.1` | changed | 0.904 → 0.90322417 |
+| `part_load_fheatplc.1.coefficients.2` | changed | 0.09066 → 0.01546033 |
+| `part_load_fheatplc.1.form` | changed | quadratic → bivariate_quadratic |
+| `part_load_fheatplc.1.formula` | changed | FHeatPLC = a + b(Qpartload/Qdesign) + c(Qpartload/Qdesign)^2 → FHeatPLC = a + b(Qpartload/Qdesign) + c(Qpartload/Qdesign)^2 + d(Tw,return) + e(Tw,return)^2 + f(Qpartload/Qdesign)(Tw,return) |
+| `part_load_fheatplc.2.archived_payload` | changed | provenance/vintage_match/8.4.5.2.-B.result.json → provenance/vintage_match/8.4.6.2.result.json |
+| `part_load_fheatplc.2.form` | changed | points → quadratic |
+| `part_load_fheatplc.2.formula` | changed | FHeatPLC values are those listed in the table → FHeatPLC = a + b(Qpartload/Qdesign) + c(Qpartload/Qdesign)^2 |
+| `part_load_fheatplc.2.row` | changed | Qpartload/Qdesign 0.1 to 1.0 → Modulating |
+| `part_load_fheatplc.5.archived_payload` | changed | provenance/vintage_match/8.4.5.2.-B.result.json → provenance/vintage_match/8.4.6.3.result.json |
+| `part_load_fheatplc.5.form` | changed | points → quadratic |
+| `part_load_fheatplc.5.formula` | changed | FHeatPLC values are those listed in the table → FHeatPLC = a + b(Qpartload/Qrated) + c(Qpartload/Qrated)^2 |
+| `part_load_fheatplc.5.row` | changed | Qpartload/Qrated 0.1 to 1.0 → Modulating |
 | `unitary_acs.0.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `unitary_acs.1.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
 | `unitary_acs.10.notes` | changed | From NECB 2020, Table 5.2.12.1.-A → NECB 2025 Table 5.2.12.1.-A |
@@ -208,6 +266,186 @@ there rather than silently dropped from the comparison.
 | `chillers.7.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.8.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.9.notes` | added | — → capacity in ton, full load eff in kW/ton |
+| `curves.0.points.10.0` | added | — → 0.11 |
+| `curves.0.points.10.1` | added | — → 0.882894 |
+| `curves.0.points.11.0` | added | — → 0.12 |
+| `curves.0.points.11.1` | added | — → 0.893521 |
+| `curves.0.points.12.0` | added | — → 0.13 |
+| `curves.0.points.12.1` | added | — → 0.902696 |
+| `curves.0.points.13.0` | added | — → 0.14 |
+| `curves.0.points.13.1` | added | — → 0.910694 |
+| `curves.0.points.14.0` | added | — → 0.15 |
+| `curves.0.points.14.1` | added | — → 0.917723 |
+| `curves.0.points.15.0` | added | — → 0.16 |
+| `curves.0.points.15.1` | added | — → 0.923947 |
+| `curves.0.points.16.0` | added | — → 0.17 |
+| `curves.0.points.16.1` | added | — → 0.929493 |
+| `curves.0.points.17.0` | added | — → 0.18 |
+| `curves.0.points.17.1` | added | — → 0.934464 |
+| `curves.0.points.18.0` | added | — → 0.19 |
+| `curves.0.points.18.1` | added | — → 0.938943 |
+| `curves.0.points.19.0` | added | — → 0.2 |
+| `curves.0.points.19.1` | added | — → 0.942997 |
+| `curves.0.points.20.0` | added | — → 0.21 |
+| `curves.0.points.20.1` | added | — → 0.946682 |
+| `curves.0.points.21.0` | added | — → 0.22 |
+| `curves.0.points.21.1` | added | — → 0.950045 |
+| `curves.0.points.22.0` | added | — → 0.23 |
+| `curves.0.points.22.1` | added | — → 0.953124 |
+| `curves.0.points.23.0` | added | — → 0.24 |
+| `curves.0.points.23.1` | added | — → 0.955952 |
+| `curves.0.points.24.0` | added | — → 0.25 |
+| `curves.0.points.24.1` | added | — → 0.958557 |
+| `curves.0.points.25.0` | added | — → 0.26 |
+| `curves.0.points.25.1` | added | — → 0.960964 |
+| `curves.0.points.26.0` | added | — → 0.27 |
+| `curves.0.points.26.1` | added | — → 0.963192 |
+| `curves.0.points.27.0` | added | — → 0.28 |
+| `curves.0.points.27.1` | added | — → 0.965261 |
+| `curves.0.points.28.0` | added | — → 0.29 |
+| `curves.0.points.28.1` | added | — → 0.967184 |
+| `curves.0.points.29.0` | added | — → 0.3 |
+| `curves.0.points.29.1` | added | — → 0.968977 |
+| `curves.0.points.30.0` | added | — → 0.31 |
+| `curves.0.points.30.1` | added | — → 0.970651 |
+| `curves.0.points.31.0` | added | — → 0.32 |
+| `curves.0.points.31.1` | added | — → 0.972216 |
+| `curves.0.points.32.0` | added | — → 0.33 |
+| `curves.0.points.32.1` | added | — → 0.973682 |
+| `curves.0.points.33.0` | added | — → 0.34 |
+| `curves.0.points.33.1` | added | — → 0.975057 |
+| `curves.0.points.34.0` | added | — → 0.35 |
+| `curves.0.points.34.1` | added | — → 0.976349 |
+| `curves.0.points.35.0` | added | — → 0.36 |
+| `curves.0.points.35.1` | added | — → 0.977564 |
+| `curves.0.points.36.0` | added | — → 0.37 |
+| `curves.0.points.36.1` | added | — → 0.978708 |
+| `curves.0.points.37.0` | added | — → 0.38 |
+| `curves.0.points.37.1` | added | — → 0.979787 |
+| `curves.0.points.38.0` | added | — → 0.39 |
+| `curves.0.points.38.1` | added | — → 0.980805 |
+| `curves.0.points.39.0` | added | — → 0.4 |
+| `curves.0.points.39.1` | added | — → 0.981766 |
+| `curves.0.points.40.0` | added | — → 0.41 |
+| `curves.0.points.40.1` | added | — → 0.982675 |
+| `curves.0.points.41.0` | added | — → 0.42 |
+| `curves.0.points.41.1` | added | — → 0.983535 |
+| `curves.0.points.42.0` | added | — → 0.43 |
+| `curves.0.points.42.1` | added | — → 0.98435 |
+| `curves.0.points.43.0` | added | — → 0.44 |
+| `curves.0.points.43.1` | added | — → 0.985122 |
+| `curves.0.points.44.0` | added | — → 0.45 |
+| `curves.0.points.44.1` | added | — → 0.985854 |
+| `curves.0.points.45.0` | added | — → 0.46 |
+| `curves.0.points.45.1` | added | — → 0.986549 |
+| `curves.0.points.46.0` | added | — → 0.47 |
+| `curves.0.points.46.1` | added | — → 0.987208 |
+| `curves.0.points.47.0` | added | — → 0.48 |
+| `curves.0.points.47.1` | added | — → 0.987835 |
+| `curves.0.points.48.0` | added | — → 0.49 |
+| `curves.0.points.48.1` | added | — → 0.988431 |
+| `curves.0.points.49.0` | added | — → 0.5 |
+| `curves.0.points.49.1` | added | — → 0.988998 |
+| `curves.0.points.50.0` | added | — → 0.51 |
+| `curves.0.points.50.1` | added | — → 0.989537 |
+| `curves.0.points.51.0` | added | — → 0.52 |
+| `curves.0.points.51.1` | added | — → 0.99005 |
+| `curves.0.points.52.0` | added | — → 0.53 |
+| `curves.0.points.52.1` | added | — → 0.990538 |
+| `curves.0.points.53.0` | added | — → 0.54 |
+| `curves.0.points.53.1` | added | — → 0.991003 |
+| `curves.0.points.54.0` | added | — → 0.55 |
+| `curves.0.points.54.1` | added | — → 0.991447 |
+| `curves.0.points.55.0` | added | — → 0.56 |
+| `curves.0.points.55.1` | added | — → 0.991869 |
+| `curves.0.points.56.0` | added | — → 0.57 |
+| `curves.0.points.56.1` | added | — → 0.992271 |
+| `curves.0.points.57.0` | added | — → 0.58 |
+| `curves.0.points.57.1` | added | — → 0.992655 |
+| `curves.0.points.58.0` | added | — → 0.59 |
+| `curves.0.points.58.1` | added | — → 0.993021 |
+| `curves.0.points.59.0` | added | — → 0.6 |
+| `curves.0.points.59.1` | added | — → 0.99337 |
+| `curves.0.points.60.0` | added | — → 0.61 |
+| `curves.0.points.60.1` | added | — → 0.993702 |
+| `curves.0.points.61.0` | added | — → 0.62 |
+| `curves.0.points.61.1` | added | — → 0.994019 |
+| `curves.0.points.62.0` | added | — → 0.63 |
+| `curves.0.points.62.1` | added | — → 0.994322 |
+| `curves.0.points.63.0` | added | — → 0.64 |
+| `curves.0.points.63.1` | added | — → 0.99461 |
+| `curves.0.points.64.0` | added | — → 0.65 |
+| `curves.0.points.64.1` | added | — → 0.994885 |
+| `curves.0.points.65.0` | added | — → 0.66 |
+| `curves.0.points.65.1` | added | — → 0.995147 |
+| `curves.0.points.66.0` | added | — → 0.67 |
+| `curves.0.points.66.1` | added | — → 0.995397 |
+| `curves.0.points.67.0` | added | — → 0.68 |
+| `curves.0.points.67.1` | added | — → 0.995635 |
+| `curves.0.points.68.0` | added | — → 0.69 |
+| `curves.0.points.68.1` | added | — → 0.995862 |
+| `curves.0.points.69.0` | added | — → 0.7 |
+| `curves.0.points.69.1` | added | — → 0.996078 |
+| `curves.0.points.70.0` | added | — → 0.71 |
+| `curves.0.points.70.1` | added | — → 0.996284 |
+| `curves.0.points.71.0` | added | — → 0.72 |
+| `curves.0.points.71.1` | added | — → 0.996479 |
+| `curves.0.points.72.0` | added | — → 0.73 |
+| `curves.0.points.72.1` | added | — → 0.996666 |
+| `curves.0.points.73.0` | added | — → 0.74 |
+| `curves.0.points.73.1` | added | — → 0.996843 |
+| `curves.0.points.74.0` | added | — → 0.75 |
+| `curves.0.points.74.1` | added | — → 0.997012 |
+| `curves.0.points.75.0` | added | — → 0.76 |
+| `curves.0.points.75.1` | added | — → 0.997172 |
+| `curves.0.points.76.0` | added | — → 0.77 |
+| `curves.0.points.76.1` | added | — → 0.997324 |
+| `curves.0.points.77.0` | added | — → 0.78 |
+| `curves.0.points.77.1` | added | — → 0.997468 |
+| `curves.0.points.78.0` | added | — → 0.79 |
+| `curves.0.points.78.1` | added | — → 0.997605 |
+| `curves.0.points.79.0` | added | — → 0.8 |
+| `curves.0.points.79.1` | added | — → 0.997734 |
+| `curves.0.points.80.0` | added | — → 0.81 |
+| `curves.0.points.80.1` | added | — → 0.997856 |
+| `curves.0.points.81.0` | added | — → 0.82 |
+| `curves.0.points.81.1` | added | — → 0.997972 |
+| `curves.0.points.82.0` | added | — → 0.83 |
+| `curves.0.points.82.1` | added | — → 0.998082 |
+| `curves.0.points.83.0` | added | — → 0.84 |
+| `curves.0.points.83.1` | added | — → 0.998185 |
+| `curves.0.points.84.0` | added | — → 0.85 |
+| `curves.0.points.84.1` | added | — → 0.998282 |
+| `curves.0.points.85.0` | added | — → 0.86 |
+| `curves.0.points.85.1` | added | — → 0.998373 |
+| `curves.0.points.86.0` | added | — → 0.87 |
+| `curves.0.points.86.1` | added | — → 0.998458 |
+| `curves.0.points.87.0` | added | — → 0.88 |
+| `curves.0.points.87.1` | added | — → 0.998539 |
+| `curves.0.points.88.0` | added | — → 0.89 |
+| `curves.0.points.88.1` | added | — → 0.998613 |
+| `curves.0.points.89.0` | added | — → 0.9 |
+| `curves.0.points.89.1` | added | — → 0.998683 |
+| `curves.0.points.90.0` | added | — → 0.91 |
+| `curves.0.points.90.1` | added | — → 0.998748 |
+| `curves.0.points.91.0` | added | — → 0.92 |
+| `curves.0.points.91.1` | added | — → 0.998808 |
+| `curves.0.points.92.0` | added | — → 0.93 |
+| `curves.0.points.92.1` | added | — → 0.998864 |
+| `curves.0.points.93.0` | added | — → 0.94 |
+| `curves.0.points.93.1` | added | — → 0.998915 |
+| `curves.0.points.94.0` | added | — → 0.95 |
+| `curves.0.points.94.1` | added | — → 0.998962 |
+| `curves.0.points.95.0` | added | — → 0.96 |
+| `curves.0.points.95.1` | added | — → 0.999004 |
+| `curves.0.points.96.0` | added | — → 0.97 |
+| `curves.0.points.96.1` | added | — → 0.999043 |
+| `curves.0.points.97.0` | added | — → 0.98 |
+| `curves.0.points.97.1` | added | — → 0.999077 |
+| `curves.0.points.98.0` | added | — → 0.99 |
+| `curves.0.points.98.1` | added | — → 0.999108 |
+| `curves.0.points.99.0` | added | — → 1.0 |
+| `curves.0.points.99.1` | added | — → 0.999135 |
 | `heat_pumps_heating.2.low_temp_note` | added | — → COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational) |
 | `heat_pumps_heating.2.minimum_coefficient_of_performance_heating_low_temp` | added | — → 2.25 |
 | `heat_pumps_heating.3.low_temp_note` | added | — → COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational) |
@@ -224,6 +462,18 @@ there rather than silently dropped from the comparison.
 | `heat_pumps_heating.8.minimum_coefficient_of_performance_heating_low_temp` | added | — → 2.05 |
 | `heat_pumps_heating.9.low_temp_note` | added | — → COPh at -8.3C db / -9.4C wb per NECB 2025 Table 5.2.12.1.-A (informational) |
 | `heat_pumps_heating.9.minimum_coefficient_of_performance_heating_low_temp` | added | — → 2.05 |
+| `part_load_fheatplc.1.coefficients.3` | added | — → 0.00159778 |
+| `part_load_fheatplc.1.coefficients.4` | added | — → -6.45e-06 |
+| `part_load_fheatplc.1.coefficients.5` | added | — → 0.00111432 |
+| `part_load_fheatplc.1.variables.1` | added | — → Tw,return (degF) |
+| `part_load_fheatplc.2.coefficients.0` | added | — → 0.01798667 |
+| `part_load_fheatplc.2.coefficients.1` | added | — → 0.9674242 |
+| `part_load_fheatplc.2.coefficients.2` | added | — → 0.01545455 |
+| `part_load_fheatplc.2.points` | added | — → null |
+| `part_load_fheatplc.5.coefficients.0` | added | — → 0.01798667 |
+| `part_load_fheatplc.5.coefficients.1` | added | — → 0.9674242 |
+| `part_load_fheatplc.5.coefficients.2` | added | — → 0.01545455 |
+| `part_load_fheatplc.5.points` | added | — → null |
 | `plant_heat_pumps_heating.0.condition` | added | — → EAT 8C db/6C wb |
 | `plant_heat_pumps_heating.0.equipment_type` | added | — → Air-source heat pump (plant, heating mode) |
 | `plant_heat_pumps_heating.0.minimum_cop_lwt_40c` | added | — → 3.35 |
@@ -285,10 +535,54 @@ there rather than silently dropped from the comparison.
 | `unitary_acs.29.notes` | added | — → NECB 2025 Table 5.2.12.1.-A: single-phase DOE 10 CFR 430 App. M1 class (SEER2). Not selected by the engine (subcategory). |
 | `unitary_acs.29.start_date` | added | — → 9/9/1919 |
 | `unitary_acs.29.subcategory` | added | — → Split System (single-phase) |
+| `curves.0.implements.error_grid` | removed | exact at all ten printed points (error 0 by construction); the Code publishes no value between or below them, so there is no exact function to measure an interpolation error against. → — |
 | `heat_pumps.0.minimum_full_load_efficiency` | removed | null → — |
 | `heat_pumps.1.minimum_full_load_efficiency` | removed | null → — |
 | `heat_pumps.2.minimum_full_load_efficiency` | removed | null → — |
 | `heat_pumps.3.minimum_full_load_efficiency` | removed | null → — |
+| `part_load_fheatplc.1.deferred_reason` | removed | not implemented: no reference rule elects condensing equipment, so no model object carries this class. Retained here as the edition's published requirement (D-89). → — |
+| `part_load_fheatplc.2.coefficients` | removed | null → — |
+| `part_load_fheatplc.2.points.0.0` | removed | 0.1 → — |
+| `part_load_fheatplc.2.points.0.1` | removed | 0.118 → — |
+| `part_load_fheatplc.2.points.1.0` | removed | 0.2 → — |
+| `part_load_fheatplc.2.points.1.1` | removed | 0.209 → — |
+| `part_load_fheatplc.2.points.2.0` | removed | 0.3 → — |
+| `part_load_fheatplc.2.points.2.1` | removed | 0.308 → — |
+| `part_load_fheatplc.2.points.3.0` | removed | 0.4 → — |
+| `part_load_fheatplc.2.points.3.1` | removed | 0.407 → — |
+| `part_load_fheatplc.2.points.4.0` | removed | 0.5 → — |
+| `part_load_fheatplc.2.points.4.1` | removed | 0.506 → — |
+| `part_load_fheatplc.2.points.5.0` | removed | 0.6 → — |
+| `part_load_fheatplc.2.points.5.1` | removed | 0.605 → — |
+| `part_load_fheatplc.2.points.6.0` | removed | 0.7 → — |
+| `part_load_fheatplc.2.points.6.1` | removed | 0.704 → — |
+| `part_load_fheatplc.2.points.7.0` | removed | 0.8 → — |
+| `part_load_fheatplc.2.points.7.1` | removed | 0.802 → — |
+| `part_load_fheatplc.2.points.8.0` | removed | 0.9 → — |
+| `part_load_fheatplc.2.points.8.1` | removed | 0.901 → — |
+| `part_load_fheatplc.2.points.9.0` | removed | 1.0 → — |
+| `part_load_fheatplc.2.points.9.1` | removed | 1.0 → — |
+| `part_load_fheatplc.5.coefficients` | removed | null → — |
+| `part_load_fheatplc.5.points.0.0` | removed | 0.1 → — |
+| `part_load_fheatplc.5.points.0.1` | removed | 0.118 → — |
+| `part_load_fheatplc.5.points.1.0` | removed | 0.2 → — |
+| `part_load_fheatplc.5.points.1.1` | removed | 0.209 → — |
+| `part_load_fheatplc.5.points.2.0` | removed | 0.3 → — |
+| `part_load_fheatplc.5.points.2.1` | removed | 0.308 → — |
+| `part_load_fheatplc.5.points.3.0` | removed | 0.4 → — |
+| `part_load_fheatplc.5.points.3.1` | removed | 0.407 → — |
+| `part_load_fheatplc.5.points.4.0` | removed | 0.5 → — |
+| `part_load_fheatplc.5.points.4.1` | removed | 0.506 → — |
+| `part_load_fheatplc.5.points.5.0` | removed | 0.6 → — |
+| `part_load_fheatplc.5.points.5.1` | removed | 0.605 → — |
+| `part_load_fheatplc.5.points.6.0` | removed | 0.7 → — |
+| `part_load_fheatplc.5.points.6.1` | removed | 0.704 → — |
+| `part_load_fheatplc.5.points.7.0` | removed | 0.8 → — |
+| `part_load_fheatplc.5.points.7.1` | removed | 0.802 → — |
+| `part_load_fheatplc.5.points.8.0` | removed | 0.9 → — |
+| `part_load_fheatplc.5.points.8.1` | removed | 0.901 → — |
+| `part_load_fheatplc.5.points.9.0` | removed | 1.0 → — |
+| `part_load_fheatplc.5.points.9.1` | removed | 1.0 → — |
 
 </details>
 

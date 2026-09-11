@@ -679,7 +679,9 @@ class TestEquipmentFamilyMapping(unittest.TestCase):
 
 
 class TestModulatingBoilerAndFurnace(unittest.TestCase):
-    """`boiler_modulating` was declared and never consumed. It is now."""
+    """`boiler_modulating` was declared and never consumed. It is now — and
+    since D-89 the comparison follows the snapshot's own class MAP rather than
+    one curve name every row happened to carry."""
 
     TEN_POINT = {
         "headers": ["Qpartload, Qrated and Qdesign (Part-Load Ratio)", "FHeatPLC"],
@@ -695,24 +697,68 @@ class TestModulatingBoilerAndFurnace(unittest.TestCase):
         "rows": [
             {"Type of Boiler": "Non-condensing", "a": "0.082597",
              "b": "0.996764", "c": "-0.079361"},
+            {"Type of Boiler": "Condensing", "a": "0.00533",
+             "b": "0.904", "c": "0.09066"},
         ],
     }
-    SHIPPED_CURVE = {
-        "name": "BOILER-EFFFPLR", "form": "Cubic",
-        "coeff_1": 0.3831, "coeff_2": 2.0567, "coeff_3": -2.6469,
-        "coeff_4": 1.2148, "coeff_5": None, "coeff_6": None, "coeff_7": None,
-        "coeff_8": None, "coeff_9": None, "coeff_10": None,
-    }
+    NON_CONDENSING = (0.082597, 0.996764, -0.079361)
+
+    @classmethod
+    def _lookup(cls, name, points, table, klass, error):
+        return {
+            "name": name, "form": "TableLookup", "interpolation": "Linear",
+            "extrapolation": "Constant", "points": points,
+            "minimum_independent_variable_1": points[0][0],
+            "maximum_independent_variable_1": points[-1][0],
+            "implements": {"equipment": "boiler", "class": klass,
+                           "table": table, "row": klass,
+                           "transform": "PLF = PLR / FHeatPLC(PLR)",
+                           "max_error_vs_exact": error},
+        }
+
+    def _shipped(self):
+        a, b, c = self.NON_CONDENSING
+        non_condensing = [[round(0.01 * i, 2),
+                           round((0.01 * i) / (a + b * 0.01 * i
+                                               + c * (0.01 * i) ** 2), 6)]
+                          for i in range(1, 101)]
+        modulating = [[plr, round(plr / f, 6)]
+                      for plr, f in [(0.1, 0.118), (0.2, 0.209), (0.3, 0.308),
+                                     (0.4, 0.407), (0.5, 0.506), (0.6, 0.605),
+                                     (0.7, 0.704), (0.8, 0.802), (0.9, 0.901),
+                                     (1.0, 1.0)]]
+        return {
+            "curves": [
+                self._lookup("BOILER-PLF-NONCONDENSING", non_condensing,
+                             "8.4.5.2.-A", "non_condensing", 0.014823855),
+                self._lookup("BOILER-PLF-MODULATING-necb2020", modulating,
+                             "8.4.5.2.-B", "modulating", 0.0),
+            ],
+            "boilers": [{"fuel_type": "Gas", "fluid_type": "Hot Water",
+                         "part_load_curve_class": "non_condensing"}],
+            "part_load_curves": {
+                "boiler": {"article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+                           "classes": {
+                               "non_condensing": "BOILER-PLF-NONCONDENSING",
+                               "modulating": "BOILER-PLF-MODULATING-necb2020",
+                               "not_applicable": None}},
+            },
+            "part_load_fheatplc": [
+                {"equipment": "boiler", "class": "non_condensing",
+                 "reachable": True},
+                {"equipment": "boiler", "class": "modulating", "reachable": True},
+                {"equipment": "boiler", "class": "condensing", "reachable": False,
+                 "deferred_reason": "not implemented: no reference rule elects "
+                                    "condensing equipment."},
+            ],
+        }
 
     def _records(self):
         with TemporaryDirectory() as tmp:
             data = Path(tmp) / "necb2020"
             data.mkdir(parents=True)
-            (data / "efficiencies.json").write_text(json.dumps({
-                "curves": [self.SHIPPED_CURVE],
-                "boilers": [{"fuel_type": "Gas", "fluid_type": "Hot Water",
-                             "efffplr": "BOILER-EFFFPLR"}],
-            }), encoding="utf-8")
+            (data / "efficiencies.json").write_text(json.dumps(self._shipped()),
+                                                    encoding="utf-8")
             archive = data / "provenance" / gen.ARCHIVE_DIRNAME
             archive.mkdir(parents=True)
             (archive / "8.4.5.2.-A.result.json").write_text(
@@ -738,27 +784,46 @@ class TestModulatingBoilerAndFurnace(unittest.TestCase):
         self.assertEqual(modulating["requirement_form"], "tabulated")
         self.assertEqual(modulating["table"], "8.4.5.2.-B")
 
-    def test_the_modulating_deviation_is_the_33_percent_one(self):
+    def test_the_modulating_class_now_gets_its_own_curve(self):
+        """The 33.5 % finding this comparison used to report was the
+        non-condensing cubic being handed to a modulating boiler. D-89 maps the
+        class to its own curve, so the requirement is reproduced exactly."""
         modulating = next(r for r in self._records()
                           if r["equipment_class"] == "Modulating")
-        # PLF = PLR/FHeatPLC; the shipped non-condensing cubic gives 0.5635 at
-        # PLR 0.1 where the modulating requirement is 0.1/0.118 = 0.8475.
-        self.assertAlmostEqual(modulating["assigned_deviation"], 0.3351, places=3)
+        self.assertEqual("BOILER-PLF-MODULATING-necb2020",
+                         modulating["assigned_name"])
+        self.assertAlmostEqual(modulating["assigned_deviation"], 0.0, places=5)
+        self.assertEqual("identical to rounding", modulating["verdict"])
 
-    def test_the_curve_compared_is_the_one_every_row_is_actually_given(self):
-        for record in self._records():
-            self.assertEqual(record["assigned_name"], "BOILER-EFFFPLR")
+    def test_the_curve_compared_is_the_one_the_class_map_assigns(self):
+        assigned = {r["equipment_class"]: r["assigned_name"]
+                    for r in self._records()}
+        self.assertEqual("BOILER-PLF-NONCONDENSING", assigned["Non-condensing"])
+        self.assertEqual("BOILER-PLF-MODULATING-necb2020", assigned["Modulating"])
 
-    def test_no_shipped_curve_is_named_for_the_modulating_class(self):
-        modulating = next(r for r in self._records()
-                          if r["equipment_class"] == "Modulating")
-        self.assertIsNone(modulating["nominal_name"])
-        self.assertIn("no curve named for this class", modulating["detail"])
+    def test_a_class_the_map_does_not_carry_is_reported_not_implemented(self):
+        condensing = next(r for r in self._records()
+                          if r["equipment_class"] == "Condensing")
+        self.assertIsNone(condensing["assigned_name"])
+        self.assertEqual("not implemented (D-89)", condensing["verdict"])
+        self.assertIn("not implemented (D-89)", condensing["detail"])
+        self.assertIn("no reference rule elects condensing equipment",
+                      condensing["detail"])
 
-    def test_the_non_condensing_class_is_the_small_2_67_percent_one(self):
+    def test_the_non_condensing_class_reproduces_its_own_requirement(self):
         record = next(r for r in self._records()
                       if r["equipment_class"] == "Non-condensing")
-        self.assertAlmostEqual(record["assigned_deviation"], 0.0267, places=3)
+        self.assertAlmostEqual(record["assigned_deviation"], 0.0, places=5)
+        # and the snapshot's own between-node interpolation error is carried
+        # through to the document rather than recomputed there
+        self.assertAlmostEqual(record["published_error"], 0.014823855, places=9)
+
+    def test_a_table_lookup_is_evaluated_the_way_the_engine_would(self):
+        points = [(0.0, 0.0), (1.0, 1.0)]
+        self.assertAlmostEqual(gen._table_lookup(points, 0.25), 0.25)
+        # Constant extrapolation outside the grid, both ends
+        self.assertAlmostEqual(gen._table_lookup(points, -5.0), 0.0)
+        self.assertAlmostEqual(gen._table_lookup(points, 5.0), 1.0)
 
     def test_plf_is_plr_over_fheatplc(self):
         self.assertAlmostEqual(
