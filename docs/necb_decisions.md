@@ -5129,3 +5129,34 @@ selection; the modulating furnace (unreachable; no representation
 shipped, a WARNING if ever selected); Table C-1 and exterior lighting
 (behind their own matching work); DF-1 (unmet hours at 01-baseboard-gas)
 remains open and is reported, not claimed fixed, if R-O moves it.
+
+**Amendment (2026-09-11, from the R-O attribution): the legacy boiler
+curve never reached EnergyPlus.** OpenStudio's forward translator
+(`ForwardTranslateBoilerHotWater.cpp`, v3.11.0) writes a
+`Boiler:HotWater` normalized-efficiency curve into the IDF only when the
+Efficiency Curve Temperature Evaluation Variable is set, and logs nothing
+when it is not. The pinned gem (`hvac_systems.rb:539-600`) and the
+pre-D-89 Python never set that field, so every legacy run, every oracle
+golden and every frozen baseline before R-O simulated reference boilers
+with NO part-load penalty (gas ÷ heat = 1/η at every timestep) while the
+audit reported "curve BOILER-EFFFPLR". Proven three ways on
+`corpus-annual-01-baseboard-gas`: the legacy reference IDF's curve field
+is blank; the translator source; and the legacy IDF re-run with the cubic
+wired in by hand. Setting `EnteringBoiler` here is therefore not "free":
+it is what activates the part-load curve for the first time. The week's
+reference boiler gas decomposes as 1151.5 kWh (no curve, the frozen
+legacy) → 1743.7 kWh with the legacy cubic active (+51.4 %) → 1859.3 kWh
+with this edition's table (+6.6 % more); the heat delivered is identical
+(1036 kWh), and the engine identity fuel = load ÷ (η × PLF(PLR)) holds at
+every timestep against the table. The vintage-match document's
+"2.67 %" was the content deviation of a curve that never acted; it stays
+correct as a statement about the curves and is now labelled with this
+finding. The furnace curve was always translated (no such gate on
+`Coil:Heating:Gas`), so the atmospheric change is the small one predicted.
+Consequence: the reference boilers in the corpus are oversized (PLR mostly
+below 0.2, where the Code's FHeatPLC intercept a = 0.0826 dominates), so
+reference heating gas rises 29–50 % in the annual scenarios and the
+proposed buildings' ratios fall accordingly; the NECB 2025 determination
+crosses the tier-2 boundary (76.0 → 67.5 % of target) and its GHG level
+moves F → E. This is the Code's own curve acting on the reference for the
+first time, attributed per scenario in the plan log, not a defect.
