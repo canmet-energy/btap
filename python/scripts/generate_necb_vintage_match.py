@@ -2428,9 +2428,6 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
         assigned_worst = samples = None
         if assigned_curve:
             assigned_worst, samples = _worst_against(assigned_curve, requirement)
-        nominal_name = assigned_name
-        nominal_worst = None
-
         if requirement["form"] == "bivariate":
             relation = ("BIVARIATE: FHeatPLC is stated over PLR **and** the "
                         "boiler return-hot-water temperature T_w,return (°F, six "
@@ -2502,7 +2499,6 @@ def fheatplc_records(edition_id: str, kind: str, curves: dict) -> list[dict]:
             "points": samples or [],
             "equipment_class": klass, "equipment": equipment,
             "assigned_name": assigned_name, "assigned_deviation": assigned_worst,
-            "nominal_name": nominal_name, "nominal_deviation": nominal_worst,
             "published_error": ((shipped_curve or {}).get("implements")
                                 or {}).get("max_error_vs_exact"),
             "requirement_form": requirement["form"], "domain": domain,
