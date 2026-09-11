@@ -582,10 +582,16 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 52.0
+   "capacity_kw": 52.0,
+   "part_load_curve_class": "non_condensing",
+   "class_source": "row",
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), curve BOILER-EFFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (boilers)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+  "ruling": "D-89",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.01 to 1.00, step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 1.4824 % against the exact requirement; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -595,10 +601,16 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 0.0
+   "capacity_kw": 0.0,
+   "part_load_curve_class": "non_condensing",
+   "class_source": "row",
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), curve BOILER-EFFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (boilers)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+  "ruling": "D-89",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.01 to 1.00, step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 1.4824 % against the exact requirement; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -1077,7 +1089,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
+  "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
@@ -1145,7 +1157,7 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
+  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
@@ -2793,10 +2805,16 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 52.0
+   "capacity_kw": 52.0,
+   "part_load_curve_class": "non_condensing",
+   "class_source": "row",
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), curve BOILER-EFFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (boilers)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+  "ruling": "D-89",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.01 to 1.00, step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 1.4824 % against the exact requirement; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -2806,10 +2824,16 @@
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 0.0
+   "capacity_kw": 0.0,
+   "part_load_curve_class": "non_condensing",
+   "class_source": "row",
+   "curve": "BOILER-PLF-NONCONDENSING",
+   "form": "TableLookup"
   },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), curve BOILER-EFFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (boilers)",
+  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
+  "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
+  "ruling": "D-89",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.01 to 1.00, step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 1.4824 % against the exact requirement; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -3000,6 +3024,54 @@
  {
   "step": "efficiency",
   "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-CAPFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFT (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-CAPFT",
+   "form": "BiQuadratic",
+   "applied": "DXCOOL-REF-CAPFT (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-CAPFFLOW",
+   "form": "Quadratic",
+   "applied": "DXCOOL-REF-CAPFFLOW (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-COOLEIRFT",
+   "form": "BiQuadratic",
+   "applied": "DXCOOL-REF-COOLEIRFT (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-COOLPLFFPLR",
+   "form": "Cubic",
+   "applied": "DXCOOL-REF-COOLPLFFPLR (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
   "action": "staged DX cooling efficiency applied to every stage",
   "inputs": {
    "table": "unitary_acs",
@@ -3083,11 +3155,16 @@
   "action": "staged gas heating efficiency applied to every stage",
   "inputs": {
    "stages": 2,
-   "top_stage_kw": 24.1
+   "top_stage_kw": 24.1,
+   "part_load_curve_class": "atmospheric",
+   "class_source": "row",
+   "curve": "FURNACE-PLF-ATMOSPHERIC",
+   "form": "TableLookup"
   },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, curve FURNACE-EFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (furnaces)",
-  "ruling": "D-46",
+  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
+  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+  "ruling": "D-46 D-89",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.10 to 1.00, step 0.01 (91 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0268 % against the exact requirement; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3097,11 +3174,16 @@
   "action": "staged gas heating efficiency applied to every stage",
   "inputs": {
    "stages": 2,
-   "top_stage_kw": 11.8
+   "top_stage_kw": 11.8,
+   "part_load_curve_class": "atmospheric",
+   "class_source": "row",
+   "curve": "FURNACE-PLF-ATMOSPHERIC",
+   "form": "TableLookup"
   },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, curve FURNACE-EFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (furnaces)",
-  "ruling": "D-46",
+  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
+  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+  "ruling": "D-46 D-89",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.10 to 1.00, step 0.01 (91 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0268 % against the exact requirement; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3111,11 +3193,16 @@
   "action": "staged gas heating efficiency applied to every stage",
   "inputs": {
    "stages": 2,
-   "top_stage_kw": 24.2
+   "top_stage_kw": 24.2,
+   "part_load_curve_class": "atmospheric",
+   "class_source": "row",
+   "curve": "FURNACE-PLF-ATMOSPHERIC",
+   "form": "TableLookup"
   },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, curve FURNACE-EFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (furnaces)",
-  "ruling": "D-46",
+  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
+  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+  "ruling": "D-46 D-89",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.10 to 1.00, step 0.01 (91 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0268 % against the exact requirement; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3125,11 +3212,16 @@
   "action": "staged gas heating efficiency applied to every stage",
   "inputs": {
    "stages": 2,
-   "top_stage_kw": 11.8
+   "top_stage_kw": 11.8,
+   "part_load_curve_class": "atmospheric",
+   "class_source": "row",
+   "curve": "FURNACE-PLF-ATMOSPHERIC",
+   "form": "TableLookup"
   },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, curve FURNACE-EFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (furnaces)",
-  "ruling": "D-46",
+  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
+  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+  "ruling": "D-46 D-89",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.10 to 1.00, step 0.01 (91 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0268 % against the exact requirement; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3139,11 +3231,16 @@
   "action": "staged gas heating efficiency applied to every stage",
   "inputs": {
    "stages": 2,
-   "top_stage_kw": 11.2
+   "top_stage_kw": 11.2,
+   "part_load_curve_class": "atmospheric",
+   "class_source": "row",
+   "curve": "FURNACE-PLF-ATMOSPHERIC",
+   "form": "TableLookup"
   },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, curve FURNACE-EFFPLR",
-  "article": "NECB 2020 Table 5.2.12.1 (furnaces)",
-  "ruling": "D-46",
+  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
+  "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
+  "ruling": "D-46 D-89",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.10 to 1.00, step 0.01 (91 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0268 % against the exact requirement; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },

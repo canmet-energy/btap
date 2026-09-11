@@ -62,8 +62,8 @@
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
 Proposed              2,725            3.4        800.0
-Reference             3,025            3.8        800.0
-Margin                300.0   9.9% under target   Tier 1
+Reference             3,731            4.7        800.0
+Margin                1,006   27.0% under target   Tier 2
 Unmet hours  heating 0.8 / 24.8 h    cooling 13.5 / 0.0 h
 ------------------------------------------------------------------
 
@@ -76,4 +76,4 @@ Unmet hours  heating 0.8 / 24.8 h    cooling 13.5 / 0.0 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  58 warning(s) recorded - see audit.txt
+  62 warning(s) recorded - see audit.txt

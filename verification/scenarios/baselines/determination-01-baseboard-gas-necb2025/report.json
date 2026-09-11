@@ -53,49 +53,49 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 155047.2,
-  "electricity_kwh": 87716.7,
-  "natural_gas_kwh": 67330.6,
+  "total_site_kwh": 174697.2,
+  "electricity_kwh": 87769.4,
+  "natural_gas_kwh": 86927.8,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 53063.9,
-   "cooling": 3138.9,
-   "fans": 50402.8,
-   "pumps": 1116.7,
+   "heating": 72661.1,
+   "cooling": 3241.7,
+   "fans": 50355.6,
+   "pumps": 1111.1,
    "interior_lighting": 9402.8,
    "interior_equipment": 22311.1,
    "water_systems": 14266.7
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 193.8,
+  "eui_kwh_per_m2": 218.4,
   "unmet_occupied_hours": {
-   "heating": 801.0,
+   "heating": 802.25,
    "cooling": 10.5
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
-    "heating": 159.75,
+    "heating": 159.5,
     "cooling": 1.5
    },
    "THERMAL ZONE 2": {
-    "heating": 103.0,
+    "heating": 104.25,
     "cooling": 5.25
    },
    "THERMAL ZONE 3": {
-    "heating": 142.5,
-    "cooling": 1.0
+    "heating": 151.25,
+    "cooling": 0.75
    },
    "THERMAL ZONE 4": {
-    "heating": 116.0,
-    "cooling": 3.0
+    "heating": 115.5,
+    "cooling": 3.25
    },
    "THERMAL ZONE 5": {
-    "heating": 765.25,
+    "heating": 766.0,
     "cooling": 0.0
    }
   },
-  "ghg_kg_co2e": 17535.0
+  "ghg_kg_co2e": 21163.5
  },
  "capacity_iterations": [
   {
@@ -165,7 +165,7 @@
      "cooling": 1709.75
     },
     "reference": {
-     "heating": 842.75,
+     "heating": 843.25,
      "cooling": 6.5
     }
    }
@@ -177,13 +177,13 @@
      "mode": "zonal",
      "zones": {
       "THERMAL ZONE 1": {
-       "heating_sizing_factor": 1.966
+       "heating_sizing_factor": 1.965
       },
       "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.85
+       "heating_sizing_factor": 1.848
       },
       "THERMAL ZONE 3": {
-       "heating_sizing_factor": 1.993
+       "heating_sizing_factor": 1.988
       },
       "THERMAL ZONE 4": {
        "heating_sizing_factor": 1.84
@@ -201,18 +201,18 @@
      "cooling": 1709.75
     },
     "reference": {
-     "heating": 801.0,
+     "heating": 802.25,
      "cooling": 10.5
     }
    }
   }
  ],
- "percent_of_target": 76.0,
- "tier": 1,
+ "percent_of_target": 67.5,
+ "tier": 2,
  "annual": true,
  "ghg": {
-  "percent_of_ghg_target": 95.3,
-  "level": "F"
+  "percent_of_ghg_target": 79.0,
+  "level": "E"
  },
  "compliant": false,
  "warnings": [
@@ -272,6 +272,10 @@
   "Service water heater performance (Table 6.2.2.1) \u2014 partial. Applied: electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented. Gaps: pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered \u2014 the extraction had LOST the solar/pool sections and the Volume of Tank column when D-41 ran its cross-check, so it could not see them; re-checked 2026-09-01, both sections are back and the column is present (the table now returns 57 rows, not 27) and the vendored minimums agree exactly; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
   "Pools and hot tubs \u2014 partial. Applied: pool-heater minimum efficiencies ARE applied when a SwimmingPoolIndoor is present in the model (gas Et 82% / oil 78% / heat-pump COP 4.0, D-63, apply-when-present). Gaps: the 6.2.7.1. shutoff device and pump/heater time switches are installed controls with no model object; 6.2.7.2. covers govern heated OUTDOOR pools and tubs, and EnergyPlus models INDOOR pools only, so that sentence is permanently outside model scope",
   "Remaining reference SWH sentences \u2014 partial. Applied: (3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically \u2014 trivially matching the (4)(a) ratio (Note A-8.4.5.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.6.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.6.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater \u2014 there is no electric counterpart in 8.4.6 to apply.. Gaps: REFINED after machine-verification (D-41) and D-53: (3)/(4)/(6)/(7)/(8) are satisfied by clone and (5) is closed for every article-eligible heater. Remaining: (9) circulation-pump consolidation is satisfied BY CONSTRUCTION for models this gem authors \u2014 necb/demand.rb builds exactly ONE PumpConstantSpeed per service water loop, so there is never a set of pumps to consolidate. It is unverified only for a FOREIGN proposed that arrives with several pumps on one SHW loop; such a model is cloned as-is, keeping identical W/(L/s) (energy-equivalent, topology differs). No consolidation pass is implemented because it would be unreachable code on every model this toolchain produces.",
+  "model object named 'DXCOOL-REF-CAPFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFT (D-89)'",
+  "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
+  "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
+  "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
   "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (hard-sized equipment does not respond to sizing-factor increases).",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
   "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) \u2014 partial. Applied: check-then-normalize (Archetypes.conformance / normalize!): the proposed is checked against the Table 8.4.4.2. values (occupant density, receptacle W/m2, SWH L/h/occupant; schedule profiles compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. Gaps: unmapped spaces keep their modeled loads (the Table applies \u201cfor the applicable building archetype\u201d); spaces with no water-use equipment warn rather than gaining a SWH system"

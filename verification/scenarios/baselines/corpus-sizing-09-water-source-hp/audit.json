@@ -1061,7 +1061,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
+  "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
@@ -1129,7 +1129,7 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
+  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
@@ -2929,6 +2929,54 @@
   "ruling": "D-46",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-CAPFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFT (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-CAPFT",
+   "form": "BiQuadratic",
+   "applied": "DXCOOL-REF-CAPFT (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-CAPFFLOW",
+   "form": "Quadratic",
+   "applied": "DXCOOL-REF-CAPFFLOW (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-COOLEIRFT",
+   "form": "BiQuadratic",
+   "applied": "DXCOOL-REF-COOLEIRFT (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "efficiency",
+  "target": "CoilCoolingDXMultiSpeed_dx",
+  "action": "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
+  "inputs": {
+   "curve": "DXCOOL-REF-COOLPLFFPLR",
+   "form": "Cubic",
+   "applied": "DXCOOL-REF-COOLPLFFPLR (D-89)"
+  },
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "efficiency",

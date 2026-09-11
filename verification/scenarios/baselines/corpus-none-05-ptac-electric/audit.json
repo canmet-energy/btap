@@ -1021,7 +1021,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
+  "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
@@ -1089,7 +1089,7 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
+  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 10,
