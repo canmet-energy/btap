@@ -108,6 +108,38 @@ The Section 8.4 article caches live in each edition's snapshot at
 in the wheel. Refresh them with `python3 python/scripts/fetch_necb_8_4_text.py`;
 ordinary runtime remains offline.
 
+## Two references for any NECB behaviour
+
+Implementing or verifying an NECB rule uses both of these, and they answer
+different questions:
+
+- **The hbix codes MCP is the normative text.** It answers what the Code
+  requires: the article, a table's exact form, coefficients, thresholds,
+  Appendix A notes, and the server's own errata (`known_issue` in a
+  payload). In a session it is the `mcp__codes__*` tools; from a script it
+  is `btap._mcp.MCPClient("codes")` with `HBIX_API_KEY` exported from `.env`
+  (`set -a && source .env && set +a`; never print the key). It carries NECB
+  2020 and 2025 only and exposes no revision id, so an archived canonical
+  payload under an edition's `provenance/` is the retained artifact.
+- **The pinned openstudio-standards gem is the legacy realisation.** It
+  answers how the previous implementation put a requirement into
+  EnergyPlus: curve conversions, reference-system construction, schedule
+  sets, and what the oracle goldens were built from. `legacy_pin/REF` is
+  the revision; `BUNDLE_GEMFILE=legacy_pin/Gemfile bundle install` checks
+  it out under `vendor/bundle/`, and `bundle show openstudio-standards`
+  locates it. **It may be wrong, and it is still useful.** It has already
+  been caught shipping NECB 2015's Table C-1 as 2020's, the NECB 2011
+  performance curves for every edition, stale BC heating-degree values, a
+  zeroed Schedule I fan column, and the non-condensing part-load curve on
+  every boiler row. Treat it as evidence of an approach, never as an
+  authority.
+
+Before designing or verifying a rule, fetch the governing article or
+table from the MCP and read the gem's corresponding Ruby and data. Cite
+both in the decision and the provenance entry. When they disagree, the
+Code wins and the gem's version is recorded as a finding, not adopted;
+`docs/NECB_VINTAGE_MATCH.md` is the pattern.
+
 ## Verification
 
 The post-R6 verification model has two independent parts:
