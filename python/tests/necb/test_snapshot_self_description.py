@@ -33,25 +33,33 @@ JSON numbers are excluded by construction — walking ``str`` nodes only):
     a clean origin sentence looks like (one with no comparative word in it
     at all). The one exception is the origin-identity shape (see
     ``_ORIGIN_IDENTITY_RE``): "byte-identical to NECB20xx/data/..." is the
-    only honest way to state an unmodified-copy fact. Two things follow from
-    that, both scoped to the identity CLAUSE itself, never broadcast to the
-    whole sentence: (i) the edition token that IS the object of that exact
-    phrase (the `NECB20xx` inside the `.../data/...` path, see
-    ``_identity_token_spans``) is never itself a (c) problem; (ii) the
+    only honest way to state an unmodified-copy fact. What follows from that is
+    scoped to the identity CLAUSE itself, and to that clause's own edition
+    token alone -- never broadcast to license naming any other edition in the
+    same sentence: the edition token that IS the object of that exact phrase
+    (the `NECB20xx` inside the `.../data/...` path, see
+    ``_identity_token_spans``) is never itself a (c) problem, and the
     comparative word ``identical`` that the phrase is built from is masked
     out of the sentence (see ``_mask_identity_phrases``) before checking
-    every OTHER token for a comparative word, so that one unavoidable word
-    doesn't make an otherwise-clean origin narrative read as a comparison —
-    a long origin sentence can legitimately name several other editions
-    before ever reaching the clause that justifies them (e.g. "NECB2017 and
-    NECB2020 ship no schedules table, so the merge resolves to NECB2015's:
-    ... all 240 shipped records are byte-identical to
-    NECB2015/data/schedules.json."). An unrelated comparative word elsewhere
-    in the sentence still catches every non-identity-object token normally:
-    `Rows are byte-identical to NECB2015/data/x.json but differs from
-    NECB2011 values.` yields exactly one (c) problem, for the `NECB2011`
-    token — `differs` is outside the identity clause and the masking does
-    not touch it.
+    every OTHER token for a comparative word. But an identity sentence may
+    contain only its source-object edition token: if any OTHER edition token
+    also appears in the sentence, rule (c) fires for that token, and the
+    identity clause's own comparative word counts as the comparison being
+    made about it -- masking "identical" away must not silently strip the
+    only comparative word in the sentence and let that other token through
+    ungated. `Rows are byte-identical to NECB2015/data/x.json but differs
+    from NECB2011 values.` yields exactly one (c) problem, for the
+    `NECB2011` token, because `differs` catches it directly; but
+    `NECB2011 is byte-identical to NECB2015/data/x.json.` yields the same one
+    (c) problem for `NECB2011` even though masking removes the sentence's
+    only literal comparative word -- NECB2011 is plainly the SUBJECT of a
+    cross-edition comparison, not an origin fact about it. A long origin
+    narrative naming several other editions before ever reaching its
+    "byte-identical to NECB20xx/..." clause is therefore NOT exempt merely
+    for being long: it must be split into an origin sentence (naming the
+    other editions, no comparative word) and a separate identity sentence
+    (naming only the identity clause's own edition) — see the real
+    necb2020/necb2025 ``manifest.json`` ``tables/schedules.json`` note.
 
 Two keys are flagged by NAME, not by token content, because their existence
 is the problem regardless of what they say: a key literally named
@@ -92,6 +100,27 @@ passes. It also widened rule (a)'s ``NECB``-prefixed token to any
 ``20\\d\\d`` year rather than the five enumerated editions (so a snapshot
 catches a forward reference to an edition that isn't enumerated yet, e.g.
 ``NECB 2030`` in a 2020 snapshot).
+
+A third PR #43 review round found that the identity-clause exemption still
+had a bypass: masking the identity phrase's own ``identical`` out of the
+sentence, to check every OTHER token for a comparative word, could remove
+the sentence's ONLY literal comparative word -- leaving a genuine
+cross-edition comparison subject (e.g. ``NECB2011`` in "NECB2011 is
+byte-identical to NECB2015/data/x.json.") with nothing left in the masked
+sentence to catch it. The fix narrows the exemption one step further: an
+identity sentence may name only its own source-object edition token; any
+OTHER edition token in that same sentence is a (c) problem outright, whether
+or not a literal (non-``identical``) comparative word also happens to be
+present. This forced the real necb2020/necb2025 ``manifest.json``
+``tables/schedules.json`` note -- previously the doctrinal example of a
+long origin narrative allowed to name several other editions before its
+identity clause -- to be split into a token-bearing, comparative-word-free
+origin sentence (the ``NECB2017``/``NECB2020`` lineage fact) and a separate
+identity sentence naming only ``NECB2015``; the ``tables/space_types.json``
+note's residue sentence was reworded to drop ``differ`` and the bare word
+``vintages`` entirely (it carried no token, so it was not itself a rule (c)
+exposure, but "differ" no longer belongs in ORIGIN-ONLY prose under the
+tightened policy either).
 """
 
 from __future__ import annotations
@@ -280,17 +309,30 @@ def _sentence_has_non_identity_other_edition_token(sentence: str, own_year: int)
     would itself enter the rule (c) branch: not this snapshot's own edition,
     ``vintage`` included) that is NOT the object of an identity phrase.
 
-    This is what distinguishes the two shapes the identity-token exemption
-    must tell apart. "Rows are byte-identical to NECB2015/data/x.json but
-    differ from NECB2011 values." carries a second, non-identity token
-    (NECB2011) that already absorbs the sentence's one (c) finding, so the
-    identity object (NECB2015) stays exempt. The real necb2025 manifest
-    sentence for ``tables/space_types.json`` -- "...286 of the 308 records
-    are byte-identical to NECB2020/data/space_types.json and the remaining
-    22 differ only by keys..." -- names no OTHER edition at all: NECB2020 is
+    Two uses in ``_check_string``, both keyed off this same fact. First, it
+    is what distinguishes the two shapes the identity-token exemption must
+    tell apart: "Rows are byte-identical to NECB2015/data/x.json but differ
+    from NECB2011 values." carries a second, non-identity token (NECB2011)
+    that already absorbs the sentence's one (c) finding, so the identity
+    object (NECB2015) stays exempt. The real necb2025 manifest sentence for
+    ``tables/space_types.json`` -- "...286 of the 308 records are
+    byte-identical to NECB2020/data/space_types.json and the remaining 22
+    differ only by keys..." -- names no OTHER edition at all: NECB2020 is
     simultaneously the identity object AND the only token the comparative
     word ``differ`` could possibly be describing, so it must not get a free
     pass just because it also happens to sit inside the identity clause.
+
+    Second, when the sentence also carries an identity clause at all (see
+    ``_identity_token_spans``), a ``True`` result unconditionally flags every
+    OTHER, non-identity-object token in the sentence for (c): an identity
+    sentence may name only its own source-object edition, so "NECB2011 is
+    byte-identical to NECB2015/data/x.json." must fail for NECB2011 even
+    though "identical" -- the only literal comparative word in the sentence
+    -- is masked away when checking for a bare comparative word (see
+    ``_mask_identity_phrases``). Without this, masking the identity phrase's
+    own "identical" would silently remove the only comparative word in the
+    sentence and let NECB2011 -- plainly the SUBJECT of a cross-edition
+    comparison -- through ungated.
     """
     for match in TOKEN_RE.finditer(sentence):
         named_year = _named_year(match)
@@ -382,26 +424,46 @@ def _check_string(
             # The identity-phrase's own object token is exempt from the
             # comparative word its own clause is built from ("identical"),
             # but that exemption is scoped to the identity CLAUSE, not
-            # broadcast to the whole sentence: a comparative word OUTSIDE
-            # the clause is still examined against every other-edition
-            # token in the sentence, including the identity object's own
-            # token, whenever it is the only such token there to answer for
-            # it. If another, non-identity other-edition token is also
-            # present in the sentence, that token already absorbs the
-            # finding, so the identity object stays exempt (the mixed
+            # broadcast to the whole sentence, and it is scoped to that ONE
+            # token, not to every token in the sentence: an identity sentence
+            # may name only its own source-object edition. If another,
+            # non-identity other-edition token is also present in the
+            # sentence, the identity object still stays exempt (the mixed
             # sentence "Rows are byte-identical to NECB2015/data/x.json but
             # differ from NECB2011 values." yields exactly one (c) finding,
-            # for NECB2011, not two). But when the identity object is the
-            # ONLY other-edition token in the sentence -- the real
-            # necb2025/necb2020 manifest shape "...286 of the 308 records
-            # are byte-identical to NECB2020/data/space_types.json and the
-            # remaining 22 differ only by keys..." -- there is no other
-            # token to absorb the comparison the sentence is plainly making
-            # about that same NECB2020 data, so the identity object is
-            # examined like any other token.
+            # for NECB2011, not two) -- but that OTHER token is now flagged
+            # unconditionally, because the sentence carries an identity
+            # clause: the identity clause's own comparative word ("identical")
+            # counts as the comparison being made about it, even when it is
+            # the only literal comparative word in the sentence and gets
+            # masked away below ("NECB2011 is byte-identical to NECB2015/
+            # data/x.json." must fail for the plainly-comparative NECB2011
+            # subject). When the identity object is the ONLY other-edition
+            # token in the sentence -- the real necb2025/necb2020 manifest
+            # shape "...286 of the 308 records are byte-identical to
+            # NECB2020/data/space_types.json and the remaining 22 differ only
+            # by keys..." -- there is no other token to absorb the comparison
+            # the sentence is plainly making about that same NECB2020 data,
+            # so the identity object itself is examined like any other token
+            # (falls through to the masked-sentence check below).
             is_identity = _is_origin_identity_token(sentence, token_start, token_end)
-            if is_identity and _sentence_has_non_identity_other_edition_token(sentence, own_year):
+            has_other_token = _sentence_has_non_identity_other_edition_token(sentence, own_year)
+            if is_identity and has_other_token:
                 pass
+            elif _identity_token_spans(sentence) and has_other_token:
+                # The sentence carries an identity clause (so the "identical"
+                # this branch would otherwise need gets masked away below) AND
+                # some OTHER token beyond the identity clause's own source
+                # object -- the identity exemption is scoped to that ONE
+                # token, never broadcast to license naming any other edition
+                # in the same sentence. This token is not the identity
+                # object (that case is the branch above), so it is the
+                # comparison the sentence is plainly making, even when
+                # "identical" is the only literal comparative word in the
+                # sentence: "NECB2011 is byte-identical to NECB2015/data/
+                # x.json." names NECB2011 as the plain SUBJECT of a
+                # cross-edition comparison, not as an origin fact about it.
+                problems_c.append(loc)
             elif _has_comparative_word_in_sentence(_mask_identity_phrases(sentence)):
                 problems_c.append(loc)
 
@@ -582,6 +644,19 @@ _FIXTURE_RULES_NECB2020 = {
             "note": "All 240 records are byte-identical to NECB2015/data/schedules.json."
         }
     },
+    # (c) the third bypass this review round found: NECB2011 here is not the
+    # identity phrase's object (NECB2015 is), and it is not touched by any
+    # literal comparative word other than "identical" -- which the identity
+    # clause's own masking strips out. NECB2011 is plainly the SUBJECT of a
+    # cross-edition comparison ("NECB2011 is [comparable-to] NECB2015's
+    # data"), not an origin fact about NECB2011 itself, so it must still
+    # yield exactly one (c) finding even though masking removes the
+    # sentence's only literal comparative word. NECB2015 stays exempt (it IS
+    # the identity phrase's object and NECB2011 is present to absorb the
+    # sentence's one comparison).
+    "scenario_identity_subject_not_object": {
+        "provenance": {"note": "NECB2011 is byte-identical to NECB2015/data/x.json."}
+    },
     # (c) word-STEM regression: the exact "but differ from" sentence a prior
     # negative fixture silently rewrote to "differs" (the inflection the old
     # literal `COMPARATIVE_WORDS` list happened to contain), which let the
@@ -733,6 +808,25 @@ class TestGateCatchesKnownShapes(unittest.TestCase):
         schedules.json." -- the only other-edition token in the sentence is
         the identity phrase's own object, so no problem in any bucket."""
         self._assert_no_problem_mentions("scenario_byte_identical_multi_record")
+
+    def test_identity_subject_token_not_object_fails_rule_c(self):
+        """"NECB2011 is byte-identical to NECB2015/data/x.json." -- NECB2011
+        is plainly the SUBJECT of a cross-edition comparison, but it is not
+        the identity phrase's object (NECB2015 is) and no literal comparative
+        word other than "identical" touches it -- masking the identity
+        clause strips that word out before the bare-comparative-word check
+        runs. The old code let this whole sentence through with zero
+        problems; the fix must yield exactly one (c) finding, for NECB2011,
+        while NECB2015 stays exempt as the identity phrase's own object."""
+        matches = [
+            loc for loc in self._problems["c"]
+            if "scenario_identity_subject_not_object.provenance.note" in loc
+        ]
+        self.assertEqual(
+            len(matches), 1,
+            f"expected exactly one (c) finding, got: {matches}",
+        )
+        self.assertIn("NECB2011", matches[0])
 
     def test_differ_stem_without_s_fails_rule_c(self):
         """"Rows are byte-identical to NECB2015/data/x.json but differ from
