@@ -348,7 +348,7 @@
       "retrieved": "2026-07-12",
       "method": "generated",
       "source_verification": "revision_addressable",
-      "note": "The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json. The remaining 22 records differ from that file only by keys inherited from the earlier vintages. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
+      "note": "The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json. The remaining 22 records add keys inherited from earlier source layers. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
       "result_sha256": "3b3bba2aa078a1308f024fd32ebb6239c3d2ca5a67016454b426c5fa0efd2965"
     },
     "tables/schedules.json": {
@@ -369,7 +369,7 @@
       "retrieved": "2026-07-12",
       "method": "generated",
       "source_verification": "revision_addressable",
-      "note": "NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's: checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against printed Table A-8.4.3.2.(1)-A via the MCP (see loads_rules.json).",
+      "note": "NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's source rows. Checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against printed Table A-8.4.3.2.(1)-A via the MCP (see loads_rules.json).",
       "result_sha256": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47"
     },
     "tables/led_lighting.json": {
