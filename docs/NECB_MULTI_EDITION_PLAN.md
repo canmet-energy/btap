@@ -1830,7 +1830,7 @@ proves. **Nothing here changes until Sol approves D-89.**
 
 | item | what the edition says | what ships | size | recommendation |
 |---|---|---|---|---|
-| **Boiler/furnace part-load — by equipment CLASS** | FHeatPLC per class: non-condensing/condensing quadratics (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3), **modulating** as a ten-point table in 2020 (8.4.5.2.-B, boilers AND furnaces) and polynomial rows in 2025; 2025 condensing boiler **bivariate** in PLR and return-water °F (domain assumed by the comparison, not a Code bound) | no shipped row declares a class (`condensing: null` on all ten rows, both editions); `find_row` keys on fluid/fuel/capacity; every row receives the non-condensing curve; the `-COND` curves are referenced by no row; no modulating curve ships; purchased heating's "gas-fired modulating boiler" is an audit sentence that nothing propagates | **demonstrated:** modulating 33.5 % (2020) / 35.3 % (2025) via purchased heating — the ONLY demonstrated figure. **Conditional** (what the current curve costs against the class a row WOULD carry): non-condensing 2.67 %, atmospheric furnace 1.16 %, condensing boiler 45.5 / 48.4 %, condensing furnace 23.3 %, modulating furnace 11.3 / 10.3 % | **rewrite and split**: explicit per-row `part_load_class` (enumerated below), propagation from the purchased-heating decision, PLF = PLR/FHeatPLC per class from each edition's own table; the 2025 bivariate condensing surface as a bounded 2-D fit/lookup of p/FHeatPLC or EMS (the printed a…f are FHeatPLC, not the multiplier); cite the chiller errata rows |
+| **Boiler/furnace part-load — by equipment CLASS** | FHeatPLC per class: non-condensing/condensing quadratics (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3), **modulating** as a ten-point table in 2020 (8.4.5.2.-B, boilers AND furnaces) and polynomial rows in 2025; 2025 condensing boiler **bivariate** in PLR and return-water °F (domain assumed by the comparison, not a Code bound) | no shipped row declares a class (`condensing: null` on all ten rows, both editions); `find_row` keys on fluid/fuel/capacity; every row receives the non-condensing curve; the `-COND` curves are referenced by no row; no modulating curve ships; purchased heating's "gas-fired modulating boiler" is an audit sentence that nothing propagates | **demonstrated today:** modulating 33.5 % (2020) / 35.3 % (2025) via purchased heating; **demonstrated once D-89 assigns the ordinary rows `non_condensing` (legacy continuity):** boiler 2.67 %, atmospheric furnace 1.16 %. **Conditional on an explicit condensing selection D-89 does not make:** condensing boiler 45.5 / 48.4 %, condensing furnace 23.3 %; modulating furnace 11.3 / 10.3 % only if a furnace is ever selected modulating | **rewrite and split**: explicit per-row `part_load_class` decoupled from the efficiency row (ordinary rows `non_condensing`, electric `not_applicable`, condensing only by explicit selection), propagation from the purchased-heating decision, PLF = PLR/FHeatPLC per class from each edition's own table; the 2025 bivariate condensing surface as a bounded 2-D fit/lookup of p/FHeatPLC or EMS (the printed a…f are FHeatPLC, not the multiplier); cite the chiller errata rows |
 | Schedule I fan | `NECB-I-Fan` 33 `On`, 39 `Off` | **corrected 2026-09-10** (was 72 zeros) | 33 cells | **data correction only, APPLIED** — dormant today (nothing reads `exhaust_schedule`; reference loops inherit the proposed schedule; `NECB-I-FAN` vs `NECB-I-Fan`); no runtime impact claimed; wiring fans is a separate decision |
 | Exterior lighting 2025 | loading docks zones 1/3/4 | 2020 values | 3 cells | **defer** — both editions' extraction puts 3.8 in zone 2 with blank neighbours (a merged span); verify printed Table 4.2.3.1.-D |
 | Medical supply | — | — | — | **removed** — matcher artifact; the row matches its own edition (0 differing cells) |
@@ -1849,39 +1849,47 @@ written against a class nothing assigns.
 inferred.
 
 - **Declared in the data.** Every `boilers` and `furnaces` row gains
-  `part_load_class` ∈ {`non_condensing`, `condensing`, `modulating`}, and
-  every part-load curve row declares the class and the edition table it
-  implements. The enum is shared by boilers and furnaces with an explicit
+  `part_load_class` ∈ {`non_condensing`, `condensing`, `modulating`} —
+  nullable, written `not_applicable` for equipment with no combustion
+  part-load factor (electric boilers): fuel type and combustion class stay
+  separate concepts — and every part-load curve row declares the class and
+  the edition table it implements. The enum is shared by boilers and furnaces with an explicit
   furnace mapping: the Code's **atmospheric** furnace is `non_condensing`
   (Table 8.4.5.3 / 8.4.6.3 row "Atmospheric"), its **condensing** furnace is
   `condensing`, and its modulating furnace is `modulating` (Table 8.4.5.2.-B
   in 2020, the Modulating row of 8.4.6.3 in 2025).
 
-  **The ten ordinary rows, assigned explicitly** (identical in both
-  editions; the source is each row's OWN required efficiency in Table
-  5.2.12.1.-N / -O against the technology threshold — 90 % AFUE or thermal
-  efficiency on gas is reachable only by condensing equipment, 81 % is
-  atmospheric — a rule proposed here for Sol's adjudication, not asserted):
+  **The ten ordinary rows, assigned explicitly — and DECOUPLED from the
+  efficiency row.** Sol's review (2026-09-11, live HBIX checks of both
+  editions) rejected inferring a class from the row's minimum: Tables
+  5.2.12.1.-N/-O specify minimum performance, capacity, fuel and rating
+  conditions and no condensing/atmospheric class (confirmed: the -N
+  columns are Equipment Category, Type, Capacity, Testing Standard, Rating
+  Conditions, Minimum Performance); Article 5.2.12.1 only requires those
+  minima; Note A-5.2.12.1.(1) is about certification, not technology; AFUE,
+  thermal efficiency and combustion efficiency are distinct metrics that a
+  common 90 % threshold cannot join; and the pinned oracle likewise selects
+  rows by fuel, fluid and capacity and applies the row's fixed `efffplr`,
+  never deriving a class from efficiency (its ECM catalogue's 0.90/0.86
+  cutoffs are labelled "Assumption" and unconsumed, and it offers 85 % and
+  88 % "Condensing Boiler" packages). The assignment is therefore:
 
-  | family | fuel | capacity (Btu/h) | required efficiency | proposed `part_load_class` |
-  |---|---|---|---|---|
-  | boiler | gas | < 300 000 | 0.90 AFUE | `condensing` |
-  | boiler | gas | 300 000 – 2 499 999 | 0.90 thermal | `condensing` |
-  | boiler | gas | ≥ 2 500 000 | 0.90 combustion | `condensing` |
-  | boiler | electric | all | 1.00 thermal | `electric` — no combustion part-load factor; PLF = 1 (a fourth enum value, explicit, never a silent non-condensing default) |
-  | boiler | oil | < 300 000 | 0.86 AFUE | `non_condensing` |
-  | boiler | oil | 300 000 – 2 499 999 | 0.87 thermal | `non_condensing` |
-  | boiler | oil | ≥ 2 500 000 | 0.88 combustion | `non_condensing` |
-  | furnace | gas | < 225 201 | 0.95 AFUE | `condensing` |
-  | furnace | gas | 225 202 – 399 221 | 0.81 thermal | `non_condensing` (atmospheric) |
-  | furnace | gas | ≥ 399 222 | 0.81 thermal | `non_condensing` (atmospheric) |
+  | rows | `part_load_class` | source |
+  |---|---|---|
+  | the 6 ordinary gas and oil boiler rows | `non_condensing` | legacy continuity — the curve every row receives today IS the non-condensing curve; assigning the class makes that explicit, changes nothing yet |
+  | the 3 ordinary furnace rows | `non_condensing` (the Code's "atmospheric") | same |
+  | the electric boiler row | `not_applicable` | no combustion part-load factor; PLF = 1 |
+  | purchased heating (8.4.4.6.(1)) | `modulating` | the only class the Code selects, propagated from the decision — never a row property |
+  | condensing equipment | `condensing` **only by explicit selection** — a D-XX, or a declared class on the proposed building's equipment carried into the reference — or by duplicated class-variant rows; **never inferred from the minimum** | — |
 
-  No row needs duplicating: each row's class follows from its own required
-  efficiency, so one class per row is not arbitrary. `modulating` is never
-  a row property — it is reached only through the purchased-heating
-  decision's propagation. If Sol rejects the efficiency-threshold rule,
-  the alternative is to duplicate the gas boiler and small-furnace rows as
-  class variants and select by the proposed building's declared class. The existing `condensing` / `condensing_control` columns are
+  **Consequence for the figures.** Once the ordinary rows are explicitly
+  `non_condensing`, the boiler 2.67 % and atmospheric-furnace 1.16 %
+  deviations become **demonstrated** (the class is assigned and the curve
+  applied is that class's, so the mismatch against the edition's own
+  quadratic is live), alongside the modulating 33.5 / 35.3 %. The
+  condensing figures (45.5 / 48.4 % boilers, 23.3 % furnaces) stay
+  **conditional** on an explicit condensing selection, which D-89 does not
+  make. The existing `condensing` / `condensing_control` columns are
   `null` on all ten rows in both editions and carry no class: D-89 either
   populates them or removes them — they are never read as a class while they
   are null.
@@ -1908,13 +1916,12 @@ all the same kind of claim, and R-O's attribution must not mix them.
   purchased-heating path elects a modulating boiler and that boiler receives
   `BOILER-EFFFPLR`, so the multiplier is **33.5 % (2020) / 35.3 % (2025)**
   away from the modulating requirement in every reference building whose
-  heating energy is purchased. **That is the only demonstrated figure.**
-  The non-condensing 2.67 % and atmospheric-furnace 1.16 % figures are NOT
-  demonstrated either: no shipped row carries a class today, so they are
-  what the current curve costs against the requirement that WOULD apply
-  once a row is classified non-condensing or atmospheric — conditional,
-  exactly like the condensing figures, until D-89 assigns each row
-  explicitly.
+  heating energy is purchased. Today that is the only demonstrated figure,
+  because no shipped row carries a class. With D-89's explicit
+  `non_condensing` assignment of the nine ordinary combustion rows (legacy
+  continuity), the non-condensing 2.67 % and atmospheric-furnace 1.16 %
+  deviations join it as demonstrated: the class is assigned and the curve
+  applied is that class's.
 - **Conditional:** the condensing figures — **45.5 % (2020) / 48.4 % (2025)**
   for boilers and 23.3 % for furnaces. No shipped row is classified
   condensing, so nothing today is subject to the condensing requirement;
@@ -2057,3 +2064,16 @@ product Python and no `verification/scenarios/` touched:
   conditional wording. **Counts:** quote the dispatch's own lanes from now
   on — run 34517214976: python 993 passed / 41 skipped / 111 subtests,
   verify 1032 / 2 / 113 — not the local suite's total.
+- **Sol's fifth pass (2026-09-11):** #43 approved; Schedule I and the
+  matcher/provenance portions of #45 approved. **D-89's
+  efficiency-threshold class inference REJECTED** — verified on the MCP
+  (Table 5.2.12.1.-N carries no class column) and consistent with the
+  pinned oracle (rows by fuel/fluid/capacity, fixed `efffplr`); AFUE,
+  thermal and combustion efficiency are distinct metrics. Rewritten as
+  Sol recommends: class decoupled from the efficiency row — ordinary
+  boilers and furnaces `non_condensing` for legacy continuity, electric
+  `not_applicable` (nullable; fuel and combustion class separate),
+  purchased heating `modulating` by propagation, condensing only by
+  explicit selection or class-variant rows. Consequence: 2.67 % / 1.16 %
+  become demonstrated once assigned; condensing stays conditional.
+  Dispatch 34604452661 green — python 994/41/111, verify 1033/2/113.
