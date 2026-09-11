@@ -290,7 +290,97 @@
       "retrieved": "2026-07-12",
       "method": "transcribed",
       "source_verification": "archived",
-      "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256.",
+      "note": "The archived set is the letter map this file's own provenance records, re-verified against the post-hbix#88 extraction 2026-08-02 (D-60). The performance CURVES in this file have no code source in the 5.2.12.1 series: they are vendored from openstudio-standards NECB2011/data/curves.json and are not covered by source_sha256. The curve block was checked against this edition's own part-load and chiller tables 2026-09-09: the archived payloads and the per-table verdicts are in verified_against. The 15 DX cooling, DX heating, VAV fan and SWH curves have no table in this edition at all, so their origin is retained and stated rather than adopted.",
+      "verified_against": [
+        {
+          "table": "8.4.6.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.2.result.json",
+          "sha256": "3e7947d7d80d2b6ba012d7457873cbef6f9463a6bd60805dec1b4cfa0cd4a49c",
+          "verdict": "differs",
+          "detail": "boiler FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. Non-condensing: `BOILER-EFFFPLR` deviates 2.67 % over PLR 0.10-1.00. MODULATING: this edition states the modulating requirement as a polynomial row here, where 2020 stated the same requirement as the ten printed points of Table 8.4.5.2.-B - a change of FORM, not a new class of equipment; against it `BOILER-EFFFPLR` deviates by up to 35.26 %, and no shipped curve is named for the class. CONDENSING: BIVARIATE here, stated over PLR and the boiler return-hot-water temperature T_w,return in degrees F with six coefficients. Over an ASSUMED implementation box PLR 0.10-1.00 by T_w,return 80-180 F - the domain of this comparison, not a Code bound: the edition publishes the six coefficients and no bounds on T_w,return, to be sourced or adjudicated in D-89 - the required PLF ranges 0.9062 to 1.0924, so a normalised- efficiency curve in PLR alone cannot hold it exactly at any T_w; the assigned `BOILER-EFFFPLR` deviates by up to 48.41 % and even `BOILER-EFFFPLR-COND` by 13.44 %. Equipment-class selection is what makes this large: `hvac/efficiency.py` gives EVERY `boilers` row `BOILER-EFFFPLR` and every `furnaces` row `FURNACE-EFFPLR`, so naming a curve `-COND` does not assign it - no row references either condensing curve. The reference building elects modulating equipment: `hvac/reference.py` represents purchased heating by a gas-fired MODULATING boiler, which receives `BOILER-EFFFPLR` like every other. Pending D-89"
+        },
+        {
+          "table": "8.4.6.3",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.3.result.json",
+          "sha256": "a3422bb5801644db57b05ab34f0925c5a8d76c2a35c0d986a0bd8a7823a240ff",
+          "verdict": "differs",
+          "detail": "furnace FHeatPLC, three classes, each compared against the curve its rows are actually GIVEN. `FURNACE-EFFPLR` deviates 1.16 % (atmospheric), 23.25 % (condensing) and up to 10.27 % against the MODULATING row - which states as a polynomial what 2020 published as the ten points of Table 8.4.5.2.-B, a change of form rather than a new class. `FURNACE-EFFPLR-COND`, named for the condensing class, would deviate 0.49 % but no row uses it. Pending D-89"
+        },
+        {
+          "table": "8.4.6.5.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-A.result.json",
+          "sha256": "db8e9b39aa3213699fa2b6f19236a3cfb817fb2f3e3546da47ac07854a3d4621",
+          "verdict": "identical",
+          "detail": "chiller CAP_FT: the four shipped water-cooled surfaces are the exact affine °F->°C image of this table's rows (max relative deviation 4.2e-06), so the two sources state one surface in two units"
+        },
+        {
+          "table": "8.4.6.5.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-B.result.json",
+          "sha256": "97a91ee3a0b1b0231b97844559d1672371b8d14b12f8598fbdcea0df13aa4f27",
+          "verdict": "identical",
+          "detail": "chiller EIR_FPLR: all four shipped curves agree with this table on every digit both sources publish (max relative deviation 9.7e-06; the snapshot carries 6 decimal places, the table 8)"
+        },
+        {
+          "table": "8.4.6.5.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.5.-C.result.json",
+          "sha256": "7d5ffcc986ddc396bda74f8fe2d7741588c25d6a4e52ee0ab96abfdff74faa4c",
+          "verdict": "identical",
+          "detail": "chiller EIR_FT: the four shipped surfaces are the exact affine °F->°C image of this table's rows; the water-cooled Scroll and Reciprocating rows agree only after the codes service's own published errata for those two rows (b: -0.0882156 -> -0.00882156; d: -0.0128136 -> -0.00128136), so the misprint is the printed source's and the shipped curve already carries the corrected value"
+        },
+        {
+          "table": "8.4.6.8.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-A.result.json",
+          "sha256": "109ecbeed45c5ba172fd05a3c8955aae2ecd58cd4e66edcd71c8d6118df7c0fa",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "8.4.6.8.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-B.result.json",
+          "sha256": "0bae1a478ef656748b19c8d92b214710dcf7d08bb45bad0918af12c0aae0ce86",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "8.4.6.8.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/8.4.6.8.-C.result.json",
+          "sha256": "c0f83e2d9d87963e032160724eb77483c3d32d87bcbf1d293befa8e73d6c82f7",
+          "verdict": "partial",
+          "detail": "absorption chillers: this table's equipment classes are not modelled by the snapshot, so no shipped curve corresponds to any of its rows"
+        },
+        {
+          "table": "section 8.4.6.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.2.result.json",
+          "sha256": "7690d6d655e2b1e0b47c9011c5cde55d19a02dd9b130c5f97a9ad97910dc07d9",
+          "verdict": "differs",
+          "detail": "the governing article: it defines FHeatPLC as a fuel RATIO over PLR, which is what settles the boiler form difference"
+        },
+        {
+          "table": "section 8.4.6.3",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.3.result.json",
+          "sha256": "9965aed90efdfd90dc4da6757723fd553ff55f62c36f0e5ee05adc2f89973417",
+          "verdict": "differs",
+          "detail": "the governing article: it defines FHeatPLC as a fuel RATIO over PLR, which is what settles the furnace form difference"
+        },
+        {
+          "table": "section 8.4.6.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.5.result.json",
+          "sha256": "1d4b49e18a1459673a171199fc366df8b9be200d5c816db2e88f4da87d4b1bfc",
+          "verdict": "identical",
+          "detail": "the governing article: it states the chiller surfaces over t_chws and t_cws in °F, which is what reconciles them with the shipped °C coefficients"
+        }
+      ],
       "result_sha256": "40c7cd93583ed3934a5f333ea563e50f8b7294f6e5c2c611bae556b9eef337b9"
     },
     "lighting_rules.json": {
@@ -312,6 +402,57 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "The three constants this file carries are legacy-derived, from the oracle paths in `request`. NECB 2025 Table 4.2.1.6 was transcribed in full into tables/lpd_space_functions.json and has its own archived entry. dwelling_unit_lpd_w_per_m2 = 5.0 is code text (8.4.5.5.(2)) and is not covered by source_sha256.",
+      "inherited_reason": "the three LED atrium coefficients are an NREL-63807 retrofit alternative this edition does not publish, so their origin is retained - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "partial",
+          "detail": "the LED atrium equations have no cell here: this edition publishes atrium LPDs by height bin and no LED-alternative equation at all, so the below-12 m intercept and slope and the at-or-above-12 m slope are unsourced; the fourth coefficient's value matches a string in this table only incidentally"
+        },
+        {
+          "table": "section 4.2.2.2",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_4.2.2.2.result.json",
+          "sha256": "efac6da59ede88d102f67f83b76042889beb04a5dac5ee879ad55959b8dfba8b",
+          "verdict": "identical",
+          "detail": "the sensor-schedule LPD threshold 0.799256505 W/ft² (8.6 W/m²) resolves in this edition's own lighting-control text"
+        },
+        {
+          "table": "section 4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_4.2.1.6.result.json",
+          "sha256": "e00bd34b7e48d98e86db6b2e7bfb4fabeabeb5fa2063fc08375b8505b54b5708",
+          "verdict": "identical",
+          "detail": "the sensor-schedule LPD threshold 0.799256505 W/ft² (8.6 W/m²) resolves in this edition's own lighting-control text"
+        },
+        {
+          "table": "section 8.4.5.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.5.5.result.json",
+          "sha256": "17746784f98148bc2b6ca27f46239f69060cee949379f0ea4255902e63c21145",
+          "verdict": "identical",
+          "detail": "the dwelling-unit LPD 5.0 W/m² is this article's own text"
+        },
+        {
+          "table": "4.3.2.10.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-A.result.json",
+          "sha256": "ea5766527c3879207f2c2fe08b4b531df46c96922e854e31ab74ab3c095dad48",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        },
+        {
+          "table": "4.3.2.10.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-B.result.json",
+          "sha256": "fa33cb2cea5c1a3ca9c206417571ce6d227f9a329f80b8873d6dbd603ddf895d",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        }
+      ],
       "result_sha256": "98c61ac40b17bb973e34657bb6c7609136f5e6920436bda1c5265ccd26a040c9"
     },
     "loads_rules.json": {
@@ -360,6 +501,25 @@
       "method": "transcribed",
       "source_verification": "revision_addressable",
       "note": "Per this file's own provenance: the autosize and efficiency parameters were transcribed from the legacy water_heater_mixed_apply_efficiency / auto_size_shw_capacity implementations at REF, then cross-verified against printed NECB 2025 Table 6.2.2.1 via the MCP, with this edition's citations (8.4.5.20, 8.4.6.9). This edition's storage-type heat-pump water heater requirement, UEF >= 2.23, is an equipment class this package does not model and is recorded in the file. The printed-table side is a cross-check, not the origin, and is not archived here. The storage-type heat-pump water heater floor and its metric label moved from code literals in shw/efficiency.py into this file (efficiency.heat_pump) on 2026-09-08, multi-edition plan Stage 5; the values are unchanged and the source is unchanged.",
+      "inherited_reason": "engine constants and DOE test draws (ua_divisor_f 70, thermal_efficiency 1.0, off-cycle heat fraction 0.8, the 38 and 84 gal draws) have no cell in this edition's Table 6.2.2.1, and the part-load curve has no edition table at all - pending D-89",
+      "verified_against": [
+        {
+          "table": "6.2.2.1",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/6.2.2.1.result.json",
+          "sha256": "6f2b09d3f5b907622f4161c3f1f043b47a6e5906ed937b998894121e0cae5980",
+          "verdict": "partial",
+          "detail": "39 of the 46 consumed numeric leaves are corroborated in this table's cells; the 7 that are not are engine constants and DOE test-draw parameters (ua_divisor_f 70, thermal_efficiency 1.0, and the 38 and 84 gal draws), not code cells"
+        },
+        {
+          "table": "section 8.4.6.9",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/section_8.4.6.9.result.json",
+          "sha256": "669fd93f56d2fb617480dfe52ab1135d5203ab8b37b353c8270e95415cbb70b9",
+          "verdict": "identical",
+          "detail": "the part-load article: this edition's own quadratic FHeatPLC coefficients [0.021826, 0.97763, 0.000543] are already carried verbatim in the file as code_fheatplc, and the shipped cubic is the probe-verified image of PLF(x) = x / FHeatPLC(x) for the EnergyPlus degradation-divisor field (D-53); this edition publishes no table for the curve itself"
+        }
+      ],
       "result_sha256": "dbf5cec4b37893c8c4abcf64d26b32306c8044342f3d4ad7b9284a5b64490d01"
     },
     "tables/space_types.json": {
@@ -390,6 +550,49 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/space_types.json",
       "note": "This edition ships its own copy of the retained merge. The 308 records are the legacy MERGED standards_data (deep merge along NECB2011<-2015<-2017<-2020, later keys win) — what legacy actually runs; the per-vintage files are partial. Checked against the oracle at REF while writing this block: 286 of the 308 records are byte-identical to NECB2020/data/space_types.json. The remaining 22 records add keys inherited from earlier source layers. Units are IP as in legacy. The two vendored template columns lighting_standard and target_illuminance_setpoint_ref were removed 2026-09-09; no reader (D-88), which is why the shipped rows carry 78 of the merge's 80 keys.",
+      "inherited_reason": "engine table: 68 of the 75 shipped columns have no edition source at all, and `service_water_heating_peak_flow_per_area` is derived rather than transcribed; every cell that does have a source is identical - pending D-89",
+      "verified_against": [
+        {
+          "table": "A-8.4.3.2.(2)-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(2)-B.result.json",
+          "sha256": "f0f1b700e4aaeb309d3aa94a688334b7527bd4950785500560fb17d40375827a",
+          "verdict": "partial",
+          "detail": "occupant density, receptacle and service-water-heating loads, schedule letter and illuminance: 301 of the 308 shipped records join a row here and all 1176 compared cells are identical - **0 differing**. The four cells previously reported as differing on the `Health care facility medical supply room` row were a matcher defect, not a data difference: the join imported Table 4.2.1.6's control-only cross-reference to the Storage Room rows and reused it for loads and LPD. This edition publishes an explicit medical-supply row of its own (schedule H, illuminance 400 lx, occupant density 20 m2/occupant, peak receptacle 1 W/m2) and the shipped values match it, so the cross-reference is now used for control states only"
+        },
+        {
+          "table": "A-8.4.3.2.(2)-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(2)-A.result.json",
+          "sha256": "99d37746305a8c40bc27ed718ef14cb7679c65beff90c5341cb4d15de4caa826",
+          "verdict": "partial",
+          "detail": "building-area space functions: the WholeBuilding records resolve against this table"
+        },
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "identical",
+          "detail": "space-by-space LPD: the shipped `lighting_per_area` agrees with this table for every joined record, including the `Health care facility medical supply room` row once the control-only cross-reference is kept out of the loads join"
+        },
+        {
+          "table": "4.2.1.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.5.result.json",
+          "sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+          "verdict": "partial",
+          "detail": "building-area LPD: the WholeBuilding lighting_per_area resolves against this table"
+        },
+        {
+          "table": "4.3.2.10.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.3.2.10.-A.result.json",
+          "sha256": "ea5766527c3879207f2c2fe08b4b531df46c96922e854e31ab74ab3c095dad48",
+          "verdict": "partial",
+          "detail": "fetched as this edition's lighting-power companion table; no constant in this file is transcribed from it"
+        }
+      ],
       "result_sha256": "3b3bba2aa078a1308f024fd32ebb6239c3d2ca5a67016454b426c5fa0efd2965"
     },
     "tables/schedules.json": {
@@ -412,7 +615,98 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/schedules.json",
       "note": "This edition numbers the schedule tables A-8.4.3.2.(1)(b)-A..K and ships its own copy of the retained source. NECB2017 and NECB2020 ship no schedules table, so the merge resolves to NECB2015's source rows. Checked against the oracle at REF while writing this block, all 240 shipped records are byte-identical to NECB2015/data/schedules.json. Set A was cell-verified against the printed schedule table via the MCP (see loads_rules.json).",
-      "result_sha256": "d339901364b2f2b2d84cfd07c80a5d6c5c4db2dbd0305bd82e67f592b3bf4e47"
+      "inherited_reason": "the shipped records still come from the oracle merge rather than a transcription of this edition's own tables: the edition publishes hourly fractions only, so the 9 Constant design-day records have no edition row at all and 333 cells it states as words have no numeric form to transcribe. Every compared cell now agrees - the 33 `NECB-I-Fan` cells were corrected 2026-09-10 from the archived edition table; dormant, no product reader - so re-sourcing the file would be provenance-only, pending D-89",
+      "verified_against": [
+        {
+          "table": "A-8.4.3.2.(1)(b)-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-A.result.json",
+          "sha256": "abcbcd5667524011d7e7fbe2dac1d022694576aa348e9eb4b12364357019ff60",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-B.result.json",
+          "sha256": "4a0616150320c84221ba3fc754aa3de298cfac2105496dbdd8442576f9f112e0",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-C.result.json",
+          "sha256": "134228d07d7a167141111803740b39c865f4eae2959e2140fde76a4da6d6ca69",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-D",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-D.result.json",
+          "sha256": "d24fc877fd7ffed04c79a58e9d338a86db53d434bc44d30b300605ebf4471eff",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-E",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-E.result.json",
+          "sha256": "41934a4a97738a048cc9406119f7b6e70bfcce3f220786e3f9e61f4ccc9850ba",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-F",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-F.result.json",
+          "sha256": "63eb5a5871c64b36c04e44c25e1c717f9e246cc1bb55ea38602de60c6d17fbef",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-G",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-G.result.json",
+          "sha256": "de9190a61fced33a2839bef550b81b0130908056f0d98fe45fa0a8cd2c6262f1",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-H",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-H.result.json",
+          "sha256": "a653c39e72b7c35778a80e0b0befa6727bc8ee283c7a21a624e2b7c57e1d7042",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-I",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-I.result.json",
+          "sha256": "14a1221f844bd13079e1011b0961d2f11dca963d05aa55e7e0d17af55baefa5a",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-J",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-J.result.json",
+          "sha256": "8b47a67e1564d22983bdf85f513cfc46744f5d15aa79e1ad90b493884f0405a1",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        },
+        {
+          "table": "A-8.4.3.2.(1)(b)-K",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/A-8.4.3.2.(1)(b)-K.result.json",
+          "sha256": "136f896da01b36b5702bd6285a019447b157357cdd1f2a82b590c3a8e4efa289",
+          "verdict": "identical",
+          "detail": "operating schedules, one of the 11 lettered tables: across the set all 231 shipped hourly records join a row and all 5 211 compared cells agree. The 33 `NECB-I-Fan` cells this edition's Schedule I `Fans` row prints as `On` were corrected from 0.0 to 1.0 on 2026-09-10 from the archived edition table - the value every other shipped fan schedule uses for an on fan - and the same row's 39 `Off` cells were already 0.0. The row is DORMANT: no product Python reads `exhaust_schedule`, the reference air loops inherit the PROPOSED system's operating schedule (D-14, Article 8.4.3.2.(1)), and the space-type references spell `NECB-I-FAN` against the table's `NECB-I-Fan`, so no output moved with the correction. A further 333 cells this edition states as a word (`On`/`Off`, and the two thermostat rows' `Off` against the engine's 35 C / 5 C sentinels) are an encoding difference, not a value difference"
+        }
+      ],
+      "result_sha256": "0fa6114edca17d210403932bb560105b41f83c8c3d9a17d7bc75e145e020baa0"
     },
     "tables/led_lighting.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
@@ -442,6 +736,25 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/led_lighting.json",
       "note": "The LED alternative table is legacy data with no counterpart in this edition's code text; this edition ships its own copy of the retained merge (LED alternative LPDs in W/ft2 plus heat fractions per NREL 63807). Checked against the oracle at REF while writing this block: all 308 shipped records are byte-identical to NECB2020/data/led_lighting_data.json. The vendored lighting_standard template column was removed 2026-09-09; no reader (D-88).",
+      "inherited_reason": "LED-alternative table: this edition publishes no LED alternative at all and 3 shipped columns have no edition source; every LPD that can be compared is consistent with this edition's published maximum - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.1.6",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.6.result.json",
+          "sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+          "verdict": "partial",
+          "detail": "LED-alternative LPDs against this edition's published space-by-space values: 298 of the 308 shipped records join a row and all 298 are consistent with this table - **0 differing**. The single record previously reported as differing was the `Health care facility medical supply room` row, which the join had steered through Table 4.2.1.6's control-only cross-reference; against this edition's own medical-supply row (6.7 W/m2, i.e. 0.622450368 W/ft2) the shipped value agrees"
+        },
+        {
+          "table": "4.2.1.5",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.1.5.result.json",
+          "sha256": "33a6f50336c82de3295e2c30c05d4b0291b8e25c055cc8913d755b8f9f09b827",
+          "verdict": "partial",
+          "detail": "building-area LPD: the WholeBuilding rows resolve against this table"
+        }
+      ],
       "result_sha256": "0d3f6dd379c5457af9378773f51ef61283759a9806a47be402b8014f54c8d4c7"
     },
     "tables/exterior_lighting.json": {
@@ -491,6 +804,49 @@
       "source_verification": "archived",
       "byte_identical_to": "necb2020/tables/exterior_lighting.json",
       "note": "This edition ships its own copy of the transcription named in `request`, and the archived payload travels with it. Re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). Table -C rows other than facades are merged cells in the source extraction and were transcribed with their applicable zones.",
+      "inherited_reason": "3 of the 91 compared values are unresolved against this edition's own extraction - pending D-89",
+      "verified_against": [
+        {
+          "table": "4.2.3.1.-A",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-A.result.json",
+          "sha256": "fe169898f9fb8eb7780978618cccbeb2ba9affba236741c6e46372307f860e0c",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-B",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-B.result.json",
+          "sha256": "8f1f9219515a1135ac102169710a7d6306fac3ab45188b0b2d261814e4ae0726",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-C",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-C.result.json",
+          "sha256": "82755b70d1e19d3d1ef2e90fa7f3dbf68653431d453609a76e29de6f86fa9074",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-D",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-D.result.json",
+          "sha256": "e61804756fc9df7d30f4bc50d98d05b403d8b5ec49fba54c87818b444a831878",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        },
+        {
+          "table": "4.2.3.1.-E",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/4.2.3.1.-E.result.json",
+          "sha256": "4eddde8a361f462bcf97f447b8032c18f4ed0d483497019589a414b0a1230b28",
+          "verdict": "partial",
+          "detail": "one of this edition's five exterior-lighting tables, compared as a set: 21 of 21 shipped allowance entries join a row, 88 of the 91 compared values equal this edition's, and all five zone descriptions the file compresses exist in Table 4.2.3.1.-A; the 3 that do not agree are loading_docks in zones 1, 3 and 4, where this edition's extraction serves an empty cell (the merged-cell limitation the file's own provenance already records) - pending D-89"
+        }
+      ],
       "result_sha256": "4c12b192a0f053e9e21ccdc5f1da84deb36a0804ad12a724f0c974ef85c32fe8"
     },
     "tables/table_c1.json": {
@@ -506,24 +862,35 @@
       "source_verification": "revision_addressable",
       "byte_identical_to": "necb2020/tables/table_c1.json",
       "note": "This edition ships its own copy of the corrected 2015-lineage table the nearest-city HDD lookup runs on. Vendored from the NECB 2015 Table C-1 the oracle ships, then CORRECTED 2026-09-01: seven British Columbia HDD18 values this edition revises (Comox, Courtenay, Hope, Ladysmith, Nanaimo, Parksville, Qualicum Beach), each read from the codes MCP (necb:2020 Table C-1) and confirmed row by row. Diffed against the oracle at REF while writing this block: exactly those 7 of 679 rows differ, so source_sha256 hashes the pre-correction source and result_sha256 the corrected shipped file.",
+      "inherited_reason": "row-set and unread-column adoption pending D-89: 39 shipped and 40 edition rows do not join even keyed by (city, province), and this edition's table carries no coordinates, which is half of what runtime reads",
+      "verified_against": [
+        {
+          "table": "C-1",
+          "edition": "2025",
+          "payload": "provenance/vintage_match/C-1.result.json",
+          "sha256": "f3dd1ff89cfd618c0405ec40d6c4c946392e153e0527d83b3e46a69d764501ae",
+          "verdict": "partial",
+          "detail": "climatic data, keyed by (normalised city, PROVINCE) - the city alone is not a key, because Alma, Princeton, Waterloo and Windsor each name two places in two provinces. 640 rows join, and every degree-days-below-18 value and every design temperature among them is identical. 1250 cells differ: hourly wind pressures (612 at 1/10 and 634 at 1/50), which no reader in this package consumes, and 4 degree-days-below-15 values. The residue is 39 unmatched shipped rows and 40 unmatched edition rows, every one of them listed with its nearest candidate in the alias/unmatched ledger of docs/NECB_VINTAGE_MATCH.md; the row sets differ (this edition prints 680 rows resolving to 680 distinct keys, the snapshot ships 679), and this edition additionally prints July Future dry and wet columns that nothing shipped carries. What runtime reads from this file is lat_long and degree_days_below_18_c, and this edition's table publishes no coordinates at all, so its row set cannot supply the column the nearest-city lookup keys on"
+        }
+      ],
       "result_sha256": "ffd0ba3e3fccbc1c61ae0b00a696b155f3adc542b1e4a967bd3a6d19653720fd"
     },
     "tables/daylighting_controls_4_2_1_6.json": {
-      "source": "mcp:necb:2020",
+      "source": "mcp:necb:2025",
       "request": {
         "tool": "get_table",
         "code": "necb",
-        "edition": "2020",
+        "edition": "2025",
         "division": "B",
         "table_number": "4.2.1.6"
       },
       "source_revision": null,
-      "source_sha256": "b23d91540c87abcd2a9c269674bf99ef4cf46e6dbc11b32233a6179cc35421b1",
-      "extractor": "manual (this edition's copy of the same retained source artifact)",
-      "retrieved": "2026-07-30",
-      "method": "copied",
+      "source_sha256": "ab939817ee666545223d0ce09009ab39ba55c366455f441e9c5251dc44ea7d59",
+      "extractor": "manual (transcription from the archived MCP payload)",
+      "retrieved": "2026-09-09",
+      "method": "transcribed",
       "source_verification": "archived",
-      "note": "This edition ships its own copy of the transcription named in `request`, and the archived payload travels with it; the two editions' files are not byte-identical, because each cites its own dwelling-unit LPD article (8.4.5.5.(2) here) in the not_listed note. Re-read 2026-07-30 from the extraction canmet-energy/hbix#88 corrected. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree).",
+      "note": "This edition's Table 4.2.1.6 daylight-control columns, transcribed from the archived payload named in `request`. Of the 106 entries the file carries, 98 join a table row by the file's own `table_row` label and all 192 of their control states agree with this edition's table; 5 further entries the file's own `residue` declares are absent from the table by construction. Row-LABEL finding: the remaining 3 carry a `table_row` label no row of this edition's table normalises to - the label merges the `Healthcare facility` rows `exam/treatment room` and `imaging room` into one string from an earlier extraction, and gives `Sales area` as the category where the table prints the row name with its note marker. Their six control states were read back by hand against this edition's rows and agree exactly (exam/treatment room X/X, imaging room -/-, Sales area -/X), so this is a stale join label and not a value difference; correcting the label edits a shipped file and is not done here. The two daylight-control columns are keyed by the 105 NECB space-function catalog names rather than by table row, and each catalog name was mapped to a row by hand and checked by comparing the catalog's lighting_per_area against the row's LPD (102 of 102 agree). The file's own in-file provenance block still narrates the 2026-07-30 transcription that produced these bytes.",
       "result_sha256": "de624de23ab0576c11d8dbd86d24f65b03670431e3a49ad8d77470700edcf4ee"
     },
     "tables/lpd_building_types.json": {

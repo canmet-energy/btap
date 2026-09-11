@@ -506,8 +506,18 @@ def _walk(
 
 
 def _is_archived_payload(json_path: Path) -> bool:
-    """``provenance/*.result.json`` -- archived MCP payloads, exempt."""
-    return json_path.parent.name == "provenance" and json_path.name.endswith(".result.json")
+    """An archived MCP payload -- exempt.
+
+    D-88 rule 4 exempts everything "under ``provenance/``": the payloads are
+    the codes service's own text, hashed and never read, and the server's
+    prose legitimately compares editions ("identical in NECB 2020 and 2025").
+    The exemption follows the DIRECTORY, not one level of it, so the Phase B
+    vintage-match archive at ``provenance/vintage_match/*.result.json`` is
+    covered by the same rule as ``provenance/*.result.json``.
+    """
+    if not json_path.name.endswith(".result.json"):
+        return False
+    return "provenance" in json_path.parts
 
 
 def find_problems(data_root) -> dict[str, list[str]]:

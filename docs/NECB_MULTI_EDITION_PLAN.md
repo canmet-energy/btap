@@ -1801,3 +1801,313 @@ own text. R-N next.
   id and scenario field unchanged. **No numeric value moved.** The plan's
   R-N contract said `report.json` unchanged — wrong: the report carries the
   coverage sentences in `warnings[]`; corrected here, same category.
+
+## Phase B — step 1 done; D-89 proposal for Sol (2026-09-09)
+
+**Step 1** (`phase-b-step1`, PR #44, read-only): every inherited snapshot
+file verified against the edition's own tables on the MCP — 91 payloads
+archived, `docs/NECB_VINTAGE_MATCH.md` generated with a `--check` gate.
+Phase A's dispatch run 34390249900 is green (PR #43).
+
+**Corrections the verification forced on the plan's own findings:**
+DF-2's "chiller CAP_FT/EIR_FT differ outright" is **withdrawn** — they are
+the same surfaces in °C (shipped) vs °F (the code's tables), 4.2e-06
+relative after the closed-form transform, and the snapshot matches the
+code service's errata corrections for two rows. Table C-1's HDD18 and
+design temperatures are identical for every matched city.
+
+**User decision:** provenance-only adoptions now (step 2, in flight);
+the numeric set goes to Sol as D-89's proposal before any R-O freeze.
+
+### D-89 proposal — the numeric set, as corrected after Sol's review (2026-09-10)
+
+Sol's review of the first proposal (2026-09-10) found the matcher unsafe as
+a basis; the matcher was rebuilt (explicit per-family equipment mapping,
+city+province Table C-1 keys, the daylighting bridge used for control
+states only, the modulating tables consumed, 62 synthetic tests, a payload
+completeness gate). The proposal below is what the corrected matcher
+proves. **Nothing here changes until Sol approves D-89.**
+
+| item | what the edition says | what ships | size | recommendation |
+|---|---|---|---|---|
+| **Boiler/furnace part-load — by equipment CLASS** | FHeatPLC per class: non-condensing/condensing quadratics (2020 8.4.5.2.-A, 8.4.5.3; 2025 8.4.6.2/3), **modulating** as a ten-point table in 2020 (8.4.5.2.-B, boilers AND furnaces) and polynomial rows in 2025; 2025 condensing boiler **bivariate** in PLR and return-water °F (domain assumed by the comparison, not a Code bound) | no shipped row declares a class (`condensing: null` on all ten rows, both editions); `find_row` keys on fluid/fuel/capacity; every row receives the non-condensing curve; the `-COND` curves are referenced by no row; no modulating curve ships; purchased heating's "gas-fired modulating boiler" is an audit sentence that nothing propagates | **demonstrated today:** modulating 33.5 % (2020) / 35.3 % (2025) via purchased heating; **demonstrated once D-89 assigns the ordinary rows `non_condensing` (legacy continuity):** boiler 2.67 %, atmospheric furnace 1.16 %. **Conditional on an explicit condensing selection D-89 does not make:** condensing boiler 45.5 / 48.4 %, condensing furnace 23.3 %; modulating furnace 11.3 / 10.3 % only if a furnace is ever selected modulating | **rewrite and split**: explicit per-row `part_load_class` decoupled from the efficiency row (ordinary rows `non_condensing`, electric `not_applicable`, condensing only by explicit selection), propagation from the purchased-heating decision, PLF = PLR/FHeatPLC per class from each edition's own table; the 2025 bivariate condensing surface as a bounded 2-D fit/lookup of p/FHeatPLC or EMS (the printed a…f are FHeatPLC, not the multiplier); cite the chiller errata rows |
+| Schedule I fan | `NECB-I-Fan` 33 `On`, 39 `Off` | **corrected 2026-09-10** (was 72 zeros) | 33 cells | **data correction only, APPLIED** — dormant today (nothing reads `exhaust_schedule`; reference loops inherit the proposed schedule; `NECB-I-FAN` vs `NECB-I-Fan`); no runtime impact claimed; wiring fans is a separate decision |
+| Exterior lighting 2025 | loading docks zones 1/3/4 | 2020 values | 3 cells | **defer** — both editions' extraction puts 3.8 in zone 2 with blank neighbours (a merged span); verify printed Table 4.2.3.1.-D |
+| Medical supply | — | — | — | **removed** — matcher artifact; the row matches its own edition (0 differing cells) |
+| Table C-1 | 680 rows; 2025 adds July Future columns | 679 rows from NECB 2015 | 636/640 matched by (city, province), HDD18 and design temps identical; 39–43 unmatched each side (ledger published) | **defer wholesale adoption** — runtime reads only coordinates + HDD18, the edition's table carries no coordinates; resolve the ledger first |
+| Heat rejection | Table 5.2.12.2 | 24-row ASHRAE block | whole block | **out of the behavioural set** — vestigial; runtime applies the edition's 0.013 separately; delete or re-source as data hygiene |
+| Equipment efficiencies (2020) | 5.2.12.1.-A…O | oracle tables | 8 of 9 families mapped row-and-column: 93/94 rows, **102/102 mapped cells identical**; 52 IEER/IPLV minima the snapshot has no value for; `heat_pumps_heating` notes cite `-B` while the values live in `-A` | provenance upgrade candidate (own-edition verified) once the note citation is fixed; the 52 missing minima are a coverage finding, not a difference |
+
+#### The part-load class contract — D-89's boiler/furnace item
+
+Sol's second pass: without this, the item is unactionable. The snapshot data
+carries no equipment class at all, so "the condensing boiler gets the wrong
+curve" names no boiler that exists today, and an adjudication cannot be
+written against a class nothing assigns.
+
+**(a) Where the class comes from.** Two sources, both explicit, neither
+inferred.
+
+- **Declared in the data.** Every `boilers` and `furnaces` row gains
+  `part_load_class` ∈ {`non_condensing`, `condensing`, `modulating`} —
+  nullable, written `not_applicable` for equipment with no combustion
+  part-load factor (electric boilers): fuel type and combustion class stay
+  separate concepts — and every part-load curve row declares the class and
+  the edition table it implements. The enum is shared by boilers and furnaces with an explicit
+  furnace mapping: the Code's **atmospheric** furnace is `non_condensing`
+  (Table 8.4.5.3 / 8.4.6.3 row "Atmospheric"), its **condensing** furnace is
+  `condensing`, and its modulating furnace is `modulating` (Table 8.4.5.2.-B
+  in 2020, the Modulating row of 8.4.6.3 in 2025).
+
+  **The ten ordinary rows, assigned explicitly — and DECOUPLED from the
+  efficiency row.** Sol's review (2026-09-11, live HBIX checks of both
+  editions) rejected inferring a class from the row's minimum: Tables
+  5.2.12.1.-N/-O specify minimum performance, capacity, fuel and rating
+  conditions and no condensing/atmospheric class (confirmed: the -N
+  columns are Equipment Category, Type, Capacity, Testing Standard, Rating
+  Conditions, Minimum Performance); Article 5.2.12.1 only requires those
+  minima; Note A-5.2.12.1.(1) is about certification, not technology; AFUE,
+  thermal efficiency and combustion efficiency are distinct metrics that a
+  common 90 % threshold cannot join; and the pinned oracle likewise selects
+  rows by fuel, fluid and capacity and applies the row's fixed `efffplr`,
+  never deriving a class from efficiency (its ECM catalogue's 0.90/0.86
+  cutoffs are labelled "Assumption" and unconsumed, and it offers 85 % and
+  88 % "Condensing Boiler" packages). The assignment is therefore:
+
+  | rows | `part_load_class` | source |
+  |---|---|---|
+  | the 6 ordinary gas and oil boiler rows | `non_condensing` | legacy continuity — the curve every row receives today IS the non-condensing curve; assigning the class makes that explicit, changes nothing yet |
+  | the 3 ordinary furnace rows | `non_condensing` (the Code's "atmospheric") | same |
+  | the electric boiler row | `not_applicable` | no combustion part-load factor; PLF = 1 |
+  | purchased heating (8.4.4.6.(1)) | `modulating` | the only class the Code selects, propagated from the decision — never a row property |
+  | condensing equipment | `condensing` **only by explicit selection** — a D-XX, or a declared class on the proposed building's equipment carried into the reference — or by duplicated class-variant rows; **never inferred from the minimum** | — |
+
+  **Sol's D-89 decision (2026-09-11): APPROVED with a narrowed, binding
+  implementation contract**, which supersedes the wording above where they
+  differ:
+  1. The field is **`part_load_curve_class`**, in the Code's own taxonomy:
+     ordinary fuel-fired boilers `non_condensing`; ordinary furnaces
+     **`atmospheric`** (not "non_condensing" — that loses the Code's
+     taxonomy); electric boilers **`not_applicable`** as a REAL enum value
+     (not nullable); the purchased-heating boiler `modulating`;
+     `condensing` unreachable in D-89 unless a separate explicit decision
+     selects it.
+  2. The ordinary assignments are an **adjudicated legacy default**, not an
+     NECB-derived technology: the Code's Tables 5.2.12.1.-N/-O, Article
+     5.2.12.1 and Note A-5.2.12.1.(1) give minima and certification
+     guidance, no class rule; the pinned oracle selects by fuel, fluid and
+     capacity and applies each row's fixed curve (`hvac_systems.rb:539-600,
+     855-877`); its 0.90/0.86 ECM thresholds are marked "Assumption",
+     unused on the NECB path, and contradicted by its own 85 %/88 %
+     "Condensing Boiler" packages.
+  3. **No automatic proposed-to-reference condensing propagation.** D-89
+     propagates `modulating` for purchased heating because the Code requires
+     it; any condensing propagation needs its own D-XX. Condensing
+     coefficients remain retained evidence; the condensing deviations remain
+     conditional.
+  4. **The electric-boiler change is behavioural and rides R-O.** Electric
+     boilers currently receive `BOILER-EFFFPLR` (multiplier 0.5635 at PLR
+     0.10 → 1.0077 at 1.00); D-89 removes/resets that curve (constant PLF =
+     1), adds a focused electric-boiler test, quantifies the output effect,
+     and attributes it in the same clean-tree R-O re-freeze.
+  5. **Implement only the reachable classes now**: own-edition PLR/FHeatPLC
+     representations for non-condensing boilers, atmospheric furnaces and
+     the purchased-heating modulating boiler. The 2025 condensing rational
+     surface stays deferred until a decision selects condensing equipment
+     and sources or adjudicates its return-water domain.
+
+  **Consequence for the figures.** Once the ordinary rows are explicitly
+  `non_condensing`, the boiler 2.67 % and atmospheric-furnace 1.16 %
+  deviations become **demonstrated** (the class is assigned and the curve
+  applied is that class's, so the mismatch against the edition's own
+  quadratic is live), alongside the modulating 33.5 / 35.3 %. The
+  condensing figures (45.5 / 48.4 % boilers, 23.3 % furnaces) stay
+  **conditional** on an explicit condensing selection, which D-89 does not
+  make. The existing `condensing` / `condensing_control` columns are
+  `null` on all ten rows in both editions and carry no class: D-89 either
+  populates them or removes them — they are never read as a class while they
+  are null.
+- **Derived from the reference-system decision.** The selection step states
+  the class in the same audit entry that elects the energy type. The rule:
+  **purchased heating → `modulating`** (8.4.4.6.(1), the gas-fired modulating
+  boiler `reference.py:~1733` already names); otherwise the class is whatever
+  the selected row declares; **`condensing` only when a row declares it or a
+  D-XX rules it**, never inferred from capacity, fuel or thermal efficiency.
+  A class no row declares is a WARNING, never a silent fall-back to
+  non-condensing.
+- **Propagation.** `efficiency.py` stops asking the row for a curve NAME and
+  asks for the class's curve: `find_row` → `part_load_class` → that class's
+  curve for this edition, with the elected class carried in the selection
+  facts so the purchased-heating boiler is built as modulating rather than
+  merely described as one. DF-4's loader check — validate form, coefficients
+  and bounds before reusing a model curve found by name — is what stops two
+  classes silently sharing one object.
+
+**(b) What is demonstrated and what is conditional.** The figures are not
+all the same kind of claim, and R-O's attribution must not mix them.
+
+- **Demonstrated runtime behaviour:** the modulating mismatch. The
+  purchased-heating path elects a modulating boiler and that boiler receives
+  `BOILER-EFFFPLR`, so the multiplier is **33.5 % (2020) / 35.3 % (2025)**
+  away from the modulating requirement in every reference building whose
+  heating energy is purchased. Today that is the only demonstrated figure,
+  because no shipped row carries a class. With D-89's explicit
+  `non_condensing` assignment of the nine ordinary combustion rows (legacy
+  continuity), the non-condensing 2.67 % and atmospheric-furnace 1.16 %
+  deviations join it as demonstrated: the class is assigned and the curve
+  applied is that class's.
+- **Conditional:** the condensing figures — **45.5 % (2020) / 48.4 % (2025)**
+  for boilers and 23.3 % for furnaces. No shipped row is classified
+  condensing, so nothing today is subject to the condensing requirement;
+  these are the cost of classifying a row that way, and they become real
+  only once (a) above assigns the class. Stated as conditional in D-89, and
+  excluded from any re-freeze attribution until a row carries the class.
+
+**(c) The 2025 condensing surface — domain, error, and the temperature
+variable.**
+
+- **The temperature domain is not published.** Table 8.4.6.2 gives the six
+  coefficients over PLR and T_w,return and no bounds whatever. The
+  0.10–1.00 × **80–180 °F** box in `docs/NECB_VINTAGE_MATCH.md` is the
+  comparison's own **implementation domain**, labelled as such wherever it is
+  printed. D-89 must either **source** it (a rating basis for condensing
+  return conditions) or **adjudicate** it, record the adopted bounds as an
+  implementation domain, and set the curve's minimum/maximum x and y to them
+  so the engine cannot extrapolate past what was adjudicated.
+- **The error bound depends on the form chosen, and the SDK is not the
+  blocker — but the printed coefficients cannot be copied in.** The
+  edition's `a`…`f` evaluate **FHeatPLC(p, T)**, the fuel-input ratio.
+  EnergyPlus's normalized boiler efficiency curve must supply the
+  multiplier **η_norm(p, T) = p / FHeatPLC(p, T)** — a RATIONAL surface,
+  not the polynomial. Populating a `Curve:Biquadratic` with `a`…`f`
+  directly (with only the °F→°C basis changed) is therefore wrong: against
+  the required surface it errs by **91.62 % at PLR 0.10 / 80 °F, 51.55 % at
+  0.50 / 80 °F and 21.77 % at 1.00 / 180 °F**. The affine temperature
+  transform that reproduced the chiller biquadratics cannot perform a
+  reciprocal. What the SDK does accept is the FORM: OS:Boiler:HotWater's
+  "Normalized Boiler Efficiency Curve Name" takes `BivariateFunctions`
+  (verified against the OpenStudio 3.11.0 IDD), so D-89 chooses one of:
+  (i) a **bounded 2-D fit** of p/FHeatPLC(p, T) over the adjudicated box —
+  a `Curve:Biquadratic` or `Table:Lookup` — with the fit's maximum error
+  over the box published and the curve's x/y limits set to the box; or
+  (ii) **EMS** evaluating the rational expression exactly each timestep.
+  If instead the implementation keeps a PLR-only curve, the best possible
+  PLR-only fit over the assumed box still misses by **≥ 8.83 % at PLR 0.10
+  and ≥ 4.7 % at every PLR** (the required multiplier spans 0.9062–1.0924
+  across the box, so no curve in PLR alone can hold it) — that fallback is
+  either rejected or ships with this bound published.
+- **How T is evaluated.** The `Efficiency Curve Temperature Evaluation
+  Variable` field must be set to **`EnteringBoiler`**: the Code's T_w,return
+  is the boiler's entering (return) water temperature, while `LeavingBoiler`
+  evaluates the supply side and is a different requirement. The distinction
+  is live, not academic — the reference plant already puts the primary boiler
+  on `LeavingSetpointModulated` flow (`efficiency.py:~1120`), so entering and
+  leaving temperatures part company.
+
+**DF-4 (curve reuse by name) is folded into the first item:** the loader
+must validate form, coefficients and bounds before reusing an existing
+model object, or divergent curves take code-qualified names (D-88 as
+amended).
+
+- **Step 2 (provenance-only adoption)** on `phase-b-step2` (`64ef29b`+):
+  every inherited entry now carries `verified_against` records (99 over the
+  91 archived own-edition payloads, each hashed) and an `inherited_reason`;
+  necb2025's daylighting-control table re-sourced to `mcp:necb:2025` (the
+  one file step 1 proved identical to its own edition — and step 2 found
+  the three "renamed rows" are a stale join label in the shipped file's
+  `table_row` field, present identically in necb2020's copy, not a value
+  difference: left for D-89's step 3); rule (h) in
+  `test_edition_provenance.py` (15 problems before, 0 after);
+  `verify-source` checks the records. No shipped rule or table changed;
+  no `result_sha256` moved; wheel +12 KB (the manifests). Verified: full
+  suite 954 passed; frozen lanes python 32 / verify 3 / parity 4
+  **byte-identical**; gates and docs clean. **Phase B pauses here** until
+  Sol's review of PRs #43/#44/#45 and the D-89 proposal.
+- **Sol's review of #43/#44/#45 (2026-09-10) — all seven checkable findings
+  verified and fixed.** #43: gate regex, `notes` scope (exposed 61 stale
+  2020 citations in 2025's equipment notes — fixed), sentence-level rule (c),
+  six negative tests, the 2020 SHW article, D-88 → "source-neutral". #44/#45:
+  the matcher rebuilt — modulating tables consumed per equipment class
+  (Sol's 33.5 / 35.3 % reproduced; and **condensing rows get the
+  non-condensing curve: 45.5 / 48.4 %**, the `-COND` curves unreferenced),
+  medical supply resolved (0 differing), equipment mapped per family
+  (102/102 identical, heat rejection UNMAPPED), C-1 by (city, province)
+  636/640 with a ledger, Schedule I stated dormant, 62 synthetic tests,
+  payload completeness gate, `--refresh`, EOF fixed; step-2 records
+  re-worded to what is proven. D-89 proposal rewritten above. Stack merged
+  forward to `phase-b-top`; manifests reconciled by hash refresh.
+
+### Second-pass review fixes (Fable, 2026-09-10)
+
+On `phase-b-review-2` off `phase-b-top` (`8f8d37d`), three commits, no
+product Python and no `verification/scenarios/` touched:
+
+1. **The 2025 condensing box is labelled an assumption, and a reversed
+   sentence is fixed.** Every printed use of the 80–180 °F return-water box
+   now carries "implementation domain assumed by this comparison; the Code
+   publishes no return-water bounds — to be adjudicated in D-89" (the domain
+   column, the curve detail, the bivariate note, necb2025's manifest prose).
+   The old note had the physics backwards — it said a boiler stops condensing
+   *below* the low end; condensing happens at LOW return-water temperature,
+   below the flue-gas dew point (roughly 130 °F on natural gas), so the 80 °F
+   end is where the condensing gain is largest and it is ABOVE the dew point
+   that the boiler does not condense.
+2. **Schedule I's 33 `NECB-I-Fan` cells corrected** in both
+   `tables/schedules.json`, 0.0 → 1.0, written from the archived payloads
+   (`A-8.4.3.2.(1)-I` / `A-8.4.3.2.(1)(b)-I`) by script, not by hand; the 39
+   `Off` cells were already 0.0. The copies stay byte-identical,
+   `byte_identical_to` intact, hashes refreshed. The document now reports
+   schedules as **identical** (5 211 cells, 0 differing) and the matcher's
+   note MEASURES the state instead of asserting the old difference; the 11
+   `verified_against` records per manifest say "33 cells corrected 2026-09-10
+   from the archived edition table; dormant — no product reader". Dormancy
+   re-proven: nothing in `python/btap` reads `exhaust_schedule`, so the
+   schedule is never requested by name, and the space-type rows still spell
+   `NECB-I-FAN` against the table's `NECB-I-Fan`. The frozen python lane is
+   green unchanged (5 tests / 32 subtests) — the output-identity proof.
+3. **D-89's boiler/furnace item rewritten** on the part-load class contract
+   above: the modulating mismatch is demonstrated (purchased heating), the
+   condensing figures are conditional on a classification no row carries
+   today, and 2025's bivariate domain must be sourced or adjudicated with its
+   error bound and `EnteringBoiler` evaluation stated.
+- **Sol's third pass (2026-09-10), verified:** rule (c) still bypassed —
+  `differ` vs `differs` (my negative fixture had quietly changed the
+  sentence), and the identity-object token exempted before the rest of
+  the sentence is examined, so the real 2025 space-types note passes
+  (0/0/0 probe reproduced) → Sonnet: stem matching, clause-scoped
+  exemption, the real sentence as a negative test, the manifest prose
+  rewritten, plus a standing "no reader" test for the dormant Schedule I.
+  **D-89's bivariate mapping was wrong**: `a`…`f` evaluate FHeatPLC, the
+  engine needs the rational surface p/FHeatPLC — direct population errs
+  91.6 % at 0.1/80 °F; corrected to a bounded 2-D fit/lookup or EMS. Class
+  attribution narrowed: only purchased heating's modulating figure is
+  demonstrated; the furnace `atmospheric → non_condensing` mapping stated.
+  Housekeeping done in the open: #44 closed, #45 rebased onto #43 via the
+  REST endpoint (the GraphQL `gh pr edit` failed silently behind a
+  deprecation warning — the silenced-step trap, again).
+- **Sol's fourth pass (2026-09-11), verified:** rule (c) third bypass —
+  a sentence whose SUBJECT is another edition loses its only comparative
+  word when the identity phrase is masked ("NECB2011 is byte-identical to
+  NECB2015/data/x.json") → Sonnet: an identity sentence may contain only
+  its source-object edition; residues rewritten as origin-only prose; the
+  schedules lineage sentence split. **D-89 High:** the ten ordinary rows
+  had no class → enumerated above from each row's own required efficiency
+  (gas 0.90 / furnace 0.95 → condensing; oil, 0.81 furnaces →
+  non-condensing; electric → a fourth explicit value), proposed for
+  adjudication, no duplicate rows needed; the summary row now carries the
+  conditional wording. **Counts:** quote the dispatch's own lanes from now
+  on — run 34517214976: python 993 passed / 41 skipped / 111 subtests,
+  verify 1032 / 2 / 113 — not the local suite's total.
+- **Sol's fifth pass (2026-09-11):** #43 approved; Schedule I and the
+  matcher/provenance portions of #45 approved. **D-89's
+  efficiency-threshold class inference REJECTED** — verified on the MCP
+  (Table 5.2.12.1.-N carries no class column) and consistent with the
+  pinned oracle (rows by fuel/fluid/capacity, fixed `efffplr`); AFUE,
+  thermal and combustion efficiency are distinct metrics. Rewritten as
+  Sol recommends: class decoupled from the efficiency row — ordinary
+  boilers and furnaces `non_condensing` for legacy continuity, electric
+  `not_applicable` (nullable; fuel and combustion class separate),
+  purchased heating `modulating` by propagation, condensing only by
+  explicit selection or class-variant rows. Consequence: 2.67 % / 1.16 %
+  become demonstrated once assigned; condensing stays conditional.
+  Dispatch 34604452661 green — python 994/41/111, verify 1033/2/113.

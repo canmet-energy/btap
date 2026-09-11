@@ -261,6 +261,38 @@ def _verify_archived(root: Path, relative: str, entry: dict, out: TextIO) -> int
     return 0
 
 
+def _verify_inherited(root: Path, entry: dict, out: TextIO) -> int:
+    """Re-hash the ``verified_against`` payloads and print the verdicts.
+
+    An entry whose ``source`` is not this edition's own text carries an
+    ``inherited_reason`` and a list of checks against the edition's OWN
+    published tables (Phase B; rule (h) of the provenance gate). Each check
+    names a retained payload inside this edition's own ``provenance/``
+    directory, so this stays offline and needs no repository around it.
+    ``0`` when everything hashes or nothing is declared, ``1`` on a mismatch.
+    """
+    records = entry.get("verified_against") or []
+    if entry.get("inherited_reason"):
+        print(f"  inherited   {entry['inherited_reason']}", file=out)
+    status = 0
+    for record in records:
+        payload = root / record["payload"]
+        if not payload.is_file():
+            print(f"  MISMATCH    verified_against payload {payload} is missing",
+                  file=out)
+            status = 1
+            continue
+        digest = _digest(payload)
+        if digest != record["sha256"]:
+            print(f"  MISMATCH    {record['payload']} hashes {digest}, "
+                  f"recorded {record['sha256']}", file=out)
+            status = 1
+            continue
+        print(f"  verified    {record['table']} ({record['verdict']}): "
+              f"{record['detail']}", file=out)
+    return status
+
+
 def _verify_revision(entry: dict, out: TextIO) -> int:
     """Re-hash the oracle files at the recorded revision, when it is here."""
     checkout = _oracle_checkout()
@@ -342,23 +374,28 @@ def verify_source(code_id: str, relative: str, *, out: TextIO) -> int:
         return 1
     print(f"  result      {relative} matches result_sha256", file=out)
 
+    inherited = _verify_inherited(root, entry, out)
+
     verification = entry["source_verification"]
     if verification == "archived":
-        return _verify_archived(root, relative, entry, out)
+        return max(inherited, _verify_archived(root, relative, entry, out))
     if verification == "revision_addressable":
-        return _verify_revision(entry, out)
+        source = _verify_revision(entry, out)
+        # A mismatch on either side is a mismatch; "not checkable here" (3)
+        # never masks a hash that DID fail.
+        return 1 if 1 in (inherited, source) else max(inherited, source)
     if verification == "current_only":
         print("  NOT CHECKABLE HERE — the source is live and nothing was "
               "retained; re-fetch is a maintainer MCP operation, not a CLI one",
               file=out)
         _write_json(entry["request"], out)
-        return 3
+        return 1 if inherited == 1 else 3
     if verification == "manual":
         print("  NOT CHECKABLE HERE — transcribed with no retrievable artifact",
               file=out)
         if entry.get("note"):
             print(f"    {entry['note']}", file=out)
-        return 3
+        return 1 if inherited == 1 else 3
     raise ValueError(
         f"{code_id} {relative} declares unknown source_verification "
         f"{verification!r}"

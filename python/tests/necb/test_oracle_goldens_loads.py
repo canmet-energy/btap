@@ -36,6 +36,14 @@ GOLDENS = oracle_goldens_dir()
 #: never hand-edited.
 DROPPED_COLUMNS = frozenset({"lighting_standard", "target_illuminance_setpoint_ref"})
 
+#: The third adjudicated divergence from the oracle merge (Sol's review of the
+#: vintage-match stack, 2026-09-10, approved as a data correction with NO
+#: runtime claim): the edition's Operating Schedule I prints 33 hourly fan
+#: cells as On that the oracle carries as 0.0. Corrected from the archived
+#: edition table; the schedule is dormant (nothing requests NECB-I-Fan).
+SCHEDULE_I_FAN = "NECB-I-Fan"
+SCHEDULE_I_FAN_ON_CELLS = {"Default|Wkdy": 11, "Sat": 15, "Sun|Hol": 7}  # = 33
+
 #: OracleProbes::Loads::PAIRS — the space types the apply golden was frozen for.
 PAIRS = [
     ['Space Function', 'Office enclosed > 25 m2'],
@@ -211,8 +219,25 @@ class TestOracleGoldensLoads(unittest.TestCase):
         self.assertEqual(normalized_oracle, space_types,
                          'vendored space types equal the oracle except the adjudicated '
                          'storage-receptacle correction')
-        self.assertEqual(expected['schedules'], schedules,
-                         'vendored schedules == legacy MERGED runtime table')
+        # 3. Schedule I fan: the oracle carries 0.0 where the edition prints On.
+        corrected_cells = {}
+        normalized_schedules = []
+        for oracle_row, row in zip(expected['schedules'], schedules, strict=True):
+            oracle_row = dict(oracle_row)
+            if row['name'] == SCHEDULE_I_FAN:
+                flipped = [i for i, (o, v) in enumerate(zip(oracle_row['values'], row['values'], strict=True))
+                           if o != v]
+                self.assertTrue(all(oracle_row['values'][i] == 0.0 and row['values'][i] == 1.0
+                                    for i in flipped),
+                                'the only Schedule I divergence is 0.0 -> On (1.0)')
+                corrected_cells[row['day_types']] = len(flipped)
+                oracle_row['values'] = list(row['values'])
+            normalized_schedules.append(oracle_row)
+        self.assertEqual(SCHEDULE_I_FAN_ON_CELLS, corrected_cells,
+                         'accepted oracle divergence is exactly the 33 Schedule I fan cells')
+        self.assertEqual(normalized_schedules, schedules,
+                         'vendored schedules == legacy MERGED runtime table except the '
+                         'adjudicated Schedule I fan correction')
 
     def test_every_schedule_builds_identically_to_the_oracle(self):
         """test_loads_schedules_parity.rb, Leg C: EVERY unique name in the
@@ -233,7 +258,12 @@ class TestOracleGoldensLoads(unittest.TestCase):
         for name in names:
             model = openstudio.model.Model()
             schedule = loads.Schedules.add(model, name)
-            if ruleset_signature(schedule) != expected[name]:
+            same = ruleset_signature(schedule) == expected[name]
+            if name == SCHEDULE_I_FAN:
+                # The one adjudicated divergence: the corrected fan schedule
+                # must NOT build the oracle's all-zero ruleset any more.
+                self.assertFalse(same, f"{name} still builds the oracle's uncorrected ruleset")
+            elif not same:
                 mismatches.append(name)
         self.assertEqual([], mismatches, f"schedule parity mismatches: {mismatches[:10]}")
 
