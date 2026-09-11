@@ -121,6 +121,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-86** — R-B: btap.necb becomes btap.codes, and the 2025-only halves of tiers.py move beside their edition _(process)_
 - **D-87** — R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output _(process)_
 - **D-88** — A snapshot names another edition only as its origin; source-neutral performance-curve identifiers (R-N) _(process)_
+- **D-89** — Each edition's reference boilers and furnaces carry its own part-load fuel curve by equipment class; electric boilers carry none; the loader validates before reuse (DF-4 closed; R-O) _(runtime)_
 
 <!-- TOC END -->
 
@@ -5010,3 +5011,121 @@ curves diverge from each other for the first time, which is why the loader
 validation or the code-qualified naming has to be in place before, not
 after, that re-freeze lands. This amendment changes no other part of the
 D-88 policy (origin-only, no forward references, no emitted comparison).
+
+## D-89
+
+**Decided:** 2026-09-11 (approved by Sol with a binding implementation
+contract). Each edition's reference boilers and furnaces carry that
+edition's OWN part-load fuel curve, selected by an explicit equipment
+class; electric boilers carry no combustion part-load curve; the loader
+validates a curve before reusing one (closes DF-4). Re-freeze R-O.
+
+**The requirement.** NECB 2020 Article 8.4.5.2. (boilers) and 8.4.5.3.
+(furnaces), NECB 2025 8.4.6.2. and 8.4.6.3.: the reference equipment's
+part-load fuel is `Fuel_partload = Fuel_design × FHeatPLC` (furnaces:
+`Fuel_rated`), with FHeatPLC a quadratic in the part-load ratio from the
+edition's table — Table 8.4.5.2.-A / 8.4.5.3 (2020), Table 8.4.6.2 /
+8.4.6.3 (2025) — and, for modulating equipment in 2020, the ten printed
+(Q_partload/Q_design, FHeatPLC) points of Table 8.4.5.2.-B, which 2025
+replaces with a `Modulating` quadratic row. FHeatPLC is the fuel-INPUT
+ratio, so the engine's normalized-efficiency / part-load-fraction field
+must carry **PLF(PLR) = PLR / FHeatPLC(PLR)** — the transform D-53
+adjudicated for service water heaters. Both references were consulted: the
+archived Code payloads under each snapshot's `provenance/vintage_match/`
+supply every coefficient and point; the pinned oracle
+(`hvac_systems.rb:539-600, 855-877`) shows the EnergyPlus mapping and the
+legacy defect this decision retires.
+
+**What was wrong.** Every boiler row in both snapshots — the electric row
+included — and every furnace row named one NECB 2011-derived cubic
+(`BOILER-EFFFPLR` / `FURNACE-EFFPLR`, "converted EIR curve to PLF via curve
+fit"), an assumption the oracle carried for every vintage. Against the
+editions' own tables the multiplier was 2.76 % off for non-condensing
+boilers, 1.22 % for atmospheric furnaces, 43.6 % for electric boilers (a
+combustion curve on equipment with no combustion part-load factor), and
+33.5 % (2020) / 35.3 % (2025) for the gas-fired MODULATING boiler that
+8.4.4.6.(1) requires when the proposed building purchases heating — a
+boiler the reference path named in its audit sentence and never built as
+one. No row carried a class; `condensing` / `condensing_control` were null
+on all ten rows; the `-COND` curves were referenced by no row.
+
+**The class contract (binding).**
+1. Every `boilers` / `furnaces` row declares `part_load_curve_class` in the
+   Code's own taxonomy: ordinary fuel-fired boilers `non_condensing`,
+   ordinary furnaces `atmospheric`, the electric boiler `not_applicable` (a
+   real enum value), the purchased-heating boiler `modulating`;
+   `condensing` is unreachable until a separate decision selects it.
+2. The ordinary assignments are an **adjudicated legacy default**, not an
+   NECB-derived technology: Tables 5.2.12.1.-N/-O, Article 5.2.12.1 and
+   Note A-5.2.12.1.(1) give minima and certification guidance and no class
+   rule; the oracle selects by fuel, fluid and capacity and applies a fixed
+   curve; its 0.90/0.86 ECM thresholds are marked "Assumption", unused on
+   the NECB path, and contradicted by its own 85 %/88 % condensing
+   packages. A class is never inferred from a row's minimum efficiency.
+3. **Propagation.** `modulating` travels from the reference-system
+   selection (`reference_rules.json` `special_rules.purchased_heating`,
+   8.4.4.6.(1)) into the selection's config and onto each new reference
+   boiler as the `btap_part_load_curve_class` feature, which the efficiency
+   pass reads ahead of the row's class — persisted on the object so the
+   second efficiency pass after sizing sees it. No proposed-to-reference
+   condensing propagation exists; any needs its own decision.
+4. **Electric boilers** get no normalized-efficiency curve (constant PLF 1);
+   a curve copied in from the proposed loop is reset. The effect is
+   quantified by a focused test (legacy multiplier 0.5635 at PLR 0.10,
+   0.7508 at 0.25, 0.9016 at 0.50, 1.0077 at 1.00 → 1.0 throughout); no
+   frozen scenario has an electric reference boiler, so R-O shows no delta
+   for it and says so.
+5. **Only the reachable classes are implemented:** non-condensing boilers,
+   atmospheric furnaces, the modulating boiler. The 2025 condensing boiler
+   is a bivariate rational surface in PLR and return-water temperature
+   whose domain the Code does not publish; it stays deferred with its
+   coefficients retained as evidence in `part_load_fheatplc`.
+
+**Representation and its published error.** Every implemented class is a
+`Table:Lookup` in PLR (Linear interpolation, Constant extrapolation, output
+bounds set): exact at every printed point, the literal reading of "values …
+shall be those listed" for Table 8.4.5.2.-B, no fit residual. Grids:
+boiler quadratic classes PLR 0.01–1.00 step 0.01; the 2020 modulating
+table at its ten printed points 0.10–1.00; the atmospheric furnace
+0.10–1.00 step 0.01. Each curve row's `implements` block records the
+table, row, transform, grid and `max_error_vs_exact`
+(non-condensing boiler 1.48 % relative at PLR 0.014 and 0.055 % above PLR 0.10; atmospheric furnace 0.027 %; the 2020 modulating table exact at its printed points; the 2025 modulating quadratic 2.89 % at PLR 0.014 and 0.029 % above PLR 0.10 — the uniform 0.01 grid is coarsest where the rational is most convex, at loads below 3 % where the absolute fuel is negligible), re-derived by a test rather than trusted. Implementation
+choices the Code leaves open, recorded here: interpolation between the ten
+printed points is linear; below the lowest printed point the factor is held
+constant; the furnace grid starts at 10 % load (EnergyPlus 25.2 floors a fuel heating coil's part-load fraction at 0.7 in `HeatingCoils::CalcFuelHeatingCoil`, verified in the shipped library, and the atmospheric rational crosses 0.7 at PLR ≈ 0.055); the boiler
+grid's low end reproduces the Code's own standby fuel `a × Fuel_design`,
+and the engine clamps the evaluated ratio at the boiler's minimum part-load
+ratio as it did before. Names: `BOILER-PLF-NONCONDENSING` and
+`FURNACE-PLF-ATMOSPHERIC` are source-neutral because their content is
+identical in both editions; `BOILER-PLF-MODULATING-necb2020` and
+`-necb2025` are code-qualified because it differs (D-88 as amended). The
+efficiency-curve temperature evaluation variable is set to `EnteringBoiler`
+on every boiler the pass touches — the Code's T_w,return basis, adjudicated
+now so any future bivariate curve inherits it.
+
+**The loader (DF-4 closed).** An existing model curve is reused only when
+found by its typed lookup for the row's form AND its form, coefficients or
+points, and bounds match the data row; otherwise a WARNING names the foreign
+object and the ruleset's own curve is built under a disambiguated name. An
+unknown curve form is a WARNING, never a silent skip.
+
+**Data hygiene riding this change.** The vestigial `heat_rejection` block
+(ASHRAE 90.1 gpm/hp rows no Python reads; the 0.013 kW/kW rule is applied
+separately) leaves both snapshots; the daylighting table's stale
+`table_row` join labels are corrected to each edition's printed row names.
+The four NECB 2011 cubics are retired from `curves[]`, their coefficients
+and origin recorded in the manifest provenance.
+
+**The wider DF-4 consequence.** Validating before reuse also exposed that `btap.modeling`'s own DX catalogue (`modeling/hvac/data/curves.json`) ships different coefficients or bounds under four names the snapshots also use (`DXCOOL-REF-COOLPLFFPLR` wholly different, `DXCOOL-REF-CAPFFLOW` different, `DXCOOL-REF-CAPFT` and `DXCOOL-REF-COOLEIRFT` at the fifth significant figure). Before this decision the reference building silently adopted the proposed model's objects; now the reference pass audits a WARNING per divergent curve and builds the snapshot's own, so reference DX energy moves in every scenario with a DX coil, and R-O attributes those deltas too. Which catalogue the PROPOSED side should carry is a modeling-layer question recorded as deferred finding DF-5, not decided here.
+
+**Re-freeze R-O.** Two freezes on a clean tree. R-O-a (machinery only):
+`corpus-sizing-13-district-heating` and `corpus-annual-13-district-heating`
+join the frozen set under their own python-only seal with no
+cross-language attestation, so the modulating path is exercised; the
+existing 39 baselines byte-identical. R-O (numeric): the attribution is recorded in the progress log of `docs/NECB_MULTI_EDITION_PLAN.md` (step 3) and summarised in the amendment below once the freeze ran.
+
+**Deferred, by name:** the 2025 condensing surface and any condensing
+selection; the modulating furnace (unreachable; no representation
+shipped, a WARNING if ever selected); Table C-1 and exterior lighting
+(behind their own matching work); DF-1 (unmet hours at 01-baseboard-gas)
+remains open and is reported, not claimed fixed, if R-O moves it.
