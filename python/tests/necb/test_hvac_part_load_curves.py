@@ -232,7 +232,8 @@ class TestPartLoadData(unittest.TestCase):
                     xs = [x for x, _ in points]
                     self.assertEqual([round(0.001 * i, 3) for i in range(1, 50)],
                                      xs[:49], f'{where}: 0.001 steps below 0.05')
-                    self.assertIn(0.05, xs); self.assertIn(0.055, xs); self.assertIn(0.1, xs)
+                    for node in (0.05, 0.055, 0.1):
+                        self.assertIn(node, xs, f'{where}: node {node}')
 
     def test_no_furnace_node_sits_under_the_engine_s_plf_floor(self):
         """The 0.10 grid start is not a preference: EnergyPlus resets a fuel

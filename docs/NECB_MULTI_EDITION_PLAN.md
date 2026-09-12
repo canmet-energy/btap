@@ -2510,4 +2510,3 @@ amendment for the figures). P3 — whitespace; `git diff --check` added to
 the verification. Four tests added (mixed sources in both orders, reuse
 mechanism, stale tag, engine domain). D-89 amended; R-O re-frozen on the
 clean tree; attribution and lanes re-run below.
-
