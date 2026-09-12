@@ -7,8 +7,24 @@ import openstudio
 
 from btap.modeling.hvac.components import schedules
 
+#: Feature stamped on a boiler's additionalProperties to carry the part-load
+#: curve class the reference selection elected (D-89). The NECB efficiency
+#: pass reads it; nothing in this layer interprets its value.
+BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
 
-def find_hot_water(model):
+
+def boiler_part_load_class(loop):
+    """The part-load class the loop's boilers carry, or None when unstamped."""
+    for comp in loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType()):
+        boiler = comp.to_BoilerHotWater().get()
+        feature = boiler.additionalProperties().getFeatureAsString(
+            BOILER_PART_LOAD_CLASS_FEATURE)
+        if feature.is_initialized() and feature.get():
+            return feature.get()
+    return None
+
+
+def find_hot_water(model, part_load_curve_class=None):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
@@ -16,7 +32,8 @@ def find_hot_water(model):
     """
     return next(
         (pl for pl in model.getPlantLoops()
-         if len(pl.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0),
+         if len(pl.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
+         and boiler_part_load_class(pl) == part_load_curve_class),
         None)
 
 
@@ -35,7 +52,8 @@ def _district_heated(loop):
     return False
 
 
-def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler'):
+def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
+              part_load_curve_class=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -45,10 +63,15 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     :param reuse: return an existing boiler loop when present (default True)
     :param source: 'boiler' (default) or 'district' (DistrictHeating object
         instead of boilers — the CBECS 'district hot water' pattern)
+    :param part_load_curve_class: the part-load curve class the caller's
+        selection elected for these boilers (D-89; None = unstamped). Reuse
+        is class-aware: a loop whose boilers carry a different class (or none)
+        is not adopted, so a purchased-heating group never lands on an
+        ordinary group's boilers and vice versa.
     :return: openstudio.model.PlantLoop
     """
     if reuse:
-        existing = find_hot_water(model)
+        existing = find_hot_water(model, part_load_curve_class)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -67,7 +90,8 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             existing = next(
                 (pl for pl in model.getPlantLoops()
                  if pl.nameString() == 'Hot Water Loop'
-                 and _district_heated(pl) == (source == 'district')),
+                 and _district_heated(pl) == (source == 'district')
+                 and boiler_part_load_class(pl) == part_load_curve_class),
                 None)
         if existing is not None:
             return existing
@@ -100,6 +124,10 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # Names are load-bearing downstream (NECB boiler efficiency rules match on them).
         boiler1.setName('Primary Boiler')
         boiler2.setName('Secondary Boiler')
+        if part_load_curve_class:
+            for boiler in (boiler1, boiler2):
+                boiler.additionalProperties().setFeature(
+                    BOILER_PART_LOAD_CLASS_FEATURE, part_load_curve_class)
         hw_loop.addSupplyBranchForComponent(boiler1)
         hw_loop.addSupplyBranchForComponent(boiler2)
 

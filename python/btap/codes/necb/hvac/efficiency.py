@@ -26,6 +26,7 @@ from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
+from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
 
 
 def data(edition):
@@ -1310,8 +1311,7 @@ def optional_f(value):
 #: The feature a reference-building selection stamps on an object it creates, so
 #: the part-load class it elected survives the SECOND efficiency pass — the same
 #: `additionalProperties` mechanism the purchased-cooling chiller COP uses.
-PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
-
+PART_LOAD_CLASS_FEATURE = BOILER_PART_LOAD_CLASS_FEATURE
 #: Every class the enum admits, across both editions. A row or a feature naming
 #: anything else is a data error, reported rather than quietly defaulted.
 PART_LOAD_CLASSES = ('non_condensing', 'atmospheric', 'condensing',
@@ -1338,6 +1338,18 @@ def _fheatplc_entry(tables, equipment, klass):
                  if e.get('equipment') == equipment and e.get('class') == klass), None)
 
 
+def _align_engine_domain(boiler, tables, curve_name):
+    """The table's first node becomes the boiler's engine minimum part-load
+    ratio when the engine's is lower, so every part-load ratio the engine can
+    hand the curve lies inside the table's domain (D-89; Sol's R-O review).
+    A higher minimum already set — 8.4.4.9.(6)(d)'s 0.25 on a staged primary
+    boiler — is kept."""
+    row = next((c for c in tables['curves'] if c['name'] == curve_name), None)
+    grid_min = (row or {}).get('minimum_independent_variable_1')
+    if grid_min is not None and boiler.minimumPartLoadRatio() < grid_min:
+        boiler.setMinimumPartLoadRatio(grid_min)
+
+
 def _curve_evidence(tables, row):
     """What the part-load curve IS: the article, the table row it comes from,
     the transform, the representation and its published error."""
@@ -1354,7 +1366,11 @@ def _curve_evidence(tables, row):
             f"carries the transform {implements.get('transform')}; represented as "
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
-            f"{row.get('extrapolation')} extrapolation — {error_text}")
+            f"{row.get('extrapolation')} extrapolation — {error_text}"
+            + (f"; the engine minimum part-load ratio is raised to the first node "
+               f"({row.get('minimum_independent_variable_1')}) when lower, so every "
+               f"permitted input lies in the table's domain"
+               if implements.get('equipment') == 'boiler' else ''))
 
 
 def _part_load_curve(component, tables, equipment, klass, audit, target):
@@ -1448,6 +1464,7 @@ def _apply_boiler(boiler, tables, plant, audit):
         boiler.resetNormalizedBoilerEfficiencyCurve()
     else:
         boiler.setNormalizedBoilerEfficiencyCurve(plf)
+        _align_engine_domain(boiler, tables, curve_label)
 
     thermal_eff, label = boiler_thermal_efficiency(row)
     if thermal_eff is None:

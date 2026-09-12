@@ -2461,7 +2461,7 @@ furnace curve was always translated (−0.1 % on the coils). D-89 amended
 with this finding; memory note `boiler-curve-never-translated`.
 
 Per-scenario numeric attribution (`attribute_ro.py`, base = R-O-a
-`1ed97f8`): 
+`1ed97f8`):
 
 | scenario | reference heating (kWh) | reference natural gas (kWh) | reference site (kWh) | % of target | tier / GHG level | reference unmet heating (h) | attributed to |
 |---|---|---|---|---|---|---|---|
@@ -2492,3 +2492,22 @@ oversized reference boiler at PLR < 0.1 burning the Code's a·Fuel_design
 standby is the intended reading (it is the literal one; the alternative is
 a minimum PLR or a cycling model, which the Code does not state); (3) DF-5;
 (4) the tier/GHG re-pin.
+
+### Step 3 — Sol's review of the first R-O freeze (2026-09-12): request changes, all fixed
+
+All four findings verified in the code before acting. P1 (plant reuse
+loses the purchased class in a mixed building; a proposed tag steers the
+reference) — both were design gaps of mine: the interface contract said "a
+present feature wins" without requiring the reference build to clear
+incoming tags, and I reviewed the propagation for homogeneous layouts only.
+Fixed: class-aware loop reuse and stamping at creation in
+`plant_loops.hot_water` (builder passes `boiler_part_load_curve_class`),
+tags cleared on the clone in `reference_hvac` with an audited info entry.
+P2 (table domain vs permitted PLR) — my grid choice; fixed with the 0.001
+grid start, the finer low-load region, the engine minimum aligned to the
+first node, and the error re-derived on a 0.0001 grid (see D-89's second
+amendment for the figures). P3 — whitespace; `git diff --check` added to
+the verification. Four tests added (mixed sources in both orders, reuse
+mechanism, stale tag, engine domain). D-89 amended; R-O re-frozen on the
+clean tree; attribution and lanes re-run below.
+

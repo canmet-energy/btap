@@ -65,11 +65,12 @@ def interpolate(points, x):
 
 def derive_max_error(points, coefficients):
     """Max RELATIVE error of the table's Linear interpolation against the exact
-    rational, on a 0.001 grid over the table's own span."""
+    rational, on a 0.0001 grid over the table's own span — finer than the
+    finest node spacing (0.001), so no interval is sampled only at its nodes."""
     lo, hi = points[0][0], points[-1][0]
     worst = 0.0
-    for i in range(round((hi - lo) / 0.001) + 1):
-        x = round(lo + i * 0.001, 3)
+    for i in range(round((hi - lo) / 0.0001) + 1):
+        x = round(lo + i * 0.0001, 4)
         exact = exact_plf(coefficients, x)
         worst = max(worst, abs(interpolate(points, x) - exact) / abs(exact))
     return worst
@@ -188,12 +189,12 @@ class TestPartLoadData(unittest.TestCase):
     def test_the_published_errors_are_the_expected_magnitudes(self):
         """Pinned so a regenerated grid cannot quietly get coarser."""
         expected = {
-            ('necb2020', 'BOILER-PLF-NONCONDENSING'): 0.014823855,
-            ('necb2025', 'BOILER-PLF-NONCONDENSING'): 0.014823855,
-            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268462,
-            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268462,
+            ('necb2020', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
+            ('necb2025', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
+            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268619,
+            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268619,
             ('necb2020', 'BOILER-PLF-MODULATING-necb2020'): 0.0,
-            ('necb2025', 'BOILER-PLF-MODULATING-necb2025'): 0.028898647,
+            ('necb2025', 'BOILER-PLF-MODULATING-necb2025'): 0.007898575,
         }
         for (edition, name), value in expected.items():
             self.assertAlmostEqual(
@@ -223,8 +224,15 @@ class TestPartLoadData(unittest.TestCase):
                                      f'{where}: the furnace grid starts at 0.10')
                     self.assertEqual(91, len(points), where)
                 else:
-                    self.assertEqual(0.01, points[0][0], where)
-                    self.assertEqual(100, len(points), where)
+                    # Boiler quadratic classes: the grid starts at the engine's
+                    # aligned minimum part-load ratio (0.001) and is finest
+                    # where the rational is most convex (Sol's R-O review P2).
+                    self.assertEqual(0.001, points[0][0], where)
+                    self.assertEqual(150, len(points), where)
+                    xs = [x for x, _ in points]
+                    self.assertEqual([round(0.001 * i, 3) for i in range(1, 50)],
+                                     xs[:49], f'{where}: 0.001 steps below 0.05')
+                    self.assertIn(0.05, xs); self.assertIn(0.055, xs); self.assertIn(0.1, xs)
 
     def test_no_furnace_node_sits_under_the_engine_s_plf_floor(self):
         """The 0.10 grid start is not a preference: EnergyPlus resets a fuel
@@ -538,3 +546,42 @@ class TestCurveLoaderValidatesBeforeReuse(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
+class TestEngineDomainMatchesTheTable(unittest.TestCase):
+    """Sol's R-O review, P2: the published error only bounds the engine's
+    behaviour if every part-load ratio the engine can evaluate lies inside the
+    table's domain. The applier raises the boiler's minimum part-load ratio to
+    the table's first node when the engine's is lower, and keeps a higher one."""
+
+    def test_the_minimum_part_load_ratio_is_raised_to_the_first_node(self):
+        for edition in EDITIONS:
+            model, boiler = boiler_model()
+            self.assertEqual(0.0, boiler.minimumPartLoadRatio(), 'SDK default')
+            audit = apply_boiler(boiler, edition=edition)
+            applied = boiler.normalizedBoilerEfficiencyCurve().get()
+            row = curves(edition)[applied.nameString()]
+            self.assertEqual(row['minimum_independent_variable_1'],
+                             boiler.minimumPartLoadRatio(), edition)
+            self.assertEqual(0.001, boiler.minimumPartLoadRatio(), edition)
+            entry = next(e for e in audit.entries
+                         if e['action'] == 'boiler efficiency applied')
+            self.assertIn('minimum part-load ratio is raised to the first node (0.001)',
+                          entry['evidence'], edition)
+
+    def test_a_higher_minimum_already_set_is_kept(self):
+        """8.4.4.9.(6)(d): a staged primary boiler runs modulating with a 25 %
+        floor — above every table's first node, so it must not be lowered."""
+        model, boiler = boiler_model(capacity_w=400_000.0)
+        apply_boiler(boiler)
+        self.assertEqual(0.25, boiler.minimumPartLoadRatio())
+
+    def test_the_modulating_table_s_floor_is_the_code_s_lowest_printed_point(self):
+        model, boiler = boiler_model()
+        boiler.additionalProperties().setFeature(
+            efficiency.PART_LOAD_CLASS_FEATURE, 'modulating')
+        apply_boiler(boiler, edition='necb2020')
+        # Table 8.4.5.2.-B prints nothing below 0.10; clamping the engine there
+        # is output-identical to the declared Constant extrapolation.
+        self.assertEqual(0.10, boiler.minimumPartLoadRatio())

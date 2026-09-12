@@ -113,7 +113,9 @@ def build_system(model, system_name, zones, control_zone=None, remove_existing=F
     if resolved.get('needs_boiler'):
         hw_loop = plant_loops.hot_water(model,
                                         fuel=resolved.get('boiler_fuel', 'NaturalGas'),
-                                        source=resolved.get('hw_source', 'boiler'))
+                                        source=resolved.get('hw_source', 'boiler'),
+                                        part_load_curve_class=resolved.get(
+                                            'boiler_part_load_curve_class'))
     chw_loop = None
     if resolved.get('needs_chiller'):
         chw_loop = plant_loops.chilled_water(model,

@@ -24,6 +24,7 @@ from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
+from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
 
 
 def rules(edition):
@@ -486,6 +487,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
 
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
+    _clear_proposed_part_load_classes(reference, audit)
 
     facts = _classify.characterize(reference, audit=audit)
     info = _building_info(reference, building, audit)
@@ -600,7 +602,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
             for boiler in reference.getBoilerHotWaters():
                 if str(boiler.handle()) not in existing_boilers:
                     boiler.additionalProperties().setFeature(
-                        'btap_part_load_curve_class', boiler_class)
+                        BOILER_PART_LOAD_CLASS_FEATURE, boiler_class)
         built_inputs = {'system': assignment.reference_system, 'action': assignment.action}
         if boiler_class is not None:
             built_inputs['boiler_part_load_curve_class'] = boiler_class
@@ -920,6 +922,26 @@ def _emit_article_coverage(rules_data, audit):
     unimplemented or partially-implemented articles surface as warnings, so a missed
     requirement is visible in every log rather than discovered by review."""
     emit_coverage(rules_data['article_coverage'], audit)
+
+
+def _clear_proposed_part_load_classes(reference, audit):
+    """D-89 forbids proposed-to-reference class propagation: the ONLY class
+    the reference carries is the one its own selection elects (purchased
+    heating -> modulating). A boiler cloned from the proposed may arrive
+    tagged — by a user, a tool, or a previous reference pass — and the
+    efficiency pass gives a present tag precedence over the row, so every
+    incoming tag is removed here, before any reference system is built."""
+    cleared = []
+    for boiler in reference.getBoilerHotWaters():
+        props = boiler.additionalProperties()
+        feature = props.getFeatureAsString(BOILER_PART_LOAD_CLASS_FEATURE)
+        if feature.is_initialized() and feature.get():
+            cleared.append(f"{boiler.nameString()}={feature.get()}")
+            props.resetFeature(BOILER_PART_LOAD_CLASS_FEATURE)
+    if cleared:
+        audit.info('build', 'proposed boiler part-load class tags not carried into the reference',
+                   target=','.join(c.split('=')[0] for c in cleared),
+                   inputs={'cleared': cleared}, ruling='D-89')
 
 
 def _clone_model(model):

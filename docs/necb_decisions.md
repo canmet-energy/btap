@@ -5160,3 +5160,36 @@ proposed buildings' ratios fall accordingly; the NECB 2025 determination
 crosses the tier-2 boundary (76.0 → 67.5 % of target) and its GHG level
 moves F → E. This is the Code's own curve acting on the reference for the
 first time, attributed per scenario in the plan log, not a defect.
+
+
+**Second amendment (2026-09-12, Sol's review of the first R-O freeze;
+request-changes, all four findings verified in the code and fixed before the
+freeze was redone).** (1) *Plant reuse is class-aware.* The reference
+builder reuses the first existing hot-water loop, so in a building that
+mixes purchased and ordinary heating the purchased assignment could adopt an
+unstamped boiler and end up `non_condensing`; `plant_loops.hot_water` now
+takes the class, stamps it on the boilers it creates, and reuses a loop only
+when its boilers carry the same class (None for ordinary), so the two kinds
+of loop coexist. (2) *Incoming class tags are cleared.* The applier gives a
+present tag precedence over the row, and the reference is built on a clone
+of the proposed, so a proposed boiler tagged `condensing` would have made an
+ordinary reference boiler condensing — exactly the propagation this decision
+forbids. `reference_hvac` now removes every `btap_part_load_curve_class` tag
+from the clone before any system is built and audits an info entry naming
+what it cleared; the only tags a reference carries are the ones its own
+selection stamps. (3) *The engine's permitted inputs lie inside the table's
+domain.* The boiler tables started at PLR 0.01 while most boilers keep the
+SDK's minimum part-load ratio of 0, so the engine could evaluate the curve
+below the table and the published error bounded nothing there. The boiler
+grids now start at 0.001 (0.001 steps to 0.05, 0.005 to 0.10, 0.01 to 1.00;
+150 nodes), the applier raises a boiler's minimum part-load ratio to the
+table's first node when the engine's is lower (a higher one, such as the
+8.4.4.9.(6)(d) 25 % floor, is kept), and the error is re-derived on a
+0.0001 grid over the whole domain: non-condensing 0.199 % at PLR 0.0014,
+2025 modulating 0.790 %, atmospheric furnace 0.027 %. For the 2020
+modulating table the floor is the Code's lowest printed point (0.10), which
+is output-identical to the declared constant extrapolation. (4) Trailing
+whitespace removed; `git diff --check` is part of the verification. Tests
+added for the mixed-source building in both group orders, the class-aware
+reuse mechanism, the stale proposed tag, and the engine-domain alignment.
+R-O was re-frozen on the clean tree after these changes.

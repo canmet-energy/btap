@@ -309,3 +309,97 @@ class TestTheFeatureSurvivesTheSecondEfficiencyPass(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@needs_sdk
+class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
+    """Sol's R-O review, P1 (both findings).
+
+    (1) Plant reuse is class-aware: the reference builder reuses an existing
+    hot-water loop, so in a building that mixes purchased and ordinary heating
+    the purchased assignment could land on an unstamped boiler. Every ordering
+    of the groups must end with every reference boiler carrying a class.
+    (2) A class arriving ON the cloned proposed model must not steer the
+    reference: D-89 forbids proposed-to-reference class propagation."""
+
+    def _mixed_proposed(self, purchased_first):
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.audit import AuditLog
+        from btap.codes.necb import loads
+
+        model = load_raw_fixture()
+        loads.apply_loads(model, code="necb2020", audit=AuditLog())
+        zones = sorted_by_name(model.getThermalZones())
+        district, gas = (zones[:2], zones[2:]) if purchased_first else (zones[3:], zones[:3])
+        modeling.build_system(model, "Baseboard district hot water", district)
+        modeling.build_system(model, "Baseboard gas boiler", gas)
+        return model
+
+    def test_every_reference_boiler_carries_a_class_whatever_the_group_order(self):
+        for purchased_first in (True, False):
+            model = self._mixed_proposed(purchased_first)
+            self.assertEqual(1, district_count(model))
+            self.assertTrue(model.getBoilerHotWaters(),
+                            "the proposed carries an ordinary gas boiler too")
+            reference, _ = build_reference(model)
+            self.assertEqual(0, district_count(reference),
+                             f"purchased_first={purchased_first}: 8.4.4.6.(1) "
+                             "replaces purchased heating")
+            found = classes(reference)
+            self.assertTrue(found)
+            unstamped = [n for n, c in found if c is None]
+            self.assertEqual([], unstamped,
+                             f"purchased_first={purchased_first}: a reference "
+                             f"boiler serving purchased heating lost its class "
+                             f"through plant reuse: {found}")
+            self.assertIn("modulating", {c for _, c in found})
+            for name, value in found:
+                self.assertIn(value, CLASSES, f"{name}={value}")
+
+    def test_plant_reuse_is_class_aware(self):
+        """The mechanism itself, at the modeling layer: a loop is reused only
+        for the class its boilers carry, so an ordinary loop and a modulating
+        loop coexist instead of the second caller adopting the first's boilers."""
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        ordinary = plant_loops.hot_water(model)
+        self.assertIsNone(plant_loops.boiler_part_load_class(ordinary))
+        modulating = plant_loops.hot_water(model, part_load_curve_class="modulating")
+        self.assertNotEqual(ordinary.handle(), modulating.handle(),
+                            "a purchased-heating caller must not adopt the "
+                            "ordinary loop's boilers")
+        self.assertEqual("modulating", plant_loops.boiler_part_load_class(modulating))
+        self.assertEqual(modulating.handle(),
+                         plant_loops.hot_water(model, part_load_curve_class="modulating").handle(),
+                         "the same class reuses its own loop")
+        self.assertEqual(ordinary.handle(), plant_loops.hot_water(model).handle(),
+                         "an unstamped caller still reuses the ordinary loop")
+        self.assertEqual({None: 2, "modulating": 2},
+                         {k: sum(1 for _, c in classes(model) if c == k)
+                          for k in (None, "modulating")})
+
+    def test_a_class_tagged_on_the_proposed_is_cleared_before_the_reference_is_built(self):
+        model = proposed_with_hvac("Baseboard gas boiler")
+        boilers = model.getBoilerHotWaters()
+        self.assertTrue(boilers)
+        for boiler in boilers:
+            boiler.additionalProperties().setFeature(FEATURE, "condensing")
+
+        reference, audit = build_reference(model)
+
+        found = classes(reference)
+        self.assertTrue(found)
+        self.assertEqual([], [(n, c) for n, c in found if c is not None],
+                         f"a proposed tag must never reach the reference: {found}")
+        cleared = [e for e in audit.entries
+                   if str(e.get("action") or "").startswith(
+                       "proposed boiler part-load class tags not carried")]
+        self.assertEqual(1, len(cleared), "the clearing is audited, once")
+        self.assertEqual("D-89", cleared[0].get("ruling"))
+        self.assertTrue(all("condensing" in c for c in cleared[0]["inputs"]["cleared"]))
+        # the proposed itself is untouched: the reference is built on a clone
+        self.assertEqual({"condensing"}, {c for _, c in classes(model)})

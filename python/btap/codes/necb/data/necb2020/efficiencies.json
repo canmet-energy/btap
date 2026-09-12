@@ -2066,40 +2066,240 @@
       "extrapolation": "Constant",
       "points": [
         [
+          0.001,
+          0.011963
+        ],
+        [
+          0.002,
+          0.023643
+        ],
+        [
+          0.003,
+          0.035052
+        ],
+        [
+          0.004,
+          0.046199
+        ],
+        [
+          0.005,
+          0.057091
+        ],
+        [
+          0.006,
+          0.067739
+        ],
+        [
+          0.007,
+          0.078151
+        ],
+        [
+          0.008,
+          0.088333
+        ],
+        [
+          0.009,
+          0.098295
+        ],
+        [
           0.01,
           0.108042
+        ],
+        [
+          0.011,
+          0.117582
+        ],
+        [
+          0.012,
+          0.126921
+        ],
+        [
+          0.013,
+          0.136066
+        ],
+        [
+          0.014,
+          0.145023
+        ],
+        [
+          0.015,
+          0.153798
+        ],
+        [
+          0.016,
+          0.162395
+        ],
+        [
+          0.017,
+          0.170822
+        ],
+        [
+          0.018,
+          0.179081
+        ],
+        [
+          0.019,
+          0.187179
         ],
         [
           0.02,
           0.195121
         ],
         [
+          0.021,
+          0.20291
+        ],
+        [
+          0.022,
+          0.210552
+        ],
+        [
+          0.023,
+          0.21805
+        ],
+        [
+          0.024,
+          0.225408
+        ],
+        [
+          0.025,
+          0.232631
+        ],
+        [
+          0.026,
+          0.239721
+        ],
+        [
+          0.027,
+          0.246684
+        ],
+        [
+          0.028,
+          0.253522
+        ],
+        [
+          0.029,
+          0.260238
+        ],
+        [
           0.03,
           0.266836
+        ],
+        [
+          0.031,
+          0.273319
+        ],
+        [
+          0.032,
+          0.27969
+        ],
+        [
+          0.033,
+          0.285952
+        ],
+        [
+          0.034,
+          0.292108
+        ],
+        [
+          0.035,
+          0.29816
+        ],
+        [
+          0.036,
+          0.304111
+        ],
+        [
+          0.037,
+          0.309964
+        ],
+        [
+          0.038,
+          0.315721
+        ],
+        [
+          0.039,
+          0.321384
         ],
         [
           0.04,
           0.326956
         ],
         [
+          0.041,
+          0.332439
+        ],
+        [
+          0.042,
+          0.337835
+        ],
+        [
+          0.043,
+          0.343146
+        ],
+        [
+          0.044,
+          0.348374
+        ],
+        [
+          0.045,
+          0.353522
+        ],
+        [
+          0.046,
+          0.35859
+        ],
+        [
+          0.047,
+          0.363581
+        ],
+        [
+          0.048,
+          0.368497
+        ],
+        [
+          0.049,
+          0.373339
+        ],
+        [
           0.05,
           0.37811
+        ],
+        [
+          0.055,
+          0.400936
         ],
         [
           0.06,
           0.422187
         ],
         [
+          0.065,
+          0.442022
+        ],
+        [
           0.07,
           0.460582
+        ],
+        [
+          0.075,
+          0.477987
         ],
         [
           0.08,
           0.494345
         ],
         [
+          0.085,
+          0.50975
+        ],
+        [
           0.09,
           0.524283
+        ],
+        [
+          0.095,
+          0.53802
         ],
         [
           0.1,
@@ -2466,11 +2666,11 @@
           1.0
         ]
       ],
-      "minimum_independent_variable_1": 0.01,
+      "minimum_independent_variable_1": 0.001,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": 0.108042,
+      "minimum_dependent_variable_output": 0.011963,
       "maximum_dependent_variable_output": 1.0,
       "implements": {
         "equipment": "boiler",
@@ -2478,9 +2678,9 @@
         "table": "8.4.5.2.-A",
         "row": "Non-condensing",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
-        "grid": "PLR 0.01 to 1.00, step 0.01 (100 nodes)",
-        "max_error_vs_exact": 0.014823855,
-        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.010 to 1.000 step 0.001: 1.4824 % at PLR 0.014. The rational is strongly convex as PLR approaches 0, so the error is confined to the first two intervals; above PLR 0.10 it is 0.0550 %."
+        "grid": "PLR 0.001 to 0.050 step 0.001, 0.050 to 0.100 step 0.005, 0.10 to 1.00 step 0.01 (150 nodes)",
+        "max_error_vs_exact": 0.001991326,
+        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0010 to 1.0000 step 0.0001: 0.1991 % at PLR 0.0014. The grid is finest where the rational is most convex (below PLR 0.05), and the boiler's engine minimum part-load ratio is raised to the first node (0.001) when lower, so every part-load ratio the engine can evaluate lies inside this domain."
       },
       "notes": "Reference non-condensing boiler part-load factor for Article 8.4.5.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact at every node."
     },
@@ -3122,8 +3322,8 @@
         "row": "Atmospheric",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
         "grid": "PLR 0.10 to 1.00, step 0.01 (91 nodes)",
-        "max_error_vs_exact": 0.000268462,
-        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.100 to 1.000 step 0.001: 0.0268 % at PLR 0.105."
+        "max_error_vs_exact": 0.000268619,
+        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.1000 to 1.0000 step 0.0001: 0.0269 % at PLR 0.1049"
       },
       "notes": "Reference atmospheric furnace part-load factor for Article 8.4.5.3. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_rated x FHeatPLC), so the EnergyPlus part-load-fraction multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). The grid starts at PLR 0.10 and not at 0.01: EnergyPlus floors a fuel heating coil's PLF at 0.7 (EnergyPlus::HeatingCoils::CalcFuelHeatingCoil, 25.2.0 - \"PLF curve values must be >= 0.7. PLF has been reset to 0.7\"), and the rational crosses 0.7 near PLR 0.055, so nodes below 0.10 would only feed the engine values it rejects. Below PLR 0.10 the Constant extrapolation holds PLF at 0.788005; the departure from the Code there is bounded by a x Fuel_rated = 1.86 % of rated fuel and is stated in D-89."
     },
