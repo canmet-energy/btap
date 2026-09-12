@@ -2465,10 +2465,10 @@ Per-scenario numeric attribution (`attribute_ro.py`, base = R-O-a
 
 | scenario | reference heating (kWh) | reference natural gas (kWh) | reference site (kWh) | % of target | tier / GHG level | reference unmet heating (h) | attributed to |
 |---|---|---|---|---|---|---|---|
-| corpus-annual-01-baseboard-gas (1 week) | 1227.8 → 1933.3 (+57.5 %) | 1538.9 → 2244.4 | 3025.0 → 3730.6 | 90.1 → 73.0 | 1 → 2 | unchanged | boiler curve now evaluated (+51 %) + Code table vs legacy cubic (+6.6 %); furnace −0.1 %; DX rebuilt, cooling unchanged |
-| corpus-annual-02-psz-gas-dx (1 week) | 1258.3 → 2041.7 (+62.3 %) | 1569.4 → 2350.0 | 3019.4 → 3802.8 | 131.6 → 104.5 | none → none | unchanged | same mechanism |
+| corpus-annual-01-baseboard-gas (1 week) | 1227.8 → 1947.2 (+58.6 %) | 1538.9 → 2258.3 | 3025.0 → 3744.4 | 90.1 → 72.8 | 1 → 2 | unchanged | boiler curve now evaluated (+51 %) + Code table vs legacy cubic (+6.6 %); furnace −0.1 %; DX rebuilt, cooling unchanged |
+| corpus-annual-02-psz-gas-dx (1 week) | 1258.3 → 2047.2 (+62.7 %) | 1569.4 → 2358.3 | 3019.4 → 3811.1 | 131.6 → 104.3 | none → none | unchanged | same mechanism |
 | corpus-annual-13-district-heating (1 week, NEW at R-O-a) | 1258.3 → 1394.4 (+10.8 %) | 1569.4 → 1705.6 | 3022.2 → 3158.3 | 139.9 → 133.9 | none → none | unchanged | the MODULATING table (PLF 0.85–1.0) now evaluated on the purchased-heating boiler — the one scenario where 8.4.4.6.(1) is live |
-| determination-01-baseboard-gas-necb2025 (full year) | 53063.9 → 72661.1 (+36.9 %) | 67330.6 → 86927.8 | 155047.2 → 174697.2 | 76.0 → 67.5 | 1 → 2; GHG F → E (95.3 → 79.0 % of GHG target) | 801.0 → 802.25 (DF-1, open) | boiler activation + 2025 table; cooling +3.3 % (DX curves rebuilt from the snapshot, DF-5); fans −0.1 %; sizing factors ±0.3 % |
+| determination-01-baseboard-gas-necb2025 (full year) | 53063.9 → 73152.8 (+37.9 %) | 67330.6 → 87419.4 | 155047.2 → 175188.9 | 76.0 → 67.3 | 1 → 2; GHG F → E (95.3 → 78.7 % of GHG target) | 801.0 → 802.25 (DF-1, open) | boiler activation + 2025 table; cooling +3.3 % (DX curves rebuilt from the snapshot, DF-5); fans −0.1 %; sizing factors ±0.3 % |
 | corpus-sizing-01/-02/-09/-13 | — | — | — | — | — | — | audit only (efficiency entries, DF-4 warnings) |
 | 20 corpus-none-* and the api/verdict/usage scenarios | — | — | — | — | — | — | audit text only where a reference boiler/furnace entry or coverage sentence appears; 13 scenarios byte-identical |
 
@@ -2512,3 +2512,18 @@ amendment for the figures). P3 — whitespace; `git diff --check` added to
 the verification. Four tests added (mixed sources in both orders, reuse
 mechanism, stale tag, engine domain). D-89 amended; R-O re-frozen on the
 clean tree; attribution and lanes re-run below.
+
+**Final R-O (2026-09-12, `freeze.py` on the clean tree after the review
+fixes; the table above carries the final numbers).** Relative to the first
+freeze: 7 scenarios moved — `corpus-annual-01` +0.7 %, `-02` +0.3 %, the
+2025 determination +0.7 % reference heating (the tables now follow the
+Code's rational down to PLR 0.001 instead of holding PLF(0.01) below it),
+their sized siblings' audit text, and nothing else; `corpus-annual-13`
+(modulating) byte-identical — the 0.2 % it moved under the reverted
+engine-minimum attempt was the forced heat output, which is why that
+approach was dropped. Against R-O-a the accepted categories are unchanged
+(boiler/furnace efficiency entries in 28 scenarios, the class on the
+purchased-heating selection and build entries, the reworded coverage
+sentences, the tier/GHG entries, one DF-4 warning per divergent DX curve
+name per sized reference model, 32 in all). Scenario-lane verification
+(suite + three lanes + gates) follows below.
