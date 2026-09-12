@@ -550,39 +550,54 @@ if __name__ == '__main__':
 
 
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
-class TestEngineDomainMatchesTheTable(unittest.TestCase):
+class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
     """Sol's R-O review, P2: the published error only bounds the engine's
-    behaviour if every part-load ratio the engine can evaluate lies inside the
-    table's domain. The applier raises the boiler's minimum part-load ratio to
-    the table's first node when the engine's is lower, and keeps a higher one."""
+    behaviour if every part-load ratio the engine can evaluate is covered.
+    Most boilers keep the SDK's minimum part-load ratio of 0, so the engine
+    may evaluate any PLR in (0, 1]. The table covers [0.001, 1] by nodes and
+    (0, 0.001) by its declared Constant extrapolation; the under-count there is
+    bounded by the Code's own standby term, and that bound is published.
 
-    def test_the_minimum_part_load_ratio_is_raised_to_the_first_node(self):
-        for edition in EDITIONS:
-            model, boiler = boiler_model()
-            self.assertEqual(0.0, boiler.minimumPartLoadRatio(), 'SDK default')
-            audit = apply_boiler(boiler, edition=edition)
-            applied = boiler.normalizedBoilerEfficiencyCurve().get()
-            row = curves(edition)[applied.nameString()]
-            self.assertEqual(row['minimum_independent_variable_1'],
-                             boiler.minimumPartLoadRatio(), edition)
-            self.assertEqual(0.001, boiler.minimumPartLoadRatio(), edition)
-            entry = next(e for e in audit.entries
-                         if e['action'] == 'boiler efficiency applied')
-            self.assertIn('minimum part-load ratio is raised to the first node (0.001)',
-                          entry['evidence'], edition)
+    The engine minimum is deliberately NOT raised to close the domain:
+    EnergyPlus forces the delivered heat up to MinPLR x capacity under locked
+    flow (Boilers.cc, CalcBoilerModel), which changes the load, not the curve."""
 
-    def test_a_higher_minimum_already_set_is_kept(self):
-        """8.4.4.9.(6)(d): a staged primary boiler runs modulating with a 25 %
-        floor — above every table's first node, so it must not be lowered."""
+    def test_the_applier_leaves_the_engine_minimum_alone(self):
+        model, boiler = boiler_model()
+        apply_boiler(boiler)
+        self.assertEqual(0.0, boiler.minimumPartLoadRatio())
         model, boiler = boiler_model(capacity_w=400_000.0)
         apply_boiler(boiler)
-        self.assertEqual(0.25, boiler.minimumPartLoadRatio())
+        self.assertEqual(0.25, boiler.minimumPartLoadRatio(),
+                         "8.4.4.9.(6)(d)'s staged-primary floor is the only "
+                         "minimum the pass sets")
 
-    def test_the_modulating_table_s_floor_is_the_code_s_lowest_printed_point(self):
-        model, boiler = boiler_model()
-        boiler.additionalProperties().setFeature(
-            efficiency.PART_LOAD_CLASS_FEATURE, 'modulating')
-        apply_boiler(boiler, edition='necb2020')
-        # Table 8.4.5.2.-B prints nothing below 0.10; clamping the engine there
-        # is output-identical to the declared Constant extrapolation.
-        self.assertEqual(0.10, boiler.minimumPartLoadRatio())
+    def test_the_under_count_below_the_first_node_is_bounded_by_the_standby_term(self):
+        """fuel_exact(p) - fuel_table(p), as a fraction of the design fuel
+        Fuel_design = Q_design / eta, for every p below the first node: the
+        exact rational charges Fuel_design x FHeatPLC(p) while the table, held
+        at PLF(p0), charges Fuel_design x p / PLF(p0). The gap is at most
+        FHeatPLC(0) = a, and the test derives it rather than trusting the text."""
+        for edition in EDITIONS:
+            for curve in curves(edition).values():
+                implements = curve.get('implements') or {}
+                if curve['form'] != 'TableLookup' or implements.get('equipment') != 'boiler':
+                    continue
+                entry = fheatplc_entry(edition, 'boiler', implements['class'])
+                if entry['form'] != 'quadratic':
+                    continue
+                a = entry['coefficients'][0]
+                p0, plf0 = curve['points'][0]
+                self.assertEqual('Constant', curve['extrapolation'])
+                worst = 0.0
+                for i in range(1, 1000):
+                    p = p0 * i / 1000
+                    # FHeatPLC(p) = p / PLF_exact(p): the Code's fuel as a
+                    # fraction of Fuel_design; the table's is p / PLF(p0).
+                    fuel_exact = p / exact_plf(entry['coefficients'], p)
+                    fuel_table = p / plf0
+                    worst = max(worst, fuel_exact - fuel_table)
+                self.assertLessEqual(worst, a + 1e-12, f'{edition}/{curve["name"]}')
+                self.assertGreater(worst, 0.9 * a, 'the bound is tight as p -> 0')
+                self.assertIn(f'{a} x Fuel_design', implements['error_grid'],
+                              f'{edition}/{curve["name"]}: the bound is published')

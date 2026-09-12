@@ -1338,18 +1338,6 @@ def _fheatplc_entry(tables, equipment, klass):
                  if e.get('equipment') == equipment and e.get('class') == klass), None)
 
 
-def _align_engine_domain(boiler, tables, curve_name):
-    """The table's first node becomes the boiler's engine minimum part-load
-    ratio when the engine's is lower, so every part-load ratio the engine can
-    hand the curve lies inside the table's domain (D-89; Sol's R-O review).
-    A higher minimum already set — 8.4.4.9.(6)(d)'s 0.25 on a staged primary
-    boiler — is kept."""
-    row = next((c for c in tables['curves'] if c['name'] == curve_name), None)
-    grid_min = (row or {}).get('minimum_independent_variable_1')
-    if grid_min is not None and boiler.minimumPartLoadRatio() < grid_min:
-        boiler.setMinimumPartLoadRatio(grid_min)
-
-
 def _curve_evidence(tables, row):
     """What the part-load curve IS: the article, the table row it comes from,
     the transform, the representation and its published error."""
@@ -1367,9 +1355,9 @@ def _curve_evidence(tables, row):
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
             f"{row.get('extrapolation')} extrapolation — {error_text}"
-            + (f"; the engine minimum part-load ratio is raised to the first node "
-               f"({row.get('minimum_independent_variable_1')}) when lower, so every "
-               f"permitted input lies in the table's domain"
+            + (f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
+               f"the declared Constant extrapolation holds the factor, where the "
+               f"Code's standby term bounds the under-count at a x Fuel_design"
                if implements.get('equipment') == 'boiler' else ''))
 
 
@@ -1464,7 +1452,6 @@ def _apply_boiler(boiler, tables, plant, audit):
         boiler.resetNormalizedBoilerEfficiencyCurve()
     else:
         boiler.setNormalizedBoilerEfficiencyCurve(plf)
-        _align_engine_domain(boiler, tables, curve_label)
 
     thermal_eff, label = boiler_thermal_efficiency(row)
     if thermal_eff is None:

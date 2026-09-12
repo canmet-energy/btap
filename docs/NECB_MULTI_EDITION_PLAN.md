@@ -2504,8 +2504,10 @@ Fixed: class-aware loop reuse and stamping at creation in
 `plant_loops.hot_water` (builder passes `boiler_part_load_curve_class`),
 tags cleared on the clone in `reference_hvac` with an audited info entry.
 P2 (table domain vs permitted PLR) — my grid choice; fixed with the 0.001
-grid start, the finer low-load region, the engine minimum aligned to the
-first node, and the error re-derived on a 0.0001 grid (see D-89's second
+grid start, the finer low-load region, the published standby-term bound
+below the first node (an engine-minimum alignment was tried first and
+reverted: EnergyPlus forces heat output up to the minimum, a physics
+change), and the error re-derived on a 0.0001 grid (see D-89's second
 amendment for the figures). P3 — whitespace; `git diff --check` added to
 the verification. Four tests added (mixed sources in both orders, reuse
 mechanism, stale tag, engine domain). D-89 amended; R-O re-frozen on the

@@ -5182,13 +5182,20 @@ domain.* The boiler tables started at PLR 0.01 while most boilers keep the
 SDK's minimum part-load ratio of 0, so the engine could evaluate the curve
 below the table and the published error bounded nothing there. The boiler
 grids now start at 0.001 (0.001 steps to 0.05, 0.005 to 0.10, 0.01 to 1.00;
-150 nodes), the applier raises a boiler's minimum part-load ratio to the
-table's first node when the engine's is lower (a higher one, such as the
-8.4.4.9.(6)(d) 25 % floor, is kept), and the error is re-derived on a
-0.0001 grid over the whole domain: non-condensing 0.199 % at PLR 0.0014,
-2025 modulating 0.790 %, atmospheric furnace 0.027 %. For the 2020
-modulating table the floor is the Code's lowest printed point (0.10), which
-is output-identical to the declared constant extrapolation. (4) Trailing
+150 nodes), and the error is re-derived on a 0.0001 grid over the nodes' span:
+non-condensing 0.199 % at PLR 0.0014, 2025 modulating 0.790 %, atmospheric
+furnace 0.027 %. Below the first node the engine still evaluates the
+curve, and the table's declared Constant extrapolation defines its value
+there; the under-count against the Code's rational is bounded by the
+standby term FHeatPLC(0) = a (0.082597 of the design fuel for
+non-condensing, 0.01798667 for 2025 modulating) in an hour whose load is
+under 0.1 % of capacity, and that bound is published in each row and
+re-derived by a test. The engine minimum part-load ratio is deliberately
+NOT raised to close the domain: EnergyPlus forces the delivered heat up to
+the minimum times capacity under locked flow (`Boilers.cc`,
+`CalcBoilerModel`), which changes the load, not the curve — a first
+attempt did raise it and moved the modulating scenario 0.2 % for exactly
+that reason, so it was reverted before the freeze. (4) Trailing
 whitespace removed; `git diff --check` is part of the verification. Tests
 added for the mixed-source building in both group orders, the class-aware
 reuse mechanism, the stale proposed tag, and the engine-domain alignment.

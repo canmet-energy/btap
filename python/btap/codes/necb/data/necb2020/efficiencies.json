@@ -2680,7 +2680,7 @@
         "transform": "PLF = PLR / FHeatPLC(PLR)",
         "grid": "PLR 0.001 to 0.050 step 0.001, 0.050 to 0.100 step 0.005, 0.10 to 1.00 step 0.01 (150 nodes)",
         "max_error_vs_exact": 0.001991326,
-        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0010 to 1.0000 step 0.0001: 0.1991 % at PLR 0.0014. The grid is finest where the rational is most convex (below PLR 0.05), and the boiler's engine minimum part-load ratio is raised to the first node (0.001) when lower, so every part-load ratio the engine can evaluate lies inside this domain."
+        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0010 to 1.0000 step 0.0001: 0.1991 % at PLR 0.0014. The grid is finest where the rational is most convex (below PLR 0.05). The engine may evaluate any PLR in (0, 1]; below the first node the declared Constant extrapolation holds PLF at its first value, so the table under-counts the Code's fuel there by at most FHeatPLC(0) x Fuel_design = 0.082597 x Fuel_design in an hour whose load is under 0.1 % of capacity (the boiler's engine minimum part-load ratio is NOT raised: EnergyPlus forces the delivered heat up to that minimum, which would change the load, not the curve domain)."
       },
       "notes": "Reference non-condensing boiler part-load factor for Article 8.4.5.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact at every node."
     },
