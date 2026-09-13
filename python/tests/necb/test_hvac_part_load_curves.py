@@ -33,7 +33,7 @@ CLASSES = ('non_condensing', 'atmospheric', 'condensing',
 #: EnergyPlus floors a fuel heating coil's part-load fraction at 0.7 —
 #: ``EnergyPlus::HeatingCoils::CalcFuelHeatingCoil`` (25.2.0, shipped with
 #: OpenStudio 3.11.0): "PLF curve values must be >= 0.7. PLF has been reset to
-#: 0.7 and the simulation continues...". The furnace grid starts at PLR 0.10
+#: 0.7 and the simulation continues...". The furnace grid starts at PLR 0.055
 #: for that reason, and no furnace node may sit under the floor.
 ENGINE_PLF_FLOOR = 0.7
 
@@ -65,12 +65,13 @@ def interpolate(points, x):
 
 def derive_max_error(points, coefficients):
     """Max RELATIVE error of the table's Linear interpolation against the exact
-    rational, on a 0.0001 grid over the table's own span — finer than the
-    finest node spacing (0.001), so no interval is sampled only at its nodes."""
+    rational, on a 0.00001 grid over the table's own span — finer than the
+    finest node spacing (0.0001), so no interval is sampled only at its nodes.
+    It is a SAMPLED maximum, which is what the rows publish."""
     lo, hi = points[0][0], points[-1][0]
     worst = 0.0
-    for i in range(round((hi - lo) / 0.0001) + 1):
-        x = round(lo + i * 0.0001, 4)
+    for i in range(round((hi - lo) / 0.00001) + 1):
+        x = round(lo + i * 0.00001, 5)
         exact = exact_plf(coefficients, x)
         worst = max(worst, abs(interpolate(points, x) - exact) / abs(exact))
     return worst
@@ -189,12 +190,12 @@ class TestPartLoadData(unittest.TestCase):
     def test_the_published_errors_are_the_expected_magnitudes(self):
         """Pinned so a regenerated grid cannot quietly get coarser."""
         expected = {
-            ('necb2020', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
-            ('necb2025', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
-            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.000330127,
-            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.000330127,
+            ('necb2020', 'BOILER-PLF-NONCONDENSING'): 0.001993695,
+            ('necb2025', 'BOILER-PLF-NONCONDENSING'): 0.001993695,
+            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.00033024,
+            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.00033024,
             ('necb2020', 'BOILER-PLF-MODULATING-necb2020'): 0.0,
-            ('necb2025', 'BOILER-PLF-MODULATING-necb2025'): 0.007898575,
+            ('necb2025', 'BOILER-PLF-MODULATING-necb2025'): 0.007904609,
         }
         for (edition, name), value in expected.items():
             self.assertAlmostEqual(
@@ -550,29 +551,17 @@ if __name__ == '__main__':
     unittest.main()
 
 
-def engine_floor_crossing(coefficients, floor):
-    """Smallest PLR at which the exact multiplier PLR / FHeatPLC reaches the
-    engine's floor (bisection; the multiplier is monotone in PLR)."""
-    lo, hi = 0.0, 1.0
-    for _ in range(80):
-        mid = (lo + hi) / 2
-        if exact_plf(coefficients, mid) >= floor:
-            hi = mid
-        else:
-            lo = mid
-    return hi
-
-
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
 class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
-    """Sol's R-O review, P2 (twice): the table must carry the Code equation
-    over every positive PLR the engine can evaluate. EnergyPlus itself floors
-    the boiler multiplier at 0.01 (Boilers.cc) and the coil PLF at 0.7
-    (HeatingCoils.cc); the exact rational reaches those floors at a PLR the
-    test re-derives, and each table's first node must be at or below that
-    crossing (coils: the first node above it, so no node value sits under the
-    floor and triggers the engine's recurring warning). Below the crossing the
-    ENGINE clamps, whatever the table says; that residual is published.
+    """Sol's R-O review, P2 (twice), corrected by the independent review: the
+    table is the Code equation over its nodes' span; below the first node its
+    own Constant extrapolation governs and the under-count is bounded by the
+    standby term. EnergyPlus applies NO floor to a positive boiler-curve
+    output (Boilers.cc substitutes 0.01 only for an output <= 0, which the
+    positive rational never produces — a constant 0.005 curve was measured
+    to be used unclamped), so the boiler tables carry no 'engine floor'
+    claim. A fuel heating coil's PLF IS floored at 0.7 (HeatingCoils.cc), and
+    the furnace table's first node lies above it so the engine never clamps.
 
     The engine minimum PLR is deliberately NOT raised (it forces delivered
     heat), and the parasitic-fuel fields were measured to charge in every OFF
@@ -588,50 +577,132 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
                          "8.4.4.9.(6)(d)'s staged-primary floor is the only "
                          "minimum the pass sets")
 
-    def test_each_table_reaches_the_engine_floor_and_publishes_it(self):
+    def test_boiler_tables_claim_no_engine_floor_and_publish_the_extrapolation_bound(self):
         for edition in EDITIONS:
             for curve in curves(edition).values():
                 implements = curve.get('implements') or {}
-                if curve['form'] != 'TableLookup' or 'engine_floor' not in implements:
+                if curve['form'] != 'TableLookup' or implements.get('equipment') != 'boiler':
+                    continue
+                entry = fheatplc_entry(edition, 'boiler', implements['class'])
+                if entry['form'] != 'quadratic':
                     continue
                 where = f'{edition}/{curve["name"]}'
-                entry = fheatplc_entry(edition, implements['equipment'], implements['class'])
-                self.assertEqual('quadratic', entry['form'], where)
-                floor = implements['engine_floor']['multiplier_floor']
-                self.assertEqual(0.01 if implements['equipment'] == 'boiler' else 0.7,
-                                 floor, where)
-                crossing = engine_floor_crossing(entry['coefficients'], floor)
-                self.assertAlmostEqual(crossing, implements['engine_floor']['plr_at_floor'],
-                                       places=6, msg=where)
-                first_x, first_y = curve['points'][0]
-                if implements['equipment'] == 'boiler':
-                    self.assertLessEqual(first_x, crossing, f'{where}: the table reaches the floor')
-                else:
-                    self.assertGreaterEqual(first_y, floor, f'{where}: no node under the coil floor')
-                    self.assertLess(first_x - crossing, 0.005, f'{where}: first node just above')
+                self.assertNotIn('engine_floor', implements, f'{where}: no engine floor exists')
                 self.assertEqual('Constant', curve['extrapolation'], where)
-                self.assertIn(f'{implements["engine_floor"]["plr_at_floor"]}',
-                              implements['error_grid'], f'{where}: crossing published')
-                self.assertIn('OFF', implements['error_grid'],
-                              f'{where}: the rejected parasitic route is recorded')
+                a = entry['coefficients'][0]
+                self.assertIn(f'{a} x Fuel_design', implements['error_grid'], where)
+                self.assertIn('unclamped', implements['error_grid'], where)
+                self.assertIn('OFF', implements['error_grid'], where)
+                p0, plf0 = curve['points'][0]
+                worst = max(p / exact_plf(entry['coefficients'], p) - p / plf0
+                            for p in (p0 * i / 1000 for i in range(1, 1000)))
+                self.assertLessEqual(worst, a + 1e-12, where)
 
-    def test_the_residual_below_the_floor_is_the_engine_s_not_the_table_s(self):
-        """Where the table still has nodes but the engine floor binds, the
-        table value is below the floor: the engine's clamp, not a table
-        choice, decides the fuel there. Asserted for the boiler tables, whose
-        nodes run below the crossing."""
+    def test_the_furnace_table_sits_above_the_engine_s_real_floor(self):
+        for edition in EDITIONS:
+            curve = curves(edition)['FURNACE-PLF-ATMOSPHERIC']
+            floor = curve['implements']['engine_floor']
+            self.assertEqual(0.7, floor['multiplier_floor'], edition)
+            first_x, first_y = curve['points'][0]
+            self.assertGreaterEqual(first_y, 0.7, f'{edition}: no node under the coil floor')
+            self.assertEqual(first_y, floor['first_node_value'], edition)
+            self.assertTrue(all(y >= 0.7 for _, y in curve['points']), edition)
+            self.assertIn('never clamps', curve['implements']['error_grid'], edition)
+
+    def test_every_node_is_the_rational_to_six_decimals(self):
+        """'exact to six decimals at every node': asserted RELATIVELY, since
+        an absolute six-place tolerance at PLF ~ 0.001 would permit 0.04 %."""
         for edition in EDITIONS:
             for curve in curves(edition).values():
                 implements = curve.get('implements') or {}
-                if implements.get('equipment') != 'boiler' or 'engine_floor' not in implements:
+                if curve['form'] != 'TableLookup':
                     continue
-                floor = implements['engine_floor']['multiplier_floor']
-                entry = fheatplc_entry(edition, 'boiler', implements['class'])
-                below = [(x, y) for x, y in curve['points'] if y < floor]
-                self.assertTrue(below, f'{edition}/{curve["name"]}: nodes exist under the floor')
-                for x, y in below:
-                    self.assertAlmostEqual(y, exact_plf(entry['coefficients'], x), places=6,
-                                           msg=f'{edition}/{curve["name"]}: node {x} is the exact rational')
+                entry = fheatplc_entry(edition, implements['equipment'], implements['class'])
+                if entry['form'] != 'quadratic':
+                    continue
+                for x, y in curve['points']:
+                    exact = exact_plf(entry['coefficients'], x)
+                    self.assertLessEqual(abs(y - exact), 0.5e-6 + 1e-12,
+                                         f'{edition}/{curve["name"]} node {x}')
+                    self.assertLessEqual(abs(y - exact) / exact, 5e-4,
+                                         f'{edition}/{curve["name"]} node {x}: relative')
+                self.assertIn('six decimals', curve['notes'], f'{edition}/{curve["name"]}')
+
+
+@unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
+class TestTagsAreValidatedAndCannotOverrideNotApplicable(unittest.TestCase):
+    """Independent review (2026-09-13): PART_LOAD_CLASSES was declared and never
+    consulted, and a propagated tag could give an ELECTRIC boiler a combustion
+    curve against contract item 4."""
+
+    def test_an_electric_boiler_ignores_a_combustion_tag(self):
+        model, boiler = boiler_model(fuel='Electricity')
+        boiler.additionalProperties().setFeature(
+            efficiency.PART_LOAD_CLASS_FEATURE, 'modulating')
+        audit = apply_boiler(boiler)
+        self.assertFalse(boiler.normalizedBoilerEfficiencyCurve().is_initialized())
+        entry = next(e for e in audit.entries if e['action'] == 'boiler efficiency applied')
+        self.assertEqual('not_applicable', entry['inputs']['part_load_curve_class'])
+        self.assertEqual('row', entry['inputs']['class_source'])
+        self.assertTrue(any('ignored' in w['action'] and "'modulating'" in w['action']
+                            for w in audit.warnings), audit.warnings)
+
+    def test_a_tag_outside_the_enum_is_a_data_error_not_an_unpublished_class(self):
+        model, boiler = boiler_model()
+        boiler.additionalProperties().setFeature(
+            efficiency.PART_LOAD_CLASS_FEATURE, 'banana')
+        audit = apply_boiler(boiler)
+        applied = boiler.normalizedBoilerEfficiencyCurve()
+        self.assertTrue(applied.is_initialized(), 'the row class is used instead')
+        self.assertEqual('BOILER-PLF-NONCONDENSING', applied.get().nameString())
+        warning = next(w for w in audit.warnings if "'banana'" in w['action'])
+        self.assertIn('not one of', warning['action'])
+        self.assertNotIn('has no representation', warning['action'])
+
+
+@unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
+class TestFallbackNameSquattingAndUnitTypes(unittest.TestCase):
+    """Independent review (2026-09-13)."""
+
+    def _foreign_lookup(self, model, row, name, mutate=None, unit=None):
+        pts = [list(p) for p in row['points']]
+        if mutate:
+            mutate(pts)
+        obj = efficiency._build_lookup(model, dict(row, points=pts), name)
+        if unit:
+            obj.independentVariables()[0].setUnitType(unit)
+        return obj
+
+    def test_a_foreign_object_on_the_fallback_name_does_not_multiply_objects_or_warnings(self):
+        tables = efficiency.data('2020')
+        row = next(c for c in tables['curves'] if c['name'] == 'BOILER-PLF-NONCONDENSING')
+        model = openstudio.model.Model()
+        self._foreign_lookup(model, row, 'BOILER-PLF-NONCONDENSING',
+                             mutate=lambda pts: pts[50].__setitem__(1, 0.5))
+        self._foreign_lookup(model, row, 'BOILER-PLF-NONCONDENSING (D-89)',
+                             mutate=lambda pts: pts[60].__setitem__(1, 0.5))
+        audit = AuditLog()
+        applied = [efficiency.curve(model, tables, 'BOILER-PLF-NONCONDENSING',
+                                    audit=audit, target=f'boiler {i}')
+                   for i in range(3)]
+        self.assertEqual(1, len({str(c.handle()) for c in applied}), 'one own object')
+        own = [c for c in model.getTableLookups()
+               if c.nameString().startswith('BOILER-PLF-NONCONDENSING (D-89)')]
+        self.assertEqual(2, len(own), 'the squatter and exactly one own object')
+        warnings = [w for w in audit.warnings if 'NOT adopted' in w['action']]
+        self.assertEqual(1, len(warnings))
+        self.assertEqual(applied[0].nameString(), warnings[0]['inputs']['applied'],
+                         'the audited name is the name actually built')
+
+    def test_a_foreign_unit_type_blocks_reuse(self):
+        tables = efficiency.data('2020')
+        row = next(c for c in tables['curves'] if c['name'] == 'BOILER-PLF-NONCONDENSING')
+        model = openstudio.model.Model()
+        foreign = self._foreign_lookup(model, row, 'BOILER-PLF-NONCONDENSING', unit='Temperature')
+        audit = AuditLog()
+        applied = efficiency.curve(model, tables, 'BOILER-PLF-NONCONDENSING', audit=audit, target='p')
+        self.assertNotEqual(str(foreign.handle()), str(applied.handle()))
+        self.assertTrue(any('NOT adopted' in w['action'] for w in audit.warnings))
 
 
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')

@@ -1151,6 +1151,8 @@ def _lookup_matches(obj, row):
         return False
     if obj.normalizationMethod() != 'None':
         return False
+    if independent.unitType() != 'Dimensionless' or obj.outputUnitType() != 'Dimensionless':
+        return False  # what _build_lookup writes; a foreign unit type is a divergence
     for key, getter in (('minimum_independent_variable_1', independent.minimumValue),
                         ('maximum_independent_variable_1', independent.maximumValue),
                         ('minimum_dependent_variable_output', obj.minimumOutput),
@@ -1270,21 +1272,23 @@ def curve(model, tables, name, audit=None, target=None):
                 else _build_polynomial(model, row, spec, name))
 
     own_name = f'{name} (D-89)'
-    found = getattr(model, spec['find'])(own_name)
-    mine = found.get() if found.is_initialized() else None
-    if mine is not None and curve_matches(mine, row):
-        # The foreign object was already reported when the ruleset's own
-        # curve was first built for this model; every later component that
-        # needs the same row reuses it without repeating the warning.
-        return mine
+    # The ruleset's own object is found by CONTENT among the objects carrying
+    # the disambiguated name (the SDK suffixes ' 1', ' 2' when a foreign object
+    # squats on '(D-89)' too), never by the single fixed name: the foreign
+    # object was reported when the own curve was first built for this model,
+    # and every later component that needs the row reuses that one silently.
+    for candidate in model.getCurves():
+        if candidate.nameString().startswith(own_name) and curve_matches(candidate, row):
+            return candidate
+    built = (_build_lookup(model, row, own_name) if form == 'TableLookup'
+             else _build_polynomial(model, row, spec, own_name))
     audit.warn('efficiency',
                f"model object named '{name}' does not state this edition's "
                f"{form} catalogue row — it is NOT adopted; the ruleset's own "
-               f"curve is applied as '{own_name}'",
+               f"curve is applied as '{built.nameString()}'",
                target=target, inputs={'curve': name, 'form': form,
-                                      'applied': own_name})
-    return (_build_lookup(model, row, own_name) if form == 'TableLookup'
-            else _build_polynomial(model, row, spec, own_name))
+                                      'applied': built.nameString()})
+    return built
 
 
 def set_limits(curve_object, row, two_vars=False):
@@ -1335,14 +1339,45 @@ def _edition_label(tables):
     return f"{provenance.get('code') or 'NECB'} {provenance.get('edition') or ''}".strip()
 
 
-def _part_load_class(component, row):
+def _part_load_class(component, row, audit, target):
     """``(class, source)``. A class PROPAGATED onto the object wins over the
     table row's default: the row bins by fluid, fuel and capacity and knows
-    nothing about the reference selection that created this object."""
+    nothing about the reference selection that created this object.
+
+    Two guards (independent review, 2026-09-13): a value outside
+    PART_LOAD_CLASSES is a DATA error, reported as such and ignored rather
+    than treated as a class the edition happens not to publish; and a row
+    whose class is ``not_applicable`` (no combustion part-load factor —
+    the electric boiler, contract item 4) keeps it whatever a tag says."""
+    row_class = row.get('part_load_curve_class')
+    if row_class not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"row declares part_load_curve_class {row_class!r}, which is not "
+                   f"one of {PART_LOAD_CLASSES} — data error; treated as no class",
+                   target=target, inputs={'part_load_curve_class': row_class},
+                   ruling='D-89')
+        row_class = None
     feature = component.additionalProperties().getFeatureAsString(PART_LOAD_CLASS_FEATURE)
-    if feature.is_initialized() and feature.get():
-        return feature.get(), 'reference selection'
-    return row.get('part_load_curve_class'), 'row'
+    tag = feature.get() if feature.is_initialized() and feature.get() else None
+    if tag is None:
+        return row_class, 'row'
+    if tag not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} is not one of "
+                   f"{PART_LOAD_CLASSES} — data error; the row's class "
+                   f"{row_class!r} is used",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    if row_class == 'not_applicable':
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} ignored: this row has no "
+                   f"combustion part-load factor (not_applicable) and a tag cannot "
+                   f"give it one",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    return tag, 'reference selection'
 
 
 def _fheatplc_entry(tables, equipment, klass):
@@ -1359,7 +1394,7 @@ def _curve_evidence(tables, row):
     error = implements.get('max_error_vs_exact')
     error_text = ('exact at every value the Code publishes' if not error
                   else f'max relative error {error * 100:.4f} % against the exact '
-                       'requirement')
+                       'requirement (sampled at PLR step 0.00001)')
     return (f"Article {article} states FHeatPLC as a fuel-INPUT ratio "
             f"(Table {implements.get('table')}, row "
             f"{implements.get('row')!r}), so the EnergyPlus part-load field "
@@ -1367,11 +1402,12 @@ def _curve_evidence(tables, row):
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
             f"{row.get('extrapolation')} extrapolation — {error_text}"
-            + (f"; exact to the engine's own floor on the multiplier "
-               f"({(implements.get('engine_floor') or {}).get('multiplier_floor')}, "
-               f"reached at PLR {(implements.get('engine_floor') or {}).get('plr_at_floor')}), "
-               f"below which the engine clamps"
-               if implements.get('engine_floor') else ''))
+            + (f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
+               f"the table's Constant extrapolation holds the factor, an under-count "
+               f"bounded by the Code's standby term FHeatPLC(0) x design fuel"
+               + ("; the first node's value lies above the engine's 0.7 floor on the "
+                  "coil part-load fraction, so the engine never clamps"
+                  if implements.get('engine_floor') else "")))
 
 
 def _part_load_curve(component, tables, equipment, klass, audit, target):
@@ -1457,7 +1493,7 @@ def _apply_boiler(boiler, tables, plant, audit):
     # because the field has no IDD default and any future temperature-dependent
     # curve (2025's condensing row) needs an adjudicated basis.
     boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-    klass, class_source = _part_load_class(boiler, row)
+    klass, class_source = _part_load_class(boiler, row, audit, name)
     plf, curve_label, curve_shape, evidence = _part_load_curve(
         boiler, tables, 'boiler', klass, audit, name)
     if plf is None:
@@ -1849,7 +1885,7 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    klass, class_source = _part_load_class(coil, row)
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
     plf, curve_label, curve_shape, evidence = _part_load_curve(
         coil, tables, 'furnace', klass, audit, name)
     if plf is None:
@@ -1931,7 +1967,7 @@ def _apply_gas_coil(coil, tables, audit):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    klass, class_source = _part_load_class(coil, row)
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
     plf, curve_label, curve_shape, evidence = _part_load_curve(
         coil, tables, 'furnace', klass, audit, name)
     if plf is None:

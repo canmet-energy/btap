@@ -459,3 +459,31 @@ class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
             self.assertEqual(gas.handle(), plant_loops.hot_water(model).handle())
             self.assertEqual(district.handle(),
                              plant_loops.hot_water(model, source="district").handle())
+
+    def test_a_district_request_never_adopts_a_ground_loop(self):
+        """Independent review (2026-09-13): hp_plant_fancoils models the
+        ground-loop heat exchanger as a DistrictHeating object on a condenser
+        loop, so 'any district-heated loop' handed the district baseboards a
+        5 C condenser loop. The hot-water lookup is name-guarded."""
+        import btap.modeling as modeling
+        from btap._compat import sorted_by_name
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = load_raw_fixture()
+        zones = sorted_by_name(model.getThermalZones())
+        modeling.build_system(model, "hs14_cgshp_fancoils", zones[:2])
+        modeling.build_system(model, "Baseboard district hot water", zones[2:])
+
+        loops = {pl.nameString(): pl for pl in model.getPlantLoops()}
+        hw_names = [n for n in loops if n.startswith("Hot Water Loop")]
+        self.assertEqual(1, len(hw_names), f"the district family builds its own loop: {sorted(loops)}")
+        hw = loops[hw_names[0]]
+        self.assertTrue(plant_loops._district_heated(hw))
+        condenser = [pl for n, pl in loops.items() if "GLHX" in n]
+        self.assertTrue(condenser, "the ground loop exists")
+        baseboards = [c for c in condenser[0].demandComponents()
+                      if c.iddObjectType().valueName() == "OS_Coil_Heating_Water_Baseboard"]
+        self.assertEqual([], [b.nameString() for b in baseboards],
+                         "no baseboard heats off the condenser loop")
+        self.assertEqual(str(hw.handle()),
+                         str(plant_loops.hot_water(model, source="district").handle()))

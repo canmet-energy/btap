@@ -3,6 +3,8 @@ openstudio-standards setup_hw_loop_with_components et al.)."""
 
 from __future__ import annotations
 
+import re
+
 import openstudio
 
 from btap.modeling.hvac.components import schedules
@@ -22,6 +24,15 @@ def boiler_part_load_class(loop):
         if feature.is_initialized() and feature.get():
             return feature.get()
     return None
+
+
+_HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
+
+
+def _named_hot_water_loop(loop):
+    """A loop this builder made: 'Hot Water Loop', or the SDK's uniqueness
+    suffix 'Hot Water Loop 1' once a second one exists."""
+    return bool(_HOT_WATER_LOOP_NAME.match(loop.nameString()))
 
 
 def find_hot_water(model, part_load_curve_class=None):
@@ -75,8 +86,12 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # boiler loop (and a boiler caller never a district loop), whatever
         # order the two were built in; then class-aware within boiler loops.
         if source == 'district':
+            # Name-guarded: a ground-loop condenser loop is modelled with a
+            # DistrictHeating object too (hp_plant_fancoils), and must never
+            # serve as the hot-water loop (independent review, 2026-09-13).
             existing = next((pl for pl in model.getPlantLoops()
-                             if _district_heated(pl)), None)
+                             if _named_hot_water_loop(pl)
+                             and _district_heated(pl)), None)
         else:
             existing = find_hot_water(model, part_load_curve_class)
         # The name fallback catches a loop that has no boiler YET. It must not
@@ -96,7 +111,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         if existing is None:
             existing = next(
                 (pl for pl in model.getPlantLoops()
-                 if pl.nameString() == 'Hot Water Loop'
+                 if _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
                  and boiler_part_load_class(pl) == part_load_curve_class),
                 None)

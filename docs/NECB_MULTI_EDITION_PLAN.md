@@ -2556,3 +2556,32 @@ PLR 0.055), `corpus-annual-13`'s heating END USE one 0.01 GJ rounding step
 unchanged, and the sized siblings' audit text; nothing else. Against
 R-O-a the accepted categories are unchanged (32 DF-4 warnings in all).
 Suite, three lanes and gates below.
+
+### Step 3 — independent Opus review before Sol's third pass (2026-09-13): request changes, all fixed
+
+Verdict reproduced and accepted. P1: the "engine floor at 0.01" on the
+boiler curve was my misreading of `Boilers.cc` — a substitution for a
+non-positive output, never reached by the positive rational (a constant
+0.005 curve runs unclamped); the boiler rows drop `engine_floor`, the first
+node is the table's own stopping point with the standby-term bound
+published. P2: my source-first district lookup adopted the ground-loop
+condenser loop (a DistrictHeating object) — name guard restored, accepting
+the SDK's `Hot Water Loop 1` suffix an exact match missed; ground-loop case
+tested. P2: the D-89 body and first amendment carried stale grids and
+figures (fixed); the verification record I said "follows below" was never
+written — it is here now: **final freeze `ea3376b` verified on `f80c8fe`:
+suite 1076 passed / 83 subtests; lanes python 5 passed (32 subtests),
+verify 5 (4), parity 5 (5); lint-imports, Ruff, orphan keys, decisions
+TOC, edition delta, vintage match, provenance hashes, `git diff --check`
+clean; regenerated documents no diff.** P2: `PART_LOAD_CLASSES` was never
+consulted and a tag could put a combustion curve on an electric boiler —
+validated, and `not_applicable` rows keep their class. P2 stated:
+purchased-heating references on systems 3/4/hp keep an atmospheric furnace
+beside the modulating boiler (DF-6); the heat-pump reference path never
+reaches the purchased-heating rule (DF-7). P3: "exact at every node" → six
+decimals asserted relatively; sampled maxima labelled as such and
+resampled at 0.00001; `(D-89)` name squatting no longer multiplies objects;
+lookup unit types compared. The earlier Opus-A bullet's 1.48 % / 2.89 % /
+0.027 % and "0.10 furnace grid" are first-freeze figures, superseded above.
+D-89 fourth amendment; R-O re-frozen (audit evidence text moved; no point
+changed).

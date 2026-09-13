@@ -5085,14 +5085,15 @@ on all ten rows; the `-COND` curves were referenced by no row.
 `Table:Lookup` in PLR (Linear interpolation, Constant extrapolation, output
 bounds set): exact at every printed point, the literal reading of "values …
 shall be those listed" for Table 8.4.5.2.-B, no fit residual. Grids:
-boiler quadratic classes PLR 0.01–1.00 step 0.01; the 2020 modulating
-table at its ten printed points 0.10–1.00; the atmospheric furnace
-0.10–1.00 step 0.01. Each curve row's `implements` block records the
+boiler quadratic classes PLR 0.0001–1.00 on a non-uniform 159-node grid
+(finest below 0.05); the 2020 modulating table at its ten printed points
+0.10–1.00; the atmospheric furnace 0.055–1.00 on 100 nodes (as amended
+below; the first freeze used coarser grids). Each curve row's `implements` block records the
 table, row, transform, grid and `max_error_vs_exact`
-(non-condensing boiler 1.48 % relative at PLR 0.014 and 0.055 % above PLR 0.10; atmospheric furnace 0.027 %; the 2020 modulating table exact at its printed points; the 2025 modulating quadratic 2.89 % at PLR 0.014 and 0.029 % above PLR 0.10 — the uniform 0.01 grid is coarsest where the rational is most convex, at loads below 3 % where the absolute fuel is negligible), re-derived by a test rather than trusted. Implementation
+(sampled maxima at PLR step 0.00001: non-condensing boiler 0.1994 % at PLR 0.0014; atmospheric furnace 0.0330 %; the 2020 modulating table exact at its printed points; the 2025 modulating quadratic 0.7905 % at PLR 0.0014), re-derived by a test rather than trusted. Implementation
 choices the Code leaves open, recorded here: interpolation between the ten
 printed points is linear; below the lowest printed point the factor is held
-constant; the furnace grid starts at 10 % load (EnergyPlus 25.2 floors a fuel heating coil's part-load fraction at 0.7 in `HeatingCoils::CalcFuelHeatingCoil`, verified in the shipped library, and the atmospheric rational crosses 0.7 at PLR ≈ 0.055); the boiler
+constant; the furnace grid starts at 5.5 % load, the first 0.005 step above where the exact fraction meets the engine's 0.7 floor (EnergyPlus 25.2 floors a fuel heating coil's part-load fraction at 0.7 in `HeatingCoils::CalcFuelHeatingCoil`, verified in the shipped library, and the atmospheric rational crosses 0.7 at PLR ≈ 0.055); the boiler
 grid's low end reproduces the Code's own standby fuel `a × Fuel_design`,
 and the engine clamps the evaluated ratio at the boiler's minimum part-load
 ratio as it did before. Names: `BOILER-PLF-NONCONDENSING` and
@@ -5155,9 +5156,9 @@ finding. The furnace curve was always translated (no such gate on
 `Coil:Heating:Gas`), so the atmospheric change is the small one predicted.
 Consequence: the reference boilers in the corpus are oversized (PLR mostly
 below 0.2, where the Code's FHeatPLC intercept a = 0.0826 dominates), so
-reference heating gas rises 29–50 % in the annual scenarios and the
+reference heating gas rises 8.7 % (the modulating scenario) to 50.4 % in the four annual scenarios and the
 proposed buildings' ratios fall accordingly; the NECB 2025 determination
-crosses the tier-2 boundary (76.0 → 67.5 % of target) and its GHG level
+crosses the tier-2 boundary (76.0 → 67.3 % of target) and its GHG level
 moves F → E. This is the Code's own curve acting on the reference for the
 first time, attributed per scenario in the plan log, not a defect.
 
@@ -5243,3 +5244,52 @@ loop, and both construction orders are tested. (5) The verification
 statements corrected: the suite count is what the run prints, and
 `corpus-annual-13`'s REPORT was byte-identical between the two freezes
 while its audit text moved. R-O re-frozen on the clean tree once more.
+
+
+**Fourth amendment (2026-09-13, independent review before Sol's third
+pass; one P1, three P2, four P3, all reproduced and fixed).** (1) *There is
+no engine floor on the boiler curve.* The third amendment read
+`EffCurveOutput <= 0 → 0.01` in `Boilers.cc` as a floor at 0.01; it is a
+substitution for a non-positive output, which the positive rational never
+produces, and a constant 0.005 curve was measured to be used unclamped. The
+boiler rows therefore carry no `engine_floor`; the first node (PLR 0.0001)
+is the table's own stopping point, below it the table's Constant
+extrapolation governs, and the residual there is bounded by the standby
+term FHeatPLC(0) × Fuel_design in an hour whose load is under 0.01 % of
+capacity — a table choice, stated as one, with no lower node changing any
+output. The coil floor at 0.7 is real, and the furnace table's first node
+sits above it, so the engine never clamps that table either; the row says
+so. Published errors are now sampled at PLR step 0.00001 (non-condensing
+0.1994 %, 2025 modulating 0.7905 %, atmospheric 0.0330 %) and labelled as
+sampled maxima; nodes are "exact to six decimals", asserted relatively.
+(2) *District reuse regression.* The source-first lookup adopted ANY
+district-heated loop, including the ground-loop condenser loop that
+`hp_plant_fancoils` models with a DistrictHeating object (5 °C), so a
+district baseboard family built beside a ground-source family heated off
+the condenser loop. The hot-water-loop name guard is restored on that
+branch — accepting the SDK's uniqueness suffix (`Hot Water Loop 1`), which
+an exact match had missed — and the ground-loop case is a test. (3) *Tags
+are validated.* `PART_LOAD_CLASSES` was declared and never consulted: a
+value outside the enum is now a reported DATA error (row or tag), distinct
+from a class the edition does not publish; and a row whose class is
+`not_applicable` (the electric boiler, contract item 4) keeps it whatever a
+tag says — a propagated combustion class on an electric boiler is reported
+and ignored. (4) A foreign object squatting on the `(D-89)` fallback name
+no longer multiplies own objects and warnings per component: the own object
+is found by content among the suffixed names, and the audited `applied`
+name is the one built. Lookup unit types are compared. (5) Stated, not
+decided: on reference systems 3, 4 and the heat-pump system the
+purchased-heating reference's larger fuel-fired device is the gas furnace,
+which keeps the `atmospheric` class; 8.4.4.6.(1) names the boiler and
+contract item 3 propagates to boilers only, so most of that reference's
+heating fuel still runs on the atmospheric curve (`corpus-sizing-13`: a
+64.8 kW modulating boiler beside an 83.1 kW atmospheric coil). Whether the
+furnace of a purchased-heating reference should also be modulating is a
+separate adjudication (DF-6), as is the heat-pump reference path, where
+`_finalize` takes the auxiliary energy type and never reaches the
+purchased-heating rule, so no class propagates there (DF-7, unreached by
+any frozen scenario). (6) The body's "Representation and its published
+error" paragraph and the first amendment's figures are rewritten to the
+shipped data (67.3 % of target; reference heating gas +8.7 % to +50.4 %
+across the four annual scenarios, the modulating one included), and the
+verification record the log promised is written out.

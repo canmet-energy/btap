@@ -31,7 +31,7 @@ there rather than silently dropped from the comparison.
 |---|---|---|---|---|---|
 | envelope (`envelope_rules.json`) | 76 | 1 | 0 | 0 | 0 |
 | hvac (`reference_rules.json`) | 320 | 23 | 1 | 1 | 0 |
-| hvac_efficiencies (`efficiencies.json`) | 2687 | 25 | 111 | 410 | 48 |
+| hvac_efficiencies (`efficiencies.json`) | 2684 | 25 | 111 | 407 | 48 |
 | lighting (`lighting_rules.json`) | 6 | 0 | 0 | 0 | 0 |
 | loads (`loads_rules.json`) | 0 | 1 | 0 | 0 | 0 |
 | shw (`shw_rules.json`) | 76 | 1 | 3 | 0 | 0 |
@@ -42,7 +42,7 @@ there rather than silently dropped from the comparison.
 | tables/schedules (`tables/schedules.json`) | 7473 | 0 | 0 | 0 | 0 |
 | tables/space_types (`tables/space_types.json`) | 24024 | 0 | 0 | 0 | 0 |
 | tables/table_c1 (`tables/table_c1.json`) | 8827 | 0 | 0 | 0 | 0 |
-| **Total** | **46037** | **51** | **117** | **411** | **48** |
+| **Total** | **46034** | **51** | **117** | **408** | **48** |
 
 ## necb2020 → necb2025
 
@@ -98,7 +98,7 @@ there rather than silently dropped from the comparison.
 </details>
 
 <details>
-<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3281 leaves: 2687 identical, 25 renumbered, 111 changed, 410 added, 48 removed (click to expand)</summary>
+<summary><b>hvac_efficiencies</b> (`efficiencies.json`) — 3275 leaves: 2684 identical, 25 renumbered, 111 changed, 407 added, 48 removed (click to expand)</summary>
 
 #### Renumbered
 
@@ -142,7 +142,7 @@ there rather than silently dropped from the comparison.
 | `boilers.5.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
 | `boilers.6.notes` | changed | From NECB 2020 (first printing) Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). → NECB 2025 Table 5.2.12.1.-N. class: adjudicated legacy default (D-89). |
 | `curves.0.implements.grid` | changed | the ten printed points, PLR 0.10 to 1.00 step 0.10 → PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) |
-| `curves.0.implements.max_error_vs_exact` | changed | 0.0 → 0.007898575 |
+| `curves.0.implements.max_error_vs_exact` | changed | 0.0 → 0.007904609 |
 | `curves.0.implements.row` | changed | Qpartload/Qdesign 0.1 to 1.0 → Modulating |
 | `curves.0.minimum_dependent_variable_output` | changed | 0.847458 → 0.00553 |
 | `curves.0.minimum_independent_variable_1` | changed | 0.1 → 0.0001 |
@@ -265,9 +265,6 @@ there rather than silently dropped from the comparison.
 | `chillers.7.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.8.notes` | added | — → capacity in ton, full load eff in kW/ton |
 | `chillers.9.notes` | added | — → capacity in ton, full load eff in kW/ton |
-| `curves.0.implements.engine_floor.multiplier_floor` | added | — → 0.01 |
-| `curves.0.implements.engine_floor.plr_at_floor` | added | — → 0.000182 |
-| `curves.0.implements.engine_floor.source` | added | — → Boilers.cc CalcBoilerModel (EffCurveOutput <= 0 -> 0.01; > 1.1 -> 1.1) |
 | `curves.0.points.10.0` | added | — → 0.002 |
 | `curves.0.points.10.1` | added | — → 0.100394 |
 | `curves.0.points.100.0` | added | — → 0.42 |

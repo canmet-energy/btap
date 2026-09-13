@@ -2053,7 +2053,7 @@
         "max_error_vs_exact": 0.0,
         "error_grid": "exact at all ten printed points (error 0 by construction); the Code publishes no value between or below them, so there is no exact function to measure an interpolation error against."
       },
-      "notes": "Reference modulating boiler part-load factor for Sentence 8.4.5.2.(3), which states that the values for Qpartload/Qdesign and FHeatPLC \"shall be those listed in Table 8.4.5.2.-B\". The ten printed points are carried verbatim through PLF = PLR / FHeatPLC(PLR), so the representation is exact at every value the Code publishes. The Code prints no interpolation rule between them and nothing below PLR 0.10; Linear interpolation and Constant extrapolation are the implementation choices D-89 records. The name is code-qualified because this edition's modulating content is its own (D-88)."
+      "notes": "Reference modulating boiler part-load factor for Sentence 8.4.5.2.(3), which states that the values for Qpartload/Qdesign and FHeatPLC \"shall be those listed in Table 8.4.5.2.-B\". The ten printed points are carried verbatim through PLF = PLR / FHeatPLC(PLR), so the representation is exact at every value the Code publishes. The Code prints no interpolation rule between them and nothing below PLR 0.10; Linear interpolation and Constant extrapolation are the implementation choices D-89 records. The name is code-qualified because this edition's modulating content is its own (D-88). Exact to six decimals at every node."
     },
     {
       "name": "BOILER-PLF-NONCONDENSING",
@@ -2715,15 +2715,10 @@
         "row": "Non-condensing",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
         "grid": "PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes)",
-        "max_error_vs_exact": 0.001991326,
-        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0001 to 1.0000 step 0.0001: 0.1991 % at PLR 0.0014. EnergyPlus floors a boiler's normalized-efficiency curve output at 0.01 (Boilers.cc, CalcBoilerModel), which the exact rational reaches at PLR 0.000834; the table carries the Code equation exactly down to that engine floor and below it the engine, not the table, clamps the multiplier (undercount approaching the standby term 0.082597 x Fuel_design as PLR -> 0). The engine's Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps), so it would add standby fuel the Code never prescribes.",
-        "engine_floor": {
-          "multiplier_floor": 0.01,
-          "plr_at_floor": 0.000834,
-          "source": "Boilers.cc CalcBoilerModel (EffCurveOutput <= 0 -> 0.01; > 1.1 -> 1.1)"
-        }
+        "max_error_vs_exact": 0.001993695,
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0001 to 1.00000 step 0.00001: 0.1994 % at PLR 0.00142. Below the first node (PLR 0.0001) the table's Constant extrapolation holds PLF at 0.001209; the under-count against the Code's rational there is bounded by the standby term FHeatPLC(0) = 0.082597 x Fuel_design and occurs only in an hour whose load is under 0.01 % of capacity. EnergyPlus applies NO floor to a positive boiler-efficiency-curve output (Boilers.cc substitutes 0.01 only for an output <= 0, which the positive rational never produces; measured: a constant 0.005 curve is used unclamped), so the first node is the table's own stopping point and no lower node changes any output. The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
       },
-      "notes": "Reference non-condensing boiler part-load factor for Article 8.4.5.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact at every node."
+      "notes": "Reference non-condensing boiler part-load factor for Article 8.4.5.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact to six decimals at every node."
     },
     {
       "name": "DXCOOL-REF-CAPFFLOW",
@@ -3399,15 +3394,15 @@
         "row": "Atmospheric",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
         "grid": "PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes)",
-        "max_error_vs_exact": 0.000330127,
-        "error_grid": "max relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.055 to 1.0000 step 0.0001: 0.0330 % at PLR 0.0574. EnergyPlus floors a fuel heating coil's part-load fraction at 0.7 (HeatingCoils.cc), which the exact rational reaches at PLR 0.054650; the table carries the Code equation exactly down to that engine floor (its first node is the first 0.005 step above it, so no node value sits under the floor) and below it the engine, not the table, clamps the fraction (undercount approaching the standby term 0.01861 x Fuel_rated as PLR -> 0). The coil's Off Cycle Parasitic Gas Load was evaluated and rejected: EnergyPlus charges it in every timestep the coil is OFF (measured, 659 of 659 off steps).",
+        "max_error_vs_exact": 0.00033024,
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.055 to 1.00000 step 0.00001: 0.0330 % at PLR 0.05745. The first node's value (0.701082) lies above the engine's 0.7 floor on a fuel heating coil's part-load fraction (HeatingCoils.cc, PLF < 0.7 -> 0.7), so the engine never clamps this table; below the first node (PLR 0.055) the table's Constant extrapolation holds PLF at 0.701082, an under-count bounded by the standby term FHeatPLC(0) = 0.01861 x Fuel_rated. The coil's Off Cycle Parasitic Gas Load was evaluated and rejected: EnergyPlus charges it in every timestep the coil is OFF (measured, 659 of 659 off steps).",
         "engine_floor": {
           "multiplier_floor": 0.7,
-          "plr_at_floor": 0.05465,
-          "source": "HeatingCoils.cc CalcFuelHeatingCoil (PLF < 0.7 -> 0.7)"
+          "first_node_value": 0.701082,
+          "source": "HeatingCoils.cc CalcFuelHeatingCoil (PLF < 0.7 -> 0.7); never reached by this table"
         }
       },
-      "notes": "Reference atmospheric furnace part-load factor for Article 8.4.5.3. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_rated x FHeatPLC), so the EnergyPlus part-load-fraction multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). The grid starts at PLR 0.10 and not at 0.01: EnergyPlus floors a fuel heating coil's PLF at 0.7 (EnergyPlus::HeatingCoils::CalcFuelHeatingCoil, 25.2.0 - \"PLF curve values must be >= 0.7. PLF has been reset to 0.7\"), and the rational crosses 0.7 near PLR 0.055, so nodes below 0.10 would only feed the engine values it rejects. Below PLR 0.10 the Constant extrapolation holds PLF at 0.788005; the departure from the Code there is bounded by a x Fuel_rated = 1.86 % of rated fuel and is stated in D-89."
+      "notes": "Reference atmospheric furnace part-load factor for Article 8.4.5.3. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_rated x FHeatPLC), so the EnergyPlus part-load-fraction multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact to six decimals at every node. The grid starts at PLR 0.055, the first 0.005 step above where the exact fraction meets the engine's floor: EnergyPlus floors a fuel heating coil's PLF at 0.7 (HeatingCoils.cc, CalcFuelHeatingCoil, 'PLF curve values must be >= 0.7'), which the rational reaches at PLR 0.05465, so the first node (0.701082) sits above the floor and the engine never clamps this table. Below PLR 0.055 the Constant extrapolation holds PLF at 0.701082; the departure from the Code there is bounded by a x Fuel_rated (1.86 % of rated fuel) and is stated in D-89."
     },
     {
       "name": "SWH-EFFFPLR",
