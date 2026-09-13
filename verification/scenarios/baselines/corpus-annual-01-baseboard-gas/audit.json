@@ -605,7 +605,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1991 % against the exact requirement; exact to the engine's own floor on the multiplier (0.01, reached at PLR 0.000834), below which the engine clamps; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.0001) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -624,7 +624,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1991 % against the exact requirement; exact to the engine's own floor on the multiplier (0.01, reached at PLR 0.000834), below which the engine clamps; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.0001) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -2828,7 +2828,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1991 % against the exact requirement; exact to the engine's own floor on the multiplier (0.01, reached at PLR 0.000834), below which the engine clamps; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.0001) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -2847,7 +2847,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1991 % against the exact requirement; exact to the engine's own floor on the multiplier (0.01, reached at PLR 0.000834), below which the engine clamps; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-A, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.0001) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -3178,7 +3178,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
   "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement; exact to the engine's own floor on the multiplier (0.7, reached at PLR 0.05465), below which the engine clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3197,7 +3197,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
   "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement; exact to the engine's own floor on the multiplier (0.7, reached at PLR 0.05465), below which the engine clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3216,7 +3216,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
   "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement; exact to the engine's own floor on the multiplier (0.7, reached at PLR 0.05465), below which the engine clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3235,7 +3235,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
   "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement; exact to the engine's own floor on the multiplier (0.7, reached at PLR 0.05465), below which the engine clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
@@ -3254,7 +3254,7 @@
   "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
   "article": "NECB 2020 Table 5.2.12.1.-O; 8.4.5.3.",
   "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement; exact to the engine's own floor on the multiplier (0.7, reached at PLR 0.05465), below which the engine clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
+  "evidence": "Article 8.4.5.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x design fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
   "building": "reference building",
   "level": "decision"
  },
