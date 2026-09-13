@@ -62,8 +62,8 @@
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
 Proposed              3,975            5.0        800.0
-Reference             3,811            4.8        800.0
-Margin               -163.9   4.3% OVER target
+Reference             3,814            4.8        800.0
+Margin               -161.1   4.2% OVER target
 Unmet hours  heating 23.5 / 29.8 h    cooling 0.0 / 0.0 h
 ------------------------------------------------------------------
 

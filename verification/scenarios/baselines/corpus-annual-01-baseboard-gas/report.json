@@ -52,13 +52,13 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 3744.4,
+  "total_site_kwh": 3747.2,
   "electricity_kwh": 1486.1,
-  "natural_gas_kwh": 2258.3,
+  "natural_gas_kwh": 2261.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1947.2,
+   "heating": 1950.0,
    "cooling": 5.6,
    "fans": 680.6,
    "pumps": 38.9,
@@ -96,7 +96,7 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 72.8,
+ "percent_of_target": 72.7,
  "tier": 2,
  "annual": false,
  "compliant": true,
