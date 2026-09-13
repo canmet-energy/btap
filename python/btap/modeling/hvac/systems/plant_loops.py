@@ -51,18 +51,22 @@ def find_hot_water(model, part_load_curve_class=None):
         None)
 
 
+_DISTRICT_HEATING_TYPES = frozenset({
+    'OS_DistrictHeating', 'OS_DistrictHeating_Water', 'OS_DistrictHeating_Steam'})
+
+
 def _district_heated(loop):
     """Is this loop heated by PURCHASED energy rather than a boiler?
 
     Both SDK spellings: DistrictHeating was deprecated for DistrictHeatingWater
     at 3.7.0 and older models still carry the former.
     """
+    # By IDD type, not by the typed casts: to_DistrictHeating() is the
+    # deprecated class and the SDK logs a deprecation line to stdout on every
+    # call, which leaked into audit.txt once reuse checked every loop.
     for c in loop.supplyComponents():
-        if c.to_DistrictHeating().is_initialized():
+        if c.iddObjectType().valueName() in _DISTRICT_HEATING_TYPES:
             return True
-        for kind in ('to_DistrictHeatingWater', 'to_DistrictHeatingSteam'):
-            if hasattr(c, kind) and getattr(c, kind)().is_initialized():
-                return True
     return False
 
 
