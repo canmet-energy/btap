@@ -2592,3 +2592,9 @@ the boiler/furnace efficiency entries' evidence text (the retracted
 engine-floor claim; sampled-maximum wording); zero `report.json` leaves
 moved, no new warning, no new entry kind. The plan-log table's numbers
 stand. Suite, three lanes and gates for this head follow.
+
+**Verification of `2156994` (2026-09-13):** suite 1082 passed / 83
+subtests; lanes python 5 passed (32 subtests), verify 5 (4), parity 5 (5);
+lint-imports, Ruff, orphan keys, decisions TOC, edition delta, vintage
+match, provenance hashes, `git diff --check` clean; regenerated documents
+no diff. Ready for Sol's third pass.
