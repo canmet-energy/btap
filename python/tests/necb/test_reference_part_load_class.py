@@ -397,9 +397,65 @@ class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
                          f"a proposed tag must never reach the reference: {found}")
         cleared = [e for e in audit.entries
                    if str(e.get("action") or "").startswith(
-                       "proposed boiler part-load class tags not carried")]
+                       "proposed part-load class tags not carried")]
         self.assertEqual(1, len(cleared), "the clearing is audited, once")
         self.assertEqual("D-89", cleared[0].get("ruling"))
         self.assertTrue(all("condensing" in c for c in cleared[0]["inputs"]["cleared"]))
         # the proposed itself is untouched: the reference is built on a clone
         self.assertEqual({"condensing"}, {c for _, c in classes(model)})
+
+    def test_tags_on_proposed_gas_coils_are_cleared_too(self):
+        """Sol's second review: the applier resolves the class for single- and
+        multi-stage gas coils as well as boilers, so the sanitizer must visit
+        every consumer. A proposed PSZ-AC with gas coils, every coil tagged
+        condensing, must build a reference whose coils carry no tag."""
+        model = proposed_with_hvac("PSZ-AC with gas coil")
+        coils = list(model.getCoilHeatingGass()) + list(model.getCoilHeatingGasMultiStages())
+        self.assertTrue(coils, "the proposed carries gas heating coils")
+        for coil in coils:
+            coil.additionalProperties().setFeature(FEATURE, "condensing")
+
+        reference, audit = build_reference(model)
+
+        tagged = []
+        for component in (list(reference.getBoilerHotWaters())
+                          + list(reference.getCoilHeatingGass())
+                          + list(reference.getCoilHeatingGasMultiStages())):
+            value = component.additionalProperties().getFeatureAsString(FEATURE)
+            if value.is_initialized() and value.get():
+                tagged.append((component.nameString(), value.get()))
+        self.assertEqual([], tagged, f"a proposed coil tag reached the reference: {tagged}")
+        cleared = [e for e in audit.entries
+                   if str(e.get("action") or "").startswith(
+                       "proposed part-load class tags not carried")]
+        self.assertEqual(1, len(cleared))
+        self.assertTrue(all("condensing" in c for c in cleared[0]["inputs"]["cleared"]))
+
+    def test_loop_reuse_honours_the_source_in_both_construction_orders(self):
+        """Sol's second review: a caller asking for district heat must never
+        adopt a boiler loop, nor a boiler caller a district loop, whichever
+        was built first."""
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        for district_first in (False, True):
+            model = openstudio.model.Model()
+            if district_first:
+                district = plant_loops.hot_water(model, source="district")
+                gas = plant_loops.hot_water(model)
+            else:
+                gas = plant_loops.hot_water(model)
+                district = plant_loops.hot_water(model, source="district")
+            self.assertNotEqual(gas.handle(), district.handle(),
+                                f"district_first={district_first}: distinct loops")
+            self.assertEqual(0, len(district.supplyComponents(
+                openstudio.model.BoilerHotWater.iddObjectType())),
+                "the district loop carries no boiler")
+            self.assertTrue(plant_loops._district_heated(district))
+            self.assertFalse(plant_loops._district_heated(gas))
+            self.assertEqual(2, len(gas.supplyComponents(
+                openstudio.model.BoilerHotWater.iddObjectType())))
+            self.assertEqual(gas.handle(), plant_loops.hot_water(model).handle())
+            self.assertEqual(district.handle(),
+                             plant_loops.hot_water(model, source="district").handle())

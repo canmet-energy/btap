@@ -5200,3 +5200,46 @@ whitespace removed; `git diff --check` is part of the verification. Tests
 added for the mixed-source building in both group orders, the class-aware
 reuse mechanism, the stale proposed tag, and the engine-domain alignment.
 R-O was re-frozen on the clean tree after these changes.
+
+
+**Third amendment (2026-09-13, Sol's second review; request changes, all
+five findings verified in the code and fixed before the freeze was redone
+again).** (1) *Every feature consumer is sanitized.* The class resolver
+serves single- and multi-stage gas coils as well as boilers, and the first
+sanitizer visited boilers only; a proposed PSZ-AC with coils tagged
+`condensing` reached the reference tagged and lost its atmospheric curve.
+`reference_hvac` now clears the tag from boilers, `CoilHeatingGas` and
+`CoilHeatingGasMultiStage` before building (tested on that model).
+(2) *The tables carry the Code equation to the engine's own floor, and no
+further is possible.* Two carriers for the standby term below the first
+node were evaluated and rejected with measurements: raising the engine
+minimum part-load ratio forces delivered heat (second amendment), and the
+Off Cycle Parasitic Fuel/Gas Load fields — algebraically exact, since
+`Fuel_design × (a + b·p + c·p²)` = `a·Fuel_design·(1 − p)` +
+`p·Fuel_design/PLF(p)` with `PLF = 1/(a + b + c·p)` — are charged by
+EnergyPlus 25.2 in every timestep the equipment is OFF (boiler: 45 of 45
+off steps; coils: 659 of 659), i.e. as a pilot light all year, which the
+Code never prescribes. What remains is the multiplier field, and the engine
+floors it: the boiler curve output at 0.01 (`Boilers.cc`, `EffCurveOutput
+<= 0 → 0.01`) and the coil part-load fraction at 0.7 (`HeatingCoils.cc`).
+The boiler tables therefore run to PLR 0.0001 (159 nodes; the exact
+rational reaches the 0.01 floor at PLR 0.000834 non-condensing, 0.000182
+2025 modulating) and the furnace table to PLR 0.055 (100 nodes; the 0.7
+floor is reached at PLR 0.05465, and the first node is the first 0.005
+step above it so no node value sits under the floor). Above the crossing
+the table is the Code equation to within 0.199 % (non-condensing), 0.790 %
+(2025 modulating) and 0.033 % (atmospheric); below it the engine clamps
+whatever the table says, and that residual is the engine's, published in
+each row (`implements.engine_floor`) and re-derived by tests. (3) *A null
+bound means absent.* The matchers skipped any bound the row left null, so a
+same-named object with an undeclared output clamp (`minimumCurveOutput` =
+99 on `DXCOOL-REF-CAPFT`) was reused unwarned; a null row bound now
+requires the object's optional field to be uninitialized (required SDK
+fields, which cannot be absent, are not compared). (4) *Loop reuse honours
+the source first.* `hot_water` looked up a boiler loop by class before
+checking the source, so a district caller after a gas caller adopted the
+boiler loop; a district request now only ever adopts a district-heated
+loop, and both construction orders are tested. (5) The verification
+statements corrected: the suite count is what the run prints, and
+`corpus-annual-13`'s REPORT was byte-identical between the two freezes
+while its audit text moved. R-O re-frozen on the clean tree once more.

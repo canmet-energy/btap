@@ -191,8 +191,8 @@ class TestPartLoadData(unittest.TestCase):
         expected = {
             ('necb2020', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
             ('necb2025', 'BOILER-PLF-NONCONDENSING'): 0.001991326,
-            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268619,
-            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.000268619,
+            ('necb2020', 'FURNACE-PLF-ATMOSPHERIC'): 0.000330127,
+            ('necb2025', 'FURNACE-PLF-ATMOSPHERIC'): 0.000330127,
             ('necb2020', 'BOILER-PLF-MODULATING-necb2020'): 0.0,
             ('necb2025', 'BOILER-PLF-MODULATING-necb2025'): 0.007898575,
         }
@@ -220,19 +220,20 @@ class TestPartLoadData(unittest.TestCase):
                 if name.startswith('BOILER-PLF-MODULATING-necb2020'):
                     self.assertEqual(10, len(points), where)
                 elif name.startswith('FURNACE-'):
-                    self.assertEqual(0.10, points[0][0],
-                                     f'{where}: the furnace grid starts at 0.10')
-                    self.assertEqual(91, len(points), where)
+                    # down to the engine's 0.7 floor on the coil PLF (first
+                    # 0.005 step above the crossing at PLR 0.0547)
+                    self.assertEqual(0.055, points[0][0], where)
+                    self.assertEqual(100, len(points), where)
                 else:
-                    # Boiler quadratic classes: the grid starts at the engine's
-                    # aligned minimum part-load ratio (0.001) and is finest
-                    # where the rational is most convex (Sol's R-O review P2).
-                    self.assertEqual(0.001, points[0][0], where)
-                    self.assertEqual(150, len(points), where)
+                    # Boiler quadratic classes: down to the engine's 0.01
+                    # floor on the multiplier (crossed at PLR 0.00083 /
+                    # 0.00018), finest where the rational is most convex.
+                    self.assertEqual(0.0001, points[0][0], where)
+                    self.assertEqual(159, len(points), where)
                     xs = [x for x, _ in points]
-                    self.assertEqual([round(0.001 * i, 3) for i in range(1, 50)],
-                                     xs[:49], f'{where}: 0.001 steps below 0.05')
-                    for node in (0.05, 0.055, 0.1):
+                    self.assertEqual([round(0.0001 * i, 4) for i in range(1, 10)],
+                                     xs[:9], f'{where}: 0.0001 steps below 0.001')
+                    for node in (0.001, 0.05, 0.055, 0.1):
                         self.assertIn(node, xs, f'{where}: node {node}')
 
     def test_no_furnace_node_sits_under_the_engine_s_plf_floor(self):
@@ -549,18 +550,33 @@ if __name__ == '__main__':
     unittest.main()
 
 
+def engine_floor_crossing(coefficients, floor):
+    """Smallest PLR at which the exact multiplier PLR / FHeatPLC reaches the
+    engine's floor (bisection; the multiplier is monotone in PLR)."""
+    lo, hi = 0.0, 1.0
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        if exact_plf(coefficients, mid) >= floor:
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
 class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
-    """Sol's R-O review, P2: the published error only bounds the engine's
-    behaviour if every part-load ratio the engine can evaluate is covered.
-    Most boilers keep the SDK's minimum part-load ratio of 0, so the engine
-    may evaluate any PLR in (0, 1]. The table covers [0.001, 1] by nodes and
-    (0, 0.001) by its declared Constant extrapolation; the under-count there is
-    bounded by the Code's own standby term, and that bound is published.
+    """Sol's R-O review, P2 (twice): the table must carry the Code equation
+    over every positive PLR the engine can evaluate. EnergyPlus itself floors
+    the boiler multiplier at 0.01 (Boilers.cc) and the coil PLF at 0.7
+    (HeatingCoils.cc); the exact rational reaches those floors at a PLR the
+    test re-derives, and each table's first node must be at or below that
+    crossing (coils: the first node above it, so no node value sits under the
+    floor and triggers the engine's recurring warning). Below the crossing the
+    ENGINE clamps, whatever the table says; that residual is published.
 
-    The engine minimum is deliberately NOT raised to close the domain:
-    EnergyPlus forces the delivered heat up to MinPLR x capacity under locked
-    flow (Boilers.cc, CalcBoilerModel), which changes the load, not the curve."""
+    The engine minimum PLR is deliberately NOT raised (it forces delivered
+    heat), and the parasitic-fuel fields were measured to charge in every OFF
+    timestep, so neither can carry the standby term."""
 
     def test_the_applier_leaves_the_engine_minimum_alone(self):
         model, boiler = boiler_model()
@@ -572,32 +588,73 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
                          "8.4.4.9.(6)(d)'s staged-primary floor is the only "
                          "minimum the pass sets")
 
-    def test_the_under_count_below_the_first_node_is_bounded_by_the_standby_term(self):
-        """fuel_exact(p) - fuel_table(p), as a fraction of the design fuel
-        Fuel_design = Q_design / eta, for every p below the first node: the
-        exact rational charges Fuel_design x FHeatPLC(p) while the table, held
-        at PLF(p0), charges Fuel_design x p / PLF(p0). The gap is at most
-        FHeatPLC(0) = a, and the test derives it rather than trusting the text."""
+    def test_each_table_reaches_the_engine_floor_and_publishes_it(self):
         for edition in EDITIONS:
             for curve in curves(edition).values():
                 implements = curve.get('implements') or {}
-                if curve['form'] != 'TableLookup' or implements.get('equipment') != 'boiler':
+                if curve['form'] != 'TableLookup' or 'engine_floor' not in implements:
                     continue
+                where = f'{edition}/{curve["name"]}'
+                entry = fheatplc_entry(edition, implements['equipment'], implements['class'])
+                self.assertEqual('quadratic', entry['form'], where)
+                floor = implements['engine_floor']['multiplier_floor']
+                self.assertEqual(0.01 if implements['equipment'] == 'boiler' else 0.7,
+                                 floor, where)
+                crossing = engine_floor_crossing(entry['coefficients'], floor)
+                self.assertAlmostEqual(crossing, implements['engine_floor']['plr_at_floor'],
+                                       places=6, msg=where)
+                first_x, first_y = curve['points'][0]
+                if implements['equipment'] == 'boiler':
+                    self.assertLessEqual(first_x, crossing, f'{where}: the table reaches the floor')
+                else:
+                    self.assertGreaterEqual(first_y, floor, f'{where}: no node under the coil floor')
+                    self.assertLess(first_x - crossing, 0.005, f'{where}: first node just above')
+                self.assertEqual('Constant', curve['extrapolation'], where)
+                self.assertIn(f'{implements["engine_floor"]["plr_at_floor"]}',
+                              implements['error_grid'], f'{where}: crossing published')
+                self.assertIn('OFF', implements['error_grid'],
+                              f'{where}: the rejected parasitic route is recorded')
+
+    def test_the_residual_below_the_floor_is_the_engine_s_not_the_table_s(self):
+        """Where the table still has nodes but the engine floor binds, the
+        table value is below the floor: the engine's clamp, not a table
+        choice, decides the fuel there. Asserted for the boiler tables, whose
+        nodes run below the crossing."""
+        for edition in EDITIONS:
+            for curve in curves(edition).values():
+                implements = curve.get('implements') or {}
+                if implements.get('equipment') != 'boiler' or 'engine_floor' not in implements:
+                    continue
+                floor = implements['engine_floor']['multiplier_floor']
                 entry = fheatplc_entry(edition, 'boiler', implements['class'])
-                if entry['form'] != 'quadratic':
-                    continue
-                a = entry['coefficients'][0]
-                p0, plf0 = curve['points'][0]
-                self.assertEqual('Constant', curve['extrapolation'])
-                worst = 0.0
-                for i in range(1, 1000):
-                    p = p0 * i / 1000
-                    # FHeatPLC(p) = p / PLF_exact(p): the Code's fuel as a
-                    # fraction of Fuel_design; the table's is p / PLF(p0).
-                    fuel_exact = p / exact_plf(entry['coefficients'], p)
-                    fuel_table = p / plf0
-                    worst = max(worst, fuel_exact - fuel_table)
-                self.assertLessEqual(worst, a + 1e-12, f'{edition}/{curve["name"]}')
-                self.assertGreater(worst, 0.9 * a, 'the bound is tight as p -> 0')
-                self.assertIn(f'{a} x Fuel_design', implements['error_grid'],
-                              f'{edition}/{curve["name"]}: the bound is published')
+                below = [(x, y) for x, y in curve['points'] if y < floor]
+                self.assertTrue(below, f'{edition}/{curve["name"]}: nodes exist under the floor')
+                for x, y in below:
+                    self.assertAlmostEqual(y, exact_plf(entry['coefficients'], x), places=6,
+                                           msg=f'{edition}/{curve["name"]}: node {x} is the exact rational')
+
+
+@unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
+class TestNullBoundsMeanAbsent(unittest.TestCase):
+    """Sol's second R-O review: a bound the catalogue row leaves null must be
+    ABSENT on a same-named object for it to be reused; an undeclared clamp is
+    a divergence. Probe: the ruleset's own DXCOOL-REF-CAPFT, then a minimum
+    curve output the row never declared."""
+
+    def test_an_undeclared_output_clamp_blocks_reuse(self):
+        tables = efficiency.data('2020')
+        row = next(c for c in tables['curves'] if c['name'] == 'DXCOOL-REF-CAPFT')
+        self.assertIsNone(row.get('minimum_dependent_variable_output'),
+                          'precondition: the row declares no output minimum')
+        model = openstudio.model.Model()
+        own = efficiency.curve(model, tables, 'DXCOOL-REF-CAPFT', audit=AuditLog(), target='probe')
+        self.assertEqual('DXCOOL-REF-CAPFT', own.nameString())
+        own.to_CurveBiquadratic().get().setMinimumCurveOutput(99.0)
+
+        audit = AuditLog()
+        again = efficiency.curve(model, tables, 'DXCOOL-REF-CAPFT', audit=audit, target='probe')
+
+        self.assertNotEqual(own.handle(), again.handle(), 'the clamped object is not reused')
+        self.assertEqual('DXCOOL-REF-CAPFT (D-89)', again.nameString())
+        self.assertFalse(again.to_CurveBiquadratic().get().minimumCurveOutput().is_initialized())
+        self.assertTrue(any('NOT adopted' in w['action'] for w in audit.warnings))

@@ -1082,11 +1082,13 @@ def _close(a, b):
 
 
 def _optional_value(getter):
-    """An SDK optional accessor's value, or None when uninitialized."""
-    value = getter()
+    """An SDK optional's value (or a plain value), None when uninitialized;
+    accepts the accessor itself or its result."""
+    value = getter() if callable(getter) else getter
     if hasattr(value, 'is_initialized'):
-        return float(value.get()) if value.is_initialized() else None
-    return float(value)
+        return value.get() if value.is_initialized() else None
+    return value
+
 
 
 def _limits_match(obj, row, two_vars):
@@ -1105,9 +1107,16 @@ def _limits_match(obj, row, two_vars):
                   ('maximum_dependent_variable_output', obj.maximumOutput)]
     for key, getter in pairs:
         wanted = row.get(key)
+        value = getter()
         if wanted is None:
+            # A bound the row leaves null must be ABSENT on the object too: a
+            # foreign clamp the catalogue never declared is a divergence
+            # (Sol's R-O review). A required SDK field (plain float, never
+            # optional) cannot be absent and is not compared.
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False
             continue
-        if not _close(_optional_value(getter), wanted):
+        if not _close(_optional_value(value), wanted):
             return False
     return True
 
@@ -1147,9 +1156,12 @@ def _lookup_matches(obj, row):
                         ('minimum_dependent_variable_output', obj.minimumOutput),
                         ('maximum_dependent_variable_output', obj.maximumOutput)):
         wanted = row.get(key)
+        value = getter()
         if wanted is None:
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False  # a clamp the catalogue never declared
             continue
-        if not _close(_optional_value(getter), wanted):
+        if not _close(_optional_value(value), wanted):
             return False
     return True
 
@@ -1355,10 +1367,11 @@ def _curve_evidence(tables, row):
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
             f"{row.get('extrapolation')} extrapolation — {error_text}"
-            + (f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
-               f"the declared Constant extrapolation holds the factor, where the "
-               f"Code's standby term bounds the under-count at a x Fuel_design"
-               if implements.get('equipment') == 'boiler' else ''))
+            + (f"; exact to the engine's own floor on the multiplier "
+               f"({(implements.get('engine_floor') or {}).get('multiplier_floor')}, "
+               f"reached at PLR {(implements.get('engine_floor') or {}).get('plr_at_floor')}), "
+               f"below which the engine clamps"
+               if implements.get('engine_floor') else ''))
 
 
 def _part_load_curve(component, tables, equipment, klass, audit, target):

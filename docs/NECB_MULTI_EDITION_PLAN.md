@@ -2519,7 +2519,7 @@ freeze: 7 scenarios moved — `corpus-annual-01` +0.7 %, `-02` +0.3 %, the
 2025 determination +0.7 % reference heating (the tables now follow the
 Code's rational down to PLR 0.001 instead of holding PLF(0.01) below it),
 their sized siblings' audit text, and nothing else; `corpus-annual-13`
-(modulating) byte-identical — the 0.2 % it moved under the reverted
+(modulating) report byte-identical, audit text moved — the 0.2 % it moved under the reverted
 engine-minimum attempt was the forced heat output, which is why that
 approach was dropped. Against R-O-a the accepted categories are unchanged
 (boiler/furnace efficiency entries in 28 scenarios, the class on the
@@ -2527,3 +2527,21 @@ purchased-heating selection and build entries, the reworded coverage
 sentences, the tier/GHG entries, one DF-4 warning per divergent DX curve
 name per sized reference model, 32 in all). Scenario-lane verification
 (suite + three lanes + gates) follows below.
+
+### Step 3 — Sol's second review (2026-09-13): request changes, all fixed
+
+All five findings verified in the code first. P1 coils: the sanitizer I
+added covered boilers only while the resolver also serves both gas coil
+types — fixed and tested on a tagged PSZ-AC with gas coil. P1 domain: nodes
+at 0.001 still left the standby term unrepresented; two exact carriers were
+measured and rejected (engine minimum forces heat; the parasitic fuel
+fields charge in every OFF timestep — boiler 45/45, coils 659/659), so the
+tables now run to the engine's own floors (boilers to PLR 0.0001 against
+the 0.01 curve floor, furnaces to 0.055 against the 0.7 PLF floor), the
+crossing and the residual are published per row and re-derived by tests.
+P1 DF-4: null row bounds now require an absent object bound (Sol's
+`minimumCurveOutput = 99` probe is a test). P2: district requests no longer
+adopt a boiler loop built first; both orders tested. P3: the suite count
+below is the run's own; annual-13's REPORT (not the scenario) was
+byte-identical between freezes. D-89 third amendment; R-O re-frozen on the
+clean tree; attribution and lanes below.

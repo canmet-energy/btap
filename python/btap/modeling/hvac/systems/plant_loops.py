@@ -71,7 +71,14 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     :return: openstudio.model.PlantLoop
     """
     if reuse:
-        existing = find_hot_water(model, part_load_curve_class)
+        # Source first: a caller asking for DISTRICT heat must never adopt a
+        # boiler loop (and a boiler caller never a district loop), whatever
+        # order the two were built in; then class-aware within boiler loops.
+        if source == 'district':
+            existing = next((pl for pl in model.getPlantLoops()
+                             if _district_heated(pl)), None)
+        else:
+            existing = find_hot_water(model, part_load_curve_class)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district

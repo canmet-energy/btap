@@ -932,14 +932,21 @@ def _clear_proposed_part_load_classes(reference, audit):
     efficiency pass gives a present tag precedence over the row, so every
     incoming tag is removed here, before any reference system is built."""
     cleared = []
-    for boiler in reference.getBoilerHotWaters():
-        props = boiler.additionalProperties()
+    # Every object the efficiency pass resolves a class for: boilers and
+    # both gas heating coil types (single- and multi-stage). A new consumer
+    # in efficiency.py must be added here too — the propagation test asserts
+    # the two lists agree.
+    consumers = (list(reference.getBoilerHotWaters())
+                 + list(reference.getCoilHeatingGass())
+                 + list(reference.getCoilHeatingGasMultiStages()))
+    for component in consumers:
+        props = component.additionalProperties()
         feature = props.getFeatureAsString(BOILER_PART_LOAD_CLASS_FEATURE)
         if feature.is_initialized() and feature.get():
-            cleared.append(f"{boiler.nameString()}={feature.get()}")
+            cleared.append(f"{component.nameString()}={feature.get()}")
             props.resetFeature(BOILER_PART_LOAD_CLASS_FEATURE)
     if cleared:
-        audit.info('build', 'proposed boiler part-load class tags not carried into the reference',
+        audit.info('build', 'proposed part-load class tags not carried into the reference',
                    target=','.join(c.split('=')[0] for c in cleared),
                    inputs={'cleared': cleared}, ruling='D-89')
 
