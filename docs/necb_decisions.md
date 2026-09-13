@@ -5293,3 +5293,26 @@ error" paragraph and the first amendment's figures are rewritten to the
 shipped data (67.3 % of target; reference heating gas +8.7 % to +50.4 %
 across the four annual scenarios, the modulating one included), and the
 verification record the log promised is written out.
+
+
+**Fifth amendment (2026-09-13, Sol's third pass: verified both rounds;
+five items before merge, all done).** (1) *The zero node.* Each boiler
+table now carries a node at PLR 0 with PLF 0 (169 nodes, with a
+0.00001-step segment below 0.0001). On the first segment the interpolation
+is PLR × PLF(p₁)/p₁, the rational's own limit p/FHeatPLC(0) to first order,
+so the Code equation is represented down to zero load and there is no
+extrapolation region: the residual as PLR → 0 is FHeatPLC(0)/FHeatPLC(p₁) −
+1 = 0.012 % (non-condensing), 0.054 % (2025 modulating). The furnace table
+keeps its 0.055 start: the engine's 0.7 floor on the coil fraction is real,
+and a lower node would only feed the engine values it resets with a
+warning. (2) *An engine regression test.* `test_part_load_engine.py` runs
+EnergyPlus on a one-boiler loop and asserts, from the SQL: a constant 0.005
+curve is used unclamped (no floor); the shipped table gives fuel = heat ÷
+(η × PLF) at PLR 0.20, i.e. Fuel_design × FHeatPLC; and at PLR 0.00005
+the zero node keeps the engine on the equation. (3) *District steam.*
+`DistrictHeatingSteam` counts as a district source. (4) *Exclusive source
+matching.* A hybrid loop (boilers and a district object on one supply side)
+is adopted by neither a boiler caller nor a district caller. (5) The audit
+evidence and the row texts say what the table now is (a node at PLR 0; no
+"first node" clause for boilers); the furnace wording is unchanged. R-O
+re-frozen on the clean tree.

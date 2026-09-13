@@ -693,6 +693,46 @@
       "extrapolation": "Constant",
       "points": [
         [
+          0.0,
+          0.0
+        ],
+        [
+          1e-05,
+          0.000556
+        ],
+        [
+          2e-05,
+          0.001111
+        ],
+        [
+          3e-05,
+          0.001665
+        ],
+        [
+          4e-05,
+          0.002219
+        ],
+        [
+          5e-05,
+          0.002772
+        ],
+        [
+          6e-05,
+          0.003325
+        ],
+        [
+          7e-05,
+          0.003877
+        ],
+        [
+          8e-05,
+          0.004429
+        ],
+        [
+          9e-05,
+          0.00498
+        ],
+        [
           0.0001,
           0.00553
         ],
@@ -1329,11 +1369,11 @@
           0.999135
         ]
       ],
-      "minimum_independent_variable_1": 0.0001,
+      "minimum_independent_variable_1": 0.0,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": 0.00553,
+      "minimum_dependent_variable_output": 0.0,
       "maximum_dependent_variable_output": 1.0,
       "implements": {
         "equipment": "boiler",
@@ -1341,9 +1381,9 @@
         "table": "8.4.6.2",
         "row": "Modulating",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
-        "grid": "PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes)",
+        "grid": "PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes)",
         "max_error_vs_exact": 0.007904609,
-        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0001 to 1.00000 step 0.00001: 0.7905 % at PLR 0.00141. Below the first node (PLR 0.0001) the table's Constant extrapolation holds PLF at 0.00553; the under-count against the Code's rational there is bounded by the standby term FHeatPLC(0) = 0.01798667 x Fuel_design and occurs only in an hour whose load is under 0.01 % of capacity. EnergyPlus applies NO floor to a positive boiler-efficiency-curve output (Boilers.cc substitutes 0.01 only for an output <= 0, which the positive rational never produces; measured: a constant 0.005 curve is used unclamped), so the first node is the table's own stopping point and no lower node changes any output. The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.00001 to 1.00000 step 0.00001: 0.7905 % at PLR 0.00141. The table carries a node at PLR 0 with PLF 0, so the Code equation is represented down to zero load: on (0, 1e-05) the interpolation is PLR x PLF(1e-05)/1e-05, which differs from the exact rational by at most FHeatPLC(0)/FHeatPLC(1e-05) - 1 = 0.0538 % as PLR -> 0. Node values are stored to six decimals (the SDK's field precision), which below PLR 0.0001 is three significant figures — a rounding of at most 0.0597 % at those nodes. There is no extrapolation region. EnergyPlus substitutes 0.01 for a non-positive curve output (Boilers.cc), which only the PLR = 0 node would produce, and at zero load the boiler model returns before the curve is evaluated; it applies no floor to a positive output (measured: a constant 0.005 curve runs unclamped). The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
       },
       "notes": "Reference modulating boiler part-load factor for Article 8.4.6.2. This edition states the modulating requirement as a coefficient row of Table 8.4.6.2 (a 0.01798667, b 0.96742420, c 0.01545455), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). The name is code-qualified because this edition's modulating content is its own (D-88). Exact to six decimals at every node."
     },
@@ -1357,6 +1397,46 @@
       "interpolation": "Linear",
       "extrapolation": "Constant",
       "points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1e-05,
+          0.000121
+        ],
+        [
+          2e-05,
+          0.000242
+        ],
+        [
+          3e-05,
+          0.000363
+        ],
+        [
+          4e-05,
+          0.000484
+        ],
+        [
+          5e-05,
+          0.000605
+        ],
+        [
+          6e-05,
+          0.000726
+        ],
+        [
+          7e-05,
+          0.000847
+        ],
+        [
+          8e-05,
+          0.000968
+        ],
+        [
+          9e-05,
+          0.001088
+        ],
         [
           0.0001,
           0.001209
@@ -1994,11 +2074,11 @@
           1.0
         ]
       ],
-      "minimum_independent_variable_1": 0.0001,
+      "minimum_independent_variable_1": 0.0,
       "maximum_independent_variable_1": 1.0,
       "minimum_independent_variable_2": null,
       "maximum_independent_variable_2": null,
-      "minimum_dependent_variable_output": 0.001209,
+      "minimum_dependent_variable_output": 0.0,
       "maximum_dependent_variable_output": 1.0,
       "implements": {
         "equipment": "boiler",
@@ -2006,11 +2086,11 @@
         "table": "8.4.6.2",
         "row": "Non-condensing",
         "transform": "PLF = PLR / FHeatPLC(PLR)",
-        "grid": "PLR 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (159 nodes)",
+        "grid": "PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes)",
         "max_error_vs_exact": 0.001993695,
-        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.0001 to 1.00000 step 0.00001: 0.1994 % at PLR 0.00142. Below the first node (PLR 0.0001) the table's Constant extrapolation holds PLF at 0.001209; the under-count against the Code's rational there is bounded by the standby term FHeatPLC(0) = 0.082597 x Fuel_design and occurs only in an hour whose load is under 0.01 % of capacity. EnergyPlus applies NO floor to a positive boiler-efficiency-curve output (Boilers.cc substitutes 0.01 only for an output <= 0, which the positive rational never produces; measured: a constant 0.005 curve is used unclamped), so the first node is the table's own stopping point and no lower node changes any output. The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
+        "error_grid": "sampled maximum relative error of the Linear interpolation against the exact rational PLF = PLR / FHeatPLC(PLR), sampled at PLR 0.00001 to 1.00000 step 0.00001: 0.1994 % at PLR 0.00142. The table carries a node at PLR 0 with PLF 0, so the Code equation is represented down to zero load: on (0, 1e-05) the interpolation is PLR x PLF(1e-05)/1e-05, which differs from the exact rational by at most FHeatPLC(0)/FHeatPLC(1e-05) - 1 = 0.0121 % as PLR -> 0. Node values are stored to six decimals (the SDK's field precision), which below PLR 0.0001 is three significant figures — a rounding of at most 0.0456 % at those nodes. There is no extrapolation region. EnergyPlus substitutes 0.01 for a non-positive curve output (Boilers.cc), which only the PLR = 0 node would produce, and at zero load the boiler model returns before the curve is evaluated; it applies no floor to a positive output (measured: a constant 0.005 curve runs unclamped). The Off Cycle Parasitic Fuel Load was evaluated as a carrier for the standby term and rejected: EnergyPlus 25.2 charges it in every timestep the boiler is OFF (measured, 45 of 45 off steps)."
       },
-      "notes": "Reference non-condensing boiler part-load factor for Article 8.4.6.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup, Linear interpolation, Constant extrapolation; exact to six decimals at every node."
+      "notes": "Reference non-condensing boiler part-load factor for Article 8.4.6.2. The Code states FHeatPLC as a fuel-INPUT ratio (Fuel_partload = Fuel_design x FHeatPLC), so the EnergyPlus normalized-boiler-efficiency multiplier is PLF = PLR / FHeatPLC(PLR) (the D-53 transform). Table:Lookup with a node at PLR 0, Linear interpolation; exact to six decimals (the SDK's field precision) at every node and the Code equation down to zero load."
     },
     {
       "name": "DXCOOL-REF-CAPFFLOW",

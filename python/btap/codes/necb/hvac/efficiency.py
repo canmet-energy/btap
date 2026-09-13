@@ -1402,9 +1402,11 @@ def _curve_evidence(tables, row):
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
             f"{row.get('extrapolation')} extrapolation — {error_text}"
-            + (f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
+            + ("; a node at PLR 0 carries the Code equation down to zero load"
+               if row.get('minimum_independent_variable_1') == 0 else
+               f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
                f"the table's Constant extrapolation holds the factor, an under-count "
-               f"bounded by the Code's standby term FHeatPLC(0) x design fuel"
+               f"bounded by the Code's standby term FHeatPLC(0) x rated fuel"
                + ("; the first node's value lies above the engine's 0.7 floor on the "
                   "coil part-load fraction, so the engine never clamps"
                   if implements.get('engine_floor') else "")))

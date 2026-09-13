@@ -43,6 +43,10 @@ def fheatplc(coefficients, plr):
     return a + b * plr + c * plr * plr
 
 
+def fheatplc_value(coefficients, plr):
+    return sum(c * plr ** i for i, c in enumerate(coefficients))
+
+
 def exact_plf(coefficients, plr):
     """PLF = PLR / FHeatPLC(PLR) — the transform 8.4.5.2.(1)/8.4.6.2.(1) fixes:
     FHeatPLC scales the FUEL input, the EnergyPlus field is a degradation
@@ -68,7 +72,7 @@ def derive_max_error(points, coefficients):
     rational, on a 0.00001 grid over the table's own span — finer than the
     finest node spacing (0.0001), so no interval is sampled only at its nodes.
     It is a SAMPLED maximum, which is what the rows publish."""
-    lo, hi = points[0][0], points[-1][0]
+    lo, hi = max(points[0][0], 0.00001), points[-1][0]  # the zero node has no ratio
     worst = 0.0
     for i in range(round((hi - lo) / 0.00001) + 1):
         x = round(lo + i * 0.00001, 5)
@@ -226,15 +230,14 @@ class TestPartLoadData(unittest.TestCase):
                     self.assertEqual(0.055, points[0][0], where)
                     self.assertEqual(100, len(points), where)
                 else:
-                    # Boiler quadratic classes: down to the engine's 0.01
-                    # floor on the multiplier (crossed at PLR 0.00083 /
-                    # 0.00018), finest where the rational is most convex.
-                    self.assertEqual(0.0001, points[0][0], where)
-                    self.assertEqual(159, len(points), where)
+                    # Boiler quadratic classes: a node at PLR 0 (PLF 0), a fine
+                    # segment to 0.001, finest where the rational is most convex.
+                    self.assertEqual([0.0, 0.0], points[0], where)
+                    self.assertEqual(169, len(points), where)
                     xs = [x for x, _ in points]
-                    self.assertEqual([round(0.0001 * i, 4) for i in range(1, 10)],
-                                     xs[:9], f'{where}: 0.0001 steps below 0.001')
-                    for node in (0.001, 0.05, 0.055, 0.1):
+                    self.assertEqual([round(0.00001 * i, 5) for i in range(1, 10)],
+                                     xs[1:10], f'{where}: 0.00001 steps below 0.0001')
+                    for node in (0.0001, 0.001, 0.05, 0.055, 0.1):
                         self.assertIn(node, xs, f'{where}: node {node}')
 
     def test_no_furnace_node_sits_under_the_engine_s_plf_floor(self):
@@ -577,7 +580,11 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
                          "8.4.4.9.(6)(d)'s staged-primary floor is the only "
                          "minimum the pass sets")
 
-    def test_boiler_tables_claim_no_engine_floor_and_publish_the_extrapolation_bound(self):
+    def test_boiler_tables_carry_the_zero_node_and_claim_no_engine_floor(self):
+        """Sol's third pass: with a node at (0, 0) the interpolation on the
+        first segment is PLR x PLF(p1)/p1, which is the rational's own
+        limit p/FHeatPLC(0) to first order — the Code equation is represented
+        down to zero load and there is no extrapolation region left."""
         for edition in EDITIONS:
             for curve in curves(edition).values():
                 implements = curve.get('implements') or {}
@@ -588,15 +595,27 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
                     continue
                 where = f'{edition}/{curve["name"]}'
                 self.assertNotIn('engine_floor', implements, f'{where}: no engine floor exists')
-                self.assertEqual('Constant', curve['extrapolation'], where)
-                a = entry['coefficients'][0]
-                self.assertIn(f'{a} x Fuel_design', implements['error_grid'], where)
+                self.assertEqual([0.0, 0.0], curve['points'][0], where)
+                self.assertEqual(0.0, curve['minimum_independent_variable_1'], where)
+                self.assertEqual(0.0, curve['minimum_dependent_variable_output'], where)
+                self.assertIn('node at PLR 0', implements['error_grid'], where)
                 self.assertIn('unclamped', implements['error_grid'], where)
                 self.assertIn('OFF', implements['error_grid'], where)
-                p0, plf0 = curve['points'][0]
-                worst = max(p / exact_plf(entry['coefficients'], p) - p / plf0
-                            for p in (p0 * i / 1000 for i in range(1, 1000)))
-                self.assertLessEqual(worst, a + 1e-12, where)
+                # the first segment's error, re-derived: ratio of the
+                # interpolation to the exact rational tends to
+                # FHeatPLC(0)/FHeatPLC(p1) as p -> 0+, and is below 0.06 %.
+                p1, plf1 = curve['points'][1]
+                worst = max(abs((p * plf1 / p1) / exact_plf(entry['coefficients'], p) - 1)
+                            for p in (p1 * i / 1000 for i in range(1, 1000)))
+                self.assertLess(worst, 6e-4, f'{where}: first segment {worst:.6f}')
+                # the published limit is for the exact node value; the stored
+                # node adds the six-decimal rounding, also published
+                a = entry['coefficients'][0]
+                limit = abs(a / fheatplc_value(entry['coefficients'], p1) - 1)
+                rounding = abs(plf1 / exact_plf(entry['coefficients'], p1) - 1)
+                self.assertLessEqual(worst, limit + rounding + 1e-6, where)
+                self.assertIn(f'{limit * 100:.4f} % as PLR -> 0', implements['error_grid'], where)
+                self.assertIn('six decimals', implements['error_grid'], where)
 
     def test_the_furnace_table_sits_above_the_engine_s_real_floor(self):
         for edition in EDITIONS:
@@ -610,8 +629,10 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
             self.assertIn('never clamps', curve['implements']['error_grid'], edition)
 
     def test_every_node_is_the_rational_to_six_decimals(self):
-        """'exact to six decimals at every node': asserted RELATIVELY, since
-        an absolute six-place tolerance at PLF ~ 0.001 would permit 0.04 %."""
+        """Six decimals is the SDK's field precision, so it is what the engine
+        sees. Asserted RELATIVELY as well: below PLR 0.0001 six places is three
+        significant figures (<= 0.1 %), elsewhere <= 0.05 %. The zero node is
+        the rational's limit."""
         for edition in EDITIONS:
             for curve in curves(edition).values():
                 implements = curve.get('implements') or {}
@@ -621,12 +642,15 @@ class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
                 if entry['form'] != 'quadratic':
                     continue
                 for x, y in curve['points']:
+                    if x == 0:
+                        self.assertEqual(0.0, y)
+                        continue
                     exact = exact_plf(entry['coefficients'], x)
                     self.assertLessEqual(abs(y - exact), 0.5e-6 + 1e-12,
                                          f'{edition}/{curve["name"]} node {x}')
-                    self.assertLessEqual(abs(y - exact) / exact, 5e-4,
+                    self.assertLessEqual(abs(y - exact) / exact, 1e-3 if x < 0.0001 else 5e-4,
                                          f'{edition}/{curve["name"]} node {x}: relative')
-                self.assertIn('six decimals', curve['notes'], f'{edition}/{curve["name"]}')
+                self.assertRegex(curve['notes'], r'(?i)exact to six decimals', f'{edition}/{curve["name"]}')
 
 
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')

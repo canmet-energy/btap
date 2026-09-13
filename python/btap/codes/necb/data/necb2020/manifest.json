@@ -507,7 +507,7 @@
           "detail": "the governing article: it states the chiller surfaces over t_chws and t_cws in °F, which is what reconciles them with the shipped °C coefficients"
         }
       ],
-      "result_sha256": "13b483fc24e949701a620289ef1e5f24bac473e9493e3dc301d25681d94a5b0e"
+      "result_sha256": "72b783757fafff981619f35f20fdcc87c3abb8f07ec01164c54ce9bb4e0910da"
     },
     "lighting_rules.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",

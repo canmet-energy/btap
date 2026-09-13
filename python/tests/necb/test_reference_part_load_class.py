@@ -487,3 +487,33 @@ class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
                          "no baseboard heats off the condenser loop")
         self.assertEqual(str(hw.handle()),
                          str(plant_loops.hot_water(model, source="district").handle()))
+
+    def test_district_steam_counts_as_district_and_hybrid_loops_are_adopted_by_nobody(self):
+        """Sol's third pass: (a) a DistrictHeatingSteam loop is a district loop;
+        (b) source matching is EXCLUSIVE — a loop carrying both boilers and a
+        district object is handed to neither a boiler caller nor a district
+        caller."""
+        import openstudio
+
+        from btap.modeling.hvac.systems import plant_loops
+
+        model = openstudio.model.Model()
+        steam_loop = openstudio.model.PlantLoop(model)
+        steam_loop.setName("Hot Water Loop")
+        steam_loop.addSupplyBranchForComponent(openstudio.model.DistrictHeatingSteam(model))
+        self.assertTrue(plant_loops._district_heated(steam_loop))
+        self.assertEqual(str(steam_loop.handle()),
+                         str(plant_loops.hot_water(model, source="district").handle()),
+                         "a steam district loop is reused by a district caller")
+        gas = plant_loops.hot_water(model)
+        self.assertNotEqual(str(gas.handle()), str(steam_loop.handle()))
+
+        hybrid = openstudio.model.Model()
+        loop = plant_loops.hot_water(hybrid)  # boilers
+        loop.addSupplyBranchForComponent(openstudio.model.DistrictHeatingWater(hybrid))
+        self.assertTrue(plant_loops._district_heated(loop) and plant_loops._boiler_heated(loop))
+        self.assertNotEqual(str(loop.handle()), str(plant_loops.hot_water(hybrid).handle()),
+                            "a boiler caller does not adopt the hybrid loop")
+        self.assertNotEqual(str(loop.handle()),
+                            str(plant_loops.hot_water(hybrid, source="district").handle()),
+                            "a district caller does not adopt the hybrid loop")

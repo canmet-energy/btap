@@ -41,9 +41,12 @@ def find_hot_water(model, part_load_curve_class=None):
     :param model: openstudio.model.Model
     :return: openstudio.model.PlantLoop or None
     """
+    # Source matching is EXCLUSIVE: a hybrid loop (boilers AND a district
+    # object on the supply side) is neither a boiler loop nor a district loop
+    # for reuse, so the two callers can never be handed the same object.
     return next(
         (pl for pl in model.getPlantLoops()
-         if len(pl.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
+         if _boiler_heated(pl) and not _district_heated(pl)
          and boiler_part_load_class(pl) == part_load_curve_class),
         None)
 
@@ -57,10 +60,14 @@ def _district_heated(loop):
     for c in loop.supplyComponents():
         if c.to_DistrictHeating().is_initialized():
             return True
-        if (hasattr(c, 'to_DistrictHeatingWater')
-                and c.to_DistrictHeatingWater().is_initialized()):
-            return True
+        for kind in ('to_DistrictHeatingWater', 'to_DistrictHeatingSteam'):
+            if hasattr(c, kind) and getattr(c, kind)().is_initialized():
+                return True
     return False
+
+
+def _boiler_heated(loop):
+    return len(loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
 
 
 def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
@@ -91,7 +98,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
             # serve as the hot-water loop (independent review, 2026-09-13).
             existing = next((pl for pl in model.getPlantLoops()
                              if _named_hot_water_loop(pl)
-                             and _district_heated(pl)), None)
+                             and _district_heated(pl) and not _boiler_heated(pl)), None)
         else:
             existing = find_hot_water(model, part_load_curve_class)
         # The name fallback catches a loop that has no boiler YET. It must not
@@ -113,6 +120,7 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
                 (pl for pl in model.getPlantLoops()
                  if _named_hot_water_loop(pl)
                  and _district_heated(pl) == (source == 'district')
+                 and not (source == 'district' and _boiler_heated(pl))
                  and boiler_part_load_class(pl) == part_load_curve_class),
                 None)
         if existing is not None:

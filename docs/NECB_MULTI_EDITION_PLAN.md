@@ -2598,3 +2598,15 @@ subtests; lanes python 5 passed (32 subtests), verify 5 (4), parity 5 (5);
 lint-imports, Ruff, orphan keys, decisions TOC, edition delta, vintage
 match, provenance hashes, `git diff --check` clean; regenerated documents
 no diff. Ready for Sol's third pass.
+
+### Step 3 — Sol's third pass (2026-09-13): verified; five pre-merge items done
+
+Sol verified both rounds (his run: focused 51 passed; full suite 1087 /
+115 subtests; lanes verify 5 (4), parity 5 (5); gates clean; the
+independent-review freeze changed evidence only). Five items before
+merge, all done: the zero node on the boiler tables (169 nodes; the Code
+equation to zero load, residual ≤ 0.054 % as PLR → 0); an engine
+regression test that measures the three engine facts D-89 rests on
+(`test_part_load_engine.py`); `DistrictHeatingSteam` as a district source;
+exclusive source matching for hybrid loops; audit/row text aligned. D-89
+fifth amendment; R-O re-frozen; attribution and verification below.
