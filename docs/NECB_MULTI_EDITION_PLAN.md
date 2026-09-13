@@ -2585,3 +2585,10 @@ lookup unit types compared. The earlier Opus-A bullet's 1.48 % / 2.89 % /
 0.027 % and "0.10 furnace grid" are first-freeze figures, superseded above.
 D-89 fourth amendment; R-O re-frozen (audit evidence text moved; no point
 changed).
+
+**R-O after the independent review (2026-09-13, clean tree at `855fa44`).**
+Relative to the previous freeze: 7 scenarios moved, every difference in
+the boiler/furnace efficiency entries' evidence text (the retracted
+engine-floor claim; sampled-maximum wording); zero `report.json` leaves
+moved, no new warning, no new entry kind. The plan-log table's numbers
+stand. Suite, three lanes and gates for this head follow.
