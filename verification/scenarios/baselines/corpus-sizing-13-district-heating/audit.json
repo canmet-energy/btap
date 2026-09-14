@@ -2329,7 +2329,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-MODULATING-necb2020",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-B, row 'Qpartload/Qdesign 0.1 to 1.0'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on the ten printed points, PLR 0.10 to 1.00 step 0.10 with Linear interpolation and Constant extrapolation \u2014 exact at every value the Code publishes; below the first node (PLR 0.1) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-B, row 'Qpartload/Qdesign 0.1 to 1.0'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on the ten printed points, PLR 0.10 to 1.00 step 0.10 with Linear interpolation and Constant extrapolation \u2014 exact at every value the Code publishes; the Code publishes no value below PLR 0.1, and the table's Constant extrapolation holds the lowest printed factor there \u2014 an implementation choice D-89 records; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -2348,7 +2348,7 @@
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-MODULATING-necb2020",
   "article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2.",
   "ruling": "D-89",
-  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-B, row 'Qpartload/Qdesign 0.1 to 1.0'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on the ten printed points, PLR 0.10 to 1.00 step 0.10 with Linear interpolation and Constant extrapolation \u2014 exact at every value the Code publishes; below the first node (PLR 0.1) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the efficiency curve is evaluated on the EnteringBoiler temperature",
+  "evidence": "Article 8.4.5.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.5.2.-B, row 'Qpartload/Qdesign 0.1 to 1.0'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on the ten printed points, PLR 0.10 to 1.00 step 0.10 with Linear interpolation and Constant extrapolation \u2014 exact at every value the Code publishes; the Code publishes no value below PLR 0.1, and the table's Constant extrapolation holds the lowest printed factor there \u2014 an implementation choice D-89 records; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
@@ -2395,6 +2395,7 @@
    "form": "BiQuadratic",
    "applied": "DXCOOL-REF-CAPFT (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2407,6 +2408,7 @@
    "form": "Quadratic",
    "applied": "DXCOOL-REF-CAPFFLOW (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2419,6 +2421,7 @@
    "form": "BiQuadratic",
    "applied": "DXCOOL-REF-COOLEIRFT (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2431,6 +2434,7 @@
    "form": "Cubic",
    "applied": "DXCOOL-REF-COOLPLFFPLR (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },

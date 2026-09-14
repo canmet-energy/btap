@@ -2939,6 +2939,7 @@
    "form": "BiQuadratic",
    "applied": "DXCOOL-REF-CAPFT (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2951,6 +2952,7 @@
    "form": "Quadratic",
    "applied": "DXCOOL-REF-CAPFFLOW (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2963,6 +2965,7 @@
    "form": "BiQuadratic",
    "applied": "DXCOOL-REF-COOLEIRFT (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
@@ -2975,6 +2978,7 @@
    "form": "Cubic",
    "applied": "DXCOOL-REF-COOLPLFFPLR (D-89)"
   },
+  "ruling": "D-89",
   "building": "reference building",
   "level": "warning"
  },
