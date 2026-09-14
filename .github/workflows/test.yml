@@ -136,7 +136,8 @@ jobs:
           # D-80 R4: the frozen-scenario python lane (default) rides this
           # pytest run; missing baselines are a FAILURE, never a skip.
           BTAP_SCENARIOS_REQUIRED: '1'
-        run: pytest -n auto -q tests/
+        # --durations: the slowest tests bound a many-core run, so name them.
+        run: pytest -n auto -q --durations=40 --durations-min=5 tests/
       # Distribution integrity. The suites above run against the CHECKOUT,
       # where every data file exists because the repo exists; a wheel is a
       # different artifact. This builds one, installs it into a clean venv,
@@ -217,7 +218,7 @@ jobs:
           BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
           BTAP_RASTERIZER_REQUIRED=1 BTAP_SAMPLES_REQUIRED=1 FULL_MATRIX=1 \
           BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 \
-            /opt/btap-ci/venv/bin/pytest -n auto -q tests/
+            /opt/btap-ci/venv/bin/pytest -n auto -q --durations=40 --durations-min=5 tests/
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
