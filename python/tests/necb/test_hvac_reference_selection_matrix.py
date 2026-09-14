@@ -10,16 +10,22 @@ The golden was adjudicated 2026-08-02 against Table 8.4.4.7.-A fetched from the
 codes MCP (all 12 category rules match the printed table) plus the 8.4.4.13
 heat-pump rules; see D-58 in docs/necb_decisions.md.
 
-Default run: a representative subset (every family + every special-rule shape),
-~2 min. FULL_MATRIX=1 runs all 97 (~7 min). The golden is NEVER regenerated
-from Python — the Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not
-ported (D-79: the adjudicated matrix is the shared contract both ports read).
+Default run: a representative subset (every family + every special-rule shape).
+FULL_MATRIX=1 runs all 97. The golden is NEVER regenerated from Python — the
+Ruby suite's UPDATE_GOLDEN escape hatch is deliberately not ported (D-79: the
+adjudicated matrix is the shared contract both ports read).
+
+One test per system, generated below, so pytest-xdist spreads the matrix over
+every worker. As a single loop it was the longest test in CI (301 s of the
+verify job's 332 s suite on 36 vCPUs); the subset-matching and one-test-per-
+system checks keep the split from silently testing fewer systems.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import unittest
 
 import btap.modeling as modeling
@@ -59,6 +65,32 @@ SUBSET = [
 
 _KEYS = ('system', 'action', 'energy_type', 'catalog', 'zones')
 
+#: The prefix every generated per-system test carries.
+PER_SYSTEM_PREFIX = 'test_reference_assignments_match_the_adjudicated_golden__'
+
+
+def names_under_test():
+    """``(names, unmatched subset entries)``. Subset entries are prefixes-or-exact
+    against the catalog (some names carry long suffixes)."""
+    all_names = [r['name'] for r in catalog.rows()]
+    if os.environ.get('FULL_MATRIX'):
+        return all_names, []
+    names, unmatched = [], []
+    for want in SUBSET:
+        found = next((n for n in all_names if n == want), None)
+        if found is None:
+            found = next((n for n in all_names if n.startswith(want)), None)
+        if found is None:
+            unmatched.append(want)
+        elif found not in names:
+            names.append(found)
+    return names, unmatched
+
+
+def _test_name(index, name):
+    slug = re.sub(r'[^0-9a-zA-Z]+', '_', name).strip('_').lower()
+    return f'{PER_SYSTEM_PREFIX}{index:03d}_{slug}'
+
 
 @needs_sdk
 class TestReferenceSelectionMatrix(unittest.TestCase):
@@ -67,24 +99,6 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
     def setUpClass(cls):
         with open(GOLDEN, encoding='utf-8') as f:
             cls.golden = json.load(f)
-
-    def names_under_test(self):
-        all_names = [r['name'] for r in catalog.rows()]
-        if os.environ.get('FULL_MATRIX'):
-            return all_names
-
-        # subset entries are prefixes-or-exact against the catalog (some names carry
-        # long suffixes); every subset entry must match something or the test is lying
-        names = []
-        for want in SUBSET:
-            found = next((n for n in all_names if n == want), None)
-            if found is None:
-                found = next((n for n in all_names if n.startswith(want)), None)
-            if found is None:
-                self.fail(f"SUBSET entry '{want}' matches no catalog name")
-            if found not in names:
-                names.append(found)
-        return names
 
     def compute_row(self, name):
         row = next(r for r in catalog.rows() if r['name'] == name)
@@ -126,18 +140,28 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
             out.append({k: a.get(k) for k in _KEYS})
         return out
 
-    def test_reference_assignments_match_the_adjudicated_golden(self):
-        for name in self.names_under_test():
-            expected = next((r for r in self.golden if r['name'] == name), None)
-            self.assertIsNotNone(
-                expected, f"'{name}' missing from the golden — regenerate and re-adjudicate (D-58)")
-            actual = self.compute_row(name)
-            for pass_ in ('catalog', 'scrubbed'):
-                for label in SCENARIOS:
-                    key = f'{pass_}_{label}'
-                    self.assertEqual(
-                        self.normalize(expected[key]), self.normalize(actual[key]),
-                        f'{name} / {key}: reference assignment drifted from the adjudicated matrix')
+    def check_system(self, name):
+        expected = next((r for r in self.golden if r['name'] == name), None)
+        self.assertIsNotNone(
+            expected, f"'{name}' missing from the golden — regenerate and re-adjudicate (D-58)")
+        actual = self.compute_row(name)
+        for pass_ in ('catalog', 'scrubbed'):
+            for label in SCENARIOS:
+                key = f'{pass_}_{label}'
+                self.assertEqual(
+                    self.normalize(expected[key]), self.normalize(actual[key]),
+                    f'{name} / {key}: reference assignment drifted from the adjudicated matrix')
+
+    def test_every_subset_entry_matches_a_catalog_system(self):
+        _names, unmatched = names_under_test()
+        self.assertEqual([], unmatched,
+                         'SUBSET entries that match no catalog name — the matrix would '
+                         'silently test fewer systems')
+
+    def test_one_generated_test_per_system_under_test(self):
+        names, _unmatched = names_under_test()
+        generated = sorted(n for n in dir(type(self)) if n.startswith(PER_SYSTEM_PREFIX))
+        self.assertEqual(sorted(_test_name(i, n) for i, n in enumerate(names)), generated)
 
     def test_catalog_and_scrubbed_passes_agree_in_the_golden(self):
         for row in self.golden:
@@ -154,3 +178,16 @@ class TestReferenceSelectionMatrix(unittest.TestCase):
         self.assertEqual(
             [], missing,
             'catalog systems missing from the adjudicated golden (new system added? re-run D-58)')
+
+
+def _add_per_system_tests():
+    names, _unmatched = names_under_test()
+    for index, name in enumerate(names):
+        def test(self, name=name):
+            self.check_system(name)
+        test.__name__ = _test_name(index, name)
+        test.__doc__ = f'D-58 matrix: {name}'
+        setattr(TestReferenceSelectionMatrix, test.__name__, test)
+
+
+_add_per_system_tests()

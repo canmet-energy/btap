@@ -43,3 +43,38 @@ jobs:
           docker build -t "$IMAGE" infra/ci-image
           docker push "$IMAGE"
           echo "### Published \`${IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # The CodeBuild runners pull from ECR in their own region instead of GHCR
+  # (~50 s per container job otherwise). This copies the exact GHCR image, so
+  # both registries serve identical content under the same tag. It runs ON a
+  # CodeBuild runner because the project's service role is what may push to
+  # the btap-ci repository (infra/aws-ci/README.md); without CI_RUNNER there
+  # is nothing to mirror for.
+  mirror-to-ecr:
+    needs: publish
+    if: vars.CI_RUNNER != ''
+    runs-on: ${{ fromJSON(format('["codebuild-{0}-{1}-{2}","buildspec-override:true"]', vars.CI_RUNNER, github.run_id, github.run_attempt)) }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Copy the tag into ECR
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          DOCKERFILE=infra/ci-image/Dockerfile
+          VERSION=$(sed -n 's|^FROM nrel/openstudio:\([0-9.]*\).*|\1|p' "$DOCKERFILE")
+          TAG="${VERSION}-$(sha256sum "$DOCKERFILE" | cut -c1-12)"
+          REGISTRY=765017559068.dkr.ecr.ca-central-1.amazonaws.com
+          if aws ecr describe-images --region ca-central-1 --repository-name btap-ci \
+               --image-ids imageTag="$TAG" > /dev/null 2>&1; then
+            echo "$REGISTRY/btap-ci:${TAG} is already mirrored"
+            exit 0
+          fi
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+          aws ecr get-login-password --region ca-central-1 \
+            | docker login --username AWS --password-stdin "$REGISTRY"
+          docker pull "ghcr.io/canmet-energy/btap-ci:${TAG}"
+          docker tag "ghcr.io/canmet-energy/btap-ci:${TAG}" "$REGISTRY/btap-ci:${TAG}"
+          docker push "$REGISTRY/btap-ci:${TAG}"
+          echo "### Mirrored \`$REGISTRY/btap-ci:${TAG}\`" >> "$GITHUB_STEP_SUMMARY"
