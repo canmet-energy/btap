@@ -134,10 +134,6 @@ class TestAuditFixes(unittest.TestCase):
         self.assertTrue(any(e.get('article') == '8.4.4.13.(2)(c)' for e in audit.entries))
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 @needs_sdk
 class TestOrphanedVrfOutdoorUnit(unittest.TestCase):
     """A proposed VRF outdoor unit does not survive into the reference.
@@ -181,3 +177,7 @@ class TestOrphanedVrfOutdoorUnit(unittest.TestCase):
         self.assertFalse([e for e in audit.entries
                           if (e.get('inputs') or {}).get('equipment_class')],
                          'nothing is left for the Table-I classifier to guess about')
+
+
+if __name__ == '__main__':
+    unittest.main()

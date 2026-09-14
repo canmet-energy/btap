@@ -2707,4 +2707,12 @@ docstring in the engine test. Left: no catalogue icon for
 `OS_DistrictHeating_Steam` (cosmetic, `catalog_icons.py`); purchased service
 water heating (8.4.4.6.(3)) remains the declared `host_scope` gap for any
 medium. None of the follow-ups reaches a frozen output (engine and runner
-tests 7 passed; Ruff clean; coverage page moved one row). Ready for Sol.
+tests 7 passed; Ruff clean; coverage page moved one row).
+
+Sol's P3 about `unittest.main()` preceding test classes was a pattern, not
+one file: an AST scan found it in five more test modules
+(`test_reference_part_load_class.py`, and before D-89 `test_catalog_report.py`,
+`test_hvac_audit_fixes.py`, `simulation/test_engine.py`, `test_compat.py`).
+Each guard now ends its file (placement moved only; 89 passed, 2 subtests,
+on those five files; `python -m unittest tests.test_compat` now runs all 16).
+Ready for Sol.

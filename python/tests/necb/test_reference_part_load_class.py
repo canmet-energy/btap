@@ -333,10 +333,6 @@ class TestTheFeatureSurvivesTheSecondEfficiencyPass(unittest.TestCase):
                          "the second efficiency pass must not drop the class")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 @needs_sdk
 class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
     """Sol's R-O review, P1 (both findings).
@@ -543,3 +539,7 @@ class TestTheClassSurvivesMixedSourcesAndStaleTags(unittest.TestCase):
         self.assertNotEqual(str(loop.handle()),
                             str(plant_loops.hot_water(hybrid, source="district").handle()),
                             "a district caller does not adopt the hybrid loop")
+
+
+if __name__ == "__main__":
+    unittest.main()
