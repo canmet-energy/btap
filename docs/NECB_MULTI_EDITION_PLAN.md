@@ -2610,3 +2610,15 @@ regression test that measures the three engine facts D-89 rests on
 (`test_part_load_engine.py`); `DistrictHeatingSteam` as a district source;
 exclusive source matching for hybrid loops; audit/row text aligned. D-89
 fifth amendment; R-O re-frozen; attribution and verification below.
+
+**R-O after Sol's third-pass items (2026-09-14, clean tree at `6d8de96`).**
+Relative to the previous freeze: 7 scenarios moved — the boiler/furnace
+efficiency entries' evidence text (the zero node), and the NECB 2025
+determination's reference heating 73283.3 → 73291.7 kWh (+0.011 %), gas
++0.006 %, site +0.005 %, the zero node's effect in hours under 0.01 %
+load; the three one-week annual scenarios' reports unchanged. A first
+attempt at this freeze leaked 60 OpenStudio deprecation lines into one
+scenario's audit text (the reuse checks called the deprecated
+`to_DistrictHeating()` on every supply component); the district check now
+reads the IDD type and the leak is gone. Suite, three lanes and gates for
+this head follow.
