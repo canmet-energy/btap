@@ -2622,3 +2622,11 @@ scenario's audit text (the reuse checks called the deprecated
 `to_DistrictHeating()` on every supply component); the district check now
 reads the IDD type and the leak is gone. Suite, three lanes and gates for
 this head follow.
+
+**Verification of `a45f25a` (2026-09-14):** suite 1085 passed / 83 subtests
+with one failure — the 8.4 coverage page had been generated before the
+fifth amendment's text and is regenerated in the next commit (its test
+passes on the regenerated page); lanes python 5 passed (32 subtests),
+verify 5 (4), parity 5 (5); lint-imports, Ruff, orphan keys, decisions
+TOC, edition delta, vintage match, provenance hashes, `git diff --check`
+clean. Ready for Sol.
