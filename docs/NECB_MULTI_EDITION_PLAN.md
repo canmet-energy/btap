@@ -2716,3 +2716,17 @@ one file: an AST scan found it in five more test modules
 Each guard now ends its file (placement moved only; 89 passed, 2 subtests,
 on those five files; `python -m unittest tests.test_compat` now runs all 16).
 Ready for Sol.
+
+**Full CI on the D-89 head (2026-09-14).** PR #47 (CodeBuild runners, the CI
+image, parallel parity, the per-system D-58 matrix, line coverage) merged to
+main, and main was merged into `d89-step3` as `d270250`: an automatic merge,
+no conflicts, with no product code or frozen baseline changes from main. This
+is D-89's first CI run that includes `verify` and the parity lanes (PR runs
+skip them). Dispatch run 34875691969: all five jobs green in 7 min 2 s.
+- verify: 1203 passed, 2 skipped; line coverage of `btap` **85.57%**, above
+  the 84% floor.
+- python: 1085 passed, 45 skipped.
+- parity: SmallOffice gate 4 passed; Live Leg C 23 passed. Its four
+  `[BOOST_ASSERT] … addAndInsertObjects` lines also appear in pre-D-89 parity
+  runs, so they are existing SDK noise, not a D-89 effect.
+- parity-scenarios: 5 passed (the annual lane, frozen at `d8b656b`).
