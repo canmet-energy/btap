@@ -186,17 +186,25 @@ attribution together. Never hand-edit a golden. Full instructions are in
 
 ## CI
 
-The workflow has four jobs:
+The workflow has five jobs:
 
 | Job | Role |
 |---|---|
 | `lint` | orphan keys, coverage pointers and generated docs, decisions registry |
 | `python` | import contracts, Ruff, full Python suite, installed-wheel smoke |
 | `verify` | required SDK/EnergyPlus suite, NECB checks, sizing scenarios |
-| `parity` | live pinned oracle, SmallOffice gate, annual scenarios, optional golden export |
+| `parity` | live pinned oracle, SmallOffice gate, optional golden export |
+| `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
 
-`parity` is `workflow_dispatch` only; no schedule is declared. Run it whenever
-the oracle pin changes.
+`parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
+declared. Run them whenever the oracle pin changes.
+
+`verify`, `parity` and `parity-scenarios` run in the CI image
+`ghcr.io/canmet-energy/btap-ci`, built from `infra/ci-image/Dockerfile` by the
+`ci-image` workflow under a content-addressed tag; `test_ci_image_pin.py` keeps
+`test.yml` on the current one. With the repository variable
+`CI_RUNNER=necb-ci`, every job but `lint` runs on a 72-vCPU AWS CodeBuild runner
+([infra/aws-ci/README.md](../infra/aws-ci/README.md)).
 
 ## D-84 attestation
 

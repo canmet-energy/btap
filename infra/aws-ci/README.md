@@ -1,73 +1,86 @@
 # CI on AWS (CodeBuild-hosted Actions runners)
 
-GitHub bills Actions minutes **only for GitHub-hosted runners**. Jobs on
-CodeBuild-hosted runners consume zero GitHub minutes while keeping the Actions
-UI, checks and PR gating — the workflow does not move, only its compute does.
+The `python`, `verify`, `parity` and `parity-scenarios` jobs in
+`.github/workflows/test.yml` run on a CodeBuild-hosted Actions runner when the
+repository variable `CI_RUNNER` names the CodeBuild project, and on
+`ubuntu-latest` when it is unset. The workflow does not move, only its compute
+does: the Actions UI, checks and PR gating stay on GitHub.
+
+**Why it is on (2026-09-14): speed.** The repository is public, so
+GitHub-hosted minutes are free, but a standard public runner has 4 vCPUs. The
+project runs on `BUILD_GENERAL1_2XLARGE` (72 vCPUs, 144 GiB), and the
+pytest-xdist suites in `python` and `verify` spread across all of it. GitHub
+bills nothing for jobs on CodeBuild-hosted runners; the build minutes land on
+the AWS account (`btap-dev`, ca-central-1) instead.
 
 ## Turn it on
 
 ```bash
-aws login                       # the account that holds the HBIX stack
-bash infra/aws-ci/setup.sh      # idempotent; ca-central-1
+aws sso login --sso-session <session>   # the account that holds the HBIX stack
+bash infra/aws-ci/setup.sh               # idempotent; ca-central-1
+gh variable set CI_RUNNER --body necb-ci
 ```
 
-Then set one repository variable (Settings → Secrets and variables → Actions):
+The variable holds the PROJECT NAME only. The workflow composes the per-run
+label `codebuild-necb-ci-<runId>-<runAttempt>` itself with `format()` —
+expressions stored inside a variable are never re-expanded by GitHub, so a
+variable holding `${{ github.run_id }}` delivers that literal text and
+CodeBuild 400s every queued job.
 
-    CI_RUNNER = necb-ci
-
-The PROJECT NAME only. The workflow composes the per-run label
-`codebuild-necb-ci-<runId>-<runAttempt>` itself with `format()` — expressions
-stored inside a variable are never re-expanded by GitHub, so a variable
-holding `${{ github.run_id }}` delivers that literal text and CodeBuild 400s
-every queued job.
-
-The workflow reads `vars.CI_RUNNER` for `python`, `verify`, and `parity`;
-`lint` stays on a bare GitHub-hosted runner. Unset the variable and the other
-three jobs revert to `ubuntu-latest`. No workflow edit is needed in either
-direction.
+**Turn it off:** `gh variable delete CI_RUNNER`. Every job reverts to
+`ubuntu-latest` with no workflow edit; the container jobs still run in the CI
+image below.
 
 ## Changing the project's source DETACHES the webhook
 
 `aws codebuild update-project --source …` silently drops the project's
 webhook — every subsequent CI job then queues forever, because nothing
-delivers `WORKFLOW_JOB_QUEUED` any more (paid for once, at the
-openstudio-necb-gems → btap-gems rename; btap-gems → btap (2026-08-30) left CodeBuild's source on the redirecting old URL — fix source + re-create the webhook together). After ANY source change, always:
+delivers `WORKFLOW_JOB_QUEUED` any more. After ANY source change, always:
 
 ```bash
 aws codebuild create-webhook --project-name necb-ci \
   --filter-groups '[[{"type":"EVENT","pattern":"WORKFLOW_JOB_QUEUED"}]]'
 ```
 
-and verify the hook is back on the repo (`gh api repos/<owner>/<repo>/hooks`).
-A GitHub-side repo RENAME is NOT harmless, and the note that used to sit
-here saying so was wrong (paid for at the btap-gems → btap rename,
-2026-08-30). The GitHub hook does survive — `gh api repos/<owner>/<repo>/hooks`
-still lists it — but CodeBuild matches the incoming event against the
-project's SOURCE URL, which still names the old repo, so every job queues
-forever with no error anywhere. Symptom: `gh run list` shows runs stuck at
-`queued` while `lint` (a bare GitHub runner) passes. After a rename, update
-the project source AND re-create the webhook, in that order.
+and verify the hook is on the repo (`gh api repos/<owner>/<repo>/hooks`).
 
-On a PUBLIC repo none of this is needed: GitHub-hosted minutes are free, so
-deleting the `CI_RUNNER` variable reverts every job to `ubuntu-latest`
-(`gh variable delete CI_RUNNER`) — which is what this repo does since it
-went public.
+A GitHub-side repo RENAME is NOT harmless. The GitHub hook survives, but
+CodeBuild matches the incoming event against the project's SOURCE URL, which
+still names the old repo, so every job queues forever with no error anywhere.
+Symptom: `gh run list` shows runs stuck at `queued` while `lint` (a bare GitHub
+runner) passes. After a rename, update the project source AND re-create the
+webhook, in that order. Paid for at the openstudio-necb-gems → btap-gems and
+btap-gems → btap (2026-08-30) renames; the second was only repaired on
+2026-09-14, when the source was repointed to `canmet-energy/btap`, the project
+moved to `BUILD_GENERAL1_2XLARGE`, and the webhook was re-created.
 
-## What runs where afterwards
+## What runs where
 
-| job | runner | GitHub minutes |
-|---|---|---|
-| lint (every PR push) | GitHub bare runner | ~20 s |
-| python + verify (main / dispatch) | CodeBuild | **0** |
-| parity (dispatch) | CodeBuild | **0** |
+| job | when | runner with `CI_RUNNER=necb-ci` | environment |
+|---|---|---|---|
+| lint | every push and PR | GitHub-hosted | bare |
+| python | every push and PR | CodeBuild 2XLARGE | bare (installs the wheel) |
+| verify | main/develop push, dispatch | CodeBuild 2XLARGE | CI image |
+| parity | dispatch | CodeBuild 2XLARGE | CI image |
+| parity-scenarios | dispatch | CodeBuild 2XLARGE | CI image |
 
-AWS cost is per-minute with zero idle — order of $0.25–0.50 per full run on
-`BUILD_GENERAL1_LARGE` (verify against current ca-central-1 pricing). The
-8-vCPU instance is useful to pytest-xdist in the Python and verify jobs.
+AWS cost is per build-minute with zero idle. 2XLARGE is the most expensive
+on-demand Linux size per minute; check current ca-central-1 pricing. The jobs
+are short, and each job is one build.
 
-## Phase 2 — faster image pulls
+## The CI image
 
-`setup.sh` mirrors `nrel/openstudio:3.11.0` into ECR (same region). Point the
-workflow's `container:` at the ECR URI it prints to cut the multi-GB Docker Hub
-pull to a same-region fetch, and to stop depending on Docker Hub rate limits.
-The mirror is optional; CI continues to work directly from Docker Hub without it.
+`infra/ci-image/Dockerfile` is `nrel/openstudio:3.11.0` plus what the container
+jobs used to install on every run (apt `python3-venv librsvg2-bin`, a verify
+venv with pytest, pytest-xdist and the thermal-bridging stack, and a plain
+pytest venv for parity). `.github/workflows/ci-image.yml` publishes it to
+`ghcr.io/canmet-energy/btap-ci:<openstudio>-<sha256(Dockerfile)[:12]>` on a
+GitHub-hosted runner whenever the Dockerfile changes on any branch, and never
+overwrites a tag. `test.yml` pins that exact tag, and
+`python/tests/test_ci_image_pin.py` fails when the two disagree — so edit the
+Dockerfile, push, wait for `ci-image`, then move the tag in `test.yml`.
+
+The jobs pull it with the workflow's own `GITHUB_TOKEN` (`packages: read`),
+from both runner kinds. The ECR mirror `setup.sh` creates
+(`nrel-openstudio:3.11.0`) predates the CI image and is not used by the
+workflow.

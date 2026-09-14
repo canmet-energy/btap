@@ -90,10 +90,9 @@ jobs:
   # linting, the installable wheel, and the engine-free frozen scenarios. The
   # EnergyPlus-dependent tests skip here; verify supplies the full runtime.
   python:
-    # Same AWS switch as the container jobs. This job is no longer the ~40 s
-    # it was at M1: the wheel gate, ruff and the full suite put it near six
-    # minutes, and on a private repo those are BILLED GitHub minutes. With
-    # vars.CI_RUNNER set it runs on CodeBuild instead; unset reverts to
+    # Same runner switch as the container jobs. With vars.CI_RUNNER set this
+    # job runs on the 72-vCPU CodeBuild runner (infra/aws-ci/README.md), where
+    # `pytest -n auto` spreads the suite across every core; unset reverts to
     # GitHub-hosted with no workflow edit. No `container:` here on purpose —
     # the point of this job is a bare environment that installs the wheel.
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
@@ -148,13 +147,23 @@ jobs:
         working-directory: python
         run: python3 scripts/wheel_smoke.py
 
-  # Full Python rule verification in the OpenStudio image. EnergyPlus, the SDK,
-  # rasterizer, generated sample corpus, and thermal-bridging dependencies are
-  # all required here so dependency skips cannot pass vacuously.
+  # Full Python rule verification in the CI image (infra/ci-image: the nrel
+  # OpenStudio 3.11.0 image plus the test dependencies, so nothing is
+  # installed per run). EnergyPlus, the SDK, rasterizer, generated sample
+  # corpus, and thermal-bridging dependencies are all required here so
+  # dependency skips cannot pass vacuously.
   verify:
     if: github.event_name != 'pull_request'
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
-    container: nrel/openstudio:3.11.0
+    permissions:
+      contents: read
+      packages: read
+    # The tag is content-addressed; test_ci_image_pin.py keeps it current.
+    container:
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       # The container runs as root while the workspace belongs to the runner
@@ -171,8 +180,9 @@ jobs:
       # bindings at /usr/local/openstudio-3.11.0/Python (identical native lib
       # loaded by the image), and the bundled EnergyPlus is the engine.
       # Parallel via pytest-xdist (worker processes; the E+-touching suites
-      # dominate serial wall time ~10x). The venv exists only to carry
-      # pytest — the SDK still comes from the image via PYTHONPATH, so both
+      # dominate serial wall time ~10x). The image's venv
+      # (/opt/btap-ci/venv) carries pytest and the thermal-bridging stack
+      # only — the SDK still comes from the image via PYTHONPATH, so both
       # languages run the identical native lib. Falls back loudly, never
       # silently: every dependency is REQUIRED.
       # The corpus samples are DERIVED artifacts (never committed). The
@@ -183,52 +193,31 @@ jobs:
         run: |
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
             python3 python/scripts/generate_samples.py python/tests/generated/samples
-      # Install only the Python thermal-bridging stack. The legacy Ruby bundle
-      # is isolated to the parity job where the oracle still needs it.
-      - name: Install Python test and thermal-bridging dependencies
-        working-directory: python
-        run: |
-          # librsvg2-bin: the floor-plan raster test needs an SVG rasterizer
-          # on PATH; supplied here (M8) so it RUNS instead of skipping, and
-          # BTAP_RASTERIZER_REQUIRED below keeps it from ever going vacuous.
-          apt-get update -qq && apt-get install -y -qq python3-venv librsvg2-bin > /dev/null
-          python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q pytest pytest-xdist
-          # py-tbd itself with --no-deps: its openstudio requirement would
-          # pull the PyPI wheel into the venv and SHADOW the image SDK this
-          # job's premise is built on (venv site-packages beat PYTHONPATH).
-          # Every other dep is pure Python; the py-topolys SHA mirrors the
-          # pin inside py-tbd's own pyproject.
-          .ci-venv/bin/pip install -q "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" \
-            "py-topolys==0.1.0"
-          .ci-venv/bin/pip install -q --no-deps "canmet-tbd==3.5.2"
+      # The thermal-bridging stack and the rasterizer (librsvg2-bin) are baked
+      # into the CI image. The legacy Ruby bundle is isolated to the parity job
+      # where the oracle still needs it.
       - name: Python NECB rule verification
         run: |
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
-          BTAP_PYTHON="$PWD/python/.ci-venv/bin/python" rake necb:verify
-      - name: Python suites, everything required
+          BTAP_PYTHON=/opt/btap-ci/venv/bin/python rake necb:verify
+      - name: Python suites and verify-lane scenarios, everything required
         working-directory: python
         run: |
-          # (.ci-venv was built in the tbd install step above — pytest,
-          # pytest-xdist and the pinned py-tbd already live in it.)
           # FULL_MATRIX=1: the D-58 reference-selection matrix defaults to a
           # 22-system subset for PR speed. The M5 acceptance claim is about
           # all 97, so the claim is enforced HERE rather than resting on a
           # manual run someone did once.
+          # The verify-lane frozen scenarios (the adjudicated R4 behaviour
+          # after the live cross-language drivers retired) ride this parallel
+          # run instead of a serial step after it. The engine-free python lane
+          # is NOT repeated here: it was the longest single test in this run,
+          # and the python job already runs it with its scenarios required.
           PYTHONPATH=/usr/local/openstudio-3.11.0/Python \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
           BTAP_RASTERIZER_REQUIRED=1 BTAP_SAMPLES_REQUIRED=1 FULL_MATRIX=1 \
-            .ci-venv/bin/pytest -n auto -q tests/
-      # The verify-lane frozen scenarios preserve the adjudicated R4 behavior
-      # after retirement of the live cross-language product drivers.
-      - name: Frozen scenarios (verify lane)
-        working-directory: python
-        run: |
-          PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 \
-            .ci-venv/bin/pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
+            /opt/btap-ci/venv/bin/pytest -n auto -q tests/
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
@@ -245,7 +234,14 @@ jobs:
   parity:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
-    container: nrel/openstudio:3.11.0
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     env:
       LEGACY_PIN_REQUIRED: '1'
       BUNDLE_GEMFILE: ${{ github.workspace }}/legacy_pin/Gemfile
@@ -266,15 +262,14 @@ jobs:
       - name: Bundle the oracle
         run: bundle install
       # Whole-building Python pipeline against the surviving pinned oracle.
+      # /opt/btap-ci/pytest is the CI image's plain-pytest venv: no
+      # thermal-bridging stack, exactly what this gate always ran with.
       - name: Pinned NECB2020 SmallOffice whole-building gate (Python)
         run: |
-          apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
-          python3 -m venv python/.archetype-venv
-          python/.archetype-venv/bin/pip install -q pytest
           PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python" \
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           LEGACY_PIN_REQUIRED=1 \
-            python/.archetype-venv/bin/python -m pytest -q \
+            /opt/btap-ci/pytest/bin/python -m pytest -q \
               python/tests/necb/test_legacy_archetype_e2e.py
       # LIVE Leg C (D-80 R1): Python vs the LIVE pinned oracle across ALL
       # golden groups — python-prep / ruby-probe, the committed-goldens
@@ -284,22 +279,9 @@ jobs:
       # whether frozen or, as here, live.
       - name: Live Leg C (python-prep / ruby-probe, all golden groups)
         run: |
-          python3 -m venv python/.parity-venv
-          python/.parity-venv/bin/pip install -q pytest
           export PYTHONPATH="$PWD/python:/usr/local/openstudio-3.11.0/Python"
-          BTAP_PYTHON="$PWD/python/.parity-venv/bin/python" \
+          BTAP_PYTHON=/opt/btap-ci/pytest/bin/python \
             bash verification/live_leg_c.sh /tmp/live-leg-c
-      # The frozen annual scenarios are the parity job's pipeline gate.
-      # test_ci_wires_every_lane pins each declared lane to a CI executor.
-      - name: Frozen scenarios (parity lane)
-        working-directory: python
-        env:
-          BUNDLE_GEMFILE: ''
-        run: |
-          PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
-          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
-          BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
-            .parity-venv/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
       # Leg-C golden export (D-78/D-80): the pin bundle lives HERE, so this
       # is how goldens are (re)generated — dispatch with export_goldens=true,
       # download the artifact into verification/oracle/goldens/, commit. Run
@@ -321,3 +303,32 @@ jobs:
           path: verification/oracle/goldens/
           retention-days: 7
           if-no-files-found: error
+
+  # The frozen annual scenarios (parity lane) are the pipeline gate of a
+  # dispatch run. They are their own job so they run BESIDE the oracle gates
+  # above instead of after them; they are Python-only and need no oracle
+  # bundle. test_ci_wires_every_lane pins each declared lane to a CI executor.
+  parity-scenarios:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      # See the same step in verify: git refuses a workspace owned by another
+      # UID, and the manifest-ancestry check needs git.
+      - name: Trust the workspace (container UID != workspace owner)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Frozen scenarios (parity lane)
+        working-directory: python
+        run: |
+          PYTHONPATH="/usr/local/openstudio-3.11.0/Python" \
+          BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
+          BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
+            /opt/btap-ci/pytest/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider

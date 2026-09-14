@@ -167,16 +167,25 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 
 ## CI
 
-`.github/workflows/test.yml` has four jobs:
+`.github/workflows/test.yml` has five jobs:
 
 - **`lint`**: stdlib-oriented Python checks, coverage pointers/doc drift, and
   the decisions registry.
 - **`python`**: import contracts, Ruff, the Python suite, and installed-wheel
   smoke on a bare runner.
 - **`verify`**: the full SDK/EnergyPlus Python suite, rule verification, and
-  sizing-lane frozen scenarios in `nrel/openstudio:3.11.0`.
-- **`parity`**: dispatch-only live-oracle checks, whole-building archetype gate,
-  and annual frozen scenarios. It is also where oracle goldens are exported.
+  sizing-lane frozen scenarios, in one parallel pytest run.
+- **`parity`**: dispatch-only live-oracle checks and the whole-building
+  archetype gate. It is also where oracle goldens are exported.
+- **`parity-scenarios`**: dispatch-only annual frozen scenarios, beside `parity`.
+
+`verify`, `parity` and `parity-scenarios` run in the CI image
+`ghcr.io/canmet-energy/btap-ci` (`infra/ci-image/Dockerfile`: the OpenStudio
+3.11.0 image plus the test dependencies). Its tag is content-addressed and
+`python/tests/test_ci_image_pin.py` fails until `test.yml` names the tag of the
+current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
+but `lint` runs on a 72-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
+deleting the variable falls back to `ubuntu-latest`.
 
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
 moves. Documentation-only pushes are path-ignored by the workflow, so run local
