@@ -136,8 +136,9 @@ class TestPartLoadTablesInTheEngine(unittest.TestCase):
     def _gas_per_heat(self, tag, load_w, factory, capacity_w=CAPACITY_W):
         """(gas/heat, actual PLR). The PLR is taken from the heat the boiler
         actually delivered (the pump adds ~2 W to the loop, which at a 100 W
-        load is 2 % of the part-load ratio), not from the nominal load."""
-        """Forward-translate and run the engine directly, sizing off: nothing
+        load is 2 % of the part-load ratio), not from the nominal load.
+
+        Forward-translate and run the engine directly, sizing off: nothing
         here is autosized and a zone-less loop has no design environments for
         the plant-sizing pass btap.simulation.runner always requests."""
         model, _ = boiler_model(load_w, factory, capacity_w)

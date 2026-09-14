@@ -2630,3 +2630,81 @@ passes on the regenerated page); lanes python 5 passed (32 subtests),
 verify 5 (4), parity 5 (5); lint-imports, Ruff, orphan keys, decisions
 TOC, edition delta, vintage match, provenance hashes, `git diff --check`
 clean. Ready for Sol.
+
+### Step 3 — Sol's fourth pass (2026-09-14): request changes, all fixed
+
+Sol accepted the zero-node implementation and the numeric R-O results (his
+run: focused 55 passed; full suite 1090 / 1 skipped / 115 subtests; lanes
+python 5 (32), verify 5 (4), parity 5 (5); gates clean) and requested
+changes. Every finding was reproduced in the code before acting; fixes in
+`38d1a47`, D-89 sixth amendment.
+- **P1 — district steam bypassed D-89's selection path.** `classify` (both
+  `_plant_facts` and `_external_source_loop`) now reads
+  `plant_loops.DISTRICT_HEATING_TYPES` by IDD type, steam included; costing
+  warns for steam objects. The Code (MCP): 8.4.4.6.(1) / 8.4.5.6.(1) name
+  no medium; the oracle counts `OS_DistrictHeating_Steam` as purchased
+  (`Standards.Model.rb:1036`, `Standards.PlantLoop.rb:1388`). `runner.py`
+  needed no code change: `SqlFile_Impl::districtHeatingTotalEndUses` returns
+  water + steam (OpenStudio v3.11.0 source) and is asked first; a comment and
+  an SDK-free test pin that. New tests: steam is purchased heating and an
+  external HP source (classify), a steam proposed builds modulating reference
+  boilers and fires the 8.4.4.6.(1) decision (reference), the steam costing
+  warning.
+- **P2 — the engine test did not guard the zero node.** Now 20 MW at 100 W:
+  PLR 4.8718e-6, asserted below the first positive node (1e-5); gas/heat
+  18848.81 against the Code's 18839.05 (+0.052 %, tolerance 0.5 %). Negative
+  control with the node removed: 9182.74 (−51.26 %), exactly the held
+  first-node value.
+- **P2 — D-89 evidence against the data.** The body's grids, the fifth
+  amendment's items (1)–(3) and the registry summary now state the shipped
+  tables; `_curve_evidence` branches on the FHeatPLC entry's form, so NECB
+  2020's printed-point table says the Code publishes nothing below PLR 0.1
+  instead of a standby bound.
+- **P2 — disposition.** 8.4.6.1–8.4.6.3 rewritten to D-89 and the Python probe
+  in edition-neutral wording (probe run 2026-09-14: boiler and furnace tables
+  0.00 % over PLR 0.25–1.0; DX 0.01 / 0.00 / 2.02 %; chillers 0.00 %; ASHP
+  0.00 / 0.01 / 1.83 %; SWH 0.98 %); the same retired Ruby-probe citation
+  also left 8.4.6.4, 8.4.6.5 and 8.4.6.7–8.4.6.9. The reviewer fields say the
+  rationale was revised and is pending re-review. Coverage page regenerated.
+- **P2 — diagnostics.** A class already reported as a data error no longer
+  draws a second "no representation" warning; the loader's unknown-form and
+  NOT-adopted warnings carry `ruling='D-89'`.
+- **P3.** CLAUDE.md and DEVELOPERS.md: 41 scenarios, ten Python-only from
+  their first freeze; `unittest.main()` moved to the end of
+  `test_hvac_part_load_curves.py`.
+
+**R-O after the fourth-pass items (2026-09-14, clean tree at `38d1a47`,
+baselines `d8b656b`).** 42 files: 26 scenarios and the manifest. No
+`report.json` moved. `audit.json` / `audit.txt` in 8 scenarios: `ruling`
+D-89 on the 32 DF-4 warnings; `corpus-sizing-13` and `corpus-annual-13`: the
+2020 modulating evidence (two entries each, one per efficiency pass);
+`stdout.txt` in 25 scenarios: 845 `[openstudio.model.DistrictHeating]
+Deprecated at 3.7.0` lines removed, printed until now by the classifier's
+deprecated cast — the one category beyond the "audit re-freeze" Sol
+anticipated, of the same kind as `6d8de96`'s; manifest: `provenance.commit`
+and the moved hashes only.
+
+**Verification (2026-09-14).** Full suite on the fix tree (`38d1a47`'s
+content), frozen module excluded because its baselines were not yet
+re-frozen: 1097 passed, 1 skipped, 83 subtests. Engine regression with
+`BTAP_ENGINE_REQUIRED=1`: 4 passed. Lanes on `d8b656b`: python 5 passed
+(32 subtests), verify 5 (4), parity 5 (5). Ruff, import contracts (4 kept),
+orphan keys, decisions TOC and registry tests, edition delta, vintage match,
+Python curve probe (status OK, 0 failures) and `git diff --check` clean.
+
+**Independent review (Fable, 2026-09-14): approve.** It re-ran Sol's
+end-to-end probe with steam (purchased heating true; two modulating
+reference boilers; five 8.4.4.6.(1) decisions; no deprecation output),
+reasoned that every new test fails on the pre-fix code, confirmed the
+re-freeze has no unexplained change and that the coverage page regenerates
+byte-identical. Six P3s, four fixed in the commit that carries this entry: the sixth amendment
+(and registry summary) named disposition 8.4.6.1–8.4.6.5 where the commit
+changed 8.4.6.1–8.4.6.5 and 8.4.6.7–8.4.6.9; 8.4.6.9's rewritten rationale
+now carries the "pending re-review" note; the runner test's docstring says
+the SDK arithmetic was verified from source, not by the test; the untagged
+catalogue-miss warning is stated as deliberate; plus a pre-existing double
+docstring in the engine test. Left: no catalogue icon for
+`OS_DistrictHeating_Steam` (cosmetic, `catalog_icons.py`); purchased service
+water heating (8.4.4.6.(3)) remains the declared `host_scope` gap for any
+medium. None of the follow-ups reaches a frozen output (engine and runner
+tests 7 passed; Ruff clean; coverage page moved one row). Ready for Sol.

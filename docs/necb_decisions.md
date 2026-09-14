@@ -5354,11 +5354,17 @@ measures the held first-node value instead, more than 25 % away. (3)
 every boiler table as starting at PLR 0; NECB 2020's modulating table keeps
 its printed points from 0.10, and its audit evidence no longer states an
 FHeatPLC(0) standby bound for a table the Code publishes only at those
-points. (4) The Section 8.4 disposition for 8.4.6.1–8.4.6.5 (2020:
-8.4.5.1–8.4.5.5) is rewritten from the retired Ruby probe and the legacy
+points. (4) The Section 8.4 disposition for 8.4.6.1–8.4.6.3 (2020:
+8.4.5.1–8.4.5.3) is rewritten from the retired Ruby probe and the legacy
 cubic's 1.88 % to these tables and the Python probe's comparison, in wording
-that holds for both editions. (5) An invalid row class raises one data-error
+that holds for both editions; 8.4.6.4, 8.4.6.5 and 8.4.6.7–8.4.6.9 cite the
+Python probe's re-run in place of the Ruby probe, and 8.4.6.9's sentence is
+re-scoped to both editions. Entries whose rationale was rewritten say so
+beside the original sign-off and await re-review; entries that only gained a
+re-probe sentence keep it. (5) An invalid row class raises one data-error
 warning, not a second "no representation" warning, and the loader's DF-4
-warnings cite `ruling='D-89'`. (6) The live scenario counts read 41, ten of
+warnings (a same-named object not adopted, an unknown curve form) cite
+`ruling='D-89'`; a name missing from the catalogue stays untagged, being a
+data miss rather than a DF-4 validation. (6) The live scenario counts read 41, ten of
 them Python-only from their first freeze. R-O re-frozen on the clean tree;
 attribution in the plan log.

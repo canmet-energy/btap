@@ -5,7 +5,9 @@ From OpenStudio 3.7 ``SqlFile.districtHeatingTotalEndUses`` is water PLUS steam
 ``addTwoOptionalDoubles(districtHeatingWaterTotalEndUses(),
 districtHeatingSteamTotalEndUses())``), so ``runner.energy_results`` must ask
 for it FIRST; the water-only accessor is only the fallback for an SDK without
-the combined one. SDK-free: the accessors are faked.
+the combined one. SDK-free: the accessors are faked, so these tests pin the
+ORDER in which runner asks; the SDK's water-plus-steam arithmetic itself was
+verified by reading the OpenStudio 3.11.0 source, not by this file.
 """
 
 import unittest

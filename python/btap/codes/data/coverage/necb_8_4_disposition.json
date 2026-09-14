@@ -131,7 +131,7 @@
         "shw"
       ],
       "rationale": "VERIFIED EQUIVALENT: the water-heater part-load factor curve tracks the service water heater FHeatPLC row (Sentence (2) of this article in both editions) within 0.98 % over PLR 0.25-1.0 — re-probed 2026-09-14 by python/scripts/necb_8_4_6_curve_probe.py on the as-applied model curve.",
-      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08)"
+      "reviewer": "phylroy — signed off 2026-07-23 (batch review, probe-evidenced, docs/necb_decisions.md D-08); rationale revised 2026-09-14 for D-89 (Sol's fourth pass), pending re-review"
     }
   }
 }
