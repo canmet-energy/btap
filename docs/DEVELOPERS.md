@@ -203,7 +203,7 @@ declared. Run them whenever the oracle pin changes.
 `ghcr.io/canmet-energy/btap-ci`, built from `infra/ci-image/Dockerfile` by the
 `ci-image` workflow under a content-addressed tag; `test_ci_image_pin.py` keeps
 `test.yml` on the current one. With the repository variable
-`CI_RUNNER=necb-ci`, every job but `lint` runs on a 72-vCPU AWS CodeBuild runner
+`CI_RUNNER=necb-ci`, every job but `lint` runs on a 36-vCPU AWS CodeBuild runner
 ([infra/aws-ci/README.md](../infra/aws-ci/README.md)).
 
 ## D-84 attestation

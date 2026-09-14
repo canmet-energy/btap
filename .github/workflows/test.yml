@@ -91,7 +91,7 @@ jobs:
   # EnergyPlus-dependent tests skip here; verify supplies the full runtime.
   python:
     # Same runner switch as the container jobs. With vars.CI_RUNNER set this
-    # job runs on the 72-vCPU CodeBuild runner (infra/aws-ci/README.md), where
+    # job runs on the 36-vCPU CodeBuild runner (infra/aws-ci/README.md), where
     # `pytest -n auto` spreads the suite across every core; unset reverts to
     # GitHub-hosted with no workflow edit. No `container:` here on purpose —
     # the point of this job is a bare environment that installs the wheel.

@@ -13,7 +13,10 @@ set -euo pipefail
 REGION="${AWS_REGION:-ca-central-1}"
 PROJECT="necb-ci"
 REPO_URL="https://github.com/canmet-energy/btap"
-COMPUTE="BUILD_GENERAL1_2XLARGE"   # 72 vCPU / 144 GiB: pytest-xdist uses all of it
+# 36 vCPU / 72 GiB. Not 2XLARGE: measured 2026-09-14, an on-demand 2XLARGE
+# build spends ~175 s PROVISIONING (its image is not cached) against 8-9 s for
+# XLARGE, which costs more than its extra cores save (README).
+COMPUTE="BUILD_GENERAL1_XLARGE"
 ECR_REPO="nrel-openstudio"
 IMAGE_TAG="3.11.0"
 

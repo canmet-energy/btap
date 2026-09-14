@@ -8,7 +8,7 @@ does: the Actions UI, checks and PR gating stay on GitHub.
 
 **Why it is on (2026-09-14): speed.** The repository is public, so
 GitHub-hosted minutes are free, but a standard public runner has 4 vCPUs. The
-project runs on `BUILD_GENERAL1_2XLARGE` (72 vCPUs, 144 GiB), and the
+project runs on `BUILD_GENERAL1_XLARGE` (36 vCPUs, 72 GiB), and the
 pytest-xdist suites in `python` and `verify` spread across all of it. GitHub
 bills nothing for jobs on CodeBuild-hosted runners; the build minutes land on
 the AWS account (`btap-dev`, ca-central-1) instead.
@@ -51,22 +51,39 @@ Symptom: `gh run list` shows runs stuck at `queued` while `lint` (a bare GitHub
 runner) passes. After a rename, update the project source AND re-create the
 webhook, in that order. Paid for at the openstudio-necb-gems → btap-gems and
 btap-gems → btap (2026-08-30) renames; the second was only repaired on
-2026-09-14, when the source was repointed to `canmet-energy/btap`, the project
-moved to `BUILD_GENERAL1_2XLARGE`, and the webhook was re-created.
+2026-09-14, when the source was repointed to `canmet-energy/btap` and the
+webhook was re-created. (Changing only the compute type does not detach the
+webhook.)
 
 ## What runs where
 
 | job | when | runner with `CI_RUNNER=necb-ci` | environment |
 |---|---|---|---|
 | lint | every push and PR | GitHub-hosted | bare |
-| python | every push and PR | CodeBuild 2XLARGE | bare (installs the wheel) |
-| verify | main/develop push, dispatch | CodeBuild 2XLARGE | CI image |
-| parity | dispatch | CodeBuild 2XLARGE | CI image |
-| parity-scenarios | dispatch | CodeBuild 2XLARGE | CI image |
+| python | every push and PR | CodeBuild XLARGE | bare (installs the wheel) |
+| verify | main/develop push, dispatch | CodeBuild XLARGE | CI image |
+| parity | dispatch | CodeBuild XLARGE | CI image |
+| parity-scenarios | dispatch | CodeBuild XLARGE | CI image |
 
-AWS cost is per build-minute with zero idle. 2XLARGE is the most expensive
-on-demand Linux size per minute; check current ca-central-1 pricing. The jobs
-are short, and each job is one build.
+AWS cost is per build-minute with zero idle; each job is one build, billed
+from submission (queue time included). Check current ca-central-1 pricing.
+A reserved-capacity fleet would remove the queue wait but is billed while
+idle, so it is deliberately not used.
+
+## Why XLARGE, not 2XLARGE
+
+Measured on 2026-09-14 with the same commit, dispatching the whole workflow:
+
+| size | provisioning per build | CodeBuild queue per build | wall clock | verify suite |
+|---|---|---|---|---|
+| `BUILD_GENERAL1_2XLARGE` (72 vCPU) | 175–176 s | 90–149 s | 12 min 11 s | 320 s |
+| `BUILD_GENERAL1_XLARGE` (36 vCPU) | 8–9 s | 0–150 s | 10 min 24 s | 345 s |
+
+The 2XLARGE image is not in CodeBuild's cache (its compute-type table marks
+cached images for SMALL through XLARGE only), so every build pulls it before
+the runner starts. The extra 36 cores save 25 s of verify's suite, which is
+bounded by a few long serial tests, not by core count. What remains is
+CodeBuild's own queue, which varies from run to run.
 
 ## The CI image
 

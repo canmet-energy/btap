@@ -184,7 +184,7 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 3.11.0 image plus the test dependencies). Its tag is content-addressed and
 `python/tests/test_ci_image_pin.py` fails until `test.yml` names the tag of the
 current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
-but `lint` runs on a 72-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
+but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
 deleting the variable falls back to `ubuntu-latest`.
 
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
