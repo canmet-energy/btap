@@ -14,14 +14,15 @@ RUN apt-get update -qq \
  && apt-get install -y -qq python3-venv librsvg2-bin > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
-# verify: the test runner and the pure-Python thermal-bridging stack. The SDK
+# verify: the test runner, pytest-cov (verify measures line coverage of btap),
+# and the pure-Python thermal-bridging stack. The SDK
 # still comes from the image via PYTHONPATH. canmet-tbd goes in with --no-deps
 # because its openstudio requirement would pull the PyPI wheel into the venv
 # and SHADOW the image SDK (venv site-packages beat PYTHONPATH). Every other
 # dependency is pure Python; the py-topolys pin mirrors the one inside
 # canmet-tbd's own pyproject.
 RUN python3 -m venv /opt/btap-ci/venv \
- && /opt/btap-ci/venv/bin/pip install -q --no-cache-dir pytest pytest-xdist \
+ && /opt/btap-ci/venv/bin/pip install -q --no-cache-dir pytest pytest-xdist pytest-cov \
       "oslg==0.4.0" "osut==0.9.1" "jsonschema>=4" "py-topolys==0.1.0" \
  && /opt/btap-ci/venv/bin/pip install -q --no-cache-dir --no-deps "canmet-tbd==3.5.2"
 

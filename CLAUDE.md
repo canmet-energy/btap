@@ -63,7 +63,7 @@ unless a moved link itself is wrong.
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build coverage
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build coverage pytest-cov
 .venv/bin/pytest -n auto -q tests/
 .venv/bin/lint-imports
 .venv/bin/ruff check .
@@ -174,7 +174,10 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 - **`python`**: import contracts, Ruff, the Python suite, and installed-wheel
   smoke on a bare runner.
 - **`verify`**: the full SDK/EnergyPlus Python suite, rule verification, and
-  sizing-lane frozen scenarios, in one parallel pytest run.
+  sizing-lane frozen scenarios, in one parallel pytest run. It measures line
+  coverage of `btap` (summary on the job page, HTML/XML artifact) and fails
+  below `--cov-fail-under=84`; the baseline is in
+  `docs/necb_rule_verification.md`.
 - **`parity`**: dispatch-only live-oracle checks and the whole-building
   archetype gate. It is also where oracle goldens are exported.
 - **`parity-scenarios`**: dispatch-only annual frozen scenarios, beside `parity`.

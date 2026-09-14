@@ -190,4 +190,57 @@ Command:
 | `tiers.py` | 67 | 2 | 97% |
 | `report/checklist.py` | 76 | 1 | 99% |
 | `hvac/__init__.py`, `__init__.py`, `lighting/exterior.py`, `lighting/reference.py`, `loads/space_types.py`, `report/__init__.py`, `report/svg.py`, `shw/reference.py` | — | 0 | 100% |
+
+The module paths above are the pre-Stage-1 layout (`btap/codes/necb/…` today).
+
+## Line-coverage baseline — 2026-09-14 (all of `btap`; CI floor)
+
+Measured locally on `main`'s product code (before D-89 merged), over the full
+suite less `test_frozen_scenarios.py` (its scenarios run in subprocesses,
+which coverage does not follow): 1056 passed in 4 min 7 s on 8 xdist workers
+with pytest-cov 7.1.0 / coverage 7.16.0. Unlike 2026-09-07, this covers the
+whole distribution, not only `btap/codes`.
+
+Command:
+
+    cd python && BTAP_SDK_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
+      .venv/bin/pytest -n 8 -q -p no:cacheprovider --cov=btap --cov-report=term:skip-covered \
+        --ignore=tests/necb/test_frozen_scenarios.py tests/
+
+**`btap` overall: 85.3% — 17,574 statements, 2,582 missed.**
+
+| package | stmts | miss | cov |
+|---|---:|---:|---:|
+| `btap.audit` | 90 | 0 | 100.0% |
+| `btap` (top-level modules) | 209 | 15 | 92.8% |
+| `btap.codes` | 7,723 | 901 | 88.3% |
+| `btap.costing` | 2,215 | 315 | 85.8% |
+| `btap.modeling` | 6,827 | 1,251 | 81.7% |
+| `btap.simulation` | 510 | 100 | 80.4% |
+
+`btap.codes` moved from 89% (7,362 statements, 776 missed) to 88.3% (7,723,
+901 missed) since 2026-09-07: 361 more statements, 125 more of them unrun.
+
+Lowest-covered modules:
+
+| module | stmts | miss | cov |
+|---|---:|---:|---:|
+| `modeling/geometry/render_worker.py` | 36 | 36 | 0% — runs only as a child process (glTF export isolation), so unmeasurable here |
+| `modeling/geometry/bar.py` | 881 | 490 | 44% |
+| `codes/coverage.py` | 260 | 129 | 50% |
+| `modeling/geometry/plan.py` | 142 | 43 | 70% |
+| `simulation/engine.py` | 150 | 44 | 71% |
+| `modeling/envelope/constructions.py` | 158 | 46 | 71% |
+| `costing/envelope/report.py` | 37 | 10 | 73% |
+| `modeling/hvac/systems/vav_reheat.py` | 101 | 27 | 73% |
+| `costing/envelope/assemblies.py` | 42 | 11 | 74% |
+| `codes/necb/lighting/storage_garage/schedules.py` | 140 | 32 | 77% |
+| `modeling/geometry/wizards.py` | 1,374 | 310 | 77% |
+| `codes/necb/hvac/checker.py` | 125 | 27 | 78% |
+
+**CI.** The `verify` job measures the same (`--cov=btap`) in the full runtime —
+the sample corpus, `FULL_MATRIX=1` and the rasterizer add tests a local run
+skips — publishes a per-module summary and an HTML/XML artifact, and fails
+below `--cov-fail-under=84`, set 1.3 points under this baseline. Raise the
+floor as coverage rises; never lower it to make a change pass.
 | **TOTAL** | **7362** | **776** | **89%** |

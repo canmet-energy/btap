@@ -101,3 +101,6 @@ packaging/pypi/energyplus/dist/
 # Claude Code agent worktrees and coverage data files
 .claude/worktrees/
 .coverage
+.coverage.*
+python/htmlcov/
+python/coverage.xml

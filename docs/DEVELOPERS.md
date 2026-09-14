@@ -56,7 +56,7 @@ bash .devcontainer/setup.sh --serena
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist pytest-cov import-linter ruff build
 ```
 
 `[tbd]` installs the exact `canmet-tbd==3.5.2` thermal-bridging line. Do not
@@ -104,6 +104,20 @@ Serial zero-install fallback:
 ```bash
 cd python && python3 -m unittest discover tests
 ```
+
+Line coverage of `btap` (the frozen scenarios run in subprocesses, so they are
+left out as they measure nothing):
+
+```bash
+cd python
+.venv/bin/pytest -n auto -q --cov=btap --cov-report=term:skip-covered \
+  --ignore=tests/necb/test_frozen_scenarios.py tests/
+```
+
+CI's `verify` job measures the same, publishes a per-module summary and an
+HTML report, and fails below its floor (`--cov-fail-under` in
+`.github/workflows/test.yml`). The baselines are recorded in
+[necb_rule_verification.md](necb_rule_verification.md).
 
 Repository checks from the root:
 

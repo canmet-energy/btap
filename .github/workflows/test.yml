@@ -161,7 +161,7 @@ jobs:
       packages: read
     # The tag is content-addressed; test_ci_image_pin.py keeps it current.
     container:
-      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-79dcf13420a0
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -218,7 +218,42 @@ jobs:
           BTAP_SDK_REQUIRED=1 BTAP_ENGINE_REQUIRED=1 BTAP_TBD_REQUIRED=1 \
           BTAP_RASTERIZER_REQUIRED=1 BTAP_SAMPLES_REQUIRED=1 FULL_MATRIX=1 \
           BTAP_SCENARIO_LANES=verify BTAP_SCENARIOS_REQUIRED=1 \
-            /opt/btap-ci/venv/bin/pytest -n auto -q --durations=40 --durations-min=5 tests/
+            /opt/btap-ci/venv/bin/pytest -n auto -q --durations=40 --durations-min=5 \
+              --cov=btap --cov-report=xml:coverage.xml --cov-report=html:htmlcov \
+              --cov-fail-under=84 tests/
+      # Line coverage of btap, measured HERE because this is the only job with
+      # the SDK, EnergyPlus, the sample corpus and the rasterizer all present.
+      # Scenario and CLI runs in subprocesses are not measured. The floor
+      # (--cov-fail-under=84, above) sits below the 2026-09-14 local baseline
+      # of 85.3%; the baseline and its history are in
+      # docs/necb_rule_verification.md. Raise the floor as coverage rises.
+      - name: Coverage summary
+        if: always()
+        working-directory: python
+        run: |
+          if [ ! -f .coverage ]; then
+            echo "no coverage data (the suite did not run)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "### Line coverage of \`btap\`: $(/opt/btap-ci/venv/bin/coverage report --format=total)%"
+            echo
+            echo "<details><summary>Per module (lowest first)</summary>"
+            echo
+            /opt/btap-ci/venv/bin/coverage report --format=markdown --sort=cover --skip-empty
+            echo
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the coverage report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-btap
+          path: |
+            python/htmlcov/
+            python/coverage.xml
+          retention-days: 14
+          if-no-files-found: warn
 
   # The legacy-parity gates, against the PINNED oracle revision.
   #
@@ -239,7 +274,7 @@ jobs:
       contents: read
       packages: read
     container:
-      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-79dcf13420a0
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -316,7 +351,7 @@ jobs:
       contents: read
       packages: read
     container:
-      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-79dcf13420a0
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
