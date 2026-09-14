@@ -5085,18 +5085,21 @@ on all ten rows; the `-COND` curves were referenced by no row.
 `Table:Lookup` in PLR (Linear interpolation, Constant extrapolation, output
 bounds set): exact at every printed point, the literal reading of "values …
 shall be those listed" for Table 8.4.5.2.-B, no fit residual. Grids:
-boiler quadratic classes PLR 0.0001–1.00 on a non-uniform 159-node grid
-(finest below 0.05); the 2020 modulating table at its ten printed points
-0.10–1.00; the atmospheric furnace 0.055–1.00 on 100 nodes (as amended
-below; the first freeze used coarser grids). Each curve row's `implements` block records the
+the boiler classes stated by a quadratic row (non-condensing in both editions,
+2025 modulating) PLR 0–1.00 on a non-uniform 169-node grid with a node at
+PLR 0 (finest below 0.0001); the 2020 modulating table at its ten printed
+points 0.10–1.00 and nothing below them; the atmospheric furnace 0.055–1.00
+on 100 nodes (as amended below; earlier freezes used coarser grids). Each curve row's `implements` block records the
 table, row, transform, grid and `max_error_vs_exact`
 (sampled maxima at PLR step 0.00001: non-condensing boiler 0.1994 % at PLR 0.0014; atmospheric furnace 0.0330 %; the 2020 modulating table exact at its printed points; the 2025 modulating quadratic 0.7905 % at PLR 0.0014), re-derived by a test rather than trusted. Implementation
 choices the Code leaves open, recorded here: interpolation between the ten
 printed points is linear; below the lowest printed point the factor is held
 constant; the furnace grid starts at 5.5 % load, the first 0.005 step above where the exact fraction meets the engine's 0.7 floor (EnergyPlus 25.2 floors a fuel heating coil's part-load fraction at 0.7 in `HeatingCoils::CalcFuelHeatingCoil`, verified in the shipped library, and the atmospheric rational crosses 0.7 at PLR ≈ 0.055); the boiler
-grid's low end reproduces the Code's own standby fuel `a × Fuel_design`,
-and the engine clamps the evaluated ratio at the boiler's minimum part-load
-ratio as it did before. Names: `BOILER-PLF-NONCONDENSING` and
+quadratic tables' node at PLR 0 carries the Code's own equation, standby fuel
+`a × Fuel_design` included, down to zero load; below the 2020 table's lowest
+printed point (PLR 0.10) the Code states nothing and the lowest printed
+factor is held; the engine clamps the evaluated ratio at the boiler's minimum
+part-load ratio as it did before. Names: `BOILER-PLF-NONCONDENSING` and
 `FURNACE-PLF-ATMOSPHERIC` are source-neutral because their content is
 identical in both editions; `BOILER-PLF-MODULATING-necb2020` and
 `-necb2025` are code-qualified because it differs (D-88 as amended). The
@@ -5297,8 +5300,11 @@ verification record the log promised is written out.
 
 **Fifth amendment (2026-09-13, Sol's third pass: verified both rounds;
 five items before merge, all done).** (1) *The zero node.* Each boiler
-table now carries a node at PLR 0 with PLF 0 (169 nodes, with a
-0.00001-step segment below 0.0001). On the first segment the interpolation
+table stated by a quadratic row (non-condensing in both editions, 2025
+modulating) now carries a node at PLR 0 with PLF 0 (169 nodes, with a
+0.00001-step segment below 0.0001); NECB 2020's modulating Table 8.4.5.2.-B
+prints ten points from 0.10 and keeps them, with no zero node (sixth
+amendment). On the first segment the interpolation
 is PLR × PLF(p₁)/p₁, the rational's own limit p/FHeatPLC(0) to first order,
 so the Code equation is represented down to zero load and there is no
 extrapolation region: the residual as PLR → 0 is FHeatPLC(0)/FHeatPLC(p₁) −
@@ -5308,11 +5314,51 @@ and a lower node would only feed the engine values it resets with a
 warning. (2) *An engine regression test.* `test_part_load_engine.py` runs
 EnergyPlus on a one-boiler loop and asserts, from the SQL: a constant 0.005
 curve is used unclamped (no floor); the shipped table gives fuel = heat ÷
-(η × PLF) at PLR 0.20, i.e. Fuel_design × FHeatPLC; and at PLR 0.00005
-the zero node keeps the engine on the equation. (3) *District steam.*
-`DistrictHeatingSteam` counts as a district source. (4) *Exclusive source
+(η × PLF) at PLR 0.20, i.e. Fuel_design × FHeatPLC; and a tiny-load case
+meant to exercise the zero node (it did not; sixth amendment). (3) *District
+steam.* `DistrictHeatingSteam` counts as a district source for plant-loop
+reuse (the compliance classifier followed in the sixth amendment). (4) *Exclusive source
 matching.* A hybrid loop (boilers and a district object on one supply side)
 is adopted by neither a boiler caller nor a district caller. (5) The audit
 evidence and the row texts say what the table now is (a node at PLR 0; no
 "first node" clause for boilers); the furnace wording is unchanged. R-O
 re-frozen on the clean tree.
+
+
+**Sixth amendment (2026-09-14, Sol's fourth pass; request changes, one P1,
+four P2 and one P3, all reproduced in the code and fixed).** (1) *Purchased
+heating in any medium.* The fifth amendment made steam a district source for
+plant-loop reuse only; the compliance classifier (`classify._plant_facts` and
+`_external_source_loop`) still recognised only the DistrictHeating and
+DistrictHeatingWater casts, so a steam-heated proposed had no purchased
+heating and no detected heating energy, and its reference was built electric
+with no modulating boiler. Article 8.4.4.6.(1) (2025: 8.4.5.6.(1)) applies
+"where a primary heating system of the proposed building uses purchased
+energy" and names no medium, and the pinned oracle counts
+`OS_DistrictHeating_Steam` as purchased (`Standards.Model.rb:1036`,
+`Standards.PlantLoop.rb:1388`). Both classifier sites and plant-loop reuse
+now read one IDD-type set, `plant_loops.DISTRICT_HEATING_TYPES`; costing lists
+steam objects with the other unowned district plant; and
+`runner.energy_results` already reported steam, because OpenStudio's
+`districtHeatingTotalEndUses` is water plus steam (`SqlFile_Impl.cpp`,
+v3.11.0) — now stated at the call and pinned by a test. Reading the IDD type
+also retires the deprecated `to_DistrictHeating()` cast, whose SDK
+deprecation line had been printed to stdout once per supply component
+classified. (2) *The engine test reaches the zero node.* The fifth
+amendment's tiny-load case sat at PLR 4.87 × 10⁻⁵, above the first positive
+node (10⁻⁵), and still passed with the zero node removed. It now runs a 20 MW
+boiler at 100 W, asserts the PLR lies inside the zero node's segment, and
+holds the Code equation to 0.5 %; a negative control removes the node and
+measures the held first-node value instead, more than 25 % away. (3)
+*Evidence says what the data is.* The body and the fifth amendment described
+every boiler table as starting at PLR 0; NECB 2020's modulating table keeps
+its printed points from 0.10, and its audit evidence no longer states an
+FHeatPLC(0) standby bound for a table the Code publishes only at those
+points. (4) The Section 8.4 disposition for 8.4.6.1–8.4.6.5 (2020:
+8.4.5.1–8.4.5.5) is rewritten from the retired Ruby probe and the legacy
+cubic's 1.88 % to these tables and the Python probe's comparison, in wording
+that holds for both editions. (5) An invalid row class raises one data-error
+warning, not a second "no representation" warning, and the loader's DF-4
+warnings cite `ruling='D-89'`. (6) The live scenario counts read 41, ten of
+them Python-only from their first freeze. R-O re-frozen on the clean tree;
+attribution in the plan log.

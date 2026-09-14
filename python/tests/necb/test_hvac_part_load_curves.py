@@ -550,10 +550,6 @@ class TestCurveLoaderValidatesBeforeReuse(unittest.TestCase):
                             for w in audit.warnings))
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 @unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
 class TestTheTableCoversEveryPermittedInput(unittest.TestCase):
     """Sol's R-O review, P2 (twice), corrected by the independent review: the
@@ -753,3 +749,64 @@ class TestNullBoundsMeanAbsent(unittest.TestCase):
         self.assertEqual('DXCOOL-REF-CAPFT (D-89)', again.nameString())
         self.assertFalse(again.to_CurveBiquadratic().get().minimumCurveOutput().is_initialized())
         self.assertTrue(any('NOT adopted' in w['action'] for w in audit.warnings))
+
+
+@unittest.skipIf(openstudio is None, 'OpenStudio SDK unavailable')
+class TestDiagnosticsAndEvidenceFollowTheData(unittest.TestCase):
+    """Sol's fourth pass (2026-09-14): one warning per cause, the DF-4 warning
+    cites its ruling, and the 2020 printed-point table claims no standby
+    bound the Code never states."""
+
+    PLANT = {'two_boiler_max_kw': 352.0, 'single_boiler_max_kw': 176.0,
+             'modulating_min_fraction': 0.25}
+
+    def test_an_invalid_row_class_is_one_warning_not_two(self):
+        import copy
+        tables = copy.deepcopy(efficiency.data('2020'))
+        for row in tables['boilers']:
+            row['part_load_curve_class'] = 'banana'
+        model, boiler = boiler_model()
+        audit = AuditLog()
+
+        efficiency._apply_boiler(boiler, tables, self.PLANT, audit)
+
+        self.assertEqual(1, len(audit.warnings), audit.warnings)
+        self.assertIn('data error', audit.warnings[0]['action'])
+        self.assertFalse(boiler.normalizedBoilerEfficiencyCurve().is_initialized())
+        entry = next(e for e in audit.entries if e['action'] == 'boiler efficiency applied')
+        self.assertIsNone(entry['inputs']['part_load_curve_class'])
+
+    def test_a_foreign_curve_collision_cites_D_89(self):
+        model, boiler = boiler_model()
+        squatter = openstudio.model.CurveCubic(model)
+        squatter.setName('BOILER-PLF-NONCONDENSING')
+
+        audit = apply_boiler(boiler)
+
+        warning = next(w for w in audit.warnings if 'NOT adopted' in w['action'])
+        self.assertEqual('D-89', warning['ruling'])
+
+    def test_the_2020_printed_point_table_states_no_standby_bound(self):
+        model, boiler = boiler_model()
+        boiler.additionalProperties().setFeature(efficiency.PART_LOAD_CLASS_FEATURE, 'modulating')
+
+        audit = apply_boiler(boiler, 'necb2020')
+
+        entry = next(e for e in audit.entries if e['action'] == 'boiler efficiency applied')
+        self.assertEqual('BOILER-PLF-MODULATING-necb2020', entry['inputs']['curve'])
+        self.assertNotIn('standby', entry['evidence'])
+        self.assertNotIn('FHeatPLC(0)', entry['evidence'])
+        self.assertIn('publishes no value below PLR 0.1', entry['evidence'])
+
+    def test_the_quadratic_tables_keep_the_zero_node_sentence(self):
+        for edition, klass in (('necb2020', None), ('necb2025', 'modulating')):
+            model, boiler = boiler_model()
+            if klass:
+                boiler.additionalProperties().setFeature(efficiency.PART_LOAD_CLASS_FEATURE, klass)
+            audit = apply_boiler(boiler, edition)
+            entry = next(e for e in audit.entries if e['action'] == 'boiler efficiency applied')
+            self.assertIn('a node at PLR 0 carries the Code equation', entry['evidence'], edition)
+
+
+if __name__ == '__main__':
+    unittest.main()

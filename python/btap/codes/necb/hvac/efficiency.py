@@ -1253,7 +1253,8 @@ def curve(model, tables, name, audit=None, target=None):
         audit.warn('efficiency',
                    f"curve '{name}' declares form {row.get('form')!r}, which this "
                    "loader cannot build — not set",
-                   target=target, inputs={'curve': name, 'form': row.get('form')})
+                   target=target, inputs={'curve': name, 'form': row.get('form')},
+                   ruling='D-89')
         return None
     spec = _CURVE_FORMS[form]
 
@@ -1287,7 +1288,8 @@ def curve(model, tables, name, audit=None, target=None):
                f"{form} catalogue row — it is NOT adopted; the ruleset's own "
                f"curve is applied as '{built.nameString()}'",
                target=target, inputs={'curve': name, 'form': form,
-                                      'applied': built.nameString()})
+                                      'applied': built.nameString()},
+               ruling='D-89')
     return built
 
 
@@ -1395,21 +1397,30 @@ def _curve_evidence(tables, row):
     error_text = ('exact at every value the Code publishes' if not error
                   else f'max relative error {error * 100:.4f} % against the exact '
                        'requirement (sampled at PLR step 0.00001)')
+    first_node = row.get('minimum_independent_variable_1')
+    if first_node == 0:
+        low_end = "; a node at PLR 0 carries the Code equation down to zero load"
+    elif (entry or {}).get('form') == 'points':
+        # A printed-point table (NECB 2020 Table 8.4.5.2.-B) is no equation:
+        # the Code states nothing below its lowest point, so there is no
+        # standby term to bound the hold against.
+        low_end = (f"; the Code publishes no value below PLR {first_node}, and "
+                   f"the table's Constant extrapolation holds the lowest printed "
+                   f"factor there — an implementation choice D-89 records")
+    else:
+        low_end = (f"; below the first node (PLR {first_node}) the table's "
+                   f"Constant extrapolation holds the factor, an under-count "
+                   f"bounded by the Code's standby term FHeatPLC(0) x rated fuel"
+                   + ("; the first node's value lies above the engine's 0.7 floor "
+                      "on the coil part-load fraction, so the engine never clamps"
+                      if implements.get('engine_floor') else ""))
     return (f"Article {article} states FHeatPLC as a fuel-INPUT ratio "
             f"(Table {implements.get('table')}, row "
             f"{implements.get('row')!r}), so the EnergyPlus part-load field "
             f"carries the transform {implements.get('transform')}; represented as "
             f"a Table:Lookup on {implements.get('grid')} with "
             f"{row.get('interpolation')} interpolation and "
-            f"{row.get('extrapolation')} extrapolation — {error_text}"
-            + ("; a node at PLR 0 carries the Code equation down to zero load"
-               if row.get('minimum_independent_variable_1') == 0 else
-               f"; below the first node (PLR {row.get('minimum_independent_variable_1')}) "
-               f"the table's Constant extrapolation holds the factor, an under-count "
-               f"bounded by the Code's standby term FHeatPLC(0) x rated fuel"
-               + ("; the first node's value lies above the engine's 0.7 floor on the "
-                  "coil part-load fraction, so the engine never clamps"
-                  if implements.get('engine_floor') else "")))
+            f"{row.get('extrapolation')} extrapolation — {error_text}{low_end}")
 
 
 def _part_load_curve(component, tables, equipment, klass, audit, target):
@@ -1421,6 +1432,12 @@ def _part_load_curve(component, tables, equipment, klass, audit, target):
     spec = (tables.get('part_load_curves') or {}).get(equipment) or {}
     article = spec.get('article')
     classes = spec.get('classes') or {}
+    if klass is None:
+        # _part_load_class has already reported the row's class as a data
+        # error; a second "no representation" warning would misname the cause.
+        return None, 'none (no valid class)', None, (
+            f"the {equipment} row declares no valid part-load curve class, so no "
+            f"part-load curve applies and the part-load factor stays constant at 1.0")
     if klass not in classes:
         audit.warn('efficiency',
                    f"part-load class {klass!r} has no representation in "

@@ -139,6 +139,32 @@ class TestPurchasedHeatingPropagatesTheClass(unittest.TestCase):
                          f"every reference boiler must carry the modulating "
                          f"class: {found}")
 
+    def test_district_steam_is_purchased_heating_too(self):
+        """Sol's fourth pass, P1: 8.4.4.6.(1) names no medium, yet a steam
+        proposed classified as no purchased heating and got five electric
+        references and no boiler."""
+        import openstudio
+
+        model = purchased_heating_proposed()
+        for water in list(model.getDistrictHeatingWaters()):
+            loop = water.plantLoop().get()
+            loop.addSupplyBranchForComponent(openstudio.model.DistrictHeatingSteam(model))
+            water.remove()
+        self.assertEqual(1, len(model.getDistrictHeatingSteams()))
+        self.assertEqual(0, len(model.getDistrictHeatingWaters()))
+
+        reference, audit = build_reference(model)
+
+        found = classes(reference)
+        self.assertTrue(found, "the reference must grow a boiler")
+        self.assertEqual([], [n for n, c in found if c != "modulating"],
+                         f"every reference boiler must be modulating: {found}")
+        self.assertTrue([e for e in audit.entries
+                         if str(e.get("action") or "") ==
+                         "purchased heating energy -> represented by gas-fired "
+                         "modulating boiler"],
+                        "the 8.4.4.6.(1) selection decision must fire for steam")
+
     def test_the_selection_decision_carries_the_class_and_cites_D_89(self):
         _, audit = build_reference(purchased_heating_proposed())
 

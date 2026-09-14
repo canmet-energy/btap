@@ -6,8 +6,10 @@ Three facts the decision rests on, each one probe:
    burns exactly 1/(eta x 0.005) per unit heat) — there is no 0.01 floor;
 2. the shipped BOILER-PLF-NONCONDENSING table gives fuel = heat / (eta x
    PLF(PLR)) at an ordinary part load, i.e. the Code's Fuel_design x FHeatPLC;
-3. at a load far below the old first node (PLR 0.00005) the zero node keeps
-   the engine on the Code equation: fuel/heat matches FHeatPLC(p)/(eta x p).
+3. at a load inside the zero node's own segment (PLR below the first positive
+   node, 0.00001) the zero node keeps the engine on the Code equation:
+   fuel/heat matches FHeatPLC(p)/(eta x p) — and, as a negative control, the
+   same case with the zero node removed departs from it by about half.
 """
 
 from __future__ import annotations
@@ -96,6 +98,21 @@ def shipped_table(name='BOILER-PLF-NONCONDENSING', edition='2020'):
     return factory
 
 
+def shipped_row(name='BOILER-PLF-NONCONDENSING', edition='2020'):
+    return next(c for c in efficiency.data(edition)['curves'] if c['name'] == name)
+
+
+def table_without_zero_node(name='BOILER-PLF-NONCONDENSING', edition='2020'):
+    """The shipped table with its (0, 0) node removed: below the first positive
+    node its Constant extrapolation then holds PLF at that node's value."""
+    def factory(m):
+        row = dict(shipped_row(name, edition))
+        row['points'] = row['points'][1:]
+        row['minimum_independent_variable_1'] = row['points'][0][0]
+        return efficiency._build_lookup(m, row, f'{name} WITHOUT ZERO NODE')
+    return factory
+
+
 def run_period_totals(out_dir):
     sql = sqlite3.connect(str(Path(out_dir) / 'eplusout.sql'))
     env = sql.execute("select EnvironmentPeriodIndex from EnvironmentPeriods "
@@ -166,18 +183,46 @@ class TestPartLoadTablesInTheEngine(unittest.TestCase):
         expected = fheatplc(coefficients, plr) / (ETA * plr)  # Fuel_design x FHeatPLC / heat
         self.assertAlmostEqual(expected, ratio, delta=0.01 * expected)
 
+    def _inside_the_zero_node_segment(self, tag, factory):
+        """(gas/heat, PLR) with the PLR BELOW the first positive node, so only
+        the segment (0, first node) can decide the result. Sol's fourth pass:
+        the previous case (PLR 0.00005) sat above that node and passed with
+        the zero node removed."""
+        points = shipped_row()['points']
+        self.assertEqual([0.0, 0.0], [float(v) for v in points[0]], 'the table has a zero node')
+        first_positive = points[1][0]
+        # a 20 MW boiler at 100 W: PLR ~5e-6 (a 5 W load on a 100 kW boiler
+        # never registers as a plant load, so the ratio is reached through
+        # capacity)
+        capacity = 20_000_000.0
+        ratio, plr = self._gas_per_heat(tag, 100.0, factory, capacity)
+        self.assertLess(plr, first_positive, 'the case sits inside the zero-node segment')
+        self.assertGreater(plr, 0.2 * first_positive)
+        return ratio, plr, points[1][1]
+
+    def _nc_coefficients(self):
+        return next(e for e in efficiency.data('2020')['part_load_fheatplc']
+                    if e['equipment'] == 'boiler' and e['class'] == 'non_condensing'
+                    )['coefficients']
+
     def test_the_zero_node_keeps_the_engine_on_the_equation_at_a_tiny_load(self):
-        coefficients = next(e for e in efficiency.data('2020')['part_load_fheatplc']
-                            if e['equipment'] == 'boiler' and e['class'] == 'non_condensing'
-                            )['coefficients']
-        # a 2 MW boiler at 100 W: PLR 0.00005, below the 0.0001 first node of
-        # the previous freeze (a 5 W load on a 100 kW boiler never registers
-        # as a plant load, so the ratio is reached through capacity)
-        capacity = 2_000_000.0
-        ratio, plr = self._gas_per_heat('plr00005', 0.00005 * capacity, shipped_table(), capacity)
-        self.assertLess(plr, 0.0001, 'the case sits below the previous first node')
-        self.assertGreater(plr, 0.00002)
-        expected = fheatplc(coefficients, plr) / (ETA * plr)
-        self.assertAlmostEqual(expected, ratio, delta=0.02 * expected,
+        ratio, plr, _ = self._inside_the_zero_node_segment('zero_node', shipped_table())
+        expected = fheatplc(self._nc_coefficients(), plr) / (ETA * plr)
+        self.assertAlmostEqual(expected, ratio, delta=0.005 * expected,
                                msg='the standby term a x Fuel_design is charged at a load '
-                                   'of 0.005 % of capacity')
+                                   'of 0.0005 % of capacity')
+
+    def test_without_the_zero_node_the_same_case_departs_from_the_equation(self):
+        """Negative control: the test above can fail. Without the (0, 0) node
+        the Constant extrapolation holds PLF at the first positive node, so
+        fuel/heat is 1/(eta x PLF(first node)) whatever the load — roughly half
+        the Code's standby-dominated figure at this PLR."""
+        ratio, plr, first_value = self._inside_the_zero_node_segment(
+            'no_zero_node', table_without_zero_node())
+        expected = fheatplc(self._nc_coefficients(), plr) / (ETA * plr)
+        self.assertGreater(abs(ratio - expected) / expected, 0.25,
+                           'removing the zero node must move the result far outside the '
+                           'tolerance the zero-node test allows')
+        held = 1.0 / (ETA * first_value)
+        self.assertAlmostEqual(held, ratio, delta=0.005 * held,
+                               msg='the engine holds the first node value below it')

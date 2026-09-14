@@ -141,6 +141,10 @@ def energy_results(model) -> dict:
         "total_site_kwh": ruby_round(total_gj * GJ_TO_KWH, 1) if total_gj is not None else None,
         "electricity_kwh": _scaled(sql.electricityTotalEndUses()),
         "natural_gas_kwh": _scaled(sql.naturalGasTotalEndUses()),
+        # Purchased heating in either medium: from OpenStudio 3.7 the combined
+        # accessor is water PLUS steam (SqlFile_Impl::districtHeatingTotalEndUses,
+        # addTwoOptionalDoubles), so it must stay first; the water-only one is
+        # the fallback for an SDK that lacks it (D-89, sixth amendment).
         "district_heating_kwh": _district(sql, ["districtHeatingTotalEndUses",
                                                 "districtHeatingWaterTotalEndUses"]),
         "district_cooling_kwh": _district(sql, ["districtCoolingTotalEndUses"]),

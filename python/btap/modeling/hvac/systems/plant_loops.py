@@ -51,7 +51,10 @@ def find_hot_water(model, part_load_curve_class=None):
         None)
 
 
-_DISTRICT_HEATING_TYPES = frozenset({
+#: Every IDD type that is PURCHASED heating, whatever the medium: the deprecated
+#: pre-3.7 DistrictHeating, and the water and steam objects that replaced it.
+#: Shared with classify, so reuse and purchased-energy detection agree.
+DISTRICT_HEATING_TYPES = frozenset({
     'OS_DistrictHeating', 'OS_DistrictHeating_Water', 'OS_DistrictHeating_Steam'})
 
 
@@ -65,7 +68,7 @@ def _district_heated(loop):
     # deprecated class and the SDK logs a deprecation line to stdout on every
     # call, which leaked into audit.txt once reuse checked every loop.
     for c in loop.supplyComponents():
-        if c.iddObjectType().valueName() in _DISTRICT_HEATING_TYPES:
+        if c.iddObjectType().valueName() in DISTRICT_HEATING_TYPES:
             return True
     return False
 

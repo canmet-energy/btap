@@ -33,6 +33,7 @@ import re
 from btap._compat import opt, sorted_by_name
 from btap.modeling.hvac import catalog
 from btap.modeling.hvac.components import coils
+from btap.modeling.hvac.systems.plant_loops import DISTRICT_HEATING_TYPES
 
 # Legacy NECB pipe-name prefix -> gem family (sys_2/5 are fan-coil systems, sys_1/4 MAU-based).
 PIPE_NAME_FAMILIES = {
@@ -140,7 +141,7 @@ def _plant_facts(loop, audit):
         elif comp.to_ChillerElectricEIR().is_initialized():
             has_chiller = True
             fuels.append('Electricity')
-        elif comp.to_DistrictHeating().is_initialized() or _defined_district_heating_water(comp):
+        elif _district_heating(comp):
             purchased = True
             fuels.append('Purchased')
         elif comp.to_DistrictCooling().is_initialized():
@@ -183,9 +184,12 @@ def _plant_facts(loop, audit):
     return facts
 
 
-def _defined_district_heating_water(comp):
-    """DistrictHeatingWater replaced DistrictHeating at OS 3.7; handle both SDKs."""
-    return hasattr(comp, 'to_DistrictHeatingWater') and comp.to_DistrictHeatingWater().is_initialized()
+def _district_heating(comp):
+    """Purchased heating in any medium. By IDD type, not by the typed casts:
+    DistrictHeatingWater and DistrictHeatingSteam replaced DistrictHeating at
+    OS 3.7, the SDK has no steam cast, and the deprecated to_DistrictHeating()
+    logs to stdout on every call."""
+    return comp.iddObjectType().valueName() in DISTRICT_HEATING_TYPES
 
 
 def _heating_loop(loop):
@@ -389,9 +393,8 @@ def _external_source_loop(loop):
     boiler and/or heat-rejection device explicitly allowed)."""
     for c in loop.supplyComponents():
         if (any(_try_cast(c, cast) is not None for cast in GROUND_HX_CASTS) or
-                c.to_DistrictHeating().is_initialized() or
+                _district_heating(c) or
                 c.to_DistrictCooling().is_initialized() or
-                _defined_district_heating_water(c) or
                 (hasattr(c, 'to_PlantComponentTemperatureSource') and
                  c.to_PlantComponentTemperatureSource().is_initialized())):
             return True
