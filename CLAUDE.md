@@ -181,8 +181,7 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 
 `verify`, `parity` and `parity-scenarios` run in the CI image
 `ghcr.io/canmet-energy/btap-ci` (`infra/ci-image/Dockerfile`: the OpenStudio
-3.11.0 image plus the test dependencies), pulled from its same-region ECR
-mirror on CodeBuild. Its tag is content-addressed and
+3.11.0 image plus the test dependencies). Its tag is content-addressed and
 `python/tests/test_ci_image_pin.py` fails until `test.yml` names the tag of the
 current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
 but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);

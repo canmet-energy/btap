@@ -95,7 +95,7 @@ jobs:
     # `pytest -n auto` spreads the suite across every core; unset reverts to
     # GitHub-hosted with no workflow edit. No `container:` here on purpose —
     # the point of this job is a bare environment that installs the wheel.
-    runs-on: ${{ vars.CI_RUNNER != '' && fromJSON(format('["codebuild-{0}-{1}-{2}","buildspec-override:true"]', vars.CI_RUNNER, github.run_id, github.run_attempt)) || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -155,16 +155,16 @@ jobs:
   # dependency skips cannot pass vacuously.
   verify:
     if: github.event_name != 'pull_request'
-    runs-on: ${{ vars.CI_RUNNER != '' && fromJSON(format('["codebuild-{0}-{1}-{2}","buildspec-override:true"]', vars.CI_RUNNER, github.run_id, github.run_attempt)) || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: read
     # The tag is content-addressed; test_ci_image_pin.py keeps it current.
-    # CodeBuild pulls the same-region ECR mirror (the project's PRE_BUILD logs
-    # Docker in, hence buildspec-override:true in runs-on); GitHub-hosted pulls
-    # GHCR with the job token. One content-addressed tag in both.
     container:
-      image: ${{ vars.CI_RUNNER != '' && '765017559068.dkr.ecr.ca-central-1.amazonaws.com/btap-ci:3.11.0-286df9bda653' || 'ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653' }}
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       # The container runs as root while the workspace belongs to the runner
@@ -234,15 +234,15 @@ jobs:
   # reader comes to believe parity runs on a timer when nothing runs it.
   parity:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ${{ vars.CI_RUNNER != '' && fromJSON(format('["codebuild-{0}-{1}-{2}","buildspec-override:true"]', vars.CI_RUNNER, github.run_id, github.run_attempt)) || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: read
-    # CodeBuild pulls the same-region ECR mirror (the project's PRE_BUILD logs
-    # Docker in, hence buildspec-override:true in runs-on); GitHub-hosted pulls
-    # GHCR with the job token. One content-addressed tag in both.
     container:
-      image: ${{ vars.CI_RUNNER != '' && '765017559068.dkr.ecr.ca-central-1.amazonaws.com/btap-ci:3.11.0-286df9bda653' || 'ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653' }}
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     env:
       LEGACY_PIN_REQUIRED: '1'
       BUNDLE_GEMFILE: ${{ github.workspace }}/legacy_pin/Gemfile
@@ -311,15 +311,15 @@ jobs:
   # bundle. test_ci_wires_every_lane pins each declared lane to a CI executor.
   parity-scenarios:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ${{ vars.CI_RUNNER != '' && fromJSON(format('["codebuild-{0}-{1}-{2}","buildspec-override:true"]', vars.CI_RUNNER, github.run_id, github.run_attempt)) || 'ubuntu-latest' }}
+    runs-on: ${{ vars.CI_RUNNER != '' && format('codebuild-{0}-{1}-{2}', vars.CI_RUNNER, github.run_id, github.run_attempt) || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: read
-    # CodeBuild pulls the same-region ECR mirror (the project's PRE_BUILD logs
-    # Docker in, hence buildspec-override:true in runs-on); GitHub-hosted pulls
-    # GHCR with the job token. One content-addressed tag in both.
     container:
-      image: ${{ vars.CI_RUNNER != '' && '765017559068.dkr.ecr.ca-central-1.amazonaws.com/btap-ci:3.11.0-286df9bda653' || 'ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653' }}
+      image: ghcr.io/canmet-energy/btap-ci:3.11.0-286df9bda653
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       # See the same step in verify: git refuses a workspace owned by another

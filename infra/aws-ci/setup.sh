@@ -63,16 +63,6 @@ aws iam get-role --role-name "$ROLE" >/dev/null 2>&1 || {
   echo "   created $ROLE"
 }
 
-echo "== 2b/4 ECR repository for the CI image mirror, and the role's push right =="
-aws ecr describe-repositories --repository-names btap-ci --region "$REGION" >/dev/null 2>&1 ||
-  aws ecr create-repository --repository-name btap-ci --image-tag-mutability IMMUTABLE --region "$REGION" >/dev/null
-aws iam put-role-policy --role-name "$ROLE" --policy-name ecr-push-btap-ci --policy-document "{
-  \"Version\": \"2012-10-17\",
-  \"Statement\": [{\"Effect\": \"Allow\",
-    \"Action\": [\"ecr:BatchCheckLayerAvailability\",\"ecr:InitiateLayerUpload\",\"ecr:UploadLayerPart\",\"ecr:CompleteLayerUpload\",\"ecr:PutImage\",\"ecr:BatchGetImage\",\"ecr:GetDownloadUrlForLayer\",\"ecr:DescribeImages\"],
-    \"Resource\": \"arn:aws:ecr:${REGION}:${ACCOUNT}:repository/btap-ci\"}]
-}"
-
 echo "== 3/4  GitHub connection =="
 echo "   CodeBuild needs a one-time OAuth/App connection to GitHub. If none exists:"
 echo "     Console -> CodeBuild -> Settings -> Connections -> Connect to GitHub"
@@ -86,17 +76,9 @@ if aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --quer
   echo "   $PROJECT exists: source $(aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].source.location' --output text)," \
        "compute $(aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].environment.computeType' --output text) (not modified)"
 else
-  # The inline buildspec runs only for jobs labelled buildspec-override:true:
-  # it logs Docker in to ECR before the runner starts, so container jobs can
-  # pull the same-region CI image mirror without credentials in the workflow.
-  BUILDSPEC="version: 0.2
-phases:
-  pre_build:
-    commands:
-      - aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
   aws codebuild create-project --region "$REGION" \
     --name "$PROJECT" \
-    --source "$(python3 -c 'import json,sys; print(json.dumps({"type": "GITHUB", "location": sys.argv[1], "buildspec": sys.argv[2]}))' "$REPO_URL" "$BUILDSPEC")" \
+    --source "type=GITHUB,location=${REPO_URL}" \
     --artifacts "type=NO_ARTIFACTS" \
     --environment "type=LINUX_CONTAINER,image=aws/codebuild/standard:7.0,computeType=${COMPUTE},privilegedMode=true" \
     --service-role "arn:aws:iam::${ACCOUNT}:role/${ROLE}" >/dev/null

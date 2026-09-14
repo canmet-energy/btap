@@ -34,13 +34,13 @@ image below.
 ## Changing the project's source can DETACH the webhook
 
 `aws codebuild update-project --source …` with a new source LOCATION silently
-dropped the project's webhook (2026-09-14: after repointing btap-gems → btap,
+dropped the project's webhook (2026-09-14: after repointing btap-gems → btap
 the project showed `webhook: null`) — every subsequent CI job then queues
 forever, because nothing delivers `WORKFLOW_JOB_QUEUED` any more. The same
-call with the location unchanged and only the inline buildspec added kept the
-webhook (`create-webhook` then answered "Webhook already exists"). After ANY
-source change, check `aws codebuild batch-get-projects --names necb-ci
---query 'projects[0].webhook.url'` and, if it is null, run:
+call with the location unchanged (adding, then removing, an inline buildspec)
+kept it. After ANY source change, check
+`aws codebuild batch-get-projects --names necb-ci --query 'projects[0].webhook.url'`
+and, if it is null, run:
 
 ```bash
 aws codebuild create-webhook --project-name necb-ci \
@@ -102,26 +102,26 @@ overwrites a tag. `test.yml` pins that exact tag, and
 `python/tests/test_ci_image_pin.py` fails when the two disagree — so edit the
 Dockerfile, push, wait for `ci-image`, then move the tag in `test.yml`.
 
-**Where each runner pulls it from.** Pulling ~1 GB from GHCR cost ~50 s per
-container job on CodeBuild, so the image is mirrored into ECR in the runners'
-own region:
-
-- `ci-image.yml`'s `mirror-to-ecr` job runs on a CodeBuild runner, after the
-  GHCR publish, and copies the exact GHCR image to
-  `765017559068.dkr.ecr.ca-central-1.amazonaws.com/btap-ci:<same tag>`.
-  The repository has immutable tags. The service role holds the
-  `ecr-push-btap-ci` inline policy, scoped to that repository.
-- With `CI_RUNNER` set, the container jobs name the ECR image. The project's
-  inline buildspec logs Docker in to ECR in `PRE_BUILD`, which runs only
-  because every CodeBuild job's `runs-on` carries `buildspec-override:true`.
-  The Actions runner does no registry login when a job supplies no
-  credentials, so its pull uses that login.
-- Without `CI_RUNNER`, they name the GHCR image. On GitHub-hosted runners the
-  Actions runner logs in to `ghcr.io` with the job's `GITHUB_TOKEN`
-  (`packages: read`); the package is private.
-
-Every CodeBuild job in a workflow run uses the same two labels, so GitHub
-cannot hand a job to a runner created for another (CodeBuild's
-unique-label caveat applies only when label counts differ). The older ECR
+The jobs pull it with the workflow's own `GITHUB_TOKEN` (`packages: read`),
+from both runner kinds. The package is private, and the credentials in
+`test.yml` are required on CodeBuild: the Actions runner only supplies the
+job token to `ghcr.io` by itself on GitHub-HOSTED runners
+(`ContainerOperationProvider.UpdateRegistryAuthForGitHubToken`). The ECR
 mirror `setup.sh` creates (`nrel-openstudio:3.11.0`) predates the CI image
 and is not used by the workflow.
+
+**Tried and reverted: a same-region ECR mirror of the CI image** (2026-09-14,
+dispatch run 34867456472). "Initialize containers" takes ~50 s per container
+job, which looked like a cross-internet pull. The job log says otherwise:
+
+| pulled from | layers downloaded | layers extracted | container created → started |
+|---|---|---|---|
+| GHCR | 8.0 s | 27 s | 13.6 s |
+| ECR, same region | 5.9 s | 27 s | 14.0 s |
+
+The download is a few seconds either way; extraction and container start
+dominate and do not depend on the registry. The mirror saved ~2 s per job at
+the cost of a mirror job, an ECR repository, a push policy on the service
+role, a PRE_BUILD docker login and per-runner image selection, so all of it
+was removed. The remaining lever there is the image itself (size, or
+faster-to-decompress layers), not where it is pulled from.
