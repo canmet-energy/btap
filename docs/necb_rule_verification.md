@@ -243,4 +243,8 @@ the sample corpus, `FULL_MATRIX=1` and the rasterizer add tests a local run
 skips — publishes a per-module summary and an HTML/XML artifact, and fails
 below `--cov-fail-under=84`, set 1.3 points under this baseline. Raise the
 floor as coverage rises; never lower it to make a change pass.
+
+First CI measurement (dispatch run 34870047732, the same product code):
+**85.39%**, floor met; 1135 passed with coverage in 108 s on the 36-vCPU runner
+(88–122 s without coverage on earlier runs of the same suite).
 | **TOTAL** | **7362** | **776** | **89%** |
