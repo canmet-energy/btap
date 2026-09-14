@@ -12,7 +12,11 @@ set -euo pipefail
 
 REGION="${AWS_REGION:-ca-central-1}"
 PROJECT="necb-ci"
-REPO_URL="https://github.com/canmet-energy/btap-gems"
+REPO_URL="https://github.com/canmet-energy/btap"
+# 36 vCPU / 72 GiB. Not 2XLARGE: measured 2026-09-14, an on-demand 2XLARGE
+# build spends ~175 s PROVISIONING (its image is not cached) against 8-9 s for
+# XLARGE, which costs more than its extra cores save (README).
+COMPUTE="BUILD_GENERAL1_XLARGE"
 ECR_REPO="nrel-openstudio"
 IMAGE_TAG="3.11.0"
 
@@ -65,17 +69,23 @@ echo "     Console -> CodeBuild -> Settings -> Connections -> Connect to GitHub"
 echo "   (this is the only step the CLI cannot fully automate)"
 
 echo "== 4/4  CodeBuild project wired as an Actions runner =="
-aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].name' --output text 2>/dev/null | grep -q "$PROJECT" || {
+if aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].name' --output text 2>/dev/null | grep -q "$PROJECT"; then
+  # An existing project is left alone: updating its SOURCE detaches the
+  # webhook (README). To repoint or resize one, run update-project and then
+  # create-webhook, in that order, and confirm with gh api repos/<owner>/<repo>/hooks.
+  echo "   $PROJECT exists: source $(aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].source.location' --output text)," \
+       "compute $(aws codebuild batch-get-projects --names "$PROJECT" --region "$REGION" --query 'projects[0].environment.computeType' --output text) (not modified)"
+else
   aws codebuild create-project --region "$REGION" \
     --name "$PROJECT" \
     --source "type=GITHUB,location=${REPO_URL}" \
     --artifacts "type=NO_ARTIFACTS" \
-    --environment "type=LINUX_CONTAINER,image=aws/codebuild/standard:7.0,computeType=BUILD_GENERAL1_LARGE,privilegedMode=true" \
+    --environment "type=LINUX_CONTAINER,image=aws/codebuild/standard:7.0,computeType=${COMPUTE},privilegedMode=true" \
     --service-role "arn:aws:iam::${ACCOUNT}:role/${ROLE}" >/dev/null
   aws codebuild create-webhook --region "$REGION" --project-name "$PROJECT" \
     --filter-groups '[[{"type":"EVENT","pattern":"WORKFLOW_JOB_QUEUED"}]]' >/dev/null
   echo "   created project + WORKFLOW_JOB_QUEUED webhook"
-}
+fi
 
 cat <<DONE
 
@@ -92,10 +102,9 @@ rejects every queued job with HTTP 400 ("a project label matching pattern
 codebuild-<projectName>-<runId>-<runAttempt> is required"). Paid for once.
 
 The workflow already reads that variable; unset, it falls back to
-ubuntu-latest. Setting it moves the container matrix + verify onto CodeBuild —
-zero GitHub-hosted minutes — and deleting the variable reverts instantly.
+ubuntu-latest. Setting it moves python, verify, parity and parity-scenarios
+onto CodeBuild (${COMPUTE}) — and deleting the variable reverts instantly.
 
-Phase 2 (optional, faster): point the matrix's container: at
-  ${ECR_URI}:${IMAGE_TAG}
-instead of docker.io, so image pulls are same-region.
+The container jobs run in ghcr.io/canmet-energy/btap-ci (infra/ci-image), not in
+the ECR mirror above, which is optional and unused by the workflow.
 DONE

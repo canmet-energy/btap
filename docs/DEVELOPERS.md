@@ -56,7 +56,7 @@ bash .devcontainer/setup.sh --serena
 ```bash
 cd python
 python3 -m venv .venv
-.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist import-linter ruff build
+.venv/bin/pip install -e '.[tbd]' pytest pytest-xdist pytest-cov import-linter ruff build
 ```
 
 `[tbd]` installs the exact `canmet-tbd==3.5.2` thermal-bridging line. Do not
@@ -104,6 +104,20 @@ Serial zero-install fallback:
 ```bash
 cd python && python3 -m unittest discover tests
 ```
+
+Line coverage of `btap` (the frozen scenarios run in subprocesses, so they are
+left out as they measure nothing):
+
+```bash
+cd python
+.venv/bin/pytest -n auto -q --cov=btap --cov-report=term:skip-covered \
+  --ignore=tests/necb/test_frozen_scenarios.py tests/
+```
+
+CI's `verify` job measures the same, publishes a per-module summary and an
+HTML report, and fails below its floor (`--cov-fail-under` in
+`.github/workflows/test.yml`). The baselines are recorded in
+[necb_rule_verification.md](necb_rule_verification.md).
 
 Repository checks from the root:
 
@@ -188,17 +202,25 @@ attribution together. Never hand-edit a golden. Full instructions are in
 
 ## CI
 
-The workflow has four jobs:
+The workflow has five jobs:
 
 | Job | Role |
 |---|---|
 | `lint` | orphan keys, coverage pointers and generated docs, decisions registry |
 | `python` | import contracts, Ruff, full Python suite, installed-wheel smoke |
 | `verify` | required SDK/EnergyPlus suite, NECB checks, sizing scenarios |
-| `parity` | live pinned oracle, SmallOffice gate, annual scenarios, optional golden export |
+| `parity` | live pinned oracle, SmallOffice gate, optional golden export |
+| `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
 
-`parity` is `workflow_dispatch` only; no schedule is declared. Run it whenever
-the oracle pin changes.
+`parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
+declared. Run them whenever the oracle pin changes.
+
+`verify`, `parity` and `parity-scenarios` run in the CI image
+`ghcr.io/canmet-energy/btap-ci`, built from `infra/ci-image/Dockerfile` by the
+`ci-image` workflow under a content-addressed tag; `test_ci_image_pin.py` keeps
+`test.yml` on the current one. With the repository variable
+`CI_RUNNER=necb-ci`, every job but `lint` runs on a 36-vCPU AWS CodeBuild runner
+([infra/aws-ci/README.md](../infra/aws-ci/README.md)).
 
 ## D-84 attestation
 

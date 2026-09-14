@@ -1,0 +1,45 @@
+name: ci-image
+
+# Builds infra/ci-image/Dockerfile and publishes it to GHCR under a
+# content-addressed tag: <openstudio version>-<first 12 hex of the Dockerfile's
+# sha256>. test.yml pins that exact tag (python/tests/test_ci_image_pin.py
+# enforces the match), so a Dockerfile change publishes a NEW tag and CI moves
+# only when test.yml moves with it. An existing tag is never overwritten.
+#
+# Runs on a GitHub-hosted runner: it needs a Docker daemon and nothing else,
+# and GitHub-hosted minutes are free for this public repository.
+on:
+  push:
+    paths:
+      - 'infra/ci-image/**'
+      - '.github/workflows/ci-image.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build and publish the content-addressed tag
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          DOCKERFILE=infra/ci-image/Dockerfile
+          VERSION=$(sed -n 's|^FROM nrel/openstudio:\([0-9.]*\).*|\1|p' "$DOCKERFILE")
+          TAG="${VERSION}-$(sha256sum "$DOCKERFILE" | cut -c1-12)"
+          IMAGE="ghcr.io/canmet-energy/btap-ci:${TAG}"
+          echo "image: ${IMAGE}"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+          if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
+            echo "${IMAGE} is already published; content-addressed tags are never overwritten"
+            exit 0
+          fi
+          docker build -t "$IMAGE" infra/ci-image
+          docker push "$IMAGE"
+          echo "### Published \`${IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
