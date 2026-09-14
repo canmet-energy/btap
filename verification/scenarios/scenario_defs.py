@@ -35,6 +35,17 @@ FIXTURE_ARGS = BASE_ARGS + ["--space-type", "Space Function/Office enclosed > 25
 SIZING_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx", "09-water-source-hp"]
 ANNUAL_SUBSET = ["01-baseboard-gas", "02-psz-gas-dx"]
 
+#: D-89 step 3 (R-O-a): the purchased-heating corpus model, sized (verify
+#: lane) and simulated (parity lane), so the 8.4.4.6.(1) modulating
+#: reference boiler is exercised by a frozen baseline. Authored after the
+#: Ruby product retired: these carry their own python-only seal and NO
+#: cross-language attestation (see FIRST_FREEZE_SEAL's rationale).
+D89_SIZING_SUBSET = ["13-district-heating"]
+D89_ANNUAL_SUBSET = ["13-district-heating"]
+D89_SEAL = ("python-only:first frozen at D-89 step 3 (R-O-a) — authored "
+            "after the Ruby product retired; no cross-language attestation "
+            "exists for this scenario")
+
 CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
 
@@ -75,7 +86,7 @@ def edition_of(code):
     return match.group(1)
 
 
-def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
+def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     sim = (["--simulate", "annual", "--quick"] if tier == "annual"
            else ["--simulate", tier])
     epw = [] if tier == "none" else ["--epw", "<EPW>"]
@@ -94,7 +105,8 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=()):
         "expect_exit": 6,
         "files": CORPUS_FILES, "text_files": CORPUS_TEXT,
         "streams": {"stdout": "exact", "stderr": "exact"},
-        "seal": ("ruby" if code == DEFAULT_CODE
+        "seal": (seal if seal is not None
+                 else "ruby" if code == DEFAULT_CODE
                  else FIRST_FREEZE_SEAL.format(edition=edition_of(code))),
     }
     if tier == "annual":
@@ -106,6 +118,10 @@ def corpus_scenarios(slugs):
     out = [_corpus(s, "none", "python") for s in [*slugs, "5zone-onramp"]]
     out += [_corpus(s, "sizing", "verify") for s in SIZING_SUBSET]
     out += [_corpus(s, "annual", "parity") for s in ANNUAL_SUBSET]
+    out += [_corpus(s, "sizing", "verify", seal=D89_SEAL)
+            for s in D89_SIZING_SUBSET]
+    out += [_corpus(s, "annual", "parity", seal=D89_SEAL)
+            for s in D89_ANNUAL_SUBSET]
     return out
 
 
@@ -321,6 +337,10 @@ EDITION_SCENARIOS = [
     # capacity increases (8.4.1.2.(5)); the energy verdict itself passes
     # (76.0 % of target, tier 1); GHG level "F" at 95.3 % of the GHG
     # target. The asserts tie the pinned exit to that reason.
+    # R-O (D-89, 2026-09-11): the reference building's own-edition part-load
+    # curves raise its energy, so the proposed's ratio crosses the tier-2
+    # boundary and the GHG level moves one step; tier and level re-pinned
+    # from the R-O freeze run. exit and compliant unchanged.
     {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
@@ -344,10 +364,10 @@ EDITION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "json_equals", "file": "report.json", "path": "tier",
-          "value": 1},
+          "value": 2},
          {"op": "json_exists", "file": "report.json", "path": "ghg"},
          {"op": "json_equals", "file": "report.json", "path": "ghg.level",
-          "value": "F"},
+          "value": "E"},
          {"op": "audit_entry", "step": "compliance", "level": "decision",
           "action": "proposed does not exceed the building energy target",
           "article": "8.4.1.2.(2)", "count": 1},

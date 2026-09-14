@@ -54,11 +54,11 @@ compliance paths share — so nothing is silently missed.
 | hvac | 8.4.4.9.(2) | Heating System | purchased energy routes to Article 8.4.4.6. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.4.9.(4) | Heating System | reference heating energy type modeled identical to the proposed (structural election; see also 8.4.4.13.(2)(g)) — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.4.9.(6) | Heating System | hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass — Code: `plant_loops.py#hot_water`, `efficiency.py#_apply_boiler` |
-| hvac | 8.4.4.9.(8) | Heating System | heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code) — Code: `curves.py#build`, `efficiency.py#apply` |
+| hvac | 8.4.4.9.(8) | Heating System | heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89 — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.4.10.(1) | Cooling Systems | reference cooling system selected per Table 8.4.4.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.4.10.(2) | Cooling Systems | purchased energy routes to Article 8.4.4.6. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.4.10.(3) | Cooling Systems | reference cooling energy type modeled identical to the proposed — Code: `reference.py#_reference_energy_type` |
-| hvac | 8.4.4.10.(5) | Cooling Systems | cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies) — Code: `curves.py#build`, `efficiency.py#apply` |
+| hvac | 8.4.4.10.(5) | Cooling Systems | cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited) — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.4.10.(6) | Cooling Systems | hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor — plant defaults + the efficiency pass — Code: `plant_loops.py#chilled_water`, `efficiency.py#_apply_chiller` |
 | hvac | 8.4.4.10.(9) | Cooling Systems | water-cooled systems pair to the cooling tower built per Article 8.4.4.11. — Code: `efficiency.py#_apply_tower_rules` |
 | hvac | 8.4.4.11.(1) | Cooling Tower Systems | axial-fan direct-contact tower with 35/29 C water and 24 C wet-bulb design temperatures; fan power at the Table 5.2.12.2 0.013 kW/kW maximum — Code: `efficiency.py#_apply_tower_rules` |
@@ -234,11 +234,11 @@ genuine open item to watch on a real run.
 | hvac | 8.4.5.9.(2) | Heating System | purchased energy routes to Article 8.4.5.6. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.5.9.(4) | Heating System | reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g)) — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.5.9.(6) | Heating System | hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass — Code: `plant_loops.py#hot_water`, `efficiency.py#_apply_boiler` |
-| hvac | 8.4.5.9.(8) | Heating System | heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code) — Code: `curves.py#build`, `efficiency.py#apply` |
+| hvac | 8.4.5.9.(8) | Heating System | heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.6.: Table 8.4.6.2 for boilers, Table 8.4.6.3 for furnaces); the as-applied class, table row and curve points are audited per D-89 — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.5.10.(1) | Cooling Systems | reference cooling system selected per Table 8.4.5.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.5.10.(2) | Cooling Systems | purchased energy routes to Article 8.4.5.6. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.5.10.(3) | Cooling Systems | reference cooling energy type modeled identical to the proposed — Code: `reference.py#_reference_energy_type` |
-| hvac | 8.4.5.10.(5) | Cooling Systems | cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies) — Code: `curves.py#build`, `efficiency.py#apply` |
+| hvac | 8.4.5.10.(5) | Cooling Systems | cooling part-load performance applied from the Subsection 8.4.6. curve set (chiller and unitary curves; the as-applied coefficients are audited) — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.5.10.(6) | Cooling Systems | hydronic cooling plant per the article: 2100 kW chiller split, 7 C CHWST, 25% modulating floor — plant defaults + the efficiency pass — Code: `plant_loops.py#chilled_water`, `efficiency.py#_apply_chiller` |
 | hvac | 8.4.5.10.(9) | Cooling Systems | water-cooled systems pair to the cooling tower built per Article 8.4.5.11. — Code: `efficiency.py#_apply_tower_rules` |
 | hvac | 8.4.5.11.(1) | Cooling Tower Systems | axial-fan direct-contact tower with 35/29 C water and 24 C wet-bulb design temperatures; fan power at the Table 5.2.12.2 0.013 kW/kW maximum — Code: `efficiency.py#_apply_tower_rules` |

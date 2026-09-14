@@ -1,27 +1,3 @@
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Nominal Capacity'.
 [openstudio.model.ModelObject] <0> This model has no sql file, cannot retrieve the autosized value 'Design Size Speed 2 Gross Rated Total Cooling Capacity'.

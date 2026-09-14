@@ -2118,3 +2118,615 @@ product Python and no `verification/scenarios/` touched:
   provenance with rule (h), the Schedule I correction, D-89 approved with
   Sol's binding contract. Step 3 (D-89 implementation + R-O) starts from
   main.
+
+## Phase B step 3 — D-89 implementation and R-O: the design (Fable, 2026-09-11)
+
+Written from a read-only exploration of the product paths, the SDK/IDD, the
+Code's archived text and the pinned gem (both references consulted, per the
+CLAUDE.md rule). Sol's binding contract (items 1–5 above) governs; where this
+design chooses, it says so and D-89 records the choice.
+
+### What is true today (the facts the design rests on)
+
+- The efficiency pass runs on the REFERENCE only (`reference.py:594` always;
+  `path.py:332` after reference sizing; `path.py:901` in the 8.4.1.2.(5) loop).
+  `checker.py:180` applies it to a throwaway clone of the proposed.
+- `_apply_boiler` selects by fluid + fuel + capacity (`efficiency.py:1134`)
+  and applies the row's `efffplr` NAME. Every row — the electric row
+  included — names `BOILER-EFFFPLR`; no row names a `-COND` curve. The gem
+  does exactly the same for every vintage, so the electric-boiler curve is a
+  faithfully ported legacy bug (`hvac_systems.rb:539-600`).
+- `curve()` (`efficiency.py:1009-1062`) reuses any model curve by name with
+  no validation (DF-4), has no `TableLookup` branch, returns `None` silently
+  for an unknown form, and `getCurves()` does not enumerate lookup tables.
+  The SHW module already does it right (`shw/efficiency.py:286-321`: honours
+  `form`, validates coefficient count, typed `getCurve…ByName`).
+- Purchased heating propagates nothing: `reference.py:1727-1736` audits the
+  sentence and returns `'gas'`, which selects the ORDINARY gas variant. The
+  purchased-COOLING path is the precedent for propagation: config value →
+  `additionalProperties` feature on the new object (`reference.py:556-576`)
+  → read by the applier (`efficiency.py:1221`), which is what survives the
+  second efficiency pass (`python/btap/codes/CLAUDE.md`, "second pass trap").
+- The Code (archived payloads, re-checked live): 2020 8.4.5.2.(1)–(3) and
+  8.4.5.3, 2025 8.4.6.2 and 8.4.6.3. FHeatPLC is the fuel-INPUT ratio
+  (`Fuel_partload = Fuel_design × FHeatPLC`), so the EnergyPlus multiplier is
+  PLF(p) = p / FHeatPLC(p), the transform D-53 already adjudicated for SWH.
+  2020 modulating is the ten-point Table 8.4.5.2.-B (boilers AND furnaces),
+  with NO interpolation rule printed; 2025 modulating is a quadratic row
+  (0.01798667 / 0.96742420 / 0.01545455, identical for boilers and furnaces).
+  Non-condensing (0.082597 / 0.996764 / −0.079361) and atmospheric
+  (0.0186100 / 1.0942090 / −0.1128190) are identical in both editions.
+  Only 2025's condensing boiler row is temperature-dependent — deferred.
+- SDK: `OS:Boiler:HotWater` "Normalized Boiler Efficiency Curve Name" and
+  both gas-coil PLF fields accept `Table:Lookup` (Univariate/Bivariate
+  function lists; verified against the 3.11.0 IDD); `TableLookup` +
+  `TableIndependentVariable` exist in the Python SDK (interpolation
+  Linear|Cubic, extrapolation Constant|Linear). `CoilHeatingGasMultiStage`
+  has ONE PLF field, on the parent. The efficiency-curve temperature
+  evaluation variable is never set anywhere and has no IDD default.
+- Frozen exposure: energies move only in `corpus-annual-01`, `-02` and
+  `determination-01-baseboard-gas-necb2025` (gas Sys 3: non-condensing
+  boilers + atmospheric furnaces, so ≤ 3 % per curve); `corpus-sizing-01/02`
+  move audit only; ~20 `corpus-none-*` move audit text only. **No frozen
+  scenario sizes a purchased-heating (modulating) boiler and none has an
+  electric reference boiler**, so the 33.5 / 35.3 % and 43.6 % effects are
+  invisible to the frozen set as it stands.
+
+### Data shape (both editions, `efficiencies.json`)
+
+1. `boilers[]` / `furnaces[]` rows: add `part_load_curve_class` — the enum
+   `non_condensing | atmospheric | condensing | modulating | not_applicable`
+   — and REMOVE `efffplr`, `condensing`, `condensing_control` (never read
+   while null; Sol: populate or remove). Assignment per the contract: the
+   six gas/oil boiler rows `non_condensing`, the three furnace rows
+   `atmospheric`, the electric row `not_applicable`. `notes` on each row
+   state "class: adjudicated legacy default (D-89)".
+2. New block `part_load_fheatplc` — the edition's OWN normative content, one
+   entry per (equipment, class) the edition publishes, including the classes
+   D-89 does not implement (retained evidence): `equipment`, `class`,
+   `table`, `row`, `form` (`quadratic` | `points` | `bivariate_quadratic`),
+   `coefficients` or `points`, `variables`, `archived_payload` (the
+   `provenance/vintage_match/*.result.json` already on disk), `reachable`
+   (true only for non-condensing boiler, atmospheric furnace, modulating
+   boiler), and for unreachable ones `deferred_reason`.
+3. `curves[]`: the four 2011-derived cubics (`BOILER-EFFFPLR`, `-COND`,
+   `FURNACE-EFFPLR`, `-COND`) are RETIRED (their coefficients and the "2011
+   EIR → PLF curve fit" origin recorded in the manifest provenance note, not
+   kept as live catalogue). New rows, `form: "TableLookup"`:
+   - `BOILER-PLF-NONCONDENSING` and `FURNACE-PLF-ATMOSPHERIC` — content is
+     identical in both editions, so the names are source-neutral (D-88).
+   - `BOILER-PLF-MODULATING-necb2020` (the ten printed points, PLF =
+     p/FHeatPLC at each) and `BOILER-PLF-MODULATING-necb2025` (from the
+     quadratic row) — content differs, so the names are code-qualified
+     (D-88 as amended), and the loader validates before reuse anyway.
+   Each row carries `independent_variable: PLR`, `points: [[plr, plf], …]`,
+   `interpolation: Linear`, `extrapolation: Constant`, output bounds, and an
+   `implements` block: `{class, table, row, transform: "PLF = PLR /
+   FHeatPLC(PLR)", grid, max_error_vs_exact, error_grid}`.
+4. `part_load_curves`: the class → curve map per equipment
+   (`{"boiler": {"non_condensing": "BOILER-PLF-NONCONDENSING", "modulating":
+   "BOILER-PLF-MODULATING-necb2020", "not_applicable": null}, "furnace":
+   {"atmospheric": "FURNACE-PLF-ATMOSPHERIC"}}`). A class absent from the map
+   is unrepresentable in that edition (condensing, modulating furnace).
+5. `heat_rejection` block removed (Sol: vestigial; no reader —
+   `tables['heat_rejection']` has zero hits in product Python; the 0.013
+   kW/kW rule is a literal at `efficiency.py:1282`). The vintage-match
+   generator's UNMAPPED entry becomes "not shipped".
+6. Manifest provenance for `efficiencies.json` in both editions: the curve
+   block's `source` becomes `mcp:necb:<own edition>` with the archived
+   payloads listed; `inherited_reason` for the DX/fan/SWH curves stays.
+
+**Representation choice — `Table:Lookup` for every reachable class.** One
+representation kind; exact at every printed point; the literal reading of
+"values … shall be those listed" for 8.4.5.2.-B; no fit residual to
+adjudicate. Grids: quadratic classes on PLR 0.01–1.00 step 0.01 (100 nodes;
+Linear interpolation error against the exact rational published from a
+0.001 grid — expected well under 0.1 %); the 2020 modulating table at its
+ten printed points 0.10–1.00. Extrapolation `Constant` outside the grid,
+declared as an implementation choice in D-89 (the Code prints nothing below
+PLR 0.10 for the modulating table). Furnace grids start at 0.10: EnergyPlus
+floors a heating coil's PLF at 0.7 (implementer verifies in the E+ source /
+modelling MCP before relying on it), and the atmospheric rational crosses
+0.7 near PLR 0.05, so nodes below 0.10 would only feed warnings; the
+departure from the Code below 10 % load is bounded by a·Fuel_rated ≈ 1.9 % of
+rated fuel and is stated in D-89. Boiler grids start at 0.01 (no engine
+floor; the rational's PLF → 0 as p → 0 is the Code's own standby fuel
+a·Fuel_design, and EnergyPlus clamps the evaluated PLR at the boiler's
+minimum PLR before the curve, exactly as today). If the engine rejects a
+`Table:Lookup` in either field, the fallback is a `CurveCubic` least-squares
+fit per class with the same `implements` block and its error published — a
+representation swap, not a data change.
+
+### Product code
+
+- `hvac/efficiency.py`
+  - `curve()` → `_curve_for(model, tables, name)`: gains a `TableLookup`
+    branch (TableIndependentVariable with the grid, interpolation,
+    extrapolation, min/max; output unit Dimensionless; normalization None;
+    output bounds); reuse ONLY via the typed lookup for the row's form
+    (`getTableLookupByName`, `getCurveCubicByName`, …) and ONLY after
+    form, coefficients/points and bounds match the data row; on mismatch,
+    audit a WARNING naming the foreign object and build the ruleset's own
+    object under a disambiguated name (`<name> (D-89)`), never adopt it.
+    Unknown form → WARNING, not silent `None`. `set_limits` writes a
+    legitimate `0.0` bound (today it drops falsy values). Closes DF-4.
+  - `_apply_boiler` / `_apply_gas_coil` / `_apply_gas_multi`: class
+    resolution = the object's `btap_part_load_curve_class` feature if
+    present (propagated), else the selected row's `part_load_curve_class`;
+    then `part_load_curves[equipment][class]` → curve. `not_applicable` →
+    `resetNormalizedBoilerEfficiencyCurve()` (constant PLF 1; also clears a
+    curve copied in from the proposed loop). Class in the map with no curve
+    row, or class not in the map → WARNING ("part-load class X has no
+    representation in <edition>; part-load factor left constant"), never a
+    silent non-condensing fallback. Set
+    `setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')`
+    on every boiler the pass touches (free today; the adjudicated basis for
+    any future bivariate curve).
+  - Audit entry in the SHW shape (`shw/efficiency.py:272-283`):
+    `inputs={fuel, capacity_kw, part_load_curve_class, class_source:
+    'row'|'reference selection', curve, form}`, `value` = thermal
+    efficiency + curve, `evidence` = the transform, the table row, the
+    representation and its published error, `article` = the edition's own
+    equipment table AND part-load article (2020 `Table 5.2.12.1.-N; 8.4.5.2.`,
+    2025 `Table 5.2.12.1.-N; 8.4.6.2.`) — the hard-coded `'NECB 2020 …'`
+    string goes; `ruling='D-89'`. Furnaces likewise with `-O` and
+    8.4.5.3. / 8.4.6.3.; the staged-coil entry keeps `ruling='D-46'` and
+    gains D-89 in evidence.
+- `hvac/reference.py`: `reference_rules.json` `special_rules.purchased_heating`
+  gains `part_load_curve_class: "modulating"` (both editions);
+  `_reference_energy_type` puts the class into the selection's config
+  (`boiler_part_load_curve_class`) and into the decision's `inputs`; the
+  build site (`:556-576` precedent) stamps `btap_part_load_curve_class` on
+  every boiler `replace_system` created for that assignment. Nothing else
+  propagates a class (contract item 3).
+- `python/tests/data/coverage_code_ref_mapping_r7.json:46` if
+  `_apply_boiler` is renamed (prefer not to rename it).
+
+### Tests (spec-first where the behaviour is new)
+
+- `test_hvac_necb_efficiency.py`: the `BOILER-EFFFPLR` regex → the class
+  curve; new: every boiler/furnace row declares a class in the enum and
+  every reachable class maps to a curve row; each `Table:Lookup` reproduces
+  PLF = p/FHeatPLC at every node from the `part_load_fheatplc` block and
+  the published `max_error_vs_exact` is re-derived and asserted (not
+  trusted); 2020 and 2025 modulating curves differ and non-condensing /
+  atmospheric are identical across editions; `EnteringBoiler` set.
+- Electric boiler (contract item 4): a sized electric boiler ends with NO
+  normalized-efficiency curve even when one was pre-attached; the test
+  prints and asserts the legacy-vs-corrected multiplier at PLR
+  0.10/0.25/0.50/1.00 (0.5635 → 1, …) so the effect is quantified in the
+  suite, since no frozen scenario can show it.
+- Loader (DF-4): Sol's probe as a test — a pre-existing
+  `BOILER-PLF-NONCONDENSING` with a wrong point is NOT reused, a WARNING is
+  audited, and the boiler gets the ruleset's object; a matching one IS
+  reused; an unknown form warns.
+- Propagation: `test_reference_rules.py` gains "purchased heating → the
+  reference boilers carry the `modulating` feature, the selection decision
+  carries the class, and after sizing + the second efficiency pass the
+  boiler's curve is `BOILER-PLF-MODULATING-<edition>`"; an unrepresentable
+  class (feature `condensing`) yields the WARNING and no curve.
+- Generators: `generate_necb_vintage_match.py` reads the class map and
+  `part_load_fheatplc` instead of `efffplr` (assigned deviation is now the
+  published table error; unreachable classes reported as "not implemented
+  (D-89)"); `docs/NECB_VINTAGE_MATCH.md`, `docs/NECB_EDITION_DELTAS.md` (the
+  modulating rows now differ by edition), both coverage docs regenerated;
+  `necb_orphan_keys` must still see every key read.
+- Registry: D-89 `kind: runtime`, cited from `efficiency.py` and
+  `reference.py`; `docs/necb_decisions.md` heading + TOC.
+
+### Data hygiene riding the same change (Sol)
+
+- The daylighting table's stale `table_row` join labels for the three rows
+  2025 renamed (present identically in both copies; a label, not a value).
+- `heat_rejection` block removal (above).
+
+### R-O — two freezes, accepted diff stated before either runs
+
+**R-O-a (machinery only, Fable, on `d89-step3` off main, BEFORE the
+behaviour lands):** add `corpus-sizing-13-district-heating` (verify lane)
+and `corpus-annual-13-district-heating` (parity lane) so the purchased-
+heating boiler is sized and simulated in the frozen set. `_corpus` gains a
+`seal` override: these carry `python-only:d-89-purchased-heating` and NO
+attestation fields (a default-code corpus scenario would otherwise be
+minted `ruby` and converted to `post-handoff` with the 85ab143 attestation
+— a fabricated cross-language claim; `test_first_freeze_seals_claim_no_
+attestation` guards it, and the 31-transitioned count stays). Accepted
+diff: the two new baselines, `defs_sha256`, `provenance.commit`, counts
+(verify 3→4, parity 4→5); the existing 39 byte-identical.
+
+**R-O (numeric, Fable, on the integrated tree):** allowed and attributed per
+scenario by an `attribute_ro.py` in the R-C style:
+- `audit.json`/`audit.txt`: the boiler/furnace efficiency entries (new
+  inputs/value/evidence/article/ruling), the purchased-heating selection
+  entry's new class input, the `EnteringBoiler` setting if it is audited;
+  any WARNING must be explained or it stops the freeze.
+- `report.json`: `corpus-annual-01`, `-02`, `determination-01-…-necb2025`
+  (non-condensing boiler + atmospheric furnace curves: reference gas, site
+  energy, unmet hours, GHG; each delta listed against the curve that moved,
+  bounded by the ≤ 2.76 % / 1.22 % multiplier changes) and
+  `corpus-annual-13-district-heating` (the modulating curve: the one
+  scenario where the 33.5 % multiplier difference is live; delta listed).
+  `corpus-sizing-*`: audit only, `report.json` unchanged.
+  `api-eui-path-necb2025`: untouched (no reference building).
+- manifest: `provenance.commit`, `baseline_sha256`, `defs_sha256` only if
+  defs moved again; `spec` unchanged.
+- Electric boiler: attributed as "no frozen exposure; quantified by the
+  focused test" — stated, not omitted.
+- DF-1 (unmet hours at 01-baseboard-gas) stays open; a movement in its
+  unmet hours is reported, not claimed fixed.
+Sol reviews the attribution before the stack merges.
+
+### Execution
+
+- **Fable, now, `d89-step3` off main:** R-O-a (scenario defs + freeze). Then
+  D-89 registry/doc text, integration, R-O + attribution, docs regen, the
+  parallel verification, and the Sol brief.
+- **Opus A — "curves, loader, appliers"** (worktree off main): data shape
+  items 1–6 (both editions, byte-identical where content is identical),
+  `efficiency.py` changes, the electric reset, the feature READ, tests,
+  the vintage-match generator and regenerated docs, manifest provenance +
+  hash refresh. Interface with B: the feature key
+  `btap_part_load_curve_class` (string, the enum) on `BoilerHotWater`.
+- **Opus B — "propagation"** (worktree off main): `reference_rules.json`,
+  `reference.py` (config + decision inputs + feature stamp), the
+  propagation tests, D-89's citation site in `reference.py`.
+- **Sonnet — "hygiene"** (worktree off main): the daylighting `table_row`
+  labels in both copies with hash refresh, and the data README's authoring
+  rule for `part_load_curve_class`.
+Agents run targeted tests only; one heavy job at a time (the freeze is
+Fable's). Merge commits, not squash.
+
+### Step 3 progress — R-O-a done (Fable, 2026-09-11)
+
+- **R-O-a frozen on `d89-step3` (`1ed97f8`).** 41 scenarios (python 32,
+  verify 4, parity 5). `_corpus` gained a `seal` override; the two
+  purchased-heating scenarios carry `python-only:first frozen at D-89 step 3
+  (R-O-a) …` with no attestation fields (31 transitioned seals unchanged).
+  Attribution (`attribute_ro.py`): 10 new files in 2 new scenarios, 0
+  changed files in the 39 existing; manifest moved only `counts`,
+  `provenance.{commit,defs_sha256,active_seals}`. Manifest gates green.
+- **The new annual baseline records the defect D-89 fixes:** the reference
+  built for `13-district-heating` elects the modulating boiler
+  (8.4.4.6.(1)), sizes the Primary Boiler at 64.8 kW and applies
+  `BOILER-EFFFPLR` (the non-condensing 2011 cubic); reference natural gas
+  1569.4 kWh, site 3022.2 kWh, unmet heating 29.25 h. R-O's modulating delta
+  is measured against these numbers.
+- **Sonnet hygiene delivered** (`worktree-agent-aeb392b059e5de005`
+  `ab7913a`): the three stale daylighting `table_row` labels fixed in both
+  copies from the archived Table 4.2.1.6 payload (0 values moved; 101/101
+  join, 198/198 control states agree), vintage-match unmatched counts down
+  by exactly those rows, README subsection for the class rule. Held for
+  integration.
+
+### Step 3 — D-89 implemented; R-O frozen and attributed (Fable, 2026-09-11)
+
+**Delivered on `d89-step3`** (three agent branches merged, each re-verified
+on the integrated tree in the main checkout — the shared venv's editable
+install pins `btap` to the main checkout, so a worktree agent's pytest
+silently tests main unless it bypasses the finder; recorded in memory):
+- Opus A — both `efficiencies.json`: `part_load_curve_class` on every
+  boiler/furnace row (`efffplr`, `condensing`, `condensing_control` and the
+  vestigial `heat_rejection` block removed); `part_load_fheatplc` with every
+  class the edition publishes (six per edition; unreachable ones carry
+  `deferred_reason`); the four 2011 cubics retired; three `TableLookup`
+  rows per edition (`BOILER-PLF-NONCONDENSING`, `FURNACE-PLF-ATMOSPHERIC`
+  source-neutral, `BOILER-PLF-MODULATING-necb20xx` code-qualified) with
+  `implements` blocks and computed `max_error_vs_exact` — non-condensing
+  1.48 % relative at PLR 0.014 (0.055 % above 0.10), atmospheric 0.027 %,
+  2020 modulating exact, 2025 modulating 2.89 % at 0.014 (0.029 % above
+  0.10); `part_load_curves` class→curve map with the edition's own article
+  strings. `efficiency.py`: `TableLookup` branch, typed validated reuse
+  (DF-4 closed), `set_limits` writes a declared 0.0, class resolution with
+  the propagated feature winning over the row, electric reset,
+  `EnteringBoiler`, the SHW-shaped audit entry with `ruling='D-89'`.
+  EnergyPlus 25.2 confirmed (shipped library) to floor a fuel coil's PLF at
+  0.7; the atmospheric rational crosses 0.7 at PLR ≈ 0.055, so the 0.10
+  furnace grid start is justified. Vintage-match generator and docs
+  regenerated; `necb_8_4_6_curve_probe.py` reads a `Table:Lookup`. 23 new
+  tests.
+- Opus B — `reference_rules.json` `purchased_heating.part_load_curve_class:
+  modulating`; `_reference_energy_type` returns `(energy_type, class)`,
+  the class rides `assignment.config` and is stamped as
+  `btap_part_load_curve_class` on every boiler `replace_system` creates
+  (the purchased-cooling precedent); decision inputs + `ruling='D-89'`; 13
+  new tests incl. clone, save/load and second-pass survival.
+- Sonnet — the three stale daylighting `table_row` labels (0 values moved)
+  and the data README's class rule.
+- Fable — D-89 registered (`kind: runtime`, cited by both sites); the two
+  8.4.4.9.(8)/8.4.4.10.(5) coverage sentences that named "Subsection 8.4.6"
+  and a retired Rake task in BOTH snapshots reworded in each edition's own
+  numbering; loader warning de-duplicated to once per model; R-O-a and
+  R-O.
+
+**Integrated-tree verification before the freeze:** 236 targeted tests
+(20 files, SDK + engine) passed; Ruff, import contracts, orphan keys,
+provenance hashes, decisions TOC, vintage-match and edition-delta `--check`
+all clean.
+
+**R-O attribution — the numbers were not what the design predicted, and
+the investigation found a legacy defect.** The design bounded the boiler
+change at ≤ 3 %; the freeze moved reference heating gas 29–50 %. On
+`corpus-annual-01` (one week, deterministic re-run), the boiler's heat
+output is identical (1036 kWh) in both trees while gas goes 1151.5 →
+1859.3 kWh. The legacy run's gas ÷ heat is exactly 1/0.9 at every
+timestep: **its curve was never evaluated.** The legacy reference IDF has
+a BLANK curve field on `Boiler:HotWater`; OpenStudio's forward translator
+(`ForwardTranslateBoilerHotWater.cpp` v3.11.0) writes the curve only when
+the Efficiency Curve Temperature Evaluation Variable is set and logs
+nothing otherwise; the gem never set it, nor did the pre-D-89 Python. So
+no oracle golden and no earlier frozen baseline ever carried a boiler
+part-load penalty. Re-running the legacy IDF with the cubic wired in by
+hand gives 1743.7 kWh (+51.4 %); the Code's table then adds +6.6 %. The
+furnace curve was always translated (−0.1 % on the coils). D-89 amended
+with this finding; memory note `boiler-curve-never-translated`.
+
+Per-scenario numeric attribution (`attribute_ro.py`, base = R-O-a
+`1ed97f8`):
+
+| scenario | reference heating (kWh) | reference natural gas (kWh) | reference site (kWh) | % of target | tier / GHG level | reference unmet heating (h) | attributed to |
+|---|---|---|---|---|---|---|---|
+| corpus-annual-01-baseboard-gas (1 week) | 1227.8 → 1950.0 (+58.8 %) | 1538.9 → 2261.1 | 3025.0 → 3747.2 | 90.1 → 72.7 | 1 → 2 | unchanged | boiler curve now evaluated (+51 %) + Code table vs legacy cubic (+6.6 %); furnace −0.1 %; DX rebuilt, cooling unchanged |
+| corpus-annual-02-psz-gas-dx (1 week) | 1258.3 → 2050.0 (+62.9 %) | 1569.4 → 2361.1 | 3019.4 → 3813.9 | 131.6 → 104.2 | none → none | unchanged | same mechanism |
+| corpus-annual-13-district-heating (1 week, NEW at R-O-a) | 1258.3 → 1397.2 (+11.0 %) | 1569.4 → 1705.6 | 3022.2 → 3158.3 | 139.9 → 133.9 | none → none | unchanged | the MODULATING table (PLF 0.85–1.0) now evaluated on the purchased-heating boiler — the one scenario where 8.4.4.6.(1) is live |
+| determination-01-baseboard-gas-necb2025 (full year) | 53063.9 → 73283.3 (+38.1 %) | 67330.6 → 87552.8 | 155047.2 → 175319.4 | 76.0 → 67.3 | 1 → 2; GHG F → E (95.3 → 78.6 % of GHG target) | 801.0 → 802.25 (DF-1, open) | boiler activation + 2025 table; cooling +3.3 % (DX curves rebuilt from the snapshot, DF-5); fans −0.1 %; sizing factors ±0.3 % |
+| corpus-sizing-01/-02/-09/-13 | — | — | — | — | — | — | audit only (efficiency entries, DF-4 warnings) |
+| 20 corpus-none-* and the api/verdict/usage scenarios | — | — | — | — | — | — | audit text only where a reference boiler/furnace entry or coverage sentence appears; 13 scenarios byte-identical |
+
+
+Accepted non-numeric diff: the boiler/furnace efficiency entries (new
+inputs/value/evidence/article/ruling) in 28 scenarios; the purchased-
+heating selection and build entries carrying the class (3 scenarios); the
+two reworded coverage sentences in every reference-building audit; the
+`Tier 1 → Tier 2` compliance entries where the ratio crossed; the
+`determination-01` assertion re-pin (tier 2, GHG level E); one DF-4 WARNING
+per divergent DX curve name per reference model (32 in total — the
+`btap.modeling` DX catalogue diverges from the snapshots under four shared
+names; the reference now builds the snapshot's own; which catalogue the
+PROPOSED side should carry is deferred finding **DF-5**). Electric boiler:
+no frozen exposure; quantified by the focused test (0.5635 → 1 at PLR
+0.10). DF-1 (801 h unmet at 01-baseboard-gas, 2025) moved to 802.25 h —
+reported, not claimed fixed.
+
+**For Sol:** (1) the translator finding and its magnitude; (2) whether an
+oversized reference boiler at PLR < 0.1 burning the Code's a·Fuel_design
+standby is the intended reading (it is the literal one; the alternative is
+a minimum PLR or a cycling model, which the Code does not state); (3) DF-5;
+(4) the tier/GHG re-pin.
+
+### Step 3 — Sol's review of the first R-O freeze (2026-09-12): request changes, all fixed
+
+All four findings verified in the code before acting. P1 (plant reuse
+loses the purchased class in a mixed building; a proposed tag steers the
+reference) — both were design gaps of mine: the interface contract said "a
+present feature wins" without requiring the reference build to clear
+incoming tags, and I reviewed the propagation for homogeneous layouts only.
+Fixed: class-aware loop reuse and stamping at creation in
+`plant_loops.hot_water` (builder passes `boiler_part_load_curve_class`),
+tags cleared on the clone in `reference_hvac` with an audited info entry.
+P2 (table domain vs permitted PLR) — my grid choice; fixed with the 0.001
+grid start, the finer low-load region, the published standby-term bound
+below the first node (an engine-minimum alignment was tried first and
+reverted: EnergyPlus forces heat output up to the minimum, a physics
+change), and the error re-derived on a 0.0001 grid (see D-89's second
+amendment for the figures). P3 — whitespace; `git diff --check` added to
+the verification. Four tests added (mixed sources in both orders, reuse
+mechanism, stale tag, engine domain). D-89 amended; R-O re-frozen on the
+clean tree; attribution and lanes re-run below.
+
+**Final R-O (2026-09-12, `freeze.py` on the clean tree after the review
+fixes; the table above carries the final numbers).** Relative to the first
+freeze: 7 scenarios moved — `corpus-annual-01` +0.7 %, `-02` +0.3 %, the
+2025 determination +0.7 % reference heating (the tables now follow the
+Code's rational down to PLR 0.001 instead of holding PLF(0.01) below it),
+their sized siblings' audit text, and nothing else; `corpus-annual-13`
+(modulating) report byte-identical, audit text moved — the 0.2 % it moved under the reverted
+engine-minimum attempt was the forced heat output, which is why that
+approach was dropped. Against R-O-a the accepted categories are unchanged
+(boiler/furnace efficiency entries in 28 scenarios, the class on the
+purchased-heating selection and build entries, the reworded coverage
+sentences, the tier/GHG entries, one DF-4 warning per divergent DX curve
+name per sized reference model, 32 in all). Scenario-lane verification
+(suite + three lanes + gates) follows below.
+
+### Step 3 — Sol's second review (2026-09-13): request changes, all fixed
+
+All five findings verified in the code first. P1 coils: the sanitizer I
+added covered boilers only while the resolver also serves both gas coil
+types — fixed and tested on a tagged PSZ-AC with gas coil. P1 domain: nodes
+at 0.001 still left the standby term unrepresented; two exact carriers were
+measured and rejected (engine minimum forces heat; the parasitic fuel
+fields charge in every OFF timestep — boiler 45/45, coils 659/659), so the
+tables now run to the engine's own floors (boilers to PLR 0.0001 against
+the 0.01 curve floor, furnaces to 0.055 against the 0.7 PLF floor), the
+crossing and the residual are published per row and re-derived by tests.
+P1 DF-4: null row bounds now require an absent object bound (Sol's
+`minimumCurveOutput = 99` probe is a test). P2: district requests no longer
+adopt a boiler loop built first; both orders tested. P3: the suite count
+below is the run's own; annual-13's REPORT (not the scenario) was
+byte-identical between freezes. D-89 third amendment; R-O re-frozen on the
+clean tree; attribution and lanes below.
+
+**Final R-O after the second review (2026-09-13, clean tree at `571ca58`;
+the table above carries these numbers).** Relative to the previous freeze:
+7 scenarios moved — `corpus-annual-01` +0.14 %, `-02` +0.14 %, the 2025
+determination +0.18 % reference heating (the boiler tables now reach the
+engine's 0.01 floor at PLR 0.0001 and the furnace table the 0.7 floor at
+PLR 0.055), `corpus-annual-13`'s heating END USE one 0.01 GJ rounding step
+(1394.4 → 1397.2 kWh) from its furnaces with its gas and site totals
+unchanged, and the sized siblings' audit text; nothing else. Against
+R-O-a the accepted categories are unchanged (32 DF-4 warnings in all).
+Suite, three lanes and gates below.
+
+### Step 3 — independent Opus review before Sol's third pass (2026-09-13): request changes, all fixed
+
+Verdict reproduced and accepted. P1: the "engine floor at 0.01" on the
+boiler curve was my misreading of `Boilers.cc` — a substitution for a
+non-positive output, never reached by the positive rational (a constant
+0.005 curve runs unclamped); the boiler rows drop `engine_floor`, the first
+node is the table's own stopping point with the standby-term bound
+published. P2: my source-first district lookup adopted the ground-loop
+condenser loop (a DistrictHeating object) — name guard restored, accepting
+the SDK's `Hot Water Loop 1` suffix an exact match missed; ground-loop case
+tested. P2: the D-89 body and first amendment carried stale grids and
+figures (fixed); the verification record I said "follows below" was never
+written — it is here now: **final freeze `ea3376b` verified on `f80c8fe`:
+suite 1076 passed / 83 subtests; lanes python 5 passed (32 subtests),
+verify 5 (4), parity 5 (5); lint-imports, Ruff, orphan keys, decisions
+TOC, edition delta, vintage match, provenance hashes, `git diff --check`
+clean; regenerated documents no diff.** P2: `PART_LOAD_CLASSES` was never
+consulted and a tag could put a combustion curve on an electric boiler —
+validated, and `not_applicable` rows keep their class. P2 stated:
+purchased-heating references on systems 3/4/hp keep an atmospheric furnace
+beside the modulating boiler (DF-6); the heat-pump reference path never
+reaches the purchased-heating rule (DF-7). P3: "exact at every node" → six
+decimals asserted relatively; sampled maxima labelled as such and
+resampled at 0.00001; `(D-89)` name squatting no longer multiplies objects;
+lookup unit types compared. The earlier Opus-A bullet's 1.48 % / 2.89 % /
+0.027 % and "0.10 furnace grid" are first-freeze figures, superseded above.
+D-89 fourth amendment; R-O re-frozen (audit evidence text moved; no point
+changed).
+
+**R-O after the independent review (2026-09-13, clean tree at `855fa44`).**
+Relative to the previous freeze: 7 scenarios moved, every difference in
+the boiler/furnace efficiency entries' evidence text (the retracted
+engine-floor claim; sampled-maximum wording); zero `report.json` leaves
+moved, no new warning, no new entry kind. The plan-log table's numbers
+stand. Suite, three lanes and gates for this head follow.
+
+**Verification of `2156994` (2026-09-13):** suite 1082 passed / 83
+subtests; lanes python 5 passed (32 subtests), verify 5 (4), parity 5 (5);
+lint-imports, Ruff, orphan keys, decisions TOC, edition delta, vintage
+match, provenance hashes, `git diff --check` clean; regenerated documents
+no diff. Ready for Sol's third pass.
+
+### Step 3 — Sol's third pass (2026-09-13): verified; five pre-merge items done
+
+Sol verified both rounds (his run: focused 51 passed; full suite 1087 /
+115 subtests; lanes verify 5 (4), parity 5 (5); gates clean; the
+independent-review freeze changed evidence only). Five items before
+merge, all done: the zero node on the boiler tables (169 nodes; the Code
+equation to zero load, residual ≤ 0.054 % as PLR → 0); an engine
+regression test that measures the three engine facts D-89 rests on
+(`test_part_load_engine.py`); `DistrictHeatingSteam` as a district source;
+exclusive source matching for hybrid loops; audit/row text aligned. D-89
+fifth amendment; R-O re-frozen; attribution and verification below.
+
+**R-O after Sol's third-pass items (2026-09-14, clean tree at `6d8de96`).**
+Relative to the previous freeze: 7 scenarios moved — the boiler/furnace
+efficiency entries' evidence text (the zero node), and the NECB 2025
+determination's reference heating 73283.3 → 73291.7 kWh (+0.011 %), gas
++0.006 %, site +0.005 %, the zero node's effect in hours under 0.01 %
+load; the three one-week annual scenarios' reports unchanged. A first
+attempt at this freeze leaked 60 OpenStudio deprecation lines into one
+scenario's audit text (the reuse checks called the deprecated
+`to_DistrictHeating()` on every supply component); the district check now
+reads the IDD type and the leak is gone. Suite, three lanes and gates for
+this head follow.
+
+**Verification of `a45f25a` (2026-09-14):** suite 1085 passed / 83 subtests
+with one failure — the 8.4 coverage page had been generated before the
+fifth amendment's text and is regenerated in the next commit (its test
+passes on the regenerated page); lanes python 5 passed (32 subtests),
+verify 5 (4), parity 5 (5); lint-imports, Ruff, orphan keys, decisions
+TOC, edition delta, vintage match, provenance hashes, `git diff --check`
+clean. Ready for Sol.
+
+### Step 3 — Sol's fourth pass (2026-09-14): request changes, all fixed
+
+Sol accepted the zero-node implementation and the numeric R-O results (his
+run: focused 55 passed; full suite 1090 / 1 skipped / 115 subtests; lanes
+python 5 (32), verify 5 (4), parity 5 (5); gates clean) and requested
+changes. Every finding was reproduced in the code before acting; fixes in
+`38d1a47`, D-89 sixth amendment.
+- **P1 — district steam bypassed D-89's selection path.** `classify` (both
+  `_plant_facts` and `_external_source_loop`) now reads
+  `plant_loops.DISTRICT_HEATING_TYPES` by IDD type, steam included; costing
+  warns for steam objects. The Code (MCP): 8.4.4.6.(1) / 8.4.5.6.(1) name
+  no medium; the oracle counts `OS_DistrictHeating_Steam` as purchased
+  (`Standards.Model.rb:1036`, `Standards.PlantLoop.rb:1388`). `runner.py`
+  needed no code change: `SqlFile_Impl::districtHeatingTotalEndUses` returns
+  water + steam (OpenStudio v3.11.0 source) and is asked first; a comment and
+  an SDK-free test pin that. New tests: steam is purchased heating and an
+  external HP source (classify), a steam proposed builds modulating reference
+  boilers and fires the 8.4.4.6.(1) decision (reference), the steam costing
+  warning.
+- **P2 — the engine test did not guard the zero node.** Now 20 MW at 100 W:
+  PLR 4.8718e-6, asserted below the first positive node (1e-5); gas/heat
+  18848.81 against the Code's 18839.05 (+0.052 %, tolerance 0.5 %). Negative
+  control with the node removed: 9182.74 (−51.26 %), exactly the held
+  first-node value.
+- **P2 — D-89 evidence against the data.** The body's grids, the fifth
+  amendment's items (1)–(3) and the registry summary now state the shipped
+  tables; `_curve_evidence` branches on the FHeatPLC entry's form, so NECB
+  2020's printed-point table says the Code publishes nothing below PLR 0.1
+  instead of a standby bound.
+- **P2 — disposition.** 8.4.6.1–8.4.6.3 rewritten to D-89 and the Python probe
+  in edition-neutral wording (probe run 2026-09-14: boiler and furnace tables
+  0.00 % over PLR 0.25–1.0; DX 0.01 / 0.00 / 2.02 %; chillers 0.00 %; ASHP
+  0.00 / 0.01 / 1.83 %; SWH 0.98 %); the same retired Ruby-probe citation
+  also left 8.4.6.4, 8.4.6.5 and 8.4.6.7–8.4.6.9. The reviewer fields say the
+  rationale was revised and is pending re-review. Coverage page regenerated.
+- **P2 — diagnostics.** A class already reported as a data error no longer
+  draws a second "no representation" warning; the loader's unknown-form and
+  NOT-adopted warnings carry `ruling='D-89'`.
+- **P3.** CLAUDE.md and DEVELOPERS.md: 41 scenarios, ten Python-only from
+  their first freeze; `unittest.main()` moved to the end of
+  `test_hvac_part_load_curves.py`.
+
+**R-O after the fourth-pass items (2026-09-14, clean tree at `38d1a47`,
+baselines `d8b656b`).** 42 files: 26 scenarios and the manifest. No
+`report.json` moved. `audit.json` / `audit.txt` in 8 scenarios: `ruling`
+D-89 on the 32 DF-4 warnings; `corpus-sizing-13` and `corpus-annual-13`: the
+2020 modulating evidence (two entries each, one per efficiency pass);
+`stdout.txt` in 25 scenarios: 845 `[openstudio.model.DistrictHeating]
+Deprecated at 3.7.0` lines removed, printed until now by the classifier's
+deprecated cast — the one category beyond the "audit re-freeze" Sol
+anticipated, of the same kind as `6d8de96`'s; manifest: `provenance.commit`
+and the moved hashes only.
+
+**Verification (2026-09-14).** Full suite on the fix tree (`38d1a47`'s
+content), frozen module excluded because its baselines were not yet
+re-frozen: 1097 passed, 1 skipped, 83 subtests. Engine regression with
+`BTAP_ENGINE_REQUIRED=1`: 4 passed. Lanes on `d8b656b`: python 5 passed
+(32 subtests), verify 5 (4), parity 5 (5). Ruff, import contracts (4 kept),
+orphan keys, decisions TOC and registry tests, edition delta, vintage match,
+Python curve probe (status OK, 0 failures) and `git diff --check` clean.
+
+**Independent review (Fable, 2026-09-14): approve.** It re-ran Sol's
+end-to-end probe with steam (purchased heating true; two modulating
+reference boilers; five 8.4.4.6.(1) decisions; no deprecation output),
+reasoned that every new test fails on the pre-fix code, confirmed the
+re-freeze has no unexplained change and that the coverage page regenerates
+byte-identical. Six P3s, four fixed in the commit that carries this entry: the sixth amendment
+(and registry summary) named disposition 8.4.6.1–8.4.6.5 where the commit
+changed 8.4.6.1–8.4.6.5 and 8.4.6.7–8.4.6.9; 8.4.6.9's rewritten rationale
+now carries the "pending re-review" note; the runner test's docstring says
+the SDK arithmetic was verified from source, not by the test; the untagged
+catalogue-miss warning is stated as deliberate; plus a pre-existing double
+docstring in the engine test. Left: no catalogue icon for
+`OS_DistrictHeating_Steam` (cosmetic, `catalog_icons.py`); purchased service
+water heating (8.4.4.6.(3)) remains the declared `host_scope` gap for any
+medium. None of the follow-ups reaches a frozen output (engine and runner
+tests 7 passed; Ruff clean; coverage page moved one row).
+
+Sol's P3 about `unittest.main()` preceding test classes was a pattern, not
+one file: an AST scan found it in five more test modules
+(`test_reference_part_load_class.py`, and before D-89 `test_catalog_report.py`,
+`test_hvac_audit_fixes.py`, `simulation/test_engine.py`, `test_compat.py`).
+Each guard now ends its file (placement moved only; 89 passed, 2 subtests,
+on those five files; `python -m unittest tests.test_compat` now runs all 16).
+Ready for Sol.
+
+**Full CI on the D-89 head (2026-09-14).** PR #47 (CodeBuild runners, the CI
+image, parallel parity, the per-system D-58 matrix, line coverage) merged to
+main, and main was merged into `d89-step3` as `d270250`: an automatic merge,
+no conflicts, with no product code or frozen baseline changes from main. This
+is D-89's first CI run that includes `verify` and the parity lanes (PR runs
+skip them). Dispatch run 34875691969: all five jobs green in 7 min 2 s.
+- verify: 1203 passed, 2 skipped; line coverage of `btap` **85.57%**, above
+  the 84% floor.
+- python: 1085 passed, 45 skipped.
+- parity: SmallOffice gate 4 passed; Live Leg C 23 passed. Its four
+  `[BOOST_ASSERT] … addAndInsertObjects` lines also appear in pre-D-89 parity
+  runs, so they are existing SDK noise, not a D-89 effect.
+- parity-scenarios: 5 passed (the annual lane, frozen at `d8b656b`).

@@ -26,6 +26,7 @@ from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
+from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
 
 
 def data(edition):
@@ -1005,82 +1006,309 @@ def w_to_tons(watts):
 
 
 # ---------------- curves ----------------
+#
+# D-89 closes deferred finding DF-4. Until it landed, `curve()` adopted ANY
+# model object whose NAME matched the wanted curve, with no check on its form,
+# its coefficients or its bounds — so a proposed model carrying a differently
+# shaped `BOILER-EFFFPLR` silently supplied the reference building's part-load
+# curve, and a neutral curve identifier could not be trusted once two editions
+# published different numbers under it. Reuse is now TYPED (the lookup for the
+# row's own form) and VALIDATED; a mismatch is a WARNING naming the foreign
+# object, never a silent adoption, and the ruleset then builds its OWN object
+# under a disambiguated name. An unknown form is a WARNING too, not a silent
+# `None` that leaves the component with whatever curve it already had.
+#
+# MEASURED CONSEQUENCE, beyond the part-load curves D-89 is about:
+# `btap/modeling/hvac/data/curves.json` ships DIFFERENT coefficients and bounds
+# under four of the names this catalogue also uses — DXCOOL-REF-CAPFT,
+# DXCOOL-REF-CAPFFLOW, DXCOOL-REF-COOLEIRFT and DXCOOL-REF-COOLPLFFPLR (the
+# last wholly different: cubic [0.0277, 4.9151, -8.184, 4.2702] over x 0.7-1.0
+# against this catalogue's [0.5157488, 2.1061434, -3.4205764, 1.8073371] over
+# 0.25-1.0). Before D-89 the reference building silently ADOPTED the proposed
+# model's versions; it now gets the ruleset's own, with a warning naming the
+# foreign object. That is the rest of DF-4, and it moves reference DX energy in
+# every scenario with a DX coil — not only the boiler/furnace scenarios. The
+# right durable fix is to make the two catalogues agree; narrowing the check to
+# `form == 'TableLookup'` in `curve()` would defer it again.
 
-def curve(model, tables, name):
-    """Build (or reuse by name) a performance curve from a vendored curve row."""
+#: The tolerance a reused object's numbers must agree within. Generous enough
+#: for an .osm/.idf text round-trip of a double, far tighter than any real
+#: divergence between two catalogues.
+CURVE_MATCH_TOL = 1e-9
+
+#: form (as the catalogue spells it) -> how to find, read and build it.
+#: ``coefficients`` are the SDK accessor suffixes in the catalogue's
+#: ``coeff_1..coeff_N`` order, so one table drives building AND validating.
+_CURVE_FORMS = {
+    'BiQuadratic': {
+        'cls': 'CurveBiquadratic', 'find': 'getCurveBiquadraticByName',
+        'two_vars': True,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4y', '5yPOW2', '6xTIMESY'),
+    },
+    'BiCubic': {
+        'cls': 'CurveBicubic', 'find': 'getCurveBicubicByName',
+        'two_vars': True,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4y', '5yPOW2', '6xTIMESY',
+                         '7xPOW3', '8yPOW3', '9xPOW2TIMESY', '10xTIMESYPOW2'),
+    },
+    'Cubic': {
+        'cls': 'CurveCubic', 'find': 'getCurveCubicByName', 'two_vars': False,
+        'coefficients': ('1Constant', '2x', '3xPOW2', '4xPOW3'),
+    },
+    'Quadratic': {
+        'cls': 'CurveQuadratic', 'find': 'getCurveQuadraticByName', 'two_vars': False,
+        'coefficients': ('1Constant', '2x', '3xPOW2'),
+    },
+    'TableLookup': {
+        'cls': 'TableLookup', 'find': 'getTableLookupByName', 'two_vars': False,
+        'coefficients': (),
+    },
+}
+#: Spellings the vendored catalogue has used for the same form.
+_FORM_ALIASES = {'Biquadratic': 'BiQuadratic', 'Bicubic': 'BiCubic'}
+
+
+def curve_form(row):
+    """The catalogue row's form, in this module's one spelling, or None."""
+    form = row.get('form')
+    form = _FORM_ALIASES.get(form, form)
+    return form if form in _CURVE_FORMS else None
+
+
+def _close(a, b):
+    if a is None or b is None:
+        return a is None and b is None
+    return abs(float(a) - float(b)) <= CURVE_MATCH_TOL + CURVE_MATCH_TOL * abs(float(b))
+
+
+def _optional_value(getter):
+    """An SDK optional's value (or a plain value), None when uninitialized;
+    accepts the accessor itself or its result."""
+    value = getter() if callable(getter) else getter
+    if hasattr(value, 'is_initialized'):
+        return value.get() if value.is_initialized() else None
+    return value
+
+
+
+def _limits_match(obj, row, two_vars):
+    """Declared bounds agree. A bound the row leaves null is not compared — the
+    catalogue is silent there and the SDK's own default stands."""
+    pairs = [('minimum_independent_variable_1', obj.minimumValueofx),
+             ('maximum_independent_variable_1', obj.maximumValueofx)]
+    if two_vars:
+        pairs += [('minimum_independent_variable_2', obj.minimumValueofy),
+                  ('maximum_independent_variable_2', obj.maximumValueofy)]
+    if hasattr(obj, 'minimumCurveOutput'):
+        pairs += [('minimum_dependent_variable_output', obj.minimumCurveOutput),
+                  ('maximum_dependent_variable_output', obj.maximumCurveOutput)]
+    elif hasattr(obj, 'minimumOutput'):
+        pairs += [('minimum_dependent_variable_output', obj.minimumOutput),
+                  ('maximum_dependent_variable_output', obj.maximumOutput)]
+    for key, getter in pairs:
+        wanted = row.get(key)
+        value = getter()
+        if wanted is None:
+            # A bound the row leaves null must be ABSENT on the object too: a
+            # foreign clamp the catalogue never declared is a divergence
+            # (Sol's R-O review). A required SDK field (plain float, never
+            # optional) cannot be absent and is not compared.
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False
+            continue
+        if not _close(_optional_value(value), wanted):
+            return False
+    return True
+
+
+def _polynomial_matches(obj, row, spec):
+    for index, suffix in enumerate(spec['coefficients'], start=1):
+        wanted = row.get(f'coeff_{index}')
+        got = getattr(obj, f'coefficient{suffix}')()
+        if not _close(got, wanted):
+            return False
+    return _limits_match(obj, row, spec['two_vars'])
+
+
+def _lookup_matches(obj, row):
+    """One independent variable, the same grid, the same outputs, the same
+    interpolation/extrapolation and the same bounds."""
+    variables = obj.independentVariables()
+    if len(variables) != 1:
+        return False
+    points = row.get('points') or []
+    independent = variables[0]
+    values = [float(v) for v in independent.values()]
+    outputs = [float(v) for v in obj.outputValues()]
+    if len(values) != len(points) or len(outputs) != len(points):
+        return False
+    for (x, y), got_x, got_y in zip(points, values, outputs):
+        if not _close(got_x, x) or not _close(got_y, y):
+            return False
+    if independent.interpolationMethod() != row.get('interpolation'):
+        return False
+    if independent.extrapolationMethod() != row.get('extrapolation'):
+        return False
+    if obj.normalizationMethod() != 'None':
+        return False
+    if independent.unitType() != 'Dimensionless' or obj.outputUnitType() != 'Dimensionless':
+        return False  # what _build_lookup writes; a foreign unit type is a divergence
+    for key, getter in (('minimum_independent_variable_1', independent.minimumValue),
+                        ('maximum_independent_variable_1', independent.maximumValue),
+                        ('minimum_dependent_variable_output', obj.minimumOutput),
+                        ('maximum_dependent_variable_output', obj.maximumOutput)):
+        wanted = row.get(key)
+        value = getter()
+        if wanted is None:
+            if hasattr(value, 'is_initialized') and value.is_initialized():
+                return False  # a clamp the catalogue never declared
+            continue
+        if not _close(_optional_value(value), wanted):
+            return False
+    return True
+
+
+def curve_matches(obj, row):
+    """Does this model object state exactly what the catalogue row states?
+
+    The FORM is part of the answer: an object of another curve type sharing the
+    name never matches, however close its numbers (the SHW loader's rule — a
+    Quadratic spec must not be smuggled through as a cubic with a zero term)."""
+    form = curve_form(row)
+    if form is None:
+        return False
+    spec = _CURVE_FORMS[form]
+    caster = getattr(obj, f"to_{spec['cls']}", None)
+    if caster is None:
+        return False
+    cast = caster()
+    if not cast.is_initialized():
+        return False
+    obj = cast.get()
+    if form == 'TableLookup':
+        return _lookup_matches(obj, row)
+    return _polynomial_matches(obj, row, spec)
+
+
+def _build_polynomial(model, row, spec, name):
+    k = getattr(openstudio.model, spec['cls'])(model)
+    for index, suffix in enumerate(spec['coefficients'], start=1):
+        getattr(k, f'setCoefficient{suffix}')(row.get(f'coeff_{index}'))
+    set_limits(k, row, two_vars=spec['two_vars'])
+    k.setName(name)
+    return k
+
+
+def _build_lookup(model, row, name):
+    """A `Table:Lookup` over one independent variable — the representation the
+    part-load articles' printed points and rationals are carried in (D-89)."""
+    points = row.get('points') or []
+    independent = openstudio.model.TableIndependentVariable(model)
+    independent.setName(f'{name} PLR')
+    independent.setInterpolationMethod(row.get('interpolation') or 'Linear')
+    independent.setExtrapolationMethod(row.get('extrapolation') or 'Constant')
+    independent.setUnitType('Dimensionless')
+    independent.setValues([float(x) for x, _y in points])
+    if row.get('minimum_independent_variable_1') is not None:
+        independent.setMinimumValue(row['minimum_independent_variable_1'])
+    if row.get('maximum_independent_variable_1') is not None:
+        independent.setMaximumValue(row['maximum_independent_variable_1'])
+
+    table = openstudio.model.TableLookup(model)
+    table.addIndependentVariable(independent)
+    table.setNormalizationMethod('None')
+    table.setOutputUnitType('Dimensionless')
+    table.setOutputValues([float(y) for _x, y in points])
+    if row.get('minimum_dependent_variable_output') is not None:
+        table.setMinimumOutput(row['minimum_dependent_variable_output'])
+    if row.get('maximum_dependent_variable_output') is not None:
+        table.setMaximumOutput(row['maximum_dependent_variable_output'])
+    table.setName(name)
+    return table
+
+
+def curve(model, tables, name, audit=None, target=None):
+    """Build — or reuse, once validated — a performance curve from this
+    edition's own catalogue row.
+
+    Reuse is typed and checked (D-89/DF-4): the lookup is the one for the row's
+    OWN form, and the object it finds is adopted only when its form,
+    coefficients or points, and declared bounds all state what the row states.
+    A model object that merely shares the name is reported as foreign and the
+    ruleset builds its own object beside it.
+    """
     if name is None or str(name) == '':
         return None
-
-    existing = next((c for c in model.getCurves() if c.nameString() == name), None)
-    if existing is not None:
-        return existing
+    audit = audit if audit is not None else NullAudit()
 
     row = next((c for c in tables['curves'] if c['name'] == name), None)
     if row is None:
+        audit.warn('efficiency',
+                   f"curve '{name}' is not in this edition's curve catalogue — not set",
+                   target=target, inputs={'curve': name})
         return None
 
-    coeffs = [row.get(f'coeff_{i}') for i in range(1, 11)]
-    form = row.get('form')
-    if form in ('BiQuadratic', 'Biquadratic'):
-        k = openstudio.model.CurveBiquadratic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4y(coeffs[3])
-        k.setCoefficient5yPOW2(coeffs[4])
-        k.setCoefficient6xTIMESY(coeffs[5])
-        set_limits(k, row, two_vars=True)
-        c = k
-    elif form in ('BiCubic', 'Bicubic'):
-        k = openstudio.model.CurveBicubic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4y(coeffs[3])
-        k.setCoefficient5yPOW2(coeffs[4])
-        k.setCoefficient6xTIMESY(coeffs[5])
-        k.setCoefficient7xPOW3(coeffs[6])
-        k.setCoefficient8yPOW3(coeffs[7])
-        k.setCoefficient9xPOW2TIMESY(coeffs[8])
-        k.setCoefficient10xTIMESYPOW2(coeffs[9])
-        set_limits(k, row, two_vars=True)
-        c = k
-    elif form == 'Cubic':
-        k = openstudio.model.CurveCubic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        k.setCoefficient4xPOW3(coeffs[3])
-        set_limits(k, row)
-        c = k
-    elif form == 'Quadratic':
-        k = openstudio.model.CurveQuadratic(model)
-        k.setCoefficient1Constant(coeffs[0])
-        k.setCoefficient2x(coeffs[1])
-        k.setCoefficient3xPOW2(coeffs[2])
-        set_limits(k, row)
-        c = k
-    else:
+    form = curve_form(row)
+    if form is None:
+        audit.warn('efficiency',
+                   f"curve '{name}' declares form {row.get('form')!r}, which this "
+                   "loader cannot build — not set",
+                   target=target, inputs={'curve': name, 'form': row.get('form')},
+                   ruling='D-89')
         return None
-    c.setName(name)
-    return c
+    spec = _CURVE_FORMS[form]
+
+    found = getattr(model, spec['find'])(name)
+    existing = found.get() if found.is_initialized() else None
+    if existing is None:
+        # An object of a DIFFERENT curve type may hold the name; one built under
+        # it would be silently renamed by the SDK ('NAME 1'), so it counts as
+        # occupying the name even though the typed lookup does not see it.
+        existing = next((c for c in model.getCurves() if c.nameString() == name), None)
+    if existing is not None and curve_matches(existing, row):
+        return existing
+
+    if existing is None:
+        return (_build_lookup(model, row, name) if form == 'TableLookup'
+                else _build_polynomial(model, row, spec, name))
+
+    own_name = f'{name} (D-89)'
+    # The ruleset's own object is found by CONTENT among the objects carrying
+    # the disambiguated name (the SDK suffixes ' 1', ' 2' when a foreign object
+    # squats on '(D-89)' too), never by the single fixed name: the foreign
+    # object was reported when the own curve was first built for this model,
+    # and every later component that needs the row reuses that one silently.
+    for candidate in model.getCurves():
+        if candidate.nameString().startswith(own_name) and curve_matches(candidate, row):
+            return candidate
+    built = (_build_lookup(model, row, own_name) if form == 'TableLookup'
+             else _build_polynomial(model, row, spec, own_name))
+    audit.warn('efficiency',
+               f"model object named '{name}' does not state this edition's "
+               f"{form} catalogue row — it is NOT adopted; the ruleset's own "
+               f"curve is applied as '{built.nameString()}'",
+               target=target, inputs={'curve': name, 'form': form,
+                                      'applied': built.nameString()},
+               ruling='D-89')
+    return built
 
 
 def set_limits(curve_object, row, two_vars=False):
-    if row.get('minimum_independent_variable_1'):
-        curve_object.setMinimumValueofx(row['minimum_independent_variable_1'])
-    if row.get('maximum_independent_variable_1'):
-        curve_object.setMaximumValueofx(row['maximum_independent_variable_1'])
+    """Write every bound the row DECLARES. A declared ``0.0`` is a legitimate
+    bound, not an absent one — the pre-D-89 truthiness test dropped it."""
+    def write(key, setter):
+        value = row.get(key)
+        if value is not None:
+            setter(value)
+
+    write('minimum_independent_variable_1', curve_object.setMinimumValueofx)
+    write('maximum_independent_variable_1', curve_object.setMaximumValueofx)
     if two_vars:
-        if row.get('minimum_independent_variable_2'):
-            curve_object.setMinimumValueofy(row['minimum_independent_variable_2'])
-        if row.get('maximum_independent_variable_2'):
-            curve_object.setMaximumValueofy(row['maximum_independent_variable_2'])
+        write('minimum_independent_variable_2', curve_object.setMinimumValueofy)
+        write('maximum_independent_variable_2', curve_object.setMaximumValueofy)
     if hasattr(curve_object, 'setMinimumCurveOutput'):
-        if row.get('minimum_dependent_variable_output'):
-            curve_object.setMinimumCurveOutput(row['minimum_dependent_variable_output'])
-        if row.get('maximum_dependent_variable_output'):
-            curve_object.setMaximumCurveOutput(row['maximum_dependent_variable_output'])
+        write('minimum_dependent_variable_output', curve_object.setMinimumCurveOutput)
+        write('maximum_dependent_variable_output', curve_object.setMaximumCurveOutput)
 
 
 # ---------------- capacities ----------------
@@ -1096,10 +1324,153 @@ def optional_f(value):
 
 # ---------------- component appliers ----------------
 
+# ---------------- part-load classes (D-89) ----------------
+
+#: The feature a reference-building selection stamps on an object it creates, so
+#: the part-load class it elected survives the SECOND efficiency pass — the same
+#: `additionalProperties` mechanism the purchased-cooling chiller COP uses.
+PART_LOAD_CLASS_FEATURE = BOILER_PART_LOAD_CLASS_FEATURE
+#: Every class the enum admits, across both editions. A row or a feature naming
+#: anything else is a data error, reported rather than quietly defaulted.
+PART_LOAD_CLASSES = ('non_condensing', 'atmospheric', 'condensing',
+                     'modulating', 'not_applicable')
+
+
+def _edition_label(tables):
+    provenance = tables.get('provenance') or {}
+    return f"{provenance.get('code') or 'NECB'} {provenance.get('edition') or ''}".strip()
+
+
+def _part_load_class(component, row, audit, target):
+    """``(class, source)``. A class PROPAGATED onto the object wins over the
+    table row's default: the row bins by fluid, fuel and capacity and knows
+    nothing about the reference selection that created this object.
+
+    Two guards (independent review, 2026-09-13): a value outside
+    PART_LOAD_CLASSES is a DATA error, reported as such and ignored rather
+    than treated as a class the edition happens not to publish; and a row
+    whose class is ``not_applicable`` (no combustion part-load factor —
+    the electric boiler, contract item 4) keeps it whatever a tag says."""
+    row_class = row.get('part_load_curve_class')
+    if row_class not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"row declares part_load_curve_class {row_class!r}, which is not "
+                   f"one of {PART_LOAD_CLASSES} — data error; treated as no class",
+                   target=target, inputs={'part_load_curve_class': row_class},
+                   ruling='D-89')
+        row_class = None
+    feature = component.additionalProperties().getFeatureAsString(PART_LOAD_CLASS_FEATURE)
+    tag = feature.get() if feature.is_initialized() and feature.get() else None
+    if tag is None:
+        return row_class, 'row'
+    if tag not in PART_LOAD_CLASSES:
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} is not one of "
+                   f"{PART_LOAD_CLASSES} — data error; the row's class "
+                   f"{row_class!r} is used",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    if row_class == 'not_applicable':
+        audit.warn('efficiency',
+                   f"propagated part-load class tag {tag!r} ignored: this row has no "
+                   f"combustion part-load factor (not_applicable) and a tag cannot "
+                   f"give it one",
+                   target=target, inputs={'tag': tag, 'part_load_curve_class': row_class},
+                   ruling='D-89')
+        return row_class, 'row'
+    return tag, 'reference selection'
+
+
+def _fheatplc_entry(tables, equipment, klass):
+    return next((e for e in (tables.get('part_load_fheatplc') or [])
+                 if e.get('equipment') == equipment and e.get('class') == klass), None)
+
+
+def _curve_evidence(tables, row):
+    """What the part-load curve IS: the article, the table row it comes from,
+    the transform, the representation and its published error."""
+    implements = row.get('implements') or {}
+    entry = _fheatplc_entry(tables, implements.get('equipment'), implements.get('class'))
+    article = (entry or {}).get('article') or '(article not declared)'
+    error = implements.get('max_error_vs_exact')
+    error_text = ('exact at every value the Code publishes' if not error
+                  else f'max relative error {error * 100:.4f} % against the exact '
+                       'requirement (sampled at PLR step 0.00001)')
+    first_node = row.get('minimum_independent_variable_1')
+    if first_node == 0:
+        low_end = "; a node at PLR 0 carries the Code equation down to zero load"
+    elif (entry or {}).get('form') == 'points':
+        # A printed-point table (NECB 2020 Table 8.4.5.2.-B) is no equation:
+        # the Code states nothing below its lowest point, so there is no
+        # standby term to bound the hold against.
+        low_end = (f"; the Code publishes no value below PLR {first_node}, and "
+                   f"the table's Constant extrapolation holds the lowest printed "
+                   f"factor there — an implementation choice D-89 records")
+    else:
+        low_end = (f"; below the first node (PLR {first_node}) the table's "
+                   f"Constant extrapolation holds the factor, an under-count "
+                   f"bounded by the Code's standby term FHeatPLC(0) x rated fuel"
+                   + ("; the first node's value lies above the engine's 0.7 floor "
+                      "on the coil part-load fraction, so the engine never clamps"
+                      if implements.get('engine_floor') else ""))
+    return (f"Article {article} states FHeatPLC as a fuel-INPUT ratio "
+            f"(Table {implements.get('table')}, row "
+            f"{implements.get('row')!r}), so the EnergyPlus part-load field "
+            f"carries the transform {implements.get('transform')}; represented as "
+            f"a Table:Lookup on {implements.get('grid')} with "
+            f"{row.get('interpolation')} interpolation and "
+            f"{row.get('extrapolation')} extrapolation — {error_text}{low_end}")
+
+
+def _part_load_curve(component, tables, equipment, klass, audit, target):
+    """``(curve or None, label, form, evidence)`` for one equipment class.
+
+    The edition's own class -> curve map decides. A class the map does not carry
+    is UNREPRESENTABLE in this edition: a warning and a constant part-load
+    factor, never a quiet fall back to the non-condensing curve."""
+    spec = (tables.get('part_load_curves') or {}).get(equipment) or {}
+    article = spec.get('article')
+    classes = spec.get('classes') or {}
+    if klass is None:
+        # _part_load_class has already reported the row's class as a data
+        # error; a second "no representation" warning would misname the cause.
+        return None, 'none (no valid class)', None, (
+            f"the {equipment} row declares no valid part-load curve class, so no "
+            f"part-load curve applies and the part-load factor stays constant at 1.0")
+    if klass not in classes:
+        audit.warn('efficiency',
+                   f"part-load class {klass!r} has no representation in "
+                   f"{_edition_label(tables)} — part-load factor left constant",
+                   target=target,
+                   inputs={'part_load_curve_class': klass, 'equipment': equipment},
+                   article=article, ruling='D-89')
+        return None, 'none (class unrepresentable in this edition)', None, (
+            f"{_edition_label(tables)} publishes no part-load curve this ruleset can "
+            f"apply to the {klass!r} class, so the part-load factor stays constant "
+            f"at 1.0 rather than borrowing another class's curve")
+    name = classes[klass]
+    if name is None:
+        return None, 'none (constant part-load factor 1.0)', None, (
+            f"{article} derives the part-load fuel consumption of a FUEL-fired "
+            f"{equipment} from FHeatPLC; this {equipment} has no fuel input to "
+            f"adjust, so no part-load curve applies and the part-load factor is "
+            f"constant at 1.0")
+    built = curve(component.model(), tables, name, audit=audit, target=target)
+    row = next((c for c in tables['curves'] if c['name'] == name), None)
+    if built is None or row is None:
+        return None, f'none ({name} unavailable)', None, (
+            f"{article} requires a part-load curve for the {klass!r} class, and "
+            f"{name!r} could not be built from this edition's catalogue; the "
+            f"part-load factor is left constant at 1.0")
+    return built, built.nameString(), row.get('form'), _curve_evidence(tables, row)
+
+
 def _apply_boiler(boiler, tables, plant, audit):
     """Legacy boiler_hot_water_apply_efficiency_and_curves (NECB2011 hvac_systems.rb:539):
-    primary/secondary staging (176/352 kW), EFFFPLR curve, AFUE/thermal/combustion ->
-    thermal efficiency, legacy rename."""
+    primary/secondary staging (176/352 kW), the part-load curve of the boiler's own
+    FHeatPLC class (D-89), AFUE/thermal/combustion -> thermal efficiency, legacy
+    rename."""
     fuel_type = boiler.fuelType()
     if fuel_type == 'Electricity':
         fuel = 'Electric'
@@ -1136,9 +1507,19 @@ def _apply_boiler(boiler, tables, plant, audit):
         return audit.warn('efficiency', 'no boiler efficiency row found — not set', target=name,
                           inputs={'fuel': fuel, 'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    eff_fplr = curve(boiler.model(), tables, row.get('efffplr'))
-    if eff_fplr:
-        boiler.setNormalizedBoilerEfficiencyCurve(eff_fplr)
+    # 8.4.5.2./8.4.6.2. state FHeatPLC on the part-load ratio alone, so the
+    # evaluation variable is not load-bearing today; it is set explicitly
+    # because the field has no IDD default and any future temperature-dependent
+    # curve (2025's condensing row) needs an adjudicated basis.
+    boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
+    klass, class_source = _part_load_class(boiler, row, audit, name)
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        boiler, tables, 'boiler', klass, audit, name)
+    if plf is None:
+        # also clears a curve the proposed model contributed to this clone
+        boiler.resetNormalizedBoilerEfficiencyCurve()
+    else:
+        boiler.setNormalizedBoilerEfficiencyCurve(plf)
 
     thermal_eff, label = boiler_thermal_efficiency(row)
     if thermal_eff is None:
@@ -1146,11 +1527,18 @@ def _apply_boiler(boiler, tables, plant, audit):
 
     boiler.setNominalThermalEfficiency(thermal_eff)
     boiler.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(boiler_capacity))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('boiler') or {}).get('article')
     return audit.decision('efficiency', 'boiler efficiency applied', target=name,
-                          inputs={'fuel': fuel, 'capacity_kw': ruby_round(boiler_capacity / 1000.0, 1)},
+                          inputs={'fuel': fuel,
+                                  'capacity_kw': ruby_round(boiler_capacity / 1000.0, 1),
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f"thermal efficiency {ruby_round(thermal_eff, 3)} ({label}), "
-                                f"curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (boilers)')
+                                f"part-load curve {curve_label}",
+                          evidence=f"{evidence}; the efficiency curve is evaluated on "
+                                   "the EnteringBoiler temperature",
+                          article=article, ruling='D-89')
 
 
 def boiler_thermal_efficiency(row):
@@ -1210,7 +1598,7 @@ def _apply_chiller(chiller, tables, plant, audit):
                            ('setCoolingCapacityFunctionOfTemperature',
                             'setElectricInputToCoolingOutputRatioFunctionOfTemperature',
                             'setElectricInputToCoolingOutputRatioFunctionOfPLR')):
-        c = curve(chiller.model(), tables, row.get(key))
+        c = curve(chiller.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(chiller, setter)(c)
 
@@ -1352,7 +1740,7 @@ def _apply_dx_cooling(coil, tables, audit):
                         ('cool_eir_ft', 'setEnergyInputRatioFunctionOfTemperatureCurve'),
                         ('cool_eir_fflow', 'setEnergyInputRatioFunctionOfFlowFractionCurve'),
                         ('cool_plf_fplr', 'setPartLoadFractionCorrelationCurve')):
-        c = curve(coil.model(), tables, row.get(key))
+        c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
         if c:
             getattr(coil, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1404,7 +1792,7 @@ def _apply_dx_cooling_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGrossRatedCoolingCOP(cop)
         for key, setter in curves:
-            c = curve(coil.model(), tables, row.get(key))
+            c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
             if c:
                 getattr(stage, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1471,7 +1859,7 @@ def _apply_dx_heating_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGrossRatedHeatingCOP(cop)
         for key, setter in curves:
-            c = curve(coil.model(), tables, row.get(key))
+            c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
             if c and hasattr(stage, setter):
                 getattr(stage, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1516,8 +1904,12 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    plf = curve(coil.model(), tables, row.get('efffplr'))
-    if plf:
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        coil, tables, 'furnace', klass, audit, name)
+    if plf is None:
+        coil.resetPartLoadFractionCorrelationCurve()
+    else:
         coil.setPartLoadFractionCorrelationCurve(plf)
 
     # same AFUE/thermal/combustion triad
@@ -1528,12 +1920,19 @@ def _apply_gas_multi(coil, tables, audit, capacity_w=None):
     for stage in coil.stages():
         stage.setGasBurnerEfficiency(thermal_eff)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('furnace') or {}).get('article')
     return audit.decision('efficiency', 'staged gas heating efficiency applied to every stage', target=name,
                           inputs={'stages': len(coil.stages()),
-                                  'top_stage_kw': ruby_round(capacity_w / 1000.0, 1)},
+                                  'top_stage_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}) on all '
-                                f"{len(coil.stages())} stages, curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (furnaces)', ruling='D-46')
+                                f"{len(coil.stages())} stages, part-load curve {curve_label}",
+                          evidence=f"{evidence}; the part-load curve sits on the PARENT "
+                                   "staged coil, which carries EnergyPlus' single "
+                                   "part-load-fraction field (D-46)",
+                          article=article, ruling='D-46 D-89')
 
 
 def _apply_dx_heating(coil, tables, audit):
@@ -1563,7 +1962,7 @@ def _apply_dx_heating(coil, tables, audit):
                         ('heat_eir_ft', 'setEnergyInputRatioFunctionofTemperatureCurve'),
                         ('heat_eir_fflow', 'setEnergyInputRatioFunctionofFlowFractionCurve'),
                         ('heat_plf_fplr', 'setPartLoadFractionCorrelationCurve')):
-        c = curve(coil.model(), tables, row.get(key))
+        c = curve(coil.model(), tables, row.get(key), audit=audit, target=name)
         if c and hasattr(coil, setter):
             getattr(coil, setter)(c)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
@@ -1587,8 +1986,12 @@ def _apply_gas_coil(coil, tables, audit):
         return audit.warn('efficiency', 'no furnace efficiency row found — not set', target=name,
                           inputs={'capacity_btu_hr': ruby_round(cap_btuh)})
 
-    plf = curve(coil.model(), tables, row.get('efffplr'))
-    if plf:
+    klass, class_source = _part_load_class(coil, row, audit, coil.nameString())
+    plf, curve_label, curve_shape, evidence = _part_load_curve(
+        coil, tables, 'furnace', klass, audit, name)
+    if plf is None:
+        coil.resetPartLoadFractionCorrelationCurve()
+    else:
         coil.setPartLoadFractionCorrelationCurve(plf)
 
     # same AFUE/thermal/combustion triad
@@ -1598,11 +2001,16 @@ def _apply_gas_coil(coil, tables, audit):
 
     coil.setGasBurnerEfficiency(thermal_eff)
     coil.setName(f'{name} {ruby_round(w_to_kbtu_per_hr(capacity_w))}kBtu/hr {label}')
+    article = ((tables.get('part_load_curves') or {}).get('furnace') or {}).get('article')
     return audit.decision('efficiency', 'gas heating coil efficiency applied', target=name,
-                          inputs={'capacity_kw': ruby_round(capacity_w / 1000.0, 1)},
+                          inputs={'capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'part_load_curve_class': klass,
+                                  'class_source': class_source,
+                                  'curve': curve_label, 'form': curve_shape},
                           value=f'burner efficiency {ruby_round(thermal_eff, 3)} ({label}), '
-                                f"curve {row.get('efffplr')}",
-                          article='NECB 2020 Table 5.2.12.1 (furnaces)')
+                                f'part-load curve {curve_label}',
+                          evidence=evidence,
+                          article=article, ruling='D-89')
 
 
 # ---------------- context helpers ----------------

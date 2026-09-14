@@ -105,18 +105,20 @@ enforces it; `scripts/refresh_provenance_hashes.py` refreshes the result
 hashes after any data edit.
 
 **Curve identifiers are SOURCE-neutral, not edition-neutral.** A performance
-curve keeps one neutral name (`BOILER-EFFFPLR`, no edition suffix) only
-while it is VERIFIED IDENTICAL across every edition that shares it. A curve
-whose coefficients or form diverge between editions must either take a
-code-qualified name (`BOILER-EFFFPLR-necb2025`) or have its loader validate
-form, coefficients and bounds before reusing an existing model object of
-the same name — that loader change is D-89's behavioural item. **Today's
-limitation:** `hvac/efficiency.py`'s `curve()` (around line 1009) reuses
-ANY existing model curve that matches by name, unvalidated — an existing
-`BOILER-EFFFPLR` with a diverged coefficient is returned unchanged (deferred
-finding DF-4). Until D-89 lands, do not rely on curve-name matching alone
-once an edition's coefficients are known to diverge; name it distinctly
-instead.
+curve keeps one neutral name (`BOILER-PLF-NONCONDENSING`, no edition suffix)
+only while it is VERIFIED IDENTICAL across every edition that shares it. A
+curve whose coefficients, points or form diverge between editions takes a
+code-qualified name — `BOILER-PLF-MODULATING-necb2020` and
+`BOILER-PLF-MODULATING-necb2025` are the first pair, because 2020 publishes
+ten printed points where 2025 publishes a coefficient row. **Both belts are
+now fastened:** since D-89, `hvac/efficiency.py`'s `curve()` reuses an
+existing model object only through the TYPED lookup for the row's own form
+and only after its form, its coefficients or points and its declared bounds
+all state what the row states. A model object that merely shares the name is
+reported as foreign in the audit and the ruleset builds its own beside it
+under `<name> (D-89)` — never adopted, never silently. That closes deferred
+finding DF-4. Keep both halves: a diverged curve still gets a distinct name,
+so the audit reads honestly without needing the validator to catch it.
 
 ---
 
@@ -330,6 +332,28 @@ deliberately leaves it out of scope (`necb_orphan_keys.NON_RULE_MANIFESTS`).
   matching the documented openstudio-standards assumption. Table -C (PTAC/PTHP
   coefficients) changed moderately in 2025; that coefficient path is not
   implemented by the engine (documented gap, same as 2020).
+
+### Part-load curve class (D-89)
+
+Every `boilers` / `furnaces` row declares `part_load_curve_class`, one of the
+enum `non_condensing | atmospheric | condensing | modulating |
+not_applicable`. This is the Code's own taxonomy, not an inference from a
+row's minimum efficiency: ordinary fuel-fired boilers are `non_condensing`,
+ordinary furnaces are `atmospheric`, electric boilers are `not_applicable`
+(no combustion part-load factor). The one class assigned outside a row's own
+declaration is `modulating`, given to the 8.4.4.6.(1) purchased-heating
+boiler by PROPAGATION from the reference-system selection at the point the
+system is elected — never carried as a property of the efficiency row
+itself. `condensing` is reachable only by an explicit decision; nothing
+infers it from capacity, fuel or a row's printed thermal efficiency.
+
+The class → curve mapping lives in `part_load_curves`; each edition's own
+printed FHeatPLC tables are transcribed in `part_load_fheatplc`, with the
+archived MCP payloads that back them under `provenance/`, in the same
+archived form every other table in this snapshot uses. The model curve for a
+class is PLF = PLR / FHeatPLC(PLR), fit or evaluated from that edition's own
+FHeatPLC table, and its `max_error_vs_exact` against the exact ratio is
+published alongside it — never silently assumed to be zero.
 
 ## `lighting_rules.json`
 

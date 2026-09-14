@@ -3,21 +3,59 @@ openstudio-standards setup_hw_loop_with_components et al.)."""
 
 from __future__ import annotations
 
+import re
+
 import openstudio
 
 from btap.modeling.hvac.components import schedules
 
+#: Feature stamped on a boiler's additionalProperties to carry the part-load
+#: curve class the reference selection elected (D-89). The NECB efficiency
+#: pass reads it; nothing in this layer interprets its value.
+BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
 
-def find_hot_water(model):
+
+def boiler_part_load_class(loop):
+    """The part-load class the loop's boilers carry, or None when unstamped."""
+    for comp in loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType()):
+        boiler = comp.to_BoilerHotWater().get()
+        feature = boiler.additionalProperties().getFeatureAsString(
+            BOILER_PART_LOAD_CLASS_FEATURE)
+        if feature.is_initialized() and feature.get():
+            return feature.get()
+    return None
+
+
+_HOT_WATER_LOOP_NAME = re.compile(r'^Hot Water Loop( \d+)?$')
+
+
+def _named_hot_water_loop(loop):
+    """A loop this builder made: 'Hot Water Loop', or the SDK's uniqueness
+    suffix 'Hot Water Loop 1' once a second one exists."""
+    return bool(_HOT_WATER_LOOP_NAME.match(loop.nameString()))
+
+
+def find_hot_water(model, part_load_curve_class=None):
     """Find an existing hot-water loop (one with a boiler on the supply side), or None.
 
     :param model: openstudio.model.Model
     :return: openstudio.model.PlantLoop or None
     """
+    # Source matching is EXCLUSIVE: a hybrid loop (boilers AND a district
+    # object on the supply side) is neither a boiler loop nor a district loop
+    # for reuse, so the two callers can never be handed the same object.
     return next(
         (pl for pl in model.getPlantLoops()
-         if len(pl.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0),
+         if _boiler_heated(pl) and not _district_heated(pl)
+         and boiler_part_load_class(pl) == part_load_curve_class),
         None)
+
+
+#: Every IDD type that is PURCHASED heating, whatever the medium: the deprecated
+#: pre-3.7 DistrictHeating, and the water and steam objects that replaced it.
+#: Shared with classify, so reuse and purchased-energy detection agree.
+DISTRICT_HEATING_TYPES = frozenset({
+    'OS_DistrictHeating', 'OS_DistrictHeating_Water', 'OS_DistrictHeating_Steam'})
 
 
 def _district_heated(loop):
@@ -26,16 +64,21 @@ def _district_heated(loop):
     Both SDK spellings: DistrictHeating was deprecated for DistrictHeatingWater
     at 3.7.0 and older models still carry the former.
     """
+    # By IDD type, not by the typed casts: to_DistrictHeating() is the
+    # deprecated class and the SDK logs a deprecation line to stdout on every
+    # call, which leaked into audit.txt once reuse checked every loop.
     for c in loop.supplyComponents():
-        if c.to_DistrictHeating().is_initialized():
-            return True
-        if (hasattr(c, 'to_DistrictHeatingWater')
-                and c.to_DistrictHeatingWater().is_initialized()):
+        if c.iddObjectType().valueName() in DISTRICT_HEATING_TYPES:
             return True
     return False
 
 
-def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler'):
+def _boiler_heated(loop):
+    return len(loop.supplyComponents(openstudio.model.BoilerHotWater.iddObjectType())) > 0
+
+
+def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='boiler',
+              part_load_curve_class=None):
     """Build a hot-water loop: primary + secondary boiler, variable-speed pump,
     82C design exit / 16K dT, OA-reset 82C@-16C down to 60C@0C.
 
@@ -45,10 +88,26 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
     :param reuse: return an existing boiler loop when present (default True)
     :param source: 'boiler' (default) or 'district' (DistrictHeating object
         instead of boilers — the CBECS 'district hot water' pattern)
+    :param part_load_curve_class: the part-load curve class the caller's
+        selection elected for these boilers (D-89; None = unstamped). Reuse
+        is class-aware: a loop whose boilers carry a different class (or none)
+        is not adopted, so a purchased-heating group never lands on an
+        ordinary group's boilers and vice versa.
     :return: openstudio.model.PlantLoop
     """
     if reuse:
-        existing = find_hot_water(model)
+        # Source first: a caller asking for DISTRICT heat must never adopt a
+        # boiler loop (and a boiler caller never a district loop), whatever
+        # order the two were built in; then class-aware within boiler loops.
+        if source == 'district':
+            # Name-guarded: a ground-loop condenser loop is modelled with a
+            # DistrictHeating object too (hp_plant_fancoils), and must never
+            # serve as the hot-water loop (independent review, 2026-09-13).
+            existing = next((pl for pl in model.getPlantLoops()
+                             if _named_hot_water_loop(pl)
+                             and _district_heated(pl) and not _boiler_heated(pl)), None)
+        else:
+            existing = find_hot_water(model, part_load_curve_class)
         # The name fallback catches a loop that has no boiler YET. It must not
         # adopt a loop heated by a DIFFERENT SOURCE than the one asked for:
         # every loop this builder makes is named 'Hot Water Loop', district
@@ -66,8 +125,10 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         if existing is None:
             existing = next(
                 (pl for pl in model.getPlantLoops()
-                 if pl.nameString() == 'Hot Water Loop'
-                 and _district_heated(pl) == (source == 'district')),
+                 if _named_hot_water_loop(pl)
+                 and _district_heated(pl) == (source == 'district')
+                 and not (source == 'district' and _boiler_heated(pl))
+                 and boiler_part_load_class(pl) == part_load_curve_class),
                 None)
         if existing is not None:
             return existing
@@ -100,6 +161,10 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         # Names are load-bearing downstream (NECB boiler efficiency rules match on them).
         boiler1.setName('Primary Boiler')
         boiler2.setName('Secondary Boiler')
+        if part_load_curve_class:
+            for boiler in (boiler1, boiler2):
+                boiler.additionalProperties().setFeature(
+                    BOILER_PART_LOAD_CLASS_FEATURE, part_load_curve_class)
         hw_loop.addSupplyBranchForComponent(boiler1)
         hw_loop.addSupplyBranchForComponent(boiler2)
 

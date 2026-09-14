@@ -52,13 +52,13 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 3025.0,
+  "total_site_kwh": 3747.2,
   "electricity_kwh": 1486.1,
-  "natural_gas_kwh": 1538.9,
+  "natural_gas_kwh": 2261.1,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 1227.8,
+   "heating": 1950.0,
    "cooling": 5.6,
    "fans": 680.6,
    "pumps": 38.9,
@@ -67,7 +67,7 @@
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 3.8,
+  "eui_kwh_per_m2": 4.7,
   "unmet_occupied_hours": {
    "heating": 24.75,
    "cooling": 0.0
@@ -96,8 +96,8 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 90.1,
- "tier": 1,
+ "percent_of_target": 72.7,
+ "tier": 2,
  "annual": false,
  "compliant": true,
  "warnings": [
@@ -157,6 +157,10 @@
   "Service water heater performance (Table 6.2.2.1) \u2014 partial. Applied: electric storage (SL formulas), gas-fired storage (UEF ladders + Et>=90%/SL for large) and oil (via the gas path, legacy behavior) implemented on WaterHeaterMixed with Maguire-Roberts UA derivation; instantaneous rows (gas UEF 0.86 conservative / Et 0.94, oil Et 0.80, tankless zero UA) and storage heat-pump water heaters (WaterHeaterHeatPump build + code EF/UEF floor as rated COP) implemented. Gaps: pool-heater minimums IMPLEMENTED apply-when-present since D-63 (gas Et 82% / oil 78% / HP COP 4.0 floor set on heaters serving a SwimmingPoolIndoor; values from the printed rows hbix's table audit recovered \u2014 the extraction had LOST the solar/pool sections and the Volume of Tank column when D-41 ran its cross-check, so it could not see them; re-checked 2026-09-01, both sections are back and the column is present (the table now returns 57 rows, not 27) and the vendored minimums agree exactly; volume-binned values stand on their legacy-primary transcription). Solar-thermal SEF (>= 1.4 electric-aux / >= 0.9 gas-aux) is an equipment RATING with no EnergyPlus field: detected collectors get an audited determination, the physics stay cloned. No archetype exercises either class. HPWH uses the bounded pumped-condenser construction (upstream stratified-tank/EMS recipe not ported)",
   "Pools and hot tubs \u2014 partial. Applied: pool-heater minimum efficiencies ARE applied when a SwimmingPoolIndoor is present in the model (gas Et 82% / oil 78% / heat-pump COP 4.0, D-63, apply-when-present). Gaps: the 6.2.7.1. shutoff device and pump/heater time switches are installed controls with no model object; 6.2.7.2. covers govern heated OUTDOOR pools and tubs, and EnergyPlus models INDOOR pools only, so that sentence is permanently outside model scope",
   "Remaining reference SWH sentences \u2014 partial. Applied: (3)/(4) verified against the full article text (retrieved via MCP 2026-07-28 after the ingestion fix): the umbrella's clone preserves the boiler-fed immersion coil's energy type ((3)) and the multi-energy capacity allocation and operating schedules identically \u2014 trivially matching the (4)(a) ratio (Note A-8.4.4.20.(4)(a) merely says how to determine it) and (4)(b) operational characteristics. Part 6 minimum efficiencies applied on top via apply_efficiency. (5) the 8.4.5.9.(2) FHeatPLC fuel part-load curve is applied to every fuel-fired reference water heater, storage AND instantaneous, via the documented PLF(x) = x / FHeatPLC(x) transform into the EnergyPlus part-load-factor field (probe-verified equivalent, max 0.98% over PLR 0.25-1.0; D-53). Electric water heaters carry NO such curve BY ARTICLE SCOPE, not by omission: 8.4.5.9 is titled 'Fuel-Fired Service Water Heater' and governs only the reference fuel-fired heater \u2014 there is no electric counterpart in 8.4.5 to apply.. Gaps: REFINED after machine-verification (D-41) and D-53: (3)/(4)/(6)/(7)/(8) are satisfied by clone and (5) is closed for every article-eligible heater. Remaining: (9) circulation-pump consolidation is satisfied BY CONSTRUCTION for models this gem authors \u2014 necb/demand.rb builds exactly ONE PumpConstantSpeed per service water loop, so there is never a set of pumps to consolidate. It is unverified only for a FOREIGN proposed that arrives with several pumps on one SHW loop; such a model is cloned as-is, keeping identical W/(L/s) (energy-equivalent, topology differs). No consolidation pass is implemented because it would be unreachable code on every model this toolchain produces.",
+  "model object named 'DXCOOL-REF-CAPFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFT (D-89)'",
+  "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
+  "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
+  "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
   "run period is SHORTENED \u2014 the energy comparison above is not a code-compliant annual determination (8.4.1.2 requires a simulated year)",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline"
  ]

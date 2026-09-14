@@ -135,10 +135,6 @@ class TestPins(EngineTestCase):
         self.assertTrue(str(engine.cache_dir("25.2.0")).endswith("25.2.0"))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class FakeCompanion:
     """A stand-in canmet_energyplus module injected via sys.modules."""
 
@@ -239,3 +235,7 @@ class TestCompanionResolution(EngineTestCase):
         with self.assertRaises(engine.EngineError) as ctx:
             engine._companion_binary(engine.PINNED_VERSION)
         self.assertIn("canmet_energyplus.payload", str(ctx.exception))
+
+
+if __name__ == "__main__":
+    unittest.main()

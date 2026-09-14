@@ -24,6 +24,7 @@ from btap.costing.hvac import geometry as _costing_geometry
 from btap.modeling.hvac import classify as _classify
 from btap.modeling.hvac.components import coils as _coils
 from btap.modeling.hvac.components import schedules as _schedules
+from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
 
 
 def rules(edition):
@@ -354,15 +355,31 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
                        article=f'{hp_article}.(1); Note A-{hp_article}', ruling='D-37')
 
     assignment.energy_type = None
+    boiler_part_load_curve_class = None
     if assignment.reference_system == 'hp':
         assignment.energy_type = heat_pump_aux_energy_type(
             group, facts, hp_rules, proposed_annual, audit, article_base=hp_article)
     if assignment.energy_type is None:
-        assignment.energy_type = _reference_energy_type(group, selection, facts, audit)
+        assignment.energy_type, boiler_part_load_curve_class = \
+            _reference_energy_type(group, selection, facts, audit)
     definition = definitions[str(assignment.reference_system)]
     variant = definition[assignment.energy_type]
     assignment.catalog_name = variant['name']
     assignment.config = variant.get('config')
+
+    # D-89: the ONE part-load curve class the Code itself selects. 8.4.4.6.(1)
+    # (2025: 8.4.5.6.(1)) names a "gas-fired MODULATING boiler" for purchased
+    # heating, so the class travels with the selection rather than being
+    # inferred from the equipment row. It rides the assignment's config exactly
+    # as `purchased_cooling_reference_cop` does (below), and the build site
+    # stamps it onto the boilers `replace_system` creates. Nothing else
+    # propagates a class: a proposed condensing boiler does NOT make the
+    # reference condensing (8.4.4.9.(4) transfers the ENERGY TYPE, not the
+    # equipment kind).
+    if boiler_part_load_curve_class is not None:
+        merged = dict(assignment.config or {})
+        merged['boiler_part_load_curve_class'] = boiler_part_load_curve_class
+        assignment.config = merged
 
     # D-39 (A4 ruled conditional, phylroy 2026-07-28): Table 8.4.4.7.-B lists
     # System 5's heating as "None", but 8.4.4.1.(5) requires the presence or
@@ -470,6 +487,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
 
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
+    _clear_proposed_part_load_classes(reference, audit)
 
     facts = _classify.characterize(reference, audit=audit)
     info = _building_info(reference, building, audit)
@@ -557,6 +575,8 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         zones = [zones_by_name[n] for n in assignment.zones]
         existing_chillers = {str(chiller.handle())
                              for chiller in reference.getChillerElectricEIRs()}
+        existing_boilers = {str(boiler.handle())
+                            for boiler in reference.getBoilerHotWaters()}
         result = modeling.replace_system(reference, assignment.catalog_name, zones,
                                          config=assignment.config)
         purchased_cooling_cop = (assignment.config or {}).get(
@@ -571,8 +591,23 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
             for chiller, cop in new_purchased_chillers:
                 chiller.additionalProperties().setFeature(
                     'btap_purchased_cooling_reference_cop', cop)
+        # D-89: persist the selected part-load curve class ON the boiler. The
+        # efficiency pass runs AGAIN after reference sizing, so a class held
+        # only in this function's locals would be silently overwritten before
+        # the annual run (the purchased-cooling COP above is the precedent for
+        # exactly that trap). additionalProperties survives clone, save/load
+        # and the second pass; the applier reads it back.
+        boiler_class = (assignment.config or {}).get('boiler_part_load_curve_class')
+        if boiler_class is not None:
+            for boiler in reference.getBoilerHotWaters():
+                if str(boiler.handle()) not in existing_boilers:
+                    boiler.additionalProperties().setFeature(
+                        BOILER_PART_LOAD_CLASS_FEATURE, boiler_class)
+        built_inputs = {'system': assignment.reference_system, 'action': assignment.action}
+        if boiler_class is not None:
+            built_inputs['boiler_part_load_curve_class'] = boiler_class
         audit.decision('build', 'reference system built', target=','.join(assignment.zones),
-                       inputs={'system': assignment.reference_system, 'action': assignment.action},
+                       inputs=built_inputs,
                        value=assignment.catalog_name,
                        article='; '.join(_uniq([a for a in assignment.articles if a is not None])))
         _apply_fan_rules(result.air_loops, assignment.reference_system, rules_data, audit)
@@ -887,6 +922,33 @@ def _emit_article_coverage(rules_data, audit):
     unimplemented or partially-implemented articles surface as warnings, so a missed
     requirement is visible in every log rather than discovered by review."""
     emit_coverage(rules_data['article_coverage'], audit)
+
+
+def _clear_proposed_part_load_classes(reference, audit):
+    """D-89 forbids proposed-to-reference class propagation: the ONLY class
+    the reference carries is the one its own selection elects (purchased
+    heating -> modulating). A boiler cloned from the proposed may arrive
+    tagged — by a user, a tool, or a previous reference pass — and the
+    efficiency pass gives a present tag precedence over the row, so every
+    incoming tag is removed here, before any reference system is built."""
+    cleared = []
+    # Every object the efficiency pass resolves a class for: boilers and
+    # both gas heating coil types (single- and multi-stage). A new consumer
+    # in efficiency.py must be added here too — the propagation test asserts
+    # the two lists agree.
+    consumers = (list(reference.getBoilerHotWaters())
+                 + list(reference.getCoilHeatingGass())
+                 + list(reference.getCoilHeatingGasMultiStages()))
+    for component in consumers:
+        props = component.additionalProperties()
+        feature = props.getFeatureAsString(BOILER_PART_LOAD_CLASS_FEATURE)
+        if feature.is_initialized() and feature.get():
+            cleared.append(f"{component.nameString()}={feature.get()}")
+            props.resetFeature(BOILER_PART_LOAD_CLASS_FEATURE)
+    if cleared:
+        audit.info('build', 'proposed part-load class tags not carried into the reference',
+                   target=','.join(c.split('=')[0] for c in cleared),
+                   inputs={'cleared': cleared}, ruling='D-89')
 
 
 def _clone_model(model):
@@ -1727,18 +1789,28 @@ def _energy_type_variant(fuel):
 
 def _reference_energy_type(group, selection, facts, audit):
     """8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;
-    8.4.4.6.(1): purchased heating is represented by a gas-fired boiler."""
+    8.4.4.6.(1): purchased heating is represented by a gas-fired boiler.
+
+    Returns ``(energy_type, boiler_part_load_curve_class)``. The class is
+    ``None`` for every selection but purchased heating — D-89: the Code names
+    a MODULATING boiler only there, and the class it names is read from the
+    rule file (never a literal here), so a future edition that names a
+    different class changes data, not code.
+    """
     fuels = group['heating_energy_types']
     if 'Purchased' in fuels or (facts.get('purchased_energy') or {}).get('heating'):
+        purchased_heating = selection['special_rules']['purchased_heating']
+        part_load_curve_class = purchased_heating.get('part_load_curve_class')
         audit.decision('selection', 'purchased heating energy -> represented by gas-fired modulating boiler',
                        target=','.join(group['zones']),
-                       article=selection['special_rules']['purchased_heating']['article'])
-        return 'gas'
+                       inputs={'part_load_curve_class': part_load_curve_class},
+                       article=purchased_heating['article'], ruling='D-89')
+        return 'gas', part_load_curve_class
     if any(re.search(r'gas|oil|propane', str(f), re.IGNORECASE) for f in fuels):
-        return 'gas'
+        return 'gas', None
     if 'Electricity' in fuels:
-        return 'electric'
+        return 'electric', None
 
     audit.warn('selection', 'no proposed heating energy type detected — electric reference assumed',
                target=','.join(group['zones']), article='8.4.4.9.(4)')
-    return 'electric'
+    return 'electric', None

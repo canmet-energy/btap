@@ -305,7 +305,8 @@
    "purchased_heating": {
     "article": "8.4.5.6.(1)",
     "text": "one gas-fired modulating boiler complying with Section 5.2. shall be used to represent the purchased energy equipment",
-    "energy_type": "NaturalGas"
+    "energy_type": "NaturalGas",
+    "part_load_curve_class": "modulating"
    },
    "purchased_cooling": {
     "article": "8.4.5.6.(2)",
@@ -816,7 +817,7 @@
     "article": "8.4.5.9.(8)",
     "title": "Heating System",
     "status": "implemented",
-    "how": "heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
+    "how": "heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.6.: Table 8.4.6.2 for boilers, Table 8.4.6.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
     "code": [
      "python/btap/modeling/hvac/components/curves.py#build",
      "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -859,7 +860,7 @@
     "article": "8.4.5.10.(5)",
     "title": "Cooling Systems",
     "status": "implemented",
-    "how": "cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
+    "how": "cooling part-load performance applied from the Subsection 8.4.6. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
     "code": [
      "python/btap/modeling/hvac/components/curves.py#build",
      "python/btap/codes/necb/hvac/efficiency.py#apply"

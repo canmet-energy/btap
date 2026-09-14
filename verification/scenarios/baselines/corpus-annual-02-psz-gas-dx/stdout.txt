@@ -1,56 +1,8 @@
 [openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
 [openstudio.model.YearDescription] <1> 'UseWeatherFile' is selected in YearDescription, but there are no weather file set for the model.
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 [openstudio.energyplus.SqlFile] <0> Reporting Total Site Energy with 168 hrs
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
-[openstudio.model.DistrictHeating] <0> Deprecated at 3.7.0, use DistrictHeatingWater.
 [openstudio.energyplus.ForwardTranslator] <0> OS_ProgramControl is not currently translated
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setSensibleEffectivenessat75HeatingAirFlow(double) is deprecated. Use sensibleEffectivenessofHeatingAirFlowCurve instead.
 [openstudio.model.HeatExchangerAirToAirSensibleAndLatent] <0> As of 3.8.0, bool openstudio::model::HeatExchangerAirToAirSensibleAndLatent::setLatentEffectivenessat75HeatingAirFlow(double) is deprecated. Use latentEffectivenessofHeatingAirFlowCurve instead.
@@ -62,8 +14,8 @@
 ------------------------------------------------------------------
                    site kWh      kWh/m2/yr      area m2
 Proposed              3,975            5.0        800.0
-Reference             3,019            3.8        800.0
-Margin               -955.6   31.6% OVER target
+Reference             3,814            4.8        800.0
+Margin               -161.1   4.2% OVER target
 Unmet hours  heating 23.5 / 29.8 h    cooling 0.0 / 0.0 h
 ------------------------------------------------------------------
 
@@ -76,4 +28,4 @@ Unmet hours  heating 23.5 / 29.8 h    cooling 0.0 / 0.0 h
 
   Audit    <RUN_DIR>/audit.txt
   Data     <RUN_DIR>/report.json
-  42 warning(s) recorded - see audit.txt
+  46 warning(s) recorded - see audit.txt

@@ -210,7 +210,9 @@ class EquipmentQuantifier:
                 self.add('gshp_ground_loop', kw, ['HEATING_COOLING'],
                          f"W2W GSHP {hp.nameString()}")
 
-        for district in list(model.getDistrictHeatingWaters()) + list(model.getDistrictCoolings()):
+        for district in (list(model.getDistrictHeatingWaters())
+                         + list(model.getDistrictHeatingSteams())
+                         + list(model.getDistrictCoolings())):
             self.warnings.append(
                 f"district energy object {district.nameString()}: connection costs "
                 "not modeled (energy purchased, not owned plant)")

@@ -129,7 +129,11 @@
   "step": "selection",
   "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
   "action": "purchased heating energy -> represented by gas-fired modulating boiler",
+  "inputs": {
+   "part_load_curve_class": "modulating"
+  },
   "article": "8.4.4.6.(1)",
+  "ruling": "D-89",
   "building": "reference building",
   "level": "decision"
  },
@@ -155,7 +159,8 @@
   "action": "reference system built",
   "inputs": {
    "system": 3,
-   "action": "build"
+   "action": "build",
+   "boiler_part_load_curve_class": "modulating"
   },
   "value": "PSZ RTU Gas and DX Coils and Hot Water Baseboard",
   "article": "8.4.4.7.(1)",
@@ -598,7 +603,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: heating part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies the as-applied coefficients against the code)",
+  "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 2,
@@ -666,7 +671,7 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.6 curve set (rake necb:curves verifies)",
+  "action": "Cooling Systems \u2014 implemented: cooling part-load performance applied from the Subsection 8.4.5. curve set (chiller and unitary curves; the as-applied coefficients are audited)",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 2,
