@@ -1148,17 +1148,25 @@ any result.
   baseboard ran before the always-on rooftop terminal in `SequentialLoad`.
   D-91 (decided by Sol) runs the rooftop terminal first in one-unit-per-block
   Systems 3/4. Evidence and the options measured are in D-90/D-91.
-- **DF-8 — shared "single-zone" System 3/4 reference units.** D-28 keeps
-  single-zone families on the proposed's selection grouping, so a proposed
-  multi-zone air system (corpus 02, 03, 04, 13; SmallHotel's System 4)
-  yields ONE System 3/4 unit over several thermal blocks controlled from one
-  zone. Division A 1.4.1.2 defines a single-zone system as "serving only a
-  single thermal block"; Note (3) to Table 8.4.5.7.-B groups the blocks of a
-  ≤4-storey building under "a single system". Measured 2026-09-15 (D-91
-  screening): every dispatch option loosened reference energy (+1.5 % to
-  +8.5 % on the first run) and raised cooling hours on this topology, and the
-  core zone is recovery-limited. Excluded from D-91; needs its own ruling as a
-  D-28 amendment (one unit per thermal block, or the grouping kept).
+- **DF-8 — shared "single-zone" System 3/4 reference units.** D-28 keeps the
+  single-zone families (Systems 1, 3, 4 and the heat-pump reference) on the
+  proposed's selection grouping, a legacy-parity choice ("sys-3 school/retail
+  loop counts stay at legacy parity"). So a proposed multi-zone air system
+  (corpus 02, 03, 04, 13; SmallHotel's System 4) yields ONE System 3/4 unit,
+  controlled from one zone, serving several SDK thermal zones. Division A
+  1.4.1.2 defines a single-zone system as "serving only a single thermal
+  block", and a thermal block as "a space or group of spaces that is
+  considered as one homogeneous space for modeling purposes". The unresolved
+  question is the mapping: whether those SDK zones form one thermal block
+  (then one unit is right) or several (then the reference needs one unit per
+  block), and whether D-28's legacy-parity grouping should stand. Note (3) to
+  Table 8.4.5.7.-B is not an authority here — its marker is attached to
+  System 6, and D-18 records it as the System 6 grouping rule (corrected after
+  Sol's review of PR #49). Measured 2026-09-15 (D-91 screening): every
+  dispatch option loosened reference energy (+1.5 % to +8.5 % on the first
+  run) and raised cooling hours on this topology, and the core zone is
+  recovery-limited. Excluded from D-91; needs its own ruling as a D-28
+  amendment.
 - **DF-9 — the heat-pump reference barely runs its heat pump.** In the
   'hp' PSZ the supplemental gas coil is a separate loop coil under
   `SetpointManager:SingleZone:Reheat`, outside the load-controlled unitary.

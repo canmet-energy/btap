@@ -16,14 +16,18 @@ pipeline does not own.
 """
 
 import re
+import sqlite3
+import tempfile
 import unittest
+from pathlib import Path
 
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac, path
 from btap.codes.necb.hvac import efficiency
-from tests.necb.hvac_helpers import load_fixture, proposed_with_hvac, sorted_zones
-from tests.support import needs_sdk
+from btap.simulation import runner
+from tests.necb.hvac_helpers import attach_weather, load_fixture, proposed_with_hvac, sorted_zones
+from tests.support import needs_engine, needs_sdk
 
 WATER_COOLED_SYSTEM = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
 
@@ -119,6 +123,47 @@ class TestStagingIsRepeatable(unittest.TestCase):
 
 
 @needs_sdk
+class TestStagingBandCrossing(unittest.TestCase):
+    """Each pass sets the complete control state of the band the plant lands in:
+    between the build-time pass (the proposed's sizing) and the post-sizing pass
+    (the reference's) a plant can cross 352 kW in either direction."""
+
+    def restage(self, first_w, second_w):
+        model = plant(boiler_w=first_w)
+        apply_passes(model, 1)
+        for boiler in model.getBoilerHotWaters():
+            boiler.setNominalCapacity(second_w)  # a new sizing, not the value the pass applied
+        apply_passes(model, 1)
+        return boilers(model)
+
+    def assert_not_modulating(self, boiler):
+        self.assertEqual('ConstantFlow', boiler.boilerFlowMode())
+        self.assertTrue(boiler.isMinimumPartLoadRatioDefaulted())
+
+    def test_crossing_down_to_one_boiler_drops_the_modulating_controls(self):
+        primary, secondary = self.restage(400_000.0, 100_000.0)
+        self.assertAlmostEqual(100_000.0, primary.nominalCapacity().get(), delta=1.0)
+        self.assertAlmostEqual(0.001, secondary.nominalCapacity().get(), delta=1e-6)
+        self.assert_not_modulating(primary)
+        self.assert_not_modulating(secondary)
+
+    def test_crossing_down_to_two_equal_boilers_drops_the_modulating_controls(self):
+        primary, secondary = self.restage(400_000.0, 300_000.0)
+        self.assertAlmostEqual(150_000.0, primary.nominalCapacity().get(), delta=1.0)
+        self.assertAlmostEqual(150_000.0, secondary.nominalCapacity().get(), delta=1.0)
+        self.assert_not_modulating(primary)
+        self.assert_not_modulating(secondary)
+
+    def test_crossing_up_above_352_kw_modulates_the_primary(self):
+        primary, secondary = self.restage(100_000.0, 400_000.0)
+        self.assertAlmostEqual(400_000.0, primary.nominalCapacity().get(), delta=1.0)
+        self.assertEqual('LeavingSetpointModulated', primary.boilerFlowMode())
+        self.assertAlmostEqual(0.25, primary.minimumPartLoadRatio(), delta=1e-6)
+        self.assertAlmostEqual(0.001, secondary.nominalCapacity().get(), delta=1e-6)
+        self.assert_not_modulating(secondary)
+
+
+@needs_sdk
 class TestPrepareForResizing(unittest.TestCase):
 
     def test_releases_capacity_derived_from_sizing_and_keeps_inputs(self):
@@ -139,6 +184,20 @@ class TestPrepareForResizing(unittest.TestCase):
         entry = next(e for e in audit.entries if e.get('ruling') == 'D-90')
         self.assertEqual({'boilers': 1, 'chillers': 0, 'towers': 0}, entry['inputs'])
         self.assertRegex(entry['article'], r'8\.4\.4\.9\.\(6\)\(a\).*8\.4\.1\.2\.\(5\)')
+
+    def test_the_release_cites_the_active_editions_articles(self):
+        for code, prefix in (('necb2020', '8.4.4'), ('necb2025', '8.4.5')):
+            with self.subTest(code=code):
+                model = plant(boiler_w=200_000.0)
+                apply_passes(model, 1, code=code)
+                primary, _ = boilers(model)
+                efficiency._record_capacity(primary, 200_000.0, 'autosized',
+                                            primary.nominalCapacity().get(), 'Primary Boiler')
+                audit = AuditLog()
+                hvac.prepare_for_resizing(model, audit=audit, code=code)
+                entry = next(e for e in audit.entries if e.get('ruling') == 'D-90')
+                self.assertEqual(f'{prefix}.9.(6)(a); {prefix}.10.(6); 8.4.1.2.(5)',
+                                 entry['article'])
 
     def test_nothing_owned_emits_no_plant_release(self):
         model = plant()
@@ -208,11 +267,78 @@ class TestHardSizedDetection(unittest.TestCase):
     def test_an_autosized_model_lists_nothing(self):
         self.assertEqual([], path._hard_sized_capacities(plant()))
 
+    def failing_report(self, hard=None):
+        report = {'proposed': {'unmet_occupied_hours': {'heating': 500.0, 'cooling': 0.0},
+                               'mechanical_cooling': False},
+                  'reference': {'unmet_occupied_hours': {'heating': 10.0, 'cooling': 0.0}},
+                  'capacity_iterations': []}
+        if hard:
+            report['proposed']['hard_sized_capacities'] = hard
+        return report
+
+    def capacity_warning(self, report):
+        audit = AuditLog()
+        path.evaluate_unmet(report, efficiency.resolve('necb2020'), audit)
+        return next(e for e in audit.entries
+                    if e['level'] == 'warning' and e.get('article') == '8.4.1.2.(5)')['action']
+
+    def test_an_empty_result_says_which_equipment_was_checked(self):
+        text = self.capacity_warning(self.failing_report())
+        self.assertIn('no hard-sized capacity was detected among', text)
+        self.assertIn('staged coils are not checked', text)
+
+    def test_detected_capacities_are_named(self):
+        text = self.capacity_warning(self.failing_report(['Coil Heating Gas 1']))
+        self.assertIn('Coil Heating Gas 1', text)
+        self.assertNotIn('no hard-sized capacity was detected', text)
+
     def test_the_phrase_names_five_and_counts_the_rest(self):
         names = [f'Coil {i}' for i in range(7)]
         phrase = path._hard_sized_phrase(names)
         self.assertEqual(5, len(re.findall(r'Coil \d', phrase)))
         self.assertTrue(phrase.endswith('and 2 more'))
+
+
+@needs_engine
+class TestPublicReferenceIsReadyToSize(unittest.TestCase):
+    """Sol, PR #49 P1: the public reference_hvac() tells callers to size the returned
+    reference directly, but its build-time efficiency pass reads the proposed's
+    sizing through the clone and hard-sets the plant. The returned model must be
+    ready to size: a direct sizing run sees no user-specified boiler capacity."""
+
+    def test_a_direct_sizing_run_of_the_returned_reference_sizes_its_own_plant(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        proposed = load_fixture()
+        attach_weather(proposed)
+        modeling.build_system(proposed, 'Baseboard gas boiler', sorted_zones(proposed))
+        out = runner.run_energyplus(proposed, str(Path(tmp.name) / 'proposed'), sizing_only=True)
+        self.assertTrue(runner.is_clean_run(out), 'proposed sizing run completes cleanly')
+        self.assertTrue(proposed.sqlFile().is_initialized(), 'the proposed carries its sizing SQL')
+
+        audit = AuditLog()
+        result = hvac.reference_hvac(proposed, code='necb2025', building={'storeys': 1}, audit=audit)
+        reference = result.model
+
+        boilers_ = list(reference.getBoilerHotWaters())
+        self.assertTrue(boilers_, 'fixture precondition: a hot-water reference plant')
+        for boiler in boilers_:
+            self.assertTrue(boiler.isNominalCapacityAutosized(), boiler.nameString())
+        release = [e for e in audit.entries if e.get('ruling') == 'D-90' and e['step'] == 'efficiency'
+                   and e['level'] == 'info']
+        self.assertEqual(1, len(release), 'the build-time capacities were released before returning')
+        self.assertEqual('8.4.5.9.(6)(a); 8.4.5.10.(6); 8.4.1.2.(5)', release[0]['article'])
+
+        attach_weather(reference)
+        out = runner.run_energyplus(reference, str(Path(tmp.name) / 'reference'), sizing_only=True)
+        self.assertTrue(runner.is_clean_run(out), 'direct reference sizing run completes cleanly')
+        with sqlite3.connect(str(Path(tmp.name) / 'reference' / 'run' / 'eplusout.sql')) as con:
+            rows = con.execute(
+                "select CompName, Description from ComponentSizes "
+                "where CompType like 'Boiler:HotWater%' and Description like '%Nominal Capacity%'"
+            ).fetchall()
+        self.assertTrue(rows, 'the direct sizing run sized the reference boilers')
+        self.assertFalse([r for r in rows if r[1].startswith('User-Specified')], rows)
 
 
 if __name__ == '__main__':

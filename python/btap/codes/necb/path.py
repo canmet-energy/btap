@@ -323,7 +323,7 @@ def _size_reference(run):
         # the SmallHotel gas variant). Release to autosize first — a no-op on
         # clean references, and the 8.4.4.14 transfer below re-establishes the
         # proposed-equivalent W/(L/s) on the sized flows (D-27 machinery).
-        hvac.prepare_for_resizing(reference, audit=audit)
+        hvac.prepare_for_resizing(reference, audit=audit, code=run.ruleset.id)
         runner.run_energyplus(reference,
                               os.path.join(opts["run_dir"], "reference_sizing"),
                               sizing_only=True)
@@ -732,7 +732,7 @@ def evaluate_unmet(report, ruleset, audit):
                        for name in (report[label].get("hard_sized_capacities") or [])})
         cause = ("hard-sized capacities do not respond to sizing-factor increases: "
                  + _hard_sized_phrase(hard)) if hard else (
-                 "no hard-sized capacity was detected")
+                 "no hard-sized capacity was detected among " + _HARD_SIZED_SCOPE)
         audit.warn(
             "compliance",
             f"8.4.1.2.(5): unmet-hours limits still not met after "
@@ -837,6 +837,12 @@ def _hard_sized_capacities(model):
         if not coil.isRatedTotalCoolingCapacityAutosized():
             found.append(coil.nameString())
     return sorted(found)
+
+
+#: What _hard_sized_capacities inspects — stated in the warnings so an empty result
+#: is never read as "no hard capacity anywhere" (staged coils are not inspected).
+_HARD_SIZED_SCOPE = ("boilers, chillers, baseboards, gas and electric coils and "
+                     "single-speed DX coils (staged coils are not checked)")
 
 
 def _hard_sized_phrase(names):
@@ -950,7 +956,7 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
                     # against the OLD sizes first — a frozen pump power
                     # against a freshly grown autosized flow is an EnergyPlus
                     # input FATAL, not a modeling nuance.
-                    hvac.prepare_for_resizing(model, audit=audit)
+                    hvac.prepare_for_resizing(model, audit=audit, code=ruleset.id)
                     runner.run_energyplus(model, f"{dir}_sizing",
                                           sizing_only=True)
                     hvac.efficiency._apply(model, ruleset,
@@ -988,9 +994,9 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
             hard.update(_hard_sized_capacities(reference))
         cause = ("hard-sized capacities sizing factors cannot reach: "
                  + _hard_sized_phrase(sorted(hard))) if hard else (
-                 "no hard-sized capacity was detected, so the gate concerns "
-                 "equipment the building does not have or a limit sizing "
-                 "factors do not move")
+                 "no hard-sized capacity was detected among " + _HARD_SIZED_SCOPE
+                 + ", so a hard-sized staged coil, equipment the building "
+                 "does not have, or a limit sizing factors do not move")
         audit.warn(
             "compliance",
             f"capacity iteration {iteration} produced no unmet-hours "

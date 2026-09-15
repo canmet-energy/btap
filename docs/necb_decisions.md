@@ -5421,11 +5421,20 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
 2. A hard value equal to the applied value is the pass's own output, so the
    pass stages from the stored basis and a repeat pass gives the same plant.
    Any other hard value is an `input`; an unset capacity is `autosized` from
-   the model's own sizing.
-3. `prepare_for_resizing` returns `autosized` capacities to autosize before
-   every re-sizing run, together with the tower fields hardened from autosized
-   values (`btap_tower_hardened_fields`), in one info entry with
-   `ruling='D-90'`. `input` capacities are kept.
+   the model's own sizing. Every pass sets the complete control state of the
+   band the plant lands in: the Primary modulates to 25 % only above 352 kW,
+   and in the lower bands both boilers return to the builder's state
+   (`ConstantFlow`, defaulted minimum part-load ratio). The build-time pass
+   reads the proposed's sizing and the next pass the reference's, so a plant
+   can cross 352 kW in either direction between them.
+3. `prepare_for_resizing(model, audit, code)` returns `autosized` capacities
+   to autosize before every re-sizing run, together with the tower fields
+   hardened from autosized values (`btap_tower_hardened_fields`), in one info
+   entry with `ruling='D-90'` citing the active edition's articles (2020
+   8.4.4.9.(6)(a) and 8.4.4.10.(6); 2025 8.4.5.9.(6)(a) and 8.4.5.10.(6)).
+   `input` capacities are kept. The public `reference_hvac()` calls it before
+   returning, so the reference it hands back is ready to size: a caller's
+   direct sizing run sizes the reference's own plant, not the proposed's.
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches
@@ -5433,9 +5442,11 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
 6. The reference clone drops any ownership features carried in with the input
    model, audited, so ownership always comes from the reference's own sizing.
 7. The 8.4.1.2.(5) warnings (the final one and the stall) name the hard
-   capacities the pipeline does not own — boilers, chillers, baseboards, gas
-   and electric coils, single-speed DX coils — or state that none were
-   detected.
+   capacities the pipeline does not own among the classes inspected —
+   boilers, chillers, baseboards, gas and electric coils, single-speed DX
+   coils — or say none were detected among those classes and that staged
+   coils are not checked, so an empty result is never read as "no hard
+   capacity anywhere".
 
 **Evidence (screening, run-time patch, corpus 01).** With the boiler released
 before every re-sizing run, the applied Primary capacity follows the
@@ -5457,7 +5468,8 @@ with attribution in the plan log.
 **Decided:** 2026-09-15 by Sol, after two Fable reviews and four rounds of
 measurement (DF-1). In every reference thermal block served by its own System
 3 or 4 packaged rooftop unit — one constant-volume air terminal and one zone
-baseboard, and no other zone equipment — the zone equipment list is set to
+baseboard as its conditioning equipment, with or without a zone exhaust fan —
+the zone equipment list is set to
 `SequentialLoad`, the air terminal at heating and cooling priority 1, the
 baseboard at priority 2, and every sequential heating and cooling fraction to
 1.0. The rooftop unit is offered the full zone load; the baseboard serves the
@@ -5539,7 +5551,10 @@ materiality is the limit the reference sets: 12.7 → 5.2 h under 2020 and
 31.5 → 24.8 h under 2025 for A, against 52.0 / 67.2 h for the 0.05 fraction.
 
 **Scope.** In: one System 3 or 4 unit serving one zone with one
-constant-volume terminal and one baseboard. Out, as separate items: shared
+constant-volume terminal and one baseboard. A zone exhaust fan does not
+condition the zone and teardown deliberately keeps it (a kitchen hood selects
+System 4), so it is ignored in that test and runs after the terminal and
+baseboard. Out, as separate items: shared
 System 3/4 units (DF-8, a D-28 question); the heat-pump reference, whose loop
 gas coil is beyond dispatch and whose heat pump is starved (DF-9); D-64,
 rechecked full-year on current code (DF-10), amended by D-91 only if

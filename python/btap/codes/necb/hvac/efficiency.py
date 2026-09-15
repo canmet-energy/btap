@@ -1569,11 +1569,9 @@ def _apply_boiler(boiler, tables, plant, audit):
     name = _base_name(boiler)
     if 'Primary Boiler' in name or 'Secondary Boiler' in name:
         kw = capacity_w / 1000.0
+        modulating = kw > plant['two_boiler_max_kw'] and 'Primary Boiler' in name
         if kw > plant['two_boiler_max_kw']:  # 8.4.4.9.(6)(d): 'exceeds 352 kW' (strict)
-            if 'Primary Boiler' in name:
-                boiler.setBoilerFlowMode('LeavingSetpointModulated')
-                boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
-            else:
+            if 'Secondary Boiler' in name:
                 boiler_capacity = 0.001
         elif kw > plant['single_boiler_max_kw']:  # (6)(c): 'greater than 176' (strict)
             boiler_capacity = capacity_w / 2
@@ -1581,6 +1579,18 @@ def _apply_boiler(boiler, tables, plant, audit):
             boiler_capacity = 0.001
         elif capacity_w <= 1.0:
             boiler_capacity = 1.0
+        # D-90: every pass sets the COMPLETE control state of the band it lands in.
+        # The build-time pass reads the proposed's sizing and the next pass the
+        # reference's, so a plant can cross 352 kW in either direction between
+        # passes; a lower band must not keep the modulating controls of (d). The
+        # non-modulating state is the one the plant builder leaves: an explicit
+        # ConstantFlow flow mode and a defaulted minimum part-load ratio.
+        if modulating:
+            boiler.setBoilerFlowMode('LeavingSetpointModulated')
+            boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+        else:
+            boiler.setBoilerFlowMode('ConstantFlow')
+            boiler.resetMinimumPartLoadRatio()
     boiler.setNominalCapacity(boiler_capacity)
     _record_capacity(boiler, capacity_w, capacity_source, boiler_capacity, name)
 
@@ -2198,7 +2208,7 @@ def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
                   proposed=proposed)
 
 
-def prepare_for_resizing(model, audit=None):
+def prepare_for_resizing(model, audit=None, code='necb2020'):
     """Facade: make an ALREADY-EFFICIENCY-APPLIED model safe to re-size.
 
     The efficiency pass hard-sets pump rated power (the 8.4.4.14 transfer and
@@ -2247,8 +2257,11 @@ def prepare_for_resizing(model, audit=None):
             tower.additionalProperties().resetFeature(TOWER_HARDENED_FEATURE)
             released['towers'] += 1
     if any(released.values()):
+        # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10, 2025 8.4.5.9/8.4.5.10
+        prefix = resolve(code).article('reference_subsection')
         audit.info('efficiency', 'plant capacities the efficiency pass derived from sizing released to '
                                  'autosize for the re-sizing run — the next pass re-stages them from the '
                                  'newly sized design capacities; input capacities are kept',
-                   inputs=released, article='8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5)', ruling='D-90')
+                   inputs=released, article=f'{prefix}.9.(6)(a); {prefix}.10.(6); 8.4.1.2.(5)',
+                   ruling='D-90')
     return len(pumps)

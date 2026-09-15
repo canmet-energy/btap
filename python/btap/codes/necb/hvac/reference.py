@@ -463,6 +463,12 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
     the returned reference model before applying downstream (efficiencies re-apply
     cleanly via apply_efficiencies after sizing).
 
+    The returned reference is READY TO SIZE (D-90): the build-time efficiency pass
+    reads the proposed's sizing through the clone, so before returning, every plant
+    capacity and pump power that pass derived from sizing is released to autosize
+    (prepare_for_resizing). A direct sizing run of the returned model therefore sizes
+    the reference's own plant; capacities the proposed supplied as inputs are kept.
+
     :param model: the proposed openstudio.model.Model
     :param code: the code id, e.g. 'necb2020'
     :param building: dict or None — overrides for 'storeys', 'zone_types',
@@ -635,6 +641,9 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
                        target=chiller.nameString(), value=f'COP {cop}',
                        article='Table 8.4.3.5')
     _emit_article_coverage(rules_data, audit)
+    # D-90: hand back a model ready to size — the pass above read the proposed's
+    # sizing through the clone, so its plant capacities and pump powers are released
+    _efficiency.prepare_for_resizing(reference, audit=audit, code=ruleset.id)
 
     return ReferenceResult(model=reference, assignments=assignments, audit=audit)
 
@@ -696,8 +705,12 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
     sequential fractions — because a proposed `UniformLoad` scheme or other
     fractions survive the clone and the equipment teardown. Only a zone with its
     own System 3/4 loop and exactly one constant-volume terminal and one
-    baseboard is in scope: shared units (D-28 grouping), the heat-pump
-    reference, System 6 and zones with any other equipment are left untouched."""
+    baseboard as its conditioning equipment is in scope. A zone exhaust fan does
+    not condition the zone and teardown deliberately keeps it (a kitchen hood
+    selects System 4), so it is ignored in that test and ends up after the
+    terminal and baseboard. Shared units (D-28 grouping), the heat-pump
+    reference, System 6 and zones with any other conditioning equipment are left
+    untouched."""
     if reference_system not in (3, 4):
         return
     ordered = []
@@ -705,7 +718,8 @@ def _apply_zone_dispatch(zones, reference_system, code, audit):
         loop = zone.airLoopHVAC()
         if not loop.is_initialized() or len(loop.get().thermalZones()) != 1:
             continue
-        equipment = list(zone.equipmentInHeatingOrder())
+        equipment = [e for e in zone.equipmentInHeatingOrder()
+                     if not e.to_FanZoneExhaust().is_initialized()]
         terminals = [e for e in equipment
                      if e.iddObjectType().valueName() in _CONSTANT_VOLUME_TERMINALS]
         baseboards = [e for e in equipment

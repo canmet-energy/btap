@@ -91,6 +91,38 @@ class TestZoneDispatch(unittest.TestCase):
         for zone in reference.getThermalZones():
             self.assertIn('Baseboard', types(zone.equipmentInHeatingOrder())[0])
 
+    def test_a_system_4_zone_exhaust_fan_does_not_block_dispatch(self):
+        # Sol, PR #49 P1: teardown keeps FanZoneExhaust (code-required exhaust),
+        # and a kitchen hood selects System 4 — the exhaust fan is not
+        # conditioning equipment, so it must not make the zone ineligible.
+        import openstudio
+
+        proposed = proposed_with_hvac('Baseboard gas boiler')
+        for space_type in proposed.getSpaceTypes():
+            if space_type.spaces():
+                space_type.setStandardsSpaceType('Food preparation area')
+        zones = sorted(proposed.getThermalZones(), key=lambda z: z.nameString())
+        for zone in zones:
+            openstudio.model.FanZoneExhaust(proposed).addToThermalZone(zone)
+
+        audit = AuditLog()
+        result = hvac.reference_hvac(
+            proposed, code='necb2025', audit=audit,
+            building={'storeys': 1, 'kitchen_hood_zones': [z.nameString() for z in zones]})
+        reference = result.model
+        self.assertEqual({4}, {a.reference_system for a in result.assignments},
+                         'fixture precondition: hooded food preparation selects System 4')
+        decisions = dispatch_decisions(audit)
+        self.assertEqual(len(zones), sum(e['inputs']['zones'] for e in decisions))
+        self.assertTrue(all(e['inputs']['reference_system'] == 4 for e in decisions))
+        for zone in reference.getThermalZones():
+            self.assertEqual('SequentialLoad', zone.loadDistributionScheme())
+            for sequence in (zone.equipmentInHeatingOrder(), zone.equipmentInCoolingOrder()):
+                kinds = types(sequence)
+                self.assertIn(kinds[0], CONSTANT_VOLUME_TERMINALS, zone.nameString())
+                self.assertIn('Baseboard', kinds[1], zone.nameString())
+                self.assertEqual('OS_Fan_ZoneExhaust', kinds[2], zone.nameString())
+
     def test_system_6_is_left_alone(self):
         reference, audit = build_reference(proposed_with_hvac('Baseboard gas boiler'), storeys=3)
         self.assertFalse(dispatch_decisions(audit))
