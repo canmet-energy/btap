@@ -2815,3 +2815,51 @@ proposed 117,908.3 kWh / 41.75 h heating; reference 147,977.8 kWh, unmet
 0.0 / 4.75 h (was 802.25 h heating), no capacity iterations, no 8.4.1.2.(5)
 warning; five D-91 decisions, one D-90 release entry. The scenario's asserts
 are re-pinned to these values. Re-freeze and per-scenario attribution follow.
+
+**Re-freeze for D-90 + D-91 (2026-09-15, clean tree at `1a5c888`).** The first
+attempt was stopped by the session's low-memory guard at scenario 40 of 41
+(the container itself recorded no OOM kill and a 6.8 GB peak; nothing was
+published, the freeze being atomic). The second attempt froze all 41 scenarios
+in 12 min; manifest `provenance.commit` `1a5c888`, `dirty: false`. 18 scenario
+directories and the manifest changed (42 files).
+
+| scenario | files | D-90 | D-91 |
+|---|---|---|---|
+| corpus-none-01, -01-necb2025, -05, -06, -07, -09, -11, -12, -14, -15; corpus-sizing-09 | audit.json, audit.txt | — | five zone-dispatch decisions |
+| corpus-sizing-13, corpus-annual-13 | audit.json, audit.txt | the two boiler decisions cite `D-89 D-90` with design capacity and source | — |
+| corpus-sizing-02 | audit.json, audit.txt | boiler decisions, the release entry, pump clamp → within (below) | — (shared unit, out of scope) |
+| corpus-annual-02 (week) | audit, report, stdout | reference 3,813.9 → 3,969.4 kWh; as sizing-02 | — (shared unit) |
+| corpus-sizing-01 | audit.json, audit.txt | as sizing-02 | five decisions |
+| corpus-annual-01 (week) | audit, report, stdout | split below | split below |
+| determination-01-baseboard-gas-necb2025 (full year) | audit.json, audit.txt, report.json | split below | split below |
+
+**D-90 / D-91 split, from product code** (`reference._apply_zone_dispatch`
+switched off by a run-time patch for the D-90-only state; the two frozen
+states are the committed baselines):
+
+| scenario | before (`f88f287`) | D-90 only | D-90 + D-91 (frozen) |
+|---|---|---|---|
+| determination-01: reference kWh | 175,327.8 | 195,697.2 (+11.6 %) | 147,977.8 (−24.4 % from D-90 only) |
+| determination-01: reference unmet heating / cooling h | 802.25 / 10.5 | 801.0 / 11.5 | 0.0 / 4.75 |
+| determination-01: tier, GHG level, capacity iterations | 2, E, 3 | 2, D, 3 | 1, E, 0 |
+| determination-01: exit, compliant | 1, false | 1, false | 0, true |
+| corpus-annual-01 (week): reference kWh | 3,747.2 | 3,922.2 (+4.7 %) | 3,138.9 |
+| corpus-annual-01: reference unmet heating h, tier | 24.75, 2 | 24.75, 2 | 0.0, 1 |
+
+The proposed side is unchanged in both (determination-01 117,908.3 kWh,
+41.75 h heating; corpus-annual-01 2,725.0 kWh). D-90 alone raises reference
+energy — its plant now follows the reference's own sizing — and leaves the
+unmet hours where they were; D-91 clears them. The D-90-only numbers equal the
+scratchpad screening's E1 figures (195,697 kWh, 801.0 h), so the earlier
+evidence is reproduced by product code. determination-01's audit shrinks from
+383 to 296 entries because its three capacity-iteration passes no longer run.
+
+**The one side effect, attributed to D-90.** In corpus-sizing-01/-02,
+corpus-annual-01/-02 and determination-01 the hot-water loop's pump entry
+changes from "combined pump power exceeds Table 5.2.6.3 — clamped" to
+"within the maximum". corpus-sizing-02's audit shows why: before, the
+post-sizing efficiency pass read the proposed's frozen 54.1 kW boiler (cap
+244 W, pump 250 W clamped) and renamed it with a second capacity suffix
+("Primary Boiler 185kBtu/hr 0.9 AFUE"); after, it reads the reference's own
+64.4 kW (cap 290 W, pump 250 W within) and keeps the base name. No other
+change is unexplained.

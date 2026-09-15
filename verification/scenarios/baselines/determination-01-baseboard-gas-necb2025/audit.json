@@ -329,6 +329,24 @@
   "level": "info"
  },
  {
+  "step": "rules",
+  "target": "Thermal Zone 1",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
   "step": "build",
   "target": "Thermal Zone 2",
   "action": "reference system built",
@@ -392,6 +410,24 @@
   "ruling": "D-50",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 2",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
  },
  {
   "step": "build",
@@ -459,6 +495,24 @@
   "level": "info"
  },
  {
+  "step": "rules",
+  "target": "Thermal Zone 3",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
   "step": "build",
   "target": "Thermal Zone 4",
   "action": "reference system built",
@@ -522,6 +576,24 @@
   "ruling": "D-50",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 4",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
  },
  {
   "step": "build",
@@ -590,6 +662,24 @@
  },
  {
   "step": "rules",
+  "target": "Thermal Zone 5",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
+  "step": "rules",
   "action": "equipment oversizing capped",
   "inputs": {
    "proposed_heating": 1.25,
@@ -609,6 +699,8 @@
   "inputs": {
    "fuel": "Gas",
    "capacity_kw": 52.0,
+   "design_capacity_kw": 52.0,
+   "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
@@ -616,7 +708,7 @@
   },
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
+  "ruling": "D-89 D-90",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -628,6 +720,8 @@
   "inputs": {
    "fuel": "Gas",
    "capacity_kw": 0.0,
+   "design_capacity_kw": 52.0,
+   "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
@@ -635,7 +729,7 @@
   },
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
+  "ruling": "D-89 D-90",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -1020,7 +1114,7 @@
   "action": "Heating System \u2014 implemented: reference heating system selected per Table 8.4.5.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -1034,7 +1128,7 @@
   "action": "Heating System \u2014 implemented: purchased energy routes to Article 8.4.5.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1048,7 +1142,7 @@
   "action": "Heating System \u2014 partial. Applied: terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50). Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual \u2014 audited as an approximation, not claimed",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
@@ -1063,7 +1157,7 @@
   "action": "Heating System \u2014 implemented: reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g))",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1077,7 +1171,7 @@
   "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled: a proposed plant drawing on more than one energy type passes into the reference unchanged rather than being apportioned",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 10
+   "decisions_citing": 15
   },
   "article": "8.4.5.9.(5)",
   "building": "reference building",
@@ -1088,7 +1182,7 @@
   "action": "Heating System \u2014 implemented: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
@@ -1103,7 +1197,7 @@
   "action": "Heating System \u2014 partial. Applied: furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized. Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning \u2014 EnergyPlus multispeed objects cannot hold a fifth (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
@@ -1118,7 +1212,7 @@
   "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.6.: Table 8.4.6.2 for boilers, Table 8.4.6.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -1610,7 +1704,7 @@
   "action": "HVAC Systems \u2014 implemented: Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies \u2014 components are constructed, not approximated by thermodynamically-similar substitutes.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 5,
    "code": [
     "python/btap/modeling/hvac/builder.py#build_system",
     "python/btap/codes/necb/hvac/reference.py#reference_hvac"
@@ -2827,11 +2921,26 @@
  },
  {
   "step": "efficiency",
-  "target": "Primary Boiler 177kBtu/hr 0.9 AFUE",
+  "action": "plant capacities the efficiency pass derived from sizing released to autosize for the re-sizing run \u2014 the next pass re-stages them from the newly sized design capacities; input capacities are kept",
+  "inputs": {
+   "boilers": 2,
+   "chillers": 0,
+   "towers": 0
+  },
+  "article": "8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5)",
+  "ruling": "D-90",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
+  "step": "efficiency",
+  "target": "Primary Boiler",
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
-   "capacity_kw": 52.0,
+   "capacity_kw": 64.4,
+   "design_capacity_kw": 64.4,
+   "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
@@ -2839,18 +2948,20 @@
   },
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
+  "ruling": "D-89 D-90",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
  },
  {
   "step": "efficiency",
-  "target": "Secondary Boiler 0kBtu/hr 0.9 AFUE",
+  "target": "Secondary Boiler",
   "action": "boiler efficiency applied",
   "inputs": {
    "fuel": "Gas",
    "capacity_kw": 0.0,
+   "design_capacity_kw": 64.4,
+   "capacity_source": "autosized",
    "part_load_curve_class": "non_condensing",
    "class_source": "row",
    "curve": "BOILER-PLF-NONCONDENSING",
@@ -2858,7 +2969,7 @@
   },
   "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
   "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
+  "ruling": "D-89 D-90",
   "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
   "building": "reference building",
   "level": "decision"
@@ -3312,20 +3423,18 @@
  {
   "step": "efficiency",
   "target": "Hot Water Loop",
-  "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
+  "action": "combined pump power within the Table 5.2.6.3 maximum",
   "inputs": {
-   "before_w": 250,
-   "cap_w": 234,
+   "combined_w": 250,
+   "cap_w": 290,
    "w_per_kw": 4.5,
-   "thermal_kw": 52.0,
-   "system_type": "Heating",
-   "scale": 0.936
+   "thermal_kw": 64.4,
+   "system_type": "Heating"
   },
-  "value": "250 W -> 234 W",
-  "article": "5.2.6.3.(1); 8.4.5.1.(2)",
+  "article": "5.2.6.3.(1)",
   "ruling": "D-38",
   "building": "reference building",
-  "level": "decision"
+  "level": "info"
  },
  {
   "step": "efficiency",
@@ -3528,1597 +3637,9 @@
   "inputs": {
    "run_period": "full year",
    "clean_run": true,
-   "total_site_kwh": 165156,
-   "unmet_heating_h": 1268.75,
-   "unmet_cooling_h": 7.75
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "action": "capacity increase 1: reference \u2014 sizing factor(s) raised on 5 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
-  "inputs": {
-   "building": "reference",
-   "step": 1.25,
-   "iteration": 1,
-   "mode": "zonal",
-   "heating_sizing_factor": 1.563,
-   "zones_bumped": 5,
-   "zones": {
-    "THERMAL ZONE 1": {
-     "heating_sizing_factor": 1.563
-    },
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 1.563
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 1.563
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 1.563
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 1.563
-    }
-   }
-  },
-  "article": "8.4.1.2.(5)",
-  "ruling": "D-43",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "action": "hard-set pump power released to autosize for the re-sizing run \u2014 the efficiency pass re-transfers it against the newly sized flow",
-  "inputs": {
-   "pumps": 1
-  },
-  "article": "8.4.4.14.(1)-(3)",
-  "ruling": "D-11 D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "Primary Boiler 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 52.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Secondary Boiler 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 0.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 21.3,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 29.3,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 9.0,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 14.4,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 24.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 29.4,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 9.1,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 14.4,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 4.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 11.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "sys_3 Staged Unitary Thermal Zone 5",
-  "action": "staged supply airflow FLOORED at the minimum outdoor-air fraction \u2014 the lower stage(s) would otherwise deliver less air than the ventilation requirement",
-  "inputs": {
-   "outdoor_air_fraction": 0.751,
-   "stages": 2,
-   "unfloored_stage_1_ratio": 0.5
-  },
-  "article": "8.4.5.10.(8); 8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 9.0
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 24.8
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 9.1
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 4.8
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 21.3
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 14.4,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 29.4,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 14.4,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 11.8,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 29.3,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "variable-flow pump modeled riding its curve",
-  "inputs": {
-   "coefficients": [
-    0.227143,
-    1.178929,
-    -0.41071
-   ],
-   "minimum_flow_fraction": 0.47,
-   "loop": "Hot Water Loop"
-  },
-  "value": "below-D floor (E=0.68) via min flow 0.00057 m3/s",
-  "article": "8.4.5.14.(4)-(5); Table 8.4.5.14.",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "pump power transferred from the proposed building",
-  "inputs": {
-   "proposed_pumps": 1,
-   "proposed_w_per_l_s": 255.49,
-   "reference_flow_l_s": 1.22,
-   "loop_type": "Heating"
-  },
-  "value": "rated power 312 W (combined proposed intensity x reference flow)",
-  "article": "8.4.5.14.(1)-(3)",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Hot Water Loop",
-  "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
-  "inputs": {
-   "before_w": 312,
-   "cap_w": 234,
-   "w_per_kw": 4.5,
-   "thermal_kw": 52.0,
-   "system_type": "Heating",
-   "scale": 0.749
-  },
-  "value": "312 W -> 234 W",
-  "article": "5.2.6.3.(1); 8.4.5.1.(2)",
-  "ruling": "D-38",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
-  "ruling": "D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "NECB efficiency pass complete",
-  "inputs": {
-   "code": "necb2025",
-   "edition": "2025",
-   "boilers": 2,
-   "chillers": 0,
-   "dx_cooling": 0,
-   "dx_cooling_staged": 5,
-   "dx_heating": 0,
-   "dx_heating_staged": 0,
-   "gas_coils": 0,
-   "gas_coils_staged": 5
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "target": "reference_annual_iter1",
-  "action": "annual EnergyPlus run complete",
-  "inputs": {
-   "run_period": "full year",
-   "clean_run": true,
-   "total_site_kwh": 169450,
-   "unmet_heating_h": 945.5,
-   "unmet_cooling_h": 6.75
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "action": "capacity increase 2: reference \u2014 sizing factor(s) raised on 5 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
-  "inputs": {
-   "building": "reference",
-   "step": 1.25,
-   "iteration": 2,
-   "mode": "zonal",
-   "heating_sizing_factor": 1.953,
-   "zones_bumped": 5,
-   "zones": {
-    "THERMAL ZONE 1": {
-     "heating_sizing_factor": 1.805
-    },
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 1.692
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 1.806
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 1.706
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 1.953
-    }
-   }
-  },
-  "article": "8.4.1.2.(5)",
-  "ruling": "D-43",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "action": "hard-set pump power released to autosize for the re-sizing run \u2014 the efficiency pass re-transfers it against the newly sized flow",
-  "inputs": {
-   "pumps": 1
-  },
-  "article": "8.4.4.14.(1)-(3)",
-  "ruling": "D-11 D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "Primary Boiler 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 52.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Secondary Boiler 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 0.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER 73kBtu/hr 11.0EER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 24.6,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 33.4,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 9.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 15.5,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER 85kBtu/hr 11.0EER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 28.7,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 33.4,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 9.9,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 15.6,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER 16kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 6.0,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE 40kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 13.1,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "sys_3 Staged Unitary Thermal Zone 5",
-  "action": "staged supply airflow FLOORED at the minimum outdoor-air fraction \u2014 the lower stage(s) would otherwise deliver less air than the ventilation requirement",
-  "inputs": {
-   "outdoor_air_fraction": 0.601,
-   "stages": 2,
-   "unfloored_stage_1_ratio": 0.5
-  },
-  "article": "8.4.5.10.(8); 8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 9.8
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER 85kBtu/hr 11.0EER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 28.7
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 9.9
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER 16kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 6.0
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER 73kBtu/hr 11.0EER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 24.6
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 15.5,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 33.4,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 15.6,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE 40kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 13.1,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 33.4,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "variable-flow pump modeled riding its curve",
-  "inputs": {
-   "coefficients": [
-    0.227143,
-    1.178929,
-    -0.41071
-   ],
-   "minimum_flow_fraction": 0.47,
-   "loop": "Hot Water Loop"
-  },
-  "value": "below-D floor (E=0.68) via min flow 0.00065 m3/s",
-  "article": "8.4.5.14.(4)-(5); Table 8.4.5.14.",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "pump power transferred from the proposed building",
-  "inputs": {
-   "proposed_pumps": 1,
-   "proposed_w_per_l_s": 255.49,
-   "reference_flow_l_s": 1.39,
-   "loop_type": "Heating"
-  },
-  "value": "rated power 356 W (combined proposed intensity x reference flow)",
-  "article": "8.4.5.14.(1)-(3)",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Hot Water Loop",
-  "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
-  "inputs": {
-   "before_w": 356,
-   "cap_w": 234,
-   "w_per_kw": 4.5,
-   "thermal_kw": 52.0,
-   "system_type": "Heating",
-   "scale": 0.657
-  },
-  "value": "356 W -> 234 W",
-  "article": "5.2.6.3.(1); 8.4.5.1.(2)",
-  "ruling": "D-38",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
-  "ruling": "D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "NECB efficiency pass complete",
-  "inputs": {
-   "code": "necb2025",
-   "edition": "2025",
-   "boilers": 2,
-   "chillers": 0,
-   "dx_cooling": 0,
-   "dx_cooling_staged": 5,
-   "dx_heating": 0,
-   "dx_heating_staged": 0,
-   "gas_coils": 0,
-   "gas_coils_staged": 5
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "target": "reference_annual_iter2",
-  "action": "annual EnergyPlus run complete",
-  "inputs": {
-   "run_period": "full year",
-   "clean_run": true,
-   "total_site_kwh": 172606,
-   "unmet_heating_h": 843.25,
-   "unmet_cooling_h": 6.5
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "action": "capacity increase 3: reference \u2014 sizing factor(s) raised on 5 failing thermal block(s), secant-targeted from the previous run(s) \u2014 building re-sized and re-run",
-  "inputs": {
-   "building": "reference",
-   "step": 1.25,
-   "iteration": 3,
-   "mode": "zonal",
-   "heating_sizing_factor": 2.441,
-   "zones_bumped": 5,
-   "zones": {
-    "THERMAL ZONE 1": {
-     "heating_sizing_factor": 1.965
-    },
-    "THERMAL ZONE 2": {
-     "heating_sizing_factor": 1.848
-    },
-    "THERMAL ZONE 3": {
-     "heating_sizing_factor": 1.988
-    },
-    "THERMAL ZONE 4": {
-     "heating_sizing_factor": 1.84
-    },
-    "THERMAL ZONE 5": {
-     "heating_sizing_factor": 2.441
-    }
-   }
-  },
-  "article": "8.4.1.2.(5)",
-  "ruling": "D-43",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "action": "hard-set pump power released to autosize for the re-sizing run \u2014 the efficiency pass re-transfers it against the newly sized flow",
-  "inputs": {
-   "pumps": 1
-  },
-  "article": "8.4.4.14.(1)-(3)",
-  "ruling": "D-11 D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "target": "Primary Boiler 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE 177kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 52.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Secondary Boiler 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE 0kBtu/hr 0.9 AFUE",
-  "action": "boiler efficiency applied",
-  "inputs": {
-   "fuel": "Gas",
-   "capacity_kw": 0.0,
-   "part_load_curve_class": "non_condensing",
-   "class_source": "row",
-   "curve": "BOILER-PLF-NONCONDENSING",
-   "form": "TableLookup"
-  },
-  "value": "thermal efficiency 0.9 (0.9 AFUE), part-load curve BOILER-PLF-NONCONDENSING",
-  "article": "NECB 2025 Table 5.2.12.1.-N; 8.4.6.2.",
-  "ruling": "D-89",
-  "evidence": "Article 8.4.6.2. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.2, row 'Non-condensing'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0 (node value 0), 0.00001 to 0.0001 step 0.00001, 0.0001 to 0.001 step 0.0001, 0.001 to 0.05 step 0.001, 0.05 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (169 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.1994 % against the exact requirement (sampled at PLR step 0.00001); a node at PLR 0 carries the Code equation down to zero load; the efficiency curve is evaluated on the EnteringBoiler temperature",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER 73kBtu/hr 11.0EER 84kBtu/hr 11.0EER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 26.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE 114kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 36.0,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER 33kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 10.7,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE 53kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 16.8,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER 85kBtu/hr 11.0EER 98kBtu/hr 11.0EER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 31.6,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE 114kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 36.5,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER 34kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 10.7,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE 53kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 16.7,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER 16kBtu/hr 15.0SEER 20kBtu/hr 15.0SEER",
-  "action": "DX cooling modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 7.5,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.10.(8)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE 40kBtu/hr 0.95 AFUE 45kBtu/hr 0.95 AFUE",
-  "action": "furnace modelled as 2 equal stages",
-  "inputs": {
-   "capacity_kw": 14.6,
-   "two_stage_max_kw": 66,
-   "stage_size_kw": 66,
-   "stages_required": 2,
-   "stages_before": 2
-  },
-  "value": "2 autosized stage(s), each sized to 50.0% increments of the total by the unitary flow ratios",
-  "article": "8.4.5.9.(7)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 1 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER 33kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 10.7
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 2 68kBtu/hr 11.0EER 85kBtu/hr 11.0EER 98kBtu/hr 11.0EER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 31.6
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 3 25kBtu/hr 15.0SEER 31kBtu/hr 15.0SEER 34kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 10.7
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 4 14kBtu/hr 15.0SEER 16kBtu/hr 15.0SEER 20kBtu/hr 15.0SEER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 7.5
-  },
-  "value": "COP 3.98 (15.0SEER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilCoolingDXMultiSpeed_dx 58kBtu/hr 15.0SEER 73kBtu/hr 11.0EER 84kBtu/hr 11.0EER",
-  "action": "staged DX cooling efficiency applied to every stage",
-  "inputs": {
-   "table": "unitary_acs",
-   "stages": 2,
-   "heating_type": "All Other",
-   "top_stage_kw": 26.8
-  },
-  "value": "COP 3.8 (11.0EER) on all 2 stages, binned by total capacity",
-  "article": "NECB 2020 Table 5.2.12.1 (unitary equipment)",
-  "ruling": "D-46",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 1 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE 53kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 16.8,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 2 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE 114kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 36.5,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 3 40kBtu/hr 0.95 AFUE 49kBtu/hr 0.95 AFUE 53kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 16.7,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 4 38kBtu/hr 0.95 AFUE 40kBtu/hr 0.95 AFUE 45kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 14.6,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "CoilHeatingGasMultiStage_gas 82kBtu/hr 0.95 AFUE 100kBtu/hr 0.95 AFUE 114kBtu/hr 0.95 AFUE",
-  "action": "staged gas heating efficiency applied to every stage",
-  "inputs": {
-   "stages": 2,
-   "top_stage_kw": 36.0,
-   "part_load_curve_class": "atmospheric",
-   "class_source": "row",
-   "curve": "FURNACE-PLF-ATMOSPHERIC",
-   "form": "TableLookup"
-  },
-  "value": "burner efficiency 0.95 (0.95 AFUE) on all 2 stages, part-load curve FURNACE-PLF-ATMOSPHERIC",
-  "article": "NECB 2025 Table 5.2.12.1.-O; 8.4.6.3.",
-  "ruling": "D-46 D-89",
-  "evidence": "Article 8.4.6.3. states FHeatPLC as a fuel-INPUT ratio (Table 8.4.6.3, row 'Atmospheric'), so the EnergyPlus part-load field carries the transform PLF = PLR / FHeatPLC(PLR); represented as a Table:Lookup on PLR 0.055 to 0.10 step 0.005, 0.10 to 1.00 step 0.01 (100 nodes) with Linear interpolation and Constant extrapolation \u2014 max relative error 0.0330 % against the exact requirement (sampled at PLR step 0.00001); below the first node (PLR 0.055) the table's Constant extrapolation holds the factor, an under-count bounded by the Code's standby term FHeatPLC(0) x rated fuel; the first node's value lies above the engine's 0.7 floor on the coil part-load fraction, so the engine never clamps; the part-load curve sits on the PARENT staged coil, which carries EnergyPlus' single part-load-fraction field (D-46)",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "variable-flow pump modeled riding its curve",
-  "inputs": {
-   "coefficients": [
-    0.227143,
-    1.178929,
-    -0.41071
-   ],
-   "minimum_flow_fraction": 0.47,
-   "loop": "Hot Water Loop"
-  },
-  "value": "below-D floor (E=0.68) via min flow 0.00072 m3/s",
-  "article": "8.4.5.14.(4)-(5); Table 8.4.5.14.",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Pump Variable Speed 1",
-  "action": "pump power transferred from the proposed building",
-  "inputs": {
-   "proposed_pumps": 1,
-   "proposed_w_per_l_s": 255.49,
-   "reference_flow_l_s": 1.54,
-   "loop_type": "Heating"
-  },
-  "value": "rated power 392 W (combined proposed intensity x reference flow)",
-  "article": "8.4.5.14.(1)-(3)",
-  "ruling": "D-11",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Hot Water Loop",
-  "action": "combined pump power exceeds Table 5.2.6.3 \u2014 clamped to the maximum (min-wins over the pump-power transfer)",
-  "inputs": {
-   "before_w": 392,
-   "cap_w": 234,
-   "w_per_kw": 4.5,
-   "thermal_kw": 52.0,
-   "system_type": "Heating",
-   "scale": 0.596
-  },
-  "value": "392 W -> 234 W",
-  "article": "5.2.6.3.(1); 8.4.5.1.(2)",
-  "ruling": "D-38",
-  "building": "reference building",
-  "level": "decision"
- },
- {
-  "step": "efficiency",
-  "target": "Main Service Water Loop",
-  "action": "service water heating loop \u2014 outside 8.4.4.14 (HVAC hydronic pumps); pump left as built",
-  "ruling": "D-27",
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "NECB efficiency pass complete",
-  "inputs": {
-   "code": "necb2025",
-   "edition": "2025",
-   "boilers": 2,
-   "chillers": 0,
-   "dx_cooling": 0,
-   "dx_cooling_staged": 5,
-   "dx_heating": 0,
-   "dx_heating_staged": 0,
-   "gas_coils": 0,
-   "gas_coils_staged": 5
-  },
-  "building": "reference building",
-  "level": "info"
- },
- {
-  "step": "compliance",
-  "target": "reference_annual_iter3",
-  "action": "annual EnergyPlus run complete",
-  "inputs": {
-   "run_period": "full year",
-   "clean_run": true,
-   "total_site_kwh": 175328,
-   "unmet_heating_h": 802.25,
-   "unmet_cooling_h": 10.5
+   "total_site_kwh": 147978,
+   "unmet_heating_h": 0.0,
+   "unmet_cooling_h": 4.75
   },
   "building": "reference building",
   "level": "info"
@@ -5128,28 +3649,28 @@
   "action": "proposed does not exceed the building energy target",
   "inputs": {
    "proposed_kwh": 117908.3,
-   "reference_building_energy_target_kwh": 175327.8
+   "reference_building_energy_target_kwh": 147977.8
   },
-  "value": "margin 57419.5 kWh (32.7%)",
+  "value": "margin 30069.5 kWh (20.3%)",
   "article": "8.4.1.2.(2)",
   "level": "decision"
  },
  {
   "step": "compliance",
-  "action": "energy performance Tier 2 achieved",
+  "action": "energy performance Tier 1 achieved",
   "inputs": {
-   "percent_of_target": 67.3,
-   "improvement_percent": 32.7
+   "percent_of_target": 79.7,
+   "improvement_percent": 20.3
   },
   "article": "10.1.2.1. (Table verified identical 2020/2025)",
   "level": "decision"
  },
  {
   "step": "compliance",
-  "action": "unmet heating hours EXCEED 100 h",
+  "action": "unmet heating hours within 100 h for both buildings",
   "inputs": {
    "proposed_h": 41.75,
-   "reference_h": 802.25,
+   "reference_h": 0.0,
    "limit_h": 100
   },
   "article": "8.4.1.2.(3)",
@@ -5160,24 +3681,18 @@
   "action": "sentence (4) is vacuous \u2014 the proposed building has no mechanical cooling (the clause applies to thermal blocks \"for which mechanical cooling is provided\"; explicit in the 2025 wording, applied consistently for 2020)",
   "inputs": {
    "proposed_h": 1709.75,
-   "reference_h": 10.5
+   "reference_h": 4.75
   },
   "article": "8.4.1.2.(4)",
   "level": "decision"
  },
  {
   "step": "compliance",
-  "action": "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (hard-sized equipment does not respond to sizing-factor increases).",
-  "article": "8.4.1.2.(5)",
-  "level": "warning"
- },
- {
-  "step": "compliance",
   "action": "operational GHG performance level E",
   "inputs": {
    "proposed_kg_co2e": 16716.7,
-   "reference_kg_co2e": 21280.1,
-   "percent_of_ghg_target": 78.6
+   "reference_kg_co2e": 19624.9,
+   "percent_of_ghg_target": 85.2
   },
   "article": "11.4.1.1.; 11.4.2.1. (NECB 2025)",
   "level": "decision"
@@ -5187,7 +3702,7 @@
   "action": "Determination of Compliance \u2014 implemented: The pipeline computes the (2) annual-energy verdict (against the 8.4.4 EUI target or the 8.4.5 reference building), the (3)/(4) unmet-hours verdicts (with the vacuous-cooling determination when the proposed has no mechanical cooling), and the sentence-(5) capacity auto-iteration \u2014 per-thermal-block: each failing zone\u2019s Sizing:Zone factors are raised, secant-targeted from that zone\u2019s own (factor, unmet-hours) history across rounds, with a global SizingParameters fallback when per-zone data cannot attribute the failure, and hard-sized-equipment stall detection \u2014 compliance.rb; asserted by test_compliance.rb.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 8,
+   "decisions_citing": 5,
    "code": [
     "python/btap/codes/compliance.py#_evaluate",
     "python/btap/codes/compliance.py#_evaluate_unmet"

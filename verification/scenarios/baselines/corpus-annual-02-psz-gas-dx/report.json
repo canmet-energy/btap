@@ -52,13 +52,13 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 3813.9,
+  "total_site_kwh": 3969.4,
   "electricity_kwh": 1452.8,
-  "natural_gas_kwh": 2361.1,
+  "natural_gas_kwh": 2516.7,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 2050.0,
+   "heating": 2205.6,
    "cooling": 0.0,
    "fans": 636.1,
    "pumps": 41.7,
@@ -67,7 +67,7 @@
    "water_systems": 311.1
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 4.8,
+  "eui_kwh_per_m2": 5.0,
   "unmet_occupied_hours": {
    "heating": 29.75,
    "cooling": 0.0
@@ -96,7 +96,7 @@
   }
  },
  "capacity_iterations": [],
- "percent_of_target": 104.2,
+ "percent_of_target": 100.1,
  "tier": null,
  "annual": false,
  "compliant": false,

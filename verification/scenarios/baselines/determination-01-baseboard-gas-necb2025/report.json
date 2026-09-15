@@ -53,168 +53,59 @@
  },
  "reference": {
   "clean_run": true,
-  "total_site_kwh": 175327.8,
-  "electricity_kwh": 87769.4,
-  "natural_gas_kwh": 87558.3,
+  "total_site_kwh": 147977.8,
+  "electricity_kwh": 60983.3,
+  "natural_gas_kwh": 86994.4,
   "district_heating_kwh": 0.0,
   "district_cooling_kwh": 0.0,
   "end_uses_kwh": {
-   "heating": 73291.7,
-   "cooling": 3241.7,
-   "fans": 50355.6,
-   "pumps": 1111.1,
+   "heating": 72722.2,
+   "cooling": 2561.1,
+   "fans": 24977.8,
+   "pumps": 383.3,
    "interior_lighting": 9402.8,
    "interior_equipment": 22311.1,
-   "water_systems": 14266.7
+   "water_systems": 14275.0
   },
   "floor_area_m2": 800.0,
-  "eui_kwh_per_m2": 219.2,
+  "eui_kwh_per_m2": 185.0,
   "unmet_occupied_hours": {
-   "heating": 802.25,
-   "cooling": 10.5
+   "heating": 0.0,
+   "cooling": 4.75
   },
   "zone_unmet_occupied_hours": {
    "THERMAL ZONE 1": {
-    "heating": 159.5,
-    "cooling": 1.5
+    "heating": 0.0,
+    "cooling": 0.5
    },
    "THERMAL ZONE 2": {
-    "heating": 104.25,
-    "cooling": 5.25
+    "heating": 0.0,
+    "cooling": 1.25
    },
    "THERMAL ZONE 3": {
-    "heating": 151.25,
+    "heating": 0.0,
     "cooling": 0.75
    },
    "THERMAL ZONE 4": {
-    "heating": 115.5,
-    "cooling": 3.25
+    "heating": 0.0,
+    "cooling": 0.5
    },
    "THERMAL ZONE 5": {
-    "heating": 766.0,
-    "cooling": 0.0
+    "heating": 0.0,
+    "cooling": 1.75
    }
   },
-  "ghg_kg_co2e": 21280.1
+  "ghg_kg_co2e": 19624.9
  },
- "capacity_iterations": [
-  {
-   "iteration": 1,
-   "bumped": {
-    "reference": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 1": {
-       "heating_sizing_factor": 1.563
-      },
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.563
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 1.563
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 1.563
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 1.563
-      }
-     },
-     "heating_sizing_factor": 1.563
-    }
-   },
-   "unmet_after": {
-    "proposed": {
-     "heating": 41.75,
-     "cooling": 1709.75
-    },
-    "reference": {
-     "heating": 945.5,
-     "cooling": 6.75
-    }
-   }
-  },
-  {
-   "iteration": 2,
-   "bumped": {
-    "reference": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 1": {
-       "heating_sizing_factor": 1.805
-      },
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.692
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 1.806
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 1.706
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 1.953
-      }
-     },
-     "heating_sizing_factor": 1.953
-    }
-   },
-   "unmet_after": {
-    "proposed": {
-     "heating": 41.75,
-     "cooling": 1709.75
-    },
-    "reference": {
-     "heating": 843.25,
-     "cooling": 6.5
-    }
-   }
-  },
-  {
-   "iteration": 3,
-   "bumped": {
-    "reference": {
-     "mode": "zonal",
-     "zones": {
-      "THERMAL ZONE 1": {
-       "heating_sizing_factor": 1.965
-      },
-      "THERMAL ZONE 2": {
-       "heating_sizing_factor": 1.848
-      },
-      "THERMAL ZONE 3": {
-       "heating_sizing_factor": 1.988
-      },
-      "THERMAL ZONE 4": {
-       "heating_sizing_factor": 1.84
-      },
-      "THERMAL ZONE 5": {
-       "heating_sizing_factor": 2.441
-      }
-     },
-     "heating_sizing_factor": 2.441
-    }
-   },
-   "unmet_after": {
-    "proposed": {
-     "heating": 41.75,
-     "cooling": 1709.75
-    },
-    "reference": {
-     "heating": 802.25,
-     "cooling": 10.5
-    }
-   }
-  }
- ],
- "percent_of_target": 67.3,
- "tier": 2,
+ "capacity_iterations": [],
+ "percent_of_target": 79.7,
+ "tier": 1,
  "annual": true,
  "ghg": {
-  "percent_of_ghg_target": 78.6,
+  "percent_of_ghg_target": 85.2,
   "level": "E"
  },
- "compliant": false,
+ "compliant": true,
  "warnings": [
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.5.10.(8) stage count NOT set; run sizing first",
   "CoilHeatingGasMultiStage_gas: staged capacity unavailable (model not sized?) \u2014 8.4.5.9.(7) stage count NOT set; run sizing first",
@@ -276,7 +167,6 @@
   "model object named 'DXCOOL-REF-CAPFFLOW' does not state this edition's Quadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-CAPFFLOW (D-89)'",
   "model object named 'DXCOOL-REF-COOLEIRFT' does not state this edition's BiQuadratic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLEIRFT (D-89)'",
   "model object named 'DXCOOL-REF-COOLPLFFPLR' does not state this edition's Cubic catalogue row \u2014 it is NOT adopted; the ruleset's own curve is applied as 'DXCOOL-REF-COOLPLFFPLR (D-89)'",
-  "8.4.1.2.(5): unmet-hours limits still not met after 3 capacity increase(s) \u2014 the building remains non-compliant; raise max_capacity_iterations, increase capacity_step, or fix the design (hard-sized equipment does not respond to sizing-factor increases).",
   "Calculation Methods \u2014 partial. Applied: the energy model accounts for the annual energy use of what the model contains. Gaps: elevators/escalators ((1)(j)) and other loads absent from the model are not added by the pipeline",
   "Operating Schedules, Internal Loads and Service Water Heating Loads (EUI path) \u2014 partial. Applied: check-then-normalize (Archetypes.conformance / normalize!): the proposed is checked against the Table 8.4.4.2. values (occupant density, receptacle W/m2, SWH L/h/occupant; schedule profiles compared hourly against the archetype letter) and, when non-conformant, REWRITTEN to them before the EUI-path annual run. Gaps: unmapped spaces keep their modeled loads (the Table applies \u201cfor the applicable building archetype\u201d); spaces with no water-use equipment warn rather than gaining a SWH system"
  ]
