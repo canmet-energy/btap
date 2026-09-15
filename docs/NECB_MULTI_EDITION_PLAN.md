@@ -2871,3 +2871,45 @@ post-sizing efficiency pass read the proposed's frozen 54.1 kW boiler (cap
 ("Primary Boiler 185kBtu/hr 0.9 AFUE"); after, it reads the reference's own
 64.4 kW (cap 290 W, pump 250 W within) and keeps the base name. No other
 change is unexplained.
+
+**Sol's review of PR #49 and the fixes (2026-09-15, `b68580b`).** Six
+findings, all fixed; each new test fails on the pre-fix code (`3bd88a1`'s
+product package exported and imported with the editable install bypassed —
+a first attempt with `PYTHONPATH` alone silently imported the checkout) and
+passes on the fix.
+- P1 stale modulating controls after restaging below 352 kW: every pass sets
+  the complete control state of its band (the Primary modulates to 25 % only
+  above 352 kW; below it both boilers return to `ConstantFlow` with a
+  defaulted minimum part-load ratio). Tests: 400 → 100 kW, 400 → 300 kW,
+  100 → 400 kW.
+- P1 the public `reference_hvac()` returned hard-set plant capacities: it now
+  calls `prepare_for_resizing(code=)` before returning, so the returned
+  reference is ready to size. Engine test: size a proposed, call
+  `reference_hvac`, size the returned reference directly — no user-specified
+  boiler capacity.
+- P1 exhaust-bearing System 4 zones never dispatched: D-91 eligibility ignores
+  `FanZoneExhaust`, which teardown keeps. Test: hooded food-preparation zones
+  select System 4 and all five are dispatched, ordered terminal, baseboard,
+  exhaust.
+- P2 the 2025 D-90 audit cited 2020 articles: `prepare_for_resizing(model,
+  audit, code)` cites the active edition's `{prefix}.9.(6)(a);
+  {prefix}.10.(6)`. Test for both editions.
+- P2 the hard-capacity warnings overclaimed: both name the classes inspected
+  and say staged coils are not checked.
+- P2 DF-8 misattributed Note (3): rewritten around the SDK-zone to
+  thermal-block mapping and D-28's legacy-parity grouping.
+Full suite 1151 passed, 1 skipped; D-90/D-91 files 25 passed (4 subtests);
+lint, import contracts, citation gates (counts unchanged), registry and TOC,
+coverage page regenerated.
+
+**Re-freeze after the review fixes (clean tree at `b68580b`, `dirty:
+false`).** 5 scenarios changed against `3bd88a1`, audit files only, entry
+counts unchanged, no report moved: corpus-sizing-01, corpus-sizing-02,
+corpus-annual-01, corpus-annual-02 and determination-01. In all five the D-90
+plant-capacity release entry (same inputs, two boilers) moves from just
+before the reference sizing run to the end of the reference build, because
+`reference_hvac` now returns a model ready to size. In determination-01 (NECB
+2025) the entry's article also changes from `8.4.4.9.(6)(a); 8.4.4.10.(6)` to
+`8.4.5.9.(6)(a); 8.4.5.10.(6)`. The band-state, exhaust and warning fixes
+reach no frozen scenario (no plant crosses 352 kW, no zone has an exhaust fan,
+no 8.4.1.2.(5) warning is emitted).

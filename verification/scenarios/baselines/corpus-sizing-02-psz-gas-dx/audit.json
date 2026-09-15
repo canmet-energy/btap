@@ -1109,6 +1109,19 @@
   "level": "info"
  },
  {
+  "step": "efficiency",
+  "action": "plant capacities the efficiency pass derived from sizing released to autosize for the re-sizing run \u2014 the next pass re-stages them from the newly sized design capacities; input capacities are kept",
+  "inputs": {
+   "boilers": 2,
+   "chillers": 0,
+   "towers": 0
+  },
+  "article": "8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5)",
+  "ruling": "D-90",
+  "building": "reference building",
+  "level": "info"
+ },
+ {
   "step": "climate",
   "action": "HDD supplied explicitly",
   "value": 3890.0,
@@ -2311,19 +2324,6 @@
   "step": "compliance",
   "action": "8.4.3.2 operating schedules and occupancy/receptacle loads are identical between proposed and reference by construction (the reference is a clone; neither reset touches schedules or those loads); interior lighting power is reset to the Part 4 allowance per 8.4.4.5.(1) (reference_lighting); service water heating efficiencies are reset to the Part 6 minimums per 8.4.4.20 (reference_shw). Representativeness of the loads for the building type remains the modeller's input (see the loads domain for NECB space-use data).",
   "article": "8.4.3.2.(1)-(2)",
-  "level": "info"
- },
- {
-  "step": "efficiency",
-  "action": "plant capacities the efficiency pass derived from sizing released to autosize for the re-sizing run \u2014 the next pass re-stages them from the newly sized design capacities; input capacities are kept",
-  "inputs": {
-   "boilers": 2,
-   "chillers": 0,
-   "towers": 0
-  },
-  "article": "8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5)",
-  "ruling": "D-90",
-  "building": "reference building",
   "level": "info"
  },
  {
