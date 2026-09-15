@@ -1140,6 +1140,39 @@ any result.
   `determination-01-baseboard-gas-necb2025` (the scenario pins the
   reason, so fixing it is an adjudicated re-freeze). User's call
   2026-09-08: "log it for later."
+  **Diagnosed 2026-09-15; being closed by D-90 + D-91** (branch
+  `df1-d90-d91`, one atomic re-freeze with separate attribution). The frozen
+  reference boiler (held at the proposed's 51,983 W because nothing released
+  the efficiency pass's hard capacity) is a real 8.4.4.9.(6)(a) defect, D-90,
+  but releasing it alone left 801.0 h. The cause is zone dispatch: the
+  baseboard ran before the always-on rooftop terminal in `SequentialLoad`.
+  D-91 (decided by Sol) runs the rooftop terminal first in one-unit-per-block
+  Systems 3/4. Evidence and the options measured are in D-90/D-91.
+- **DF-8 — shared "single-zone" System 3/4 reference units.** D-28 keeps
+  single-zone families on the proposed's selection grouping, so a proposed
+  multi-zone air system (corpus 02, 03, 04, 13; SmallHotel's System 4)
+  yields ONE System 3/4 unit over several thermal blocks controlled from one
+  zone. Division A 1.4.1.2 defines a single-zone system as "serving only a
+  single thermal block"; Note (3) to Table 8.4.5.7.-B groups the blocks of a
+  ≤4-storey building under "a single system". Measured 2026-09-15 (D-91
+  screening): every dispatch option loosened reference energy (+1.5 % to
+  +8.5 % on the first run) and raised cooling hours on this topology, and the
+  core zone is recovery-limited. Excluded from D-91; needs its own ruling as a
+  D-28 amendment (one unit per thermal block, or the grouping kept).
+- **DF-9 — the heat-pump reference barely runs its heat pump.** In the
+  'hp' PSZ the supplemental gas coil is a separate loop coil under
+  `SetpointManager:SingleZone:Reheat`, outside the load-controlled unitary.
+  Corpus 16 (NECB 2025, first reference annual): DX heating 2.6 GJ against
+  88.3 GJ from the gas coil. Zone dispatch cannot reach that coil, so the
+  'hp' reference is excluded from D-91. Check the arrangement against
+  8.4.5.13 (2020: 8.4.4.13) and D-52's auxiliary-energy election.
+- **DF-10 — D-64 recheck on current code.** D-64 dispositioned SmallHotel's
+  318–480 h of reference unmet heating (four storage closets on a shared
+  System 4 unit, morning recovery) as "characteristic". A January 2026-09-15
+  screen of the legacy NECB2020 SmallHotel on current code gave 0.75 h
+  (closets 0.25 h each), and D-91 variants left it unchanged. Re-run
+  SmallHotel for a full year on current code; retire or amend D-64 on the
+  result, independently of D-91.
 
 ## Stage 1 — opened 2026-09-08
 
@@ -2730,3 +2763,55 @@ skip them). Dispatch run 34875691969: all five jobs green in 7 min 2 s.
   `[BOOST_ASSERT] … addAndInsertObjects` lines also appear in pre-D-89 parity
   runs, so they are existing SDK noise, not a D-89 effect.
 - parity-scenarios: 5 passed (the annual lane, frozen at `d8b656b`).
+
+## DF-1 closed by D-90 + D-91 — implementation (2026-09-15, branch `df1-d90-d91`)
+
+**Diagnosis and decision.** Scratchpad experiments (run-time patches, full year,
+NECB 2025, Toronto CWEC2020) showed the frozen reference boiler is a real
+8.4.4.9.(6)(a) defect but not DF-1's cause: releasing it left 801.0 h. The
+cause is zone dispatch — the baseboard ran before the always-on rooftop
+terminal in `SequentialLoad`. Two Fable reviews and Sol's rulings narrowed the
+dispatch rule to candidate A for one-unit-per-block Systems 3/4 (D-91) and
+split out the shared System 3/4 topology (DF-8), the starved heat-pump
+reference (DF-9) and a D-64 full-year recheck (DF-10). The user chose one
+branch for D-90 and D-91 with one re-freeze and separate attribution.
+
+**D-90 (plant capacity ownership).** `efficiency.py`: ownership features on each
+staged boiler/chiller (design basis, `autosized`/`input` source, applied value,
+base name); `_plant_capacity` re-reads a value the pass applied, so staging is
+repeatable; names rebuilt from the base name; tower fields hardened from
+autosized values recorded; `prepare_for_resizing` releases what the pass
+derived from sizing (never inputs) with one `ruling='D-90'` info entry.
+`reference.py`: `_clear_proposed_capacity_ownership` on the clone. `path.py`:
+`_hard_sized_capacities` feeds both 8.4.1.2.(5) warnings (recorded in the
+report only when something is found). Boiler decisions cite `D-89 D-90`;
+chiller decisions cite `D-90`.
+
+**D-91 (zone dispatch).** `reference.py`: `_apply_zone_dispatch` beside
+`_audit_terminal_secondary_split`, System 3/4 only, a loop serving exactly one
+zone with exactly one constant-volume terminal and one baseboard: explicit
+`SequentialLoad`, terminal priority 1 and baseboard 2 in both orders, all four
+sequential fractions 1.0, one `ruling='D-91'` decision per assignment.
+
+**Tests.** `tests/necb/test_plant_capacity_ownership.py` (13) and
+`tests/necb/test_reference_zone_dispatch.py` (4, with subtests for both
+editions): 17 passed. Two engine regressions in `test_compliance.py`
+(four-week January): the reference meets heating with no increase under D-91;
+no reference sizing run carries a user-specified boiler capacity and the final
+primary equals its last design size under D-90 — 2 passed in 40.7 s, and each
+FAILS with its fix switched off by a run-time patch (no D-91 decision; a
+user-specified 11,149 W boiler reaching `reference_sizing`). The D-89 electric
+boiler test now checks that D-89 is among the rulings. Existing efficiency,
+part-load curve and part-load class tests: 67 passed.
+
+**Checks.** Import contracts 4 kept; Ruff clean; orphan keys OK; edition delta
+and vintage match up to date; decisions TOC regenerated and registry tests
+(9) OK; `git diff --check` clean. The 8.4 coverage page moved code-pointer
+line numbers only.
+
+**Authoring run, `determination-01-baseboard-gas-necb2025`** (product code, no
+patches, 57 s): compliant, exit 0 (was 1), tier 1 (was 2), GHG level E;
+proposed 117,908.3 kWh / 41.75 h heating; reference 147,977.8 kWh, unmet
+0.0 / 4.75 h (was 802.25 h heating), no capacity iterations, no 8.4.1.2.(5)
+warning; five D-91 decisions, one D-90 release entry. The scenario's asserts
+are re-pinned to these values. Re-freeze and per-scenario attribution follow.

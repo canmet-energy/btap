@@ -122,6 +122,8 @@ audit are drained and archived — see `docs/README.md`.
 - **D-87** — R-C: the public API selects a code edition by code id, and `vintage` leaves every argument and every output _(process)_
 - **D-88** — A snapshot names another edition only as its origin; source-neutral performance-curve identifiers (R-N) _(process)_
 - **D-89** — Each edition's reference boilers and furnaces carry its own part-load fuel curve by equipment class; electric boilers carry none; the loader validates before reuse (DF-4 closed; R-O) _(runtime)_
+- **D-90** — The reference plant's capacity follows the reference's own sizing _(runtime)_
+- **D-91** — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first _(runtime)_
 
 <!-- TOC END -->
 
@@ -5368,3 +5370,195 @@ warnings (a same-named object not adopted, an unknown curve form) cite
 data miss rather than a DF-4 validation. (6) The live scenario counts read 41, ten of
 them Python-only from their first freeze. R-O re-frozen on the clean tree;
 attribution in the plan log.
+
+## D-90 — The reference plant's capacity follows the reference's own sizing
+
+**Decided:** 2026-09-15 (DF-1, planned with the user; implemented together
+with D-91 in one change and one re-freeze with separate attribution). The
+efficiency pass owns the plant capacities it derives from sizing, releases
+them before every re-sizing run, and stages repeatably; capacities a model
+supplies as inputs are never released.
+
+**The requirement.** NECB 2020 8.4.4.9.(6) (2025: 8.4.5.9.(6), identical
+text): "(a) the heating capacity of the heating plant shall be the sum of the
+heating capacities of the systems served by the plant, multiplied by the
+applicable oversize factor"; (b) up to 176 kW, one single-stage boiler; (c)
+above 176 kW and up to 352 kW, two boilers of equal capacity; (d) above
+352 kW, one boiler modulating down to 25 %. 8.4.4.10.(6) (2025: 8.4.5.10.(6))
+stages chillers at 2,100 kW. 8.4.1.2.(5): "the capacities of the primary and
+secondary systems … shall be incrementally increased until those loads are
+met." Both references were consulted: the codes MCP for the text, the pinned
+gem for the realisation.
+
+**What was wrong.** `_apply_boiler` read a boiler's nominal capacity, else
+its autosized capacity, and hard-set the staged value. On the reference clone
+the first pass runs at build time, before any reference sizing, and the
+autosized getter returns the PROPOSED's sizing, because the clone carries the
+proposed SQL. In corpus `01-baseboard-gas` (NECB 2025, Toronto CWEC2020) the
+reference boilers stayed at 51,983 W through three 8.4.1.2.(5) increases
+while EnergyPlus's design size grew from 64,396 to 101,136 W.
+`prepare_for_resizing` released only pump power. A 176–352 kW plant halved on
+one pass read as ≤ 176 kW on the next and parked its Secondary at 0.001 W;
+chillers above 2,100 kW were halved again the same way; every pass appended
+another capacity suffix to the name (114 characters after three rounds);
+tower hydraulics hardened for the Table 5.2.12.2 fan rule were never released;
+and the 8.4.1.2.(5) warning blamed "hard-sized equipment" without looking for
+any.
+
+**The legacy realisation.** The pinned gem reads capacity in the same order
+(`boiler_hot_water.rb:131-143`) and hard-sets it (`hvac_systems.rb:548-583`),
+but applies efficiencies once, after the reference's own sizing, and never
+re-sizes. The stale read, the missing release and the repeated staging are
+Python-port defects. **Findings against the gem, recorded rather than
+adopted:** it stages at `>=` thresholds where the Code says "greater than" and
+"exceeds", and it parks a 0.001 W Secondary where (6)(b) says one boiler.
+
+**The ownership contract.**
+1. Each boiler and chiller the pass stages carries four `additionalProperties`
+   features: `btap_capacity_basis_w` (the design capacity it staged from),
+   `btap_capacity_source` (`autosized` or `input`), `btap_capacity_applied_w`
+   and `btap_base_name`.
+2. A hard value equal to the applied value is the pass's own output, so the
+   pass stages from the stored basis and a repeat pass gives the same plant.
+   Any other hard value is an `input`; an unset capacity is `autosized` from
+   the model's own sizing.
+3. `prepare_for_resizing` returns `autosized` capacities to autosize before
+   every re-sizing run, together with the tower fields hardened from autosized
+   values (`btap_tower_hardened_fields`), in one info entry with
+   `ruling='D-90'`. `input` capacities are kept.
+4. D-58: a plant copied from the proposed keeps a capacity the proposed
+   specified (an input) and is re-sized where the proposed autosized it.
+5. Names are rebuilt from the base name, and Primary/Secondary staging matches
+   the base name.
+6. The reference clone drops any ownership features carried in with the input
+   model, audited, so ownership always comes from the reference's own sizing.
+7. The 8.4.1.2.(5) warnings (the final one and the stall) name the hard
+   capacities the pipeline does not own — boilers, chillers, baseboards, gas
+   and electric coils, single-speed DX coils — or state that none were
+   detected.
+
+**Evidence (screening, run-time patch, corpus 01).** With the boiler released
+before every re-sizing run, the applied Primary capacity follows the
+reference's own sizing (64,396 → 80,495 → 91,617 → 101,339 W) and the
+reference uses less energy (67.3 → 60.3 % of target), but its unmet heating
+stays at 801.0 h. D-90 is a real 8.4.4.9.(6)(a) defect and not DF-1's cause;
+D-91 is. Final figures are regenerated from product code at the re-freeze,
+with attribution in the plan log.
+
+- **Files:** `btap/codes/necb/hvac/efficiency.py` (ownership features,
+  `_plant_capacity`, boiler/chiller/tower appliers, `prepare_for_resizing`),
+  `btap/codes/necb/hvac/reference.py` (`_clear_proposed_capacity_ownership`),
+  `btap/codes/necb/path.py` (`_hard_sized_capacities`, both warnings),
+  `tests/necb/test_plant_capacity_ownership.py`.
+- **Who/when:** Claude with the user, reviewed by Fable and Sol, 2026-09-15.
+
+## D-91 — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first
+
+**Decided:** 2026-09-15 by Sol, after two Fable reviews and four rounds of
+measurement (DF-1). In every reference thermal block served by its own System
+3 or 4 packaged rooftop unit — one constant-volume air terminal and one zone
+baseboard, and no other zone equipment — the zone equipment list is set to
+`SequentialLoad`, the air terminal at heating and cooling priority 1, the
+baseboard at priority 2, and every sequential heating and cooling fraction to
+1.0. The rooftop unit is offered the full zone load; the baseboard serves the
+residual; 8.4.1.2.(5) increases remain the remedy where a terminal cannot keep
+up.
+
+**Why this rule.** A was selected for stable control behaviour and
+conservative cooling-test treatment, **not** because it produced the lowest
+reference energy. It follows the EnergyPlus guidance for a terminal carrying
+outdoor air ("order the sequence so that the most controllable piece of
+equipment runs last"), with the baseboard as the more controllable device; it
+offers the full load to priority 1 with no tuning constant; and among the
+viable options it adds the smallest reference cooling artefact, so it does not
+loosen the 8.4.1.2.(4) comparison.
+
+**Accepted consequence.** The rooftop unit meets nearly all heating, so energy
+moves from the baseboards and hot-water plant to the rooftop coil and the
+baseboards run nearly idle (corpus 01, first run: baseboards 184.2 → 1.3 GJ,
+boilers 180.2 → 0.9 GJ, rooftop coils 12.5 → 226.1 GJ). 8.4.4.9.(3) specifies
+installed capacities, not that both devices deliver a material annual share,
+and keeping the boiler active is not a Code objective. The audit declares it.
+Each option measured produced lower reference energy than the current
+implementation after its three-iteration cap; that capped reference still
+fails 8.4.1.2.(3), so it is not a valid target and no stricter-target claim is
+made.
+
+**The requirement.** NECB 2020 8.4.4.9.(3) (2025: 8.4.5.9.(3), identical
+text) sets the terminal device's heating capacity to the envelope-only load
+and the pair's to the peak; it states no operating priority. "Priority of use"
+appears only in 8.4.4.9.(5)(b), for mixed energy types. 8.4.2.10.(2): the
+calculations "shall account for the effect of terminal devices, primary
+systems and secondary systems having limited capacities on space temperature
+and energy use". 8.4.1.2.(3)–(5) set the unmet-hours tests; (4) is relative to
+the reference. The Code leaves in-zone dispatch to the modeller, so D-91 is a
+new operational ruling. D-50 is a sizing ruling and is not relied on.
+
+**The legacy realisation.** The pinned gem builds NECB System 3/4 with
+`add_zone_baseboards` before `addBranchForZone`
+(`NECB2011/hvac_system_3_and_8_single_speed.rb:263-265`), so OpenStudio's
+creation order puts the baseboard first; no NECB system sets a priority. The
+same gem puts DOAS terminals first (`Prototype.hvac_systems.rb:1769-1789`),
+quoting the EnergyPlus guidance. Python reproduced the NECB order faithfully
+(`btap/modeling/hvac/systems/psz.py:145-147`). **Finding against the gem,
+recorded rather than adopted:** its System 3/4 order places an
+outdoor-air-carrying terminal after the baseboard.
+
+**What was wrong (DF-1).** With the baseboard first, every corpus 01 reference
+zone missed its 21 °C heating setpoint by 0.25–0.5 °C: the baseboard met the
+load predicted before the supply air arrived, then the always-on rooftop
+delivered outdoor-air-cooled air and, being last, saw little load left.
+Reference occupied unmet heating was 1,268.75 h on the first run and 801.0 h
+after three increases (boiler released as D-90 requires). Ruled out: the
+frozen boiler (D-90), the air-loop schedule, EnergyPlus convergence limits.
+
+**Options measured** (corpus 01, NECB 2025, Toronto CWEC2020, full year;
+reference occupied unmet heating / cooling hours; energy is the final
+reference after the option's own increases):
+
+| option | first run h | final h | final energy | outcome |
+|---|---|---|---:|---|
+| baseboard first (before) | 1268.75 / 7.75 | 801.0 / 11.5 | 195,697 kWh | fails (3) |
+| **A: air terminal first, fractions 1.0** | **0.0 / 4.75** | **no increase** | **147,978 kWh** | **selected** |
+| heating fraction 0.5 | 0.0 / 5.25 | no increase | 176,069 kWh | rejected: arbitrary constant chosen for an energy split |
+| heating fraction 0.05 | 108.5 / 49.5 | 40.25 / 47.25 | 177,250 kWh | rejected: activation constant; cooling artefact |
+| design-derived fraction | 0.0 / 13.0 | no increase | 173,833 kWh | rejected: the fraction scales the zone load, which excludes ventilation |
+| heating fraction 0 (gem DOAS) | 323.25 / 108.0 | 101.5 / — | 172,356 kWh | rejected: the rooftop never heats |
+| air terminal first, heating only | 0.0 / 100.25 | — | 147,872 kWh | rejected: mixed sequence positions |
+| UniformLoad | 0.75 / 1440.0 | — | 175,858 kWh | rejected: cooling load split onto the baseboard |
+| SequentialUniformPLR | 0.0 / 4115.75 | — | 280,214 kWh | rejected: no cooling signal to the rooftop |
+| neutral supply, SetPoint control | 145.0 / 0.0 | — | 2,490.8 GJ site | rejected: coils fight all year; no internal coil nodes in OpenStudio |
+| neutral cap under Load control | 0.0 / 4.75 | — | identical to A | rejected: the cap is inert |
+
+Heating fractions below 1.0 add reference cooling hours in marginal evening
+hours with the baseboard off and zones 0.06–0.12 °C over setpoint, growing as
+the fraction falls (4.75, 5.25, 13.0, 49.5 h). Autosized proposeds meet their
+own cooling loads, so no corpus case flips on 8.4.1.2.(4) (a mechanically
+cooled one-unit-per-zone proposed missed 0.0 h under every option); the
+materiality is the limit the reference sets: 12.7 → 5.2 h under 2020 and
+31.5 → 24.8 h under 2025 for A, against 52.0 / 67.2 h for the 0.05 fraction.
+
+**Scope.** In: one System 3 or 4 unit serving one zone with one
+constant-volume terminal and one baseboard. Out, as separate items: shared
+System 3/4 units (DF-8, a D-28 question); the heat-pump reference, whose loop
+gas coil is beyond dispatch and whose heat pump is starved (DF-9); D-64,
+rechecked full-year on current code (DF-10), amended by D-91 only if
+SmallHotel moves; System 6, measured unaffected.
+
+**Implementation.** `_apply_zone_dispatch` runs per assignment beside
+`_audit_terminal_secondary_split` (`btap/codes/necb/hvac/reference.py`), after
+the build and before sizing, never in catalog creation order. The scheme, both
+priorities and all four fractions are set explicitly, because a proposed
+`UniformLoad` scheme survives the clone and teardown. One decision per affected
+assignment cites the edition's terminal/secondary article with 8.4.2.10.(2)
+and `ruling='D-91'`, declaring the accepted energy redistribution. Zone
+priorities are model structure; neither re-sizing nor the second efficiency
+pass rewrites them. 14 of 41 frozen scenarios build in-scope units. Final
+figures are regenerated from product code at the re-freeze, with attribution
+in the plan log.
+
+- **Files:** `btap/codes/necb/hvac/reference.py`,
+  `tests/necb/test_reference_zone_dispatch.py`, the engine regression in the
+  compliance tests.
+- **Who/when:** Claude with the user; Fable reviews; decided by Sol,
+  2026-09-15.

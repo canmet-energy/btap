@@ -344,7 +344,8 @@ class TestElectricBoilerHasNoPartLoadCurve(unittest.TestCase):
         entry = next(e for e in audit.entries if e['action'] == 'boiler efficiency applied')
         self.assertEqual('not_applicable', entry['inputs']['part_load_curve_class'])
         self.assertEqual('row', entry['inputs']['class_source'])
-        self.assertEqual('D-89', entry['ruling'])
+        # D-90 also governs this decision (the capacity basis it stages from)
+        self.assertIn('D-89', entry['ruling'].split())
         self.assertEqual([], audit.warnings)
 
     def test_the_corrected_multiplier_is_quantified_against_the_legacy_cubic(self):

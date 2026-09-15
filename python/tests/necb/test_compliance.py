@@ -5,6 +5,7 @@ report.json + audit.json."""
 
 import json
 import os
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
@@ -582,6 +583,76 @@ class TestComplianceWithEngine(unittest.TestCase):
         self.assertTrue(os.path.isdir(os.path.join(dir,
                                                    "proposed_annual_iter1")),
                         "iteration run evidence kept")
+
+    def test_reference_zone_dispatch_meets_heating_without_increases(self):
+        # D-91: the gas-baseboard proposed gets a one-unit-per-block System 3
+        # reference (five per-zone rooftop units). With the rooftop terminal
+        # running before the baseboard, the reference meets its heating
+        # setpoint without 8.4.1.2.(5) increases over a 4-week Toronto
+        # January; with the legacy order (baseboard first) it did not.
+        dir = tempfile.mkdtemp(prefix="osnecb-d91-")
+        proposed = proposed_with_hvac()
+        result = performance_compliance(
+            proposed, code="necb2025", simulate="annual", weather=weather(),
+            building=building_for(proposed), run_dir=dir,
+            max_capacity_iterations=2, run_period=week(end_day=28))
+
+        self.assertTrue([e for e in result.audit.entries if e.get("ruling") == "D-91"],
+                        "the reference zones were dispatched under D-91")
+        for zone in result.reference_model.getThermalZones():
+            self.assertEqual("SequentialLoad", zone.loadDistributionScheme())
+            first = zone.equipmentInHeatingOrder()[0].iddObjectType().valueName()
+            self.assertIn("AirTerminal", first, zone.nameString())
+        reference_h = result.report["reference"]["unmet_occupied_hours"]["heating"]
+        self.assertLessEqual(reference_h, 100.0,
+                             f"reference unmet heating {reference_h} h")
+        self.assertFalse(
+            any("reference" in (h.get("bumped") or {})
+                for h in result.report["capacity_iterations"]),
+            "the reference needed no capacity increase")
+
+    def test_reference_boiler_follows_capacity_iteration(self):
+        # D-90: the reference plant capacity comes from the reference's own
+        # sizing on every pass. Before D-90 the build-time efficiency pass read
+        # the proposed's sizing through the clone and hard-set it, nothing
+        # released it, and every reference sizing run carried a User-Specified
+        # boiler capacity frozen at the proposed's value.
+        dir = tempfile.mkdtemp(prefix="osnecb-d90-")
+        proposed = proposed_with_hvac()
+        proposed.getSizingParameters().setHeatingSizingFactor(0.25)
+        result = performance_compliance(
+            proposed, code="necb2025", simulate="annual", weather=weather(),
+            building=building_for(proposed), run_dir=dir,
+            max_capacity_iterations=2, capacity_step=3.0,
+            run_period=week(end_day=28))
+
+        def sizing_runs():
+            iterated = sorted((p for p in Path(dir).glob("reference_annual_iter*_sizing")),
+                              key=lambda p: int(p.name.split("iter")[1].split("_")[0]))
+            return [Path(dir) / "reference_sizing", *iterated]
+
+        last_design_w = None
+        for sizing in sizing_runs():
+            with sqlite3.connect(str(sizing / "run" / "eplusout.sql")) as con:
+                rows = con.execute(
+                    "select CompName, Description, Value from ComponentSizes "
+                    "where CompType like 'Boiler:HotWater%' "
+                    "and Description like '%Nominal Capacity%'").fetchall()
+            self.assertFalse([r for r in rows if r[1].startswith("User-Specified")],
+                             f"{sizing.name}: a user-specified boiler capacity "
+                             f"reached a reference sizing run: {rows}")
+            primary = [r[2] for r in rows
+                       if "PRIMARY" in r[0].upper() and r[1].startswith("Design Size")]
+            self.assertTrue(primary, f"{sizing.name}: no primary boiler design size")
+            last_design_w = primary[0]
+
+        final = next(b for b in result.reference_model.getBoilerHotWaters()
+                     if "Primary" in b.nameString())
+        self.assertLessEqual(last_design_w, 176_000.0,
+                             "fixture precondition: a single-boiler plant")
+        self.assertAlmostEqual(last_design_w, final.nominalCapacity().get(), delta=1.0,
+                               msg="the final plant is staged from the last sizing run")
+        self.assertFalse(any(h.get("stalled") for h in result.report["capacity_iterations"]))
 
     def test_bare_geometry_on_ramp(self):
         # The bare-geometry on-ramp: strip the fixture of loads AND HVAC,

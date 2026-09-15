@@ -488,6 +488,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
     audit = audit if audit is not None else AuditLog()
     reference = _clone_model(model)
     _clear_proposed_part_load_classes(reference, audit)
+    _clear_proposed_capacity_ownership(reference, audit)
 
     facts = _classify.characterize(reference, audit=audit)
     info = _building_info(reference, building, audit)
@@ -620,6 +621,7 @@ def _reference_hvac(model, ruleset, building=None, audit=None, proposed_annual=N
         _apply_operating_schedules(result.air_loops, proposed_availability, audit)
         _audit_terminal_secondary_split(zones, assignment.reference_system,
                                         ruleset.id, audit)
+        _apply_zone_dispatch(zones, assignment.reference_system, ruleset.id, audit)
 
     _rebuild_humidification(reference, proposed_humidification, rules_data,
                             ruleset.id, audit)
@@ -670,6 +672,72 @@ def _audit_terminal_secondary_split(zones, reference_system, code, audit):
                target=','.join(z.nameString() for z in zones),
                inputs={'zones': len(zones), 'reference_system': reference_system},
                article=article, ruling='D-50')
+
+
+#: D-91 scope: the constant-volume rooftop terminals Systems 3 and 4 build.
+_CONSTANT_VOLUME_TERMINALS = ('OS_AirTerminal_SingleDuct_ConstantVolume_NoReheat',
+                              'OS_AirTerminal_SingleDuct_Uncontrolled')
+
+
+def _apply_zone_dispatch(zones, reference_system, code, audit):
+    """D-91 — zone equipment dispatch for one-unit-per-block Systems 3 and 4.
+
+    Legacy creation order puts the baseboard first in `SequentialLoad`, so it
+    answers the zone load predicted before the supply air arrives, and the
+    always-on constant-volume rooftop then delivers outdoor-air-cooled air with
+    little load left to meet: the corpus 01 reference missed its heating
+    setpoint for ~800 occupied hours. 8.4.4.9.(3) (2025: 8.4.5.9.(3)) sets
+    installed capacities, not an operating order, and 8.4.2.10.(2) requires
+    limited capacities to be represented — so the order is adjudicated here:
+    the rooftop terminal is offered the full load first in both orders and the
+    baseboard, the more controllable device, serves the residual.
+
+    Everything is set explicitly — scheme, both priorities and all four
+    sequential fractions — because a proposed `UniformLoad` scheme or other
+    fractions survive the clone and the equipment teardown. Only a zone with its
+    own System 3/4 loop and exactly one constant-volume terminal and one
+    baseboard is in scope: shared units (D-28 grouping), the heat-pump
+    reference, System 6 and zones with any other equipment are left untouched."""
+    if reference_system not in (3, 4):
+        return
+    ordered = []
+    for zone in zones:
+        loop = zone.airLoopHVAC()
+        if not loop.is_initialized() or len(loop.get().thermalZones()) != 1:
+            continue
+        equipment = list(zone.equipmentInHeatingOrder())
+        terminals = [e for e in equipment
+                     if e.iddObjectType().valueName() in _CONSTANT_VOLUME_TERMINALS]
+        baseboards = [e for e in equipment
+                      if e.to_ZoneHVACBaseboardConvectiveWater().is_initialized()
+                      or e.to_ZoneHVACBaseboardConvectiveElectric().is_initialized()]
+        if len(equipment) != 2 or len(terminals) != 1 or len(baseboards) != 1:
+            continue
+        terminal, baseboard = terminals[0], baseboards[0]
+        zone.setLoadDistributionScheme('SequentialLoad')
+        zone.setHeatingPriority(terminal, 1)
+        zone.setCoolingPriority(terminal, 1)
+        zone.setHeatingPriority(baseboard, 2)
+        zone.setCoolingPriority(baseboard, 2)
+        for component in (terminal, baseboard):
+            zone.setSequentialHeatingFraction(component, 1.0)
+            zone.setSequentialCoolingFraction(component, 1.0)
+        ordered.append(zone.nameString())
+    if not ordered:
+        return
+
+    prefix = resolve(code).article('reference_subsection')
+    audit.decision('rules', 'zone dispatch: the rooftop air terminal runs before the baseboard',
+                   target=','.join(ordered),
+                   inputs={'zones': len(ordered), 'reference_system': reference_system,
+                           'load_distribution': 'SequentialLoad',
+                           'air_terminal_priority': 1, 'baseboard_priority': 2,
+                           'sequential_fractions': 1.0},
+                   value='the rooftop unit is offered the full zone load and the baseboard serves '
+                         'the residual; heating energy moves from the baseboards and hot-water plant '
+                         'to the rooftop coil — accepted, because the article sets installed '
+                         'capacities, not annual shares',
+                   article=f'{prefix}.9.(3); 8.4.2.10.(2)', ruling='D-91')
 
 
 def _apply_zone_fan_rules(zones, reference_system, rules_data, audit):
@@ -949,6 +1017,31 @@ def _clear_proposed_part_load_classes(reference, audit):
         audit.info('build', 'proposed part-load class tags not carried into the reference',
                    target=','.join(c.split('=')[0] for c in cleared),
                    inputs={'cleared': cleared}, ruling='D-89')
+
+
+def _clear_proposed_capacity_ownership(reference, audit):
+    """D-90: plant capacity ownership is re-derived from the REFERENCE's own
+    sizing. A boiler, chiller or tower cloned from the input model may carry the
+    ownership features of an efficiency pass it already went through; a stale
+    'autosized' basis would make the reference stage from another run's sizing
+    and a stale base name would rename it, so every incoming feature is removed
+    before any reference system is built."""
+    from btap.codes.necb.hvac import efficiency as _efficiency
+
+    cleared = []
+    for component in (list(reference.getBoilerHotWaters())
+                      + list(reference.getChillerElectricEIRs())
+                      + list(reference.getCoolingTowerSingleSpeeds())):
+        props = component.additionalProperties()
+        present = [f for f in _efficiency.OWNERSHIP_FEATURES if props.hasFeature(f)]
+        for feature in present:
+            props.resetFeature(feature)
+        if present:
+            cleared.append(component.nameString())
+    if cleared:
+        audit.info('build', 'plant capacity ownership carried in with the model not used in the '
+                            "reference — re-derived from the reference's own sizing",
+                   target=','.join(cleared), inputs={'components': len(cleared)}, ruling='D-90')
 
 
 def _clone_model(model):

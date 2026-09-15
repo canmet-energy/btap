@@ -359,6 +359,12 @@ def _compare_and_iterate(run):
                                                 "reference_annual"),
                                    opts["run_period"],
                                    run.report["reference"], audit=audit)
+        # D-90: name any capacity sizing-factor increases cannot reach, for the
+        # 8.4.1.2.(5) warnings (recorded only when something is found)
+        for label, built in (("proposed", run.proposed), ("reference", run.reference)):
+            hard = _hard_sized_capacities(built)
+            if hard:
+                run.report[label]["hard_sized_capacities"] = hard
         _iterate_capacities(run.proposed, run.reference, run.report,
                             ruleset=run.ruleset, run_dir=opts["run_dir"],
                             run_period=opts["run_period"],
@@ -722,13 +728,17 @@ def evaluate_unmet(report, ruleset, audit):
 
     if not status["all_ok"]:
         iterations = len(report.get("capacity_iterations") or [])
+        hard = sorted({name for label in ("proposed", "reference")
+                       for name in (report[label].get("hard_sized_capacities") or [])})
+        cause = ("hard-sized capacities do not respond to sizing-factor increases: "
+                 + _hard_sized_phrase(hard)) if hard else (
+                 "no hard-sized capacity was detected")
         audit.warn(
             "compliance",
             f"8.4.1.2.(5): unmet-hours limits still not met after "
             f"{iterations} capacity increase(s) — the building remains "
             "non-compliant; raise max_capacity_iterations, increase "
-            "capacity_step, or fix the design (hard-sized equipment does not "
-            "respond to sizing-factor increases).", article="8.4.1.2.(5)")
+            f"capacity_step, or fix the design ({cause}).", article="8.4.1.2.(5)")
     return status["all_ok"]
 
 
@@ -789,6 +799,51 @@ def _unmet_status(report, ruleset):
             "cooling_ok": cooling_ok, "cooling_vacuous": cooling_vacuous,
             "all_ok": (proposed_heating_ok and reference_heating_ok
                        and cooling_ok)}
+
+
+def _hard_sized_capacities(model):
+    """D-90: heating and cooling equipment whose capacity is a hard value the
+    reference pipeline does not own — equipment 8.4.1.2.(5) sizing-factor
+    increases cannot reach. Plant capacities the efficiency pass derived from
+    sizing (capacity source 'autosized') are excluded: they are released before
+    every re-sizing run. Staged multispeed coils are not listed; their stage
+    capacities follow the autosized top stage."""
+    from btap.codes.necb.hvac import efficiency
+
+    def owned(component):
+        source = component.additionalProperties().getFeatureAsString(
+            efficiency.CAPACITY_SOURCE_FEATURE)
+        return source.is_initialized() and source.get() == "autosized"
+
+    found = []
+    for boiler in model.getBoilerHotWaters():
+        if not boiler.isNominalCapacityAutosized() and not owned(boiler):
+            found.append(boiler.nameString())
+    for chiller in model.getChillerElectricEIRs():
+        if not chiller.isReferenceCapacityAutosized() and not owned(chiller):
+            found.append(chiller.nameString())
+    for unit in model.getZoneHVACBaseboardConvectiveWaters():
+        coil = unit.heatingCoil().to_CoilHeatingWaterBaseboard()
+        if (coil.is_initialized()
+                and coil.get().heatingDesignCapacityMethod() == "HeatingDesignCapacity"
+                and not coil.get().isHeatingDesignCapacityAutosized()):
+            found.append(unit.nameString())
+    for group in (model.getZoneHVACBaseboardConvectiveElectrics(),
+                  model.getCoilHeatingGass(), model.getCoilHeatingElectrics()):
+        for component in group:
+            if not component.isNominalCapacityAutosized():
+                found.append(component.nameString())
+    for coil in model.getCoilCoolingDXSingleSpeeds():
+        if not coil.isRatedTotalCoolingCapacityAutosized():
+            found.append(coil.nameString())
+    return sorted(found)
+
+
+def _hard_sized_phrase(names):
+    shown = ", ".join(names[:5])
+    if len(names) > 5:
+        shown += f" and {len(names) - 5} more"
+    return shown
 
 
 def _mechanical_cooling(model):
@@ -926,12 +981,21 @@ def _iterate_capacities(proposed, reference, report, *, ruleset, run_dir,
         if after["all_ok"] or any(i >= 1.0 for i in improvements):
             continue
 
+        hard = set()
+        if bumps["proposed"]["heating"] or bumps["proposed"]["cooling"]:
+            hard.update(_hard_sized_capacities(proposed))
+        if bumps["reference"]["heating"]:
+            hard.update(_hard_sized_capacities(reference))
+        cause = ("hard-sized capacities sizing factors cannot reach: "
+                 + _hard_sized_phrase(sorted(hard))) if hard else (
+                 "no hard-sized capacity was detected, so the gate concerns "
+                 "equipment the building does not have or a limit sizing "
+                 "factors do not move")
         audit.warn(
             "compliance",
             f"capacity iteration {iteration} produced no unmet-hours "
             "improvement — the failing equipment is not responding to "
-            "sizing-factor increases (hard-sized capacity, or the gate "
-            "concerns equipment the building does not have); stopping",
+            f"sizing-factor increases ({cause}); stopping",
             article="8.4.1.2.(5)", ruling="D-43")
         record["stalled"] = True
         break
