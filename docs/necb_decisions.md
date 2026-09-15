@@ -5438,7 +5438,13 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches
-   the base name.
+   the base name. That gate is NAME-based, so a plant retained by the D-58
+   residential identity whose boilers are named Primary/Secondary is staged,
+   renamed and re-controlled by this pass as well. Harmless as measured — the
+   pinned gem modulates only at and above 352 kW too, and no frozen scenario
+   carries a copied plant — but a reference should arguably not re-control a
+   plant it copied; tracked as a follow-up (gate on the reference builder's own
+   feature instead).
 6. The reference clone drops any ownership features carried in with the input
    model, audited, so ownership always comes from the reference's own sizing.
 7. The 8.4.1.2.(5) warnings (the final one and the stall) name the hard

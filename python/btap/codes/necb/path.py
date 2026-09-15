@@ -842,7 +842,8 @@ def _hard_sized_capacities(model):
 #: What _hard_sized_capacities inspects — stated in the warnings so an empty result
 #: is never read as "no hard capacity anywhere" (staged coils are not inspected).
 _HARD_SIZED_SCOPE = ("boilers, chillers, baseboards, gas and electric coils and "
-                     "single-speed DX coils (staged coils are not checked)")
+                     "single-speed DX cooling coils (hydronic coils, DX heating "
+                     "coils and staged coils are not checked)")
 
 
 def _hard_sized_phrase(names):

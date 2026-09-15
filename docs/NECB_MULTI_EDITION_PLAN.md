@@ -1162,7 +1162,10 @@ any result.
   block), and whether D-28's legacy-parity grouping should stand. Note (3) to
   Table 8.4.5.7.-B is not an authority here — its marker is attached to
   System 6, and D-18 records it as the System 6 grouping rule (corrected after
-  Sol's review of PR #49). Measured 2026-09-15 (D-91 screening): every
+  Sol's review of PR #49). Table 8.4.5.7.-A carries its OWN note (3) on the
+  "Type of HVAC System Required" column, whose text the codes MCP payload does
+  not return; nothing here rules on that note, and reading it is part of the
+  D-28 amendment. Measured 2026-09-15 (D-91 screening): every
   dispatch option loosened reference energy (+1.5 % to +8.5 % on the first
   run) and raised cooling hours on this topology, and the core zone is
   recovery-limited. Excluded from D-91; needs its own ruling as a D-28

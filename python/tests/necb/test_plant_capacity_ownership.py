@@ -193,11 +193,20 @@ class TestPrepareForResizing(unittest.TestCase):
                 primary, _ = boilers(model)
                 efficiency._record_capacity(primary, 200_000.0, 'autosized',
                                             primary.nominalCapacity().get(), 'Primary Boiler')
+                # the pump transfer hard-sets power only on a SIZED model, so set one
+                # here: the release entry beside the plant's cites the same edition
+                for pump_ in (list(model.getPumpVariableSpeeds())
+                              + list(model.getPumpConstantSpeeds())):
+                    pump_.setRatedPowerConsumption(500.0)
+
                 audit = AuditLog()
                 hvac.prepare_for_resizing(model, audit=audit, code=code)
                 entry = next(e for e in audit.entries if e.get('ruling') == 'D-90')
                 self.assertEqual(f'{prefix}.9.(6)(a); {prefix}.10.(6); 8.4.1.2.(5)',
                                  entry['article'])
+                # the pump release in the same function cites the same edition
+                pump = next(e for e in audit.entries if 'pump power released' in e['action'])
+                self.assertEqual(f'{prefix}.14.(1)-(3)', pump['article'])
 
     def test_nothing_owned_emits_no_plant_release(self):
         model = plant()

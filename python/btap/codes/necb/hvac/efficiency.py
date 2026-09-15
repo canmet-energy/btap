@@ -2235,6 +2235,9 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
 
     :return: int — pumps released"""
     audit = audit if audit is not None else NullAudit()
+    # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10/8.4.4.14,
+    # 2025 8.4.5.9/8.4.5.10/8.4.5.14
+    prefix = resolve(code).article('reference_subsection')
     pumps = ([p for p in model.getPumpVariableSpeeds() if not p.ratedPowerConsumption().empty()]
              + [p for p in model.getPumpConstantSpeeds() if not p.ratedPowerConsumption().empty()])
     for p in pumps:
@@ -2242,7 +2245,7 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     if pumps:
         audit.info('efficiency', 'hard-set pump power released to autosize for the re-sizing run — the '
                                  'efficiency pass re-transfers it against the newly sized flow',
-                   inputs={'pumps': len(pumps)}, article='8.4.4.14.(1)-(3)', ruling='D-11 D-27')
+                   inputs={'pumps': len(pumps)}, article=f'{prefix}.14.(1)-(3)', ruling='D-11 D-27')
 
     released = {'boilers': 0, 'chillers': 0, 'towers': 0}
     for boiler in model.getBoilerHotWaters():
@@ -2257,8 +2260,6 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
             tower.additionalProperties().resetFeature(TOWER_HARDENED_FEATURE)
             released['towers'] += 1
     if any(released.values()):
-        # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10, 2025 8.4.5.9/8.4.5.10
-        prefix = resolve(code).article('reference_subsection')
         audit.info('efficiency', 'plant capacities the efficiency pass derived from sizing released to '
                                  'autosize for the re-sizing run — the next pass re-stages them from the '
                                  'newly sized design capacities; input capacities are kept',
