@@ -2230,14 +2230,20 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     legacy's hard power and head, and the reference re-sizes that loop's flow, so
     keeping the input value is what triggers the fatal above (found on the
     SmallHotel gas variant). Pump power is deliberately NOT ownership-tracked the
-    way plant capacity is, and tracking it would change nothing: 8.4.4.14.(1)/(3)
-    (2025: 8.4.5.14) makes the reference's rated power a DERIVED quantity, and
+    way plant capacity is, and tracking it would change nothing: 8.4.4.14 (2025:
+    8.4.5.14) makes the reference's rated power a DERIVED quantity, and
     _transfer_pump_power re-derives it for every non-SWH pump on the next pass
-    whoever set the old value. The caller's next apply_efficiencies(proposed=)
-    re-transfers it against the newly sized flow; WITHOUT proposed= nothing is
-    transferred and the released pump is left for EnergyPlus to size. An SWH
-    circulator is released here too but left 'as built' by the pump pass (D-27),
-    so it stays autosized until the model is sized again.
+    whoever set the old value. WHICH sentence supplies that value — (1)'s inherited
+    head and efficiency, (2)'s combined shaft power, or (3)'s W/(L/s) fallback — is
+    D-11's open branch, not something this release settles (DF-11). The caller's
+    next apply_efficiencies(proposed=) re-transfers it against the newly sized flow;
+    WITHOUT proposed= nothing is transferred and the released pump is left for
+    EnergyPlus to size.
+
+    One wart, deliberately kept for now: an SWH circulator is released here too,
+    although D-27 puts service-water pumps OUTSIDE 8.4.4.14 and the pump pass leaves
+    them 'as built'. The release is sizing safety, not an Article 14 action, so it
+    is cited loosely; DF-12 tracks separating the two.
 
     D-90: the same holds for plant capacity. The pass hard-sets boiler and
     chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,

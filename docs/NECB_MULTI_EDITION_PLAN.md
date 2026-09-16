@@ -1184,6 +1184,38 @@ any result.
   (closets 0.25 h each), and D-91 variants left it unchanged. Re-run
   SmallHotel for a full year on current code; retire or amend D-64 on the
   result, independently of D-91.
+- **DF-11 — 8.4.x.14 sentence branching, and the corresponding pump.** Sol
+  (2026-09-16) ruled the reference pump's characteristics by sentence: where
+  the proposed pump's head and efficiency are KNOWN, (1) makes them
+  authoritative and power follows from them and the reference flow; (2)
+  combines multiple pumps' peak shaft power; (3)'s W/(L/s) is a fallback for
+  when head or efficiency is unknown. D-11 collapses all three into the
+  W/(L/s) mechanism, blended by loop TYPE across the whole proposed. That is
+  defensible where topologies differ and wrong where a pump-to-pump bijection
+  exists — on a loop the reference COPIED from the proposed (D-58) the
+  corresponding pump is the same pump. Two symptoms follow: a copied pump gets
+  a building-wide intensity rather than its own, and the D-27 reconciliation
+  then bends the inherited head to keep the blended power physical, inverting
+  (1) over (3). Fix: branch explicitly between (1), (2) and (3); preserve known
+  head and efficiency; use W/(L/s) only under (3). A D-11 change, deliberately
+  outside the D-90/D-91 PR.
+- **DF-12 — SWH pump power is released under an Article that excludes it.**
+  `prepare_for_resizing` releases every hard-set pump power and cites
+  `{prefix}.14.(1)-(3)`, but D-27 puts service-water circulators outside
+  8.4.4.14 and `_apply_pump_rules` leaves them "as built" — so an SWH
+  circulator is released and never re-established, under a citation that does
+  not cover it. Numerically inert today (such circulators arrive at 0 W), so
+  the fix is a scope split, not a behaviour rescue: either exclude SWH loops
+  from the release, or cite the release as the sizing-safety action it is.
+  Sol flagged it 2026-09-16.
+- **DF-13 — the plant staging gate is name-based.** `_apply_boiler` decides
+  Primary/Secondary by NAME, so a plant retained by the D-58 residential
+  identity and named that way is staged, renamed and re-controlled by the
+  pass. Sol (2026-09-16) confirmed 8.4.x.9.(6) DOES reach a copied reference
+  plant, so the behaviour is right and the GATE is the defect: it should key
+  off the reference builder's own ownership feature, not the name. Harmless as
+  measured — the pinned gem also modulates only at and above 352 kW, and no
+  frozen scenario carries a copied plant.
 
 ## Stage 1 — opened 2026-09-08
 
@@ -2991,6 +3023,37 @@ genuinely the corresponding proposed pump's, i.e. the one quantity (1) says to
 inherit. So (1) and (3) pull against each other exactly where D-58 makes them
 meet. Pinned as current behaviour, and carried to Sol as a fourth instance of
 the D-58 scope question.
+
+**Sol's ruling on the D-58 scope question (2026-09-16).** "Identical to
+proposed" means system identity and topology, subject to every explicit
+reference-building rule — not a blanket exemption preserving every proposed
+input. The textual ground: the phrase sits in Table -A's "Type of HVAC System
+Required" column; 8.4.x.9 then determines the heating system by that Table
+*and* that Article, while 8.4.x.14 separately prescribes reference-pump
+characteristics. Field-level rules govern after system selection.
+
+That validates three of the four instances and rejects one. (i) the pre-sizing
+pump release is valid as a sizing mechanism — a hard wattage must not survive a
+change of reference flow — but the value replacing it must follow the
+applicable branch of 8.4.x.14; (ii) plant staging does reach a copied plant,
+leaving the name-based gate as an implementation defect (DF-13); (iii) the
+riding-curve coefficients apply to copied variable-flow pumps; (iv) the head
+reconciliation is NOT generally justified — where head and efficiency are
+known, (1) makes them authoritative, and (3)'s W/(L/s) is a fallback for when
+they are not.
+
+He also rejected the consequence proposed alongside the question: "topology
+only" does not mean no PR change. It settles copy-versus-rule and exposes a
+separate D-11 conformance issue — the whole-building loop-type blend applied
+where an exact corresponding pump exists (DF-11), and the SWH release cited
+under an Article that excludes it (DF-12). His instruction was to keep the safe
+pre-sizing release, soften `9a9baa8`'s claim that the post-sizing transfer is
+fully article-derived for copied loops, and record the rest as concrete
+follow-ups rather than turning #49 into a D-11 rewrite. Done in this commit:
+DF-11/DF-12/DF-13 logged above, the claim softened in both docstrings and D-90,
+the gap recorded at D-11 itself, and the recovery test's comment changed to say
+its reconciliation assertion pins current behaviour that DF-11 is expected to
+change. No behaviour moved, so no re-freeze.
 
 No re-freeze for round two either, and none is arguable: the change is
 docstrings, one decision paragraph, one new test and the regenerated coverage

@@ -470,15 +470,22 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
     hard-set pump power, including one carried in with a plant this reference COPIED
     from the proposed (the D-58 residential identity).
 
-    Pump power is released unconditionally because 8.4.4.14 (2025: 8.4.5.14) ASSIGNS
-    it to this pass: (1) inherits the corresponding proposed pump's head and
-    efficiency, and (3) bases the reference pump on the proposed's W/(L/s) — so the
-    reference's rated power is DERIVED at the reference's own flow, never inherited
-    as a number. Ownership tracking could not preserve one anyway: the post-sizing
-    pass re-derives power for every non-SWH pump it finds, whoever set the old value.
-    Releasing BEFORE sizing is what avoids the EnergyPlus FATAL on 'Calculated Pump
-    Efficiency > 100%' — a frozen power and head meeting a freshly sized flow, found
-    on the SmallHotel gas variant.
+    Pump power is released because 8.4.4.14 (2025: 8.4.5.14) assigns the reference's
+    rated power to this pass rather than letting it be inherited as a number: (1)
+    inherits the corresponding proposed pump's head and efficiency, (2) combines
+    multiple pumps' peak shaft power, and (3) falls back to the proposed's W/(L/s)
+    where head or efficiency is NOT known. Ownership tracking could not preserve a
+    value anyway: the post-sizing pass re-derives power for every non-SWH pump it
+    finds, whoever set the old one. Releasing BEFORE sizing is what avoids the
+    EnergyPlus FATAL on 'Calculated Pump Efficiency > 100%' — a frozen power and head
+    meeting a freshly sized flow, found on the SmallHotel gas variant.
+
+    The RELEASE is settled (Sol, 2026-09-16: a hard wattage must not survive a change
+    of reference flow). The value that REPLACES it is not. D-11 implements (1)-(3)
+    through one mechanism — a whole-building, loop-type W/(L/s) blend, which is (3)'s
+    metric — and on a COPIED loop the corresponding pump is the SAME pump, with known
+    head and efficiency, so (1) governs there instead. DF-11 tracks the branch;
+    behaviour is unchanged here.
 
     So a direct sizing run of the returned model sizes the reference's own plant, but
     pump power comes back AUTOSIZED and is NOT recoverable from the model: call

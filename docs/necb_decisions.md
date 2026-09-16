@@ -302,6 +302,18 @@ audit are drained and archived — see `docs/README.md`.
     future data to a consumed rule block carrying the Table coefficients.
 - **Who/when:** phylroy chose "Implement" (2026-07-23); the interpretive
   sub-choices are Claude's under D-10 delegation.
+- **Known gap (Sol, 2026-09-16), tracked as DF-11:** collapsing (1)-(3) into
+  one W/(L/s) mechanism is defensible only where the correspondence is
+  genuinely loop-type — different topologies, no pump-to-pump bijection. It is
+  wrong where a bijection DOES exist: on a loop the reference copied from the
+  proposed (D-58) the corresponding pump is the *same pump*, its head and
+  efficiency are known, and sentence (1) therefore makes them authoritative,
+  with power following from them and the reference flow. Today the pass instead
+  applies the whole-building loop-type blend — (3)'s fallback metric — and then
+  bends the inherited head to keep the result physical (the D-27
+  reconciliation), which inverts the sentences' priority. The fix is to branch
+  explicitly between (1), (2) and (3); it is a D-11 change, deliberately not
+  made inside the D-90/D-91 PR.
 - **Evidence:** `Efficiency.apply_pump_rules` / `transfer_pump_power` /
   `proposed_pump_stats` in `openstudio-hvac/.../necb/efficiency.rb`; umbrella
   passes `proposed:` post-sizing; `test_necb_pump_rules.rb` (6 runs, incl.
@@ -5455,7 +5467,20 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
    a service-water circulator is released here yet left "as built" by the pump
    pass (D-27 puts SWH outside 8.4.4.14), so it stays autosized; harmless today
    because such circulators arrive at 0 W, but it is an exception to the
-   sentence above, not an instance of it.
+   sentence above, not an instance of it — **DF-12** tracks the scope split.
+
+   **Sol's ruling (2026-09-16)** settles the release and narrows the claim
+   around it. "Identical to the proposed" in Table -A's system column means
+   system identity and topology, subject to every explicit reference-building
+   rule, so 8.4.x.14 does govern a copied loop's pump and the release is valid
+   *as a sizing mechanism*: a hard wattage must not survive a change of
+   reference flow. But the value that replaces it must follow the applicable
+   branch of 8.4.x.14, and D-11's single W/(L/s) mechanism is (3)'s fallback
+   metric applied where (1) governs — on a copied loop the corresponding pump
+   is the same pump, with known head and efficiency. So this record does **not**
+   claim the post-sizing transfer is fully article-derived for copied loops;
+   **DF-11** carries that fix, and the D-27 head reconciliation it currently
+   produces is expected to go with it.
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches

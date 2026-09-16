@@ -435,9 +435,12 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
                          'one transfer decision per pump, citing the ACTIVE edition')
         # The doubled flow makes the transferred 1000 W unphysical against the
         # fixture's 179 kPa head, so D-27 reconciles the head to a 65% total
-        # efficiency and warns. Pinned rather than asserted away: on a COPIED loop
-        # that head IS the corresponding proposed pump's, which is the one thing
-        # 8.4.5.14.(1) says to inherit, so (1) and (3) genuinely pull apart here.
+        # efficiency and warns. Pinned as CURRENT behaviour, not as correct
+        # behaviour: Sol ruled (2026-09-16) that where the proposed head and
+        # efficiency are known — always, on a COPIED loop, where the corresponding
+        # pump is the same pump — 8.4.5.14.(1) makes them authoritative and power
+        # follows from them; (3)'s W/(L/s) is a fallback for when they are not.
+        # DF-11 carries the fix, and this assertion is expected to change with it.
         reconciled = [e for e in audit.entries
                       if e.get('ruling') == 'D-27' and e['level'] == 'warning']
         self.assertEqual(len(reference_pumps), len(reconciled),
