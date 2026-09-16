@@ -302,6 +302,24 @@
   "level": "info"
  },
  {
+  "step": "rules",
+  "target": "Thermal Zone 1",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
   "step": "build",
   "target": "Thermal Zone 2",
   "action": "reference system built",
@@ -365,6 +383,24 @@
   "ruling": "D-50",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 2",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
  },
  {
   "step": "build",
@@ -432,6 +468,24 @@
   "level": "info"
  },
  {
+  "step": "rules",
+  "target": "Thermal Zone 3",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
   "step": "build",
   "target": "Thermal Zone 4",
   "action": "reference system built",
@@ -497,6 +551,24 @@
   "level": "info"
  },
  {
+  "step": "rules",
+  "target": "Thermal Zone 4",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
+ },
+ {
   "step": "build",
   "target": "Thermal Zone 5",
   "action": "reference system built",
@@ -560,6 +632,24 @@
   "ruling": "D-50",
   "building": "reference building",
   "level": "info"
+ },
+ {
+  "step": "rules",
+  "target": "Thermal Zone 5",
+  "action": "zone dispatch: the rooftop air terminal runs before the baseboard",
+  "inputs": {
+   "zones": 1,
+   "reference_system": 3,
+   "load_distribution": "SequentialLoad",
+   "air_terminal_priority": 1,
+   "baseboard_priority": 2,
+   "sequential_fractions": 1.0
+  },
+  "value": "the rooftop unit is offered the full zone load and the baseboard serves the residual; heating energy moves from the baseboards and hot-water plant to the rooftop coil \u2014 accepted, because the article sets installed capacities, not annual shares",
+  "article": "8.4.5.9.(3); 8.4.2.10.(2)",
+  "ruling": "D-91",
+  "building": "reference building",
+  "level": "decision"
  },
  {
   "step": "rules",
@@ -962,7 +1052,7 @@
   "action": "Heating System \u2014 implemented: reference heating system selected per Table 8.4.5.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -976,7 +1066,7 @@
   "action": "Heating System \u2014 implemented: purchased energy routes to Article 8.4.5.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -990,7 +1080,7 @@
   "action": "Heating System \u2014 partial. Applied: terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50). Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual \u2014 audited as an approximation, not claimed",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
@@ -1005,7 +1095,7 @@
   "action": "Heating System \u2014 implemented: reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g))",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1019,7 +1109,7 @@
   "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled: a proposed plant drawing on more than one energy type passes into the reference unchanged rather than being apportioned",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 10
+   "decisions_citing": 15
   },
   "article": "8.4.5.9.(5)",
   "building": "reference building",
@@ -1030,7 +1120,7 @@
   "action": "Heating System \u2014 implemented: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
@@ -1045,7 +1135,7 @@
   "action": "Heating System \u2014 partial. Applied: furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized. Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning \u2014 EnergyPlus multispeed objects cannot hold a fifth (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
@@ -1060,7 +1150,7 @@
   "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.6.: Table 8.4.6.2 for boilers, Table 8.4.6.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 10,
+   "decisions_citing": 15,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
@@ -1552,7 +1642,7 @@
   "action": "HVAC Systems \u2014 implemented: Reference HVAC systems are built explicitly from the Table 8.4.5.7. topologies \u2014 components are constructed, not approximated by thermodynamically-similar substitutes.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 0,
+   "decisions_citing": 5,
    "code": [
     "python/btap/modeling/hvac/builder.py#build_system",
     "python/btap/codes/necb/hvac/reference.py#reference_hvac"

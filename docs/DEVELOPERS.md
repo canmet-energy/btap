@@ -134,6 +134,22 @@ The `verify` CI job is the authoritative full-runtime lane: SDK, EnergyPlus,
 rasterizer, sample corpus, thermal bridging, all 97 HVAC systems, and sizing
 frozen scenarios are required rather than skipped.
 
+**Running today's tests against an OLDER product tree** — to show a new test
+fails without its fix — needs more than `PYTHONPATH`. The venv installs `btap`
+as an editable install whose finder resolves the package to this checkout
+whatever `sys.path` says, so the tests silently exercise the current code and
+pass. Export the old tree (`git archive <ref> python/btap | tar -x -C <dir>`),
+then, before importing `btap`, drop the editable finder and put the export
+first:
+
+```python
+sys.meta_path[:] = [f for f in sys.meta_path
+                    if 'editable' not in (type(f).__module__ + repr(f)).lower()]
+sys.path.insert(0, EXPORT)
+import btap
+assert btap.__file__.startswith(EXPORT)   # never skip this check
+```
+
 ## Decisions and generated docs
 
 The canonical registry is `python/btap/codes/data/decisions.json`; the authored

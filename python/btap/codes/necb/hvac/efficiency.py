@@ -1322,6 +1322,85 @@ def optional_f(value):
     return float(value.get()) if value.is_initialized() else None
 
 
+# ---------------- plant capacity ownership (D-90) ----------------
+
+#: D-90: the efficiency pass hard-sets boiler and chiller capacities (8.4.4.9.(6)
+#: / 8.4.4.10.(6) staging) and hardens cooling-tower hydraulics. These features
+#: record what it set and from what, so a repeat pass stages from the same
+#: design capacity instead of halving an already-halved value, and
+#: prepare_for_resizing releases exactly what the pass owns — never a capacity
+#: the model supplied as an input.
+CAPACITY_BASIS_FEATURE = 'btap_capacity_basis_w'
+CAPACITY_SOURCE_FEATURE = 'btap_capacity_source'
+CAPACITY_APPLIED_FEATURE = 'btap_capacity_applied_w'
+BASE_NAME_FEATURE = 'btap_base_name'
+TOWER_HARDENED_FEATURE = 'btap_tower_hardened_fields'
+#: Every ownership feature, for clone hygiene: a reference built from a model
+#: that already carries them must re-derive ownership from its own sizing.
+OWNERSHIP_FEATURES = (CAPACITY_BASIS_FEATURE, CAPACITY_SOURCE_FEATURE,
+                      CAPACITY_APPLIED_FEATURE, BASE_NAME_FEATURE,
+                      TOWER_HARDENED_FEATURE)
+
+
+def _same_capacity(a, b):
+    return abs(a - b) <= 1e-6 + 1e-9 * max(abs(a), abs(b))
+
+
+def _plant_capacity(component, hard_w, autosized_w):
+    """D-90: the design capacity to stage from, and where it came from.
+
+    A hard value equal to what this pass last applied is the pass's own output,
+    so the stored design basis is returned with its stored source — re-applying
+    then stages from the same basis. Any other hard value is an ``input`` (set by
+    a user or carried in with a copied proposed plant); an unset capacity is the
+    ``autosized`` result of the model's own sizing run.
+
+    :return: (design capacity W, 'autosized' | 'input'), or (None, None) unsized"""
+    props = component.additionalProperties()
+    basis = props.getFeatureAsDouble(CAPACITY_BASIS_FEATURE)
+    applied = props.getFeatureAsDouble(CAPACITY_APPLIED_FEATURE)
+    source = props.getFeatureAsString(CAPACITY_SOURCE_FEATURE)
+    if (hard_w is not None and basis.is_initialized() and applied.is_initialized()
+            and source.is_initialized() and _same_capacity(hard_w, applied.get())):
+        return basis.get(), source.get()
+    if hard_w is not None:
+        return hard_w, 'input'
+    if autosized_w is not None:
+        return autosized_w, 'autosized'
+    return None, None
+
+
+def _base_name(component):
+    """The name before this pass appended its capacity and efficiency suffix."""
+    stored = component.additionalProperties().getFeatureAsString(BASE_NAME_FEATURE)
+    return stored.get() if stored.is_initialized() and stored.get() else component.nameString()
+
+
+def _record_capacity(component, basis_w, source, applied_w, base_name):
+    props = component.additionalProperties()
+    props.setFeature(CAPACITY_BASIS_FEATURE, float(basis_w))
+    props.setFeature(CAPACITY_SOURCE_FEATURE, source)
+    props.setFeature(CAPACITY_APPLIED_FEATURE, float(applied_w))
+    props.setFeature(BASE_NAME_FEATURE, base_name)
+
+
+def _release_capacity(component, autosize_method):
+    """Return a capacity this pass derived from sizing to autosize. Inputs stay."""
+    props = component.additionalProperties()
+    source = props.getFeatureAsString(CAPACITY_SOURCE_FEATURE)
+    if not (source.is_initialized() and source.get() == 'autosized'):
+        return False
+    getattr(component, autosize_method)()
+    for feature in (CAPACITY_BASIS_FEATURE, CAPACITY_SOURCE_FEATURE, CAPACITY_APPLIED_FEATURE):
+        props.resetFeature(feature)
+    return True
+
+
+def _hardened_tower_fields(tower):
+    stored = tower.additionalProperties().getFeatureAsString(TOWER_HARDENED_FEATURE)
+    return set(filter(None, stored.get().split(';'))) if stored.is_initialized() else set()
+
+
 # ---------------- component appliers ----------------
 
 # ---------------- part-load classes (D-89) ----------------
@@ -1478,20 +1557,21 @@ def _apply_boiler(boiler, tables, plant, audit):
         fuel = 'Oil'
     else:
         fuel = 'Gas'
-    capacity_w = optional_f(boiler.nominalCapacity()) or optional_f(boiler.autosizedNominalCapacity())
+    capacity_w, capacity_source = _plant_capacity(
+        boiler, optional_f(boiler.nominalCapacity()), optional_f(boiler.autosizedNominalCapacity()))
     if capacity_w is None:
         return audit.warn('efficiency', 'boiler capacity unavailable (model not sized?) — not set',
                           target=boiler.nameString())
 
     boiler_capacity = capacity_w
-    name = boiler.nameString()
+    # D-90: stage and rename from the base name, so a repeat pass neither
+    # re-halves the plant nor appends a second capacity suffix
+    name = _base_name(boiler)
     if 'Primary Boiler' in name or 'Secondary Boiler' in name:
         kw = capacity_w / 1000.0
+        modulating = kw > plant['two_boiler_max_kw'] and 'Primary Boiler' in name
         if kw > plant['two_boiler_max_kw']:  # 8.4.4.9.(6)(d): 'exceeds 352 kW' (strict)
-            if 'Primary Boiler' in name:
-                boiler.setBoilerFlowMode('LeavingSetpointModulated')
-                boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
-            else:
+            if 'Secondary Boiler' in name:
                 boiler_capacity = 0.001
         elif kw > plant['single_boiler_max_kw']:  # (6)(c): 'greater than 176' (strict)
             boiler_capacity = capacity_w / 2
@@ -1499,7 +1579,20 @@ def _apply_boiler(boiler, tables, plant, audit):
             boiler_capacity = 0.001
         elif capacity_w <= 1.0:
             boiler_capacity = 1.0
+        # D-90: every pass sets the COMPLETE control state of the band it lands in.
+        # The build-time pass reads the proposed's sizing and the next pass the
+        # reference's, so a plant can cross 352 kW in either direction between
+        # passes; a lower band must not keep the modulating controls of (d). The
+        # non-modulating state is the one the plant builder leaves: an explicit
+        # ConstantFlow flow mode and a defaulted minimum part-load ratio.
+        if modulating:
+            boiler.setBoilerFlowMode('LeavingSetpointModulated')
+            boiler.setMinimumPartLoadRatio(plant['modulating_min_fraction'])
+        else:
+            boiler.setBoilerFlowMode('ConstantFlow')
+            boiler.resetMinimumPartLoadRatio()
     boiler.setNominalCapacity(boiler_capacity)
+    _record_capacity(boiler, capacity_w, capacity_source, boiler_capacity, name)
 
     cap_btuh = w_to_btu_per_hr(boiler_capacity)
     row = find_row(tables['boilers'], {'fluid_type': 'Hot Water', 'fuel_type': fuel}, cap_btuh)
@@ -1531,6 +1624,8 @@ def _apply_boiler(boiler, tables, plant, audit):
     return audit.decision('efficiency', 'boiler efficiency applied', target=name,
                           inputs={'fuel': fuel,
                                   'capacity_kw': ruby_round(boiler_capacity / 1000.0, 1),
+                                  'design_capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'capacity_source': capacity_source,
                                   'part_load_curve_class': klass,
                                   'class_source': class_source,
                                   'curve': curve_label, 'form': curve_shape},
@@ -1538,7 +1633,7 @@ def _apply_boiler(boiler, tables, plant, audit):
                                 f"part-load curve {curve_label}",
                           evidence=f"{evidence}; the efficiency curve is evaluated on "
                                    "the EnteringBoiler temperature",
-                          article=article, ruling='D-89')
+                          article=article, ruling='D-89 D-90')
 
 
 def boiler_thermal_efficiency(row):
@@ -1557,9 +1652,10 @@ def boiler_thermal_efficiency(row):
 def _apply_chiller(chiller, tables, plant, audit):
     """Legacy chiller_electric_eir_apply_efficiency_and_curves (NECB2011:648): modulating
     to 25%, primary/secondary 2100 kW split, curves, kW/ton -> COP, tower sizing."""
-    name = chiller.nameString()
-    capacity_w = (optional_f(chiller.referenceCapacity())
-                  or optional_f(chiller.autosizedReferenceCapacity()))
+    name = _base_name(chiller)
+    capacity_w, capacity_source = _plant_capacity(
+        chiller, optional_f(chiller.referenceCapacity()),
+        optional_f(chiller.autosizedReferenceCapacity()))
     if capacity_w is None:
         return audit.warn('efficiency', 'chiller capacity unavailable (model not sized?) — not set', target=name)
 
@@ -1576,6 +1672,7 @@ def _apply_chiller(chiller, tables, plant, audit):
         else:
             chiller_capacity = capacity_w / 2.0
     chiller.setReferenceCapacity(chiller_capacity)
+    _record_capacity(chiller, capacity_w, capacity_source, chiller_capacity, name)
 
     cooling_type = 'AirCooled' if chiller.condenserType() == 'AirCooled' else 'WaterCooled'
     compressor = next((t for t in ('Reciprocating', 'Scroll', 'Centrifugal')
@@ -1627,10 +1724,12 @@ def _apply_chiller(chiller, tables, plant, audit):
     chiller.setName(f'{name} {ruby_round(tons)}tons {name_suffix}')
     return audit.decision('efficiency', action, target=name,
                           inputs={'cooling_type': cooling_type, 'compressor': compressor,
-                                  'tons': ruby_round(tons, 1)},
+                                  'tons': ruby_round(tons, 1),
+                                  'design_capacity_kw': ruby_round(capacity_w / 1000.0, 1),
+                                  'capacity_source': capacity_source},
                           value=f'{applied}, curves '
                                 f"{row.get('capft')}/{row.get('eirft')}/{row.get('eirfplr')}",
-                          article=article)
+                          article=article, ruling='D-90')
 
 
 def _apply_tower_rules(model, audit):
@@ -1678,19 +1777,39 @@ def _apply_tower_rules(model, audit):
             # water/air/UA at their solved values leaves nothing to re-solve;
             # Table 5.2.12.2 governs fan POWER only, so the code fan rides on
             # E+'s self-consistent heat-transfer sizing.
-            for getter, setter in (
-                    ('autosizedDesignWaterFlowRate', 'setDesignWaterFlowRate'),
-                    ('autosizedDesignAirFlowRate', 'setDesignAirFlowRate'),
+            # D-90: record every field hardened FROM an autosized value (and the
+            # fan power, if it was autosized) so prepare_for_resizing can hand
+            # them back to EnergyPlus before the next sizing run; input values
+            # are never recorded and so never released.
+            hardened = _hardened_tower_fields(towers[0])
+            for getter, setter, is_autosized, release in (
+                    ('autosizedDesignWaterFlowRate', 'setDesignWaterFlowRate',
+                     'isDesignWaterFlowRateAutosized', 'autosizeDesignWaterFlowRate'),
+                    ('autosizedDesignAirFlowRate', 'setDesignAirFlowRate',
+                     'isDesignAirFlowRateAutosized', 'autosizeDesignAirFlowRate'),
                     ('autosizedUFactorTimesAreaValueatDesignAirFlowRate',
-                     'setUFactorTimesAreaValueatDesignAirFlowRate'),
+                     'setUFactorTimesAreaValueatDesignAirFlowRate',
+                     'isUFactorTimesAreaValueatDesignAirFlowRateAutosized',
+                     'autosizeUFactorTimesAreaValueatDesignAirFlowRate'),
                     ('autosizedAirFlowRateinFreeConvectionRegime',
-                     'setAirFlowRateinFreeConvectionRegime'),
+                     'setAirFlowRateinFreeConvectionRegime',
+                     'isAirFlowRateinFreeConvectionRegimeAutosized',
+                     'autosizeAirFlowRateinFreeConvectionRegime'),
                     ('autosizedUFactorTimesAreaValueatFreeConvectionAirFlowRate',
-                     'setUFactorTimesAreaValueatFreeConvectionAirFlowRate')):
+                     'setUFactorTimesAreaValueatFreeConvectionAirFlowRate',
+                     'isUFactorTimesAreaValueatFreeConvectionAirFlowRateAutosized',
+                     'autosizeUFactorTimesAreaValueatFreeConvectionAirFlowRate')):
                 v = getattr(towers[0], getter)()
                 if hasattr(v, 'is_initialized') and v.is_initialized():
+                    if getattr(towers[0], is_autosized)():
+                        hardened.add(release)
                     getattr(towers[0], setter)(v.get())
+            if towers[0].isFanPoweratDesignAirFlowRateAutosized():
+                hardened.add('autosizeFanPoweratDesignAirFlowRate')
             towers[0].setFanPoweratDesignAirFlowRate(fan_w)
+            if hardened:
+                towers[0].additionalProperties().setFeature(
+                    TOWER_HARDENED_FEATURE, ';'.join(sorted(hardened)))
         audit.decision('efficiency', 'cooling tower cells set from heat rejection',
                        target=towers[0].nameString(),
                        inputs={'tower_cap_kw': ruby_round(tower_cap / 1000.0, 1),
@@ -2089,7 +2208,7 @@ def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
                   proposed=proposed)
 
 
-def prepare_for_resizing(model, audit=None):
+def prepare_for_resizing(model, audit=None, code='necb2020'):
     """Facade: make an ALREADY-EFFICIENCY-APPLIED model safe to re-size.
 
     The efficiency pass hard-sets pump rated power (the 8.4.4.14 transfer and
@@ -2106,8 +2225,39 @@ def prepare_for_resizing(model, audit=None):
     Call this before EVERY re-sizing run of a model that has already been
     through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
 
+    EVERY hard-set pump power is released, including one the model supplied as an
+    input: a plant retained by the D-58 residential identity arrives with the
+    legacy's hard power and head, and the reference re-sizes that loop's flow, so
+    keeping the input value is what triggers the fatal above (found on the
+    SmallHotel gas variant). Pump power is deliberately NOT ownership-tracked the
+    way plant capacity is, and tracking it would change nothing: 8.4.4.14 (2025:
+    8.4.5.14) makes the reference's rated power a DERIVED quantity, and
+    _transfer_pump_power re-derives it for every non-SWH pump on the next pass
+    whoever set the old value. WHICH sentence supplies that value — (1)'s inherited
+    head and efficiency, (2)'s combined shaft power, or (3)'s W/(L/s) fallback — is
+    D-11's open branch, not something this release settles (DF-11). The caller's
+    next apply_efficiencies(proposed=) re-transfers it against the newly sized flow;
+    WITHOUT proposed= nothing is transferred and the released pump is left for
+    EnergyPlus to size.
+
+    One wart, deliberately kept for now: an SWH circulator is released here too,
+    although D-27 puts service-water pumps OUTSIDE 8.4.4.14 and the pump pass leaves
+    them 'as built'. The release is sizing safety, not an Article 14 action, so it
+    is cited loosely; DF-12 tracks separating the two.
+
+    D-90: the same holds for plant capacity. The pass hard-sets boiler and
+    chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,
+    then staged) and hardens tower hydraulics; left in place, the reference
+    plant stays at whatever the FIRST pass read — on a reference clone, the
+    proposed's sizing — while its systems grow through every capacity increase.
+    Capacities the pass derived from sizing are released to autosize here;
+    capacities the model supplied as inputs are kept.
+
     :return: int — pumps released"""
     audit = audit if audit is not None else NullAudit()
+    # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10/8.4.4.14,
+    # 2025 8.4.5.9/8.4.5.10/8.4.5.14
+    prefix = resolve(code).article('reference_subsection')
     pumps = ([p for p in model.getPumpVariableSpeeds() if not p.ratedPowerConsumption().empty()]
              + [p for p in model.getPumpConstantSpeeds() if not p.ratedPowerConsumption().empty()])
     for p in pumps:
@@ -2115,5 +2265,24 @@ def prepare_for_resizing(model, audit=None):
     if pumps:
         audit.info('efficiency', 'hard-set pump power released to autosize for the re-sizing run — the '
                                  'efficiency pass re-transfers it against the newly sized flow',
-                   inputs={'pumps': len(pumps)}, article='8.4.4.14.(1)-(3)', ruling='D-11 D-27')
+                   inputs={'pumps': len(pumps)}, article=f'{prefix}.14.(1)-(3)', ruling='D-11 D-27')
+
+    released = {'boilers': 0, 'chillers': 0, 'towers': 0}
+    for boiler in model.getBoilerHotWaters():
+        released['boilers'] += _release_capacity(boiler, 'autosizeNominalCapacity')
+    for chiller in model.getChillerElectricEIRs():
+        released['chillers'] += _release_capacity(chiller, 'autosizeReferenceCapacity')
+    for tower in model.getCoolingTowerSingleSpeeds():
+        fields = _hardened_tower_fields(tower)
+        if fields:
+            for release in sorted(fields):
+                getattr(tower, release)()
+            tower.additionalProperties().resetFeature(TOWER_HARDENED_FEATURE)
+            released['towers'] += 1
+    if any(released.values()):
+        audit.info('efficiency', 'plant capacities the efficiency pass derived from sizing released to '
+                                 'autosize for the re-sizing run — the next pass re-stages them from the '
+                                 'newly sized design capacities; input capacities are kept',
+                   inputs=released, article=f'{prefix}.9.(6)(a); {prefix}.10.(6); 8.4.1.2.(5)',
+                   ruling='D-90')
     return len(pumps)

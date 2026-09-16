@@ -1140,6 +1140,82 @@ any result.
   `determination-01-baseboard-gas-necb2025` (the scenario pins the
   reason, so fixing it is an adjudicated re-freeze). User's call
   2026-09-08: "log it for later."
+  **Diagnosed 2026-09-15; being closed by D-90 + D-91** (branch
+  `df1-d90-d91`, one atomic re-freeze with separate attribution). The frozen
+  reference boiler (held at the proposed's 51,983 W because nothing released
+  the efficiency pass's hard capacity) is a real 8.4.4.9.(6)(a) defect, D-90,
+  but releasing it alone left 801.0 h. The cause is zone dispatch: the
+  baseboard ran before the always-on rooftop terminal in `SequentialLoad`.
+  D-91 (decided by Sol) runs the rooftop terminal first in one-unit-per-block
+  Systems 3/4. Evidence and the options measured are in D-90/D-91.
+- **DF-8 — shared "single-zone" System 3/4 reference units.** D-28 keeps the
+  single-zone families (Systems 1, 3, 4 and the heat-pump reference) on the
+  proposed's selection grouping, a legacy-parity choice ("sys-3 school/retail
+  loop counts stay at legacy parity"). So a proposed multi-zone air system
+  (corpus 02, 03, 04, 13; SmallHotel's System 4) yields ONE System 3/4 unit,
+  controlled from one zone, serving several SDK thermal zones. Division A
+  1.4.1.2 defines a single-zone system as "serving only a single thermal
+  block", and a thermal block as "a space or group of spaces that is
+  considered as one homogeneous space for modeling purposes". The unresolved
+  question is the mapping: whether those SDK zones form one thermal block
+  (then one unit is right) or several (then the reference needs one unit per
+  block), and whether D-28's legacy-parity grouping should stand. Note (3) to
+  Table 8.4.5.7.-B is not an authority here — its marker is attached to
+  System 6, and D-18 records it as the System 6 grouping rule (corrected after
+  Sol's review of PR #49). Table 8.4.5.7.-A carries its OWN note (3) on the
+  "Type of HVAC System Required" column, whose text the codes MCP payload does
+  not return; nothing here rules on that note, and reading it is part of the
+  D-28 amendment. Measured 2026-09-15 (D-91 screening): every
+  dispatch option loosened reference energy (+1.5 % to +8.5 % on the first
+  run) and raised cooling hours on this topology, and the core zone is
+  recovery-limited. Excluded from D-91; needs its own ruling as a D-28
+  amendment.
+- **DF-9 — the heat-pump reference barely runs its heat pump.** In the
+  'hp' PSZ the supplemental gas coil is a separate loop coil under
+  `SetpointManager:SingleZone:Reheat`, outside the load-controlled unitary.
+  Corpus 16 (NECB 2025, first reference annual): DX heating 2.6 GJ against
+  88.3 GJ from the gas coil. Zone dispatch cannot reach that coil, so the
+  'hp' reference is excluded from D-91. Check the arrangement against
+  8.4.5.13 (2020: 8.4.4.13) and D-52's auxiliary-energy election.
+- **DF-10 — D-64 recheck on current code.** D-64 dispositioned SmallHotel's
+  318–480 h of reference unmet heating (four storage closets on a shared
+  System 4 unit, morning recovery) as "characteristic". A January 2026-09-15
+  screen of the legacy NECB2020 SmallHotel on current code gave 0.75 h
+  (closets 0.25 h each), and D-91 variants left it unchanged. Re-run
+  SmallHotel for a full year on current code; retire or amend D-64 on the
+  result, independently of D-91.
+- **DF-11 — 8.4.x.14 sentence branching, and the corresponding pump.** Sol
+  (2026-09-16) ruled the reference pump's characteristics by sentence: where
+  the proposed pump's head and efficiency are KNOWN, (1) makes them
+  authoritative and power follows from them and the reference flow; (2)
+  combines multiple pumps' peak shaft power; (3)'s W/(L/s) is a fallback for
+  when head or efficiency is unknown. D-11 collapses all three into the
+  W/(L/s) mechanism, blended by loop TYPE across the whole proposed. That is
+  defensible where topologies differ and wrong where a pump-to-pump bijection
+  exists — on a loop the reference COPIED from the proposed (D-58) the
+  corresponding pump is the same pump. Two symptoms follow: a copied pump gets
+  a building-wide intensity rather than its own, and the D-27 reconciliation
+  then bends the inherited head to keep the blended power physical, inverting
+  (1) over (3). Fix: branch explicitly between (1), (2) and (3); preserve known
+  head and efficiency; use W/(L/s) only under (3). A D-11 change, deliberately
+  outside the D-90/D-91 PR.
+- **DF-12 — SWH pump power is released under an Article that excludes it.**
+  `prepare_for_resizing` releases every hard-set pump power and cites
+  `{prefix}.14.(1)-(3)`, but D-27 puts service-water circulators outside
+  8.4.4.14 and `_apply_pump_rules` leaves them "as built" — so an SWH
+  circulator is released and never re-established, under a citation that does
+  not cover it. Numerically inert today (such circulators arrive at 0 W), so
+  the fix is a scope split, not a behaviour rescue: either exclude SWH loops
+  from the release, or cite the release as the sizing-safety action it is.
+  Sol flagged it 2026-09-16.
+- **DF-13 — the plant staging gate is name-based.** `_apply_boiler` decides
+  Primary/Secondary by NAME, so a plant retained by the D-58 residential
+  identity and named that way is staged, renamed and re-controlled by the
+  pass. Sol (2026-09-16) confirmed 8.4.x.9.(6) DOES reach a copied reference
+  plant, so the behaviour is right and the GATE is the defect: it should key
+  off the reference builder's own ownership feature, not the name. Harmless as
+  measured — the pinned gem also modulates only at and above 352 kW, and no
+  frozen scenario carries a copied plant.
 
 ## Stage 1 — opened 2026-09-08
 
@@ -2730,3 +2806,257 @@ skip them). Dispatch run 34875691969: all five jobs green in 7 min 2 s.
   `[BOOST_ASSERT] … addAndInsertObjects` lines also appear in pre-D-89 parity
   runs, so they are existing SDK noise, not a D-89 effect.
 - parity-scenarios: 5 passed (the annual lane, frozen at `d8b656b`).
+
+## DF-1 closed by D-90 + D-91 — implementation (2026-09-15, branch `df1-d90-d91`)
+
+**Diagnosis and decision.** Scratchpad experiments (run-time patches, full year,
+NECB 2025, Toronto CWEC2020) showed the frozen reference boiler is a real
+8.4.4.9.(6)(a) defect but not DF-1's cause: releasing it left 801.0 h. The
+cause is zone dispatch — the baseboard ran before the always-on rooftop
+terminal in `SequentialLoad`. Two Fable reviews and Sol's rulings narrowed the
+dispatch rule to candidate A for one-unit-per-block Systems 3/4 (D-91) and
+split out the shared System 3/4 topology (DF-8), the starved heat-pump
+reference (DF-9) and a D-64 full-year recheck (DF-10). The user chose one
+branch for D-90 and D-91 with one re-freeze and separate attribution.
+
+**D-90 (plant capacity ownership).** `efficiency.py`: ownership features on each
+staged boiler/chiller (design basis, `autosized`/`input` source, applied value,
+base name); `_plant_capacity` re-reads a value the pass applied, so staging is
+repeatable; names rebuilt from the base name; tower fields hardened from
+autosized values recorded; `prepare_for_resizing` releases what the pass
+derived from sizing (never inputs) with one `ruling='D-90'` info entry.
+`reference.py`: `_clear_proposed_capacity_ownership` on the clone. `path.py`:
+`_hard_sized_capacities` feeds both 8.4.1.2.(5) warnings (recorded in the
+report only when something is found). Boiler decisions cite `D-89 D-90`;
+chiller decisions cite `D-90`.
+
+**D-91 (zone dispatch).** `reference.py`: `_apply_zone_dispatch` beside
+`_audit_terminal_secondary_split`, System 3/4 only, a loop serving exactly one
+zone with exactly one constant-volume terminal and one baseboard: explicit
+`SequentialLoad`, terminal priority 1 and baseboard 2 in both orders, all four
+sequential fractions 1.0, one `ruling='D-91'` decision per assignment.
+
+**Tests.** `tests/necb/test_plant_capacity_ownership.py` (13) and
+`tests/necb/test_reference_zone_dispatch.py` (4, with subtests for both
+editions): 17 passed. Two engine regressions in `test_compliance.py`
+(four-week January): the reference meets heating with no increase under D-91;
+no reference sizing run carries a user-specified boiler capacity and the final
+primary equals its last design size under D-90 — 2 passed in 40.7 s, and each
+FAILS with its fix switched off by a run-time patch (no D-91 decision; a
+user-specified 11,149 W boiler reaching `reference_sizing`). The D-89 electric
+boiler test now checks that D-89 is among the rulings. Existing efficiency,
+part-load curve and part-load class tests: 67 passed.
+
+**Checks.** Import contracts 4 kept; Ruff clean; orphan keys OK; edition delta
+and vintage match up to date; decisions TOC regenerated and registry tests
+(9) OK; `git diff --check` clean. The 8.4 coverage page moved code-pointer
+line numbers only.
+
+**Authoring run, `determination-01-baseboard-gas-necb2025`** (product code, no
+patches, 57 s): compliant, exit 0 (was 1), tier 1 (was 2), GHG level E;
+proposed 117,908.3 kWh / 41.75 h heating; reference 147,977.8 kWh, unmet
+0.0 / 4.75 h (was 802.25 h heating), no capacity iterations, no 8.4.1.2.(5)
+warning; five D-91 decisions, one D-90 release entry. The scenario's asserts
+are re-pinned to these values. Re-freeze and per-scenario attribution follow.
+
+**Re-freeze for D-90 + D-91 (2026-09-15, clean tree at `1a5c888`).** The first
+attempt was stopped by the session's low-memory guard at scenario 40 of 41
+(the container itself recorded no OOM kill and a 6.8 GB peak; nothing was
+published, the freeze being atomic). The second attempt froze all 41 scenarios
+in 12 min; manifest `provenance.commit` `1a5c888`, `dirty: false`. 18 scenario
+directories and the manifest changed (42 files).
+
+| scenario | files | D-90 | D-91 |
+|---|---|---|---|
+| corpus-none-01, -01-necb2025, -05, -06, -07, -09, -11, -12, -14, -15; corpus-sizing-09 | audit.json, audit.txt | — | five zone-dispatch decisions |
+| corpus-sizing-13, corpus-annual-13 | audit.json, audit.txt | the two boiler decisions cite `D-89 D-90` with design capacity and source | — |
+| corpus-sizing-02 | audit.json, audit.txt | boiler decisions, the release entry, pump clamp → within (below) | — (shared unit, out of scope) |
+| corpus-annual-02 (week) | audit, report, stdout | reference 3,813.9 → 3,969.4 kWh; as sizing-02 | — (shared unit) |
+| corpus-sizing-01 | audit.json, audit.txt | as sizing-02 | five decisions |
+| corpus-annual-01 (week) | audit, report, stdout | split below | split below |
+| determination-01-baseboard-gas-necb2025 (full year) | audit.json, audit.txt, report.json | split below | split below |
+
+**D-90 / D-91 split, from product code** (`reference._apply_zone_dispatch`
+switched off by a run-time patch for the D-90-only state; the two frozen
+states are the committed baselines):
+
+| scenario | before (`f88f287`) | D-90 only | D-90 + D-91 (frozen) |
+|---|---|---|---|
+| determination-01: reference kWh | 175,327.8 | 195,697.2 (+11.6 %) | 147,977.8 (−24.4 % from D-90 only) |
+| determination-01: reference unmet heating / cooling h | 802.25 / 10.5 | 801.0 / 11.5 | 0.0 / 4.75 |
+| determination-01: tier, GHG level, capacity iterations | 2, E, 3 | 2, D, 3 | 1, E, 0 |
+| determination-01: exit, compliant | 1, false | 1, false | 0, true |
+| corpus-annual-01 (week): reference kWh | 3,747.2 | 3,922.2 (+4.7 %) | 3,138.9 |
+| corpus-annual-01: reference unmet heating h, tier | 24.75, 2 | 24.75, 2 | 0.0, 1 |
+
+The proposed side is unchanged in both (determination-01 117,908.3 kWh,
+41.75 h heating; corpus-annual-01 2,725.0 kWh). D-90 alone raises reference
+energy — its plant now follows the reference's own sizing — and leaves the
+unmet hours where they were; D-91 clears them. The D-90-only numbers equal the
+scratchpad screening's E1 figures (195,697 kWh, 801.0 h), so the earlier
+evidence is reproduced by product code. determination-01's audit shrinks from
+383 to 296 entries because its three capacity-iteration passes no longer run.
+
+**The one side effect, attributed to D-90.** In corpus-sizing-01/-02,
+corpus-annual-01/-02 and determination-01 the hot-water loop's pump entry
+changes from "combined pump power exceeds Table 5.2.6.3 — clamped" to
+"within the maximum". corpus-sizing-02's audit shows why: before, the
+post-sizing efficiency pass read the proposed's frozen 54.1 kW boiler (cap
+244 W, pump 250 W clamped) and renamed it with a second capacity suffix
+("Primary Boiler 185kBtu/hr 0.9 AFUE"); after, it reads the reference's own
+64.4 kW (cap 290 W, pump 250 W within) and keeps the base name. No other
+change is unexplained.
+
+**Sol's review of PR #49 and the fixes (2026-09-15, `b68580b`).** Six
+findings, all fixed; each new test fails on the pre-fix code (`3bd88a1`'s
+product package exported and imported with the editable install bypassed —
+a first attempt with `PYTHONPATH` alone silently imported the checkout) and
+passes on the fix.
+- P1 stale modulating controls after restaging below 352 kW: every pass sets
+  the complete control state of its band (the Primary modulates to 25 % only
+  above 352 kW; below it both boilers return to `ConstantFlow` with a
+  defaulted minimum part-load ratio). Tests: 400 → 100 kW, 400 → 300 kW,
+  100 → 400 kW.
+- P1 the public `reference_hvac()` returned hard-set plant capacities: it now
+  calls `prepare_for_resizing(code=)` before returning, so the returned
+  reference is ready to size. Engine test: size a proposed, call
+  `reference_hvac`, size the returned reference directly — no user-specified
+  boiler capacity.
+- P1 exhaust-bearing System 4 zones never dispatched: D-91 eligibility ignores
+  `FanZoneExhaust`, which teardown keeps. Test: hooded food-preparation zones
+  select System 4 and all five are dispatched, ordered terminal, baseboard,
+  exhaust.
+- P2 the 2025 D-90 audit cited 2020 articles: `prepare_for_resizing(model,
+  audit, code)` cites the active edition's `{prefix}.9.(6)(a);
+  {prefix}.10.(6)`. Test for both editions.
+- P2 the hard-capacity warnings overclaimed: both name the classes inspected
+  and say staged coils are not checked.
+- P2 DF-8 misattributed Note (3): rewritten around the SDK-zone to
+  thermal-block mapping and D-28's legacy-parity grouping.
+Full suite 1151 passed, 1 skipped; D-90/D-91 files 25 passed (4 subtests);
+lint, import contracts, citation gates (counts unchanged), registry and TOC,
+coverage page regenerated.
+
+**Re-freeze after the review fixes (clean tree at `b68580b`, `dirty:
+false`).** 5 scenarios changed against `3bd88a1`, audit files only, entry
+counts unchanged, no report moved: corpus-sizing-01, corpus-sizing-02,
+corpus-annual-01, corpus-annual-02 and determination-01. In all five the D-90
+plant-capacity release entry (same inputs, two boilers) moves from just
+before the reference sizing run to the end of the reference build, because
+`reference_hvac` now returns a model ready to size. In determination-01 (NECB
+2025) the entry's article also changes from `8.4.4.9.(6)(a); 8.4.4.10.(6)` to
+`8.4.5.9.(6)(a); 8.4.5.10.(6)`. The band-state, exhaust and warning fixes
+reach no frozen scenario (no plant crosses 352 kW, no zone has an exhaust fan,
+no 8.4.1.2.(5) warning is emitted).
+
+**Independent review of the fixes, and the fixes to those (2026-09-16,
+`c093d52` and this commit).** Two rounds after Sol's six, both on the fixes
+rather than on the original change.
+
+Round one (`c093d52`), five items, all fixed: the pump-release entry in
+`prepare_for_resizing` still cited `8.4.4.14.(1)-(3)` for both editions (the
+same bug class as Sol's P2, one line from its fix) — `prefix` hoisted above
+the pump block, with a both-editions subtest that hard-sets pump power first,
+since an unsized model never triggers the transfer and so the original test
+saw no entry; `_HARD_SIZED_SCOPE` still overclaimed, and now says
+single-speed DX **cooling** coils with hydronic, DX heating and staged coils
+named as unchecked; the name-based staging gate re-controls a plant retained
+by the D-58 residential identity and named Primary/Secondary — recorded in
+D-90 as a known limit, harmless as measured (the pinned gem also modulates
+only at and above 352 kW, and no frozen scenario carries a copied plant) and
+tracked as a follow-up to gate on the reference builder's own feature; DF-8
+could be read as having ruled on Table -A's own note (3), so it now says the
+note's text is not in the MCP payload and reading it belongs to the D-28
+amendment; and `docs/DEVELOPERS.md` records the editable-install trap, since
+`PYTHONPATH` alone does not shadow the checkout.
+
+No re-freeze for round one: neither changed entry appears in any baseline (no
+frozen audit carries a pump-release entry, none carries an 8.4.1.2.(5)
+warning), verified by the three frozen lanes passing against the EXISTING
+baselines with `BTAP_SCENARIOS_REQUIRED=1`. CI green on all five jobs, run
+`35034683651`.
+
+Round two, one item, this commit: **pump power is deliberately not
+ownership-tracked, and the docstrings claimed otherwise.** `reference_hvac`
+said only what the pass derived from sizing is released; in fact
+`prepare_for_resizing` releases EVERY hard-set pump power, including one
+carried in with a plant the reference copies from the proposed under D-58,
+where the model supplied the value. Keeping it is what the release exists to
+prevent: the reference re-sizes those loops, and a frozen power and head
+against a freshly sized flow makes EnergyPlus FATAL on "Calculated Pump
+Efficiency > 100%" — the SmallHotel gas variant found it, and the release
+has been in place since `ba33816` (2026-08-03, the gas fleet baseline),
+with the note now carried in `path.py:_size_reference`. (An earlier
+version of this entry, and `f6101c9`'s commit message, mis-attributed that
+note to D-58; the D-58 connection is the copied loop it protects, not
+where it landed.) Fixed as
+documentation plus a pin, not as ownership tracking: both docstrings and the
+D-90 record now state the blanket release, its reason, and the consequence a
+direct API caller must act on — pump power comes back autosized, so re-apply
+`apply_efficiencies(reference, code=..., proposed=proposed)` after sizing, as
+the pipeline already does. `TestCopiedPlantPumpPowerIsReleased` pins both
+halves on a `copy_proposed` residential fan-coil proposed: every copied pump
+returns autosized with one `D-11 D-27` entry counting them, and the
+documented recovery really re-establishes power from the proposed's W/(L/s).
+
+A second independent review of that commit sharpened three things and found a
+fourth. The justification was secondary and is now primary: the reference pass
+owns pump power **by article** — 8.4.4.14.(1) (2025: 8.4.5.14.(1)) inherits the
+corresponding proposed pump's head and efficiency, (3) bases the pump on the
+proposed's W/(L/s), so rated power is derived at the reference's own flow, and
+`_transfer_pump_power` re-derives it for every non-SWH pump regardless of who
+set the previous value. Ownership tracking could therefore never have survived
+the second pass, which makes the EnergyPlus fatal the reason the release
+precedes sizing rather than the reason it is unconditional. The docstrings had
+implied the released value is always recoverable — without `proposed=` it is
+not, and they now say so, with the SWH exception (released here, left "as
+built" by the pump pass under D-27, so autosized). The recovery test proved
+nothing as first written: with the reference flow equal to the proposed's the
+transfer lands on exactly the released 500 W, so "derived" and "restored" were
+indistinguishable; it now doubles the reference flow and asserts 1000 W with
+three `8.4.5.14.(1)-(3)` decisions.
+
+The fourth is for Sol, not for the code. Doubling that flow made the
+transferred power unphysical against the fixture's 179 kPa head, so D-27
+reconciled the head down and warned — on a COPIED loop, where the head is
+genuinely the corresponding proposed pump's, i.e. the one quantity (1) says to
+inherit. So (1) and (3) pull against each other exactly where D-58 makes them
+meet. Pinned as current behaviour, and carried to Sol as a fourth instance of
+the D-58 scope question.
+
+**Sol's ruling on the D-58 scope question (2026-09-16).** "Identical to
+proposed" means system identity and topology, subject to every explicit
+reference-building rule — not a blanket exemption preserving every proposed
+input. The textual ground: the phrase sits in Table -A's "Type of HVAC System
+Required" column; 8.4.x.9 then determines the heating system by that Table
+*and* that Article, while 8.4.x.14 separately prescribes reference-pump
+characteristics. Field-level rules govern after system selection.
+
+That validates three of the four instances and rejects one. (i) the pre-sizing
+pump release is valid as a sizing mechanism — a hard wattage must not survive a
+change of reference flow — but the value replacing it must follow the
+applicable branch of 8.4.x.14; (ii) plant staging does reach a copied plant,
+leaving the name-based gate as an implementation defect (DF-13); (iii) the
+riding-curve coefficients apply to copied variable-flow pumps; (iv) the head
+reconciliation is NOT generally justified — where head and efficiency are
+known, (1) makes them authoritative, and (3)'s W/(L/s) is a fallback for when
+they are not.
+
+He also rejected the consequence proposed alongside the question: "topology
+only" does not mean no PR change. It settles copy-versus-rule and exposes a
+separate D-11 conformance issue — the whole-building loop-type blend applied
+where an exact corresponding pump exists (DF-11), and the SWH release cited
+under an Article that excludes it (DF-12). His instruction was to keep the safe
+pre-sizing release, soften `9a9baa8`'s claim that the post-sizing transfer is
+fully article-derived for copied loops, and record the rest as concrete
+follow-ups rather than turning #49 into a D-11 rewrite. Done in this commit:
+DF-11/DF-12/DF-13 logged above, the claim softened in both docstrings and D-90,
+the gap recorded at D-11 itself, and the recovery test's comment changed to say
+its reconciliation assertion pins current behaviour that DF-11 is expected to
+change. No behaviour moved, so no re-freeze.
+
+No re-freeze for round two either, and none is arguable: the change is
+docstrings, one decision paragraph, one new test and the regenerated coverage
+page. No `article=` literal moved, so citation counts are unchanged. Full
+suite 1158 passed, 1 skipped, 119 subtests; lint, import contracts, registry,
+TOC and the regenerated coverage page all clean.

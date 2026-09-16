@@ -1,7 +1,7 @@
 {
   "2020": {
     "8.4.1.2": {
-      "cited": 7,
+      "cited": 8,
       "warn": 3
     },
     "8.4.2.1": {
@@ -29,7 +29,7 @@
       "warn": 1
     },
     "8.4.4.10": {
-      "cited": 3
+      "cited": 4
     },
     "8.4.4.11": {
       "cited": 1
@@ -68,13 +68,16 @@
       "warn": 5
     },
     "8.4.4.9": {
-      "cited": 4,
+      "cited": 6,
       "warn": 1
+    },
+    "8.4.2.10": {
+      "cited": 1
     }
   },
   "2025": {
     "8.4.1.2": {
-      "cited": 7,
+      "cited": 8,
       "warn": 3
     },
     "8.4.2.1": {
@@ -113,7 +116,7 @@
       "warn": 1
     },
     "8.4.5.10": {
-      "cited": 3
+      "cited": 4
     },
     "8.4.5.11": {
       "cited": 1
@@ -152,8 +155,11 @@
       "warn": 5
     },
     "8.4.5.9": {
-      "cited": 4,
+      "cited": 6,
       "warn": 1
+    },
+    "8.4.2.10": {
+      "cited": 1
     }
   },
   "_provenance": {
@@ -165,6 +171,6 @@
     "generated_by": "python/tests/citation_counts.py:compute_citation_counts",
     "key_shape": "{edition: {article: {kind: count}}}",
     "kinds": "The scanner (python_call_kind in generate_necb_8_4_coverage.py) classifies each article= citation call site into exactly two kinds: 'cited' (any call other than audit.warn/audit.warning) and 'warn' (an audit.warn/audit.warning call). It does not separately distinguish 'decision' from 'info' \u2014 both fall under 'cited'. This baseline keys by the scanner's own two kinds, not the three-way decision/warning/info vocabulary used to describe the intent.",
-    "note": "Generated AFTER renaming compliance.py:320-357 local variable lighting_prefix -> prefix, which makes the article= keyword at compliance.py:346 (and its warn-branch sibling at :357) newly scanner-visible per generate_necb_8_4_coverage.py citation scanning (it only substitutes the literal interpolated name {prefix}). This baseline therefore already includes that fix's contribution to the counts; a further intentional count change must be re-baselined explicitly in the same commit, with the reason recorded here."
+    "note": "Generated AFTER renaming compliance.py:320-357 local variable lighting_prefix -> prefix, which makes the article= keyword at compliance.py:346 (and its warn-branch sibling at :357) newly scanner-visible per generate_necb_8_4_coverage.py citation scanning (it only substitutes the literal interpolated name {prefix}). This baseline therefore already includes that fix's contribution to the counts; a further intentional count change must be re-baselined explicitly in the same commit, with the reason recorded here. Re-baselined for D-90 + D-91 (DF-1, branch df1-d90-d91, 2026-09-15): +5 'cited' sites per edition, all increases \u2014 D-90's prepare_for_resizing release entry cites 8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5) (2025: 8.4.5.9 / 8.4.5.10 / 8.4.1.2), and D-91's zone-dispatch decision cites {prefix}.9.(3); 8.4.2.10.(2)."
   }
 }

@@ -280,8 +280,9 @@ NEWLY_COVERED = [
                    "the CLI's own argument parsing and process wiring are "
                    "outside what this freezes",
      "scenario": "determination-01-baseboard-gas-necb2025",
-     "cost": "about 3 minutes on the corpus model (189 s, three reference "
-             "capacity iterations, when authored on 2026-09-08) — the 40-90 "
+     "cost": "about 1 minute on the corpus model since D-90 + D-91 (57 s, no "
+             "capacity iterations, 2026-09-15; 189 s with three reference "
+             "capacity iterations when authored on 2026-09-08) — the 40-90 "
              "minute figure that kept it uncovered was the oracle archetypes' "
              "cost, not the corpus's; it stays parity-lane by policy (a real "
              "EnergyPlus annual run), not by cost",
@@ -341,13 +342,21 @@ EDITION_SCENARIOS = [
     # curves raise its energy, so the proposed's ratio crosses the tier-2
     # boundary and the GHG level moves one step; tier and level re-pinned
     # from the R-O freeze run. exit and compliant unchanged.
+    # D-90 + D-91 (DF-1, 2026-09-15): the reference boiler follows the
+    # reference's own sizing (D-90) and its per-zone System 3 rooftop
+    # terminals run before the baseboards (D-91), so the reference meets
+    # its heating setpoint without capacity increases: reference unmet
+    # heating 0.0 h (was 802.25 h), 147,977.8 kWh. The building is now
+    # COMPLIANT: exit 0, tier 1 (79.7 % of target), GHG level E, no
+    # 8.4.1.2.(5) warning. Re-pinned from the authoring run on the D-90 +
+    # D-91 tree; the asserts tie the exit to the new reason.
     {"id": f"determination-01-baseboard-gas-{NECB2025_EDITION}",
      "lane": "parity", "kind": "api", "replaces": [],
      "api_call": {"code": NECB2025_EDITION, "simulate": "annual",
                   "province_state": "ONTARIO",
                   "model": "<CORPUS>/01-baseboard-gas.osm",
                   "weather": _WEATHER_2025, "building": {"storeys": 1}},
-     "env": {}, "expect_exit": 1, "timeout_s": 5400,
+     "env": {}, "expect_exit": 0, "timeout_s": 5400,
      "files": CORPUS_FILES, "text_files": CORPUS_TEXT, "streams": {},
      "seal": FIRST_FREEZE_SEAL.format(edition="2025"),
      "asserts": [
@@ -364,7 +373,7 @@ EDITION_SCENARIOS = [
          {"op": "json_equals", "file": "report.json", "path": "edition",
           "value": "2025"},
          {"op": "json_equals", "file": "report.json", "path": "tier",
-          "value": 2},
+          "value": 1},
          {"op": "json_exists", "file": "report.json", "path": "ghg"},
          {"op": "json_equals", "file": "report.json", "path": "ghg.level",
           "value": "E"},
@@ -372,11 +381,15 @@ EDITION_SCENARIOS = [
           "action": "proposed does not exceed the building energy target",
           "article": "8.4.1.2.(2)", "count": 1},
          {"op": "audit_entry", "step": "compliance", "level": "decision",
-          "action": "unmet heating hours EXCEED 100 h",
+          "action": "unmet heating hours within 100 h for both buildings",
           "article": "8.4.1.2.(3)", "count": 1},
          {"op": "audit_entry", "level": "warning", "article": "8.4.1.2.(5)",
-          "count": 1},
-         {"op": "observation_equals", "key": "compliant", "value": False},
+          "count": 0},
+         {"op": "audit_entry", "step": "rules", "level": "decision",
+          "ruling": "D-91", "count": 5},
+         {"op": "audit_entry", "step": "efficiency", "level": "info",
+          "ruling": "D-90", "count": 1},
+         {"op": "observation_equals", "key": "compliant", "value": True},
          {"op": "observation_equals", "key": "reference_model_present",
           "value": True},
      ]},
