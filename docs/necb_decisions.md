@@ -5435,6 +5435,14 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
    `input` capacities are kept. The public `reference_hvac()` calls it before
    returning, so the reference it hands back is ready to size: a caller's
    direct sizing run sizes the reference's own plant, not the proposed's.
+   **Pump power is deliberately NOT ownership-tracked**: the same call releases
+   every hard-set pump power, including one carried in with a plant the
+   reference copied from the proposed (D-58), because the reference re-sizes
+   those loops and EnergyPlus fatals on "Calculated Pump Efficiency > 100%"
+   when a frozen power and head meet a freshly sized flow (the SmallHotel gas
+   variant). The 8.4.4.14 transfer re-establishes it on the sized flow, so a
+   direct API caller must pass `proposed=` to `apply_efficiencies` after
+   sizing; the pipeline already does.
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches

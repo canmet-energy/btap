@@ -2225,6 +2225,14 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     Call this before EVERY re-sizing run of a model that has already been
     through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
 
+    EVERY hard-set pump power is released, including one the model supplied as an
+    input: a plant retained by the D-58 residential identity arrives with the
+    legacy's hard power and head, and the reference re-sizes that loop's flow, so
+    keeping the input value is what triggers the fatal above (found on the
+    SmallHotel gas variant). Pump power is therefore deliberately NOT
+    ownership-tracked the way plant capacity is; the caller's next
+    apply_efficiencies(proposed=) re-transfers it against the newly sized flow.
+
     D-90: the same holds for plant capacity. The pass hard-sets boiler and
     chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,
     then staged) and hardens tower hydraulics; left in place, the reference

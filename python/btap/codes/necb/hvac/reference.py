@@ -464,10 +464,20 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
     cleanly via apply_efficiencies after sizing).
 
     The returned reference is READY TO SIZE (D-90): the build-time efficiency pass
-    reads the proposed's sizing through the clone, so before returning, every plant
-    capacity and pump power that pass derived from sizing is released to autosize
-    (prepare_for_resizing). A direct sizing run of the returned model therefore sizes
-    the reference's own plant; capacities the proposed supplied as inputs are kept.
+    reads the proposed's sizing through the clone, so before returning,
+    prepare_for_resizing releases the plant capacities that pass derived from sizing
+    — capacities the model supplied as INPUTS are kept — and, deliberately, EVERY
+    hard-set pump power, including one carried in with a plant this reference COPIED
+    from the proposed (the D-58 residential identity). That release is not an
+    ownership judgement: the reference re-sizes those loops, and EnergyPlus FATALS on
+    'Calculated Pump Efficiency > 100%' when a frozen power and head meet a freshly
+    sized flow.
+
+    So a direct sizing run of the returned model sizes the reference's own plant, but
+    pump power comes back AUTOSIZED. Re-establish it the way the pipeline does — call
+    apply_efficiencies(reference, code=..., proposed=proposed) after sizing, with the
+    sized proposed, so the 8.4.4.14 W/(L/s) transfer lands on the new flows; without
+    proposed= the Table 8.4.4.14 curves still apply and the skip is noted in the audit.
 
     :param model: the proposed openstudio.model.Model
     :param code: the code id, e.g. 'necb2020'

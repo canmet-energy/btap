@@ -30,6 +30,7 @@ from tests.necb.hvac_helpers import attach_weather, load_fixture, proposed_with_
 from tests.support import needs_engine, needs_sdk
 
 WATER_COOLED_SYSTEM = 'MZ BU RTU Hot Water Heating Coil Scroll Chiller and Hot Water Baseboard'
+FPFC = 'FPFC MAU Chilled Water Coils with Scroll Chiller'
 
 
 def plant(boiler_w=None, chiller_w=None):
@@ -348,6 +349,82 @@ class TestPublicReferenceIsReadyToSize(unittest.TestCase):
             ).fetchall()
         self.assertTrue(rows, 'the direct sizing run sized the reference boilers')
         self.assertFalse([r for r in rows if r[1].startswith('User-Specified')], rows)
+
+
+@needs_sdk
+class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
+    """The follow-up review of D-90: plant CAPACITY is ownership-tracked, but pump
+    POWER is not — ``reference_hvac`` releases every hard-set pump power, including
+    one carried in with a plant the reference COPIES from the proposed (the D-58
+    residential identity), where the model, not the pass, supplied the value.
+
+    That asymmetry is deliberate, and this pins it so it cannot be "fixed" into
+    ownership tracking by symmetry with the capacity rules: the reference re-sizes
+    those copied loops, and a frozen power and head meeting a freshly sized flow
+    makes EnergyPlus FATAL on "Calculated Pump Efficiency > 100%" (found on the
+    SmallHotel gas variant). The documented consequence for a direct API caller —
+    pump power comes back autosized, so re-apply efficiencies with ``proposed=``
+    after sizing — is pinned with it."""
+
+    def pumps(self, model):
+        return list(model.getPumpVariableSpeeds()) + list(model.getPumpConstantSpeeds())
+
+    def copied_residential(self):
+        """A multi-unit residential proposed, whose reference D-58 copies whole —
+        so its plant, and the hard pump power on it, are the PROPOSED's."""
+        model = load_fixture()
+        modeling.build_system(model, FPFC, sorted_zones(model))
+        pumps = self.pumps(model)
+        self.assertTrue(pumps, 'fixture precondition: the residential plant has pumps')
+        for pump in pumps:
+            pump.setRatedPowerConsumption(500.0)
+        return model
+
+    def reference(self, model, code='necb2025'):
+        audit = AuditLog()
+        result = hvac.reference_hvac(
+            model, code=code,
+            building={'storeys': 3,
+                      'zone_types': {z.nameString(): 'Multi-unit residential'
+                                     for z in model.getThermalZones()}},
+            audit=audit)
+        self.assertEqual(['copy_proposed'], sorted({a.action for a in result.assignments}),
+                         'precondition: D-58 copies the proposed systems, plant and all')
+        return result, audit
+
+    def test_a_copied_plants_hard_pump_power_comes_back_autosized(self):
+        result, audit = self.reference(self.copied_residential())
+
+        pumps = self.pumps(result.model)
+        self.assertTrue(pumps, 'the copied reference carries the proposed\'s pumps')
+        for pump in pumps:
+            self.assertTrue(pump.isRatedPowerConsumptionAutosized(),
+                            f'{pump.nameString()} kept a hard power the reference sizing run would '
+                            f'fatal on')
+        release = [e for e in audit.entries if e.get('ruling') == 'D-11 D-27']
+        self.assertEqual(1, len(release), 'one pump-release entry, on the way out of reference_hvac')
+        self.assertEqual('8.4.5.14.(1)-(3)', release[0]['article'])
+        self.assertEqual(len(pumps), release[0]['inputs']['pumps'],
+                         'the entry counts the pumps it released')
+
+    def test_the_documented_recovery_re_establishes_power_from_the_sized_flow(self):
+        """The docstring on reference_hvac tells a direct caller to re-apply
+        efficiencies with the sized proposed. Pin that it is a real recovery: the
+        8.4.4.14.(1)-(3) transfer puts power back, derived from the proposed's
+        W/(L/s), not from the released value."""
+        proposed = self.copied_residential()
+        for pump in self.pumps(proposed):
+            pump.setRatedFlowRate(0.004)
+        result, _ = self.reference(proposed)
+
+        audit = AuditLog()
+        efficiency.apply_efficiencies(result.model, code='necb2025', proposed=proposed, audit=audit)
+        powers = [p.ratedPowerConsumption().get() for p in self.pumps(result.model)
+                  if not p.ratedPowerConsumption().empty()]
+        self.assertTrue(powers, 'the second pass re-establishes pump power')
+        transfer = [e for e in audit.entries if '.14.(1)-(3)' in (e.get('article') or '')
+                    and e['level'] != 'warning']
+        self.assertTrue(transfer, 'and cites the transfer it derived it from')
 
 
 if __name__ == '__main__':

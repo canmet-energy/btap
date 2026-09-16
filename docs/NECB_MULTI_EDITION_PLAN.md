@@ -2916,3 +2916,55 @@ before the reference sizing run to the end of the reference build, because
 `8.4.5.9.(6)(a); 8.4.5.10.(6)`. The band-state, exhaust and warning fixes
 reach no frozen scenario (no plant crosses 352 kW, no zone has an exhaust fan,
 no 8.4.1.2.(5) warning is emitted).
+
+**Independent review of the fixes, and the fixes to those (2026-09-16,
+`c093d52` and this commit).** Two rounds after Sol's six, both on the fixes
+rather than on the original change.
+
+Round one (`c093d52`), five items, all fixed: the pump-release entry in
+`prepare_for_resizing` still cited `8.4.4.14.(1)-(3)` for both editions (the
+same bug class as Sol's P2, one line from its fix) — `prefix` hoisted above
+the pump block, with a both-editions subtest that hard-sets pump power first,
+since an unsized model never triggers the transfer and so the original test
+saw no entry; `_HARD_SIZED_SCOPE` still overclaimed, and now says
+single-speed DX **cooling** coils with hydronic, DX heating and staged coils
+named as unchecked; the name-based staging gate re-controls a plant retained
+by the D-58 residential identity and named Primary/Secondary — recorded in
+D-90 as a known limit, harmless as measured (the pinned gem also modulates
+only at and above 352 kW, and no frozen scenario carries a copied plant) and
+tracked as a follow-up to gate on the reference builder's own feature; DF-8
+could be read as having ruled on Table -A's own note (3), so it now says the
+note's text is not in the MCP payload and reading it belongs to the D-28
+amendment; and `docs/DEVELOPERS.md` records the editable-install trap, since
+`PYTHONPATH` alone does not shadow the checkout.
+
+No re-freeze for round one: neither changed entry appears in any baseline (no
+frozen audit carries a pump-release entry, none carries an 8.4.1.2.(5)
+warning), verified by the three frozen lanes passing against the EXISTING
+baselines with `BTAP_SCENARIOS_REQUIRED=1`. CI green on all five jobs, run
+`35034683651`.
+
+Round two, one item, this commit: **pump power is deliberately not
+ownership-tracked, and the docstrings claimed otherwise.** `reference_hvac`
+said only what the pass derived from sizing is released; in fact
+`prepare_for_resizing` releases EVERY hard-set pump power, including one
+carried in with a plant the reference copies from the proposed under D-58,
+where the model supplied the value. Keeping it is what the release exists to
+prevent: the reference re-sizes those loops, and a frozen power and head
+against a freshly sized flow makes EnergyPlus FATAL on "Calculated Pump
+Efficiency > 100%" — the SmallHotel gas variant found it, and
+`path.py:_size_reference` has carried that note since D-58. Fixed as
+documentation plus a pin, not as ownership tracking: both docstrings and the
+D-90 record now state the blanket release, its reason, and the consequence a
+direct API caller must act on — pump power comes back autosized, so re-apply
+`apply_efficiencies(reference, code=..., proposed=proposed)` after sizing, as
+the pipeline already does. `TestCopiedPlantPumpPowerIsReleased` pins both
+halves on a `copy_proposed` residential fan-coil proposed: every copied pump
+returns autosized with one `D-11 D-27` entry counting them, and the
+documented recovery really re-establishes power from the proposed's W/(L/s).
+
+No re-freeze for round two either, and none is arguable: the change is
+docstrings, one decision paragraph, one new test and the regenerated coverage
+page. No `article=` literal moved, so citation counts are unchanged. Full
+suite 1158 passed, 1 skipped, 119 subtests; lint, import contracts, registry,
+TOC and the regenerated coverage page all clean.
