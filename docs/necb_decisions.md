@@ -5437,12 +5437,25 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
    direct sizing run sizes the reference's own plant, not the proposed's.
    **Pump power is deliberately NOT ownership-tracked**: the same call releases
    every hard-set pump power, including one carried in with a plant the
-   reference copied from the proposed (D-58), because the reference re-sizes
-   those loops and EnergyPlus fatals on "Calculated Pump Efficiency > 100%"
-   when a frozen power and head meet a freshly sized flow (the SmallHotel gas
-   variant). The 8.4.4.14 transfer re-establishes it on the sized flow, so a
-   direct API caller must pass `proposed=` to `apply_efficiencies` after
-   sizing; the pipeline already does.
+   reference copied from the proposed (D-58). The grounds are the article, not
+   convenience: 8.4.4.14.(1) (2025: 8.4.5.14.(1)) inherits the *corresponding
+   proposed pump's head and efficiency*, and (3) bases the reference pump on the
+   proposed's W/(L/s), so the reference's rated **power** is a derived quantity
+   — the pass owns it by the Code. Tracking ownership would also change nothing,
+   because `_transfer_pump_power` re-derives power for every non-SWH pump on the
+   next pass whoever set the previous value. Releasing *before* sizing is what
+   avoids the EnergyPlus fatal on "Calculated Pump Efficiency > 100%" when a
+   frozen power and head meet a freshly sized flow (found on the SmallHotel gas
+   variant, fixed in `ba33816` on 2026-08-03).
+
+   Two consequences a caller must know. A direct API caller must pass
+   `proposed=` to `apply_efficiencies` after sizing — the pipeline does — because
+   **without it the released value is not recovered**: no power is transferred,
+   the skip is audited, and EnergyPlus sizes the pump from its head and flow. And
+   a service-water circulator is released here yet left "as built" by the pump
+   pass (D-27 puts SWH outside 8.4.4.14), so it stays autosized; harmless today
+   because such circulators arrive at 0 W, but it is an exception to the
+   sentence above, not an instance of it.
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches

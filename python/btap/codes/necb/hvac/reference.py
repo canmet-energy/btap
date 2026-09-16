@@ -468,16 +468,26 @@ def reference_hvac(model, code='necb2020', building=None, audit=None, proposed_a
     prepare_for_resizing releases the plant capacities that pass derived from sizing
     — capacities the model supplied as INPUTS are kept — and, deliberately, EVERY
     hard-set pump power, including one carried in with a plant this reference COPIED
-    from the proposed (the D-58 residential identity). That release is not an
-    ownership judgement: the reference re-sizes those loops, and EnergyPlus FATALS on
-    'Calculated Pump Efficiency > 100%' when a frozen power and head meet a freshly
-    sized flow.
+    from the proposed (the D-58 residential identity).
+
+    Pump power is released unconditionally because 8.4.4.14 (2025: 8.4.5.14) ASSIGNS
+    it to this pass: (1) inherits the corresponding proposed pump's head and
+    efficiency, and (3) bases the reference pump on the proposed's W/(L/s) — so the
+    reference's rated power is DERIVED at the reference's own flow, never inherited
+    as a number. Ownership tracking could not preserve one anyway: the post-sizing
+    pass re-derives power for every non-SWH pump it finds, whoever set the old value.
+    Releasing BEFORE sizing is what avoids the EnergyPlus FATAL on 'Calculated Pump
+    Efficiency > 100%' — a frozen power and head meeting a freshly sized flow, found
+    on the SmallHotel gas variant.
 
     So a direct sizing run of the returned model sizes the reference's own plant, but
-    pump power comes back AUTOSIZED. Re-establish it the way the pipeline does — call
-    apply_efficiencies(reference, code=..., proposed=proposed) after sizing, with the
-    sized proposed, so the 8.4.4.14 W/(L/s) transfer lands on the new flows; without
-    proposed= the Table 8.4.4.14 curves still apply and the skip is noted in the audit.
+    pump power comes back AUTOSIZED and is NOT recoverable from the model: call
+    apply_efficiencies(reference, code=..., proposed=proposed) after sizing, as the
+    pipeline does, so the transfer lands on the sized flows. WITHOUT proposed= the
+    Table curves still apply but no power is transferred (the skip is audited) and
+    EnergyPlus sizes each pump from its own head and flow. A service-water circulator
+    is released here too, yet left 'as built' by that pass (D-27, outside 8.4.4.14),
+    so it simply stays autosized.
 
     :param model: the proposed openstudio.model.Model
     :param code: the code id, e.g. 'necb2020'

@@ -414,17 +414,37 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
         W/(L/s), not from the released value."""
         proposed = self.copied_residential()
         for pump in self.pumps(proposed):
-            pump.setRatedFlowRate(0.004)
+            pump.setRatedFlowRate(0.004)  # 500 W / 4 L/s = 125 W/(L/s)
         result, _ = self.reference(proposed)
+        # Size the reference's own pumps to DOUBLE the proposed's flow. Without
+        # this the transfer lands on 125 W/(L/s) x 4 L/s = the released 500 W,
+        # and the test cannot tell a derivation from a restoration.
+        reference_pumps = self.pumps(result.model)
+        for pump in reference_pumps:
+            pump.setRatedFlowRate(0.008)
 
         audit = AuditLog()
         efficiency.apply_efficiencies(result.model, code='necb2025', proposed=proposed, audit=audit)
-        powers = [p.ratedPowerConsumption().get() for p in self.pumps(result.model)
-                  if not p.ratedPowerConsumption().empty()]
-        self.assertTrue(powers, 'the second pass re-establishes pump power')
-        transfer = [e for e in audit.entries if '.14.(1)-(3)' in (e.get('article') or '')
-                    and e['level'] != 'warning']
-        self.assertTrue(transfer, 'and cites the transfer it derived it from')
+        self.assertEqual([1000.0] * len(reference_pumps),
+                         sorted(p.ratedPowerConsumption().get() for p in reference_pumps
+                                if not p.ratedPowerConsumption().empty()),
+                         'power is DERIVED at the reference flow, not restored to the released value')
+        transfer = [e for e in audit.entries if e['level'] == 'decision'
+                    and e.get('article') == '8.4.5.14.(1)-(3)']
+        self.assertEqual(len(reference_pumps), len(transfer),
+                         'one transfer decision per pump, citing the ACTIVE edition')
+        # The doubled flow makes the transferred 1000 W unphysical against the
+        # fixture's 179 kPa head, so D-27 reconciles the head to a 65% total
+        # efficiency and warns. Pinned rather than asserted away: on a COPIED loop
+        # that head IS the corresponding proposed pump's, which is the one thing
+        # 8.4.5.14.(1) says to inherit, so (1) and (3) genuinely pull apart here.
+        reconciled = [e for e in audit.entries
+                      if e.get('ruling') == 'D-27' and e['level'] == 'warning']
+        self.assertEqual(len(reference_pumps), len(reconciled),
+                         'the head reconciliation fires once per pump, and says so')
+        for pump in reference_pumps:
+            self.assertLess(pump.ratedPumpHead(), 179352.0,
+                            f'{pump.nameString()}: head reduced to keep the transfer physical')
 
 
 if __name__ == '__main__':

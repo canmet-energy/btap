@@ -2229,9 +2229,15 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     input: a plant retained by the D-58 residential identity arrives with the
     legacy's hard power and head, and the reference re-sizes that loop's flow, so
     keeping the input value is what triggers the fatal above (found on the
-    SmallHotel gas variant). Pump power is therefore deliberately NOT
-    ownership-tracked the way plant capacity is; the caller's next
-    apply_efficiencies(proposed=) re-transfers it against the newly sized flow.
+    SmallHotel gas variant). Pump power is deliberately NOT ownership-tracked the
+    way plant capacity is, and tracking it would change nothing: 8.4.4.14.(1)/(3)
+    (2025: 8.4.5.14) makes the reference's rated power a DERIVED quantity, and
+    _transfer_pump_power re-derives it for every non-SWH pump on the next pass
+    whoever set the old value. The caller's next apply_efficiencies(proposed=)
+    re-transfers it against the newly sized flow; WITHOUT proposed= nothing is
+    transferred and the released pump is left for EnergyPlus to size. An SWH
+    circulator is released here too but left 'as built' by the pump pass (D-27),
+    so it stays autosized until the model is sized again.
 
     D-90: the same holds for plant capacity. The pass hard-sets boiler and
     chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,

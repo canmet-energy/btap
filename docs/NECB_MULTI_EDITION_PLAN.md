@@ -2952,8 +2952,12 @@ carried in with a plant the reference copies from the proposed under D-58,
 where the model supplied the value. Keeping it is what the release exists to
 prevent: the reference re-sizes those loops, and a frozen power and head
 against a freshly sized flow makes EnergyPlus FATAL on "Calculated Pump
-Efficiency > 100%" — the SmallHotel gas variant found it, and
-`path.py:_size_reference` has carried that note since D-58. Fixed as
+Efficiency > 100%" — the SmallHotel gas variant found it, and the release
+has been in place since `ba33816` (2026-08-03, the gas fleet baseline),
+with the note now carried in `path.py:_size_reference`. (An earlier
+version of this entry, and `f6101c9`'s commit message, mis-attributed that
+note to D-58; the D-58 connection is the copied loop it protects, not
+where it landed.) Fixed as
 documentation plus a pin, not as ownership tracking: both docstrings and the
 D-90 record now state the blanket release, its reason, and the consequence a
 direct API caller must act on — pump power comes back autosized, so re-apply
@@ -2962,6 +2966,31 @@ the pipeline already does. `TestCopiedPlantPumpPowerIsReleased` pins both
 halves on a `copy_proposed` residential fan-coil proposed: every copied pump
 returns autosized with one `D-11 D-27` entry counting them, and the
 documented recovery really re-establishes power from the proposed's W/(L/s).
+
+A second independent review of that commit sharpened three things and found a
+fourth. The justification was secondary and is now primary: the reference pass
+owns pump power **by article** — 8.4.4.14.(1) (2025: 8.4.5.14.(1)) inherits the
+corresponding proposed pump's head and efficiency, (3) bases the pump on the
+proposed's W/(L/s), so rated power is derived at the reference's own flow, and
+`_transfer_pump_power` re-derives it for every non-SWH pump regardless of who
+set the previous value. Ownership tracking could therefore never have survived
+the second pass, which makes the EnergyPlus fatal the reason the release
+precedes sizing rather than the reason it is unconditional. The docstrings had
+implied the released value is always recoverable — without `proposed=` it is
+not, and they now say so, with the SWH exception (released here, left "as
+built" by the pump pass under D-27, so autosized). The recovery test proved
+nothing as first written: with the reference flow equal to the proposed's the
+transfer lands on exactly the released 500 W, so "derived" and "restored" were
+indistinguishable; it now doubles the reference flow and asserts 1000 W with
+three `8.4.5.14.(1)-(3)` decisions.
+
+The fourth is for Sol, not for the code. Doubling that flow made the
+transferred power unphysical against the fixture's 179 kPa head, so D-27
+reconciled the head down and warned — on a COPIED loop, where the head is
+genuinely the corresponding proposed pump's, i.e. the one quantity (1) says to
+inherit. So (1) and (3) pull against each other exactly where D-58 makes them
+meet. Pinned as current behaviour, and carried to Sol as a fourth instance of
+the D-58 scope question.
 
 No re-freeze for round two either, and none is arguable: the change is
 docstrings, one decision paragraph, one new test and the regenerated coverage
