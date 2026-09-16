@@ -124,6 +124,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-89** — Each edition's reference boilers and furnaces carry its own part-load fuel curve by equipment class; electric boilers carry none; the loader validates before reuse (DF-4 closed; R-O) _(runtime)_
 - **D-90** — The reference plant's capacity follows the reference's own sizing _(runtime)_
 - **D-91** — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first _(runtime)_
+- **D-92** — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power _(runtime)_
 
 <!-- TOC END -->
 
@@ -302,6 +303,12 @@ audit are drained and archived — see `docs/README.md`.
     future data to a consumed rule block carrying the Table coefficients.
 - **Who/when:** phylroy chose "Implement" (2026-07-23); the interpretive
   sub-choices are Claude's under D-10 delegation.
+- **Mechanism superseded by [D-92](#d-92) (2026-09-16).** The value source
+  below — the proposed loop-type's combined W/(L/s) — still stands, but it no
+  longer reaches the model as a hard-set rated power with the head bent
+  afterwards. The reference pump's head, shaft coefficient and motor efficiency
+  are stated and its power is autosized, so the efficiency EnergyPlus computes
+  is the one declared. Read this entry's mechanism wording as history.
 - **Known gap (Sol, 2026-09-16), tracked as DF-11:** collapsing (1)-(3) into
   one W/(L/s) mechanism is defensible only where the correspondence is
   genuinely loop-type — different topologies, no pump-to-pump bijection. It is
@@ -5629,3 +5636,80 @@ in the plan log.
   compliance tests.
 - **Who/when:** Claude with the user; Fable reviews; decided by Sol,
   2026-09-15.
+
+## D-92 — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power
+
+- **Decision:** the efficiency pass writes each reference hydronic pump's rated
+  head, its design shaft power per unit flow per unit head and its motor
+  efficiency, and leaves its rated power **autosized**. [D-11](#d-11)'s value
+  source is unchanged — the proposed loop-type's combined W/(L/s) — so this
+  replaces the MECHANISM only; [DF-11](NECB_MULTI_EDITION_PLAN.md) carries the
+  value source.
+- **The requirement.** NECB 2020 8.4.4.14 (2025: 8.4.5.14, identical text):
+  (1) each reference hydronic pump has a total static head and efficiency
+  identical to that of the **corresponding** proposed pump; (2) where the
+  proposed uses more than one pump in a given hydronic system, the reference
+  pump's peak **shaft** power demand is identical to their combined peak shaft
+  power demand; (3) where the proposed pump's head or efficiency is **not
+  known**, the reference pump is based on the proposed's peak power demand in
+  W/(L/s). Note A-8.4.4.14.(2) supplies the method for (2): preserve the peak
+  power by **adjusting the head**, at a flow-weighted average pump efficiency.
+  8.4.4.9.(6)(f) separately fixes the reference plant's peak pumping flow
+  (installed capacity, pure water, 16 °C drop) — so under (2) both flow and
+  shaft power are article-owned and **head is the only free variable**. The
+  note's own example computes its 179.4 L/min from (6)(f) at 200 kW; verified
+  against the codes MCP.
+- **What was wrong.** The pass hard-set rated power to intensity × reference
+  flow, then bent the inherited head whenever the resulting triple implied a
+  pump efficiency above the motor efficiency, because EnergyPlus FATALS on
+  "Calculated Pump Efficiency > 100%". That inverts the Article: (1) makes head
+  and efficiency the inherited quantities and lets power follow. Sol ruled the
+  reconciliation "not generally justified" (2026-09-16).
+- **The mechanism.** Under `PowerPerFlowPerPressure`, EnergyPlus derives
+  `P = V × H × k / motor_eff` with `k = 1 / pump_eff`, so stating
+  `H = I × 1000 × motor_eff × pump_eff` reproduces an intensity `I` exactly at
+  any flow. **The derived power does not depend on how the total efficiency
+  splits** between motor and impeller — the split cancels — so a physical split
+  can always be chosen without moving a watt. A proposed pump whose triple
+  implies an efficiency above 100% (power hard-set against an unrelated head)
+  states nothing inheritable: that is (3)'s "not known", and the pass falls
+  back to EnergyPlus's own 0.78 pump / 0.9 motor split, **audited citing (3)**,
+  never silently. Because the stated efficiency is the one the engine computes,
+  the fatal is unreachable by construction and `_reconcile_pump_head` is
+  deleted rather than suppressed. The 5.2.6.3 cap ([D-38](#d-38)) clamps by
+  scaling **head** at constant efficiency, and computes each pump's power from
+  its own triple rather than re-reading a sizing SQL the pass has just
+  invalidated. DF-12 closes with it: the release no longer touches a
+  service-water circulator, which [D-27](#d-27) puts outside 8.4.4.14.
+- **The legacy realisation.** `openstudio-standards` has **no**
+  proposed-to-reference pump transfer at all — it generates archetypes, so
+  there is no proposed to transfer from. Its only pump-power mechanism is the
+  Part 5 cap 5.2.6.3.(1), inherited by NECB2020 from NECB2015, which scales
+  `ratedPumpHead` under `PowerPerFlowPerPressure` — the same knob this decision
+  adopts. Findings recorded rather than adopted: the gem's cap is an
+  unconditional ratio, so it **raises** an under-cap loop to the cap (D-38 is
+  min-wins), and since every gem pump starts at OpenStudio defaults, its
+  reference pump power equals the cap on every loop.
+- **Numerically inert.** `H = I × 1000 × motor_eff × pump_eff` reproduces the
+  corpus's 255.49 W/(L/s) as 179 354 Pa against OpenStudio's 179 352 Pa default
+  — 2 Pa, the truncation in the stored intensity — and the derived power matches
+  the previously hard-set power to `0.00e+00` at every flow tested. The seven
+  frozen baselines carrying a transfer entry re-freeze on audit **text** only.
+- **What this does NOT decide.** The value source: whose intensity, and which
+  of (1)/(2)/(3) supplies it. Two readings are recorded for Sol to object to
+  rather than ratify in advance: **(2) preserves absolute combined shaft watts**
+  even where the reference flow differs, superseding D-11's "intensity, not
+  absolute watts" choice; and the note's stated **54.2 %** does not reproduce as
+  a flow-weighted mean (51.3 %), though it does reproduce the note's published
+  156.1 kPa head — so the stated *method*, not the arithmetic, appears to be the
+  erratum. Also disclosed: 8.4.4.9.(6)(e) requires a **constant-speed** primary
+  pumping system, and our reference builders create `PumpVariableSpeed` given
+  the riding-curve row under (5).
+- **Files:** `btap/codes/necb/hvac/efficiency.py`
+  (`_state_pump_characteristics`, `_pump_power_from_triple`,
+  `_transfer_pump_power`, `_proposed_pump_stats`, `_apply_pump_power_cap`,
+  `prepare_for_resizing`; `_reconcile_pump_head` and `DESIGN_PUMP_EFFICIENCY`
+  deleted), `tests/necb/test_hvac_necb_pump_rules.py`,
+  `tests/necb/test_plant_capacity_ownership.py`.
+- **Who/when:** Claude under [D-10](#d-10) delegation, with the user; Fable
+  reviews; Sol's D-58 scope ruling, 2026-09-16.

@@ -425,29 +425,26 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
 
         audit = AuditLog()
         efficiency.apply_efficiencies(result.model, code='necb2025', proposed=proposed, audit=audit)
+        # D-92: the pass states head/coefficient/motor efficiency and leaves
+        # power autosized, so the recovery is checked as the power E+ will
+        # derive — 125 W/(L/s) x 8 L/s — not as a number written into the model.
         self.assertEqual([1000.0] * len(reference_pumps),
-                         sorted(p.ratedPowerConsumption().get() for p in reference_pumps
-                                if not p.ratedPowerConsumption().empty()),
+                         sorted(round(efficiency._pump_power_from_triple(p, 0.008), 6)
+                                for p in reference_pumps),
                          'power is DERIVED at the reference flow, not restored to the released value')
         transfer = [e for e in audit.entries if e['level'] == 'decision'
                     and e.get('article') == '8.4.5.14.(1)-(3)']
         self.assertEqual(len(reference_pumps), len(transfer),
                          'one transfer decision per pump, citing the ACTIVE edition')
-        # The doubled flow makes the transferred 1000 W unphysical against the
-        # fixture's 179 kPa head, so D-27 reconciles the head to a 65% total
-        # efficiency and warns. Pinned as CURRENT behaviour, not as correct
-        # behaviour: Sol ruled (2026-09-16) that where the proposed head and
-        # efficiency are known — always, on a COPIED loop, where the corresponding
-        # pump is the same pump — 8.4.5.14.(1) makes them authoritative and power
-        # follows from them; (3)'s W/(L/s) is a fallback for when they are not.
-        # DF-11 carries the fix, and this assertion is expected to change with it.
-        reconciled = [e for e in audit.entries
-                      if e.get('ruling') == 'D-27' and e['level'] == 'warning']
-        self.assertEqual(len(reference_pumps), len(reconciled),
-                         'the head reconciliation fires once per pump, and says so')
+        # The head reconciliation this test used to pin is gone with the
+        # mechanism that needed it: nothing hard-sets power, so no inherited
+        # head can contradict one.
+        self.assertEqual([], [e for e in audit.entries
+                              if e.get('ruling') == 'D-27' and e['level'] == 'warning'],
+                         'no reconciliation: the stated efficiency is physical by construction')
         for pump in reference_pumps:
-            self.assertLess(pump.ratedPumpHead(), 179352.0,
-                            f'{pump.nameString()}: head reduced to keep the transfer physical')
+            self.assertGreaterEqual(pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                    f'{pump.nameString()}: stated efficiency a pump can have')
 
 
 if __name__ == '__main__':

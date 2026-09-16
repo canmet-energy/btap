@@ -1199,7 +1199,11 @@ any result.
   (1) over (3). Fix: branch explicitly between (1), (2) and (3); preserve known
   head and efficiency; use W/(L/s) only under (3). A D-11 change, deliberately
   outside the D-90/D-91 PR.
-- **DF-12 — SWH pump power is released under an Article that excludes it.**
+- **DF-12 — SWH pump power is released under an Article that excludes it.
+  CLOSED 2026-09-16 by D-92**, which scopes the release to the pumps 8.4.x.14
+  governs: `prepare_for_resizing` now skips service-water loops, so a
+  circulator the pump pass leaves "as built" is no longer stranded autosized.
+  Original finding:
   `prepare_for_resizing` releases every hard-set pump power and cites
   `{prefix}.14.(1)-(3)`, but D-27 puts service-water circulators outside
   8.4.4.14 and `_apply_pump_rules` leaves them "as built" — so an SWH
