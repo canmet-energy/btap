@@ -1199,7 +1199,11 @@ any result.
   (1) over (3). Fix: branch explicitly between (1), (2) and (3); preserve known
   head and efficiency; use W/(L/s) only under (3). A D-11 change, deliberately
   outside the D-90/D-91 PR.
-- **DF-12 — SWH pump power is released under an Article that excludes it.**
+- **DF-12 — SWH pump power is released under an Article that excludes it.
+  CLOSED 2026-09-16 by D-92**, which scopes the release to the pumps 8.4.x.14
+  governs: `prepare_for_resizing` now skips service-water loops, so a
+  circulator the pump pass leaves "as built" is no longer stranded autosized.
+  Original finding:
   `prepare_for_resizing` releases every hard-set pump power and cites
   `{prefix}.14.(1)-(3)`, but D-27 puts service-water circulators outside
   8.4.4.14 and `_apply_pump_rules` leaves them "as built" — so an SWH
@@ -3060,3 +3064,41 @@ docstrings, one decision paragraph, one new test and the regenerated coverage
 page. No `article=` literal moved, so citation counts are unchanged. Full
 suite 1158 passed, 1 skipped, 119 subtests; lint, import contracts, registry,
 TOC and the regenerated coverage page all clean.
+
+**Re-freeze for D-92 (clean tree at `28ade30`).** 7 of 41 scenarios changed —
+`corpus-sizing-01/-02/-13`, `corpus-annual-01/-02/-13` and
+`determination-01-baseboard-gas-necb2025` — the seven that carry an
+8.4.x.14.(1)-(3) transfer entry, exactly as predicted before the run. **Audit
+files only: no `report.json` moved in any scenario**, and each audit's entry
+count is unchanged (286, 208, 210, 292, 214, 216, 296), so one entry was
+edited per scenario and none added or removed.
+
+The edit is the transfer decision, in every case identically: the action
+becomes "pump characteristics transferred from the proposed building";
+`motor_efficiency` (0.9) and `pump_efficiency` (0.78) join its inputs; the
+value changes from "rated power 250 W (combined proposed intensity x reference
+flow)" to "head 179352 Pa at 78.0% pump / 90.0% motor efficiency; power
+autosized to 250 W at the reference flow"; and the ruling becomes `D-11 D-92`.
+The derived power is the same 250 W the pass used to hard-set, and the head
+lands on 179 352 Pa — OpenStudio's own default, which is what the equivalence
+check predicted, because every proposed pump in the corpus sits at tool
+defaults (255.49 W/(L/s)).
+
+Two absences are the real evidence. **No "head reduced" warning survives
+anywhere in the baselines** (`D-27` reconciliation, now deleted with the
+mechanism that needed it), and **no `efficiency not usable` fallback entry
+appears in any scenario** — every corpus pump states a physical efficiency and
+is inherited under (1), so the (3) fallback added for hostile inputs never
+fires on the frozen set. Manifest: 14 hash lines (7 scenarios x 2 files) plus
+the commit pointer.
+
+Freezing itself took three attempts, for reasons unrelated to this change:
+Claude Code's background-shell memory-pressure reaper killed the first two runs
+(once at scenario 40, once at scenario 1) while the container had no cgroup
+memory limit, 75 % of memory available, zero PSI stall and zero `memory.events`
+of any kind. Diagnosed to a known spurious-kill bug (anthropics/claude-code
+#92448, the WSL2 case; #83258, the reaper firing without its documented
+30-minute-idle precondition); the third run was detached with `setsid` so it
+was not a tracked background task, and completed. `freeze.py` is strictly
+sequential — one EnergyPlus subprocess at a time — so the repo's one-heavy-job
+rule was never in question.

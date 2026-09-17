@@ -617,8 +617,12 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
             pumps.append(c.to_PumpVariableSpeed().get())
         elif c.to_PumpConstantSpeed().is_initialized():
             pumps.append(c.to_PumpConstantSpeed().get())
-    powers = [optional_f(p.ratedPowerConsumption()) or optional_f(p.autosizedRatedPowerConsumption())
-              for p in pumps]
+    # D-92: derive each pump's power the way E+ will — from a hard-set value, a
+    # PowerPerFlow intensity, or the flow/head/coefficient triple — rather than
+    # reading a sizing SQL the pass has just invalidated.
+    flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate()) for p in pumps]
+    sources = [_pump_power_source(p, f) for p, f in zip(pumps, flows)]
+    powers = [w for _, w in sources]
     if not pumps or any(p is None for p in powers):
         audit.info('efficiency', '5.2.6.3 pump-power cap not evaluable — pump power unsized',
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
@@ -634,12 +638,12 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
         return
 
     factor = cap_w / combined
-    for pump, power in zip(pumps, powers):
-        new_power = power * factor
-        flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-        # keep the flow/head/power triple physical (same guard as the transfer)
-        _reconcile_pump_head(pump, new_power, flow)
-        pump.setRatedPowerConsumption(new_power)
+    for pump, (source, _) in zip(pumps, sources):
+        # D-92: clamp through whichever field E+ actually reads, scaling head
+        # with it so the implied efficiency is unchanged — the gem's mechanism
+        # and the one A-8.4.x.14.(2) uses, generalised to the pumps this pass
+        # never transferred.
+        _scale_pump_power(pump, source, factor)
     audit.decision('efficiency', 'combined pump power exceeds Table 5.2.6.3 — clamped to the maximum '
                                  '(min-wins over the pump-power transfer)',
                    target=loop_.nameString(),
@@ -705,33 +709,111 @@ def _swh_loop(loop_):
             or any(c.to_WaterUseConnections().is_initialized() for c in loop_.demandComponents()))
 
 
-# Sentences (1)-(3) through one mechanism: the proposed loop-type's pumps'
-# combined peak power intensity, W/(L/s) — sentence (3)'s own metric, which
-# equals head/efficiency (sentence (1): P = V x head / eff) and absorbs the
-# multi-pump combination of sentence (2) by summing power AND flow. The
-# reference pump's rated power is hard-set to that intensity times its own
-# sized flow (reference flows legitimately differ from proposed flows, so
-# the INTENSITY, not the absolute wattage, is what transfers).
-# The total (wire-to-water) pump efficiency the reconciliation targets when
-# a hard-set power and an inherited head disagree.
-DESIGN_PUMP_EFFICIENCY = 0.65
+# D-92 replaced the MECHANISM, not yet the value source. The value source is
+# still D-11's: the proposed loop-type's pumps' combined peak power intensity,
+# W/(L/s). What changed is how it reaches the model — the reference pump's
+# head, shaft coefficient and motor efficiency are stated and its power is left
+# autosized, instead of its power being hard-set and the head bent afterwards
+# when the two disagreed. On a single-pump correspondence that collapses
+# algebraically to the proposed pump's own head and efficiency, which is what
+# sentence (1) asks for; DF-11 carries the explicit (1)/(2)/(3) branch.
+#
+# E+ derives pump power from the flow/head/coefficient triple under
+# PowerPerFlowPerPressure: P = V x H x k / motor_eff, where k is the design
+# shaft power per unit flow per unit head (1 / pump efficiency). D-92 writes
+# those three fields and leaves power autosized, so the pump efficiency E+
+# computes IS the one we stated — it cannot exceed the motor efficiency, and
+# the "Calculated Pump Efficiency > 100%" fatal is unreachable by construction.
+POWER_PER_FLOW_PER_PRESSURE = 'PowerPerFlowPerPressure'
+# The other E+ sizing method: P = V x DesignElectricPowerPerUnitFlowRate, with
+# head absent from the equation entirely. A cap that moves head does nothing to
+# a pump in this mode, which is why the clamp branches on the method.
+POWER_PER_FLOW = 'PowerPerFlow'
+# E+'s own defaults, and the physical fallback when the proposed pump's triple
+# implies an efficiency no pump can have. The derived power does NOT depend on
+# how the total splits between motor and impeller — P = V x H x k / motor_eff
+# with H = I x 1000 x motor_eff x pump_eff cancels both — so a non-physical
+# proposed split can be replaced by a physical one without moving a watt.
+DEFAULT_MOTOR_EFFICIENCY = 0.9
+DEFAULT_PUMP_EFFICIENCY = 0.78
 
 
-def _reconcile_pump_head(pump, power_w, flow):
-    """Keep a pump's flow/head/power triple physical whenever the power is
-    hard-set (the 8.4.4.14 transfer and the 5.2.6.3 clamp both do that):
-    EnergyPlus FATALS on a triple implying a pump efficiency above the motor
-    efficiency. The transferred power is authoritative (it IS the article's
-    number), so the inherited head is what gives.
+def _state_pump_characteristics(pump, w_per_l_s, motor_eff, pump_eff):
+    """D-92: state the reference pump as head + shaft coefficient + motor
+    efficiency and leave its power AUTOSIZED, so EnergyPlus derives the power
+    the Article asks for instead of being handed a number that may contradict
+    the head it was given.
 
-    :return: bool — whether the head was changed"""
-    if not (flow is not None and flow > 0 and float(power_w or 0.0) > 0):
-        return False
-    if (flow * pump.ratedPumpHead() / power_w) <= pump.motorEfficiency():
-        return False
+    The head that reproduces an intensity I (W/(L/s)) is I x 1000 x motor_eff x
+    pump_eff, since P = V x H x k / motor_eff with k = 1 / pump_eff. Stating the
+    efficiencies rather than solving for them is what makes the E+ pump
+    efficiency equal the one we declared.
 
-    pump.setRatedPumpHead(DESIGN_PUMP_EFFICIENCY * power_w / flow)
-    return True
+    :return: the head written, in Pa"""
+    head_pa = w_per_l_s * 1000.0 * motor_eff * pump_eff
+    pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    pump.setMotorEfficiency(motor_eff)
+    pump.setRatedPumpHead(head_pa)
+    pump.autosizeRatedPowerConsumption()
+    return head_pa
+
+
+def _pump_power_source(pump, flow):
+    """How EnergyPlus will actually arrive at this pump's power, and what that
+    power is — ``(source, watts)``, or ``(source, None)`` when it cannot be read.
+
+    D-92 states the pumps it transfers as PowerPerFlowPerPressure with the power
+    autosized, but the pass reaches pumps it never transfers: the 5.2.6.3 cap
+    runs with or without a proposed model, and a caller's model may hard-set
+    power or choose PowerPerFlow. For those, head does NOT enter E+'s sizing
+    equation, so a cap that only scales head reports a clamp it did not apply
+    (Sol, PR #50). Each source must be clamped on its own terms."""
+    if not pump.isRatedPowerConsumptionAutosized():
+        return 'hard', optional_f(pump.ratedPowerConsumption())
+
+    if flow is None or flow <= 0:
+        return 'autosized', None
+
+    if pump.designPowerSizingMethod() == POWER_PER_FLOW:
+        return 'per_flow', flow * pump.designElectricPowerPerUnitFlowRate()
+
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff:
+        return 'per_flow_per_pressure', None
+
+    return ('per_flow_per_pressure',
+            flow * pump.ratedPumpHead() * pump.designShaftPowerPerUnitFlowRatePerUnitHead() / motor_eff)
+
+
+def _pump_power_from_triple(pump, flow):
+    """The power E+ will derive for a PowerPerFlowPerPressure pump: V x H x k /
+    motor_eff. Computed, never read back from a sizing SQL — after the pass
+    writes a new head the stored autosized value is stale until the next sizing
+    run, and the 5.2.6.3 cap has to compare against what the model now says."""
+    return _pump_power_source(pump, flow)[1]
+
+
+def _scale_pump_power(pump, source, factor):
+    """Scale a pump's power by ``factor`` through whichever field E+ actually
+    reads, and scale its head by the same factor so the IMPLIED EFFICIENCY is
+    unchanged.
+
+    Scaling head alongside is not decoration. Cutting a hard-set power while
+    leaving the head raises V x H / P — the efficiency E+ checks — and a big
+    enough cut pushes it past the motor efficiency into the "Calculated Pump
+    Efficiency > 100%" fatal. That is why the pre-D-92 code had to reconcile the
+    head after clamping. Moving both together preserves the ratio instead, so
+    there is nothing to reconcile."""
+    pump.setRatedPumpHead(pump.ratedPumpHead() * factor)
+    if source == 'hard':
+        power = optional_f(pump.ratedPowerConsumption())
+        if power is not None:
+            pump.setRatedPowerConsumption(power * factor)
+    elif source == 'per_flow':
+        pump.setDesignElectricPowerPerUnitFlowRate(pump.designElectricPowerPerUnitFlowRate() * factor)
+    # 'per_flow_per_pressure': power is autosized FROM the head, so the head
+    # scaling above already carried it.
 
 
 def _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit):
@@ -746,24 +828,44 @@ def _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit):
                                  'transfer needs the sized flow; run sizing first', ruling='D-11')
         return
     w_per_l_s = s['power_w'] / s['flow_l_s']
+    # Sentence (1) inherits the proposed pump's efficiency — but only where the
+    # proposed states one a pump can actually have. A model that hard-sets power
+    # against an unrelated head implies an efficiency above 100%, which is the
+    # Article's "not known" (sentence (3)), not a characteristic to copy: pass it
+    # on and EnergyPlus FATALS on "Calculated Pump Efficiency > 100%". Falling
+    # back to a physical split moves no power, because the split cancels.
+    motor_eff, pump_eff = s.get('motor_eff'), s.get('pump_eff')
+    inherited = motor_eff and pump_eff and 0.0 < motor_eff <= 1.0 and 0.0 < pump_eff <= 1.0
+    if inherited and s.get('impossible'):
+        # Some constituent pumps stated the impossible and were kept out of the
+        # average. The efficiency below is real, but it is not every proposed
+        # pump's, so the exclusion is declared rather than left to be inferred.
+        audit.info('efficiency', f'{pump.nameString()}: {s["impossible"]} of {s["count"]} proposed '
+                                 f'{loop_type} pumps imply an efficiency above 100% and are excluded '
+                                 f'from the flow-weighted split — their power and flow still combine '
+                                 f'under {prefix}.14.(2)',
+                   target=pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92')
+    if not inherited:
+        implied = (f'{ruby_round(pump_eff * 100.0, 1)}%' if pump_eff else 'unreadable')
+        motor_eff, pump_eff = DEFAULT_MOTOR_EFFICIENCY, DEFAULT_PUMP_EFFICIENCY
+        audit.info('efficiency', f'{pump.nameString()}: proposed {loop_type} pump efficiency not usable '
+                                 f'(implied {implied}) — {prefix}.14.(3) W/(L/s) basis retained with a '
+                                 f'physical {ruby_round(DEFAULT_PUMP_EFFICIENCY * 100.0, 1)}% pump / '
+                                 f'{ruby_round(DEFAULT_MOTOR_EFFICIENCY * 100.0, 1)}% motor split',
+                   target=pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92')
+
+    head_pa = _state_pump_characteristics(pump, w_per_l_s, motor_eff, pump_eff)
     power_w = w_per_l_s * flow * 1000.0
-    # E+ hard-rejects power/head/flow triples implying pump efficiency
-    # above motor efficiency ("Calculated Pump Efficiency > 100%" fatal).
-    # The transferred power is authoritative (it IS the article's number);
-    # reconcile the inherited head to a physical 65% total efficiency.
-    head = pump.ratedPumpHead()
-    if _reconcile_pump_head(pump, power_w, flow):
-        audit.warn('efficiency', f'{pump.nameString()}: inherited rated head {ruby_round(head)} Pa implies pump '
-                                 f'efficiency above motor efficiency with the transferred {ruby_round(power_w)} W '
-                                 f'— head reduced to {ruby_round(pump.ratedPumpHead())} Pa (65% total efficiency) '
-                                 'to stay physical', ruling='D-27')
-    pump.setRatedPowerConsumption(power_w)
-    audit.decision('efficiency', 'pump power transferred from the proposed building',
+    audit.decision('efficiency', 'pump characteristics transferred from the proposed building',
                    target=pump.nameString(),
                    inputs={'proposed_pumps': s['count'], 'proposed_w_per_l_s': ruby_round(w_per_l_s, 2),
-                           'reference_flow_l_s': ruby_round(flow * 1000.0, 2), 'loop_type': loop_type},
-                   value=f'rated power {ruby_round(power_w, 0)} W (combined proposed intensity x reference flow)',
-                   article=f'{prefix}.14.(1)-(3)', ruling='D-11')
+                           'reference_flow_l_s': ruby_round(flow * 1000.0, 2), 'loop_type': loop_type,
+                           'motor_efficiency': ruby_round(motor_eff, 4),
+                           'pump_efficiency': ruby_round(pump_eff, 4)},
+                   value=f'head {ruby_round(head_pa)} Pa at {ruby_round(pump_eff * 100.0, 1)}% pump / '
+                         f'{ruby_round(motor_eff * 100.0, 1)}% motor efficiency; power autosized to '
+                         f'{ruby_round(power_w, 0)} W at the reference flow',
+                   article=f'{prefix}.14.(1)-(3)', ruling='D-11 D-92')
 
 
 def _proposed_pump_stats(proposed):
@@ -796,10 +898,40 @@ def _proposed_pump_stats(proposed):
             if power is None or flow is None or flow == 0:
                 continue
 
-            entry = stats.setdefault(type_, {'power_w': 0.0, 'flow_l_s': 0.0, 'count': 0})
+            # D-92 needs the efficiency SPLIT, not just the intensity: the
+            # reference pump is expressed as head + shaft coefficient + motor
+            # efficiency, so E+ derives power itself. Total efficiency comes
+            # from the triple (hydraulic / electrical); the motor's share is
+            # the pump's own field, and what is left is the shaft coefficient's
+            # reciprocal. Both are flow-weighted, per A-8.4.4.14.(2).
+            # Validation is PER PUMP, before averaging. An aggregate hides an
+            # impossible constituent: a 55.6%-efficient pump averaged with a
+            # 111.1%-efficient one reads as a plausible 60.6%, and the reference
+            # then inherits an efficiency no pump in the proposed actually has
+            # (Sol, PR #50). A pump that states the impossible states nothing
+            # inheritable — sentence (3)'s "not known" — so it contributes its
+            # power and flow to the (2) combination but NOT its efficiency.
+            motor_eff = pump.motorEfficiency()
+            total_eff = (flow * pump.ratedPumpHead() / power) if power > 0 else None
+            pump_eff = (total_eff / motor_eff) if (total_eff and motor_eff) else None
+            usable = bool(pump_eff and 0.0 < motor_eff <= 1.0 and 0.0 < pump_eff <= 1.0)
+
+            entry = stats.setdefault(type_, {'power_w': 0.0, 'flow_l_s': 0.0, 'count': 0,
+                                             'flow_x_motor': 0.0, 'flow_x_pump': 0.0,
+                                             'eff_flow_l_s': 0.0, 'impossible': 0})
             entry['power_w'] += power
             entry['flow_l_s'] += flow * 1000.0
             entry['count'] += 1
+            if usable:
+                entry['flow_x_motor'] += flow * 1000.0 * motor_eff
+                entry['flow_x_pump'] += flow * 1000.0 * pump_eff
+                entry['eff_flow_l_s'] += flow * 1000.0
+            else:
+                entry['impossible'] += 1
+    for s in stats.values():
+        weighted = s['eff_flow_l_s']
+        s['motor_eff'] = (s['flow_x_motor'] / weighted) if weighted else None
+        s['pump_eff'] = (s['flow_x_pump'] / weighted) if weighted else None
     return {k: s for k, s in stats.items() if s['flow_l_s'] != 0}
 
 
@@ -2211,16 +2343,19 @@ def apply_efficiencies(model, code='necb2020', audit=None, proposed=None):
 def prepare_for_resizing(model, audit=None, code='necb2020'):
     """Facade: make an ALREADY-EFFICIENCY-APPLIED model safe to re-size.
 
-    The efficiency pass hard-sets pump rated power (the 8.4.4.14 transfer and
-    the 5.2.6.3 clamp) while pump FLOW stays autosized, and reconciles the
-    head so the triple is physical at the flow sized so far. A later sizing
-    run re-derives the flow: if it grows, the frozen power/head no longer fit
-    it and EnergyPlus FATALS on "Calculated Pump Efficiency > 100%" during
-    input checking — before the efficiency pass gets its chance to
-    re-reconcile. Releasing the hard power back to autosize removes the
-    inconsistency by construction (EnergyPlus then derives power from the
-    flow and head it just sized), and the caller's next apply_efficiencies
-    re-transfers it against the NEW flow.
+    Since D-92 the pass does NOT hard-set pump power: it states head, shaft
+    coefficient and motor efficiency and leaves power autosized, so EnergyPlus
+    derives it from whatever flow it last sized. A pump the pass has touched
+    therefore needs no release at all — it is already consistent by
+    construction, and there is no reconciliation step any more.
+
+    What still needs releasing is a hard power the MODEL supplied: an input
+    pump power sits frozen while pump FLOW stays autosized, and when a later
+    sizing run grows the flow, the frozen power and head no longer fit it —
+    EnergyPlus FATALS on "Calculated Pump Efficiency > 100%" during input
+    checking, before the efficiency pass gets a chance to restate the pump.
+    Releasing that power to autosize removes the inconsistency, and the
+    caller's next apply_efficiencies restates the pump against the NEW flow.
 
     Call this before EVERY re-sizing run of a model that has already been
     through apply_efficiencies — the 8.4.1.2.(5) capacity iteration does.
@@ -2240,10 +2375,10 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     WITHOUT proposed= nothing is transferred and the released pump is left for
     EnergyPlus to size.
 
-    One wart, deliberately kept for now: an SWH circulator is released here too,
-    although D-27 puts service-water pumps OUTSIDE 8.4.4.14 and the pump pass leaves
-    them 'as built'. The release is sizing safety, not an Article 14 action, so it
-    is cited loosely; DF-12 tracks separating the two.
+    A service-water circulator is NOT released (DF-12, closed by D-92). D-27 puts
+    it outside 8.4.4.14 and the pump pass leaves it 'as built', so releasing it
+    would strand it autosized with nothing to re-establish it — the release is
+    scoped to the pumps the Article governs.
 
     D-90: the same holds for plant capacity. The pass hard-sets boiler and
     chiller capacities (8.4.4.9.(6)(a): the sum of the served systems' capacities,
@@ -2258,8 +2393,18 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     # the edition's own article numbers: 2020 8.4.4.9/8.4.4.10/8.4.4.14,
     # 2025 8.4.5.9/8.4.5.10/8.4.5.14
     prefix = resolve(code).article('reference_subsection')
-    pumps = ([p for p in model.getPumpVariableSpeeds() if not p.ratedPowerConsumption().empty()]
-             + [p for p in model.getPumpConstantSpeeds() if not p.ratedPowerConsumption().empty()])
+    # DF-12: the release is sizing safety for the pumps 8.4.x.14 governs. A
+    # service-water circulator is outside that Article (D-27) and the pump pass
+    # leaves it 'as built', so releasing it would strand it autosized with
+    # nothing to re-establish it.
+    def _hvac_pump(pump):
+        loop_ = pump.plantLoop()
+        return not (loop_.is_initialized() and _swh_loop(loop_.get()))
+
+    pumps = ([p for p in model.getPumpVariableSpeeds()
+              if not p.ratedPowerConsumption().empty() and _hvac_pump(p)]
+             + [p for p in model.getPumpConstantSpeeds()
+                if not p.ratedPowerConsumption().empty() and _hvac_pump(p)])
     for p in pumps:
         p.autosizeRatedPowerConsumption()
     if pumps:

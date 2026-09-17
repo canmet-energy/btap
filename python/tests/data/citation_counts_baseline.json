@@ -38,7 +38,7 @@
       "cited": 4
     },
     "8.4.4.14": {
-      "cited": 3
+      "cited": 5
     },
     "8.4.4.15": {
       "warn": 1
@@ -125,7 +125,7 @@
       "cited": 4
     },
     "8.4.5.14": {
-      "cited": 3
+      "cited": 5
     },
     "8.4.5.15": {
       "warn": 1
@@ -171,6 +171,6 @@
     "generated_by": "python/tests/citation_counts.py:compute_citation_counts",
     "key_shape": "{edition: {article: {kind: count}}}",
     "kinds": "The scanner (python_call_kind in generate_necb_8_4_coverage.py) classifies each article= citation call site into exactly two kinds: 'cited' (any call other than audit.warn/audit.warning) and 'warn' (an audit.warn/audit.warning call). It does not separately distinguish 'decision' from 'info' \u2014 both fall under 'cited'. This baseline keys by the scanner's own two kinds, not the three-way decision/warning/info vocabulary used to describe the intent.",
-    "note": "Generated AFTER renaming compliance.py:320-357 local variable lighting_prefix -> prefix, which makes the article= keyword at compliance.py:346 (and its warn-branch sibling at :357) newly scanner-visible per generate_necb_8_4_coverage.py citation scanning (it only substitutes the literal interpolated name {prefix}). This baseline therefore already includes that fix's contribution to the counts; a further intentional count change must be re-baselined explicitly in the same commit, with the reason recorded here. Re-baselined for D-90 + D-91 (DF-1, branch df1-d90-d91, 2026-09-15): +5 'cited' sites per edition, all increases \u2014 D-90's prepare_for_resizing release entry cites 8.4.4.9.(6)(a); 8.4.4.10.(6); 8.4.1.2.(5) (2025: 8.4.5.9 / 8.4.5.10 / 8.4.1.2), and D-91's zone-dispatch decision cites {prefix}.9.(3); 8.4.2.10.(2)."
+    "note": "Re-baselined 2026-09-17 for the D-92 review fixes (Sol, PR #50). One new citation site per edition: the audit call in _transfer_pump_power that declares how many proposed pumps were excluded from the flow-weighted efficiency split for implying an efficiency above 100%, citing f'{prefix}.14.(3)' (2020 8.4.4.14.(3), 2025 8.4.5.14.(3)) on the same grounds as the existing fallback call - an unreadable efficiency is sentence (3)'s \"not known\". The scanner resolves that literal onto the parent article, so 8.4.4.14 / 8.4.5.14 'cited' each go 4 -> 5 and the total goes 211 -> 213. Nothing was lost: no other (edition, article, kind) count moved. Prior re-baseline (kept for the chain): 209 -> 211 on 2026-09-16 for D-92 itself, which added the first f'{prefix}.14.(3)' site per edition when the hydronic-pump mechanism changed from hard-set power to stated head/efficiency; and before that, generated AFTER renaming compliance.py's local lighting_prefix -> prefix, which made the article= keyword at compliance.py:346 and its warn-branch sibling scanner-visible."
   }
 }

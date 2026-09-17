@@ -16,6 +16,7 @@ import openstudio
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
+from btap.codes.necb.hvac.efficiency import _pump_power_from_triple
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
 
@@ -74,9 +75,16 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertAlmostEqual(2000.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
+        # D-92: power is not hard-set any more — head, shaft coefficient and
+        # motor efficiency are stated and EnergyPlus derives the power. The
+        # number it will derive is what this asserts.
+        self.assertTrue(ref_pump.ratedPowerConsumption().empty(),
+                        'the reference pump is left autosized for E+ to size')
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='combined proposed intensity (100 W per L/s) x reference '
-                                   'flow (20 L/s)')
+                                   'flow (20 L/s), derived from the triple')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                'a stated pump efficiency no pump could have is an E+ fatal')
         decision = next((e for e in audit.entries
                          if e.get('article') == '8.4.4.14.(1)-(3)'), None)
         self.assertIsNotNone(decision, 'transfer decision audited')
@@ -96,8 +104,11 @@ class TestNecbPumpRules(unittest.TestCase):
         pump.setRatedFlowRate(0.005)
         pump.addToNode(loop_.supplyInletNode())
         hvac.apply_efficiencies(reference, code='necb2020', audit=AuditLog(), proposed=proposed)
-        self.assertAlmostEqual(600.0, pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(600.0, _pump_power_from_triple(pump, 0.005), delta=0.1,
                                msg='120 W/(L/s) x 5 L/s')
+        # "no curve" is structural, not an assertable value: PumpConstantSpeed
+        # has no part-load coefficient fields for (4)-(5) to write.
+        self.assertFalse(hasattr(pump, 'coefficient1ofthePartLoadPerformanceCurve'))
 
     def test_undeterminable_proposed_pumps_warn_never_silent(self):
         proposed = openstudio.model.Model()
@@ -161,29 +172,40 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertTrue(any(e['level'] == 'info' and 'service water heating loop' in e['action']
                             for e in audit.entries))
         # heating intensity clean of the SWH pump: 800 W / 10 L/s = 80 W/(L/s) x 20 L/s
-        self.assertAlmostEqual(1600.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(1600.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='Heating intensity excludes the proposed SWH circulator')
 
-    def test_transfer_reconciles_unphysical_inherited_head(self):
+    # D-92 replaced the repair with a statement. The pass writes head, shaft
+    # coefficient and motor efficiency and leaves power autosized, so there is
+    # no hard-set power for an inherited head to contradict: the legacy head is
+    # OVERWRITTEN rather than reduced after the fact, and the E+ fatal
+    # ("Calculated Pump Efficiency > 100%") is unreachable by construction.
+    def test_unphysical_inherited_head_is_replaced_not_reconciled(self):
         proposed = openstudio.model.Model()
-        # weak: 10 W/(L/s)
+        # weak: 10 W/(L/s), and a triple implying 1790% total efficiency
         loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=100.0)
 
         reference = openstudio.model.Model()
-        # -> 10 W transferred
         _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.001)
         # legacy SWH-scale head: flow x head / power >> motor eff
         ref_pump.setRatedPumpHead(1_927_540.0)
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        power = ref_pump.ratedPowerConsumption().get()
-        self.assertAlmostEqual(10.0, power, delta=0.1, msg='transferred power is authoritative')
-        implied = 0.001 * ref_pump.ratedPumpHead() / power
-        self.assertLessEqual(implied, ref_pump.motorEfficiency() + 1e-6,
-                             'head reconciled so implied efficiency stays physical '
-                             '(E+ fatal otherwise)')
-        self.assertTrue(any('head reduced' in e['action'] for e in audit.warnings))
+        # 10 W/(L/s) x 1000 x 0.9 motor x 0.78 pump
+        self.assertAlmostEqual(7020.0, ref_pump.ratedPumpHead(), delta=1.0,
+                               msg='the legacy head is replaced by the stated one')
+        self.assertAlmostEqual(10.0, _pump_power_from_triple(ref_pump, 0.001), delta=0.1,
+                               msg='the intensity still lands on the reference flow')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                'the stated pump efficiency is one a pump can have')
+        self.assertEqual([], [e for e in audit.warnings if 'head reduced' in e['action']],
+                         'nothing to reconcile: no hard-set power was ever written')
+        # the proposed pump could not state a usable efficiency, so (3) supplies
+        # the basis and the physical split is declared, never silently assumed
+        self.assertTrue(any('efficiency not usable' in e['action']
+                            and e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
+                        'the fallback to a physical split is audited')
 
     @staticmethod
     def add_boiler(loop_, kw):
@@ -207,17 +229,90 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        power = ref_pump.ratedPowerConsumption().get()
-        self.assertAlmostEqual(450.0, power, delta=0.5,
+        # D-92: the cap moves HEAD at constant efficiency, so the clamped pump
+        # is exactly as physical as the unclamped one.
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.5,
                                msg='combined power clamped to 4.5 W/kW x 100 kW')
-        implied = 0.020 * ref_pump.ratedPumpHead() / power
-        self.assertLessEqual(implied, ref_pump.motorEfficiency() + 1e-6,
-                             'clamped triple stays physical')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
+                                'clamping does not invent an impossible efficiency')
         decision = next((e for e in audit.entries
                          if str(e.get('article') or '') == '5.2.6.3.(1); 8.4.4.1.(2)'), None)
         self.assertIsNotNone(decision, 'clamp decision audited with both articles')
         self.assertEqual('Heating', decision['inputs']['system_type'])
         self.assertAlmostEqual(4000.0, decision['inputs']['before_w'], delta=1.0)
+
+    # Sol, PR #50 P1: every cap test above runs the transfer first, so all of
+    # them see a pump D-92 has already normalized to PowerPerFlowPerPressure
+    # with autosized power — the one shape where scaling head moves the power.
+    # The cap is documented to apply "with or without a proposed model", and on
+    # the other two power sources head is absent from E+'s sizing equation, so
+    # a head-only clamp reported a reduction it never made.
+    def capped_loop(self, mode, flow=0.020):
+        """A 100 kW heating loop (cap = 4.5 W/kW x 100 kW = 450 W) whose pump
+        draws 10 kW through the given power source, and NO proposed model."""
+        model = openstudio.model.Model()
+        loop_, pump = loop_with_vsd_pump(model, 'Heating', flow=flow)
+        self.add_boiler(loop_, 100.0)
+        if mode == 'hard':
+            pump.setRatedPowerConsumption(10_000.0)
+        elif mode == 'per_flow':
+            pump.setDesignPowerSizingMethod('PowerPerFlow')
+            pump.setDesignElectricPowerPerUnitFlowRate(10_000.0 / flow)
+        return model, pump
+
+    def test_cap_clamps_a_hard_set_pump_with_no_proposed_model(self):
+        model, pump = self.capped_loop('hard')
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(pump, 0.020), delta=0.5,
+                               msg='the clamp reaches a hard-set power, not just the head')
+        self.assertAlmostEqual(450.0, pump.ratedPowerConsumption().get(), delta=0.5,
+                               msg='and it is the hard value E+ reads that moved')
+        implied = 0.020 * pump.ratedPumpHead() / 450.0 / pump.motorEfficiency()
+        self.assertLessEqual(implied, 1.0 + 1e-9,
+                             'head scaled with power, so cutting it cannot imply >100% efficiency')
+
+    def test_cap_clamps_a_power_per_flow_pump_with_no_proposed_model(self):
+        model, pump = self.capped_loop('per_flow')
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertAlmostEqual(450.0, _pump_power_from_triple(pump, 0.020), delta=0.5,
+                               msg='PowerPerFlow sizes from W/(m3/s); head is not in the equation')
+        self.assertAlmostEqual(450.0 / 0.020, pump.designElectricPowerPerUnitFlowRate(), delta=1.0,
+                               msg='so the intensity itself is what the clamp must move')
+
+    def test_a_proposed_pump_stating_the_impossible_is_left_out_of_the_average(self):
+        """Sol, PR #50 P2: validating only the aggregate lets an impossible pump
+        hide inside a plausible mean — 55.6% averaged with 111.1% reads as 60.6%,
+        and the reference inherits an efficiency no proposed pump has."""
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        for flow, power, head in ((0.010, 1000.0, 50_000.0), (0.001, 100.0, 100_000.0)):
+            p = openstudio.model.PumpVariableSpeed(proposed)
+            p.setRatedFlowRate(flow)
+            p.setRatedPowerConsumption(power)
+            p.setRatedPumpHead(head)
+            p.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        stated = 1.0 / ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+        self.assertAlmostEqual(0.5556, stated, delta=1e-3,
+                               msg='the valid pump alone supplies the efficiency (not the 60.6% blend)')
+        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0)
+        self.assertTrue(any('excluded from the flow-weighted split' in e['action']
+                            and e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
+                        'the exclusion is declared, not silently applied')
+        # (2) still combines every pump's power and flow — only the efficiency
+        # of the impossible one is discarded.
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)-(3)')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'])
 
     def test_pump_power_cap_leaves_compliant_transfer_untouched(self):
         proposed = openstudio.model.Model()
@@ -231,7 +326,7 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertAlmostEqual(800.0, ref_pump.ratedPowerConsumption().get(), delta=0.1,
+        self.assertAlmostEqual(800.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='below-cap transfer untouched (min-wins)')
         self.assertTrue(any(e['level'] == 'info'
                             and 'within the Table 5.2.6.3 maximum' in e['action']
