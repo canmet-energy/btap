@@ -38,7 +38,7 @@
       "cited": 4
     },
     "8.4.4.14": {
-      "cited": 4
+      "cited": 5
     },
     "8.4.4.15": {
       "warn": 1
@@ -125,7 +125,7 @@
       "cited": 4
     },
     "8.4.5.14": {
-      "cited": 4
+      "cited": 5
     },
     "8.4.5.15": {
       "warn": 1
@@ -171,6 +171,6 @@
     "generated_by": "python/tests/citation_counts.py:compute_citation_counts",
     "key_shape": "{edition: {article: {kind: count}}}",
     "kinds": "The scanner (python_call_kind in generate_necb_8_4_coverage.py) classifies each article= citation call site into exactly two kinds: 'cited' (any call other than audit.warn/audit.warning) and 'warn' (an audit.warn/audit.warning call). It does not separately distinguish 'decision' from 'info' \u2014 both fall under 'cited'. This baseline keys by the scanner's own two kinds, not the three-way decision/warning/info vocabulary used to describe the intent.",
-    "note": "Re-baselined 2026-09-16 for D-92 (DF-11 increment A), which replaced the hydronic-pump MECHANISM: the reference pump's head, shaft coefficient and motor efficiency are stated and its power is left autosized, instead of the power being hard-set and the inherited head bent afterwards. That added exactly ONE new citation site per edition \u2014 the audit call in _transfer_pump_power that declares the fall back to a physical efficiency split when the proposed pump's own triple implies an efficiency above 100%, citing f'{prefix}.14.(3)' (2020 8.4.4.14.(3), 2025 8.4.5.14.(3)) because an unreadable efficiency is precisely sentence (3)'s \"not known\". The scanner resolves that literal onto the parent article, so 8.4.4.14 / 8.4.5.14 'cited' each go 3 -> 4 and the total goes 209 -> 211. Nothing was lost: no other (edition, article, kind) count moved, and the deleted _reconcile_pump_head warning carried a ruling= tag but no article=, so it was never a citation site. Superseded note (kept for the chain): generated AFTER renaming compliance.py's local lighting_prefix -> prefix, which made the article= keyword at compliance.py:346 and its warn-branch sibling scanner-visible."
+    "note": "Re-baselined 2026-09-17 for the D-92 review fixes (Sol, PR #50). One new citation site per edition: the audit call in _transfer_pump_power that declares how many proposed pumps were excluded from the flow-weighted efficiency split for implying an efficiency above 100%, citing f'{prefix}.14.(3)' (2020 8.4.4.14.(3), 2025 8.4.5.14.(3)) on the same grounds as the existing fallback call - an unreadable efficiency is sentence (3)'s \"not known\". The scanner resolves that literal onto the parent article, so 8.4.4.14 / 8.4.5.14 'cited' each go 4 -> 5 and the total goes 211 -> 213. Nothing was lost: no other (edition, article, kind) count moved. Prior re-baseline (kept for the chain): 209 -> 211 on 2026-09-16 for D-92 itself, which added the first f'{prefix}.14.(3)' site per edition when the hydronic-pump mechanism changed from hard-set power to stated head/efficiency; and before that, generated AFTER renaming compliance.py's local lighting_prefix -> prefix, which made the article= keyword at compliance.py:346 and its warn-branch sibling scanner-visible."
   }
 }

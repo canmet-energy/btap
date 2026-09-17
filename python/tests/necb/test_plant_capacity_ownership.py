@@ -21,6 +21,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import openstudio
+
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac, path
@@ -406,6 +408,39 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
         self.assertEqual('8.4.5.14.(1)-(3)', release[0]['article'])
         self.assertEqual(len(pumps), release[0]['inputs']['pumps'],
                          'the entry counts the pumps it released')
+
+    def test_a_service_water_circulators_hard_power_is_not_released(self):
+        """DF-12, closed by D-92: the release is scoped to the pumps 8.4.x.14
+        governs. D-27 puts an SWH circulator outside the Article and the pump
+        pass leaves it 'as built', so releasing it would strand it autosized
+        with nothing to re-establish it. Tested on prepare_for_resizing
+        DIRECTLY — the existing SWH test only exercises the efficiency pass."""
+        model = load_fixture()
+        hvac_loop = openstudio.model.PlantLoop(model)
+        hvac_loop.sizingPlant().setLoopType('Heating')
+        hvac_pump = openstudio.model.PumpVariableSpeed(model)
+        hvac_pump.setRatedPowerConsumption(500.0)
+        hvac_pump.addToNode(hvac_loop.supplyInletNode())
+
+        swh_loop = openstudio.model.PlantLoop(model)
+        swh_loop.sizingPlant().setLoopType('Heating')
+        openstudio.model.WaterHeaterMixed(model).addToNode(swh_loop.supplyOutletNode())
+        swh_pump = openstudio.model.PumpConstantSpeed(model)
+        swh_pump.setRatedPowerConsumption(8.0)
+        swh_pump.addToNode(swh_loop.supplyInletNode())
+
+        audit = AuditLog()
+        hvac.prepare_for_resizing(model, audit=audit, code='necb2020')
+
+        self.assertTrue(hvac_pump.isRatedPowerConsumptionAutosized(),
+                        'the HVAC hydronic pump is released for the re-sizing run')
+        self.assertFalse(swh_pump.isRatedPowerConsumptionAutosized(),
+                         'the service-water circulator keeps the power it was built with')
+        self.assertAlmostEqual(8.0, swh_pump.ratedPowerConsumption().get(), delta=1e-9)
+        release = [e for e in audit.entries if e.get('ruling') == 'D-11 D-27']
+        self.assertEqual(1, len(release))
+        self.assertEqual(1, release[0]['inputs']['pumps'],
+                         'only the HVAC pump is counted as released')
 
     def test_the_documented_recovery_re_establishes_power_from_the_sized_flow(self):
         """The docstring on reference_hvac tells a direct caller to re-apply

@@ -5674,13 +5674,29 @@ in the plan log.
   implies an efficiency above 100% (power hard-set against an unrelated head)
   states nothing inheritable: that is (3)'s "not known", and the pass falls
   back to EnergyPlus's own 0.78 pump / 0.9 motor split, **audited citing (3)**,
-  never silently. Because the stated efficiency is the one the engine computes,
+  never silently. Validation is **per constituent pump, not on the aggregate**
+  (Sol, PR #50): a 55.6 % pump averaged with a 111.1 % one reads as a plausible
+  60.6 %, and the reference would inherit an efficiency no proposed pump has.
+  Each pump's implied efficiency is checked before it joins the flow-weighted
+  mean; one that states the impossible still contributes its power and flow to
+  the (2) combination, but not its efficiency, and the exclusion is audited.
+  Because the stated efficiency is the one the engine computes,
   the fatal is unreachable by construction and `_reconcile_pump_head` is
-  deleted rather than suppressed. The 5.2.6.3 cap ([D-38](#d-38)) clamps by
-  scaling **head** at constant efficiency, and computes each pump's power from
-  its own triple rather than re-reading a sizing SQL the pass has just
-  invalidated. DF-12 closes with it: the release no longer touches a
-  service-water circulator, which [D-27](#d-27) puts outside 8.4.4.14.
+  deleted rather than suppressed. The 5.2.6.3 cap ([D-38](#d-38)) clamps
+  through **whichever field EnergyPlus actually reads** — a hard-set rated
+  power, a `PowerPerFlow` intensity, or the head of a `PowerPerFlowPerPressure`
+  pump — scaling the head alongside so the implied efficiency is unchanged.
+  That pairing keeps a clamped pump as physical as an unclamped one: cutting
+  power while leaving head raises `V × H / P` toward the very fatal the deleted
+  reconciliation existed to repair. Branching on the power source is required,
+  not cosmetic (Sol, PR #50) — the cap applies **with or without a proposed
+  model**, D-92 normalizes only the pumps it transfers, and head is absent from
+  the sizing equation for the other two sources, so a head-only clamp reported
+  a reduction it never applied (10 000 W audited as 450 W while the model still
+  sized 10 000 W). Each pump's power is computed from its own fields rather
+  than re-read from a sizing SQL the pass has just invalidated. DF-12 closes
+  with it: the release no longer touches a service-water circulator, which
+  [D-27](#d-27) puts outside 8.4.4.14.
 - **The legacy realisation.** `openstudio-standards` has **no**
   proposed-to-reference pump transfer at all — it generates archetypes, so
   there is no proposed to transfer from. Its only pump-power mechanism is the
