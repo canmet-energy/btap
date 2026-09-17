@@ -13,6 +13,11 @@ from btap.modeling.hvac.components import schedules
 #: curve class the reference selection elected (D-89). The NECB efficiency
 #: pass reads it; nothing in this layer interprets its value.
 BOILER_PART_LOAD_CLASS_FEATURE = 'btap_part_load_curve_class'
+#: Feature stamped on a boiler to say which half of a staged plant it is
+#: ('primary' / 'secondary'), so the NECB 8.4.x.9.(6) staging rules identify the
+#: pair by the builder's own mark rather than by matching its display name
+#: (DF-13). Set only where this layer builds the pair; nothing here reads it.
+BOILER_PLANT_ROLE_FEATURE = 'btap_plant_role'
 
 
 def boiler_part_load_class(loop):
@@ -158,9 +163,16 @@ def hot_water(model, fuel='NaturalGas', backup_fuel=None, reuse=True, source='bo
         boiler2 = openstudio.model.BoilerHotWater(model)
         boiler1.setFuelType(fuel)
         boiler2.setFuelType(backup_fuel)
-        # Names are load-bearing downstream (NECB boiler efficiency rules match on them).
+        # The NAME is a display label; the ROLE is the durable fact. DF-13: the
+        # efficiency pass used to identify the staged pair by matching these
+        # strings, so a plant that merely happened to be named this way was
+        # staged and re-controlled, while a genuine two-boiler plant named
+        # anything else was never staged at all. The feature says which boiler
+        # this is regardless of what the name later becomes.
         boiler1.setName('Primary Boiler')
         boiler2.setName('Secondary Boiler')
+        boiler1.additionalProperties().setFeature(BOILER_PLANT_ROLE_FEATURE, 'primary')
+        boiler2.additionalProperties().setFeature(BOILER_PLANT_ROLE_FEATURE, 'secondary')
         if part_load_curve_class:
             for boiler in (boiler1, boiler2):
                 boiler.additionalProperties().setFeature(

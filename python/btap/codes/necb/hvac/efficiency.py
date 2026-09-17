@@ -26,7 +26,10 @@ from btap._compat import NullAudit, ruby_round, sorted_by_name
 from btap.codes import resolve
 from btap.codes.necb import code_id, rulesdata
 from btap.modeling.hvac.components import coils as _coils
-from btap.modeling.hvac.systems.plant_loops import BOILER_PART_LOAD_CLASS_FEATURE
+from btap.modeling.hvac.systems.plant_loops import (
+    BOILER_PART_LOAD_CLASS_FEATURE,
+    BOILER_PLANT_ROLE_FEATURE,
+)
 
 
 def data(edition):
@@ -1541,6 +1544,45 @@ def _plant_capacity(component, hard_w, autosized_w):
     return None, None
 
 
+def _plant_role(boiler, name):
+    """Which boiler of a staged plant this is — ``'primary'``, ``'secondary'``
+    or ``None`` for a plant that is not a staged pair.
+
+    DF-13. The 8.4.x.9.(6) bands describe a PLANT, but the pass applies them per
+    boiler, and it used to decide by matching 'Primary Boiler' / 'Secondary
+    Boiler' in the name. That is fragile in both directions: a plant the
+    reference copied from the proposed (D-58) was staged and re-controlled
+    because it happened to carry those names, while a genuine two-boiler plant
+    named anything else was never staged — a miss of (6)(c), which Sol confirmed
+    (2026-09-16) applies to copied reference plants too.
+
+    Three sources, most reliable first. The builder's own feature survives any
+    renaming this pass does. The name is kept as the second source so every
+    model that staged correctly before still does. Topology is the last resort
+    and is what adds the missing coverage: exactly two boilers on one hot-water
+    loop ARE the (6)(c) pair whatever they are called, ordered by the loop's own
+    supply order so the choice is deterministic."""
+    stored = boiler.additionalProperties().getFeatureAsString(BOILER_PLANT_ROLE_FEATURE)
+    if stored.is_initialized() and stored.get() in ('primary', 'secondary'):
+        return stored.get()
+
+    if 'Primary Boiler' in name:
+        return 'primary'
+    if 'Secondary Boiler' in name:
+        return 'secondary'
+
+    loop_ = boiler.plantLoop()
+    if not loop_.is_initialized():
+        return None
+
+    boilers = [c.to_BoilerHotWater().get() for c in loop_.get().supplyComponents()
+               if c.to_BoilerHotWater().is_initialized()]
+    if len(boilers) != 2:
+        return None
+
+    return 'primary' if boiler.handle() == boilers[0].handle() else 'secondary'
+
+
 def _base_name(component):
     """The name before this pass appended its capacity and efficiency suffix."""
     stored = component.additionalProperties().getFeatureAsString(BASE_NAME_FEATURE)
@@ -1738,15 +1780,16 @@ def _apply_boiler(boiler, tables, plant, audit):
     # D-90: stage and rename from the base name, so a repeat pass neither
     # re-halves the plant nor appends a second capacity suffix
     name = _base_name(boiler)
-    if 'Primary Boiler' in name or 'Secondary Boiler' in name:
+    role = _plant_role(boiler, name)
+    if role is not None:
         kw = capacity_w / 1000.0
-        modulating = kw > plant['two_boiler_max_kw'] and 'Primary Boiler' in name
+        modulating = kw > plant['two_boiler_max_kw'] and role == 'primary'
         if kw > plant['two_boiler_max_kw']:  # 8.4.4.9.(6)(d): 'exceeds 352 kW' (strict)
-            if 'Secondary Boiler' in name:
+            if role == 'secondary':
                 boiler_capacity = 0.001
         elif kw > plant['single_boiler_max_kw']:  # (6)(c): 'greater than 176' (strict)
             boiler_capacity = capacity_w / 2
-        elif 'Secondary Boiler' in name:
+        elif role == 'secondary':
             boiler_capacity = 0.001
         elif capacity_w <= 1.0:
             boiler_capacity = 1.0

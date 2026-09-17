@@ -5491,13 +5491,22 @@ adopted:** it stages at `>=` thresholds where the Code says "greater than" and
 4. D-58: a plant copied from the proposed keeps a capacity the proposed
    specified (an input) and is re-sized where the proposed autosized it.
 5. Names are rebuilt from the base name, and Primary/Secondary staging matches
-   the base name. That gate is NAME-based, so a plant retained by the D-58
-   residential identity whose boilers are named Primary/Secondary is staged,
-   renamed and re-controlled by this pass as well. Harmless as measured — the
-   pinned gem modulates only at and above 352 kW too, and no frozen scenario
-   carries a copied plant — but a reference should arguably not re-control a
-   plant it copied; tracked as a follow-up (gate on the reference builder's own
-   feature instead).
+   the base name. **DF-13, closed 2026-09-17 — and the fix went the opposite
+   way from the one recorded here.** This entry had tracked the follow-up as
+   "a reference should arguably not re-control a plant it copied", but Sol
+   ruled (2026-09-16) that 8.4.x.9.(6) staging *does* reach a copied reference
+   plant, so narrowing the gate would have been wrong. The real defect ran the
+   other way: identification matched `Primary Boiler` / `Secondary Boiler` in
+   the name, so a genuine two-boiler plant named anything else was **never
+   staged at all** — a miss of (6)(c). `_plant_role` now resolves the role from
+   the builder's `btap_plant_role` feature first (immune to the renaming this
+   pass does every round), the name second (so every model that staged before
+   still does — the change is purely additive), and the loop's own topology
+   last: exactly two boilers on one hot-water loop are the (6)(c) pair whatever
+   they are called, ordered by the loop's supply order. Verified on boilers the
+   builder never named: (6)(c) at 300 kW halves to 150 kW each, (6)(d) at
+   400 kW modulates the primary and parks the secondary, (6)(b) at 100 kW keeps
+   one boiler — all three previously skipped.
 6. The reference clone drops any ownership features carried in with the input
    model, audited, so ownership always comes from the reference's own sizing.
 7. The 8.4.1.2.(5) warnings (the final one and the stall) name the hard

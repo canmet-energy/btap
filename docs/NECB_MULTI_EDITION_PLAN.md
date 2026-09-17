@@ -3138,3 +3138,29 @@ is not something to leave open: an unusable power now reads as unreadable, the
 cap refuses to evaluate the loop and warns naming the pump, and such a pump is
 excluded from the (2) combination rather than netted off it. Two regression
 tests; no frozen model is affected (every corpus pump is at tool defaults).
+
+**DF-13 closed (2026-09-17): the staging gate keys off the builder's mark, not
+the name.** Sol's ruling changed what the fix should be. D-90 §5 had recorded
+the follow-up as "a reference should arguably not re-control a plant it
+copied", but Sol confirmed (2026-09-16) that 8.4.x.9.(6) staging DOES reach a
+copied reference plant — so narrowing the gate would have been wrong. The real
+defect ran the other way: `_apply_boiler` matched `'Primary Boiler'` /
+`'Secondary Boiler'` in the name, so a genuine two-boiler plant named anything
+else was never staged at all, missing (6)(c) entirely. The builder's own
+comment admitted the coupling: "Names are load-bearing downstream (NECB boiler
+efficiency rules match on them)."
+
+`_plant_role` now resolves the role from three sources, most reliable first:
+the builder's `btap_plant_role` feature (stamped where the pair is created, and
+immune to the renaming this pass does every round), the name (kept second, so
+every model that staged correctly before still does — the change is purely
+additive), and finally the loop's topology, where exactly two boilers on one
+hot-water loop ARE the (6)(c) pair whatever they are called, ordered by the
+loop's own supply order so the choice is deterministic.
+
+Verified on boilers the builder never named: (6)(c) at 300 kW halves to
+150 kW each; (6)(d) at 400 kW leaves the primary at 400 kW on
+`LeavingSetpointModulated` with the secondary parked; (6)(b) at 100 kW keeps
+one boiler. Before, all three were skipped. No existing case moves: a builder
+plant renamed by the pass still resolves through its feature, and a single
+boiler is still not a pair.

@@ -104,3 +104,6 @@ packaging/pypi/energyplus/dist/
 .coverage.*
 python/htmlcov/
 python/coverage.xml
+
+# Generated/working model files (archetypes, weather) — not repo content
+models/
