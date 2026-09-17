@@ -3102,3 +3102,39 @@ of any kind. Diagnosed to a known spurious-kill bug (anthropics/claude-code
 was not a tracked background task, and completed. `freeze.py` is strictly
 sequential — one EnergyPlus subprocess at a time — so the repo's one-heavy-job
 rule was never in question.
+
+**Sol's review of PR #50 and the fixes (2026-09-17).** Three findings, all
+fixed in `4544d49`, then accepted. The P1 was a regression D-92 introduced and
+the worst kind — the 5.2.6.3 cap REPORTED a reduction it did not apply.
+Scaling head clamps power only for a `PowerPerFlowPerPressure` pump with
+autosized power; head is absent from EnergyPlus's sizing equation for a
+hard-set power and for `PowerPerFlow`, so on those the audit announced
+10,000 W → 450 W while the model still sized 10,000 W. Normalization happens
+only inside the transfer, so this hit exactly the documented "with or without
+a proposed model" path — and every existing cap test ran the transfer first,
+so they all exercised the one shape that worked. The cap now branches on the
+power source and clamps through the field E+ actually reads, scaling head
+alongside so the implied efficiency is unchanged (cutting power while leaving
+head raises V×H/P toward the fatal the deleted reconciliation existed to
+repair). The second finding was that validation ran on the flow-weighted
+aggregate while D-92's own text claimed per-pump: 55.6 % averaged with 111.1 %
+reads as a plausible 60.6 %, and the reference inherited an efficiency no
+proposed pump had. The third was a docstring still describing the deleted
+mechanism, including releasing SWH circulators — the opposite of the code
+since DF-12 closed.
+
+**Input hardening (DF-14, fixed on acceptance).** Sol's residual-risk note
+said malformed pressure triples were not explicitly rejected. Probing rather
+than reasoning narrowed it: the SDK already refuses a motor efficiency outside
+(0, 1], a non-positive shaft coefficient and a non-finite head, so "non-finite
+triples" are unreachable and there is no NaN-into-the-model path. What it
+ACCEPTS is a negative or zero rated head and a negative rated power — and the
+consequence is sharper than a bad number. Because the clamp fires only above
+the cap, a negative contribution can mask a real violation: a genuine 5,110 W
+pump beside a −5,110 W one sums to zero, the loop is certified "within the
+Table 5.2.6.3 maximum", and the real pump goes unclamped. Fixed rather than
+logged, because a compliance check that can be made to pass a violating loop
+is not something to leave open: an unusable power now reads as unreadable, the
+cap refuses to evaluate the loop and warns naming the pump, and such a pump is
+excluded from the (2) combination rather than netted off it. Two regression
+tests; no frozen model is affected (every corpus pump is at tool defaults).

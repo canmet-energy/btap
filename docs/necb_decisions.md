@@ -5697,6 +5697,20 @@ in the plan log.
   than re-read from a sizing SQL the pass has just invalidated. DF-12 closes
   with it: the release no longer touches a service-water circulator, which
   [D-27](#d-27) puts outside 8.4.4.14.
+- **Input hardening** (Sol, PR #50, accepted with residual risk). The SDK
+  refuses a motor efficiency outside (0, 1], a non-positive shaft coefficient
+  and a non-finite head — but it **accepts** a negative or zero rated head and
+  a negative rated power. Those reach the cap as negative watts, and since the
+  clamp fires only when combined power *exceeds* the cap, one malformed pump
+  can drag the sum under it: a genuine 5 110 W pump beside a −5 110 W one sums
+  to zero, the loop is certified "within the Table 5.2.6.3 maximum", and the
+  real pump **escapes the clamp**. A compliance check that can be made to pass
+  a violating loop is worse than one that refuses to answer, so a non-positive
+  or non-finite power now reads as unreadable: the cap refuses to evaluate the
+  loop and **warns, naming the pump**, and such a pump is excluded from the (2)
+  combination entirely rather than netted off it. Unreachable through the
+  authored builders and absent from every frozen model — it needs a hostile or
+  hand-edited input.
 - **The legacy realisation.** `openstudio-standards` has **no**
   proposed-to-reference pump transfer at all — it generates archetypes, so
   there is no proposed to transfer from. Its only pump-power mechanism is the

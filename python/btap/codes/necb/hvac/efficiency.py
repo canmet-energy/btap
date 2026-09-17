@@ -623,6 +623,20 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
     flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate()) for p in pumps]
     sources = [_pump_power_source(p, f) for p, f in zip(pumps, flows)]
     powers = [w for _, w in sources]
+    # A pump whose flow is readable but whose power is not states something no
+    # pump can draw (a negative or zero head, a negative rated power). That is a
+    # broken input, not an unsized model, and it must SHOUT rather than be
+    # filed as a quiet "not evaluable": the loop is left unclamped either way,
+    # so a reader has to know the cap was never actually applied here.
+    malformed = [p.nameString() for p, f, w in zip(pumps, flows, powers)
+                 if w is None and f is not None and f > 0]
+    if malformed:
+        audit.warn('efficiency', '5.2.6.3 pump-power cap NOT APPLIED — '
+                                 f'{", ".join(malformed)} state a power no pump can draw (non-positive '
+                                 'or non-finite), so this loop\'s combined power cannot be measured and '
+                                 'a real over-cap pump on it would go unclamped',
+                   target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
+        return
     if not pumps or any(p is None for p in powers):
         audit.info('efficiency', '5.2.6.3 pump-power cap not evaluable — pump power unsized',
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
@@ -770,20 +784,41 @@ def _pump_power_source(pump, flow):
     equation, so a cap that only scales head reports a clamp it did not apply
     (Sol, PR #50). Each source must be clamped on its own terms."""
     if not pump.isRatedPowerConsumptionAutosized():
-        return 'hard', optional_f(pump.ratedPowerConsumption())
+        return 'hard', _usable_watts(optional_f(pump.ratedPowerConsumption()))
 
     if flow is None or flow <= 0:
         return 'autosized', None
 
     if pump.designPowerSizingMethod() == POWER_PER_FLOW:
-        return 'per_flow', flow * pump.designElectricPowerPerUnitFlowRate()
+        return 'per_flow', _usable_watts(flow * pump.designElectricPowerPerUnitFlowRate())
 
     motor_eff = pump.motorEfficiency()
     if not motor_eff:
         return 'per_flow_per_pressure', None
 
     return ('per_flow_per_pressure',
-            flow * pump.ratedPumpHead() * pump.designShaftPowerPerUnitFlowRatePerUnitHead() / motor_eff)
+            _usable_watts(flow * pump.ratedPumpHead()
+                          * pump.designShaftPowerPerUnitFlowRatePerUnitHead() / motor_eff))
+
+
+def _usable_watts(watts):
+    """A pump power that can be reasoned about, else ``None``.
+
+    Input hardening (Sol, PR #50). The SDK refuses a motor efficiency outside
+    (0, 1], a non-positive shaft coefficient, and a non-finite head — but it
+    ACCEPTS a negative or zero rated head and a negative rated power. Those
+    reach the 5.2.6.3 cap as a negative contribution to the loop's combined
+    power, and because the clamp only fires when the combined power EXCEEDS the
+    cap, one malformed pump can drag the sum under it: a genuine 5,110 W pump
+    beside a -5,110 W one sums to zero, the loop is certified "within the Table
+    5.2.6.3 maximum", and the real pump escapes the clamp. A compliance check
+    that can be made to pass a violating loop is worse than one that refuses to
+    answer, so an unusable power is reported as unreadable and the caller says
+    so out loud."""
+    if watts is None or not math.isfinite(watts) or watts <= 0.0:
+        return None
+
+    return watts
 
 
 def _pump_power_from_triple(pump, flow):
@@ -895,7 +930,11 @@ def _proposed_pump_stats(proposed):
             power = (optional_f(pump.ratedPowerConsumption())
                      or optional_f(pump.autosizedRatedPowerConsumption()))
             flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-            if power is None or flow is None or flow == 0:
+            # Non-positive or non-finite power is excluded from the (2)
+            # combination entirely, not merely from the efficiency average: a
+            # negative wattage would subtract from the combined peak power and
+            # transfer an intensity lower than any pump in the proposed draws.
+            if flow is None or flow <= 0 or _usable_watts(power) is None:
                 continue
 
             # D-92 needs the efficiency SPLIT, not just the intensity: the

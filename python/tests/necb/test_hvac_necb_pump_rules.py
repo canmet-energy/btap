@@ -314,6 +314,54 @@ class TestNecbPumpRules(unittest.TestCase):
         decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)-(3)')
         self.assertEqual(2, decision['inputs']['proposed_pumps'])
 
+    # Sol, PR #50 (residual risk): the SDK refuses a motor efficiency outside
+    # (0,1], a non-positive shaft coefficient and a non-finite head — but it
+    # ACCEPTS a negative head and a negative rated power. Those reach the cap as
+    # negative watts, and because the clamp only fires ABOVE the cap, one
+    # malformed pump can drag the combined power under it.
+    def test_a_malformed_pump_cannot_certify_an_over_cap_loop(self):
+        model = openstudio.model.Model()
+        loop_, good = loop_with_vsd_pump(model, 'Heating', flow=0.020)  # 5,110 W, genuinely over cap
+        bad = openstudio.model.PumpVariableSpeed(model)
+        bad.setRatedFlowRate(0.020)
+        bad.setRatedPumpHead(-179_352.0)  # -5,110 W: sums with the good pump to exactly zero
+        bad.addToNode(loop_.supplyInletNode())
+        self.add_boiler(loop_, 100.0)  # cap = 450 W
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertEqual([], [e for e in audit.entries
+                              if 'within the Table 5.2.6.3 maximum' in e['action']],
+                         'a loop whose combined power cannot be measured is NEVER certified compliant')
+        warning = next((w for w in audit.warnings if 'cap NOT APPLIED' in w['action']), None)
+        self.assertIsNotNone(warning, 'refusing to evaluate shouts — the cap really was not applied')
+        self.assertIn(bad.nameString(), warning['action'], 'the offending pump is named')
+        self.assertEqual('5.2.6.3.(1)', warning['article'])
+
+    def test_a_negative_power_proposed_pump_is_left_out_of_the_combination(self):
+        """A negative wattage must not subtract from the (2) combination, or the
+        reference inherits an intensity lower than any proposed pump draws."""
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        for flow, power in ((0.010, 800.0), (0.010, -500.0)):
+            p = openstudio.model.PumpVariableSpeed(proposed)
+            p.setRatedFlowRate(flow)
+            p.setRatedPowerConsumption(power)
+            p.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        # 800 W / 10 L/s = 80 W/(L/s) x 20 L/s — NOT (800-500)/20 = 15 W/(L/s)
+        self.assertAlmostEqual(1600.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
+                               msg='the malformed pump is excluded, not netted off')
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)-(3)')
+        self.assertEqual(1, decision['inputs']['proposed_pumps'],
+                         'and it is not counted among the pumps combined')
+
     def test_pump_power_cap_leaves_compliant_transfer_untouched(self):
         proposed = openstudio.model.Model()
         # 40 W/(L/s)
