@@ -126,6 +126,80 @@ class TestStagingIsRepeatable(unittest.TestCase):
 
 
 @needs_sdk
+@needs_sdk
+class TestStagedPairIdentity(unittest.TestCase):
+    """DF-13. The 8.4.x.9.(6) bands describe a PLANT, but the pass applies them
+    per boiler, and it used to decide which boiler was which by matching
+    'Primary Boiler' / 'Secondary Boiler' in the NAME. Sol ruled (2026-09-16)
+    that staging does reach a plant the reference copied, so the defect was not
+    that copied plants get staged — it was that a two-boiler plant named
+    anything else was never staged at all, missing (6)(c) entirely."""
+
+    def foreign_named_plant(self, capacity_w):
+        """Two boilers on one hot-water loop, named as no builder here names
+        them, each carrying the plant's design capacity."""
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        boilers = []
+        for name in ('Chaudiere A', 'Chaudiere B'):
+            boiler = openstudio.model.BoilerHotWater(model)
+            boiler.setName(name)
+            boiler.setNominalCapacity(capacity_w)
+            loop_.addSupplyBranchForComponent(boiler)
+            boilers.append(boiler)
+        return model, boilers
+
+    def test_an_unnamed_two_boiler_plant_is_staged_by_its_topology(self):
+        model, boilers = self.foreign_named_plant(300_000.0)  # (6)(c) band
+        hvac.apply_efficiencies(model, code='necb2020', audit=AuditLog())
+
+        self.assertEqual([150_000.0, 150_000.0],
+                         [b.nominalCapacity().get() for b in boilers],
+                         'two boilers of equal capacity — (6)(c) reached without the names')
+
+    def test_the_modulating_band_reaches_an_unnamed_plant_too(self):
+        model, boilers = self.foreign_named_plant(400_000.0)  # (6)(d) band
+        hvac.apply_efficiencies(model, code='necb2020', audit=AuditLog())
+
+        primary, secondary = boilers
+        self.assertEqual(400_000.0, primary.nominalCapacity().get())
+        self.assertEqual('LeavingSetpointModulated', primary.boilerFlowMode())
+        self.assertAlmostEqual(0.001, secondary.nominalCapacity().get(), delta=1e-9,
+                               msg='(6)(d) is one modulating boiler')
+
+    def test_a_lone_boiler_is_not_half_of_a_pair(self):
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.setName('Chaudiere Seule')
+        boiler.setNominalCapacity(300_000.0)
+        loop_.addSupplyBranchForComponent(boiler)
+        hvac.apply_efficiencies(model, code='necb2020', audit=AuditLog())
+
+        self.assertEqual(300_000.0, boiler.nominalCapacity().get(),
+                         'a single boiler is the whole plant, never halved')
+
+    def test_a_builder_plant_keeps_its_role_after_the_pass_renames_it(self):
+        """The pass rewrites every boiler's name with a capacity suffix each
+        round, so the name is the one thing that cannot carry the identity."""
+        model = load_fixture()
+        modeling.build_system(model, WATER_COOLED_SYSTEM, sorted_zones(model))
+        for boiler in model.getBoilerHotWaters():
+            boiler.setNominalCapacity(300_000.0)
+        hvac.apply_efficiencies(model, code='necb2020', audit=AuditLog())
+
+        renamed = [b.nameString() for b in model.getBoilerHotWaters()]
+        self.assertTrue(all('kBtu/hr' in n for n in renamed),
+                        'precondition: the pass has rewritten the names')
+        self.assertEqual({'primary', 'secondary'},
+                         {efficiency._plant_role(b, efficiency._base_name(b))
+                          for b in model.getBoilerHotWaters()},
+                         'the builder feature still says which boiler is which')
+
+
+@needs_sdk
 class TestStagingBandCrossing(unittest.TestCase):
     """Each pass sets the complete control state of the band the plant lands in:
     between the build-time pass (the proposed's sizing) and the post-sizing pass
