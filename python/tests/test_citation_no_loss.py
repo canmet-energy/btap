@@ -14,9 +14,14 @@ that causes it, with the reason recorded in the baseline's ``_provenance``.
 
 from __future__ import annotations
 
+import ast
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 
 from tests.citation_counts import (
+    _foreign_content,
     compute_citation_counts,
     compute_foreign_citation_counts,
     load_baseline,
@@ -107,6 +112,100 @@ class TestForeignCitationNoLoss(unittest.TestCase):
             "dynamically built article= citation site(s) lost relative to "
             "tests/data/foreign_citation_counts_baseline.json:\n" + "\n".join(regressions),
         )
+
+
+class TestForeignGateCatchesRealRegressions(unittest.TestCase):
+    """The scanner's contracts, exercised by MUTATING a throwaway copy of the
+    source rather than by reading the baseline back to itself.
+
+    Every case here was first run by hand and reported as evidence — and the
+    very next revision of this gate shipped a cross-version key bug and kept a
+    mixed-dynamic hole, because hand-run evidence guards nothing. A gate whose
+    failure modes are not themselves tested is a gate nobody can trust twice.
+    """
+
+    def mutate(self, relative, old, new):
+        """Copy ``btap`` to a temp tree, apply one edit, return the new counts."""
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        target = tmp / relative
+        text = target.read_text(encoding="utf-8")
+        self.assertIn(old, text, f"anchor missing in {relative} — the fixture has moved")
+        target.write_text(text.replace(old, new, 1), encoding="utf-8")
+        return compute_foreign_citation_counts(source_root=tmp)
+
+    @staticmethod
+    def count(counts, bucket, key, kind="cited"):
+        return counts[bucket].get(key, {}).get(kind, 0)
+
+    def test_deleting_a_wholly_foreign_citation_is_caught(self):
+        before = load_foreign_baseline()
+        after = self.mutate("btap/codes/necb/hvac/efficiency.py",
+                            "article='5.2.6.3.(1)',", "")
+        self.assertLess(self.count(after, "static", "5.2.6.3.(1)"),
+                        self.count(before, "static", "5.2.6.3.(1)"),
+                        "a deleted Part 5 citation must drop its own key")
+
+    def test_deleting_the_foreign_half_of_a_mixed_literal_is_caught(self):
+        """``'8.4.4.12.; 5.2.2.7.(1)'`` is counted by the 8.4 gate under
+        8.4.4.12, so its Part 5 half once fired nothing in either gate."""
+        key = "8.4.4.12.; 5.2.2.7.(1)"
+        before = load_foreign_baseline()
+        after = self.mutate("btap/codes/necb/hvac/reference.py",
+                            "article='8.4.4.12.; 5.2.2.7.(1)'", "article='8.4.4.12.'")
+        self.assertLess(self.count(after, "static", key), self.count(before, "static", key),
+                        "the foreign half of a mixed literal must be guarded")
+
+    def test_deleting_the_foreign_half_of_a_mixed_DYNAMIC_citation_is_caught(self):
+        """D-38's own clamp entry, ``f'5.2.6.3.(1); {prefix}.1.(2)'``. Gated
+        dynamic sites used to be discarded wholesale, so this half was
+        deletable with nothing moving anywhere."""
+        key = "f'5.2.6.3.(1); {prefix}.1.(2)'"
+        before = load_foreign_baseline()
+        self.assertGreater(self.count(before, "dynamic", key), 0,
+                           "precondition: the mixed dynamic citation is in the baseline")
+        after = self.mutate("btap/codes/necb/hvac/efficiency.py",
+                            "article=f'5.2.6.3.(1); {prefix}.1.(2)'",
+                            "article=f'{prefix}.1.(2)'")
+        self.assertLess(self.count(after, "dynamic", key), self.count(before, "dynamic", key))
+
+    def test_a_dynamic_swap_is_caught_where_a_bare_total_would_not_be(self):
+        """Delete one dynamic citation and add an unrelated one: the site TOTAL
+        is unchanged, which is why these are keyed rather than counted."""
+        key = 'f"{article}(1)"'
+        before = load_foreign_baseline()
+        after = self.mutate("btap/codes/necb/lighting/storage_garage/__init__.py",
+                            'inputs=inputs, article=f"{article}(1)")',
+                            'inputs=inputs, article=f"{article}(9)")')
+        total_before = sum(n for k in before["dynamic"].values() for n in k.values())
+        total_after = sum(n for k in after["dynamic"].values() for n in k.values())
+        self.assertEqual(total_before, total_after, "precondition: a bare total sees nothing")
+        self.assertLess(self.count(after, "dynamic", key), self.count(before, "dynamic", key),
+                        "the keyed gate must still see the swap")
+
+    def test_an_embedded_8_4_is_not_mistaken_for_a_section_8_4_citation(self):
+        """``5.2.8.4.`` contains the substring ``8.4``. The scanner's own regex
+        is unanchored and reads it as a Section 8.4 token, which would resolve
+        to no article there and look gated here — falling between both gates."""
+        self.assertTrue(_foreign_content("5.2.8.4."), "a Part 5 article is foreign content")
+        self.assertTrue(_foreign_content("Table 3.2.8.4."))
+        self.assertFalse(_foreign_content("8.4.4.9.(6)(a); 8.4.1.2.(5)"),
+                         "a wholly 8.4 citation belongs to the other gate alone")
+
+    def test_dynamic_keys_do_not_depend_on_the_running_interpreter(self):
+        """``ast.unparse`` renders an f-string in the running interpreter's
+        syntax — a 3.12 key (PEP 701) is not the 3.11 one. Keys must be the
+        file's own bytes, or a structural dump when the slice is unreliable."""
+        counts = compute_foreign_citation_counts()
+        for key in counts["dynamic"]:
+            if key.startswith(("JoinedStr(", "Name(", "Subscript(", "Call(", "IfExp(")):
+                continue  # the deliberate structural fallback
+            # Parenthesised for the same reason the helper does it: a slice from
+            # inside an argument list can span lines legally only because of the
+            # parentheses it does not itself include.
+            rebuilt = ast.dump(ast.parse(f"({key})", mode="eval").body)
+            self.assertTrue(rebuilt, f"{key!r} must be re-parseable source, not a rendering")
 
 
 if __name__ == "__main__":

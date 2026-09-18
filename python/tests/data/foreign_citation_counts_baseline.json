@@ -165,20 +165,20 @@
     }
   },
   "dynamic": {
-    "art['article']": {
+    "art[\"article\"]": {
       "cited": 2,
       "warn": 1
     },
-    "'Table 3.2.3.1.' if boundary == 'ground' else 'Table 3.2.2.2.'": {
+    "\"Table 3.2.3.1.\" if boundary == \"ground\"\n                                else \"Table 3.2.2.2.\"": {
       "cited": 1
     },
-    "f'NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 (3.1.1.7 effective)'": {
+    "f\"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 \"\n                           \"(3.1.1.7 effective)\"": {
       "cited": 1
     },
-    "fdwr.get('article')": {
+    "fdwr.get(\"article\")": {
       "cited": 1
     },
-    "srr.get('article')": {
+    "srr.get(\"article\")": {
       "cited": 1
     },
     "rule['trigger_article']": {
@@ -189,6 +189,9 @@
       "cited": 16,
       "warn": 17
     },
+    "f'5.2.6.3.(1); {prefix}.1.(2)'": {
+      "cited": 1
+    },
     "hp_article": {
       "cited": 2,
       "warn": 2
@@ -196,7 +199,7 @@
     "economizer_spec['article']": {
       "cited": 1
     },
-    "f'{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)'": {
+    "f\"{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)\"": {
       "cited": 1
     },
     "res['article']": {
@@ -208,7 +211,7 @@
     "caps['article']": {
       "cited": 1
     },
-    "f'{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)'": {
+    "f\"{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)\"": {
       "cited": 1
     },
     "f'{article_base}.(2){sentence}'": {
@@ -221,6 +224,9 @@
     "pc['article']": {
       "cited": 1
     },
+    "f'{prefix}.12. (Table -12 -> 5.2.2.8)'": {
+      "cited": 1
+    },
     "f'{article_base}.(2)(g)'": {
       "cited": 2
     },
@@ -230,7 +236,7 @@
     "f'{hp_article}.(1); Note A-{hp_article}'": {
       "cited": 1
     },
-    "'; '.join((a for a in assignment.articles if a is not None))": {
+    "'; '.join(a for a in assignment.articles if a is not None)": {
       "cited": 1
     },
     "fans['article']": {
@@ -245,35 +251,41 @@
     "'4.2.1.6.' if building_type == 'Space Function' else '4.2.1.5.'": {
       "cited": 1
     },
-    "f'4.2.1.6.; 4.2.2.1.({sentence})'": {
+    "f\"4.2.1.6.; 4.2.2.1.({sentence})\"": {
       "warn": 1
     },
-    "f'4.2.1.6.; 4.2.2.1.({sentence}); 4.2.2.1.(2)'": {
+    "f\"4.2.1.6.; 4.2.2.1.({sentence}); 4.2.2.1.(2)\"": {
       "cited": 1
     },
     "sensor_article": {
       "cited": 1
     },
-    "f'{article}(2)'": {
+    "f\"{prefix}.5.(3); 4.3.2.10.\"": {
+      "cited": 1
+    },
+    "f\"{prefix}.5.(1); 4.2.1.6.\"": {
+      "warn": 1
+    },
+    "f\"{article}(2)\"": {
       "cited": 1,
       "warn": 1
     },
-    "f'{article}(3)'": {
+    "f\"{article}(3)\"": {
       "cited": 2,
       "warn": 1
     },
-    "f'{article}(5)'": {
+    "f\"{article}(5)\"": {
       "cited": 1
     },
-    "f'{article}(1)'": {
+    "f\"{article}(1)\"": {
       "cited": 1,
       "warn": 1
     },
-    "f'{article}(4)'": {
+    "f\"{article}(4)\"": {
       "cited": 4,
       "warn": 1
     },
-    "spec['article']": {
+    "spec[\"article\"]": {
       "cited": 6
     },
     "_article(entry)": {
@@ -281,12 +293,13 @@
     }
   },
   "_provenance": {
-    "commit": "9a662f150641eb006660c946e4d22be0a7900307",
+    "commit": "df613f453747bdc0cd1968d310c14086a5aaf68e",
     "generated_by": "python/tests/citation_counts.py:compute_foreign_citation_counts",
     "source_glob": "python/btap/**/*.py",
     "key_shape": "{'static': {literal: {kind: count}}, 'dynamic': {expression: {kind: count}}}",
-    "why": "DF-15. The Section 8.4 no-loss gate counts a citation only if its literal resolves onto an article in that edition articles_8_4.json, and _scan_citations drops a non-8.4 literal at SCAN time before that, so Part 4/5/6 citations could be deleted without failing anything. Measured 2026-09-18 at SITE level: the 8.4 gate covers 105 distinct source sites and this baseline covers 178 - about 62 percent of the citation surface was ungated. (The 8.4 baseline total of 213 is a PER-EDITION count, 96 for 2020 plus 117 for 2025, of those same 105 sites; comparing it against a per-site figure understates the gap, and an earlier draft of this file did exactly that.) Not all of these are Part 4/5/6: about 20 dynamic sites are variables bound to 8.4 f-strings and three are the data-driven coverage emitter in btap/audit, so the honest description is \"sites the 8.4 scanner cannot count\". This baseline does NOT widen the coverage attestation, which is a Section 8.4 document and stays one.",
-    "two_populations": "static: a plain string literal, keyed exactly as {literal: {kind: count}} with no file path in the key so a rename cannot invalidate it. A literal is included when it carries no 8.4 token at all, and ALSO when an article-shaped reference survives removing its 8.4 tokens - a mixed citation such as 8.4.4.12.; 5.2.2.7.(1) is counted by the 8.4 gate under 8.4.4.12, so deleting its Part 5 half used to fire nothing anywhere. dynamic: an article= that is a variable, a subscript or an f-string the scanner cannot fold to a name, keyed by ast.unparse of the expression - the code own text, not the scanner truncated rendering of it. Keyed rather than merely counted because a bare total is blind to a swap.",
-    "complement_is_derived": "The set of gated sites comes from CoverageGenerator.citations_for itself, not from a copy of its scan-time regex, so no hole can open between the two gates and there is no duplicated predicate to drift."
+    "populations": "Exact physical-site accounting at 2026-09-18: 278 article= sites in python/btap/**/*.py; 105 resolve onto a Section 8.4 article and are covered by citation_counts_baseline.json; 173 sit entirely outside that gate (173/278 = 62 percent); 9 are MIXED, citing both an 8.4 article and something else. This baseline covers the 173 plus the 9 mixed = 182, so the two baselines overlap on 9 sites BY DESIGN and must not be read as disjoint. An earlier revision said 105 and 178 as though they were, and the revision before that compared the 8.4 gate per-EDITION total of 213 (96 for 2020 plus 117 for 2025, of those same 105 sites) against a per-site figure, which understated the gap as 45 percent.",
+    "why": "DF-15. The 8.4 gate counts a citation only if its literal resolves onto an article in that edition articles_8_4.json, and _scan_citations drops a non-8.4 literal at SCAN time before that, so those citations could be deleted without failing anything. Not all 182 are Part 4/5/6: about 20 are variables bound to 8.4 f-strings and three are the data-driven coverage emitter in btap/audit, so the honest description is sites the 8.4 scanner cannot count. This baseline does NOT widen the coverage attestation, which is a Section 8.4 document.",
+    "classification": "Membership in the real gate decides first (_resolved_sites asks CoverageGenerator.citations_for itself, so no hole can open between the two gates and no predicate is copied). A GATED site is then also guarded here when foreign content survives removing its 8.4 tokens - that is what covers the 9 mixed sites, static and dynamic alike. Classifying by content first discarded every gated dynamic site wholesale, which left the foreign half of D-38 own clamp citation f'5.2.6.3.(1); {prefix}.1.(2)' deletable with nothing moving.",
+    "key_stability": "Dynamic keys come from ast.get_source_segment, validated by re-parsing: the slice is used only when it rebuilds the same tree, else a structural ast.dump is the fallback. ast.unparse cannot be used - it re-renders in the running interpreter syntax, so an f-string key authored on 3.12 (PEP 701) is not the key 3.11 emits. That shipped in the first revision and CI 3.11 job caught it; the floor is requires-python >=3.11."
   }
 }

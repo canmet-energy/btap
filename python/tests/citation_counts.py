@@ -86,7 +86,11 @@ FOREIGN_BASELINE_PATH = Path(__file__).with_name("data") / "foreign_citation_cou
 #: The scanner's own token shape, used ONLY to find what is left of a literal
 #: once the 8.4 gate's share of it is removed — never to decide whether a site
 #: is gated. That decision comes from the gate itself (``_resolved_sites``).
-_EIGHT_FOUR = re.compile(r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?")
+#: Anchored on the left, unlike the scanner's own copy: bare ``8\.4`` also
+#: matches inside ``5.2.8.4.``, which would read a Part 5 article as a Section
+#: 8.4 one. The scanner has that bug; this must not inherit it, or such a
+#: citation would look gated here while resolving to nothing there.
+_EIGHT_FOUR = re.compile(r"(?<![\d.])(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?")
 
 #: An article-shaped reference, e.g. ``5.2.6.3`` or ``4.2.2.1``.
 _ARTICLE_SHAPE = re.compile(r"\d+\.\d+\.\d+")
@@ -117,6 +121,36 @@ def _resolved_sites(coverage_module: ModuleType) -> set[tuple[str, int]]:
             for entry in entries:
                 sites.add((entry["file"], entry["line"]))
     return sites
+
+
+def _stable_key(source: str, node: ast.expr) -> str:
+    """A key for a dynamically built ``article=`` that is the SAME string on
+    every supported Python.
+
+    ``ast.unparse`` cannot be used: it re-renders the expression in the running
+    interpreter's syntax, so an f-string key authored on 3.12 (PEP 701 lets a
+    nested quote match the outer one) is not the key 3.11 emits, and a baseline
+    written on one fails on the other. That shipped, and CI's 3.11 job caught it.
+
+    The source slice has no such problem — it is the file's own bytes — but it
+    depends on the node's recorded position, and 3.11 records f-string
+    positions less precisely than 3.12. So the slice is USED only when it
+    round-trips: re-parsing it must rebuild the same tree. When it does not,
+    the structural dump is the fallback, which is uglier to read in a baseline
+    but identical across versions because PEP 701 changed the tokenizer, not
+    the AST shape.
+    """
+    segment = ast.get_source_segment(source, node)
+    if segment:
+        try:
+            # Parenthesised because a slice taken from inside a call's argument
+            # list can span lines, and those continuations were legal only
+            # because of the enclosing parentheses the slice does not include.
+            if ast.dump(ast.parse(f"({segment})", mode="eval").body) == ast.dump(node):
+                return segment
+        except SyntaxError:
+            pass
+    return ast.dump(node)
 
 
 def _foreign_content(literal: str) -> bool:
@@ -182,23 +216,32 @@ def compute_foreign_citation_counts(source_root: Path | None = None) -> dict:
     for path in sorted(root.glob(SOURCE_GLOB)):
         try:
             relative = path.relative_to(REPO_ROOT).as_posix()
-        except ValueError:  # a temp-directory copy, used by the deletion probe
+        except ValueError:  # a temp-directory copy, used by the mutation tests
             relative = f"python/{path.relative_to(root).as_posix()}"
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
         for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
             for keyword in call.keywords:
                 if keyword.arg != "article":
                     continue
-                kind = coverage.python_call_kind(call)
                 node = keyword.value
-                if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                    if not _foreign_content(node.value):
+                is_literal = isinstance(node, ast.Constant) and isinstance(node.value, str)
+                rendered = node.value if is_literal else coverage.python_citation_value(node)
+
+                # Membership in the real gate decides first; content only decides
+                # whether a GATED site also needs guarding here. Classifying by
+                # content alone discarded every gated dynamic site wholesale, so
+                # the foreign half of f'5.2.6.3.(1); {prefix}.1.(2)' — D-38's own
+                # clamp citation — could be deleted with nothing moving.
+                if (relative, node.lineno) in gated:
+                    if rendered is None or not _foreign_content(rendered):
                         continue
+
+                kind = coverage.python_call_kind(call)
+                if is_literal:
                     bucket, key = static, node.value
                 else:
-                    if (relative, node.lineno) in gated:
-                        continue
-                    bucket, key = dynamic, ast.unparse(node)
+                    bucket, key = dynamic, _stable_key(source, node)
                 bucket.setdefault(key, {}).setdefault(kind, 0)
                 bucket[key][kind] += 1
 

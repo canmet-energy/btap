@@ -3174,20 +3174,31 @@ and is never recorded at all; the `article in articles` resolution filter is a
 second gate behind it. The glob is also `python/btap/codes/**/*.py`, so
 `btap/costing` citations were never scanned either.
 
-Measured at SITE level: **the 8.4 gate covers 105 distinct source sites; this
-one covers 178** — 52 static literals over 82 sites, plus 96 sites whose
-`article=` is a variable, a subscript or an f-string the scanner cannot fold to
-a name. **About 62 % of the citation surface was ungated**: `5.2.6.3.(1)` (×4),
-`5.2.2.8.`, `5.2.2.9.`, the Part 4 lighting set, `6.2.2.1.`, `6.2.5.1.` and the
-costing entries could all be deleted without failing anything.
+Exact physical-site accounting, which the first two drafts of this entry both
+got wrong:
 
-A first draft of this entry said "213 inside, 173 outside — roughly 45 %",
-which was wrong in this change's own favour and is corrected here. 213 is the
-8.4 baseline's **per-edition** total (96 for 2020 plus 117 for 2025) of those
-same 105 sites; comparing it against a per-site figure understates the gap. Nor
-are all 178 Part 4/5/6 — about 20 are variables bound to 8.4 f-strings and
+| population | sites |
+|---|---|
+| `article=` sites in `python/btap/**/*.py` | **278** |
+| resolve onto a Section 8.4 article (the existing gate) | 105 |
+| **entirely outside that gate** | **173** (173/278 = **62.2 %**) |
+| **mixed** — cite an 8.4 article *and* something else | **9** |
+| covered by this baseline (173 + 9) | **182** |
+
+The two baselines therefore **overlap on 9 sites by design and are not
+disjoint**. The first draft said "213 inside, 173 outside — roughly 45 %",
+comparing the 8.4 gate's **per-edition** total (96 for 2020 plus 117 for 2025,
+of those same 105 sites) against a per-site figure, which understated the gap
+in this change's own favour. The second said "105 and 178" as though they were
+disjoint, and 178 was itself short: it caught the five static mixed sites and
+missed the four dynamic ones.
+
+Nor are all 182 Part 4/5/6 — about 20 are variables bound to 8.4 f-strings and
 three are the data-driven coverage emitter in `btap/audit` — so the honest
-description is "sites the 8.4 scanner cannot count".
+description is "sites the 8.4 scanner cannot count". What could be deleted
+without failing anything before this gate: `5.2.6.3.(1)` (×4), `5.2.2.8.`,
+`5.2.2.9.`, the Part 4 lighting set, `6.2.2.1.`, `6.2.5.1.` and the costing
+entries.
 
 `compute_foreign_citation_counts` guards what the 8.4 gate does not, and
 derives that set from **`citations_for` itself** rather than from a copy of its
@@ -3195,20 +3206,33 @@ scan-time regex — so no hole can open between the two gates and there is no
 duplicated predicate to drift. An 8.4 change re-baselines one file and a Part
 4/5 change the other.
 
+**Membership in the real gate decides first; content only decides whether a
+GATED site also needs guarding here.** Classifying by content first — which the
+second draft did — discarded every gated *dynamic* site wholesale, leaving the
+foreign half of D-38's own clamp citation, `f'5.2.6.3.(1); {prefix}.1.(2)'`,
+deletable with nothing moving anywhere. A gated site is now also guarded when
+an article-shaped reference survives removing its 8.4 tokens, which covers all
+nine mixed sites, static and dynamic alike.
+
 Two populations, keyed with the confidence each deserves. **Static** literals
 exactly (`{literal: {kind: count}}`, no file path in the key, the same rule the
-8.4 baseline follows). A literal is included when it carries no 8.4 token at
-all, and **also when an article-shaped reference survives removing its 8.4
-tokens**: `'8.4.4.12.; 5.2.2.7.(1)'` is counted by the 8.4 gate under 8.4.4.12,
-so deleting its Part 5 half fired nothing anywhere — five such mixed literals
-exist, and covering them is worth the deliberate overlap. **Dynamic** sites are
-keyed by `ast.unparse` of the expression — `article`, `spec['article']`,
-`f'{article}(4)'` — the code's own text, not the scanner's truncated rendering
-of it (`f'{ruleset.article(x)}.(2)(b)'` renders as the fragment `'.(2)(b)'`,
-which appears in no audit and would be a dishonest key). An earlier draft
-merely COUNTED these, which is blind to a swap: delete one and add an unrelated
-one and the total is unchanged. The 8.4 baseline moved 209 → 211 → 213 across
-two consecutive days, so that is ordinary churn here, not a hypothetical.
+8.4 baseline follows). **Dynamic** sites — a variable, a subscript, or an
+f-string the scanner cannot fold to a name — by `ast.get_source_segment`,
+validated by re-parsing: the slice is used only when it rebuilds the same tree,
+else a structural `ast.dump` is the fallback. `ast.unparse` **cannot** be used,
+and the second draft's use of it was the bug that turned CI red: it re-renders
+in the running interpreter's syntax, so an f-string key authored on 3.12 (PEP
+701 permits a nested quote matching the outer one) is not the key 3.11 emits,
+and `requires-python` is `>=3.11`. Keying at all — rather than counting — is
+what catches a swap: delete one dynamic citation, add an unrelated one, and the
+total is unchanged. The 8.4 baseline moved 209 → 211 → 213 across two
+consecutive days, so that is ordinary churn here, not a hypothetical.
+
+The scanner's own `8\.4` token regex is also unanchored, so it reads the `8.4`
+inside `5.2.8.4.` as a Section 8.4 citation; that article would resolve to
+nothing there while looking gated here, falling between both gates. The copy
+used for content detection is anchored (`(?<![\d.])`), and membership now comes
+from the gate itself, so the hole is closed from both directions.
 
 The attestation scope is untouched: `NECB_8_4_COVERAGE.html` is a Section 8.4
 document and stays one. Widening it would need Part 4/5/6 article text (the
@@ -3225,12 +3249,21 @@ required by the MOTORS", confirming the electrical basis D-38 sums; and
 into `4.2.3.`, so the four `4.2.2.7`-`4.2.2.10` citations really are the
 deliberate legacy NECB 2011 references their own text says they are.
 
-Three regression shapes were each reproduced against a throwaway copy of the
-source: a deleted static citation (`5.2.6.3.(1)`, `cited: 3 → 2`); the Part 5
-half of a mixed literal deleted (`cited: 2 → 1`, where both gates were
-previously silent); and a dynamic citation deleted while an unrelated one was
-added (total unchanged at 96 — a bare counter sees nothing — while the keyed
-gate reports `cited: 1 → 0`).
+**The mutation experiments are tests, not anecdotes.**
+`TestForeignGateCatchesRealRegressions` copies `btap` to a temporary tree,
+applies one edit, and asserts the count drops: a deleted wholly-foreign
+citation; the Part 5 half of a mixed *literal*; the Part 5 half of a mixed
+*dynamic* f-string (D-38's clamp entry); a dynamic delete-plus-unrelated-add
+where the site total is deliberately asserted UNCHANGED first, so the test
+states plainly what a bare counter would have missed; `5.2.8.4.` not being read
+as a Section 8.4 citation; and every dynamic key being re-parseable source
+rather than an interpreter-specific rendering.
+
+Earlier drafts ran those same probes by hand and reported the numbers as
+evidence. That guarded nothing: the very next revision shipped an
+interpreter-dependent key that turned CI red **and** kept the mixed-dynamic
+hole, and both were found by review rather than by the suite. A gate whose own
+failure modes are not tested is a gate nobody can trust twice.
 
 **Still open (DF-16), and larger than "the dynamic sites".** What neither gate
 can see: an article id bound to a VARIABLE and reused — `storage_garage/
