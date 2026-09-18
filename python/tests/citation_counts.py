@@ -20,8 +20,10 @@ the scanner actually produces rather than the three-way informal description
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -76,3 +78,72 @@ def compute_citation_counts(coverage_module: ModuleType | None = None) -> dict:
 
 def load_baseline() -> dict:
     return json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+
+
+#: Companion baseline for the citations the Section 8.4 scanner cannot see.
+FOREIGN_BASELINE_PATH = Path(__file__).with_name("data") / "foreign_citation_counts_baseline.json"
+
+#: The scanner's own token shape. A citation matching it belongs to the 8.4
+#: gate; everything else is this module's business.
+_EIGHT_FOUR = re.compile(r"(?:PREFIX|8\.4)(?:\.\d+)*\.?(?:\(\d+\))?")
+
+#: Product source carrying ``article=`` citations. Wider than the 8.4
+#: generator's glob (``btap/codes``) because ``btap/costing`` cites articles
+#: too, and nothing was watching those at all.
+SOURCE_GLOB = "btap/**/*.py"
+
+
+def compute_foreign_citation_counts(source_root: Path | None = None) -> dict:
+    """Citation sites the Section 8.4 no-loss gate does NOT cover (DF-15).
+
+    That gate counts a citation only if its literal resolves onto an article in
+    an edition's ``articles_8_4.json``, and the generator *raises* on non-8.4
+    content in those caches — so Part 4, Part 5 and Part 6 citations are dropped
+    at scan time and could be deleted without failing anything. Measured when
+    this was written: 213 sites inside the gate, 173 outside it.
+
+    Two populations, because they can be keyed with different confidence.
+
+    ``static`` — a plain string literal, keyed by ``{literal: {kind: count}}``.
+    Exact and meaningful: ``5.2.6.3.(1)`` losing a site is named in the failure.
+    No file path enters the key, so a rename cannot invalidate the baseline —
+    the same rule the 8.4 baseline follows.
+
+    ``dynamic_sites`` — one integer for everything else: an ``article=`` whose
+    value is a variable, or an f-string interpolating anything the scanner
+    cannot fold to a name. These cannot be keyed honestly (the scanner renders
+    ``f'{ruleset.article(x)}.(2)(b)'`` as the fragment ``'.(2)(b)'``, which is an
+    extraction artefact, not text that appears in any audit), but they can still
+    be COUNTED, so deleting one drops the total and the gate fires.
+    """
+    coverage = load_coverage_module()
+    root = source_root or (REPO_ROOT / "python")
+    static: dict[str, dict[str, int]] = {}
+    dynamic = 0
+
+    for path in sorted(root.glob(SOURCE_GLOB)):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+            for keyword in call.keywords:
+                if keyword.arg != "article":
+                    continue
+                kind = coverage.python_call_kind(call)
+                node = keyword.value
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    literal = node.value
+                    if _EIGHT_FOUR.findall(literal.replace("{prefix}", "PREFIX")):
+                        continue
+                    static.setdefault(literal, {}).setdefault(kind, 0)
+                    static[literal][kind] += 1
+                    continue
+                rendered = coverage.python_citation_value(node)
+                if rendered is not None and _EIGHT_FOUR.findall(
+                        rendered.replace("{prefix}", "PREFIX")):
+                    continue
+                dynamic += 1
+
+    return {"static": static, "dynamic_sites": dynamic}
+
+
+def load_foreign_baseline() -> dict:
+    return json.loads(FOREIGN_BASELINE_PATH.read_text(encoding="utf-8"))

@@ -1,0 +1,163 @@
+{
+  "static": {
+    "11.4.1.1.; 11.4.2.1. (NECB 2025)": {
+      "cited": 1
+    },
+    "NECB Table C-1 (legacy get_necb_hdd18 convention)": {
+      "cited": 1
+    },
+    "3.2.1.4.(1)": {
+      "cited": 1
+    },
+    "3.2.1.4.(2)": {
+      "cited": 1
+    },
+    "1.4.1.2.": {
+      "cited": 2
+    },
+    "Table 3.2.2.3.": {
+      "cited": 2
+    },
+    "3.1.1.7.": {
+      "warn": 3,
+      "cited": 1
+    },
+    "Table 3.2.2.2.; 3.1.1.7.(4)": {
+      "cited": 1
+    },
+    "Table 3.2.3.1.; 3.2.3.3.(3)": {
+      "warn": 1,
+      "cited": 2
+    },
+    "3.2.4.2.": {
+      "cited": 1
+    },
+    "3.1.1.7. (Ut = Uo + \u03a3\u03c8\u00b7L/A + \u03a3\u03c7\u00b7n/A; PSI per BETBG)": {
+      "cited": 1
+    },
+    "5.2.2.8.; 5.2.10.1.; 5.2.12.": {
+      "cited": 1
+    },
+    "5.2.2.8.": {
+      "warn": 1,
+      "cited": 1
+    },
+    "5.2.12.; Table 5.2.12.1.": {
+      "warn": 1
+    },
+    "5.2.2.9.": {
+      "cited": 2
+    },
+    "NECB 2020 Table 5.2.12.1 (unitary equipment)": {
+      "cited": 2
+    },
+    "NECB 2020 Table 5.2.12.1 (heat pumps, heating)": {
+      "cited": 2
+    },
+    "5.2.6.3.(1)": {
+      "cited": 3,
+      "warn": 1
+    },
+    "Table 5.2.12.2": {
+      "cited": 1
+    },
+    "5.2.2.7.(1)": {
+      "warn": 1
+    },
+    "4.2.1.4.; 4.2.1.5.; 4.2.1.6.": {
+      "cited": 1
+    },
+    "4.2.1.6. (atrium)": {
+      "cited": 1
+    },
+    "4.2.1.6.": {
+      "warn": 2
+    },
+    "4.2.2.1.(12)(c)": {
+      "cited": 1
+    },
+    "4.2.2.1.(12)(a)": {
+      "cited": 2
+    },
+    "4.2.2.1.(15)(c)": {
+      "cited": 1
+    },
+    "4.2.1.6.; 4.2.2.1.(10); 4.2.2.1.(13)": {
+      "warn": 1
+    },
+    "4.2.2.3.": {
+      "warn": 3
+    },
+    "4.2.2.5.": {
+      "warn": 2
+    },
+    "4.2.2.3.; 4.2.2.5.": {
+      "warn": 2
+    },
+    "4.2.2.1.": {
+      "cited": 2
+    },
+    "4.2.2.1.(15)(a)": {
+      "warn": 1
+    },
+    "4.2.2.3.; 4.2.2.4.; 4.2.2.5.": {
+      "cited": 1
+    },
+    "4.2.2.1.(10); 4.2.2.1.(12); 4.2.2.1.(13); 4.2.2.1.(15); Table 4.2.1.6.": {
+      "cited": 2
+    },
+    "NECB 2011 4.2.2.4./4.2.2.7./4.2.2.8./4.2.2.10. (articles that DO NOT EXIST in NECB 2020/2025, whose Subsection 4.2.2 ends at 4.2.2.6.)": {
+      "warn": 1
+    },
+    "4.2.2.1.(10); 4.2.2.1.(13)": {
+      "cited": 2,
+      "warn": 1
+    },
+    "4.2.3.1.": {
+      "cited": 2,
+      "warn": 1
+    },
+    "4.2.2.2.": {
+      "cited": 1
+    },
+    "4.2.2.2.(4)": {
+      "warn": 1
+    },
+    "6.2.2.1.": {
+      "cited": 1
+    },
+    "6.2.2.1. (instantaneous rows)": {
+      "cited": 1
+    },
+    "6.2.2.1. (storage-type heat pump)": {
+      "cited": 1
+    },
+    "6.2.5.1.": {
+      "cited": 3,
+      "warn": 1
+    },
+    "10.1.2.1. (Table verified identical 2020/2025)": {
+      "cited": 1
+    },
+    "materials_hvac (next-largest-size rule)": {
+      "cited": 1
+    },
+    "legacy getGeometryData port": {
+      "cited": 1
+    },
+    "hvac_vent_ahu (L/s buckets, ceil units, re-select)": {
+      "cited": 1
+    },
+    "NECB 2011 4.2.2.4./4.2.2.5./4.2.2.9. (legacy costing rule; 4.2.2.9. does not exist in NECB 2020/2025)": {
+      "cited": 1
+    }
+  },
+  "dynamic_sites": 96,
+  "_provenance": {
+    "generated_by": "python/tests/citation_counts.py:compute_foreign_citation_counts",
+    "source_glob": "python/btap/**/*.py",
+    "key_shape": "{'static': {literal: {kind: count}}, 'dynamic_sites': int}",
+    "why": "DF-15. The Section 8.4 no-loss gate counts a citation only if its literal resolves onto an article in that edition articles_8_4.json, and the generator raises on non-8.4 content in those caches, so Part 4/5/6 citations are dropped at scan time and could be deleted without failing anything. Measured 2026-09-18: 213 sites inside the 8.4 gate, 173 outside it. This baseline guards the outside. It does NOT widen the coverage attestation, which is a Section 8.4 document and stays one.",
+    "two_populations": "static: a plain string literal, keyed exactly by {literal: {kind: count}} with no file path in the key so a rename cannot invalidate it. dynamic_sites: one integer for an article= whose value is a variable or an f-string the scanner cannot fold to a name. Those cannot be keyed honestly (the scanner renders such an f-string as a fragment, an extraction artefact that appears in no audit) but they can be counted, so deleting one drops the total."
+  }
+}

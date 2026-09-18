@@ -3164,3 +3164,48 @@ Verified on boilers the builder never named: (6)(c) at 300 kW halves to
 one boiler. Before, all three were skipped. No existing case moves: a builder
 plant renamed by the pass still resolves through its feature, and a single
 boiler is still not a pair.
+
+**DF-15 closed (2026-09-18): a no-loss gate for the citations Section 8.4
+cannot see.** Found while hardening the 5.2.6.3 cap — the new warning cited
+`5.2.6.3.(1)` and the citation total did not move. The cause is upstream of
+where the PR comment guessed: `_scan_citations` filters at SCAN time with
+`re.findall(r"(?:PREFIX|8\.4)...")`, so a Part 4/5/6 literal yields no tokens
+and is never recorded at all; the `article in articles` resolution filter is a
+second gate behind it. The glob is also `python/btap/codes/**/*.py`, so
+`btap/costing` citations were never scanned either.
+
+Measured: **213 sites inside the 8.4 gate, 173 outside it** — 48 static
+literals over 77 sites, plus 96 sites whose `article=` is a variable or an
+f-string the scanner cannot fold to a name. Roughly 45 % of the citation
+surface was ungated: `5.2.6.3.(1)` (×4), `5.2.2.8.`, `5.2.2.9.`, the Part 4
+lighting set, `6.2.2.1.`, `6.2.5.1.` and the costing entries could all be
+deleted without failing anything.
+
+`compute_foreign_citation_counts` guards the complement, deliberately NOT
+duplicating the 8.4 gate, so an 8.4 change re-baselines one file and a Part 4/5
+change the other. Two populations, keyed with the confidence each deserves:
+static literals exactly (`{literal: {kind: count}}`, no file path in the key,
+the same rule the 8.4 baseline follows), and everything else as a single site
+count — those cannot be keyed honestly, because the scanner renders
+`f'{ruleset.article(x)}.(2)(b)'` as the fragment `'.(2)(b)'`, an extraction
+artefact that appears in no audit, but they can still be counted so a deletion
+drops the total.
+
+The attestation scope is untouched: `NECB_8_4_COVERAGE.html` is a Section 8.4
+document and stays one. Widening it would need Part 4/5/6 article text (the
+fetch script only retrieves 8.4) and a disposition entry per article — a new
+deliverable, not completeness.
+
+Verified by deletion rather than by assertion: removing one of the four
+`5.2.6.3.(1)` citations in a throwaway copy of the source drops `cited: 3 -> 2`
+and the gate names the literal. The codes MCP was used to check what was being
+frozen rather than to build the gate (tests stay offline): 5.2.6.3 is real —
+"Pumping Power Demand", whose (1) caps "the combined pumping power demand
+required by the MOTORS", confirming the electrical basis D-38 sums; and
+`4.2.2.9` returns null in NECB 2020 while `4.2.2.6` exists and runs straight
+into `4.2.3.`, so the four `4.2.2.7`-`4.2.2.10` citations really are the
+deliberate legacy NECB 2011 references their own text says they are.
+
+**Still open (DF-16):** those 96 dynamic sites are guarded only by a total. A
+per-site key would need the scanner to evaluate the interpolation, which it
+cannot do statically.

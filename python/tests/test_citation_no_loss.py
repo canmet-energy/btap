@@ -16,7 +16,12 @@ from __future__ import annotations
 
 import unittest
 
-from tests.citation_counts import compute_citation_counts, load_baseline
+from tests.citation_counts import (
+    compute_citation_counts,
+    compute_foreign_citation_counts,
+    load_baseline,
+    load_foreign_baseline,
+)
 
 
 class TestCitationNoLoss(unittest.TestCase):
@@ -47,6 +52,49 @@ class TestCitationNoLoss(unittest.TestCase):
         current = compute_citation_counts()
         baseline_editions = {key for key in baseline if key != "_provenance"}
         self.assertEqual(set(current.keys()), baseline_editions)
+
+
+class TestForeignCitationNoLoss(unittest.TestCase):
+    """DF-15: the same no-loss guarantee for the citations the Section 8.4
+    scanner cannot see.
+
+    Its universe is ``articles_8_4.json`` and the generator raises on anything
+    else in those caches, so a Part 4/5/6 citation is dropped at scan time.
+    Measured when this gate was written: 213 sites inside the 8.4 gate, 173
+    outside it — ``5.2.6.3.(1)``, ``5.2.2.8.``, the Part 4 lighting set and the
+    ``btap/costing`` citations could all be deleted without failing anything.
+
+    This does NOT widen the coverage attestation, which is a Section 8.4
+    document and should stay one. It only stops citations disappearing unnoticed.
+    """
+
+    def test_no_static_foreign_citation_drops_below_baseline(self):
+        baseline = load_foreign_baseline()
+        current = compute_foreign_citation_counts()
+
+        regressions = []
+        for literal, kinds in baseline["static"].items():
+            for kind, expected in kinds.items():
+                actual = current["static"].get(literal, {}).get(kind, 0)
+                if actual < expected:
+                    regressions.append(f"{literal!r}/{kind}: baseline {expected}, now {actual}")
+        self.assertEqual(
+            [], regressions,
+            "non-8.4 citation site(s) lost relative to "
+            "tests/data/foreign_citation_counts_baseline.json:\n" + "\n".join(regressions),
+        )
+
+    def test_dynamic_citation_sites_do_not_shrink(self):
+        """An ``article=`` built from a variable cannot be keyed by its text, so
+        it is counted instead — deleting one still drops the total."""
+        baseline = load_foreign_baseline()
+        current = compute_foreign_citation_counts()
+        self.assertGreaterEqual(
+            current["dynamic_sites"], baseline["dynamic_sites"],
+            "dynamically built article= citation site(s) lost: baseline "
+            f"{baseline['dynamic_sites']}, now {current['dynamic_sites']}. These carry no "
+            "keyable literal, so the count is the only guard they have.",
+        )
 
 
 if __name__ == "__main__":
