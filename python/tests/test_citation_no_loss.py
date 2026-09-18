@@ -60,9 +60,12 @@ class TestForeignCitationNoLoss(unittest.TestCase):
 
     Its universe is ``articles_8_4.json`` and the generator raises on anything
     else in those caches, so a Part 4/5/6 citation is dropped at scan time.
-    Measured when this gate was written: 213 sites inside the 8.4 gate, 173
-    outside it — ``5.2.6.3.(1)``, ``5.2.2.8.``, the Part 4 lighting set and the
-    ``btap/costing`` citations could all be deleted without failing anything.
+    Measured when this gate was written, at site level: the 8.4 gate covers 105
+    distinct source sites and this one covers 178 — about 62 % of the citation
+    surface was ungated. ``5.2.6.3.(1)``, ``5.2.2.8.``, the Part 4 lighting set
+    and the ``btap/costing`` citations could all be deleted without failing
+    anything. (The 8.4 baseline's 213 is a per-EDITION count of its 105 sites;
+    reading it as a site count understates the gap.)
 
     This does NOT widen the coverage attestation, which is a Section 8.4
     document and should stay one. It only stops citations disappearing unnoticed.
@@ -84,16 +87,25 @@ class TestForeignCitationNoLoss(unittest.TestCase):
             "tests/data/foreign_citation_counts_baseline.json:\n" + "\n".join(regressions),
         )
 
-    def test_dynamic_citation_sites_do_not_shrink(self):
-        """An ``article=`` built from a variable cannot be keyed by its text, so
-        it is counted instead — deleting one still drops the total."""
+    def test_no_dynamic_citation_drops_below_baseline(self):
+        """An ``article=`` built from a variable has no literal to key on, but it
+        does have the expression that produced it — ``spec['article']``,
+        ``f'{article}(4)'``. Keyed by that rather than merely counted, because a
+        bare total cannot see a swap: delete one and add an unrelated one and
+        the total is unchanged."""
         baseline = load_foreign_baseline()
         current = compute_foreign_citation_counts()
-        self.assertGreaterEqual(
-            current["dynamic_sites"], baseline["dynamic_sites"],
-            "dynamically built article= citation site(s) lost: baseline "
-            f"{baseline['dynamic_sites']}, now {current['dynamic_sites']}. These carry no "
-            "keyable literal, so the count is the only guard they have.",
+
+        regressions = []
+        for expression, kinds in baseline["dynamic"].items():
+            for kind, expected in kinds.items():
+                actual = current["dynamic"].get(expression, {}).get(kind, 0)
+                if actual < expected:
+                    regressions.append(f"{expression}/{kind}: baseline {expected}, now {actual}")
+        self.assertEqual(
+            [], regressions,
+            "dynamically built article= citation site(s) lost relative to "
+            "tests/data/foreign_citation_counts_baseline.json:\n" + "\n".join(regressions),
         )
 
 

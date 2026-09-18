@@ -3174,22 +3174,41 @@ and is never recorded at all; the `article in articles` resolution filter is a
 second gate behind it. The glob is also `python/btap/codes/**/*.py`, so
 `btap/costing` citations were never scanned either.
 
-Measured: **213 sites inside the 8.4 gate, 173 outside it** — 48 static
-literals over 77 sites, plus 96 sites whose `article=` is a variable or an
-f-string the scanner cannot fold to a name. Roughly 45 % of the citation
-surface was ungated: `5.2.6.3.(1)` (×4), `5.2.2.8.`, `5.2.2.9.`, the Part 4
-lighting set, `6.2.2.1.`, `6.2.5.1.` and the costing entries could all be
-deleted without failing anything.
+Measured at SITE level: **the 8.4 gate covers 105 distinct source sites; this
+one covers 178** — 52 static literals over 82 sites, plus 96 sites whose
+`article=` is a variable, a subscript or an f-string the scanner cannot fold to
+a name. **About 62 % of the citation surface was ungated**: `5.2.6.3.(1)` (×4),
+`5.2.2.8.`, `5.2.2.9.`, the Part 4 lighting set, `6.2.2.1.`, `6.2.5.1.` and the
+costing entries could all be deleted without failing anything.
 
-`compute_foreign_citation_counts` guards the complement, deliberately NOT
-duplicating the 8.4 gate, so an 8.4 change re-baselines one file and a Part 4/5
-change the other. Two populations, keyed with the confidence each deserves:
-static literals exactly (`{literal: {kind: count}}`, no file path in the key,
-the same rule the 8.4 baseline follows), and everything else as a single site
-count — those cannot be keyed honestly, because the scanner renders
-`f'{ruleset.article(x)}.(2)(b)'` as the fragment `'.(2)(b)'`, an extraction
-artefact that appears in no audit, but they can still be counted so a deletion
-drops the total.
+A first draft of this entry said "213 inside, 173 outside — roughly 45 %",
+which was wrong in this change's own favour and is corrected here. 213 is the
+8.4 baseline's **per-edition** total (96 for 2020 plus 117 for 2025) of those
+same 105 sites; comparing it against a per-site figure understates the gap. Nor
+are all 178 Part 4/5/6 — about 20 are variables bound to 8.4 f-strings and
+three are the data-driven coverage emitter in `btap/audit` — so the honest
+description is "sites the 8.4 scanner cannot count".
+
+`compute_foreign_citation_counts` guards what the 8.4 gate does not, and
+derives that set from **`citations_for` itself** rather than from a copy of its
+scan-time regex — so no hole can open between the two gates and there is no
+duplicated predicate to drift. An 8.4 change re-baselines one file and a Part
+4/5 change the other.
+
+Two populations, keyed with the confidence each deserves. **Static** literals
+exactly (`{literal: {kind: count}}`, no file path in the key, the same rule the
+8.4 baseline follows). A literal is included when it carries no 8.4 token at
+all, and **also when an article-shaped reference survives removing its 8.4
+tokens**: `'8.4.4.12.; 5.2.2.7.(1)'` is counted by the 8.4 gate under 8.4.4.12,
+so deleting its Part 5 half fired nothing anywhere — five such mixed literals
+exist, and covering them is worth the deliberate overlap. **Dynamic** sites are
+keyed by `ast.unparse` of the expression — `article`, `spec['article']`,
+`f'{article}(4)'` — the code's own text, not the scanner's truncated rendering
+of it (`f'{ruleset.article(x)}.(2)(b)'` renders as the fragment `'.(2)(b)'`,
+which appears in no audit and would be a dishonest key). An earlier draft
+merely COUNTED these, which is blind to a swap: delete one and add an unrelated
+one and the total is unchanged. The 8.4 baseline moved 209 → 211 → 213 across
+two consecutive days, so that is ordinary churn here, not a hypothetical.
 
 The attestation scope is untouched: `NECB_8_4_COVERAGE.html` is a Section 8.4
 document and stays one. Widening it would need Part 4/5/6 article text (the
@@ -3206,6 +3225,22 @@ required by the MOTORS", confirming the electrical basis D-38 sums; and
 into `4.2.3.`, so the four `4.2.2.7`-`4.2.2.10` citations really are the
 deliberate legacy NECB 2011 references their own text says they are.
 
-**Still open (DF-16):** those 96 dynamic sites are guarded only by a total. A
-per-site key would need the scanner to evaluate the interpolation, which it
-cannot do statically.
+Three regression shapes were each reproduced against a throwaway copy of the
+source: a deleted static citation (`5.2.6.3.(1)`, `cited: 3 → 2`); the Part 5
+half of a mixed literal deleted (`cited: 2 → 1`, where both gates were
+previously silent); and a dynamic citation deleted while an unrelated one was
+added (total unchanged at 96 — a bare counter sees nothing — while the keyed
+gate reports `cited: 1 → 0`).
+
+**Still open (DF-16), and larger than "the dynamic sites".** What neither gate
+can see: an article id bound to a VARIABLE and reused — `storage_garage/
+__init__.py:92` sets `article = '4.2.2.2.'` and feeds seven citation sites, so
+changing it to `'4.2.2.3.'` moves no count anywhere (same for
+`hvac/efficiency.py:149` across five sites, and several in `hvac/reference.py`);
+and roughly 70 non-8.4 `"article"` values living in
+`btap/codes/necb/data/**` JSON that reach the audit through ~24 subscript sites
+(`spec["article"]`, `rule['article']`), where editing or deleting one is
+invisible to both gates. Dead code also keeps its count, and a dynamic `warn`
+becoming an `info` is silent because the dynamic key carries kind but the
+source of truth for level is the call. A real fix means citing through a
+checked accessor rather than a free-form keyword.
