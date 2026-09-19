@@ -454,6 +454,11 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
         self.assertTrue(pumps, 'fixture precondition: the residential plant has pumps')
         for pump in pumps:
             pump.setRatedPowerConsumption(500.0)
+        # D-93 divides by the loop's DISTRIBUTION flow, never the sum of its
+        # pumps' flows, and declines rather than guessing when that flow is
+        # unsized. An unsized fixture has none, so state it.
+        for loop_ in model.getPlantLoops():
+            loop_.setMaximumLoopFlowRate(0.004)
         return model
 
     def reference(self, model, code='necb2025'):
@@ -542,7 +547,9 @@ class TestCopiedPlantPumpPowerIsReleased(unittest.TestCase):
                                 for p in reference_pumps),
                          'power is DERIVED at the reference flow, not restored to the released value')
         transfer = [e for e in audit.entries if e['level'] == 'decision'
-                    and e.get('article') == '8.4.5.14.(1)-(3)']
+                    # D-93 cites the SENTENCE that governed, not the range: these
+                    # copied pumps state no head, so (3) supplies the basis.
+                    and e.get('article') == '8.4.5.14.(3)']
         self.assertEqual(len(reference_pumps), len(transfer),
                          'one transfer decision per pump, citing the ACTIVE edition')
         # The head reconciliation this test used to pin is gone with the

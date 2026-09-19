@@ -3277,3 +3277,39 @@ invisible to both gates. Dead code also keeps its count, and a dynamic `warn`
 becoming an `info` is silent because the dynamic key carries kind but the
 source of truth for level is the call. A real fix means citing through a
 checked accessor rather than a free-form keyword.
+
+**DF-11 increment B implemented as D-93, and re-frozen (clean tree at
+`44b72f6`).** 7 of 41 scenarios changed — the same seven that carry an
+8.4.x.14 transfer entry — **audit files only; no `report.json` moved in any
+scenario**, and every audit's entry count is unchanged (286, 208, 210, 292,
+214, 216, 296). One entry edited per scenario, none added or removed.
+
+The edit is the transfer decision, which now names the sentence that governed
+instead of the range `(1)-(3)`: "pump power intensity transferred from the
+proposed system", citing **(3)**, with `combined_electrical_w`,
+`distribution_flow_l_s` and its source in the inputs. Every corpus
+correspondence is single-pump with head at the OpenStudio default, so (3)
+governs throughout — exactly as Sol predicted when he ruled that tool defaults
+mean "not known".
+
+**The re-freeze is text-only for a checkable reason.** D-93 divides by the
+loop's distribution flow where D-11 summed the pumps' rated flows; on a
+single-pump loop those are the same quantity, and the sized proposed SQLs show
+`Maximum Loop Flow Rate` equal to `Pump Design Flow Rate` to all sixteen
+digits. Where they diverge — two pumps in series, or primary-secondary — the
+old denominator counted the same water twice and halved the intensity, which
+is a third of the answer on the Code's own Appendix example. No frozen
+scenario has that topology, so nothing moved here; a real primary-secondary
+proposed would.
+
+Three defects surfaced during implementation that were not in the brief, each
+caught by a test rather than by review. `_served_zone_names` omitted
+`CoilHeatingWaterBaseboard` — a different class from `CoilHeatingWater` — so a
+baseboard-only hot-water loop resolved to no served zones, which is the
+commonest reference heating terminal there is and would have declined the
+correspondence on precisely the systems this Article most often governs. The
+"known" test ignored VALIDITY, so a pump implying a 111 % efficiency counted
+as known and sent its group to (2) rather than (3); Sol's wording is
+"defaulted, missing or invalid". And the (3) audit reported the whole group's
+pump count rather than the pumps actually combined after an unreadable one was
+excluded.
