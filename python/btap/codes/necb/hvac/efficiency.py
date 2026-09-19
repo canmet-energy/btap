@@ -913,7 +913,18 @@ def _served_zone_names(loop_, _seen=None):
                        'to_CoilHeatingWaterBaseboardRadiant',
                        'to_CoilCoolingWaterPanelRadiant',
                        'to_CoilCoolingWaterToAirHeatPumpEquationFit',
-                       'to_CoilHeatingWaterToAirHeatPumpEquationFit'):
+                       'to_CoilHeatingWaterToAirHeatPumpEquationFit',
+                       # Variable-speed WSHP coils, which classify.py already
+                       # recognises, and low-temperature radiant — omitting them
+                       # made those loops decline conservatively rather than
+                       # wrongly, but the correspondence coverage was incomplete
+                       # (Sol, PR #53).
+                       'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
+                       'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+                       'to_CoilHeatingLowTempRadiantVarFlow',
+                       'to_CoilCoolingLowTempRadiantVarFlow',
+                       'to_CoilHeatingLowTempRadiantConstFlow',
+                       'to_CoilCoolingLowTempRadiantConstFlow'):
             candidate = getattr(comp, caster, None)
             if candidate is not None and candidate().is_initialized():
                 coil = candidate().get()
@@ -986,18 +997,11 @@ def _pump_characteristics_known(pump):
         or (head_known and not pump.isRatedPowerConsumptionAutosized()
             and optional_f(pump.ratedPowerConsumption()) is not None)
     )
-    # "defaulted, missing OR INVALID" is the test — a value no pump can have is
-    # not a characteristic to inherit. Where the model pins the whole triple,
-    # the efficiency it implies is the one to check, and an implied efficiency
-    # above 100 % sends the group to (3) exactly as a blank field would.
-    implied = None
-    flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-    power = optional_f(pump.ratedPowerConsumption())
-    motor_eff = pump.motorEfficiency()
-    if flow and power and power > 0 and motor_eff:
-        implied = (flow * head / power) / motor_eff
-    physical = implied is None or 0.0 < implied <= 1.0
-    return head_known, bool(stated and physical)
+    # "defaulted, missing OR INVALID" is the test, and validity is decided by
+    # the same resolver that will later TRANSFER the value — otherwise a pump
+    # can be classified known on one field and transferred from another. A
+    # negative power and a shaft coefficient of 0.5 (200 %) both fail here.
+    return head_known, bool(stated and _hydraulic_efficiency(pump) is not None)
 
 
 def _corresponding_loop(reference_loop, proposed):
@@ -1050,14 +1054,62 @@ def _corresponding_loop(reference_loop, proposed):
 
 
 def _applicable_pumps(loop_):
-    """The loop's own circulating pumps, supply side, in name order."""
-    pumps = []
-    for comp in sorted_by_name(loop_.supplyComponents()):
+    """The loop's own circulating pumps, BOTH sides, in name order.
+
+    A primary-secondary arrangement puts the primary pump on the supply side
+    and the secondary on the DEMAND side, so scanning only the supply side
+    finds one pump where the system has two (Sol, PR #53). That mistakes (2)
+    for (1), and drops the secondary's power out of (3) entirely — on exactly
+    the topology the Appendix example describes.
+    """
+    pumps, seen = [], set()
+    for comp in sorted_by_name(list(loop_.supplyComponents()) + list(loop_.demandComponents())):
+        pump = None
         if comp.to_PumpVariableSpeed().is_initialized():
-            pumps.append(comp.to_PumpVariableSpeed().get())
+            pump = comp.to_PumpVariableSpeed().get()
         elif comp.to_PumpConstantSpeed().is_initialized():
-            pumps.append(comp.to_PumpConstantSpeed().get())
+            pump = comp.to_PumpConstantSpeed().get()
+        if pump is not None and pump.handle() not in seen:
+            seen.add(pump.handle())
+            pumps.append(pump)
     return pumps
+
+
+def _hydraulic_efficiency(pump):
+    """The pump efficiency EnergyPlus will actually use, or None if it is not
+    readable or not one a pump can have.
+
+    One resolver for every caller, because the field that DEFINES the
+    efficiency depends on how power is stated, and reading a different field
+    than the one that defines it silently transfers the wrong number (Sol,
+    PR #53: a proposed triple implying 50 % was transferred as the untouched
+    coefficient's 78 %, turning 888.9 W of proposed power into 569.8 W).
+
+    - a hard rated power pins the triple: eta_p = Q x H / (P x motor_eff)
+    - PowerPerFlow states electrical per flow: eta_p = H x motor_eff / intensity
+      ... expressed through the same identity
+    - otherwise the shaft coefficient IS the statement: eta_p = 1 / k
+    """
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff or not 0.0 < motor_eff <= 1.0:
+        return None
+
+    head = pump.ratedPumpHead()
+    flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+    efficiency = None
+    if not pump.isRatedPowerConsumptionAutosized():
+        power = optional_f(pump.ratedPowerConsumption())
+        if power is not None and power > 0 and head and flow:
+            efficiency = (flow * head) / (power * motor_eff)
+    elif pump.designPowerSizingMethod() == POWER_PER_FLOW:
+        intensity = pump.designElectricPowerPerUnitFlowRate()
+        if intensity and head:
+            efficiency = head / (intensity * motor_eff)
+    else:
+        coefficient = pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+        efficiency = (1.0 / coefficient) if coefficient else None
+
+    return efficiency if (efficiency and 0.0 < efficiency <= 1.0) else None
 
 
 def _governing_sentence(pumps):
@@ -1171,12 +1223,20 @@ def _apply_sentence_1(reference_pump, proposed_pump, prefix, audit):
     point. Flow-invariant: nothing here needs restating after a re-size.
     """
     head = proposed_pump.ratedPumpHead()
-    coefficient = proposed_pump.designShaftPowerPerUnitFlowRatePerUnitHead()
     motor_eff = proposed_pump.motorEfficiency()
+    # The efficiency the proposed STATES, resolved from whichever field defines
+    # it — not the shaft-coefficient field, which on a pump that pins its power
+    # through a hard triple still holds the untouched default and would transfer
+    # a number the proposed never claimed.
+    pump_eff = _hydraulic_efficiency(proposed_pump)
+    if pump_eff is None:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: the corresponding proposed '
+                                        f'pump states no usable efficiency — {prefix}.14.(1) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(1)', ruling='D-93')
 
     reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
     reference_pump.setRatedPumpHead(head)
-    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(coefficient)
+    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
     reference_pump.setMotorEfficiency(motor_eff)
     reference_pump.autosizeRatedPowerConsumption()
 
@@ -1185,9 +1245,9 @@ def _apply_sentence_1(reference_pump, proposed_pump, prefix, audit):
                    target=reference_pump.nameString(),
                    inputs={'corresponding_pump': proposed_pump.nameString(),
                            'head_pa': ruby_round(head),
-                           'pump_efficiency': ruby_round(1.0 / coefficient, 4),
+                           'pump_efficiency': ruby_round(pump_eff, 4),
                            'motor_efficiency': ruby_round(motor_eff, 4)},
-                   value=f'head {ruby_round(head)} Pa at {ruby_round(100.0 / coefficient, 1)}% pump / '
+                   value=f'head {ruby_round(head)} Pa at {ruby_round(pump_eff * 100.0, 1)}% pump / '
                          f'{ruby_round(motor_eff * 100.0, 1)}% motor efficiency; power follows the '
                          f'reference flow',
                    article=f'{prefix}.14.(1)', ruling='D-93')
@@ -1212,6 +1272,20 @@ def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, au
     after each sizing run.
     """
     pairs = [_pump_shaft_and_electrical(pump) for pump in proposed_pumps]
+    if any(s is None or e is None for s, e in pairs):
+        # D-92's hostile-input hardening, which this must not regress: a pump
+        # stating a power no pump can draw used to reach sum() as a None and
+        # terminate compliance processing with a TypeError (Sol, PR #53).
+        # (2) cannot preserve a combined shaft power it cannot compute, so the
+        # group declines — it does not silently drop the offending pump, which
+        # would transfer less power than the proposed system draws.
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: a pump in the corresponding '
+                                        f'proposed system states a power no pump can draw, so the '
+                                        f'combined shaft power is not computable — {prefix}.14.(2) '
+                                        'NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-92 D-93')
+
     shaft = sum(s for s, _ in pairs)
     electrical = sum(e for _, e in pairs)
     flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate())
@@ -1221,14 +1295,18 @@ def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, au
     # EnergyPlus — it only moves the head we state, never the energy — which is
     # why the Note's own 54.2 % not reproducing as a flow-weighted mean changes
     # no result. Recorded in D-93 rather than silently reconciled.
-    weighted = sum(f for f in flows if f)
-    pump_eff = (sum(f * (1.0 / p.designShaftPowerPerUnitFlowRatePerUnitHead())
-                    for f, p in zip(flows, proposed_pumps) if f) / weighted) if weighted else None
+    # Each pump's own stated efficiency, resolved from the field that defines
+    # it — the same resolver the known-test used to admit the group.
+    efficiencies = [_hydraulic_efficiency(p) for p in proposed_pumps]
+    usable = [(f, e) for f, e in zip(flows, efficiencies) if f and e]
+    weighted = sum(f for f, _ in usable)
+    pump_eff = (sum(f * e for f, e in usable) / weighted) if weighted else None
     motor_eff = shaft / electrical if electrical else None
     if not pump_eff or not motor_eff or reference_flow is None or reference_flow <= 0:
         return audit.warn('efficiency', f'{reference_pump.nameString()}: the proposed system states '
                                         f'no usable combined shaft power — {prefix}.14.(2) NOT applied',
-                          target=reference_pump.nameString(), ruling='D-93')
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-93')
 
     head_pa = shaft * pump_eff / reference_flow
     reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)

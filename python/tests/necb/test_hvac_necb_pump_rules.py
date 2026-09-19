@@ -16,7 +16,12 @@ import openstudio
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
-from btap.codes.necb.hvac.efficiency import DEFAULT_PUMP_EFFICIENCY, _pump_power_from_triple
+from btap.codes.necb.hvac.efficiency import (
+    DEFAULT_PUMP_EFFICIENCY,
+    _hydraulic_efficiency,
+    _pump_characteristics_known,
+    _pump_power_from_triple,
+)
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
 
@@ -174,6 +179,92 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertAlmostEqual(147.72, ref_pump.ratedPumpHead() / 1000.0, delta=0.05)
         self.assertAlmostEqual(578.6, 861.11 / (267 / 60.0) * (179.4 / 60.0), delta=0.5,
                                msg="what D-11's superseded method would have given")
+
+    def test_a_secondary_pump_on_the_demand_side_is_counted(self):
+        """Sol, PR #53 P1. A primary-secondary arrangement puts the primary
+        pump on the supply side and the secondary on the DEMAND side. Scanning
+        only the supply side found one pump where the system has two — which
+        mistakes (2) for (1), and drops the secondary's power out of (3)
+        entirely, on exactly the topology the Appendix example describes."""
+        proposed = openstudio.model.Model()
+        loop_, primary = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=600.0,
+                                            zones=('Block A',), distribution_flow=0.010)
+        secondary = openstudio.model.PumpVariableSpeed(proposed)
+        secondary.setRatedFlowRate(0.010)
+        secondary.setRatedPowerConsumption(400.0)
+        self.assertTrue(secondary.addToNode(loop_.demandInletNode()),
+                        'precondition: the secondary pump really is on the demand side')
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'],
+                         'both pumps combine, not just the supply-side one')
+        # (600 + 400) W over the 10 L/s stream = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
+                               msg='the secondary\'s power is not dropped')
+
+    def test_sentence_1_transfers_the_efficiency_the_proposed_actually_states(self):
+        """Sol, PR #53 P1. A hard flow/head/power triple DEFINES the hydraulic
+        efficiency, but the shaft-coefficient field on such a pump still holds
+        the untouched default — so reading that field transferred 78 % where
+        the proposed stated 50 %, turning 888.9 W into 569.8 W."""
+        proposed = openstudio.model.Model()
+        loop_, pump = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, zones=('Block A',))
+        pump.setRatedPumpHead(100_000.0)
+        pump.setRatedPowerConsumption(0.004 * 100_000.0 / 0.5 / 0.9)  # implies exactly 50 %
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.004, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)')
+        self.assertAlmostEqual(0.5, decision['inputs']['pump_efficiency'], delta=1e-4,
+                               msg='the stated efficiency, not the default field')
+        self.assertAlmostEqual(888.9, _pump_power_from_triple(ref_pump, 0.004), delta=0.5,
+                               msg='at equal flow, (1) reproduces the proposed power')
+
+    def test_a_malformed_pump_in_a_group_never_crashes_the_determination(self):
+        """Sol, PR #53 P1. A two-pump group holding 1000 W and -100 W reached
+        sum() with a None and raised, terminating compliance processing. It must
+        route to (3) or decline — never crash."""
+        proposed = openstudio.model.Model()
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=1000.0,
+                                      zones=('Block A',), distribution_flow=0.004)
+        for pump in proposed.getPumpVariableSpeeds():
+            pump.setRatedPumpHead(100_000.0)
+        broken = openstudio.model.PumpVariableSpeed(proposed)
+        broken.setRatedFlowRate(0.004)
+        broken.setRatedPumpHead(100_000.0)
+        broken.setRatedPowerConsumption(-100.0)
+        broken.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.004, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)  # no raise
+
+        self.assertTrue(any('no pump can draw' in w['action'] for w in audit.warnings),
+                        'the malformed pump is named, never silently absorbed')
+        self.assertTrue(any(e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
+                        'an unreadable efficiency sends the group to (3)')
+
+    def test_an_impossible_shaft_coefficient_is_not_a_known_efficiency(self):
+        """A coefficient of 0.5 states a 200 % pump. 'Known' means defaulted,
+        missing OR INVALID — validity decided by the same resolver that would
+        transfer the value."""
+        model = openstudio.model.Model()
+        pump = openstudio.model.PumpVariableSpeed(model)
+        pump.setRatedPumpHead(100_000.0)
+        pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(0.5)
+        self.assertIsNone(_hydraulic_efficiency(pump))
+        self.assertEqual((True, False), _pump_characteristics_known(pump),
+                         'head is stated; the efficiency it claims is not one a pump can have')
 
     def test_two_separate_proposed_systems_on_one_reference_loop_decline(self):
         """N:1 consolidation. The Code does not define correspondence across

@@ -3313,3 +3313,51 @@ as known and sent its group to (2) rather than (3); Sol's wording is
 "defaulted, missing or invalid". And the (3) audit reported the whole group's
 pump count rather than the pumps actually combined after an unreadable one was
 excluded.
+
+**Sol's review of PR #53 (2026-09-19): request changes, three P1s, all
+reproduced before fixing.** Each was a real defect in D-93 as first written,
+and each is now pinned by its own regression test — the findings landed
+precisely because the tests did not cover these shapes.
+
+**Primary-secondary pumps were undercounted.** `_applicable_pumps` scanned only
+`supplyComponents()`, but OpenStudio puts a secondary pump on the DEMAND side.
+Reproduced: the helper returned the primary alone. That mistakes (2) for (1)
+and drops the secondary's electrical power out of (3) — on exactly the topology
+the Appendix example describes. Worse, the Appendix test did not catch it
+because it placed all three pumps on the supply inlet, testing three series
+supply pumps rather than a primary-secondary arrangement. Both sides are now
+scanned and de-duplicated by handle, with a demand-side test.
+
+**The "known" efficiency was not the efficiency transferred.** The predicate
+accepted a hard flow/head/power triple as establishing hydraulic efficiency —
+correctly — but the transfer then copied the shaft-COEFFICIENT field, which on
+such a pump still holds the untouched default. Reproduced: a proposed stating
+50 % transferred as 78 %, turning 888.9 W of proposed power into 569.8 W at
+equal flow. One resolver, `_hydraulic_efficiency`, now reads whichever field
+EnergyPlus actually uses — hard power, PowerPerFlow intensity, or the shaft
+coefficient — validates 0 < eta <= 1, and is used by the predicate, by (1) and
+by (2)'s average alike. A value can no longer be admitted on one field and
+transferred from another.
+
+**A malformed multi-pump group crashed the determination.** An explicit group
+holding 1000 W and -100 W reached (2), where `sum()` received a None and raised
+a TypeError — terminating compliance processing and regressing D-92's
+hostile-input hardening. It now declines with a named warning; and because the
+shared resolver marks the negative pump's efficiency unusable, such a group
+falls to (3) before (2) is ever reached.
+
+The same validation hole accepted a shaft coefficient of 0.5 — a 200 % pump —
+as "known" and copied it under (1). Validity is now decided by the resolver
+that would transfer the value, so the classification and the transfer cannot
+disagree.
+
+**P2, taken as ruled.** The served-zone traversal gained the variable-speed
+water-to-air heat-pump coils `classify.py` already recognises and the
+low-temperature radiant coils; those models declined conservatively before
+rather than transferring a wrong value, but the claimed coverage was
+incomplete. The (2) "no usable combined shaft power" warning gained the
+`article=` it was missing, which had made that site invisible to the citation
+scanner.
+
+Citations 225 -> 231: three new warn sites per edition. No frozen baseline
+moved, so no second re-freeze. Full suite 1180 passed, 1 skipped.

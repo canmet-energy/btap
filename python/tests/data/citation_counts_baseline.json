@@ -39,7 +39,7 @@
     },
     "8.4.4.14": {
       "cited": 5,
-      "warn": 6
+      "warn": 9
     },
     "8.4.4.15": {
       "warn": 1
@@ -127,7 +127,7 @@
     },
     "8.4.5.14": {
       "cited": 5,
-      "warn": 6
+      "warn": 9
     },
     "8.4.5.15": {
       "warn": 1
@@ -173,6 +173,6 @@
     "generated_by": "python/tests/citation_counts.py:compute_citation_counts",
     "key_shape": "{edition: {article: {kind: count}}}",
     "kinds": "The scanner (python_call_kind in generate_necb_8_4_coverage.py) classifies each article= citation call site into exactly two kinds: 'cited' (any call other than audit.warn/audit.warning) and 'warn' (an audit.warn/audit.warning call). It does not separately distinguish 'decision' from 'info' \u2014 both fall under 'cited'. This baseline keys by the scanner's own two kinds, not the three-way decision/warning/info vocabulary used to describe the intent.",
-    "note": "Re-baselined 2026-09-19 for D-93 (DF-11 increment B), which decides the reference pump's VALUE SOURCE per correspondence and by the sentence that governs it. Six new warn sites per edition, all of them DECLINES the previous mechanism could not make because it inferred a whole-building intensity instead: no corresponding proposed loop; an ambiguous correspondence; N:1 consolidation (left to its own adjudication); an undeterminable distribution flow (never fall back to the sum of the pumps' flows); a proposed pump stating a power no pump can draw; and more than one pump on the reference loop, where the Article describes one. Total 213 -> 225. Nothing was lost: no 'cited' count moved, and the foreign-citation baseline is unchanged. Prior re-baselines, kept for the chain: 211 -> 213 on 2026-09-17 for the D-92 review fixes (the exclusion notice); 209 -> 211 on 2026-09-16 for D-92 itself (the first (3) fallback site); and before that, generated AFTER renaming compliance.py's local lighting_prefix -> prefix, which made the article= keyword at compliance.py:346 and its warn-branch sibling scanner-visible."
+    "note": "Re-baselined 2026-09-19 for Sol's review of D-93 (PR #53). Three new warn sites per edition, 225 -> 231, each a decline his findings required: (1) where the corresponding proposed pump states no usable efficiency; (2) where a pump in the group states a power no pump can draw, so the combined shaft power is not computable - that case previously reached sum() with a None and terminated compliance processing with a TypeError; and the article= keyword that was missing from the existing (2) 'no usable combined shaft power' warning, which made that site invisible to the scanner. Nothing was lost: no 'cited' count moved and no frozen baseline moved. Re-baselined 2026-09-19 for D-93 (DF-11 increment B), which decides the reference pump's VALUE SOURCE per correspondence and by the sentence that governs it. Six new warn sites per edition, all of them DECLINES the previous mechanism could not make because it inferred a whole-building intensity instead: no corresponding proposed loop; an ambiguous correspondence; N:1 consolidation (left to its own adjudication); an undeterminable distribution flow (never fall back to the sum of the pumps' flows); a proposed pump stating a power no pump can draw; and more than one pump on the reference loop, where the Article describes one. Total 213 -> 225. Nothing was lost: no 'cited' count moved, and the foreign-citation baseline is unchanged. Prior re-baselines, kept for the chain: 211 -> 213 on 2026-09-17 for the D-92 review fixes (the exclusion notice); 209 -> 211 on 2026-09-16 for D-92 itself (the first (3) fallback site); and before that, generated AFTER renaming compliance.py's local lighting_prefix -> prefix, which made the article= keyword at compliance.py:346 and its warn-branch sibling scanner-visible."
   }
 }
