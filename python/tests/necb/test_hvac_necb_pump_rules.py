@@ -16,14 +16,46 @@ import openstudio
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
-from btap.codes.necb.hvac.efficiency import _pump_power_from_triple
+from btap.codes.necb.hvac.efficiency import DEFAULT_PUMP_EFFICIENCY, _pump_power_from_triple
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
 
 RIDING = {'a': 0.227143, 'b': 1.178929, 'c': -0.41071, 'd': 0.47, 'e': 0.68}
 
 
-def loop_with_vsd_pump(model, type_, flow=None, power=None):
+def serve_zones(model, loop_, zones):
+    """Give a loop a demand side, so it serves named thermal blocks.
+
+    D-93 corresponds pumps between buildings by ROLE plus SERVED THERMAL
+    BLOCKS, so a loop with no demand side corresponds to nothing and the
+    transfer declines — correctly, but it makes a bare fixture untestable. A
+    water baseboard per zone is the smallest demand side that reaches a zone
+    through the same traversal the product code uses.
+    """
+    schedule = model.alwaysOnDiscreteSchedule()
+    for name in zones:
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName(name)
+        # The product builders' own idiom (modeling/hvac/systems/baseboards.py):
+        # a hot-water baseboard carries CoilHeatingWaterBaseboard, which is not
+        # CoilHeatingWater.
+        coil = openstudio.model.CoilHeatingWaterBaseboard(model)
+        loop_.addDemandBranchForComponent(coil)
+        baseboard = openstudio.model.ZoneHVACBaseboardConvectiveWater(model, schedule, coil)
+        baseboard.addToThermalZone(zone)
+    return loop_
+
+
+def loop_with_vsd_pump(model, type_, flow=None, power=None, zones=('Block A',),
+                       distribution_flow=None):
+    """A plant loop with one variable-speed pump, serving `zones`.
+
+    `distribution_flow` is the loop's own design flow — the denominator
+    8.4.x.14.(3) divides by, counted once per fluid stream. It defaults to the
+    pump's flow, which is what a single-pump loop sizes to; pass it explicitly
+    where a fixture has pumps in series, because summing their rated flows is
+    exactly the double-count D-93 exists to prevent.
+    """
     loop_ = openstudio.model.PlantLoop(model)
     loop_.sizingPlant().setLoopType(type_)
     pump = openstudio.model.PumpVariableSpeed(model)
@@ -32,6 +64,10 @@ def loop_with_vsd_pump(model, type_, flow=None, power=None):
     if power:
         pump.setRatedPowerConsumption(power)
     pump.addToNode(loop_.supplyInletNode())
+    if zones:
+        serve_zones(model, loop_, zones)
+    if distribution_flow or flow:
+        loop_.setMaximumLoopFlowRate(distribution_flow or flow)
     return loop_, pump
 
 
@@ -64,33 +100,104 @@ class TestNecbPumpRules(unittest.TestCase):
                             for e in audit.entries),
                         'transfer skip is noted, never silent')
 
-    def test_power_transfer_uses_combined_w_per_l_s_by_loop_type(self):
+    def test_two_pumps_on_one_proposed_system_combine_over_its_distribution_flow(self):
+        """Two pumps in one system, heads defaulted, so (3) governs the group.
+
+        The denominator is the SYSTEM's distribution flow counted once — not
+        the sum of the pumps' rated flows. In series they circulate the same
+        water, and summing them would halve the intensity.
+        """
         proposed = openstudio.model.Model()
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0)
-        # combined: 1500 W / 15 L/s
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.005, power=700.0)
+        loop_, first = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                                          zones=('Block A',), distribution_flow=0.015)
+        second = openstudio.model.PumpVariableSpeed(proposed)
+        second.setRatedFlowRate(0.005)
+        second.setRatedPowerConsumption(700.0)
+        second.addToNode(loop_.supplyInletNode())
 
         reference = openstudio.model.Model()
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)  # 20 L/s
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        # D-92: power is not hard-set any more — head, shaft coefficient and
-        # motor efficiency are stated and EnergyPlus derives the power. The
-        # number it will derive is what this asserts.
         self.assertTrue(ref_pump.ratedPowerConsumption().empty(),
                         'the reference pump is left autosized for E+ to size')
-        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
-                               msg='combined proposed intensity (100 W per L/s) x reference '
-                                   'flow (20 L/s), derived from the triple')
-        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
-                                'a stated pump efficiency no pump could have is an E+ fatal')
-        decision = next((e for e in audit.entries
-                         if e.get('article') == '8.4.4.14.(1)-(3)'), None)
-        self.assertIsNotNone(decision, 'transfer decision audited')
-        self.assertEqual(2, decision['inputs']['proposed_pumps'],
-                         'sentence (2): both pumps combined')
+        # 1500 W over the 15 L/s distribution flow = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1)
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'])
         self.assertAlmostEqual(100.0, decision['inputs']['proposed_w_per_l_s'], delta=0.01)
+        self.assertAlmostEqual(15.0, decision['inputs']['distribution_flow_l_s'], delta=0.01,
+                               msg='the system flow, counted once — not 10 + 5')
+
+    def test_sentence_2_reproduces_the_codes_own_appendix_example(self):
+        """A-8.4.4.14.(2)'s worked example, which nothing tested before.
+
+        Three proposed pumps — 86 L/min @ 60 kPa @ 60 %, 78 @ 100 @ 50 %, 103 @
+        120 @ 45 % — combining to 861 W of shaft power, and a reference pump at
+        179.4 L/min (the flow 8.4.4.9.(6)(f) fixes from a 200 kW plant at a
+        16 °C drop). The Article preserves the shaft watts ABSOLUTELY, so the
+        smaller reference flow does not scale them down.
+
+        This is the case D-11 got wrong: intensity x reference flow gives
+        578.6 W, a third short of what the Code requires.
+        """
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        serve_zones(proposed, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(267 / 60000.0)
+        for flow_lpm, head_kpa, pump_eff in ((86, 60, 0.60), (78, 100, 0.50), (103, 120, 0.45)):
+            pump = openstudio.model.PumpVariableSpeed(proposed)
+            pump.setRatedFlowRate(flow_lpm / 60000.0)
+            pump.setRatedPumpHead(head_kpa * 1000.0)
+            pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+            pump.setMotorEfficiency(1.0)  # the note quotes SHAFT power
+            pump.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        reference_flow = 179.4 / 60000.0
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=reference_flow,
+                                         zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(2)')
+        self.assertAlmostEqual(861.11, decision['inputs']['combined_shaft_w'], delta=0.05,
+                               msg="the note's 861 W")
+        self.assertAlmostEqual(861.11, _pump_power_from_triple(ref_pump, reference_flow), delta=0.5,
+                               msg='preserved ABSOLUTELY at the smaller reference flow')
+        # Sol, DF-11: the note's own stated method is a flow-weighted mean,
+        # which is 51.292 % — its published 54.2 % reproduces the published
+        # 156.1 kPa but follows no stated method, and is reported as an erratum.
+        self.assertAlmostEqual(0.51292, decision['inputs']['pump_efficiency'], delta=1e-4)
+        self.assertAlmostEqual(147.72, ref_pump.ratedPumpHead() / 1000.0, delta=0.05)
+        self.assertAlmostEqual(578.6, 861.11 / (267 / 60.0) * (179.4 / 60.0), delta=0.5,
+                               msg="what D-11's superseded method would have given")
+
+    def test_two_separate_proposed_systems_on_one_reference_loop_decline(self):
+        """N:1 consolidation. The Code does not define correspondence across
+        independently consolidated systems, so increment B declines and says
+        why rather than inferring a whole-building intensity."""
+        proposed = openstudio.model.Model()
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0, zones=('Block A',))
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.005, power=700.0, zones=('Block B',))
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B'))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        warning = next((w for w in audit.warnings if 'consolidated onto this one' in w['action']), None)
+        self.assertIsNotNone(warning, 'the decline names the reason')
+        self.assertIn('adjudicated separately', warning['action'])
+        # The (4)-(5) riding curve still applies — it needs no correspondence.
+        # What must NOT happen is a value transfer under (1), (2) or (3).
+        self.assertEqual([], [e for e in audit.entries if e['level'] == 'decision'
+                              and str(e.get('article') or '') in ('8.4.4.14.(1)', '8.4.4.14.(2)',
+                                                                  '8.4.4.14.(3)')],
+                         'nothing is transferred on a correspondence the Code does not define')
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
@@ -100,6 +207,8 @@ class TestNecbPumpRules(unittest.TestCase):
         reference = openstudio.model.Model()
         loop_ = openstudio.model.PlantLoop(reference)
         loop_.sizingPlant().setLoopType('Condenser')
+        serve_zones(reference, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(0.005)
         pump = openstudio.model.PumpConstantSpeed(reference)
         pump.setRatedFlowRate(0.005)
         pump.addToNode(loop_.supplyInletNode())
@@ -119,8 +228,12 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertTrue(any('NOT transferred' in w['action'] for w in audit.warnings),
-                        'undeterminable proposed pumps warn loudly')
+        warning = next((w for w in audit.warnings if 'NOT applied' in w['action']), None)
+        self.assertIsNotNone(warning, 'undeterminable proposed pumps warn loudly')
+        self.assertIn('distribution flow', warning['action'],
+                      'and name what could not be determined')
+        self.assertIn('circulate the same water', warning['action'],
+                      'saying why the sum of the pumps\' own flows is not a substitute')
         self.assertTrue(ref_pump.ratedPowerConsumption().empty(),
                         'no transfer happened — autosizing retained')
         self.assertAlmostEqual(RIDING['a'], ref_pump.coefficient1ofthePartLoadPerformanceCurve(),
@@ -131,12 +244,15 @@ class TestNecbPumpRules(unittest.TestCase):
         loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0)
 
         reference = openstudio.model.Model()
-        loop_with_vsd_pump(reference, 'Cooling', flow=0.02)  # no Cooling pumps in proposed
+        loop_with_vsd_pump(reference, 'Cooling', flow=0.02)  # no chilled-water loop in proposed
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        self.assertTrue(any('NO Cooling-type loop pumps' in w['action'] for w in audit.warnings),
-                        'missing loop-type correspondence warns')
+        warning = next((w for w in audit.warnings
+                        if 'has no chilled_water loop' in w['action']), None)
+        self.assertIsNotNone(warning, 'a missing counterpart warns')
+        self.assertIn('not a Code value', warning['action'],
+                      'and says the retained default is a modelling default, not a Code one')
 
     def test_2025_citations_renumbered(self):
         model = openstudio.model.Model()
@@ -182,11 +298,11 @@ class TestNecbPumpRules(unittest.TestCase):
     # ("Calculated Pump Efficiency > 100%") is unreachable by construction.
     def test_unphysical_inherited_head_is_replaced_not_reconciled(self):
         proposed = openstudio.model.Model()
-        # weak: 10 W/(L/s), and a triple implying 1790% total efficiency
-        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=100.0)
+        # weak: 10 W/(L/s), head left at the SDK default so (3) governs
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=100.0, zones=('Block A',))
 
         reference = openstudio.model.Model()
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.001)
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.001, zones=('Block A',))
         # legacy SWH-scale head: flow x head / power >> motor eff
         ref_pump.setRatedPumpHead(1_927_540.0)
         audit = AuditLog()
@@ -201,11 +317,13 @@ class TestNecbPumpRules(unittest.TestCase):
                                 'the stated pump efficiency is one a pump can have')
         self.assertEqual([], [e for e in audit.warnings if 'head reduced' in e['action']],
                          'nothing to reconcile: no hard-set power was ever written')
-        # the proposed pump could not state a usable efficiency, so (3) supplies
-        # the basis and the physical split is declared, never silently assumed
-        self.assertTrue(any('efficiency not usable' in e['action']
-                            and e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
-                        'the fallback to a physical split is audited')
+        # The proposed pump's head is an SDK default, so (3) governs and the
+        # split is a declared modelling choice — stated in the decision itself
+        # rather than in a separate fallback note.
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertIn('declared', decision['value'])
+        self.assertIn('modelling split', decision['value'])
 
     @staticmethod
     def add_boiler(loop_, kw):
@@ -283,36 +401,38 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertAlmostEqual(450.0 / 0.020, pump.designElectricPowerPerUnitFlowRate(), delta=1.0,
                                msg='so the intensity itself is what the clamp must move')
 
-    def test_a_proposed_pump_stating_the_impossible_is_left_out_of_the_average(self):
-        """Sol, PR #50 P2: validating only the aggregate lets an impossible pump
-        hide inside a plausible mean — 55.6% averaged with 111.1% reads as 60.6%,
-        and the reference inherits an efficiency no proposed pump has."""
+    def test_an_impossible_efficiency_sends_the_whole_group_to_sentence_3(self):
+        """D-92 kept an impossible pump's power in a (2)-style total while
+        dropping only its efficiency from the average. Sol overruled that
+        (DF-11 increment B): (2) cannot preserve a combined shaft power it
+        cannot compute, so the COMPLETE group takes (3) and the efficiency is a
+        declared modelling split, not a blend of whatever happened to be valid.
+        """
         proposed = openstudio.model.Model()
-        loop_ = openstudio.model.PlantLoop(proposed)
-        loop_.sizingPlant().setLoopType('Heating')
-        for flow, power, head in ((0.010, 1000.0, 50_000.0), (0.001, 100.0, 100_000.0)):
-            p = openstudio.model.PumpVariableSpeed(proposed)
-            p.setRatedFlowRate(flow)
-            p.setRatedPowerConsumption(power)
-            p.setRatedPumpHead(head)
-            p.addToNode(loop_.supplyInletNode())
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=1000.0,
+                                      zones=('Block A',), distribution_flow=0.011)
+        for pump in proposed.getPumpVariableSpeeds():
+            pump.setRatedPumpHead(50_000.0)
+        impossible = openstudio.model.PumpVariableSpeed(proposed)
+        impossible.setRatedFlowRate(0.001)
+        impossible.setRatedPowerConsumption(100.0)
+        impossible.setRatedPumpHead(100_000.0)  # implies 111 % — no pump can do this
+        impossible.addToNode(loop_.supplyInletNode())
 
         reference = openstudio.model.Model()
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        stated = 1.0 / ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead()
-        self.assertAlmostEqual(0.5556, stated, delta=1e-3,
-                               msg='the valid pump alone supplies the efficiency (not the 60.6% blend)')
-        self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0)
-        self.assertTrue(any('excluded from the flow-weighted split' in e['action']
-                            and e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
-                        'the exclusion is declared, not silently applied')
-        # (2) still combines every pump's power and flow — only the efficiency
-        # of the impossible one is discarded.
-        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)-(3)')
-        self.assertEqual(2, decision['inputs']['proposed_pumps'])
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
+        self.assertEqual(2, decision['inputs']['proposed_pumps'],
+                         'both pumps combine under (3) — neither efficiency is inherited')
+        self.assertAlmostEqual(DEFAULT_PUMP_EFFICIENCY,
+                               1.0 / ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), delta=1e-6,
+                               msg='a declared physical split, not the valid pump\'s 55.6 %')
+        # 1100 W over the 11 L/s distribution flow = 100 W/(L/s) x 20 L/s
+        self.assertAlmostEqual(2000.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1)
 
     # Sol, PR #50 (residual risk): the SDK refuses a motor efficiency outside
     # (0,1], a non-positive shaft coefficient and a non-finite head — but it
@@ -342,25 +462,28 @@ class TestNecbPumpRules(unittest.TestCase):
         """A negative wattage must not subtract from the (2) combination, or the
         reference inherits an intensity lower than any proposed pump draws."""
         proposed = openstudio.model.Model()
-        loop_ = openstudio.model.PlantLoop(proposed)
-        loop_.sizingPlant().setLoopType('Heating')
-        for flow, power in ((0.010, 800.0), (0.010, -500.0)):
-            p = openstudio.model.PumpVariableSpeed(proposed)
-            p.setRatedFlowRate(flow)
-            p.setRatedPowerConsumption(power)
-            p.addToNode(loop_.supplyInletNode())
+        loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                                      zones=('Block A',), distribution_flow=0.010)
+        negative = openstudio.model.PumpVariableSpeed(proposed)
+        negative.setRatedFlowRate(0.010)
+        negative.setRatedPowerConsumption(-500.0)
+        negative.addToNode(loop_.supplyInletNode())
 
         reference = openstudio.model.Model()
-        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020)
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A',))
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        # 800 W / 10 L/s = 80 W/(L/s) x 20 L/s — NOT (800-500)/20 = 15 W/(L/s)
+        # 800 W over the 10 L/s distribution flow = 80 W/(L/s) x 20 L/s —
+        # NOT (800-500)/10 = 30 W/(L/s)
         self.assertAlmostEqual(1600.0, _pump_power_from_triple(ref_pump, 0.020), delta=0.1,
                                msg='the malformed pump is excluded, not netted off')
-        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(1)-(3)')
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(3)'
+                        and e['level'] == 'decision')
         self.assertEqual(1, decision['inputs']['proposed_pumps'],
                          'and it is not counted among the pumps combined')
+        self.assertTrue(any('no pump can draw' in w['action'] for w in audit.warnings),
+                        'the exclusion is shouted, never silent')
 
     def test_pump_power_cap_leaves_compliant_transfer_untouched(self):
         proposed = openstudio.model.Model()
