@@ -1,0 +1,305 @@
+{
+  "static": {
+    "11.4.1.1.; 11.4.2.1. (NECB 2025)": {
+      "cited": 1
+    },
+    "NECB Table C-1 (legacy get_necb_hdd18 convention)": {
+      "cited": 1
+    },
+    "3.2.1.4.(1)": {
+      "cited": 1
+    },
+    "3.2.1.4.(2)": {
+      "cited": 1
+    },
+    "1.4.1.2.": {
+      "cited": 2
+    },
+    "Table 3.2.2.3.": {
+      "cited": 2
+    },
+    "3.1.1.7.": {
+      "warn": 3,
+      "cited": 1
+    },
+    "Table 3.2.2.2.; 3.1.1.7.(4)": {
+      "cited": 1
+    },
+    "Table 3.2.3.1.; 3.2.3.3.(3)": {
+      "warn": 1,
+      "cited": 2
+    },
+    "3.2.4.2.": {
+      "cited": 1
+    },
+    "3.1.1.7. (Ut = Uo + \u03a3\u03c8\u00b7L/A + \u03a3\u03c7\u00b7n/A; PSI per BETBG)": {
+      "cited": 1
+    },
+    "5.2.2.8.; 5.2.10.1.; 5.2.12.": {
+      "cited": 1
+    },
+    "5.2.2.8.": {
+      "warn": 1,
+      "cited": 1
+    },
+    "5.2.12.; Table 5.2.12.1.": {
+      "warn": 1
+    },
+    "5.2.2.9.": {
+      "cited": 2
+    },
+    "NECB 2020 Table 5.2.12.1 (unitary equipment)": {
+      "cited": 2
+    },
+    "NECB 2020 Table 5.2.12.1 (heat pumps, heating)": {
+      "cited": 2
+    },
+    "5.2.6.3.(1)": {
+      "cited": 3,
+      "warn": 1
+    },
+    "Table 5.2.12.2": {
+      "cited": 1
+    },
+    "5.2.2.7.(1)": {
+      "warn": 1
+    },
+    "8.4.4.12.; 5.2.2.7.(1)": {
+      "cited": 2
+    },
+    "4.2.1.4.; 4.2.1.5.; 4.2.1.6.": {
+      "cited": 1
+    },
+    "4.2.1.6. (atrium)": {
+      "cited": 1
+    },
+    "4.2.2.1.(16)-(23); 4.3.2.10. (8.4.4.5.(3) via schedule modulation)": {
+      "cited": 1
+    },
+    "4.2.1.6.": {
+      "warn": 2
+    },
+    "4.2.2.1.(12)(c)": {
+      "cited": 1
+    },
+    "4.2.2.1.(12)(a)": {
+      "cited": 2
+    },
+    "4.2.2.1.(15)(c)": {
+      "cited": 1
+    },
+    "4.2.1.6.; 4.2.2.1.(10); 4.2.2.1.(13)": {
+      "warn": 1
+    },
+    "4.2.2.3.": {
+      "warn": 3
+    },
+    "4.2.2.5.": {
+      "warn": 2
+    },
+    "4.2.2.3.; 4.2.2.5.": {
+      "warn": 2
+    },
+    "4.2.2.1.": {
+      "cited": 2
+    },
+    "4.2.2.1.(15)(a)": {
+      "warn": 1
+    },
+    "4.2.2.3.; 4.2.2.4.; 4.2.2.5.": {
+      "cited": 1
+    },
+    "4.2.2.1.(10); 4.2.2.1.(12); 4.2.2.1.(13); 4.2.2.1.(15); Table 4.2.1.6.": {
+      "cited": 2
+    },
+    "NECB 2011 4.2.2.4./4.2.2.7./4.2.2.8./4.2.2.10. (articles that DO NOT EXIST in NECB 2020/2025, whose Subsection 4.2.2 ends at 4.2.2.6.)": {
+      "warn": 1
+    },
+    "4.2.2.1.(10); 4.2.2.1.(13)": {
+      "cited": 2,
+      "warn": 1
+    },
+    "4.2.3.1.": {
+      "cited": 2,
+      "warn": 1
+    },
+    "4.2.2.2.": {
+      "cited": 1
+    },
+    "4.2.2.2.(4)": {
+      "warn": 1
+    },
+    "8.4.3.1.(2); 4.2.1.6.": {
+      "warn": 1
+    },
+    "8.4.3.2. (SWH loads); 6.2.2.1.": {
+      "cited": 1
+    },
+    "6.2.2.1.": {
+      "cited": 1
+    },
+    "6.2.2.1. (instantaneous rows)": {
+      "cited": 1
+    },
+    "6.2.2.1. (storage-type heat pump)": {
+      "cited": 1
+    },
+    "6.2.5.1.": {
+      "cited": 3,
+      "warn": 1
+    },
+    "10.1.2.1. (Table verified identical 2020/2025)": {
+      "cited": 1
+    },
+    "materials_hvac (next-largest-size rule)": {
+      "cited": 1
+    },
+    "legacy getGeometryData port": {
+      "cited": 1
+    },
+    "hvac_vent_ahu (L/s buckets, ceil units, re-select)": {
+      "cited": 1
+    },
+    "NECB 2011 4.2.2.4./4.2.2.5./4.2.2.9. (legacy costing rule; 4.2.2.9. does not exist in NECB 2020/2025)": {
+      "cited": 1
+    }
+  },
+  "dynamic": {
+    "art[\"article\"]": {
+      "cited": 2,
+      "warn": 1
+    },
+    "\"Table 3.2.3.1.\" if boundary == \"ground\"\n                                else \"Table 3.2.2.2.\"": {
+      "cited": 1
+    },
+    "f\"NECB {ruleset.edition} Tables 3.2.2.x/3.2.3.1 \"\n                           \"(3.1.1.7 effective)\"": {
+      "cited": 1
+    },
+    "fdwr.get(\"article\")": {
+      "cited": 1
+    },
+    "srr.get(\"article\")": {
+      "cited": 1
+    },
+    "rule['trigger_article']": {
+      "warn": 3,
+      "cited": 1
+    },
+    "article": {
+      "cited": 16,
+      "warn": 17
+    },
+    "f'5.2.6.3.(1); {prefix}.1.(2)'": {
+      "cited": 1
+    },
+    "hp_article": {
+      "cited": 2,
+      "warn": 2
+    },
+    "economizer_spec['article']": {
+      "cited": 1
+    },
+    "f\"{rule['article']}; {rule['trigger_article']}; 5.2.10.1.(4); 5.2.10.1.(6)\"": {
+      "cited": 1
+    },
+    "res['article']": {
+      "cited": 3
+    },
+    "'; '.join(_uniq([a for a in assignment.articles if a is not None]))": {
+      "cited": 2
+    },
+    "caps['article']": {
+      "cited": 1
+    },
+    "f\"{heat_pump_article_base(rules_data.get('selection') or {})}.(2)(b)\"": {
+      "cited": 1
+    },
+    "f'{article_base}.(2){sentence}'": {
+      "cited": 2,
+      "warn": 1
+    },
+    "hp_rule['article']": {
+      "cited": 1
+    },
+    "pc['article']": {
+      "cited": 1
+    },
+    "f'{prefix}.12. (Table -12 -> 5.2.2.8)'": {
+      "cited": 1
+    },
+    "f'{article_base}.(2)(g)'": {
+      "cited": 2
+    },
+    "purchased_heating['article']": {
+      "cited": 1
+    },
+    "f'{hp_article}.(1); Note A-{hp_article}'": {
+      "cited": 1
+    },
+    "'; '.join(a for a in assignment.articles if a is not None)": {
+      "cited": 1
+    },
+    "fans['article']": {
+      "cited": 1
+    },
+    "rules_data['heat_pump_reference']['article']": {
+      "cited": 1
+    },
+    "rule['article']": {
+      "warn": 1
+    },
+    "'4.2.1.6.' if building_type == 'Space Function' else '4.2.1.5.'": {
+      "cited": 1
+    },
+    "f\"4.2.1.6.; 4.2.2.1.({sentence})\"": {
+      "warn": 1
+    },
+    "f\"4.2.1.6.; 4.2.2.1.({sentence}); 4.2.2.1.(2)\"": {
+      "cited": 1
+    },
+    "sensor_article": {
+      "cited": 1
+    },
+    "f\"{prefix}.5.(3); 4.3.2.10.\"": {
+      "cited": 1
+    },
+    "f\"{prefix}.5.(1); 4.2.1.6.\"": {
+      "warn": 1
+    },
+    "f\"{article}(2)\"": {
+      "cited": 1,
+      "warn": 1
+    },
+    "f\"{article}(3)\"": {
+      "cited": 2,
+      "warn": 1
+    },
+    "f\"{article}(5)\"": {
+      "cited": 1
+    },
+    "f\"{article}(1)\"": {
+      "cited": 1,
+      "warn": 1
+    },
+    "f\"{article}(4)\"": {
+      "cited": 4,
+      "warn": 1
+    },
+    "spec[\"article\"]": {
+      "cited": 6
+    },
+    "_article(entry)": {
+      "cited": 3
+    }
+  },
+  "_provenance": {
+    "commit": "df613f453747bdc0cd1968d310c14086a5aaf68e",
+    "generated_by": "python/tests/citation_counts.py:compute_foreign_citation_counts",
+    "source_glob": "python/btap/**/*.py",
+    "key_shape": "{'static': {literal: {kind: count}}, 'dynamic': {expression: {kind: count}}}",
+    "populations": "Exact physical-site accounting at 2026-09-18: 278 article= sites in python/btap/**/*.py; 105 resolve onto a Section 8.4 article and are covered by citation_counts_baseline.json; 173 sit entirely outside that gate (173/278 = 62 percent); 9 are MIXED, citing both an 8.4 article and something else. This baseline covers the 173 plus the 9 mixed = 182, so the two baselines overlap on 9 sites BY DESIGN and must not be read as disjoint. An earlier revision said 105 and 178 as though they were, and the revision before that compared the 8.4 gate per-EDITION total of 213 (96 for 2020 plus 117 for 2025, of those same 105 sites) against a per-site figure, which understated the gap as 45 percent.",
+    "why": "DF-15. The 8.4 gate counts a citation only if its literal resolves onto an article in that edition articles_8_4.json, and _scan_citations drops a non-8.4 literal at SCAN time before that, so those citations could be deleted without failing anything. Not all 182 are Part 4/5/6: about 20 are variables bound to 8.4 f-strings and three are the data-driven coverage emitter in btap/audit, so the honest description is sites the 8.4 scanner cannot count. This baseline does NOT widen the coverage attestation, which is a Section 8.4 document.",
+    "classification": "Membership in the real gate decides first (_resolved_sites asks CoverageGenerator.citations_for itself, so no hole can open between the two gates and no predicate is copied). A GATED site is then also guarded here when foreign content survives removing its 8.4 tokens - that is what covers the 9 mixed sites, static and dynamic alike. Classifying by content first discarded every gated dynamic site wholesale, which left the foreign half of D-38 own clamp citation f'5.2.6.3.(1); {prefix}.1.(2)' deletable with nothing moving.",
+    "key_stability": "Dynamic keys come from ast.get_source_segment, validated by re-parsing: the slice is used only when it rebuilds the same tree, else a structural ast.dump is the fallback. ast.unparse cannot be used - it re-renders in the running interpreter syntax, so an f-string key authored on 3.12 (PEP 701) is not the key 3.11 emits. That shipped in the first revision and CI 3.11 job caught it; the floor is requires-python >=3.11."
+  }
+}
