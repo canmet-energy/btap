@@ -88,7 +88,7 @@
 [warning ] efficiency    staged DX heating capacity unavailable (model not sized?) — not set | building: reference building | target: CoilHeatingDXMultiSpeed_ashp 2
 [warning ] efficiency    staged DX heating capacity unavailable (model not sized?) — not set | building: reference building | target: CoilHeatingDXMultiSpeed_ashp 3
 [warning ] efficiency    staged DX heating capacity unavailable (model not sized?) — not set | building: reference building | target: CoilHeatingDXMultiSpeed_ashp 4
-[info    ] efficiency    no proposed model supplied — 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied) | building: reference building | ruling D-11
+[info    ] efficiency    no proposed model supplied — 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied) | building: reference building | ruling D-11 D-93
 [info    ] efficiency    service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built | building: reference building | target: Main Service Water Loop | ruling D-27
 [warning ] efficiency    CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable — 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first) | building: reference building | target: CoilHeatingDXMultiSpeed_ashp | per 8.4.4.13.(2)(c) | ruling D-22
 [warning ] efficiency    CoilHeatingDXMultiSpeed_ashp 1: staged cooling capacity unavailable — 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first) | building: reference building | target: CoilHeatingDXMultiSpeed_ashp 1 | per 8.4.4.13.(2)(c) | ruling D-22
