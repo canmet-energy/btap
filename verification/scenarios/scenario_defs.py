@@ -50,19 +50,23 @@ D89_SEAL = ("python-only:first frozen at D-89 step 3 (R-O-a) — authored "
 #: transfer runs in the POST-SIZING efficiency pass, so the python lane never
 #: reaches it and the annual tier would add EnergyPlus cost for nothing new.
 #:
-#: ``17-vav-hw-reheat`` is the realistic one — a catalog NECB System 6 with
-#: hot-water reheat, the corpus's only hot-water VAV and its only SIZED model
-#: carrying hot-water, chilled-water and condenser loops at once. It EXERCISES
-#: the held-coil accessor but cannot DISCRIMINATE a mis-attribution in it: its
-#: air-loop coil is hot water too and contributes every zone through the
-#: second accessor.
+#: ``17-vav-hw-reheat`` is the catalog-authored one, a real NECB System 6. It
+#: is the only frozen scenario where correspondence SUCCEEDS through a loop
+#: resolved by air-loop coil UNION held coils — it transfers
+#: ``proposed_pumps=1`` at 255.49 W/(L/s), where 18 declines and 01/02 resolve
+#: through baseboards. So it witnesses the held accessor's contribution
+#: reaching a transferred W/(L/s); it cannot DETECT the accessor's absence,
+#: because its air-loop coil is hot water too and contributes every zone
+#: through the second accessor.
 #:
 #: ``18-vav-hw-subset-reheat`` is the one that discriminates — hot-water reheat
 #: on 3 of 5 terminals of an all-electric VAV, so the loop reaches its blocks
-#: only through the held accessor and only for the zones it truly serves.
-#: Measured on the built model: real ``[Zone 1-3]``, held accessor removed
-#: ``[]``, holder over-attributed ``[Zone 1-5]`` — three correspondence
-#: outcomes, so either PR #53 defect moves this baseline. It is hand-built
+#: only through the held accessor and only for the zones it truly serves. Its
+#: System 3 reference resolves through baseboards (first accessor) and is
+#: untouched by either defect, so it is the PROPOSED set that moves: real
+#: ``[Zone 1-3]`` partial-overlap decline, round one ``[]`` "no proposed
+#: hot_water loop serves these thermal blocks", round two ``[Zone 1-5]`` a
+#: FALSE one-to-one. Either PR #53 defect moves this baseline. Hand-built
 #: because no catalog row produces the shape; all 97 were swept.
 DF17_SIZING_SUBSET = ["17-vav-hw-reheat", "18-vav-hw-subset-reheat"]
 DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "

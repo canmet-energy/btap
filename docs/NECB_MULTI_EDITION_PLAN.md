@@ -1278,29 +1278,40 @@ any result.
   **What shipped.** Two models, both sized (the transfer runs in the
   post-sizing pass, so the python lane never reaches it), 41 → 45 scenarios:
 
-  - `17-vav-hw-reheat` — the realistic one. A catalog NECB System 6 with
-    hot-water reheat: 5 `CoilHeatingWater` through `containingHVACComponent`
-    (holder `OS_AirTerminal_SingleDuct_VAV_Reheat`) plus 1 through
-    `airLoopHVAC`; the corpus's only hot-water VAV and its only *sized* model
-    carrying hot-water, chilled-water and condenser loops at once.
-    (`04-fancoil-chiller` also has three loops, but is python-lane only, where
-    the transfer never runs — an earlier claim that 17 was the only three-loop
-    building was false.) It EXERCISES the held path and cannot discriminate a
-    mis-attribution: measured with the accessor disabled, `[Zone 1-5]` either
-    way.
+  - `17-vav-hw-reheat` — the catalog-authored one, a real NECB System 6:
+    5 `CoilHeatingWater` through `containingHVACComponent` (holder
+    `OS_AirTerminal_SingleDuct_VAV_Reheat`) plus 1 through `airLoopHVAC`. It is
+    the only frozen scenario where correspondence SUCCEEDS through a loop
+    resolved by air-loop coil UNION held coils — it transfers
+    `proposed_pumps=1` at 255.49 W/(L/s), where 18 declines and 01/02 resolve
+    through baseboards. So it witnesses the third accessor's contribution
+    reaching a transferred W/(L/s). It cannot DETECT the accessor's absence:
+    with it disabled the set is `[Zone 1-5]` either way.
+
+    The "only three-loop building" claim attached to 17 was wrong **twice** —
+    first ignoring `04-fancoil-chiller`, then, narrowed to "only *sized*",
+    ignoring sample 18 itself, which carries hot-water, chilled-water and
+    condenser loops exactly as 17 does. The loop list was printed in my own
+    verification output both times. The uniqueness claim is dropped rather than
+    narrowed a third time (Fable, PR #54).
   - `18-vav-hw-subset-reheat` — the one that DISCRIMINATES. Hot-water reheat on
     3 of 5 terminals of an otherwise all-electric system. Measured on the saved
     `.osm`:
 
-        real                        : [Thermal Zone 1, 2, 3]
-        held accessor removed       : []
-        holder over-attributed      : [Thermal Zone 1, 2, 3, 4, 5]
+        real     [Zone 1, 2, 3]  -> "shares 3 of this reference loop's 5
+                                    thermal blocks … a partial overlap is not
+                                    a correspondence"
+        round 1  []              -> "no proposed hot_water loop serves these
+                                    thermal blocks"
+        round 2  [Zone 1 .. 5]   -> "one-to-one"  — a FALSE match
 
-    Three different correspondence outcomes — a partial-overlap decline, "the
-    reference loop serves no thermal block", and a false one-to-one against the
-    System 3 reference. **Either PR #53 defect moves this baseline.** Keep the
-    reheat a strict subset: give every terminal a coil and the set goes
-    insensitive again.
+    The reference this model selects is System 3 with hot-water BASEBOARDS,
+    which resolve through the FIRST accessor and are untouched by either
+    defect; it is the PROPOSED set that moves. An earlier draft quoted "the
+    reference loop serves no thermal block" for round one — the wrong branch,
+    one this sample never reaches (Fable, PR #54). **Either PR #53 defect moves
+    this baseline.** Keep the reheat a strict subset: give every terminal a
+    coil and the set goes insensitive again.
 
   The gap this finding was opened for is now closed by `18`. `17` earns its
   place on pump-transfer, riding-curve and 5.2.6.3-cap coverage, not on
