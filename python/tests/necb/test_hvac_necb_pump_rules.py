@@ -19,6 +19,8 @@ from btap.codes.necb import hvac
 from btap.codes.necb.hvac.efficiency import (
     DEFAULT_PUMP_EFFICIENCY,
     _hydraulic_efficiency,
+    _loop_role,
+    _pump_cap_basis,
     _pump_characteristics_known,
     _pump_power_from_triple,
 )
@@ -179,6 +181,57 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertAlmostEqual(147.72, ref_pump.ratedPumpHead() / 1000.0, delta=0.05)
         self.assertAlmostEqual(578.6, 861.11 / (267 / 60.0) * (179.4 / 60.0), delta=0.5,
                                msg="what D-11's superseded method would have given")
+
+    def test_the_cap_and_the_curve_both_reach_a_demand_side_pump(self):
+        """Sol, PR #53 P1 — a FALSE COMPLIANCE RESULT.
+
+        D-93's collector was fixed to scan both plant sides, but the two older
+        paths kept their own supply-only scans. A 100 W supply pump beside a
+        10,000 W demand-side pump on a 100 kW loop therefore reported
+        `combined_w=100` against a 450 W cap and was certified "within the
+        maximum", while the demand pump kept all 10,000 W and never received
+        its (4)-(5) riding curve.
+        """
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        self.add_boiler(loop_, 100.0)  # cap = 4.5 W/kW x 100 kW = 450 W
+        supply = openstudio.model.PumpVariableSpeed(model)
+        supply.setRatedFlowRate(0.004)
+        supply.setRatedPowerConsumption(100.0)
+        supply.addToNode(loop_.supplyInletNode())
+        demand = openstudio.model.PumpVariableSpeed(model)
+        demand.setRatedFlowRate(0.004)
+        demand.setRatedPowerConsumption(10_000.0)
+        self.assertTrue(demand.addToNode(loop_.demandInletNode()),
+                        'precondition: the second pump really is on the demand side')
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(model, code='necb2020', audit=audit)
+
+        self.assertEqual([], [e for e in audit.entries
+                              if 'within the Table 5.2.6.3 maximum' in e['action']],
+                         'a 10,100 W loop is NEVER certified against a 450 W cap')
+        clamp = next(e for e in audit.entries if 'exceeds Table 5.2.6.3' in e['action'])
+        self.assertAlmostEqual(10_100.0, clamp['inputs']['before_w'], delta=1.0,
+                               msg='the demand-side pump is counted')
+        self.assertLess(demand.ratedPowerConsumption().get(), 500.0,
+                        'and it is actually clamped, not merely reported')
+        self.assertAlmostEqual(RIDING['a'], demand.coefficient1ofthePartLoadPerformanceCurve(),
+                               delta=1e-6, msg='(4)-(5) reaches it too')
+
+    def test_a_variable_speed_wshp_loop_is_classified_like_a_constant_speed_one(self):
+        """Sol, PR #53 P2: three places carried their own partial list of
+        water-to-air coil types, so a variable-speed WSHP loop read as plain hot
+        water and took the Heating cap row instead of the water-source one."""
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        coil = openstudio.model.CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit(model)
+        loop_.addDemandBranchForComponent(coil)
+
+        self.assertEqual('heat_pump_source', _loop_role(loop_))
+        self.assertEqual('Water-source heat pump', _pump_cap_basis(loop_, 'Heating')[0])
 
     def test_a_secondary_pump_on_the_demand_side_is_counted(self):
         """Sol, PR #53 P1. A primary-secondary arrangement puts the primary

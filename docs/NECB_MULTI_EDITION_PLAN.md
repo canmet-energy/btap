@@ -3361,3 +3361,36 @@ scanner.
 
 Citations 225 -> 231: three new warn sites per edition. No frozen baseline
 moved, so no second re-freeze. Full suite 1180 passed, 1 skipped.
+
+**Sol's second review of PR #53 (2026-09-20): a FALSE COMPLIANCE RESULT, and
+the lesson behind it.** The previous round fixed `_applicable_pumps` to scan
+both plant sides, but two OLDER paths kept their own supply-only scans — the
+Table 8.4.x.14 riding-curve application and the D-38 combined-power cap.
+Reproduced: a 100 W supply pump beside a 10,000 W demand-side pump on a 100 kW
+heating loop reported `combined_w=100` against a 450 W cap and was audited
+"within the Table 5.2.6.3 maximum", while the demand pump kept all 10,000 W
+and never received its riding curve.
+
+That is the second time in this line of work that a partial fix left a
+compliance check able to certify a violating loop — the first was D-92's cap
+clamping through a field EnergyPlus does not read. Both share a cause: a
+behaviour was corrected in the path that had just been written while an older
+path computing the same thing was left alone. Both paths now call
+`_applicable_pumps`, so a pump cannot be visible to the transfer and invisible
+to the cap; after the fix the cap sees 10,100 W, clamps to 450 W, and the
+demand pump ends at 445.5 W with `coefficient1 = 0.227143`.
+
+The same shape appeared in the water-to-air coil checks, where THREE places
+carried their own partial list: the served-zone traversal knew the
+variable-speed WSHP coils while `_loop_role` and `_pump_cap_basis` knew only
+the constant-speed equation-fit pair, so a variable-speed WSHP loop classified
+as plain hot water and took the Heating cap row rather than the water-source
+one. One registry, `WATER_TO_AIR_HEAT_PUMP_COILS`, now serves all three.
+
+Also corrected: the `_hydraulic_efficiency` docstring stated the PowerPerFlow
+relation inverted (`eta_p = H x motor_eff / I` where the code correctly
+computes `H / (I x motor_eff)`).
+
+Two regression tests, both pinning shapes that had no coverage — which is why
+these survived three review rounds. No frozen baseline moved and citations are
+unchanged. Full suite 1183 passed, 1 skipped.

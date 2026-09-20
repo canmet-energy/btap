@@ -561,9 +561,11 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
             continue
 
         loop_type = loop_.sizingPlant().loopType()
-        for comp in sorted_by_name(loop_.supplyComponents()):
-            if comp.to_PumpVariableSpeed().is_initialized():
-                pump = comp.to_PumpVariableSpeed().get()
+        # _applicable_pumps, not a supply-side scan: a primary-secondary
+        # arrangement puts the secondary pump on the DEMAND side, and it needs
+        # the (4)-(5) curve exactly as much as the primary does (Sol, PR #53).
+        for pump in _applicable_pumps(loop_):
+            if pump.iddObjectType().valueName() == 'OS_Pump_VariableSpeed':
                 row = rule['curves']['riding pump curve']
                 pump.setCoefficient1ofthePartLoadPerformanceCurve(row['a'])
                 pump.setCoefficient2ofthePartLoadPerformanceCurve(row['b'])
@@ -605,12 +607,13 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
         audit.info('efficiency', "5.2.6.3 pump-power cap not evaluable — loop's peak thermal demand unsized",
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
         return
-    pumps = []
-    for c in loop_.supplyComponents():
-        if c.to_PumpVariableSpeed().is_initialized():
-            pumps.append(c.to_PumpVariableSpeed().get())
-        elif c.to_PumpConstantSpeed().is_initialized():
-            pumps.append(c.to_PumpConstantSpeed().get())
+    # 5.2.6.3.(1) caps the combined power of ALL the pumps in the hydronic
+    # system, and a primary-secondary arrangement keeps its secondary pump on
+    # the demand side. Scanning only the supply side reported a 10,100 W loop
+    # as 100 W and certified it "within the maximum" against a 450 W cap, while
+    # the demand pump kept every watt (Sol, PR #53). One collector, so a pump
+    # cannot be visible to the transfer and invisible to the cap.
+    pumps = _applicable_pumps(loop_)
     # D-92: derive each pump's power the way E+ will — from a hard-set value, a
     # PowerPerFlow intensity, or the flow/head/coefficient triple — rather than
     # reading a sizing SQL the pass has just invalidated.
@@ -667,17 +670,16 @@ def _pump_cap_basis(loop_, loop_type):
     water-to-air heat pump coils takes the WSHP row regardless of its
     sizing type; otherwise the row follows the Sizing:Plant loop type
     ('Condenser' = heat rejection, demand from the chillers it serves)."""
-    wta = [c for c in loop_.demandComponents()
-           if c.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized()
-           or c.to_CoilHeatingWaterToAirHeatPumpEquationFit().is_initialized()]
+    wta = _water_to_air_coils(loop_)
     if wta:
         kw = 0.0
-        for c in wta:
-            coil = c.to_CoilCoolingWaterToAirHeatPumpEquationFit()
-            if coil.empty():
+        for coil in wta:
+            # Cooling coils carry the loop's sizing basis; the heating halves of
+            # the same units add nothing to it. Both speed controls spell the
+            # capacity getter the same way.
+            if not hasattr(coil, 'ratedTotalCoolingCapacity'):
                 continue
 
-            coil = coil.get()
             kw += (optional_f(coil.ratedTotalCoolingCapacity())
                    or optional_f(coil.autosizedRatedTotalCoolingCapacity()) or 0.0) / 1000.0
         return 'Water-source heat pump', (kw if kw > 0 else None)
@@ -862,6 +864,32 @@ SDK_DEFAULT_SHAFT_COEFFICIENT = 1.282051282
 LITERAL_PUMP_ARTICLE = '8.4.4.14'
 
 
+#: Water-to-air heat-pump coils, constant-speed and variable-speed alike. ONE
+#: registry, because three places used to carry their own partial list: the
+#: served-zone traversal knew the variable-speed ones, while _loop_role and
+#: _pump_cap_basis knew only the equation-fit pair — so a variable-speed WSHP
+#: loop classified as plain hot water and took the Heating cap row instead of
+#: the water-source one (Sol, PR #53).
+WATER_TO_AIR_HEAT_PUMP_COILS = (
+    'to_CoilCoolingWaterToAirHeatPumpEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpEquationFit',
+    'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+)
+
+
+def _water_to_air_coils(loop_):
+    """The loop's water-to-air heat-pump coils, whatever their speed control."""
+    found = []
+    for comp in loop_.demandComponents():
+        for caster in WATER_TO_AIR_HEAT_PUMP_COILS:
+            candidate = getattr(comp, caster, None)
+            if candidate is not None and candidate().is_initialized():
+                found.append(candidate().get())
+                break
+    return found
+
+
 def _loop_role(loop_):
     """What this hydronic loop is FOR — finer than Sizing:Plant's loop type.
 
@@ -875,10 +903,8 @@ def _loop_role(loop_):
     if _swh_loop(loop_):
         return 'service_water'
 
-    for comp in loop_.demandComponents():
-        if (comp.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized()
-                or comp.to_CoilHeatingWaterToAirHeatPumpEquationFit().is_initialized()):
-            return 'heat_pump_source'
+    if _water_to_air_coils(loop_):
+        return 'heat_pump_source'
 
     return {'Heating': 'hot_water', 'Cooling': 'chilled_water',
             'Condenser': 'condenser'}.get(loop_.sizingPlant().loopType())
@@ -1086,8 +1112,7 @@ def _hydraulic_efficiency(pump):
     coefficient's 78 %, turning 888.9 W of proposed power into 569.8 W).
 
     - a hard rated power pins the triple: eta_p = Q x H / (P x motor_eff)
-    - PowerPerFlow states electrical per flow: eta_p = H x motor_eff / intensity
-      ... expressed through the same identity
+    - PowerPerFlow states electrical per flow: eta_p = H / (intensity x motor_eff)
     - otherwise the shaft coefficient IS the statement: eta_p = 1 / k
     """
     motor_eff = pump.motorEfficiency()
