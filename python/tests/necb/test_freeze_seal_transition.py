@@ -35,10 +35,11 @@ class TestFreezeSealTransition(unittest.TestCase):
         active, retired, attestation = freeze.seal_accounting(scenarios())
         # 31 converted at R6, plus the python-only seals authored after the
         # retirement: 4 from R6; since the multi-edition Stage 0 (R-A),
-        # 4 "first frozen post-R6 for NECB 2025" scenarios; and since D-89
-        # step 3 (R-O-a), the 2 purchased-heating scenarios — none of which
-        # has cross-language history to convert from.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 10}, active)
+        # 4 "first frozen post-R6 for NECB 2025" scenarios; since D-89
+        # step 3 (R-O-a), the 2 purchased-heating scenarios; and since DF-17,
+        # the 2 hydronic-VAV scenarios — none of which has cross-language
+        # history to convert from.
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 12}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",

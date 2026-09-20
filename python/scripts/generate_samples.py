@@ -119,6 +119,22 @@ STRESS_CASES = (
      "A mixed-fuel heat pump is required for the election to be reachable at all; "
      "on an all-electric one there is nothing to elect between.",
      None),
+    ("17-vav-hw-reheat",
+     "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
+     "8.4.4.14/8.4.5.14 + DF-17 — the only corpus model whose hot-water coils are "
+     "HELD inside other equipment: five CoilHeatingWater in VAV reheat terminals, "
+     "reached through containingHVACComponent alone (the served-zone traversal's "
+     "third accessor, which no other sample exercises). Also the only model with "
+     "three plant loops — hot water, chilled water and condenser — so the pump "
+     "transfer, the Table 8.4.x.14 riding curves and the 5.2.6.3 combined cap are "
+     "measured on a building with more than one pump to get wrong. "
+     "READ THIS BEFORE TRUSTING IT: the air loop's own heating coil is hot water "
+     "too, and it contributes every zone on the loop through the SECOND accessor, "
+     "so the loop's served-zone SET is the same whether the held path works or "
+     "not. This sample EXERCISES that path; it does not DISCRIMINATE a "
+     "mis-attribution in it. Two defects there shipped green precisely because "
+     "nothing measured them, and this sample does not change that — see DF-17.",
+     None),
 )
 
 

@@ -16,6 +16,7 @@
     "13-district-heating",
     "14-general-2storey",
     "15-general-3storey",
-    "16-ashp-electric-supp-hw-baseboard"
+    "16-ashp-electric-supp-hw-baseboard",
+    "17-vav-hw-reheat"
   ]
 }

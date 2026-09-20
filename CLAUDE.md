@@ -144,7 +144,7 @@ Code wins and the gem's version is recorded as a finding, not adopted;
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 41 frozen Python pipeline scenarios across
+- `verification/scenarios/` holds 43 frozen Python pipeline scenarios across
   `python`, `verify`, and `parity` lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.

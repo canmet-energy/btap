@@ -46,6 +46,21 @@ D89_SEAL = ("python-only:first frozen at D-89 step 3 (R-O-a) — authored "
             "after the Ruby product retired; no cross-language attestation "
             "exists for this scenario")
 
+#: DF-17: the hydronic VAV model, sized, so the 8.4.x.14 pump transfer is
+#: measured on a building with three plant loops and with hot-water coils held
+#: inside VAV reheat terminals — the served-zone traversal's third accessor,
+#: which no other sample reaches.
+#:
+#: Its limit is deliberate and recorded rather than discovered: the air loop's
+#: own heating coil is hot water, and it contributes every zone on that loop
+#: through the SECOND accessor, so this scenario EXERCISES the held path
+#: without DISCRIMINATING a mis-attribution in it. Sized only — the annual
+#: tier would add EnergyPlus cost for the same insensitivity.
+DF17_SIZING_SUBSET = ["17-vav-hw-reheat"]
+DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
+             "product retired; no cross-language attestation exists for this "
+             "scenario")
+
 CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
 
@@ -114,14 +129,26 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     return scenario
 
 
+#: Slugs whose python-lane scenario was authored AFTER the Ruby product
+#: retired. Without this the default "ruby" seal is converted by
+#: ``all_scenarios()`` into ``python-only:post-handoff``, which carries the
+#: final cross-language attestation (85ab143) — an attestation these scenarios
+#: never had. A seal is a provenance claim, so the default must not be
+#: inherited by a scenario that post-dates the evidence.
+POST_R6_PYTHON_LANE_SEALS = {"17-vav-hw-reheat": DF17_SEAL}
+
+
 def corpus_scenarios(slugs):
-    out = [_corpus(s, "none", "python") for s in [*slugs, "5zone-onramp"]]
+    out = [_corpus(s, "none", "python", seal=POST_R6_PYTHON_LANE_SEALS.get(s))
+           for s in [*slugs, "5zone-onramp"]]
     out += [_corpus(s, "sizing", "verify") for s in SIZING_SUBSET]
     out += [_corpus(s, "annual", "parity") for s in ANNUAL_SUBSET]
     out += [_corpus(s, "sizing", "verify", seal=D89_SEAL)
             for s in D89_SIZING_SUBSET]
     out += [_corpus(s, "annual", "parity", seal=D89_SEAL)
             for s in D89_ANNUAL_SUBSET]
+    out += [_corpus(s, "sizing", "verify", seal=DF17_SEAL)
+            for s in DF17_SIZING_SUBSET]
     return out
 
 
