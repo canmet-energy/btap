@@ -546,7 +546,7 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
     prefix = ruleset.article('reference_subsection')
     if proposed is None:
         audit.info('efficiency', f'no proposed model supplied — {prefix}.14.(1)-(3) pump power transfer '
-                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11')
+                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11 D-93')
     for loop_ in sorted_by_name(model.getPlantLoops()):
         # 8.4.4.14 scopes HVAC hydronic pumping; a service-water loop's
         # circulator is Part 6 territory and stays as built. Transferring the
@@ -571,7 +571,7 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
                 pump.setCoefficient2ofthePartLoadPerformanceCurve(row['b'])
                 pump.setCoefficient3ofthePartLoadPerformanceCurve(row['c'])
                 pump.setCoefficient4ofthePartLoadPerformanceCurve(0.0)
-                flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+                flow = _pump_flow(pump)
                 if flow:
                     pump.setMinimumFlowRate(row['d'] * flow)
                 audit.decision('efficiency', 'variable-flow pump modeled riding its curve',
@@ -617,7 +617,7 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
     # D-92: derive each pump's power the way E+ will — from a hard-set value, a
     # PowerPerFlow intensity, or the flow/head/coefficient triple — rather than
     # reading a sizing SQL the pass has just invalidated.
-    flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate()) for p in pumps]
+    flows = [_pump_flow(p) for p in pumps]
     sources = [_pump_power_source(p, f) for p, f in zip(pumps, flows)]
     powers = [w for _, w in sources]
     # A pump whose flow is readable but whose power is not states something no
@@ -929,6 +929,54 @@ def _loop_role(loop_):
             'Condenser': 'condenser'}.get(loop_.sizingPlant().loopType())
 
 
+def _pump_flow(pump):
+    """A pump's design flow — stated, else the value sizing produced.
+
+    One definition, because this expression appeared inline at six call sites
+    and every defect in this Article's implementation so far has come from two
+    places computing the same thing independently.
+    """
+    return optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+
+
+def _coil_served_zones(coil):
+    """The thermal blocks a water coil conditions, by name.
+
+    THREE accessors, not two. A coil sitting directly in zone equipment answers
+    `containingZoneHVACComponent`, and one on an air loop's main branch answers
+    `airLoopHVAC` — but a coil held inside an `AirLoopHVACUnitarySystem` or an
+    `AirTerminalSingleDuctVAVReheat` answers NEITHER: only
+    `containingHVACComponent` is set. Checking the first two alone made a
+    hot-water loop serving VAV reheat terminals resolve to no zones at all
+    (Fable, PR #53).
+
+    That is worse than a loud decline where the proposed has one loop: with two
+    loops — reheat on one, baseboards on another — the reference matched the
+    baseboard loop alone and reported a confident "one-to-one" for what is
+    really an N:1 consolidation. A silently wrong sentence, on an ordinary
+    rooftop-with-hydronic-reheat building.
+    """
+    zones = set()
+    container = coil.containingZoneHVACComponent()
+    if container.is_initialized() and container.get().thermalZone().is_initialized():
+        zones.add(container.get().thermalZone().get().nameString())
+
+    air_loop = coil.airLoopHVAC()
+    if air_loop.is_initialized():
+        zones |= {z.nameString() for z in air_loop.get().thermalZones()}
+
+    held_by = coil.containingHVACComponent()
+    if held_by.is_initialized():
+        holder = held_by.get()
+        holder_loop = holder.airLoopHVAC()
+        if holder_loop.is_initialized():
+            zones |= {z.nameString() for z in holder_loop.get().thermalZones()}
+        terminal_zone = getattr(holder, 'thermalZone', None)
+        if terminal_zone is not None and terminal_zone().is_initialized():
+            zones.add(terminal_zone().get().nameString())
+    return zones
+
+
 def _served_zone_names(loop_, _seen=None):
     """The thermal zones this loop ultimately conditions, by NAME.
 
@@ -964,12 +1012,7 @@ def _served_zone_names(loop_, _seen=None):
                 coil = candidate().get()
                 break
         if coil is not None:
-            container = coil.containingZoneHVACComponent()
-            if container.is_initialized() and container.get().thermalZone().is_initialized():
-                zones.add(container.get().thermalZone().get().nameString())
-            air_loop = coil.airLoopHVAC()
-            if air_loop.is_initialized():
-                zones |= {z.nameString() for z in air_loop.get().thermalZones()}
+            zones |= _coil_served_zones(coil)
             continue
 
         # Equipment that passes the load on to another loop rather than a zone.
@@ -1128,7 +1171,7 @@ def _hydraulic_efficiency(pump):
         return None
 
     head = pump.ratedPumpHead()
-    flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+    flow = _pump_flow(pump)
     efficiency = None
     if not pump.isRatedPowerConsumptionAutosized():
         power = optional_f(pump.ratedPowerConsumption())
@@ -1236,7 +1279,7 @@ def _pump_shaft_and_electrical(pump):
     power demand "required by the motors" (5.2.6.3's phrase for the same
     quantity), so both are needed and the distinction is explicit.
     """
-    flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+    flow = _pump_flow(pump)
     _, electrical = _pump_power_source(pump, flow)
     if electrical is None:
         return None, None
@@ -1321,7 +1364,7 @@ def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, au
 
     shaft = sum(s for s, _ in pairs)
     electrical = sum(e for _, e in pairs)
-    flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate())
+    flows = [_pump_flow(p)
              for p in proposed_pumps]
 
     # The Note's flow-weighted hydraulic efficiency. Numerically inert in

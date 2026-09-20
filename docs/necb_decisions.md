@@ -126,6 +126,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-91** — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first _(runtime)_
 - **D-92** — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power _(runtime)_
 - **D-93** — The reference pump's value source: correspondence, then the sentence that governs it _(runtime)_
+- **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
 
 <!-- TOC END -->
 
@@ -5863,3 +5864,34 @@ in the plan log.
   "recorded construction lineage" the implementation does not have); two Fable
   reviews; scoped by Sol to 1:1 so it need not wait on the consolidation
   adjudication.
+
+## D-94 — Development and sign-off: implement, Sol, Fable, then stop
+
+- **Decision:** phylroy set the working loop (2026-09-20): research and develop
+  a solution, implement it, **pass it to Sol** for review, **then review with
+  Fable**. When Sol, Fable and Claude all agree the implementation is good,
+  **stop and move to the next problem**. Otherwise iterate.
+- **Why the order.** Sol is the NECB adjudicator: he rules on what the Code
+  requires and whether the reading is defensible, against live HBIX text, the
+  packaged payloads and the pinned gem. Fable is the adversarial implementation
+  reviewer and comes **last** deliberately — it reproduces findings, checks
+  arithmetic, and reviews *both* the implementation and Sol's ruling. That
+  ordering has already earned itself: Fable found that a flow-weighted motor
+  efficiency leaks 123 W, which Sol then corrected; and that a headline
+  measurement was wrong in its own author's favour.
+- **Three agreements, not two.** Claude's own agreement is part of the gate, so
+  deferring is not satisfying it. Where Claude believes a finding is wrong, it
+  says so with the reproduction and iterates rather than complying — a review
+  loop that simply obeys would have shipped both of the above.
+- **What "good" means here.** The finding is reproduced before it is fixed; the
+  fix is pinned by a test covering the shape that let it through; the suites and
+  gates pass; frozen outputs are re-frozen when they move; and the adjudication
+  is recorded as a `D-XX` rather than left in correspondence.
+- **Stopping is the point.** The loop terminates on agreement rather than on
+  exhaustion. A further round needs a finding, not an impulse to polish.
+- **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
+  directly, so neither GitHub nor phylroy carries messages. Claude watches
+  `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
+  that runs terminal commands can iterate without being prompted.
+- **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
+  adjudications themselves; this governs how the resulting work is signed off.

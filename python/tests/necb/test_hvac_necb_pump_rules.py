@@ -23,6 +23,7 @@ from btap.codes.necb.hvac.efficiency import (
     _pump_cap_basis,
     _pump_characteristics_known,
     _pump_power_from_triple,
+    _served_zone_names,
 )
 from tests.necb.hvac_helpers import load_fixture, sorted_zones
 from tests.support import needs_sdk
@@ -136,6 +137,88 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertAlmostEqual(100.0, decision['inputs']['proposed_w_per_l_s'], delta=0.01)
         self.assertAlmostEqual(15.0, decision['inputs']['distribution_flow_l_s'], delta=0.01,
                                msg='the system flow, counted once — not 10 + 5')
+
+    def test_served_zones_reach_coils_held_inside_other_equipment(self):
+        """Fable, PR #53. A water coil answers one of THREE accessors: zone
+        equipment (`containingZoneHVACComponent`), an air loop's main branch
+        (`airLoopHVAC`), or — inside a unitary system or a VAV reheat terminal —
+        only `containingHVACComponent`. Checking the first two made a hot-water
+        loop serving VAV reheat resolve to no zones at all, so an ordinary
+        rooftop-with-hydronic-reheat building either declined loudly or, with a
+        second loop present, reported a confident "one-to-one" for what is
+        really an N:1 consolidation."""
+        model = openstudio.model.Model()
+        schedule = model.alwaysOnDiscreteSchedule()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        air_loop = openstudio.model.AirLoopHVAC(model)
+
+        unitary_zone = openstudio.model.ThermalZone(model)
+        unitary_zone.setName('Block U')
+        held_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(held_coil)
+        unitary = openstudio.model.AirLoopHVACUnitarySystem(model)
+        unitary.setHeatingCoil(held_coil)
+        unitary.setCoolingCoil(openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unitary.setSupplyFan(openstudio.model.FanOnOff(model, schedule))
+        unitary.addToNode(air_loop.supplyOutletNode())
+        air_loop.addBranchForZone(
+            unitary_zone,
+            openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(
+                model, schedule).to_StraightComponent())
+
+        reheat_zone = openstudio.model.ThermalZone(model)
+        reheat_zone.setName('Block R')
+        reheat_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(reheat_coil)
+        air_loop.addBranchForZone(
+            reheat_zone,
+            openstudio.model.AirTerminalSingleDuctVAVReheat(
+                model, schedule, reheat_coil).to_StraightComponent())
+
+        self.assertEqual({'Block U', 'Block R'}, _served_zone_names(loop_),
+                         'a coil held inside other equipment still serves its zone')
+
+    def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
+        """The adjudicated equivalent motor efficiency, which nothing pinned.
+
+        D-93 rules `η_m,ref = ΣS/ΣPₑ` — an electrical-weighted arithmetic mean —
+        because a flow-weighted mean preserves shaft power while LEAKING
+        electrical power, and electrical is what D-38's Part 5 cap binds. Every
+        other (2) fixture sets the motor efficiencies equal, where all weightings
+        collapse to the same answer, so regressing to the wrong one failed no
+        test (Fable, PR #53). Unequal motors are the only shape that tells them
+        apart.
+        """
+        proposed = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(proposed)
+        loop_.sizingPlant().setLoopType('Heating')
+        serve_zones(proposed, loop_, ('Block A',))
+        loop_.setMaximumLoopFlowRate(0.008)
+        # Both triples must be physically possible, or the group falls to (3)
+        # before (2) is reached — the validity check doing its job. At 4 L/s and
+        # 150 kPa: 1000 W at 95 % implies 63.2 % hydraulic, 1200 W at 60 %
+        # implies 83.3 %.
+        for power, motor_eff in ((1000.0, 0.95), (1200.0, 0.60)):
+            pump = openstudio.model.PumpVariableSpeed(proposed)
+            pump.setRatedFlowRate(0.004)
+            pump.setRatedPumpHead(150_000.0)
+            pump.setMotorEfficiency(motor_eff)
+            pump.setRatedPowerConsumption(power)
+            pump.addToNode(loop_.supplyInletNode())
+
+        reference = openstudio.model.Model()
+        _, ref_pump = loop_with_vsd_pump(reference, 'Heating', flow=0.008, zones=('Block A',))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        decision = next(e for e in audit.entries if e.get('article') == '8.4.4.14.(2)')
+        self.assertAlmostEqual(1670.0, decision['inputs']['combined_shaft_w'], delta=0.5)
+        self.assertAlmostEqual(2200.0, decision['inputs']['combined_electrical_w'], delta=0.5)
+        # ΣS/ΣPₑ = 1670/2200 = 0.7591, NOT the flow-weighted 0.7750
+        self.assertAlmostEqual(0.7591, decision['inputs']['motor_efficiency'], delta=1e-3)
+        self.assertAlmostEqual(2200.0, _pump_power_from_triple(ref_pump, 0.008), delta=0.5,
+                               msg='electrical power is conserved; a flow-weighted mean gives 2154.8 W')
 
     def test_sentence_2_reproduces_the_codes_own_appendix_example(self):
         """A-8.4.4.14.(2)'s worked example, which nothing tested before.
@@ -304,8 +387,9 @@ class TestNecbPumpRules(unittest.TestCase):
 
         self.assertTrue(any('no pump can draw' in w['action'] for w in audit.warnings),
                         'the malformed pump is named, never silently absorbed')
-        self.assertTrue(any(e.get('article') == '8.4.4.14.(3)' for e in audit.entries),
-                        'an unreadable efficiency sends the group to (3)')
+        self.assertTrue(any(e.get('article') == '8.4.4.14.(3)' and e['level'] == 'decision'
+                            for e in audit.entries),
+                        'an unreadable efficiency sends the group to (3) — the DECISION, not just\n                         the exclusion warning, which would satisfy this vacuously')
 
     def test_an_impossible_shaft_coefficient_is_not_a_known_efficiency(self):
         """A coefficient of 0.5 states a 200 % pump. 'Known' means defaulted,
