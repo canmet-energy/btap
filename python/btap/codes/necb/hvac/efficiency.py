@@ -878,6 +878,25 @@ WATER_TO_AIR_HEAT_PUMP_COILS = (
 )
 
 
+#: Every water coil that delivers a hydronic loop's output to a thermal block.
+#: COMPOSED from the registry above, not a second copy of it: the water-to-air
+#: entries must be the same list the role and cap classifications use, or the
+#: traversal silently stops seeing a coil type the others recognise.
+ZONE_SERVING_WATER_COILS = (
+    'to_CoilHeatingWater', 'to_CoilCoolingWater',
+    # A hot-water baseboard carries CoilHeatingWaterBaseboard, NOT
+    # CoilHeatingWater — omitting it made a baseboard-only loop resolve to no
+    # served zones, on the commonest reference heating terminal there is.
+    'to_CoilHeatingWaterBaseboard',
+    'to_CoilHeatingWaterBaseboardRadiant',
+    'to_CoilCoolingWaterPanelRadiant',
+    'to_CoilHeatingLowTempRadiantVarFlow',
+    'to_CoilCoolingLowTempRadiantVarFlow',
+    'to_CoilHeatingLowTempRadiantConstFlow',
+    'to_CoilCoolingLowTempRadiantConstFlow',
+) + WATER_TO_AIR_HEAT_PUMP_COILS
+
+
 def _water_to_air_coils(loop_):
     """The loop's water-to-air heat-pump coils, whatever their speed control."""
     found = []
@@ -934,23 +953,12 @@ def _served_zone_names(loop_, _seen=None):
         # heating terminal there is. Omitting it made a baseboard-only loop
         # resolve to no served zones, so the correspondence declined on exactly
         # the systems this Article most often applies to.
-        for caster in ('to_CoilHeatingWater', 'to_CoilCoolingWater',
-                       'to_CoilHeatingWaterBaseboard',
-                       'to_CoilHeatingWaterBaseboardRadiant',
-                       'to_CoilCoolingWaterPanelRadiant',
-                       'to_CoilCoolingWaterToAirHeatPumpEquationFit',
-                       'to_CoilHeatingWaterToAirHeatPumpEquationFit',
-                       # Variable-speed WSHP coils, which classify.py already
-                       # recognises, and low-temperature radiant — omitting them
-                       # made those loops decline conservatively rather than
-                       # wrongly, but the correspondence coverage was incomplete
-                       # (Sol, PR #53).
-                       'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
-                       'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
-                       'to_CoilHeatingLowTempRadiantVarFlow',
-                       'to_CoilCoolingLowTempRadiantVarFlow',
-                       'to_CoilHeatingLowTempRadiantConstFlow',
-                       'to_CoilCoolingLowTempRadiantConstFlow'):
+        # Composed from WATER_TO_AIR_HEAT_PUMP_COILS rather than restating it:
+        # three places carrying their own copy is exactly how a variable-speed
+        # WSHP loop came to classify as plain hot water. A registry that one
+        # caller still duplicates is not shared, it is only currently in
+        # agreement.
+        for caster in ZONE_SERVING_WATER_COILS:
             candidate = getattr(comp, caster, None)
             if candidate is not None and candidate().is_initialized():
                 coil = candidate().get()
