@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "446482dca42e49ede283db37d87c4d8d3bb1046f",
+  "commit": "14b447e0a1d613b8cff3880f5ab041c3d6ef8547",
   "dirty": false,
   "freezer_sha256": "ec2e87647b2de6eab1cd2a449c791c9da23ce65e67f09611366cb8e0b0f66227",
-  "defs_sha256": "8c5d464df08c99b86760a32ac5e693ee85978b9c19595a24f2c79427b31c06b3",
+  "defs_sha256": "2021efaf569690ccb88b791ec2f56ee18178485853f635147fbf3d03a33f17dd",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -14,7 +14,7 @@
   "openstudio_cli": "3.11.0+241b8abb4d",
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 10
+   "python-only": 12
   },
   "retired_seals": {
    "ruby": 29,
@@ -29,11 +29,11 @@
  },
  "corpus": {
   "generator": "python",
-  "sample_manifest_sha256": "951f023ef88a5e53a53b655317e2d44344aeeafe30e7f68fd0dd33a4b9074ac8"
+  "sample_manifest_sha256": "40df27f0dd39c5fe219281c32d26150cc458f56ea07a3c7d9fcb42701201d915"
  },
  "counts": {
-  "python": 32,
-  "verify": 4,
+  "python": 33,
+  "verify": 5,
   "parity": 5
  },
  "scenarios": [
@@ -806,6 +806,49 @@
    }
   },
   {
+   "id": "corpus-none-17-vav-hw-reheat",
+   "lane": "python",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/17-vav-hw-reheat.osm",
+    "--simulate",
+    "none",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "baseline_sha256": {
+    "audit.json": "b9ad6feff19abbed96ea711bd486013f67d4fb8924f6c541c778b20bff8a1629",
+    "audit.txt": "6b9232b584d510b2b40c16178a2a2f33a634f2d3622d9f30852a056c7fca34fc",
+    "report.json": "ac35d6007d6be2671f6e9fc2e1156e64d1be770b0a0d7d81d4da89bd05dcc586",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "adde97610fc521593453864b2d12a8bcf5285a9052bc3ea68b739b167d4ff873"
+   }
+  },
+  {
    "id": "corpus-none-5zone-onramp",
    "lane": "python",
    "kind": "cli",
@@ -1238,6 +1281,51 @@
     "report.json": "74237535e1b438c9a00bec17567e13714c473ec7cc5e02667dc251bbeb3aa703",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "ca411fe126f3bbbbddb619310ee15c870c55b798fd0111294af5e957f1ac30a6"
+   }
+  },
+  {
+   "id": "corpus-sizing-17-vav-hw-reheat",
+   "lane": "verify",
+   "kind": "cli",
+   "replaces": [
+    "B1",
+    "B2"
+   ],
+   "argv": [
+    "<CORPUS>/17-vav-hw-reheat.osm",
+    "--simulate",
+    "sizing",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen at DF-17 \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "baseline_sha256": {
+    "audit.json": "b40dec6473e6218e83e941b885231538ab6a5291be21b4233b3dda59659cb611",
+    "audit.txt": "dd1acb5c235fb15728791a2ce72f4ee623af60adbb196f8ce0b1660c5ca48ad1",
+    "report.json": "5f53481c6315eeae306f21159254b8f1112ec2dc60375b148e29169f8ddfe3a5",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "044c5200c6b59055b146aed056d20ad88b4bc217fbbf3efe7df6c4b3e4166661"
    }
   },
   {
