@@ -885,7 +885,7 @@ WATER_TO_AIR_HEAT_PUMP_COILS = (
 ZONE_SERVING_WATER_COILS = (
     'to_CoilHeatingWater', 'to_CoilCoolingWater',
     # A hot-water baseboard carries CoilHeatingWaterBaseboard, NOT
-    # CoilHeatingWater — omitting it made a baseboard-only loop resolve to no
+    # CoilHeatingWater. Dropping it would strand a baseboard-only loop with no
     # served zones, on the commonest reference heating terminal there is.
     'to_CoilHeatingWaterBaseboard',
     'to_CoilHeatingWaterBaseboardRadiant',
@@ -967,14 +967,46 @@ def _coil_served_zones(coil):
 
     held_by = coil.containingHVACComponent()
     if held_by.is_initialized():
-        holder = held_by.get()
-        holder_loop = holder.airLoopHVAC()
-        if holder_loop.is_initialized():
-            zones |= {z.nameString() for z in holder_loop.get().thermalZones()}
-        terminal_zone = getattr(holder, 'thermalZone', None)
-        if terminal_zone is not None and terminal_zone().is_initialized():
-            zones.add(terminal_zone().get().nameString())
+        zones |= _holder_zones(held_by.get())
     return zones
+
+
+def _holder_zones(holder):
+    """The zones a coil's HOLDER conditions — a distinction a union destroys.
+
+    Both kinds of holder answer `airLoopHVAC()`, and they mean opposite things
+    by it. An `AirLoopHVACUnitarySystem` on the loop's main branch conditions
+    EVERY zone on that loop. An air terminal conditions exactly ONE: its own.
+    Attributing the loop's whole zone list to both over-attributes the
+    terminal, so a reheat coil serving one zone claims every zone on the
+    rooftop unit.
+
+    That is not a harmless over-count. Correspondence compares served-zone
+    sets, so the inflated set makes a reference loop look like it matches a
+    proposed loop it only partly overlaps: the loud "partial overlap is not a
+    correspondence" decline becomes a confident, wrong one-to-one, and a second
+    proposed loop's pump is dropped from the transfer without a word (Fable,
+    PR #53).
+    """
+    holder_loop = holder.airLoopHVAC()
+    if not holder_loop.is_initialized():
+        return set()
+    loop_zones = holder_loop.get().thermalZones()
+
+    # Every OpenStudio air terminal is an OS:AirTerminal:* object, so the
+    # prefix recognises one without enumerating fifteen casters that would
+    # fall out of date the next time the SDK adds a terminal.
+    if not holder.iddObjectType().valueName().startswith('OS_AirTerminal'):
+        return {z.nameString() for z in loop_zones}
+
+    # A terminal no zone claims conditions NO zone. Returning the whole loop
+    # here would reinstate exactly the over-attribution above.
+    return {
+        z.nameString()
+        for z in loop_zones
+        if z.airLoopHVACTerminal().is_initialized()
+        and z.airLoopHVACTerminal().get().handle() == holder.handle()
+    }
 
 
 def _served_zone_names(loop_, _seen=None):
@@ -1125,8 +1157,14 @@ def _corresponding_loop(reference_loop, proposed):
                       'cross-system correspondence is not defined by the Code and is adjudicated '
                       'separately')
     if len(overlapping) == 1:
-        return None, (f'the proposed {role} loop also serves thermal blocks this reference loop does '
-                      'not — a partial overlap is not a correspondence')
+        # Either direction reaches here — the proposed loop may serve blocks
+        # the reference one does not, or only some of the ones it does — so the
+        # reason names the overlap rather than asserting a direction it has not
+        # established.
+        shared = len(_served_zone_names(overlapping[0]) & reference_zones)
+        return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
+                      f"loop's {len(reference_zones)} thermal blocks — a partial overlap is not a "
+                      'correspondence')
     return None, f'no proposed {role} loop serves these thermal blocks'
 
 

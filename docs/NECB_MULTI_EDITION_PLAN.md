@@ -1221,6 +1221,28 @@ any result.
   measured — the pinned gem also modulates only at and above 352 kW, and no
   frozen scenario carries a copied plant.
 
+- **DF-17 — no frozen scenario exercises a held water coil through the pump
+  transfer.** D-93 corresponds proposed and reference pumps by served thermal
+  blocks, and a water coil reaches its blocks through one of three accessors.
+  The third — `containingHVACComponent`, for a coil held inside an
+  `AirLoopHVACUnitarySystem` or a VAV reheat terminal — has **unit-test
+  coverage only**. The seven scenarios that reach the second efficiency pass
+  with `proposed=` all correspond through baseboards or air-loop-branch coils;
+  `corpus-none-03-vav-reheat-chiller` and `-04-fancoil-chiller` exist only in
+  the `none` lane, which never runs the transfer.
+
+  The cost of the gap is measured, not hypothetical. Two defects on that path
+  — the accessor missing entirely, then the holder over-attributing a reheat
+  coil to every zone on its air loop — each passed a full green CI, and the
+  second survived a 28-scenario re-freeze **without moving one baseline**.
+  Absence of baseline movement is therefore no evidence about this path, which
+  is exactly the inference that produced two false-compliance results earlier
+  in DF-11 (Fable, PR #53, second round).
+
+  A sizing-lane VAV-reheat scenario closes it. That is a 42nd frozen scenario,
+  so it carries a baseline, a `scenario_defs.py` entry and the documented
+  count in `CLAUDE.md` — separable work, deliberately not folded into PR #53.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push

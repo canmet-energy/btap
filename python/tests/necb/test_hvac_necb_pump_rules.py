@@ -17,7 +17,9 @@ import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
 from btap.codes.necb.hvac.efficiency import (
+    DEFAULT_MOTOR_EFFICIENCY,
     DEFAULT_PUMP_EFFICIENCY,
+    _corresponding_loop,
     _hydraulic_efficiency,
     _loop_role,
     _pump_cap_basis,
@@ -40,10 +42,25 @@ def serve_zones(model, loop_, zones):
     water baseboard per zone is the smallest demand side that reaches a zone
     through the same traversal the product code uses.
     """
-    schedule = model.alwaysOnDiscreteSchedule()
+    created = []
     for name in zones:
         zone = openstudio.model.ThermalZone(model)
         zone.setName(name)
+        created.append(zone)
+    return serve_existing_zones(model, loop_, created)
+
+
+def serve_existing_zones(model, loop_, zones):
+    """The same demand side, but onto thermal blocks that ALREADY exist.
+
+    Passing `serve_zones` a name the model already uses does not reach that
+    zone: OpenStudio keeps names unique, so it renames the new one ('Zone B' ->
+    'Zone B 1') and the loop serves a phantom that no other loop can correspond
+    to. A fixture built that way declines for a reason unrelated to what it
+    means to test.
+    """
+    schedule = model.alwaysOnDiscreteSchedule()
+    for zone in zones:
         # The product builders' own idiom (modeling/hvac/systems/baseboards.py):
         # a hot-water baseboard carries CoilHeatingWaterBaseboard, which is not
         # CoilHeatingWater.
@@ -178,6 +195,82 @@ class TestNecbPumpRules(unittest.TestCase):
 
         self.assertEqual({'Block U', 'Block R'}, _served_zone_names(loop_),
                          'a coil held inside other equipment still serves its zone')
+
+    def _rooftop_with_reheat_on_one_zone(self, model, loop_):
+        """One air loop, two zones, hot-water reheat on the FIRST zone only.
+
+        The discriminating shape: the test above puts a unitary system on the
+        air loop's main branch, so the loop's whole zone list is the right
+        answer there and a union cannot be told apart from a per-terminal
+        attribution. Here it can.
+        """
+        schedule = model.alwaysOnDiscreteSchedule()
+        air_loop = openstudio.model.AirLoopHVAC(model)
+
+        served = openstudio.model.ThermalZone(model)
+        served.setName('Zone A (reheat)')
+        reheat_coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(reheat_coil)
+        air_loop.addBranchForZone(
+            served,
+            openstudio.model.AirTerminalSingleDuctVAVReheat(
+                model, schedule, reheat_coil).to_StraightComponent())
+
+        bystander = openstudio.model.ThermalZone(model)
+        bystander.setName('Zone B (no reheat)')
+        air_loop.addBranchForZone(
+            bystander,
+            openstudio.model.AirTerminalSingleDuctConstantVolumeNoReheat(
+                model, schedule).to_StraightComponent())
+        return served, bystander
+
+    def test_a_reheat_terminal_serves_its_own_zone_not_the_whole_air_loop(self):
+        """Fable, PR #53, second round. A unitary system on the air loop's main
+        branch conditions every zone on the loop; an air terminal conditions
+        exactly one. Both answer `airLoopHVAC()`, so taking the loop's zone
+        list for both attributed a one-zone reheat coil to every zone on the
+        rooftop unit."""
+        model = openstudio.model.Model()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+        self._rooftop_with_reheat_on_one_zone(model, loop_)
+
+        self.assertEqual(
+            {'Zone A (reheat)'}, _served_zone_names(loop_),
+            'the hot-water loop reaches only the zone whose terminal holds its coil')
+
+    def test_partial_overlap_through_a_reheat_terminal_still_declines(self):
+        """The consequence the over-attribution actually had, which is worse
+        than an over-count: correspondence matches on served-zone SETS, so an
+        inflated set made a partly-overlapping proposed loop look exact. The
+        loud "consolidated onto this one" decline became a confident one-to-one
+        and the second proposed loop's pump vanished from the transfer."""
+        proposed = openstudio.model.Model()
+        reheat_loop = openstudio.model.PlantLoop(proposed)
+        reheat_loop.setName('Proposed Reheat')
+        reheat_loop.sizingPlant().setLoopType('Heating')
+        _, bystander = self._rooftop_with_reheat_on_one_zone(proposed, reheat_loop)
+
+        # The SECOND loop heats the zone the reheat loop does not — the same
+        # zone object, not a same-named new one.
+        baseboard_loop = openstudio.model.PlantLoop(proposed)
+        baseboard_loop.setName('Proposed Baseboard')
+        baseboard_loop.sizingPlant().setLoopType('Heating')
+        serve_existing_zones(proposed, baseboard_loop, (bystander,))
+
+        reference = openstudio.model.Model()
+        consolidated = openstudio.model.PlantLoop(reference)
+        consolidated.setName('Reference Hot Water')
+        consolidated.sizingPlant().setLoopType('Heating')
+        serve_zones(reference, consolidated,
+                    ('Zone A (reheat)', 'Zone B (no reheat)'))
+
+        match, reason = _corresponding_loop(consolidated, proposed)
+
+        self.assertIsNone(
+            match, 'two proposed loops consolidated onto one reference loop is '
+                   'an N:1 case increment B does not adjudicate')
+        self.assertIn('consolidated onto this one', reason)
 
     def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
         """The adjudicated equivalent motor efficiency, which nothing pinned.
@@ -539,6 +632,12 @@ class TestNecbPumpRules(unittest.TestCase):
         # 10 W/(L/s) x 1000 x 0.9 motor x 0.78 pump
         self.assertAlmostEqual(7020.0, ref_pump.ratedPumpHead(), delta=1.0,
                                msg='the legacy head is replaced by the stated one')
+        # Pin the factors, not just their product: 7020 alone is satisfied by
+        # any compensating pair, and the adjudicated 90% is what the decision's
+        # own "modelling split" wording asserts below (Fable, PR #53).
+        self.assertEqual(0.9, DEFAULT_MOTOR_EFFICIENCY)
+        self.assertAlmostEqual(0.9, ref_pump.motorEfficiency(), delta=1e-9,
+                               msg='the adjudicated motor efficiency reaches the model')
         self.assertAlmostEqual(10.0, _pump_power_from_triple(ref_pump, 0.001), delta=0.1,
                                msg='the intensity still lands on the reference flow')
         self.assertGreaterEqual(ref_pump.designShaftPowerPerUnitFlowRatePerUnitHead(), 1.0,
