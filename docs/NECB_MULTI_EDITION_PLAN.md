@@ -1221,6 +1221,28 @@ any result.
   measured — the pinned gem also modulates only at and above 352 kW, and no
   frozen scenario carries a copied plant.
 
+- **DF-17 — no frozen scenario exercises a held water coil through the pump
+  transfer.** D-93 corresponds proposed and reference pumps by served thermal
+  blocks, and a water coil reaches its blocks through one of three accessors.
+  The third — `containingHVACComponent`, for a coil held inside an
+  `AirLoopHVACUnitarySystem` or a VAV reheat terminal — has **unit-test
+  coverage only**. The seven scenarios that reach the second efficiency pass
+  with `proposed=` all correspond through baseboards or air-loop-branch coils;
+  `corpus-none-03-vav-reheat-chiller` and `-04-fancoil-chiller` exist only in
+  the `none` lane, which never runs the transfer.
+
+  The cost of the gap is measured, not hypothetical. Two defects on that path
+  — the accessor missing entirely, then the holder over-attributing a reheat
+  coil to every zone on its air loop — each passed a full green CI, and the
+  second survived a 28-scenario re-freeze **without moving one baseline**.
+  Absence of baseline movement is therefore no evidence about this path, which
+  is exactly the inference that produced two false-compliance results earlier
+  in DF-11 (Fable, PR #53, second round).
+
+  A sizing-lane VAV-reheat scenario closes it. That is a 42nd frozen scenario,
+  so it carries a baseline, a `scenario_defs.py` entry and the documented
+  count in `CLAUDE.md` — separable work, deliberately not folded into PR #53.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push
@@ -3277,3 +3299,120 @@ invisible to both gates. Dead code also keeps its count, and a dynamic `warn`
 becoming an `info` is silent because the dynamic key carries kind but the
 source of truth for level is the call. A real fix means citing through a
 checked accessor rather than a free-form keyword.
+
+**DF-11 increment B implemented as D-93, and re-frozen (clean tree at
+`44b72f6`).** 7 of 41 scenarios changed — the same seven that carry an
+8.4.x.14 transfer entry — **audit files only; no `report.json` moved in any
+scenario**, and every audit's entry count is unchanged (286, 208, 210, 292,
+214, 216, 296). One entry edited per scenario, none added or removed.
+
+The edit is the transfer decision, which now names the sentence that governed
+instead of the range `(1)-(3)`: "pump power intensity transferred from the
+proposed system", citing **(3)**, with `combined_electrical_w`,
+`distribution_flow_l_s` and its source in the inputs. Every corpus
+correspondence is single-pump with head at the OpenStudio default, so (3)
+governs throughout — exactly as Sol predicted when he ruled that tool defaults
+mean "not known".
+
+**The re-freeze is text-only for a checkable reason.** D-93 divides by the
+loop's distribution flow where D-11 summed the pumps' rated flows; on a
+single-pump loop those are the same quantity, and the sized proposed SQLs show
+`Maximum Loop Flow Rate` equal to `Pump Design Flow Rate` to all sixteen
+digits. Where they diverge — two pumps in series, or primary-secondary — the
+old denominator counted the same water twice and halved the intensity, which
+is a third of the answer on the Code's own Appendix example. No frozen
+scenario has that topology, so nothing moved here; a real primary-secondary
+proposed would.
+
+Three defects surfaced during implementation that were not in the brief, each
+caught by a test rather than by review. `_served_zone_names` omitted
+`CoilHeatingWaterBaseboard` — a different class from `CoilHeatingWater` — so a
+baseboard-only hot-water loop resolved to no served zones, which is the
+commonest reference heating terminal there is and would have declined the
+correspondence on precisely the systems this Article most often governs. The
+"known" test ignored VALIDITY, so a pump implying a 111 % efficiency counted
+as known and sent its group to (2) rather than (3); Sol's wording is
+"defaulted, missing or invalid". And the (3) audit reported the whole group's
+pump count rather than the pumps actually combined after an unreadable one was
+excluded.
+
+**Sol's review of PR #53 (2026-09-19): request changes, three P1s, all
+reproduced before fixing.** Each was a real defect in D-93 as first written,
+and each is now pinned by its own regression test — the findings landed
+precisely because the tests did not cover these shapes.
+
+**Primary-secondary pumps were undercounted.** `_applicable_pumps` scanned only
+`supplyComponents()`, but OpenStudio puts a secondary pump on the DEMAND side.
+Reproduced: the helper returned the primary alone. That mistakes (2) for (1)
+and drops the secondary's electrical power out of (3) — on exactly the topology
+the Appendix example describes. Worse, the Appendix test did not catch it
+because it placed all three pumps on the supply inlet, testing three series
+supply pumps rather than a primary-secondary arrangement. Both sides are now
+scanned and de-duplicated by handle, with a demand-side test.
+
+**The "known" efficiency was not the efficiency transferred.** The predicate
+accepted a hard flow/head/power triple as establishing hydraulic efficiency —
+correctly — but the transfer then copied the shaft-COEFFICIENT field, which on
+such a pump still holds the untouched default. Reproduced: a proposed stating
+50 % transferred as 78 %, turning 888.9 W of proposed power into 569.8 W at
+equal flow. One resolver, `_hydraulic_efficiency`, now reads whichever field
+EnergyPlus actually uses — hard power, PowerPerFlow intensity, or the shaft
+coefficient — validates 0 < eta <= 1, and is used by the predicate, by (1) and
+by (2)'s average alike. A value can no longer be admitted on one field and
+transferred from another.
+
+**A malformed multi-pump group crashed the determination.** An explicit group
+holding 1000 W and -100 W reached (2), where `sum()` received a None and raised
+a TypeError — terminating compliance processing and regressing D-92's
+hostile-input hardening. It now declines with a named warning; and because the
+shared resolver marks the negative pump's efficiency unusable, such a group
+falls to (3) before (2) is ever reached.
+
+The same validation hole accepted a shaft coefficient of 0.5 — a 200 % pump —
+as "known" and copied it under (1). Validity is now decided by the resolver
+that would transfer the value, so the classification and the transfer cannot
+disagree.
+
+**P2, taken as ruled.** The served-zone traversal gained the variable-speed
+water-to-air heat-pump coils `classify.py` already recognises and the
+low-temperature radiant coils; those models declined conservatively before
+rather than transferring a wrong value, but the claimed coverage was
+incomplete. The (2) "no usable combined shaft power" warning gained the
+`article=` it was missing, which had made that site invisible to the citation
+scanner.
+
+Citations 225 -> 231: three new warn sites per edition. No frozen baseline
+moved, so no second re-freeze. Full suite 1180 passed, 1 skipped.
+
+**Sol's second review of PR #53 (2026-09-20): a FALSE COMPLIANCE RESULT, and
+the lesson behind it.** The previous round fixed `_applicable_pumps` to scan
+both plant sides, but two OLDER paths kept their own supply-only scans — the
+Table 8.4.x.14 riding-curve application and the D-38 combined-power cap.
+Reproduced: a 100 W supply pump beside a 10,000 W demand-side pump on a 100 kW
+heating loop reported `combined_w=100` against a 450 W cap and was audited
+"within the Table 5.2.6.3 maximum", while the demand pump kept all 10,000 W
+and never received its riding curve.
+
+That is the second time in this line of work that a partial fix left a
+compliance check able to certify a violating loop — the first was D-92's cap
+clamping through a field EnergyPlus does not read. Both share a cause: a
+behaviour was corrected in the path that had just been written while an older
+path computing the same thing was left alone. Both paths now call
+`_applicable_pumps`, so a pump cannot be visible to the transfer and invisible
+to the cap; after the fix the cap sees 10,100 W, clamps to 450 W, and the
+demand pump ends at 445.5 W with `coefficient1 = 0.227143`.
+
+The same shape appeared in the water-to-air coil checks, where THREE places
+carried their own partial list: the served-zone traversal knew the
+variable-speed WSHP coils while `_loop_role` and `_pump_cap_basis` knew only
+the constant-speed equation-fit pair, so a variable-speed WSHP loop classified
+as plain hot water and took the Heating cap row rather than the water-source
+one. One registry, `WATER_TO_AIR_HEAT_PUMP_COILS`, now serves all three.
+
+Also corrected: the `_hydraulic_efficiency` docstring stated the PowerPerFlow
+relation inverted (`eta_p = H x motor_eff / I` where the code correctly
+computes `H / (I x motor_eff)`).
+
+Two regression tests, both pinning shapes that had no coverage — which is why
+these survived three review rounds. No frozen baseline moved and citations are
+unchanged. Full suite 1183 passed, 1 skipped.

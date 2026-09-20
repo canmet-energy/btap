@@ -125,6 +125,8 @@ audit are drained and archived — see `docs/README.md`.
 - **D-90** — The reference plant's capacity follows the reference's own sizing _(runtime)_
 - **D-91** — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first _(runtime)_
 - **D-92** — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power _(runtime)_
+- **D-93** — The reference pump's value source: correspondence, then the sentence that governs it _(runtime)_
+- **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
 
 <!-- TOC END -->
 
@@ -283,6 +285,12 @@ audit are drained and archived — see `docs/README.md`.
 ## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
 
 - **Decision:** implement, with these interpretive choices:
+  - **Superseded by [D-93](#d-93) (2026-09-19).** The interpretive choices
+    below are history: the value source is now decided per correspondence, by
+    the sentence that governs it. Specifically reversed — "(1)-(3) through one
+    mechanism", "intensity × reference flow, not absolute watts" (which gives
+    578.6 W against the Code's own 861 W example), and loop-TYPE
+    correspondence. The mechanism half was already replaced by [D-92](#d-92).
   - Sentences (1)-(3) through **one mechanism**: the proposed loop-type's
     pumps' combined peak power intensity in W/(L/s) — sentence (3)'s own
     metric, which equals head/efficiency (P = V·head/eff, sentence (1)) and
@@ -5752,3 +5760,138 @@ in the plan log.
   `tests/necb/test_plant_capacity_ownership.py`.
 - **Who/when:** Claude under [D-10](#d-10) delegation, with the user; Fable
   reviews; Sol's D-58 scope ruling, 2026-09-16.
+
+## D-93 — The reference pump's value source: correspondence, then the sentence that governs it
+
+- **Decision:** 8.4.4.14 (2025: 8.4.5.14) is applied per CORRESPONDENCE, not
+  per loop type. For each reference hydronic loop the pass finds the proposed
+  system it corresponds to, decides which of sentences (1), (2) and (3) that
+  system's pumps put it under, and applies **that sentence's own formula**.
+  Where no unambiguous correspondence exists it **declines and says so**.
+  [D-92](#d-92) settled the mechanism (state the pump, let EnergyPlus derive
+  the power); this settles the value.
+- **The requirement.** (1) "each hydronic pump of the reference building shall
+  have a total static head and efficiency identical to that of the
+  corresponding pump of the proposed building"; (2) where the proposed uses
+  more than one pump "in a given hydronic system", the reference pump's peak
+  **shaft** power demand "shall be modeled as being identical to the combined
+  peak shaft power demand of the proposed building's pumps"; (3) where head or
+  efficiency "is not known", the reference pump is "based on the peak power
+  demand, in W/(L/s), of the proposed building's pump". 8.4.4.9.(6)(f) fixes
+  the reference plant's pumping flow (installed capacity, pure water, 16 °C
+  drop) and 5.2.6.3.(1) caps "the combined pumping power demand required by the
+  **motors**". Verified against the codes MCP.
+- **What was wrong.** [D-11](#d-11) collapsed all three sentences into one
+  mechanism — the proposed's combined W/(L/s) **blended by plant-loop type
+  across the whole building**, applied as intensity × reference flow. Three
+  defects follow. It is not (2): on the Code's own Appendix example it yields
+  **578.6 W where the Article requires 861 W**, a third short, because the
+  reference flow (179.4 L/min, fixed by (6)(f)) is smaller than the proposed's
+  combined 267 L/min. Its denominator summed the PUMPS' flows, so two pumps in
+  series — circulating the same water — halve the intensity. And a
+  whole-building blend is weakest exactly where a real pump-to-pump
+  correspondence exists.
+- **Correspondence.** Role (`hot_water` / `chilled_water` / `condenser` /
+  `heat_pump_source`) plus the set of **served thermal blocks**, matched by zone
+  NAME because the reference is cloned and clone does not preserve handles. A
+  condenser loop reaches its zones through the chillers it serves, and a loop
+  behind a heat exchanger through the loop it serves, so both recurse. Scope is
+  an unambiguous **one-to-one** match: several proposed systems consolidated
+  onto one reference loop is real (our own builders reuse a single hot-water
+  loop) but the Code does not define correspondence across independently
+  consolidated systems, so it declines pending its own adjudication.
+- **Precedence**, at the correspondence-group level, which the Code does not
+  state and which is therefore itself adjudicated: **if ANY applicable pump's
+  head or hydraulic efficiency is unknown — defaulted, missing or physically
+  impossible — the whole group takes (3)**; otherwise more than one pump takes
+  (2); otherwise (1). (2) cannot preserve a combined shaft power it is unable to
+  compute, and (3) is the Article's explicit missing-data rule. This replaces
+  D-92's partial treatment, where an unreadable pump still contributed to a
+  (2)-style total while being dropped only from the efficiency average.
+- **"Known" is operational.** Blank-ness cannot be read: the
+  `PumpConstantSpeed` constructor writes head and motor efficiency as explicit
+  fields, so `isRatedPumpHeadDefaulted()` is False on a pump nobody touched, and
+  the shaft coefficient has no `isDefaulted` accessor at all. Head is known when
+  it is positive and not OpenStudio's 179 352 Pa; efficiency when the model pins
+  the triple (a hard power against a known head) or moves the shaft coefficient
+  off 1.282051282 — **and** the efficiency that implies is one a pump can have.
+- **The equivalent motor efficiency is adjudicated, not prescribed.** NECB does
+  not define it. A flow-weighted mean preserves shaft power while **leaking
+  electrical power**; `η_m,ref = ΣS / ΣPₑ` (an electrical-weighted arithmetic
+  mean, equivalently a shaft-power-weighted harmonic mean) conserves both at
+  once, and it is the electrical figure that [D-38](#d-38)'s Part 5 cap binds.
+- **The denominator is the distribution flow**, counted once per fluid stream —
+  the loop's own design maximum flow, hard value then autosized. Never the sum
+  of the pumps' rated flows. **If it cannot be determined the transfer declines
+  and warns**; it does not fall back.
+- **Flow dependence differs by sentence.** (1) and (3) are flow-invariant —
+  inherited characteristics and an intensity both land on whatever flow the
+  reference has. (2) is not: head carries the absolute target, so it **must be
+  restated after every re-size**. The pipeline already re-applies efficiencies
+  after each sizing run.
+- **The Appendix example is an erratum, and an inert one.** Its stated method is
+  a flow-weighted average efficiency, which is **51.292 %**; the published
+  **54.2 %** follows no weighting anyone can reproduce (flow 51.3, shaft-power
+  49.0, series 49.4, parallel 50.5, head 50.0), though it does reproduce the
+  published 156.1 kPa. We implement the stated method, giving 147.72 kPa, and
+  report the discrepancy. It changes no simulated number: the hydraulic/motor
+  split cancels out of the derived power, so the weighting moves only the head
+  we audit.
+- **What declines rather than guesses:** N:1 consolidation, partial overlap,
+  several equally valid matches, a reference loop serving no thermal block, a
+  missing counterpart, an undeterminable distribution flow, and more than one
+  pump on the reference loop (the Article describes one reference pump per
+  system). Each warns, naming the reason, and says that the retained value is a
+  modelling default rather than a Code value — 5.2.6.3 still caps it.
+- **Evidence.** The Appendix example reproduces end to end: shaft powers
+  143.33 / 260.00 / 457.78 → **861.11 W**, head **147.72 kPa** at **51.292 %**,
+  derived power **861.11 W** preserved absolutely at the smaller reference flow.
+  On the frozen corpus every correspondence is single-pump and all-default, so
+  every scenario cites **(3)** and no watts move — the loop's maximum flow rate
+  equals the pump's design flow to all 16 digits there, so the new denominator
+  is identical to the old one on those models.
+- **Supersedes:** D-11's "(1)-(3) through one mechanism", its "intensity ×
+  reference flow, not absolute watts", and its loop-TYPE correspondence; D-92's
+  partial-efficiency treatment of an unreadable pump.
+- **Files:** `btap/codes/necb/hvac/efficiency.py` (`_loop_role`,
+  `_served_zone_names`, `_distribution_flow`, `_pump_characteristics_known`,
+  `_corresponding_loop`, `_governing_sentence`, `_transfer_by_correspondence`,
+  `_apply_sentence_1/2/3`; the D-11 transfer path removed),
+  `tests/necb/test_hvac_necb_pump_rules.py`,
+  `tests/necb/test_plant_capacity_ownership.py`.
+- **Who/when:** decided by Sol, 2026-09-18/19, over three rounds in which he
+  corrected two of his own rulings (a flow-weighted motor efficiency, and a
+  "recorded construction lineage" the implementation does not have); two Fable
+  reviews; scoped by Sol to 1:1 so it need not wait on the consolidation
+  adjudication.
+
+## D-94 — Development and sign-off: implement, Sol, Fable, then stop
+
+- **Decision:** phylroy set the working loop (2026-09-20): research and develop
+  a solution, implement it, **pass it to Sol** for review, **then review with
+  Fable**. When Sol, Fable and Claude all agree the implementation is good,
+  **stop and move to the next problem**. Otherwise iterate.
+- **Why the order.** Sol is the NECB adjudicator: he rules on what the Code
+  requires and whether the reading is defensible, against live HBIX text, the
+  packaged payloads and the pinned gem. Fable is the adversarial implementation
+  reviewer and comes **last** deliberately — it reproduces findings, checks
+  arithmetic, and reviews *both* the implementation and Sol's ruling. That
+  ordering has already earned itself: Fable found that a flow-weighted motor
+  efficiency leaks 123 W, which Sol then corrected; and that a headline
+  measurement was wrong in its own author's favour.
+- **Three agreements, not two.** Claude's own agreement is part of the gate, so
+  deferring is not satisfying it. Where Claude believes a finding is wrong, it
+  says so with the reproduction and iterates rather than complying — a review
+  loop that simply obeys would have shipped both of the above.
+- **What "good" means here.** The finding is reproduced before it is fixed; the
+  fix is pinned by a test covering the shape that let it through; the suites and
+  gates pass; frozen outputs are re-frozen when they move; and the adjudication
+  is recorded as a `D-XX` rather than left in correspondence.
+- **Stopping is the point.** The loop terminates on agreement rather than on
+  exhaustion. A further round needs a finding, not an impulse to polish.
+- **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
+  directly, so neither GitHub nor phylroy carries messages. Claude watches
+  `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
+  that runs terminal commands can iterate without being prompted.
+- **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
+  adjudications themselves; this governs how the resulting work is signed off.

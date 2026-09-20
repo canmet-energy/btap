@@ -23,7 +23,7 @@
 [warning ] efficiency    CoilHeatingDXMultiSpeed_ashp: staged capacity unavailable (model not sized?) — 8.4.4.9.(7) stage count NOT set; run sizing first | building: reference building | per 8.4.4.9.(7) | ruling D-46
 [warning ] efficiency    staged DX cooling capacity unavailable (model not sized?) — not set | building: reference building | target: CoilCoolingDXMultiSpeed_ashp
 [warning ] efficiency    staged DX heating capacity unavailable (model not sized?) — not set | building: reference building | target: CoilHeatingDXMultiSpeed_ashp
-[info    ] efficiency    no proposed model supplied — 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied) | building: reference building | ruling D-11
+[info    ] efficiency    no proposed model supplied — 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied) | building: reference building | ruling D-11 D-93
 [info    ] efficiency    service water heating loop — outside 8.4.4.14 (HVAC hydronic pumps); pump left as built | building: reference building | target: Main Service Water Loop | ruling D-27
 [warning ] efficiency    CoilHeatingDXMultiSpeed_ashp: staged cooling capacity unavailable — 8.4.4.13.(2)(c) heating=cooling alignment skipped (run sizing first) | building: reference building | target: CoilHeatingDXMultiSpeed_ashp | per 8.4.4.13.(2)(c) | ruling D-22
 [info    ] efficiency    NECB efficiency pass complete | building: reference building | inputs: code=necb2020, edition=2020, boilers=0, chillers=0, dx_cooling=0, dx_cooling_staged=1, dx_heating=0, dx_heating_staged=1, gas_coils=0, gas_coils_staged=0

@@ -288,7 +288,7 @@
  {
   "step": "efficiency",
   "action": "no proposed model supplied \u2014 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied)",
-  "ruling": "D-11",
+  "ruling": "D-11 D-93",
   "building": "reference building",
   "level": "info"
  },

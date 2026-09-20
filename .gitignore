@@ -107,3 +107,6 @@ python/coverage.xml
 
 # Generated/working model files (archetypes, weather) — not repo content
 models/
+
+# Sol/Claude review drop box — working correspondence, not the record
+.reviews/

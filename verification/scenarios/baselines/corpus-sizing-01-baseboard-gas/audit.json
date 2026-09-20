@@ -861,7 +861,7 @@
  {
   "step": "efficiency",
   "action": "no proposed model supplied \u2014 8.4.4.14.(1)-(3) pump power transfer skipped (Table 8.4.4.14. curves still applied)",
-  "ruling": "D-11",
+  "ruling": "D-11 D-93",
   "building": "reference building",
   "level": "info"
  },
@@ -3381,18 +3381,18 @@
  {
   "step": "efficiency",
   "target": "Pump Variable Speed 1",
-  "action": "pump characteristics transferred from the proposed building",
+  "action": "pump power intensity transferred from the proposed system",
   "inputs": {
    "proposed_pumps": 1,
+   "combined_electrical_w": 201.7,
+   "distribution_flow_l_s": 0.79,
+   "distribution_flow_source": "autosized",
    "proposed_w_per_l_s": 255.49,
-   "reference_flow_l_s": 0.98,
-   "loop_type": "Heating",
-   "motor_efficiency": 0.9,
-   "pump_efficiency": 0.78
+   "reference_flow_l_s": 0.98
   },
-  "value": "head 179352 Pa at 78.0% pump / 90.0% motor efficiency; power autosized to 250 W at the reference flow",
-  "article": "8.4.4.14.(1)-(3)",
-  "ruling": "D-11 D-92",
+  "value": "255.49 W/(L/s) over the distribution flow (counted once, not the sum of pump flows); head 179352 Pa at a declared 78.0% pump / 90.0% modelling split",
+  "article": "8.4.4.14.(3)",
+  "ruling": "D-93",
   "building": "reference building",
   "level": "decision"
  },

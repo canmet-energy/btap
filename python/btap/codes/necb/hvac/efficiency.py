@@ -544,14 +544,9 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
         return
 
     prefix = ruleset.article('reference_subsection')
-    stats = _proposed_pump_stats(proposed)
     if proposed is None:
         audit.info('efficiency', f'no proposed model supplied — {prefix}.14.(1)-(3) pump power transfer '
-                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11')
-    elif not stats:
-        audit.warn('efficiency', 'proposed model has NO pumps with determinable power+flow — '
-                                 f'{prefix}.14.(1)-(3) power NOT transferred to any reference pump',
-                   ruling='D-11')
+                                 f'skipped (Table {prefix}.14. curves still applied)', ruling='D-11 D-93')
     for loop_ in sorted_by_name(model.getPlantLoops()):
         # 8.4.4.14 scopes HVAC hydronic pumping; a service-water loop's
         # circulator is Part 6 territory and stays as built. Transferring the
@@ -566,15 +561,17 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
             continue
 
         loop_type = loop_.sizingPlant().loopType()
-        for comp in sorted_by_name(loop_.supplyComponents()):
-            if comp.to_PumpVariableSpeed().is_initialized():
-                pump = comp.to_PumpVariableSpeed().get()
+        # _applicable_pumps, not a supply-side scan: a primary-secondary
+        # arrangement puts the secondary pump on the DEMAND side, and it needs
+        # the (4)-(5) curve exactly as much as the primary does (Sol, PR #53).
+        for pump in _applicable_pumps(loop_):
+            if pump.iddObjectType().valueName() == 'OS_Pump_VariableSpeed':
                 row = rule['curves']['riding pump curve']
                 pump.setCoefficient1ofthePartLoadPerformanceCurve(row['a'])
                 pump.setCoefficient2ofthePartLoadPerformanceCurve(row['b'])
                 pump.setCoefficient3ofthePartLoadPerformanceCurve(row['c'])
                 pump.setCoefficient4ofthePartLoadPerformanceCurve(0.0)
-                flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+                flow = _pump_flow(pump)
                 if flow:
                     pump.setMinimumFlowRate(row['d'] * flow)
                 audit.decision('efficiency', 'variable-flow pump modeled riding its curve',
@@ -585,12 +582,8 @@ def _apply_pump_rules(model, ruleset, rule, audit, proposed=None):
                                       f"{ruby_round(row['d'] * flow, 5)} m3/s") if flow
                                      else 'coefficients set; min-flow clamp deferred (flow not sized)',
                                article=f'{prefix}.14.(4)-(5); Table {prefix}.14.', ruling='D-11')
-                if proposed is not None and stats:
-                    _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
-            elif comp.to_PumpConstantSpeed().is_initialized() and proposed is not None and stats:
-                pump = comp.to_PumpConstantSpeed().get()
-                flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-                _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit)
+        if proposed is not None:
+            _transfer_by_correspondence(loop_, proposed, prefix, audit)
         _apply_pump_power_cap(loop_, loop_type, rule.get('power_caps_w_per_kw'), prefix, audit)
 
 
@@ -614,16 +607,17 @@ def _apply_pump_power_cap(loop_, loop_type, caps, prefix, audit):
         audit.info('efficiency', "5.2.6.3 pump-power cap not evaluable — loop's peak thermal demand unsized",
                    target=loop_.nameString(), article='5.2.6.3.(1)', ruling='D-38')
         return
-    pumps = []
-    for c in loop_.supplyComponents():
-        if c.to_PumpVariableSpeed().is_initialized():
-            pumps.append(c.to_PumpVariableSpeed().get())
-        elif c.to_PumpConstantSpeed().is_initialized():
-            pumps.append(c.to_PumpConstantSpeed().get())
+    # 5.2.6.3.(1) caps the combined power of ALL the pumps in the hydronic
+    # system, and a primary-secondary arrangement keeps its secondary pump on
+    # the demand side. Scanning only the supply side reported a 10,100 W loop
+    # as 100 W and certified it "within the maximum" against a 450 W cap, while
+    # the demand pump kept every watt (Sol, PR #53). One collector, so a pump
+    # cannot be visible to the transfer and invisible to the cap.
+    pumps = _applicable_pumps(loop_)
     # D-92: derive each pump's power the way E+ will — from a hard-set value, a
     # PowerPerFlow intensity, or the flow/head/coefficient triple — rather than
     # reading a sizing SQL the pass has just invalidated.
-    flows = [optional_f(p.ratedFlowRate()) or optional_f(p.autosizedRatedFlowRate()) for p in pumps]
+    flows = [_pump_flow(p) for p in pumps]
     sources = [_pump_power_source(p, f) for p, f in zip(pumps, flows)]
     powers = [w for _, w in sources]
     # A pump whose flow is readable but whose power is not states something no
@@ -676,17 +670,16 @@ def _pump_cap_basis(loop_, loop_type):
     water-to-air heat pump coils takes the WSHP row regardless of its
     sizing type; otherwise the row follows the Sizing:Plant loop type
     ('Condenser' = heat rejection, demand from the chillers it serves)."""
-    wta = [c for c in loop_.demandComponents()
-           if c.to_CoilCoolingWaterToAirHeatPumpEquationFit().is_initialized()
-           or c.to_CoilHeatingWaterToAirHeatPumpEquationFit().is_initialized()]
+    wta = _water_to_air_coils(loop_)
     if wta:
         kw = 0.0
-        for c in wta:
-            coil = c.to_CoilCoolingWaterToAirHeatPumpEquationFit()
-            if coil.empty():
+        for coil in wta:
+            # Cooling coils carry the loop's sizing basis; the heating halves of
+            # the same units add nothing to it. Both speed controls spell the
+            # capacity getter the same way.
+            if not hasattr(coil, 'ratedTotalCoolingCapacity'):
                 continue
 
-            coil = coil.get()
             kw += (optional_f(coil.ratedTotalCoolingCapacity())
                    or optional_f(coil.autosizedRatedTotalCoolingCapacity()) or 0.0) / 1000.0
         return 'Water-source heat pump', (kw if kw > 0 else None)
@@ -726,7 +719,11 @@ def _swh_loop(loop_):
             or any(c.to_WaterUseConnections().is_initialized() for c in loop_.demandComponents()))
 
 
-# D-92 replaced the MECHANISM, not yet the value source. The value source is
+# D-92 replaced the MECHANISM and D-93 the value source. What follows describes
+# the mechanism; the value now comes from the correspondence and the sentence
+# that governs it, never from a whole-building blend.
+#
+# (historical) D-92 replaced the MECHANISM, not yet the value source. It was
 # still D-11's: the proposed loop-type's pumps' combined peak power intensity,
 # W/(L/s). What changed is how it reaches the model — the reference pump's
 # head, shaft coefficient and motor efficiency are stated and its power is left
@@ -854,127 +851,668 @@ def _scale_pump_power(pump, source, factor):
     # scaling above already carried it.
 
 
-def _transfer_pump_power(pump, flow, loop_type, stats, prefix, audit):
-    s = stats.get(loop_type)
-    if s is None:
-        audit.warn('efficiency', f'{pump.nameString()}: proposed has NO {loop_type}-type loop pumps with known '
-                                 f'power+flow — {prefix}.14.(1)-(3) power NOT transferred (gem default retained)',
-                   ruling='D-11')
-        return
-    if flow is None:
-        audit.warn('efficiency', f'{pump.nameString()}: reference pump flow not sized — {prefix}.14.(1)-(3) '
-                                 'transfer needs the sized flow; run sizing first', ruling='D-11')
-        return
-    w_per_l_s = s['power_w'] / s['flow_l_s']
-    # Sentence (1) inherits the proposed pump's efficiency — but only where the
-    # proposed states one a pump can actually have. A model that hard-sets power
-    # against an unrelated head implies an efficiency above 100%, which is the
-    # Article's "not known" (sentence (3)), not a characteristic to copy: pass it
-    # on and EnergyPlus FATALS on "Calculated Pump Efficiency > 100%". Falling
-    # back to a physical split moves no power, because the split cancels.
-    motor_eff, pump_eff = s.get('motor_eff'), s.get('pump_eff')
-    inherited = motor_eff and pump_eff and 0.0 < motor_eff <= 1.0 and 0.0 < pump_eff <= 1.0
-    if inherited and s.get('impossible'):
-        # Some constituent pumps stated the impossible and were kept out of the
-        # average. The efficiency below is real, but it is not every proposed
-        # pump's, so the exclusion is declared rather than left to be inferred.
-        audit.info('efficiency', f'{pump.nameString()}: {s["impossible"]} of {s["count"]} proposed '
-                                 f'{loop_type} pumps imply an efficiency above 100% and are excluded '
-                                 f'from the flow-weighted split — their power and flow still combine '
-                                 f'under {prefix}.14.(2)',
-                   target=pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92')
-    if not inherited:
-        implied = (f'{ruby_round(pump_eff * 100.0, 1)}%' if pump_eff else 'unreadable')
-        motor_eff, pump_eff = DEFAULT_MOTOR_EFFICIENCY, DEFAULT_PUMP_EFFICIENCY
-        audit.info('efficiency', f'{pump.nameString()}: proposed {loop_type} pump efficiency not usable '
-                                 f'(implied {implied}) — {prefix}.14.(3) W/(L/s) basis retained with a '
-                                 f'physical {ruby_round(DEFAULT_PUMP_EFFICIENCY * 100.0, 1)}% pump / '
-                                 f'{ruby_round(DEFAULT_MOTOR_EFFICIENCY * 100.0, 1)}% motor split',
-                   target=pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92')
-
-    head_pa = _state_pump_characteristics(pump, w_per_l_s, motor_eff, pump_eff)
-    power_w = w_per_l_s * flow * 1000.0
-    audit.decision('efficiency', 'pump characteristics transferred from the proposed building',
-                   target=pump.nameString(),
-                   inputs={'proposed_pumps': s['count'], 'proposed_w_per_l_s': ruby_round(w_per_l_s, 2),
-                           'reference_flow_l_s': ruby_round(flow * 1000.0, 2), 'loop_type': loop_type,
-                           'motor_efficiency': ruby_round(motor_eff, 4),
-                           'pump_efficiency': ruby_round(pump_eff, 4)},
-                   value=f'head {ruby_round(head_pa)} Pa at {ruby_round(pump_eff * 100.0, 1)}% pump / '
-                         f'{ruby_round(motor_eff * 100.0, 1)}% motor efficiency; power autosized to '
-                         f'{ruby_round(power_w, 0)} W at the reference flow',
-                   article=f'{prefix}.14.(1)-(3)', ruling='D-11 D-92')
+#: OpenStudio's own defaults. A field still holding one of these was never
+#: stated by a modeller, which is what 8.4.x.14.(3)'s "not known" means in a
+#: model (Sol, DF-11 increment B). Blank-ness cannot be used instead: the
+#: PumpConstantSpeed constructor WRITES head and motor efficiency as explicit
+#: fields, so isRatedPumpHeadDefaulted() is False on a pump nobody touched,
+#: and the shaft coefficient has no isDefaulted accessor at all.
+SDK_DEFAULT_HEAD_PA = 179352.0
+SDK_DEFAULT_SHAFT_COEFFICIENT = 1.282051282
+#: The hydronic-pump article in the numbering the source literals use; the
+#: active edition's own number comes from the ruleset, as everywhere else.
+LITERAL_PUMP_ARTICLE = '8.4.4.14'
 
 
-def _proposed_pump_stats(proposed):
-    """Combined peak power and flow of the PROPOSED building's pumps, grouped
-    by plant-loop type ('Heating'/'Cooling'/'Condenser') — the loop-type
-    correspondence sidesteps the pump-to-pump bijection that cannot exist
-    between different topologies. Pumps whose power or flow cannot be read
-    (unsized, no sql) are excluded; empty groups are dropped so callers can
-    warn loudly instead of transferring zeros."""
-    if proposed is None:
-        return {}
+#: Water-to-air heat-pump coils, constant-speed and variable-speed alike. ONE
+#: registry, because three places used to carry their own partial list: the
+#: served-zone traversal knew the variable-speed ones, while _loop_role and
+#: _pump_cap_basis knew only the equation-fit pair — so a variable-speed WSHP
+#: loop classified as plain hot water and took the Heating cap row instead of
+#: the water-source one (Sol, PR #53).
+WATER_TO_AIR_HEAT_PUMP_COILS = (
+    'to_CoilCoolingWaterToAirHeatPumpEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpEquationFit',
+    'to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit',
+    'to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit',
+)
 
-    stats: dict = {}
-    for loop_ in proposed.getPlantLoops():
-        if _swh_loop(loop_):
-            continue  # SWH circulators must not pollute the Heating-loop intensity
 
-        type_ = loop_.sizingPlant().loopType()
-        for comp in loop_.supplyComponents():
-            pump = comp.to_PumpVariableSpeed().get() if comp.to_PumpVariableSpeed().is_initialized() else None
-            if pump is None:
-                pump = (comp.to_PumpConstantSpeed().get()
-                        if comp.to_PumpConstantSpeed().is_initialized() else None)
-            if pump is None:
+#: Every water coil that delivers a hydronic loop's output to a thermal block.
+#: COMPOSED from the registry above, not a second copy of it: the water-to-air
+#: entries must be the same list the role and cap classifications use, or the
+#: traversal silently stops seeing a coil type the others recognise.
+ZONE_SERVING_WATER_COILS = (
+    'to_CoilHeatingWater', 'to_CoilCoolingWater',
+    # A hot-water baseboard carries CoilHeatingWaterBaseboard, NOT
+    # CoilHeatingWater. Dropping it would strand a baseboard-only loop with no
+    # served zones, on the commonest reference heating terminal there is.
+    'to_CoilHeatingWaterBaseboard',
+    'to_CoilHeatingWaterBaseboardRadiant',
+    'to_CoilCoolingWaterPanelRadiant',
+    'to_CoilHeatingLowTempRadiantVarFlow',
+    'to_CoilCoolingLowTempRadiantVarFlow',
+    'to_CoilHeatingLowTempRadiantConstFlow',
+    'to_CoilCoolingLowTempRadiantConstFlow',
+) + WATER_TO_AIR_HEAT_PUMP_COILS
+
+
+def _water_to_air_coils(loop_):
+    """The loop's water-to-air heat-pump coils, whatever their speed control."""
+    found = []
+    for comp in loop_.demandComponents():
+        for caster in WATER_TO_AIR_HEAT_PUMP_COILS:
+            candidate = getattr(comp, caster, None)
+            if candidate is not None and candidate().is_initialized():
+                found.append(candidate().get())
+                break
+    return found
+
+
+def _loop_role(loop_):
+    """What this hydronic loop is FOR — finer than Sizing:Plant's loop type.
+
+    8.4.x.14 corresponds pumps between buildings, and a correspondence is only
+    meaningful between loops doing the same job. Loop type alone is too coarse:
+    a water-source heat-pump loop carries a boiler and reports 'Heating', so it
+    would match a reference baseboard hot-water loop and transfer characteristics
+    between two quite different systems. _pump_cap_basis already separates that
+    case for the Part 5 cap; this uses the same test.
+    """
+    if _swh_loop(loop_):
+        return 'service_water'
+
+    if _water_to_air_coils(loop_):
+        return 'heat_pump_source'
+
+    return {'Heating': 'hot_water', 'Cooling': 'chilled_water',
+            'Condenser': 'condenser'}.get(loop_.sizingPlant().loopType())
+
+
+def _pump_flow(pump):
+    """A pump's design flow — stated, else the value sizing produced.
+
+    One definition, because this expression appeared inline at six call sites
+    and every defect in this Article's implementation so far has come from two
+    places computing the same thing independently.
+    """
+    return optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
+
+
+def _coil_served_zones(coil):
+    """The thermal blocks a water coil conditions, by name.
+
+    THREE accessors, not two. A coil sitting directly in zone equipment answers
+    `containingZoneHVACComponent`, and one on an air loop's main branch answers
+    `airLoopHVAC` — but a coil held inside an `AirLoopHVACUnitarySystem` or an
+    `AirTerminalSingleDuctVAVReheat` answers NEITHER: only
+    `containingHVACComponent` is set. Checking the first two alone made a
+    hot-water loop serving VAV reheat terminals resolve to no zones at all
+    (Fable, PR #53).
+
+    That is worse than a loud decline where the proposed has one loop: with two
+    loops — reheat on one, baseboards on another — the reference matched the
+    baseboard loop alone and reported a confident "one-to-one" for what is
+    really an N:1 consolidation. A silently wrong sentence, on an ordinary
+    rooftop-with-hydronic-reheat building.
+    """
+    zones = set()
+    container = coil.containingZoneHVACComponent()
+    if container.is_initialized() and container.get().thermalZone().is_initialized():
+        zones.add(container.get().thermalZone().get().nameString())
+
+    air_loop = coil.airLoopHVAC()
+    if air_loop.is_initialized():
+        zones |= {z.nameString() for z in air_loop.get().thermalZones()}
+
+    held_by = coil.containingHVACComponent()
+    if held_by.is_initialized():
+        zones |= _holder_zones(held_by.get())
+    return zones
+
+
+def _holder_zones(holder):
+    """The zones a coil's HOLDER conditions — a distinction a union destroys.
+
+    Both kinds of holder answer `airLoopHVAC()`, and they mean opposite things
+    by it. An `AirLoopHVACUnitarySystem` on the loop's main branch conditions
+    EVERY zone on that loop. An air terminal conditions exactly ONE: its own.
+    Attributing the loop's whole zone list to both over-attributes the
+    terminal, so a reheat coil serving one zone claims every zone on the
+    rooftop unit.
+
+    That is not a harmless over-count. Correspondence compares served-zone
+    sets, so the inflated set makes a reference loop look like it matches a
+    proposed loop it only partly overlaps: the loud "partial overlap is not a
+    correspondence" decline becomes a confident, wrong one-to-one, and a second
+    proposed loop's pump is dropped from the transfer without a word (Fable,
+    PR #53).
+    """
+    holder_loop = holder.airLoopHVAC()
+    if not holder_loop.is_initialized():
+        # No air loop does not mean no zone: an `AirLoopHVACUnitarySystem` is
+        # also a `ZoneHVACComponent` and can sit directly in a thermal zone,
+        # where it conditions that one zone. The cast is not optional —
+        # `containingHVACComponent()` hands back a base `HVACComponent`, which
+        # carries no `thermalZone` accessor at all, so reaching for one by
+        # name finds nothing (Fable, PR #53, third round).
+        zone_equipment = holder.to_ZoneHVACComponent()
+        if zone_equipment.is_initialized():
+            zone = zone_equipment.get().thermalZone()
+            if zone.is_initialized():
+                return {zone.get().nameString()}
+        return set()
+    loop_zones = holder_loop.get().thermalZones()
+
+    # Every OpenStudio air terminal is an OS:AirTerminal:* object, so the
+    # prefix recognises one without enumerating sixteen casters that would fall
+    # out of date the next time the SDK adds a terminal. The three dual-duct
+    # types do not map back from their zone, but none of them holds a water
+    # coil, so none reaches here.
+    if not holder.iddObjectType().valueName().startswith('OS_AirTerminal'):
+        return {z.nameString() for z in loop_zones}
+
+    # A terminal no zone claims conditions NO zone. Returning the whole loop
+    # here would reinstate exactly the over-attribution above.
+    return {
+        z.nameString()
+        for z in loop_zones
+        if z.airLoopHVACTerminal().is_initialized()
+        and z.airLoopHVACTerminal().get().handle() == holder.handle()
+    }
+
+
+def _served_zone_names(loop_, _seen=None):
+    """The thermal zones this loop ultimately conditions, by NAME.
+
+    Names, not handles: the reference is `model.clone()`d from the proposed and
+    clone does not preserve handles, so a handle-keyed map cannot span the two
+    buildings. Zone names survive the clone and the teardown.
+
+    A condenser loop reaches zones only through the chillers it rejects heat
+    for, and a loop behind a heat exchanger only through the loop it serves, so
+    both recurse (guarded against a loop pair that references itself).
+    """
+    seen = _seen if _seen is not None else set()
+    if loop_.handle() in seen:
+        return set()
+
+    seen.add(loop_.handle())
+    zones: set[str] = set()
+    for comp in loop_.demandComponents():
+        coil = None
+        # CoilHeatingWaterBaseboard is a DIFFERENT class from CoilHeatingWater,
+        # and it is what a hot-water baseboard carries — the commonest reference
+        # heating terminal there is. Omitting it made a baseboard-only loop
+        # resolve to no served zones, so the correspondence declined on exactly
+        # the systems this Article most often applies to.
+        # Composed from WATER_TO_AIR_HEAT_PUMP_COILS rather than restating it:
+        # three places carrying their own copy is exactly how a variable-speed
+        # WSHP loop came to classify as plain hot water. A registry that one
+        # caller still duplicates is not shared, it is only currently in
+        # agreement.
+        for caster in ZONE_SERVING_WATER_COILS:
+            candidate = getattr(comp, caster, None)
+            if candidate is not None and candidate().is_initialized():
+                coil = candidate().get()
+                break
+        if coil is not None:
+            zones |= _coil_served_zones(coil)
+            continue
+
+        # Equipment that passes the load on to another loop rather than a zone.
+        for caster in ('to_ChillerElectricEIR', 'to_HeatExchangerFluidToFluid',
+                       'to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpPlantLoopEIRCooling'):
+            candidate = getattr(comp, caster, None)
+            if candidate is None or not candidate().is_initialized():
                 continue
 
-            power = (optional_f(pump.ratedPowerConsumption())
-                     or optional_f(pump.autosizedRatedPowerConsumption()))
-            flow = optional_f(pump.ratedFlowRate()) or optional_f(pump.autosizedRatedFlowRate())
-            # Non-positive or non-finite power is excluded from the (2)
-            # combination entirely, not merely from the efficiency average: a
-            # negative wattage would subtract from the combined peak power and
-            # transfer an intensity lower than any pump in the proposed draws.
-            if flow is None or flow <= 0 or _usable_watts(power) is None:
-                continue
+            served = candidate().get().plantLoop()
+            if served.is_initialized():
+                zones |= _served_zone_names(served.get(), seen)
+    return zones
 
-            # D-92 needs the efficiency SPLIT, not just the intensity: the
-            # reference pump is expressed as head + shaft coefficient + motor
-            # efficiency, so E+ derives power itself. Total efficiency comes
-            # from the triple (hydraulic / electrical); the motor's share is
-            # the pump's own field, and what is left is the shaft coefficient's
-            # reciprocal. Both are flow-weighted, per A-8.4.4.14.(2).
-            # Validation is PER PUMP, before averaging. An aggregate hides an
-            # impossible constituent: a 55.6%-efficient pump averaged with a
-            # 111.1%-efficient one reads as a plausible 60.6%, and the reference
-            # then inherits an efficiency no pump in the proposed actually has
-            # (Sol, PR #50). A pump that states the impossible states nothing
-            # inheritable — sentence (3)'s "not known" — so it contributes its
-            # power and flow to the (2) combination but NOT its efficiency.
-            motor_eff = pump.motorEfficiency()
-            total_eff = (flow * pump.ratedPumpHead() / power) if power > 0 else None
-            pump_eff = (total_eff / motor_eff) if (total_eff and motor_eff) else None
-            usable = bool(pump_eff and 0.0 < motor_eff <= 1.0 and 0.0 < pump_eff <= 1.0)
 
-            entry = stats.setdefault(type_, {'power_w': 0.0, 'flow_l_s': 0.0, 'count': 0,
-                                             'flow_x_motor': 0.0, 'flow_x_pump': 0.0,
-                                             'eff_flow_l_s': 0.0, 'impossible': 0})
-            entry['power_w'] += power
-            entry['flow_l_s'] += flow * 1000.0
-            entry['count'] += 1
-            if usable:
-                entry['flow_x_motor'] += flow * 1000.0 * motor_eff
-                entry['flow_x_pump'] += flow * 1000.0 * pump_eff
-                entry['eff_flow_l_s'] += flow * 1000.0
-            else:
-                entry['impossible'] += 1
-    for s in stats.values():
-        weighted = s['eff_flow_l_s']
-        s['motor_eff'] = (s['flow_x_motor'] / weighted) if weighted else None
-        s['pump_eff'] = (s['flow_x_pump'] / weighted) if weighted else None
-    return {k: s for k, s in stats.items() if s['flow_l_s'] != 0}
+def _distribution_flow(loop_):
+    """The design flow delivered through this loop's load-serving circuit, in
+    m3/s — counted ONCE per fluid stream, which is NOT the sum of its pumps'
+    flows (Sol, DF-11 increment B).
+
+    Two pumps in series, or a primary-secondary arrangement, circulate the same
+    water; summing their rated flows counts it twice and halves the resulting
+    W/(L/s). On the Code's own Appendix example that understates the reference
+    pump by a third. The loop's own maximum flow rate is that stream, counted
+    once, whichever sizing option produced it.
+
+    :return: (flow m3/s, source) or (None, reason) — never a silent fallback
+    """
+    hard = optional_f(loop_.maximumLoopFlowRate())
+    if hard is not None and hard > 0:
+        return hard, 'input'
+
+    sized = optional_f(loop_.autosizedMaximumLoopFlowRate())
+    if sized is not None and sized > 0:
+        return sized, 'autosized'
+
+    return None, 'the loop has no design maximum flow rate (not sized)'
+
+
+def _pump_characteristics_known(pump):
+    """Does the proposed state this pump's head AND hydraulic efficiency?
+
+    8.4.x.14.(3) applies where the head OR the efficiency is not known, so (1)
+    requires BOTH — Sol corrected us on that: "any modeller-set field" was too
+    weak a test. Neither can be read from blank-ness (see the constants above),
+    so "stated" means "not holding the SDK's own default".
+
+    Efficiency is known when the model pins the flow/head/power triple — a
+    hard-set rated power against a stated head — or when the shaft coefficient
+    itself was moved off its default.
+
+    :return: (head_known, efficiency_known)
+    """
+    head = pump.ratedPumpHead()
+    head_known = bool(head) and head > 0 and abs(head - SDK_DEFAULT_HEAD_PA) > 1e-6
+    coefficient = pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+    stated = (
+        abs(coefficient - SDK_DEFAULT_SHAFT_COEFFICIENT) > 1e-9
+        or (head_known and not pump.isRatedPowerConsumptionAutosized()
+            and optional_f(pump.ratedPowerConsumption()) is not None)
+    )
+    # "defaulted, missing OR INVALID" is the test, and validity is decided by
+    # the same resolver that will later TRANSFER the value — otherwise a pump
+    # can be classified known on one field and transferred from another. A
+    # negative power and a shaft coefficient of 0.5 (200 %) both fail here.
+    return head_known, bool(stated and _hydraulic_efficiency(pump) is not None)
+
+
+def _corresponding_loop(reference_loop, proposed):
+    """The proposed hydronic system this reference loop corresponds to, or a
+    reason it has none (Sol, DF-11 increment B).
+
+    Correspondence is by ROLE plus SERVED THERMAL BLOCKS, not by loop type —
+    D-11 matched on 'Heating'/'Cooling'/'Condenser' across the whole building,
+    which blends every heating pump in a mixed building into one intensity and
+    is weakest exactly where a real pump-to-pump correspondence exists.
+
+    Increment B is scoped to an UNAMBIGUOUS one-to-one match. Several proposed
+    systems consolidated onto one reference loop is a real case (our own
+    builders reuse a single hot-water loop) but the Code does not define
+    correspondence across independently consolidated systems; that is a
+    separate adjudication, so it declines here rather than guessing.
+
+    :return: (proposed loop, 'one-to-one') or (None, reason)
+    """
+    role = _loop_role(reference_loop)
+    if role in (None, 'service_water'):
+        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}'
+
+    reference_zones = _served_zone_names(reference_loop)
+    if not reference_zones:
+        return None, 'the reference loop serves no thermal block, so no correspondence can be drawn'
+
+    candidates = [loop_ for loop_ in sorted_by_name(proposed.getPlantLoops())
+                  if _loop_role(loop_) == role]
+    if not candidates:
+        return None, f'the proposed building has no {role} loop'
+
+    exact = [loop_ for loop_ in candidates if _served_zone_names(loop_) == reference_zones]
+    if len(exact) == 1:
+        return exact[0], 'one-to-one'
+    if len(exact) > 1:
+        return None, (f'{len(exact)} proposed {role} loops serve exactly the same thermal blocks — '
+                      'the correspondence is ambiguous')
+
+    overlapping = [loop_ for loop_ in candidates
+                   if _served_zone_names(loop_) & reference_zones]
+    if len(overlapping) > 1:
+        return None, (f'{len(overlapping)} proposed {role} loops are consolidated onto this one — '
+                      'cross-system correspondence is not defined by the Code and is adjudicated '
+                      'separately')
+    if len(overlapping) == 1:
+        # Either direction reaches here — the proposed loop may serve blocks
+        # the reference one does not, or only some of the ones it does — so the
+        # reason names the overlap rather than asserting a direction it has not
+        # established.
+        proposed_zones = _served_zone_names(overlapping[0])
+        shared = len(proposed_zones & reference_zones)
+        # Both counts, because the shared count alone is ambiguous: a proposed
+        # loop serving a strict SUPERSET reads as 'shares 1 of 1', which looks
+        # like a full match being called partial (Fable, PR #53).
+        return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
+                      f"loop's {len(reference_zones)} thermal blocks and serves "
+                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence')
+    return None, f'no proposed {role} loop serves these thermal blocks'
+
+
+def _applicable_pumps(loop_):
+    """The loop's own circulating pumps, BOTH sides, in name order.
+
+    A primary-secondary arrangement puts the primary pump on the supply side
+    and the secondary on the DEMAND side, so scanning only the supply side
+    finds one pump where the system has two (Sol, PR #53). That mistakes (2)
+    for (1), and drops the secondary's power out of (3) entirely — on exactly
+    the topology the Appendix example describes.
+    """
+    pumps, seen = [], set()
+    for comp in sorted_by_name(list(loop_.supplyComponents()) + list(loop_.demandComponents())):
+        pump = None
+        if comp.to_PumpVariableSpeed().is_initialized():
+            pump = comp.to_PumpVariableSpeed().get()
+        elif comp.to_PumpConstantSpeed().is_initialized():
+            pump = comp.to_PumpConstantSpeed().get()
+        if pump is not None and pump.handle() not in seen:
+            seen.add(pump.handle())
+            pumps.append(pump)
+    return pumps
+
+
+def _hydraulic_efficiency(pump):
+    """The pump efficiency EnergyPlus will actually use, or None if it is not
+    readable or not one a pump can have.
+
+    One resolver for every caller, because the field that DEFINES the
+    efficiency depends on how power is stated, and reading a different field
+    than the one that defines it silently transfers the wrong number (Sol,
+    PR #53: a proposed triple implying 50 % was transferred as the untouched
+    coefficient's 78 %, turning 888.9 W of proposed power into 569.8 W).
+
+    - a hard rated power pins the triple: eta_p = Q x H / (P x motor_eff)
+    - PowerPerFlow states electrical per flow: eta_p = H / (intensity x motor_eff)
+    - otherwise the shaft coefficient IS the statement: eta_p = 1 / k
+    """
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff or not 0.0 < motor_eff <= 1.0:
+        return None
+
+    head = pump.ratedPumpHead()
+    flow = _pump_flow(pump)
+    efficiency = None
+    if not pump.isRatedPowerConsumptionAutosized():
+        power = optional_f(pump.ratedPowerConsumption())
+        if power is not None and power > 0 and head and flow:
+            efficiency = (flow * head) / (power * motor_eff)
+    elif pump.designPowerSizingMethod() == POWER_PER_FLOW:
+        intensity = pump.designElectricPowerPerUnitFlowRate()
+        if intensity and head:
+            efficiency = head / (intensity * motor_eff)
+    else:
+        coefficient = pump.designShaftPowerPerUnitFlowRatePerUnitHead()
+        efficiency = (1.0 / coefficient) if coefficient else None
+
+    return efficiency if (efficiency and 0.0 < efficiency <= 1.0) else None
+
+
+def _governing_sentence(pumps):
+    """Which of 8.4.x.14 (1), (2) or (3) governs this correspondence group.
+
+    Sol's precedence (DF-11 increment B), which the Code does not state and
+    which is therefore itself an adjudication: if ANY applicable pump's head or
+    hydraulic efficiency is unknown the whole group takes (3), because (2)
+    cannot preserve a combined shaft power it is unable to compute and (3) is
+    the Article's explicit missing-data rule. Otherwise more than one pump in
+    the system takes (2), and a single known pump takes (1).
+
+    This replaces D-92's partial treatment, where an unreadable pump still
+    contributed to a (2)-style total while being dropped only from the
+    efficiency average. The group is now all one sentence or the other.
+    """
+    if not pumps:
+        return None
+
+    if any(not all(_pump_characteristics_known(pump)) for pump in pumps):
+        return '3'
+
+    return '2' if len(pumps) > 1 else '1'
+
+
+def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
+    """Apply 8.4.x.14 (1), (2) or (3) to one reference loop's pumps (D-93).
+
+    The value source follows the correspondence, not the loop type: find the
+    proposed system this loop corresponds to, decide which sentence its pumps
+    put us under, and apply that sentence's own formula. Where no unambiguous
+    correspondence exists the transfer DECLINES and says so — the reference
+    pump keeps the builder's default, which the Part 5 cap still binds. D-11
+    inferred a whole-building intensity instead, which is a number no sentence
+    of the Article asks for.
+    """
+    reference_pumps = _applicable_pumps(reference_loop)
+    if not reference_pumps:
+        return
+
+    match, reason = _corresponding_loop(reference_loop, proposed)
+    if match is None:
+        if _loop_role(reference_loop) == 'service_water':
+            return  # D-27 already said so, at the top of the pass
+
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
+                                        f'applied — {reason}. The pump keeps the modelling default, '
+                                        f'which is not a Code value; 5.2.6.3 still caps it',
+                          target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
+                          ruling='D-93')
+
+    proposed_pumps = _applicable_pumps(match)
+    sentence = _governing_sentence(proposed_pumps)
+    if sentence is None:
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: the corresponding proposed '
+                                        f'loop {match.nameString()} has no pump — {prefix}.14.(1)-(3) '
+                                        'NOT applied', target=reference_loop.nameString(),
+                          article=f'{prefix}.14.(1)-(3)', ruling='D-93')
+
+    if len(reference_pumps) > 1:
+        return audit.warn('efficiency', f'{reference_loop.nameString()} has {len(reference_pumps)} '
+                                        f'pumps; {prefix}.14 describes ONE reference pump per system '
+                                        '— NOT applied', target=reference_loop.nameString(),
+                          article=f'{prefix}.14.(1)-(3)', ruling='D-93')
+
+    reference_pump = reference_pumps[0]
+    reference_flow = (optional_f(reference_pump.ratedFlowRate())
+                      or optional_f(reference_pump.autosizedRatedFlowRate()))
+    if sentence == '1':
+        return _apply_sentence_1(reference_pump, proposed_pumps[0], prefix, audit)
+    if sentence == '2':
+        return _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, audit)
+
+    distribution_flow, flow_source = _distribution_flow(match)
+    if distribution_flow is None:
+        return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(3) needs the '
+                                        f'proposed distribution flow and {flow_source} — NOT applied. '
+                                        'The sum of the pumps\' own flows is not a substitute: in '
+                                        'series or primary-secondary they circulate the same water',
+                          target=reference_loop.nameString(), article=f'{prefix}.14.(3)',
+                          ruling='D-93')
+    return _apply_sentence_3(reference_pump, proposed_pumps, distribution_flow, reference_flow,
+                             prefix, audit, flow_source)
+
+
+def _pump_shaft_and_electrical(pump):
+    """(shaft W, electrical W) for a PROPOSED pump, or (None, None).
+
+    Electrical is what the model states or E+ will size; shaft is that times
+    the motor efficiency. Sentence (2) is expressed in shaft power and (3) in
+    power demand "required by the motors" (5.2.6.3's phrase for the same
+    quantity), so both are needed and the distinction is explicit.
+    """
+    flow = _pump_flow(pump)
+    _, electrical = _pump_power_source(pump, flow)
+    if electrical is None:
+        return None, None
+
+    motor_eff = pump.motorEfficiency()
+    if not motor_eff or not 0.0 < motor_eff <= 1.0:
+        return None, None
+
+    return electrical * motor_eff, electrical
+
+
+def _apply_sentence_1(reference_pump, proposed_pump, prefix, audit):
+    """(1): head and efficiency identical to the corresponding proposed pump.
+
+    Power is not transferred at all — it follows from the inherited
+    characteristics at the reference's own flow, which is the sentence's whole
+    point. Flow-invariant: nothing here needs restating after a re-size.
+    """
+    head = proposed_pump.ratedPumpHead()
+    motor_eff = proposed_pump.motorEfficiency()
+    # The efficiency the proposed STATES, resolved from whichever field defines
+    # it — not the shaft-coefficient field, which on a pump that pins its power
+    # through a hard triple still holds the untouched default and would transfer
+    # a number the proposed never claimed.
+    pump_eff = _hydraulic_efficiency(proposed_pump)
+    if pump_eff is None:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: the corresponding proposed '
+                                        f'pump states no usable efficiency — {prefix}.14.(1) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(1)', ruling='D-93')
+
+    reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    reference_pump.setRatedPumpHead(head)
+    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    reference_pump.setMotorEfficiency(motor_eff)
+    reference_pump.autosizeRatedPowerConsumption()
+
+    audit.decision('efficiency', 'pump head and efficiency inherited from the corresponding '
+                                 'proposed pump',
+                   target=reference_pump.nameString(),
+                   inputs={'corresponding_pump': proposed_pump.nameString(),
+                           'head_pa': ruby_round(head),
+                           'pump_efficiency': ruby_round(pump_eff, 4),
+                           'motor_efficiency': ruby_round(motor_eff, 4)},
+                   value=f'head {ruby_round(head)} Pa at {ruby_round(pump_eff * 100.0, 1)}% pump / '
+                         f'{ruby_round(motor_eff * 100.0, 1)}% motor efficiency; power follows the '
+                         f'reference flow',
+                   article=f'{prefix}.14.(1)', ruling='D-93')
+
+
+def _apply_sentence_2(reference_pump, proposed_pumps, reference_flow, prefix, audit):
+    """(2): the reference pump's peak SHAFT power equals the proposed pumps'
+    combined peak shaft power — absolutely, not scaled by flow.
+
+    D-11 transferred an intensity times the reference flow instead. On the
+    Code's own Appendix example that yields 578.6 W where the Article requires
+    861 W, a third short, because the reference flow (179.4 L/min, fixed by
+    8.4.x.9.(6)(f)) is smaller than the proposed's combined 267 L/min.
+
+    The equivalent motor efficiency is NOT a flow-weighted mean — that
+    preserves shaft power while leaking electrical power. Sum-of-shaft over
+    sum-of-electrical conserves both at once (Sol, DF-11 increment B), and it
+    is the electrical figure that D-38's Part 5 cap then binds.
+
+    Head carries the target, so it depends on the reference flow and MUST be
+    restated after every re-size; the pipeline already re-applies efficiencies
+    after each sizing run.
+    """
+    pairs = [_pump_shaft_and_electrical(pump) for pump in proposed_pumps]
+    if any(s is None or e is None for s, e in pairs):
+        # D-92's hostile-input hardening, which this must not regress: a pump
+        # stating a power no pump can draw used to reach sum() as a None and
+        # terminate compliance processing with a TypeError (Sol, PR #53).
+        # (2) cannot preserve a combined shaft power it cannot compute, so the
+        # group declines — it does not silently drop the offending pump, which
+        # would transfer less power than the proposed system draws.
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: a pump in the corresponding '
+                                        f'proposed system states a power no pump can draw, so the '
+                                        f'combined shaft power is not computable — {prefix}.14.(2) '
+                                        'NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-92 D-93')
+
+    shaft = sum(s for s, _ in pairs)
+    electrical = sum(e for _, e in pairs)
+    flows = [_pump_flow(p)
+             for p in proposed_pumps]
+
+    # The Note's flow-weighted hydraulic efficiency. Numerically inert in
+    # EnergyPlus — it only moves the head we state, never the energy — which is
+    # why the Note's own 54.2 % not reproducing as a flow-weighted mean changes
+    # no result. Recorded in D-93 rather than silently reconciled.
+    # Each pump's own stated efficiency, resolved from the field that defines
+    # it — the same resolver the known-test used to admit the group.
+    efficiencies = [_hydraulic_efficiency(p) for p in proposed_pumps]
+    usable = [(f, e) for f, e in zip(flows, efficiencies) if f and e]
+    weighted = sum(f for f, _ in usable)
+    pump_eff = (sum(f * e for f, e in usable) / weighted) if weighted else None
+    motor_eff = shaft / electrical if electrical else None
+    if not pump_eff or not motor_eff or reference_flow is None or reference_flow <= 0:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: the proposed system states '
+                                        f'no usable combined shaft power — {prefix}.14.(2) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(2)',
+                          ruling='D-93')
+
+    head_pa = shaft * pump_eff / reference_flow
+    reference_pump.setDesignPowerSizingMethod(POWER_PER_FLOW_PER_PRESSURE)
+    reference_pump.setRatedPumpHead(head_pa)
+    reference_pump.setDesignShaftPowerPerUnitFlowRatePerUnitHead(1.0 / pump_eff)
+    reference_pump.setMotorEfficiency(motor_eff)
+    reference_pump.autosizeRatedPowerConsumption()
+
+    audit.decision('efficiency', "combined peak shaft power transferred from the proposed system's pumps",
+                   target=reference_pump.nameString(),
+                   inputs={'proposed_pumps': len(proposed_pumps),
+                           'combined_shaft_w': ruby_round(shaft, 1),
+                           'combined_electrical_w': ruby_round(electrical, 1),
+                           'reference_flow_l_s': ruby_round(reference_flow * 1000.0, 2),
+                           'pump_efficiency': ruby_round(pump_eff, 4),
+                           'motor_efficiency': ruby_round(motor_eff, 4)},
+                   value=f'shaft {ruby_round(shaft, 1)} W preserved absolutely (NOT scaled by the '
+                         f'reference flow); head {ruby_round(head_pa)} Pa derived, electrical '
+                         f'{ruby_round(electrical, 1)} W',
+                   article=f'{prefix}.14.(2)', ruling='D-93')
+
+
+def _apply_sentence_3(reference_pump, proposed_pumps, distribution_flow, reference_flow,
+                      prefix, audit, flow_source):
+    """(3): where head or efficiency is not known, the reference pump is based
+    on the proposed's peak power demand in W/(L/s) — electrical, per 5.2.6.3's
+    "required by the motors".
+
+    The denominator is the DISTRIBUTION flow, counted once per fluid stream,
+    never the sum of the pumps' rated flows: pumps in series or in a
+    primary-secondary arrangement circulate the same water, and summing them
+    halves the intensity.
+
+    Head and the efficiency split only have to reproduce that intensity — the
+    split cancels out of the derived power — so a physical default split is
+    used and declared as the modelling fallback it is.
+    """
+    readable, unreadable = [], []
+    for pump in proposed_pumps:
+        _, electrical = _pump_shaft_and_electrical(pump)
+        (readable if electrical is not None else unreadable).append((pump, electrical))
+    if unreadable:
+        # D-92: a pump stating a power no pump can draw is excluded ENTIRELY
+        # rather than netted off the total — a negative wattage would transfer
+        # an intensity lower than any pump in the proposed draws. Sol's ruling
+        # governs unknown head and efficiency; it does not speak to unreadable
+        # power, so this stands.
+        audit.warn('efficiency', f'{reference_pump.nameString()}: '
+                                 f'{", ".join(p.nameString() for p, _ in unreadable)} state a power no '
+                                 f'pump can draw and are excluded from the {prefix}.14.(3) combination',
+                   target=reference_pump.nameString(), article=f'{prefix}.14.(3)', ruling='D-92 D-93')
+    if not readable:
+        return audit.warn('efficiency', f'{reference_pump.nameString()}: no proposed pump states a '
+                                        f'readable power — {prefix}.14.(3) NOT applied',
+                          target=reference_pump.nameString(), article=f'{prefix}.14.(3)',
+                          ruling='D-93')
+
+    electricals = [e for _, e in readable]
+    w_per_l_s = sum(electricals) / (distribution_flow * 1000.0)
+    head_pa = _state_pump_characteristics(reference_pump, w_per_l_s,
+                                          DEFAULT_MOTOR_EFFICIENCY, DEFAULT_PUMP_EFFICIENCY)
+    audit.decision('efficiency', 'pump power intensity transferred from the proposed system',
+                   target=reference_pump.nameString(),
+                   inputs={'proposed_pumps': len(readable),
+                           'combined_electrical_w': ruby_round(sum(electricals), 1),
+                           'distribution_flow_l_s': ruby_round(distribution_flow * 1000.0, 2),
+                           'distribution_flow_source': flow_source,
+                           'proposed_w_per_l_s': ruby_round(w_per_l_s, 2),
+                           'reference_flow_l_s': (ruby_round(reference_flow * 1000.0, 2)
+                                                  if reference_flow else None)},
+                   value=f'{ruby_round(w_per_l_s, 2)} W/(L/s) over the distribution flow (counted once, '
+                         f'not the sum of pump flows); head {ruby_round(head_pa)} Pa at a declared '
+                         f'{ruby_round(DEFAULT_PUMP_EFFICIENCY * 100.0, 1)}% pump / '
+                         f'{ruby_round(DEFAULT_MOTOR_EFFICIENCY * 100.0, 1)}% modelling split',
+                   article=f'{prefix}.14.(3)', ruling='D-93')
 
 
 def _align_heat_pump_heating_capacity(model, audit, ruleset):
@@ -2448,11 +2986,11 @@ def prepare_for_resizing(model, audit=None, code='necb2020'):
     keeping the input value is what triggers the fatal above (found on the
     SmallHotel gas variant). Pump power is deliberately NOT ownership-tracked the
     way plant capacity is, and tracking it would change nothing: 8.4.4.14 (2025:
-    8.4.5.14) makes the reference's rated power a DERIVED quantity, and
-    _transfer_pump_power re-derives it for every non-SWH pump on the next pass
-    whoever set the old value. WHICH sentence supplies that value — (1)'s inherited
-    head and efficiency, (2)'s combined shaft power, or (3)'s W/(L/s) fallback — is
-    D-11's open branch, not something this release settles (DF-11). The caller's
+    8.4.5.14) makes the reference's rated power a DERIVED quantity, and the next
+    pass re-derives it for every non-SWH pump whoever set the old value. WHICH
+    sentence supplies that value — (1)'s inherited head and efficiency, (2)'s
+    combined shaft power, or (3)'s W/(L/s) over the distribution flow — is
+    decided per correspondence by D-93. The caller's
     next apply_efficiencies(proposed=) re-transfers it against the newly sized flow;
     WITHOUT proposed= nothing is transferred and the released pump is left for
     EnergyPlus to size.
