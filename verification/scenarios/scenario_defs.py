@@ -46,17 +46,25 @@ D89_SEAL = ("python-only:first frozen at D-89 step 3 (R-O-a) — authored "
             "after the Ruby product retired; no cross-language attestation "
             "exists for this scenario")
 
-#: DF-17: the hydronic VAV model, sized, so the 8.4.x.14 pump transfer is
-#: measured on a building with three plant loops and with hot-water coils held
-#: inside VAV reheat terminals — the served-zone traversal's third accessor,
-#: which no other sample reaches.
+#: DF-17, two models, doing two different jobs. Both sized: the 8.4.x.14
+#: transfer runs in the POST-SIZING efficiency pass, so the python lane never
+#: reaches it and the annual tier would add EnergyPlus cost for nothing new.
 #:
-#: Its limit is deliberate and recorded rather than discovered: the air loop's
-#: own heating coil is hot water, and it contributes every zone on that loop
-#: through the SECOND accessor, so this scenario EXERCISES the held path
-#: without DISCRIMINATING a mis-attribution in it. Sized only — the annual
-#: tier would add EnergyPlus cost for the same insensitivity.
-DF17_SIZING_SUBSET = ["17-vav-hw-reheat"]
+#: ``17-vav-hw-reheat`` is the realistic one — a catalog NECB System 6 with
+#: hot-water reheat, the corpus's only hot-water VAV and its only SIZED model
+#: carrying hot-water, chilled-water and condenser loops at once. It EXERCISES
+#: the held-coil accessor but cannot DISCRIMINATE a mis-attribution in it: its
+#: air-loop coil is hot water too and contributes every zone through the
+#: second accessor.
+#:
+#: ``18-vav-hw-subset-reheat`` is the one that discriminates — hot-water reheat
+#: on 3 of 5 terminals of an all-electric VAV, so the loop reaches its blocks
+#: only through the held accessor and only for the zones it truly serves.
+#: Measured on the built model: real ``[Zone 1-3]``, held accessor removed
+#: ``[]``, holder over-attributed ``[Zone 1-5]`` — three correspondence
+#: outcomes, so either PR #53 defect moves this baseline. It is hand-built
+#: because no catalog row produces the shape; all 97 were swept.
+DF17_SIZING_SUBSET = ["17-vav-hw-reheat", "18-vav-hw-subset-reheat"]
 DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
              "product retired; no cross-language attestation exists for this "
              "scenario")
@@ -129,13 +137,29 @@ def _corpus(slug, tier, lane, *, code=DEFAULT_CODE, extra=(), seal=None):
     return scenario
 
 
+#: The corpus slugs that existed when the final cross-language attestation
+#: (85ab143) was run, so their python-lane scenarios may legitimately convert
+#: to ``python-only:post-handoff`` and carry it. Anything added later may not.
+R6_CORPUS_SLUGS = (
+    "01-baseboard-gas", "02-psz-gas-dx", "03-vav-reheat-chiller",
+    "04-fancoil-chiller", "05-ptac-electric", "06-unit-heaters-gas",
+    "07-furnace-forced-air", "08-vrf", "09-water-source-hp", "10-ashp-pthp",
+    "11-staged-boilers-gas-lead", "12-staged-boilers-electric-lead",
+    "13-district-heating", "14-general-2storey", "15-general-3storey",
+    "16-ashp-electric-supp-hw-baseboard",
+)
+
 #: Slugs whose python-lane scenario was authored AFTER the Ruby product
 #: retired. Without this the default "ruby" seal is converted by
 #: ``all_scenarios()`` into ``python-only:post-handoff``, which carries the
 #: final cross-language attestation (85ab143) — an attestation these scenarios
 #: never had. A seal is a provenance claim, so the default must not be
 #: inherited by a scenario that post-dates the evidence.
-POST_R6_PYTHON_LANE_SEALS = {"17-vav-hw-reheat": DF17_SEAL}
+#: ``test_every_post_handoff_slug_predates_the_attestation`` is the gate.
+POST_R6_PYTHON_LANE_SEALS = {
+    "17-vav-hw-reheat": DF17_SEAL,
+    "18-vav-hw-subset-reheat": DF17_SEAL,
+}
 
 
 def corpus_scenarios(slugs):

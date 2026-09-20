@@ -4,7 +4,7 @@ readable model carrying the properties the samples exist to demonstrate.
 
 SDK-ONLY — no EnergyPlus. The generator builds and saves models; nothing here
 simulates, so the whole class runs under ``needs_sdk`` alone. It is slow for an
-SDK test (17 models, built once in setUpClass and shared) because the thing
+SDK test (18 models, built once in setUpClass and shared) because the thing
 under test is the corpus, not one model.
 
 Why the both-directions manifest assertion matters: the Ruby original rescues
@@ -74,7 +74,7 @@ class TestGenerateSamples(unittest.TestCase):
                          "exactly — a missing sample and an extra one are both defects")
         self.assertEqual(expected, on_disk,
                          "every manifest slug must exist on disk as a .osm, and nothing else")
-        self.assertEqual(17, len(expected), "the corpus is 17 samples")
+        self.assertEqual(18, len(expected), "the corpus is 18 samples")
 
     def test_every_sample_reloads_through_the_sdk_with_zones(self):
         # model.save() reports nothing about whether the bytes it wrote can be
@@ -125,7 +125,7 @@ class TestGenerateSamples(unittest.TestCase):
 
     def test_the_shipped_readme_is_written(self):
         readme = (self.out / "README.txt").read_text(encoding="utf-8")
-        self.assertIn("Sample models — 17 files, one building", readme)
+        self.assertIn("Sample models — 18 files, one building", readme)
         for slug, _, _ in self.built:
             self.assertIn(slug, readme, f"{slug} is missing from the shipped README")
 

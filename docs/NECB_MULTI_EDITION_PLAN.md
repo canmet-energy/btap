@@ -1239,57 +1239,80 @@ any result.
   is exactly the inference that produced two false-compliance results earlier
   in DF-11 (Fable, PR #53, second round).
 
-  **Partly addressed 2026-09-20, and the original remedy was wrong.** This
-  entry first said "a sizing-lane VAV-reheat scenario closes it"; Sol and Fable
-  both endorsed that. Research before implementing showed it does not, for a
-  structural reason:
+  **Closed 2026-09-20 — after the original remedy, and then the first
+  replacement for it, both turned out to be wrong.**
+
+  *Round one.* This entry first said "a sizing-lane VAV-reheat scenario closes
+  it"; Sol and Fable both endorsed that. It does not:
 
   - `corpus-03-vav-reheat-chiller` is *all-electric* ("MZ BU RTU **Electric**
-    Heating Coil … and **Electric** Baseboard"), so adding it to the sizing
-    lane would not touch a hydronic path at all.
+    Heating Coil … and **Electric** Baseboard"), so putting it in the sizing
+    lane touches no hydronic path at all.
   - Every hydronic VAV in the catalog takes ONE `heating_coil_type` for both
-    the air-loop coil and the reheat coils (`vav_reheat.py:142,169`), so a
-    hot-water reheat always comes with a hot-water coil on the air loop. That
-    coil contributes **every zone on the loop** through the second accessor, so
-    the loop's served-zone set is identical whether the held path works or not.
-  - The one hydronic `psz` row does not help either: `psz.py` puts its unitary
-    system *on* the air loop, so its coil also answers the second accessor.
-    Measured: 5 of 5 coils via `airLoopHVAC`, 0 via `containingHVACComponent`.
+    the air-loop coil and the reheat coils (`vav_reheat.py:142,169`), so
+    hot-water reheat always arrives with a hot-water coil on the air loop, and
+    that coil contributes **every zone on the loop** through the second
+    accessor.
+  - The one hydronic `psz` row does not help either, though NOT for the reason
+    first recorded here. `PSZ-AC with gas boiler` is never staged — `psz.py`
+    sets `staged_coils` only from the reference definitions — so its coil sits
+    *bare on the air loop* rather than inside the unitary. Measured
+    `zoneHVAC=False airLoop=True held=False`. A unitary-HELD coil answers
+    neither of the first two accessors; the original wording said the opposite
+    and would have misled the next reader about unitary systems (Fable,
+    PR #54).
 
-  So no catalog model makes the held path load-bearing, and **neither defect
-  above would have moved a baseline even with the scenario in place**. The
-  masking is the air-loop coil, not the lane.
+  Fable then swept all 97 catalog rows: 64 carry a hydronic loop, **138 loops,
+  none sensitive** to either PR #53 defect. So the catalog negative is real,
+  and **neither defect would have moved a baseline** from any catalog model.
 
-  **What was done instead:** corpus model `17-vav-hw-reheat`
-  ("MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard")
-  with `corpus-none-` and `corpus-sizing-` scenarios (41 → 43). Measured on it:
-  5 `CoilHeatingWater` reached through `containingHVACComponent`, holder
-  `OS_AirTerminal_SingleDuct_VAV_Reheat`, plus 1 through `airLoopHVAC`; three
-  plant loops (hot water, chilled water, condenser), each with its own pump.
-  It is the corpus's only hot-water VAV and its only three-loop building, so it
-  earns its place on pump-transfer, riding-curve and 5.2.6.3-cap coverage.
+  *Round two.* From that negative this entry concluded discriminating coverage
+  "would mean changing product modelling capability to serve a test". Also
+  wrong. `generate_samples.py` already hand-builds samples 11/12 with
+  post-build surgery, and the same pattern gives a discriminating model with no
+  product change: take the all-electric VAV, add a hot-water loop, and put
+  hot-water reheat on a **strict subset** of the terminals. The loop then
+  reaches its blocks only through the held accessor, and only for the zones it
+  truly serves.
 
-  **It EXERCISES the held path; it does not DISCRIMINATE a mis-attribution in
-  it.** Measured on the built model by disabling the held accessor outright —
-  reproducing the round-one defect exactly:
+  **What shipped.** Two models, both sized (the transfer runs in the
+  post-sizing pass, so the python lane never reaches it), 41 → 45 scenarios:
 
-      air loops in model: 1
-      with held path    : [Thermal Zone 1 .. 5]
-      held path DISABLED: [Thermal Zone 1 .. 5]
+  - `17-vav-hw-reheat` — the realistic one. A catalog NECB System 6 with
+    hot-water reheat: 5 `CoilHeatingWater` through `containingHVACComponent`
+    (holder `OS_AirTerminal_SingleDuct_VAV_Reheat`) plus 1 through
+    `airLoopHVAC`; the corpus's only hot-water VAV and its only *sized* model
+    carrying hot-water, chilled-water and condenser loops at once.
+    (`04-fancoil-chiller` also has three loops, but is python-lane only, where
+    the transfer never runs — an earlier claim that 17 was the only three-loop
+    building was false.) It EXERCISES the held path and cannot discriminate a
+    mis-attribution: measured with the accessor disabled, `[Zone 1-5]` either
+    way.
+  - `18-vav-hw-subset-reheat` — the one that DISCRIMINATES. Hot-water reheat on
+    3 of 5 terminals of an otherwise all-electric system. Measured on the saved
+    `.osm`:
 
-  The set is unchanged, so a regression there still would not move this
-  baseline. The pipeline confirms the rest reaches it: the sized run emits
-  `pump power intensity transferred from the proposed system … proposed_pumps=1,
-  combined_electrical_w=324.5, distribution_flow_l_s=1.27 … 8.4.4.14.(3),
-  ruling D-93`. Stated here, in `scenario_defs.py` and in the sample's own note
-  so the next reader does not re-derive the same false comfort from a green
-  scenario.
+        real                        : [Thermal Zone 1, 2, 3]
+        held accessor removed       : []
+        holder over-attributed      : [Thermal Zone 1, 2, 3, 4, 5]
 
-  **Still open.** Discriminating coverage needs a model whose hydronic loop
-  reaches its zones ONLY through held coils — a non-hydronic air-loop coil with
-  hot-water reheat. No catalog row produces that shape, so it would mean
-  changing product modelling capability to serve a test. Deliberately not done;
-  reopen with that trade-off stated if a third defect lands on this path.
+    Three different correspondence outcomes — a partial-overlap decline, "the
+    reference loop serves no thermal block", and a false one-to-one against the
+    System 3 reference. **Either PR #53 defect moves this baseline.** Keep the
+    reheat a strict subset: give every terminal a coil and the set goes
+    insensitive again.
+
+  The gap this finding was opened for is now closed by `18`. `17` earns its
+  place on pump-transfer, riding-curve and 5.2.6.3-cap coverage, not on
+  discrimination — said in `scenario_defs.py` and in the sample's own note as
+  well as here, so a green `17` is not mistaken for evidence about the held
+  path.
+
+  **The durable lesson is not about pumps.** Three times running, a confident
+  claim about this path was wrong: the accessor, the attribution, and then
+  twice about how to test it. What caught each was building the thing and
+  measuring it, never reasoning about it. Absence of baseline movement was
+  treated as evidence three times and was not evidence any of them.
 
 ## Stage 1 — opened 2026-09-08
 

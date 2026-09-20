@@ -124,17 +124,51 @@ STRESS_CASES = (
      "8.4.4.14/8.4.5.14 + DF-17 — the only corpus model whose hot-water coils are "
      "HELD inside other equipment: five CoilHeatingWater in VAV reheat terminals, "
      "reached through containingHVACComponent alone (the served-zone traversal's "
-     "third accessor, which no other sample exercises). Also the only model with "
-     "three plant loops — hot water, chilled water and condenser — so the pump "
-     "transfer, the Table 8.4.x.14 riding curves and the 5.2.6.3 combined cap are "
-     "measured on a building with more than one pump to get wrong. "
+     "third accessor). It is the corpus's only hot-water VAV — a common NECB "
+     "System 6 — and the only SIZED model carrying hot-water, chilled-water and "
+     "condenser loops at once, so the pump transfer, the Table 8.4.x.14 riding "
+     "curves and the 5.2.6.3 combined cap are measured on a building with more "
+     "than one pump to get wrong. (04-fancoil-chiller also has three loops, but "
+     "it is python-lane only, where the transfer never runs.) "
      "READ THIS BEFORE TRUSTING IT: the air loop's own heating coil is hot water "
      "too, and it contributes every zone on the loop through the SECOND accessor, "
-     "so the loop's served-zone SET is the same whether the held path works or "
-     "not. This sample EXERCISES that path; it does not DISCRIMINATE a "
-     "mis-attribution in it. Two defects there shipped green precisely because "
-     "nothing measured them, and this sample does not change that — see DF-17.",
+     "so this sample's served-zone SET is the same whether the held path works or "
+     "not. It EXERCISES that path; it does not DISCRIMINATE a mis-attribution in "
+     "it. 18-vav-hw-subset-reheat is the sample that does.",
      None),
+)
+
+#: DF-17's discriminating sample, and the reason it is hand-built rather than
+#: named from the catalog: no catalog row produces a hydronic loop reached ONLY
+#: through held coils. All 97 were swept — 64 carry a hydronic loop, 138 loops,
+#: none sensitive to either PR #53 defect — because every hydronic VAV takes one
+#: `heating_coil_type` for the air-loop coil AND the reheat coils, and that
+#: air-loop coil contributes every zone through the second accessor.
+#:
+#: Post-build surgery escapes that, exactly as 11/12 do for staged boilers:
+#: take the ELECTRIC VAV (so nothing hydronic sits on the air loop), add a
+#: hot-water loop, and put hot-water reheat on a STRICT SUBSET of the terminals.
+#: The loop then reaches its zones only through containingHVACComponent, and
+#: only for the zones it actually serves.
+SUBSET_REHEAT = (
+    "18-vav-hw-subset-reheat",
+    "MZ BU RTU Electric Heating Coil Scroll Chiller and Electric Baseboard",
+    3,
+)
+
+SUBSET_REHEAT_NOTE = (
+    "8.4.4.14/8.4.5.14 + DF-17 — the sample that DISCRIMINATES a served-zone "
+    "mis-attribution instead of merely exercising the traversal. Hot-water "
+    "reheat on 3 of 5 VAV terminals of an otherwise all-electric system, so the "
+    "hot-water loop reaches its blocks ONLY through containingHVACComponent and "
+    "ONLY for the three zones it truly serves. Measured on the built model: "
+    "real [Zone 1-3]; with the held accessor removed (the first PR #53 defect) "
+    "[] — 'the reference loop serves no thermal block'; with the holder "
+    "over-attributed to its whole air loop (the second) [Zone 1-5] — which "
+    "matches the System 3 reference exactly and reports a false one-to-one. "
+    "Three different correspondence outcomes, so either defect moves this "
+    "baseline. Keep the reheat a STRICT SUBSET: give every terminal a coil and "
+    "the set becomes insensitive again."
 )
 
 
@@ -204,6 +238,8 @@ def abort(slug: str, error: BaseException) -> None:
 
 
 def generate(out: Path) -> list[tuple[str, str, int]]:
+    import openstudio
+
     import btap.modeling as modeling
     from btap._compat import sorted_by_name
     from btap.modeling.hvac.systems import plant_loops
@@ -251,6 +287,35 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
         notes[slug] = STAGED_NOTE
         print(f"  {slug:<36} {lead + ' lead / ' + backup + ' backup':<52} "
               f"{size / 1_048_576.0:6.1f} MB")
+
+    # DF-17's discriminating sample: hot-water reheat on a STRICT SUBSET of an
+    # all-electric VAV's terminals, so the loop reaches its blocks only through
+    # the held-coil accessor and only for the zones it truly serves.
+    slug, system, reheated = SUBSET_REHEAT
+    gate(slug, system)
+    try:
+        model = seed("necb2020")
+        modeling.build_system(model, system,
+                              sorted_by_name(model.getThermalZones()))
+        loop = plant_loops.hot_water(model, fuel="NaturalGas", reuse=False)
+        terminals = sorted_by_name(model.getAirTerminalSingleDuctVAVReheats())
+        if len(terminals) <= reheated:
+            abort(slug, ValueError(
+                f"needs more than {reheated} VAV terminals to leave a subset "
+                f"unserved; found {len(terminals)}"))
+        for terminal in terminals[:reheated]:
+            coil = openstudio.model.CoilHeatingWater(
+                model, model.alwaysOnDiscreteSchedule())
+            loop.addDemandBranchForComponent(coil)
+            terminal.setReheatCoil(coil)
+        size = save(model, out, slug)
+    except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named
+        abort(slug, e)
+    built.append((slug, f"{system} + hot-water reheat on {reheated} terminals",
+                  size))
+    notes[slug] = SUBSET_REHEAT_NOTE
+    print(f"  {slug:<36} {'hot-water reheat on a subset':<52} "
+          f"{size / 1_048_576.0:6.1f} MB")
 
     for slug, system, note, setup in STRESS_CASES:
         gate(slug, system)
