@@ -239,6 +239,35 @@ class TestNecbPumpRules(unittest.TestCase):
             {'Zone A (reheat)'}, _served_zone_names(loop_),
             'the hot-water loop reaches only the zone whose terminal holds its coil')
 
+    def test_a_unitary_system_used_as_zone_equipment_still_reaches_its_zone(self):
+        """Fable, PR #53, third round. A unitary system is also a
+        `ZoneHVACComponent` and can sit directly in a thermal zone, with no air
+        loop at all. The cast is the whole point: `containingHVACComponent()`
+        returns a base `HVACComponent`, which carries no `thermalZone`
+        accessor, so reaching for one by name finds nothing and the loop
+        resolves to no served block."""
+        model = openstudio.model.Model()
+        schedule = model.alwaysOnDiscreteSchedule()
+        loop_ = openstudio.model.PlantLoop(model)
+        loop_.sizingPlant().setLoopType('Heating')
+
+        zone = openstudio.model.ThermalZone(model)
+        zone.setName('Unitary Zone')
+        coil = openstudio.model.CoilHeatingWater(model, schedule)
+        loop_.addDemandBranchForComponent(coil)
+        unitary = openstudio.model.AirLoopHVACUnitarySystem(model)
+        unitary.setHeatingCoil(coil)
+        unitary.setCoolingCoil(openstudio.model.CoilCoolingDXSingleSpeed(model))
+        unitary.setSupplyFan(openstudio.model.FanOnOff(model, schedule))
+        self.assertTrue(unitary.addToThermalZone(zone),
+                        'the fixture must actually be zone equipment')
+        self.assertFalse(
+            coil.containingZoneHVACComponent().is_initialized(),
+            'the coil is reached through containingHVACComponent, not the zone accessor')
+
+        self.assertEqual({'Unitary Zone'}, _served_zone_names(loop_),
+                         'zone equipment conditions its own zone, air loop or not')
+
     def test_partial_overlap_through_a_reheat_terminal_still_declines(self):
         """The consequence the over-attribution actually had, which is worse
         than an over-count: correspondence matches on served-zone SETS, so an

@@ -990,12 +990,25 @@ def _holder_zones(holder):
     """
     holder_loop = holder.airLoopHVAC()
     if not holder_loop.is_initialized():
+        # No air loop does not mean no zone: an `AirLoopHVACUnitarySystem` is
+        # also a `ZoneHVACComponent` and can sit directly in a thermal zone,
+        # where it conditions that one zone. The cast is not optional —
+        # `containingHVACComponent()` hands back a base `HVACComponent`, which
+        # carries no `thermalZone` accessor at all, so reaching for one by
+        # name finds nothing (Fable, PR #53, third round).
+        zone_equipment = holder.to_ZoneHVACComponent()
+        if zone_equipment.is_initialized():
+            zone = zone_equipment.get().thermalZone()
+            if zone.is_initialized():
+                return {zone.get().nameString()}
         return set()
     loop_zones = holder_loop.get().thermalZones()
 
     # Every OpenStudio air terminal is an OS:AirTerminal:* object, so the
-    # prefix recognises one without enumerating fifteen casters that would
-    # fall out of date the next time the SDK adds a terminal.
+    # prefix recognises one without enumerating sixteen casters that would fall
+    # out of date the next time the SDK adds a terminal. The three dual-duct
+    # types do not map back from their zone, but none of them holds a water
+    # coil, so none reaches here.
     if not holder.iddObjectType().valueName().startswith('OS_AirTerminal'):
         return {z.nameString() for z in loop_zones}
 
@@ -1161,10 +1174,14 @@ def _corresponding_loop(reference_loop, proposed):
         # the reference one does not, or only some of the ones it does — so the
         # reason names the overlap rather than asserting a direction it has not
         # established.
-        shared = len(_served_zone_names(overlapping[0]) & reference_zones)
+        proposed_zones = _served_zone_names(overlapping[0])
+        shared = len(proposed_zones & reference_zones)
+        # Both counts, because the shared count alone is ambiguous: a proposed
+        # loop serving a strict SUPERSET reads as 'shares 1 of 1', which looks
+        # like a full match being called partial (Fable, PR #53).
         return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
-                      f"loop's {len(reference_zones)} thermal blocks — a partial overlap is not a "
-                      'correspondence')
+                      f"loop's {len(reference_zones)} thermal blocks and serves "
+                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence')
     return None, f'no proposed {role} loop serves these thermal blocks'
 
 
