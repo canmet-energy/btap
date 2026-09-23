@@ -5911,20 +5911,31 @@ in the plan log.
 ## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash
 
 - **Decision:** a PR that changes frozen baselines or the manifest provenance
-  `freeze.py` produces is merged with a **merge commit**. Ordinary PRs keep the
-  repository's squash convention. Sol ruled this on 2026-09-23 after diagnosing
-  three days of red `main`; phylroy adopted it the same day.
+  `freeze.py` produces is merged with a **merge commit** — not a squash, and
+  not a rebase. Both of those give the merged commit a new SHA, and this
+  repository allows all three. Ordinary PRs keep the squash convention. Sol
+  ruled this on 2026-09-23, on a diagnosis Claude produced and Sol verified;
+  phylroy adopted it the same day.
 - **The mechanism, so the rule does not look arbitrary.** `freeze.py` records
   the commit it RAN at, which is a PR-branch commit, and
   `test_manifest_integrity` requires that commit to be an ancestor of `HEAD` —
   a claim that the baselines were produced on this line of history, distinct
-  from the content hashes the manifest already pins. A squash merge replaces the
-  branch with one new commit and deletes it, so the recorded commit stops being
-  an ancestor. **Every squash-merged PR carrying a freeze does this.** The gate
-  is not wrong; our merge strategy rewrote the history it attests to.
-- **Measured:** `main` failed on `9f48d45` (#53) and `235145a` (#54) with
-  `manifest provenance commit c415a5188f8b is NOT an ancestor of HEAD`, while
-  both PRs' own heads were green on all five jobs.
+  from the content hashes the manifest already pins. A squash merge gives the
+  merged commit a single parent, main's previous tip, so the recorded branch
+  commit is not reachable from `HEAD` and the check fails. **Every
+  squash-merged PR carrying a freeze does this**, and a rebase merge does the
+  same by rewriting every SHA. (Branch deletion is irrelevant, and this
+  repository does not delete on merge; both offending branches still exist on
+  the remote.) The gate is not wrong; our merge strategy rewrote the history it
+  attests to.
+- **Measured — two independent breakages, each with its own stale pointer.**
+  `main` failed on `9f48d45` (#53) with `manifest provenance commit
+  446482dca42e is NOT an ancestor of HEAD`, and on `235145a` (#54) with
+  `… c415a5188f8b …`. Both PRs' own heads were green on all five jobs, though
+  only via the dispatch runs: `verify` and the parity jobs are skipped on
+  `pull_request` events, so a PR's own checks never exercise them. An earlier
+  draft of this entry reported a single SHA for both failures; Fable caught it
+  against the job logs (PR #57).
 - **Recovery, when someone squashes one anyway.** Re-freeze from the resulting
   `main` commit and submit the minimal re-pin immediately. A pure squash repair
   moves ONLY provenance metadata — `f5533ff` moved one line, `c415a51` →
@@ -5939,5 +5950,7 @@ in the plan log.
 - **The residual risk is human, and named.** This rule depends on someone
   remembering the exception, and when they forget the failure is silent until
   after the merge. That is why [D-94](#d-94)'s stop condition now requires the
-  post-merge `main` run to be checked: the two rules cover each other's gap.
+  post-merge `main` run to be checked. The relationship is asymmetric, in Sol's
+  own words: D-95 prevents the known cause when the exception is remembered;
+  D-94 detects it when it is forgotten. Neither makes the other redundant.
 - **Who/when:** Sol ruled, phylroy adopted, 2026-09-23.
