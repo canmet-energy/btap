@@ -182,7 +182,27 @@ diff.
 
 When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
-baselines and provenance with the change. The 31 scenarios that once had live
+baselines and provenance with the change.
+
+**Merge a freeze-carrying PR with GitHub's "Create a merge commit" (D-95).** A
+PR that changes frozen baselines or the manifest provenance counts as
+freeze-carrying — look for `manifest.json` or `baselines/` in the diff.
+`freeze.py` records the commit it ran at — a branch commit — and
+`test_manifest_integrity` requires that commit to be an ancestor of `HEAD`,
+which is a separate claim from the content hashes the manifest already pins.
+
+**Neither "Squash and merge" nor "Rebase and merge" will do.** Both give the
+merged commit a new SHA, so the recorded branch commit is no longer an
+ancestor and `main` goes red *after* the merge while every branch check was
+green. This is not theoretical: `main` failed that way for three days across
+two merges, with a different stale pointer each time.
+
+If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
+and submit the minimal re-pin immediately; a pure repair moves only provenance
+metadata and no baseline. And check the post-merge `main` run before calling
+the work done — green PR-head CI is a different claim (D-94).
+
+The 31 scenarios that once had live
 Ruby seals are now `python-only:post-handoff` and retain their retired seal plus
 the final attestation identity. The other fourteen are Python-only from their first
 freeze: four that were already Python-only at the handoff, four NECB 2025

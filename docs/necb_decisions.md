@@ -127,6 +127,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-92** — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power _(runtime)_
 - **D-93** — The reference pump's value source: correspondence, then the sentence that governs it _(runtime)_
 - **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
+- **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash or rebase _(process)_
 
 <!-- TOC END -->
 
@@ -5889,9 +5890,70 @@ in the plan log.
   is recorded as a `D-XX` rather than left in correspondence.
 - **Stopping is the point.** The loop terminates on agreement rather than on
   exhaustion. A further round needs a finding, not an impulse to polish.
+- **Agreement is not the whole stop condition (added 2026-09-23).** "Stop" also
+  requires the **merged-`main`** workflow to be green. Green PR-head CI is a
+  different claim, and a squash merge is exactly where the two diverge: it
+  rewrites the branch commit the frozen manifest's provenance names, so
+  `test_manifest_integrity` fails on `main` while every branch check was green.
+  That is not hypothetical — `main` was red for three days across two merges
+  (`9f48d45`, `235145a`) because each PR was verified on its own head and
+  declared closed without anyone looking at `main` afterwards. A work item is
+  closed when the three agree **and** the post-merge run passes — or, for a
+  change the workflow path-ignores entirely (documentation only), when no run
+  was triggered at all, which is a real case rather than a quibble. If a run
+  failed, the repair comes before the next item. Sol raised this, on a
+  diagnosis Claude produced and Sol verified; see [D-95](#d-95) for the merge
+  rule that removes the cause.
 - **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
   directly, so neither GitHub nor phylroy carries messages. Claude watches
   `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
   that runs terminal commands can iterate without being prompted.
 - **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
   adjudications themselves; this governs how the resulting work is signed off.
+
+## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase
+
+- **Decision:** a PR that changes frozen baselines or the manifest provenance
+  `freeze.py` produces is merged with a **merge commit** — not a squash, and
+  not a rebase. Both of those give the merged commit a new SHA, and this
+  repository allows all three. Ordinary PRs keep the squash convention. Sol
+  ruled this on 2026-09-23, on a diagnosis Claude produced and Sol verified;
+  phylroy adopted it the same day.
+- **The mechanism, so the rule does not look arbitrary.** `freeze.py` records
+  the commit it RAN at, which is a PR-branch commit, and
+  `test_manifest_integrity` requires that commit to be an ancestor of `HEAD` —
+  a claim that the baselines were produced on this line of history, distinct
+  from the content hashes the manifest already pins. A squash merge gives the
+  merged commit a single parent, main's previous tip, so the recorded branch
+  commit is not reachable from `HEAD` and the check fails. **Every
+  squash-merged PR carrying a freeze does this**, and a rebase merge does the
+  same by rewriting every SHA. (Branch deletion is irrelevant, and this
+  repository does not delete on merge; both offending branches still exist on
+  the remote.) The gate is not wrong; our merge strategy rewrote the history it
+  attests to.
+- **Measured — two independent breakages, each with its own stale pointer.**
+  `main` failed on `9f48d45` (#53) with `manifest provenance commit
+  446482dca42e is NOT an ancestor of HEAD`, and on `235145a` (#54) with
+  `… c415a5188f8b …`. Both PRs' own heads were green on all five jobs, though
+  only via the dispatch runs: `verify` and the parity jobs are skipped on
+  `pull_request` events, so a PR's own checks never exercise them. An earlier
+  draft of this entry reported a single SHA for both failures; Fable caught it
+  against the job logs (PR #57).
+- **Recovery, when someone squashes one anyway.** Re-freeze from the resulting
+  `main` commit and submit the minimal re-pin immediately. A pure squash repair
+  moves ONLY provenance metadata — `f5533ff` moved one line, `c415a51` →
+  `235145a`, with no baseline touched in any of the 45 scenarios. Baseline
+  movement in a repair is a different event and needs its own explanation.
+- **Rejected: proving provenance by content instead.** It removes the
+  recurrence and is cheapest, but the manifest already pins every baseline and
+  machinery hash; ancestry contributes the separate "made on this line of
+  history" claim, and content equality is not a substitute for it. The gate's
+  own comment says the common CI path must not routinely skip this check, so
+  weakening it would reverse a review finding rather than tidy one up.
+- **The residual risk is human, and named.** This rule depends on someone
+  remembering the exception, and when they forget the failure is silent until
+  after the merge. That is why [D-94](#d-94)'s stop condition now requires the
+  post-merge `main` run to be checked. The relationship is asymmetric, in Sol's
+  own words: D-95 prevents the known cause when the exception is remembered;
+  D-94 detects it when it is forgotten. Neither makes the other redundant.
+- **Who/when:** Sol ruled, phylroy adopted, 2026-09-23.
