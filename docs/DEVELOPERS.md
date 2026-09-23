@@ -174,7 +174,7 @@ diff.
 
 ## Frozen scenarios
 
-`verification/scenarios/` contains 41 scenarios in three lanes:
+`verification/scenarios/` contains 45 scenarios in three lanes:
 
 - `python`: engine-free, every Python-suite run
 - `verify`: sizing, in the OpenStudio container
@@ -184,9 +184,13 @@ When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
 baselines and provenance with the change. The 31 scenarios that once had live
 Ruby seals are now `python-only:post-handoff` and retain their retired seal plus
-the final attestation identity. The other ten are Python-only from their first
+the final attestation identity. The other fourteen are Python-only from their first
 freeze: four that were already Python-only at the handoff, four NECB 2025
-scenarios first frozen after R6, and the two D-89 purchased-heating scenarios.
+scenarios first frozen after R6, the two D-89 purchased-heating scenarios, and
+the four DF-17 hydronic-VAV scenarios. A scenario authored after the handoff must
+carry its own `python-only:` seal rather than inherit the default, or
+`all_scenarios()` converts it to `post-handoff` and it claims a cross-language
+attestation that was never run for it.
 
 ## Pinned oracle
 

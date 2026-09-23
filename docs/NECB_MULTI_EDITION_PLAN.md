@@ -1239,9 +1239,91 @@ any result.
   is exactly the inference that produced two false-compliance results earlier
   in DF-11 (Fable, PR #53, second round).
 
-  A sizing-lane VAV-reheat scenario closes it. That is a 42nd frozen scenario,
-  so it carries a baseline, a `scenario_defs.py` entry and the documented
-  count in `CLAUDE.md` — separable work, deliberately not folded into PR #53.
+  **Closed 2026-09-20 — after the original remedy, and then the first
+  replacement for it, both turned out to be wrong.**
+
+  *Round one.* This entry first said "a sizing-lane VAV-reheat scenario closes
+  it"; Sol and Fable both endorsed that. It does not:
+
+  - `corpus-03-vav-reheat-chiller` is *all-electric* ("MZ BU RTU **Electric**
+    Heating Coil … and **Electric** Baseboard"), so putting it in the sizing
+    lane touches no hydronic path at all.
+  - Every hydronic VAV in the catalog takes ONE `heating_coil_type` for both
+    the air-loop coil and the reheat coils (`vav_reheat.py:142,169`), so
+    hot-water reheat always arrives with a hot-water coil on the air loop, and
+    that coil contributes **every zone on the loop** through the second
+    accessor.
+  - The one hydronic `psz` row does not help either, though NOT for the reason
+    first recorded here. `PSZ-AC with gas boiler` is never staged — `psz.py`
+    sets `staged_coils` only from the reference definitions — so its coil sits
+    *bare on the air loop* rather than inside the unitary. Measured
+    `zoneHVAC=False airLoop=True held=False`. A unitary-HELD coil answers
+    neither of the first two accessors; the original wording said the opposite
+    and would have misled the next reader about unitary systems (Fable,
+    PR #54).
+
+  Fable then swept all 97 catalog rows: 64 carry a hydronic loop, **138 loops,
+  none sensitive** to either PR #53 defect. So the catalog negative is real,
+  and **neither defect would have moved a baseline** from any catalog model.
+
+  *Round two.* From that negative this entry concluded discriminating coverage
+  "would mean changing product modelling capability to serve a test". Also
+  wrong. `generate_samples.py` already hand-builds samples 11/12 with
+  post-build surgery, and the same pattern gives a discriminating model with no
+  product change: take the all-electric VAV, add a hot-water loop, and put
+  hot-water reheat on a **strict subset** of the terminals. The loop then
+  reaches its blocks only through the held accessor, and only for the zones it
+  truly serves.
+
+  **What shipped.** Two models, both sized (the transfer runs in the
+  post-sizing pass, so the python lane never reaches it), 41 → 45 scenarios:
+
+  - `17-vav-hw-reheat` — the catalog-authored one, a real NECB System 6:
+    5 `CoilHeatingWater` through `containingHVACComponent` (holder
+    `OS_AirTerminal_SingleDuct_VAV_Reheat`) plus 1 through `airLoopHVAC`. It is
+    the only frozen scenario where correspondence SUCCEEDS through a loop
+    resolved by air-loop coil UNION held coils — it transfers
+    `proposed_pumps=1` at 255.49 W/(L/s), where 18 declines and 01/02 resolve
+    through baseboards. So it witnesses the third accessor's contribution
+    reaching a transferred W/(L/s). It cannot DETECT the accessor's absence:
+    with it disabled the set is `[Zone 1-5]` either way.
+
+    The "only three-loop building" claim attached to 17 was wrong **twice** —
+    first ignoring `04-fancoil-chiller`, then, narrowed to "only *sized*",
+    ignoring sample 18 itself, which carries hot-water, chilled-water and
+    condenser loops exactly as 17 does. The loop list was printed in my own
+    verification output both times. The uniqueness claim is dropped rather than
+    narrowed a third time (Fable, PR #54).
+  - `18-vav-hw-subset-reheat` — the one that DISCRIMINATES. Hot-water reheat on
+    3 of 5 terminals of an otherwise all-electric system. Measured on the saved
+    `.osm`:
+
+        real     [Zone 1, 2, 3]  -> "shares 3 of this reference loop's 5
+                                    thermal blocks … a partial overlap is not
+                                    a correspondence"
+        round 1  []              -> "no proposed hot_water loop serves these
+                                    thermal blocks"
+        round 2  [Zone 1 .. 5]   -> "one-to-one"  — a FALSE match
+
+    The reference this model selects is System 3 with hot-water BASEBOARDS,
+    which resolve through the FIRST accessor and are untouched by either
+    defect; it is the PROPOSED set that moves. An earlier draft quoted "the
+    reference loop serves no thermal block" for round one — the wrong branch,
+    one this sample never reaches (Fable, PR #54). **Either PR #53 defect moves
+    this baseline.** Keep the reheat a strict subset: give every terminal a
+    coil and the set goes insensitive again.
+
+  The gap this finding was opened for is now closed by `18`. `17` earns its
+  place on pump-transfer, riding-curve and 5.2.6.3-cap coverage, not on
+  discrimination — said in `scenario_defs.py` and in the sample's own note as
+  well as here, so a green `17` is not mistaken for evidence about the held
+  path.
+
+  **The durable lesson is not about pumps.** Three times running, a confident
+  claim about this path was wrong: the accessor, the attribution, and then
+  twice about how to test it. What caught each was building the thing and
+  measuring it, never reasoning about it. Absence of baseline movement was
+  treated as evidence three times and was not evidence any of them.
 
 ## Stage 1 — opened 2026-09-08
 

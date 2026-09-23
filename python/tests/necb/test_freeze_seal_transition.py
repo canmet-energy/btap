@@ -35,16 +35,36 @@ class TestFreezeSealTransition(unittest.TestCase):
         active, retired, attestation = freeze.seal_accounting(scenarios())
         # 31 converted at R6, plus the python-only seals authored after the
         # retirement: 4 from R6; since the multi-edition Stage 0 (R-A),
-        # 4 "first frozen post-R6 for NECB 2025" scenarios; and since D-89
-        # step 3 (R-O-a), the 2 purchased-heating scenarios — none of which
-        # has cross-language history to convert from.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 10}, active)
+        # 4 "first frozen post-R6 for NECB 2025" scenarios; since D-89
+        # step 3 (R-O-a), the 2 purchased-heating scenarios; and since DF-17,
+        # the 4 hydronic-VAV scenarios — none of which has cross-language
+        # history to convert from.
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 14}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
             "run_id": 33544573991,
             "run_url": "https://github.com/canmet-energy/btap/actions/runs/33544573991",
         }, attestation)
+
+    def test_every_post_handoff_slug_predates_the_attestation(self):
+        """Structural, not by count. A slug added after 85ab143 was run must
+        appear in `POST_R6_PYTHON_LANE_SEALS`, or `_corpus`'s default "ruby"
+        seal is converted by `all_scenarios()` into `python-only:post-handoff`
+        and the scenario claims a cross-language run that was never made for
+        it. The counts pinned above would catch that only if someone noticed
+        the number moved; this names the rule instead (Fable, PR #54)."""
+        attested = set(scenario_defs.R6_CORPUS_SLUGS)
+        exempt = set(scenario_defs.POST_R6_PYTHON_LANE_SEALS)
+        slugs = json.loads(
+            (REPO_ROOT / "python" / "scripts" / "sample_manifest.json")
+            .read_text(encoding="utf-8"))["samples"]
+        unclaimed = [s for s in slugs if s not in attested and s not in exempt]
+        self.assertEqual(
+            [], unclaimed,
+            "slugs added after the final cross-language attestation must carry "
+            "their own python-only seal in POST_R6_PYTHON_LANE_SEALS, or they "
+            "inherit an attestation never run for them: " + ", ".join(unclaimed))
 
     def test_missing_transition_metadata_is_rejected(self):
         sample = deepcopy(scenarios())
