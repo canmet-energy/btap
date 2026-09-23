@@ -3446,6 +3446,27 @@ the baseline passes whenever the gate stops seeing a key at all — the count
 reads zero, which looks like a drop — and narrowing the key set made two of
 these tests pass anyway before it was fixed.
 
+**A second residual, in the taxonomy itself (Fable, PR #56, P3).** The
+taxonomy gate matches `article` and `*_article`, which is the suffix form only.
+A prefix, camel-case or plural citation key would still be silently
+unclassified — the same hole one naming convention over. Probed on the merged
+head:
+
+| inserted key | taxonomy gate |
+|---|---|
+| `source_article` (provenance file) | FAILS, correctly |
+| `basis_article` (`btap/costing/data`) | FAILS, correctly |
+| `article_ref` | **passes — missed** |
+| `triggerArticle`, `cited_articles` | **passes — missed** |
+
+This is not hypothetical drift: the data's OWN existing conventions are
+prefix-form and plural — `article_coverage`, `article_number`, `articles` — so
+a prefix-form citation key is the plausible next miss rather than an invented
+one. Closing it means matching `(^|_)articles?(_|$)` case-insensitively and
+adding a third `STRUCTURAL_ARTICLE_KEYS` tuple for the containers that exist
+today, so they are classified rather than merely unmatched. Deliberately not
+folded into PR #56, whose reviewers had already approved its head.
+
 **DF-16 stays OPEN for Python value flow.** Not "38 variables": every citation
 whose `article=` expression is guarded but whose resolved value can change
 upstream — the 38 variable sites, the 10 Call/IfExp sites, and any f-string
