@@ -121,16 +121,18 @@ STRESS_CASES = (
      None),
     ("17-vav-hw-reheat",
      "MZ BU RTU Hot Water Heating Coil Scroll Chiller and Electric Baseboard",
-     "8.4.4.14/8.4.5.14 + DF-17 — the only corpus model whose hot-water coils are "
-     "HELD inside other equipment: five CoilHeatingWater in VAV reheat terminals, "
-     "reached through containingHVACComponent alone (the served-zone traversal's "
-     "third accessor). It is the corpus's only CATALOG-authored hydronic VAV — a "
-     "common NECB System 6 — and, more to the point, the only frozen scenario "
-     "where correspondence SUCCEEDS through a loop resolved by air-loop coil "
-     "UNION held coils: it transfers proposed_pumps=1 at 255.49 W/(L/s). 18's "
-     "transfer declines; 01 and 02 succeed but resolve through baseboards. So "
-     "this is the one witness that the third accessor's contribution flows all "
-     "the way into a transferred W/(L/s). "
+     "8.4.4.14/8.4.5.14 + DF-17 — the CATALOG-authored hydronic VAV, a common "
+     "NECB System 6: five CoilHeatingWater in VAV reheat terminals, held inside "
+     "the terminals and so reached through containingHVACComponent (the "
+     "served-zone traversal's third accessor), plus one bare on the air loop. "
+     "(18-vav-hw-subset-reheat also carries held hot-water coils — three — so "
+     "neither sample is 'the only' one that does.) Its distinction is the "
+     "OUTCOME: it is the only frozen scenario where correspondence SUCCEEDS "
+     "through a loop resolved by air-loop coil UNION held coils, transferring "
+     "proposed_pumps=1 at 255.49 W/(L/s). 18's transfer deliberately declines; "
+     "01 and 02 succeed but resolve through baseboards. So this is the positive "
+     "correspondence witness on that topology. (The W/(L/s) figure itself is not "
+     "unique — 13 transfers the same — the topology and the outcome are.) "
      "READ THIS BEFORE TRUSTING IT: the air loop's own heating coil is hot water "
      "too, and it contributes every zone on the loop through the SECOND accessor, "
      "so this sample's served-zone SET is the same whether the held path works or "
@@ -312,8 +314,18 @@ def generate(out: Path) -> list[tuple[str, str, int]]:
         for terminal in terminals[:reheated]:
             coil = openstudio.model.CoilHeatingWater(
                 model, model.alwaysOnDiscreteSchedule())
-            loop.addDemandBranchForComponent(coil)
-            terminal.setReheatCoil(coil)
+            # Both return a bool the SDK will happily let you ignore. If either
+            # silently fails the sample still SAVES, and what ships is a model
+            # that no longer discriminates — the exact failure this sample
+            # exists to prevent (Sol, PR #54).
+            if not loop.addDemandBranchForComponent(coil):
+                abort(slug, ValueError(
+                    f"addDemandBranchForComponent refused the reheat coil for "
+                    f"{terminal.nameString()}"))
+            if not terminal.setReheatCoil(coil):
+                abort(slug, ValueError(
+                    f"setReheatCoil refused the hot-water coil on "
+                    f"{terminal.nameString()}"))
         size = save(model, out, slug)
     except Exception as e:  # noqa: BLE001 - re-raised as a fatal, named
         abort(slug, e)
