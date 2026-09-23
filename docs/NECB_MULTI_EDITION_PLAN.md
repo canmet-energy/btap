@@ -3446,26 +3446,62 @@ the baseline passes whenever the gate stops seeing a key at all — the count
 reads zero, which looks like a drop — and narrowing the key set made two of
 these tests pass anyway before it was fixed.
 
-**A second residual, in the taxonomy itself (Fable, PR #56, P3).** The
-taxonomy gate matches `article` and `*_article`, which is the suffix form only.
-A prefix, camel-case or plural citation key would still be silently
-unclassified — the same hole one naming convention over. Probed on the merged
-head:
+**A second residual, in the taxonomy itself (Fable, PR #56 and #58).** The
+taxonomy gate matches `article` and `*_article` — the suffix form only. Probed
+against the merged gate; the first two rows are CONTROLS, keys that do not
+exist in the data:
 
-| inserted key | taxonomy gate |
-|---|---|
-| `source_article` (provenance file) | FAILS, correctly |
-| `basis_article` (`btap/costing/data`) | FAILS, correctly |
-| `article_ref` | **passes — missed** |
-| `triggerArticle`, `cited_articles` | **passes — missed** |
+| inserted key | merged gate | the regex first proposed here |
+|---|---|---|
+| `source_article` *(control)* | FAILS, correctly | match |
+| `basis_article` *(control)* | FAILS, correctly | match |
+| `article_ref` | **passes — missed** | match |
+| `cited_articles` | **passes — missed** | match |
+| `triggerArticle` | **passes — missed** | **NO MATCH** |
 
-This is not hypothetical drift: the data's OWN existing conventions are
-prefix-form and plural — `article_coverage`, `article_number`, `articles` — so
-a prefix-form citation key is the plausible next miss rather than an invented
-one. Closing it means matching `(^|_)articles?(_|$)` case-insensitively and
-adding a third `STRUCTURAL_ARTICLE_KEYS` tuple for the containers that exist
-today, so they are classified rather than merely unmatched. Deliberately not
-folded into PR #56, whose reviewers had already approved its head.
+**The first prescription recorded here did not close its own table.** It said
+`(^|_)articles?(_|$)` case-insensitively; that has no boundary before a
+camel-case `Article`, so `triggerArticle` — one of the three missed rows —
+escapes it, as do `ArticleRef`, `articleId` and `refArticle`. Recorded because
+a remedy that does not work is worse than none: the next person builds on it.
+The same mistake, in the same entry, as DF-17's first remedy.
+
+What closing it actually requires, measured rather than sketched:
+
+- **A matcher with a camel boundary**, or plain substring `article` — prefix
+  and plural alone leave the camel forms open.
+- **File-scoped classification, not a third name tuple.** `articles` is
+  polysemous in this repository: an EMITTED registry in `manifest.json`
+  (`ruleset.article(key)`), a structural container in the six rule files whose
+  leaves are already guarded by their own `article`, a text cache in
+  `articles_8_4.json`, and an unread id list in `decisions.json` — 117
+  occurrences in total. No name-only tuple can classify that honestly;
+  `_article_values` already scopes by `where == "manifest.json"` and the
+  taxonomy would need the same.
+- **Whatever the tuple lists must be exactly what the matcher collects.** The
+  manifest's `coverage/articles_8_4.json` key is not matched by that regex at
+  all (`/` is not `_`), so listing it would fail the equality assertion
+  permanently.
+- **The glob is JSON-only.** Eleven CSVs under `btap/costing/data/` are outside
+  `DATA_GLOB`, so a citation column added there is invisible to the gate and to
+  the taxonomy regardless of the matcher.
+
+The sweep-in is real: the regex newly collects `article_coverage` (12),
+`article_number` (44) and `articles` (117), each of which then needs a
+conscious classification rather than silent inclusion.
+
+**Why this is drift worth guarding rather than an invented shape.** Two of
+those keys are repo-authored prefix/plural forms (`article_coverage`,
+`articles`). The third is more telling: `article_number` is the hbix MCP
+`get_section` payload field, archived verbatim in 19 `provenance/*.result.json`
+files — so external payloads stored under `data/` also carry article-named keys
+the taxonomy ignores, and their naming is not ours to control.
+
+For the record, `trigger_article` did not go unguarded through a classification
+lapse — there was no taxonomy then to classify against. Its cause was an
+unchecked SCOPE assumption, that only `article` was emitted, found by reading
+the call sites. The residual is the same failure one level over: an unchecked
+SHAPE assumption, that citation keys end in `_article`.
 
 **DF-16 stays OPEN for Python value flow.** Not "38 variables": every citation
 whose `article=` expression is guarded but whose resolved value can change
