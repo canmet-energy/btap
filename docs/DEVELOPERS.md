@@ -197,7 +197,7 @@ ancestor and `main` goes red *after* the merge while every branch check was
 green. This is not theoretical: `main` failed that way for three days across
 two merges, with a different stale pointer each time.
 
-If one is squash-merged by mistake, re-freeze from the resulting `main` commit
+If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
 and submit the minimal re-pin immediately; a pure repair moves only provenance
 metadata and no baseline. And check the post-merge `main` run before calling
 the work done — green PR-head CI is a different claim (D-94).

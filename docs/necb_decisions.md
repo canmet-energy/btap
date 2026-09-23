@@ -127,7 +127,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-92** — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power _(runtime)_
 - **D-93** — The reference pump's value source: correspondence, then the sentence that governs it _(runtime)_
 - **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
-- **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash _(process)_
+- **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash or rebase _(process)_
 
 <!-- TOC END -->
 
@@ -5898,9 +5898,12 @@ in the plan log.
   That is not hypothetical — `main` was red for three days across two merges
   (`9f48d45`, `235145a`) because each PR was verified on its own head and
   declared closed without anyone looking at `main` afterwards. A work item is
-  closed when the three agree **and** the post-merge run passes; if it does not,
-  the repair comes before the next item. Sol raised this after diagnosing the
-  incident; see [D-95](#d-95) for the merge rule that prevents the cause.
+  closed when the three agree **and** the post-merge run passes — or, for a
+  change the workflow path-ignores entirely (documentation only), when no run
+  was triggered at all, which is a real case rather than a quibble. If a run
+  failed, the repair comes before the next item. Sol raised this, on a
+  diagnosis Claude produced and Sol verified; see [D-95](#d-95) for the merge
+  rule that removes the cause.
 - **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
   directly, so neither GitHub nor phylroy carries messages. Claude watches
   `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
@@ -5908,7 +5911,7 @@ in the plan log.
 - **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
   adjudications themselves; this governs how the resulting work is signed off.
 
-## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash
+## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase
 
 - **Decision:** a PR that changes frozen baselines or the manifest provenance
   `freeze.py` produces is merged with a **merge commit** — not a squash, and
