@@ -290,7 +290,7 @@
     "8.4.2.7. (SWH loads)": 1
   },
   "_provenance": {
-    "commit": "d8817b88e99aff33c696e6c73ec3ae3e2595521f",
+    "commit": "36395f95d54a5c414932c7c59b24ecac96db5bff",
     "generated_by": "python/tests/citation_counts.py:compute_data_citation_counts",
     "key_shape": "{scope: {article value: count}}",
     "source": "values of ['article', 'trigger_article'] keys, plus each manifest \"articles\" registry mapping, under btap/**/data/**/*.json",
@@ -311,6 +311,7 @@
     "covers": "The DATA half of DF-16: article ids that reach an audit from packaged JSON rather than from an article= literal — read as spec[\"article\"] or rule[\"trigger_article\"], or resolved through ruleset.article(key) from a manifest registry. Before this gate, editing or deleting one moved neither citation gate nor the generated coverage document.",
     "does_not_cover": "DF-16 stays OPEN for Python value flow: every citation whose article= expression is guarded while the value reaching it can change upstream — the 38 variable sites, the 10 Call/IfExp sites, and any f-string fed by an unguarded binding. NOT because those values are unresolvable: folding a name to its in-function assignment expression reaches 13 of 38, and most parameter sites have a same-module caller passing an f-string, so roughly 32 are reachable with one hop (Fable, PR #56). An earlier draft of this field claimed the values \"arrive as function parameters and no static key can see them\", on a measurement that folded only ast.Constant and resolved 1 of 38. Deferred on blast radius, not impossibility.",
     "also_not_covered": "Presence, not emission. This gate proves a value still exists in a snapshot, not that any code path still emits it — so a value moved to an unread key within the same edition stays silent, the same limit the foreign gate has for dead code.",
-    "scope_rule": "Edition snapshots own their own values; btap/codes/data/** is \"shared\". Scoping is load-bearing: removing an article from 2020 while 2025 gains the same one leaves both the repository total AND the global count of that value unchanged, so only the scope can fire."
+    "scope_rule": "Edition snapshots own their own values; btap/codes/data/** is \"shared\". Scoping is load-bearing: removing an article from 2020 while 2025 gains the same one leaves both the repository total AND the global count of that value unchanged, so only the scope can fire.",
+    "commit_semantics": "The tree whose SCANNER AND DATA together reproduce inventory_when_written. An earlier revision recorded the commit that happened to be HEAD when the regeneration script ran, which was the commit BEFORE the scanner change — so checking it out reproduced a different inventory and the field asserted something untrue (Sol, PR #56). Re-record this whenever the scanner or the counted shapes change, not only when the numbers move."
   }
 }

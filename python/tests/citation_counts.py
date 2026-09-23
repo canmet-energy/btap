@@ -428,5 +428,39 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
     return counts
 
 
+def article_named_data_keys(source_root: Path | None = None) -> set[str]:
+    """Every key in product DATA that is ``article`` or ends ``_article``.
+
+    The taxonomy the two fixed tuples are checked against. Listing keys as
+    emitted or documentary proves something about the keys ALREADY listed; it
+    proves nothing about a key nobody has thought about yet, which is exactly
+    how ``trigger_article`` went unguarded — a key was never classified, so
+    nothing failed when it turned out to be emitted (Sol, PR #56).
+
+    The manifest ``articles`` registry is deliberately outside this set: it is
+    a separately named container, handled by its own branch, and its key is
+    neither ``article`` nor ``*_article``.
+    """
+    root = source_root or (REPO_ROOT / "python")
+    keys: set[str] = set()
+
+    def walk(node) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "article" or key.endswith("_article"):
+                    keys.add(key)
+                walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    for path in sorted(root.glob(DATA_GLOB)):
+        try:
+            walk(json.loads(path.read_text(encoding="utf-8")))
+        except json.JSONDecodeError:
+            continue
+    return keys
+
+
 def load_data_baseline() -> dict:
     return json.loads(DATA_BASELINE_PATH.read_text(encoding="utf-8"))

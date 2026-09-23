@@ -25,6 +25,7 @@ from tests.citation_counts import (
     DOCUMENTARY_ARTICLE_KEYS,
     EMITTED_ARTICLE_KEYS,
     _foreign_content,
+    article_named_data_keys,
     compute_citation_counts,
     compute_data_citation_counts,
     compute_foreign_citation_counts,
@@ -367,8 +368,11 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
 
     def test_a_manifest_article_registry_entry_is_guarded(self):
         """A manifest's ``articles`` mapping reaches the audit through
-        ``ruleset.article(key)`` — ``heat_pump_aux_fuel`` lands at
-        ``efficiency.py:1557``. That registry is the miniature of what DF-16
+        ``ruleset.article(key)`` — ``heat_pump_aux_fuel`` is read by
+        ``_align_staged_heat_pump``'s caller in ``hvac/efficiency.py``. Named
+        by symbol, not by line: a pinned line number shifts under unrelated
+        edits and was already stale by 29 lines. That registry is the
+        miniature of what DF-16
         ultimately wants everywhere, so leaving it unguarded would be
         perverse."""
         tmp = self.copy()
@@ -383,6 +387,41 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         self.assertLess(after["necb2020"].get("8.4.4.13.(2)(c)", 0),
                         self.before()["necb2020"]["8.4.4.13.(2)(c)"],
                         "an article id held in the manifest registry must be guarded")
+
+    def test_every_article_named_data_key_is_consciously_classified(self):
+        """The taxonomy gate: no article-named key may exist in product data
+        without being classified emitted or documentary.
+
+        The two list-versus-source tests below prove things about keys already
+        listed. Neither says anything about a key nobody has considered — which
+        is exactly how `trigger_article` went unguarded: never classified, so
+        nothing failed when it turned out to be emitted. Equality, not subset,
+        so the lists cannot rot in either direction (Sol, PR #56).
+        """
+        self.assertEqual(
+            set(EMITTED_ARTICLE_KEYS) | set(DOCUMENTARY_ARTICLE_KEYS),
+            article_named_data_keys(),
+            "an article-named data key is unclassified (or a classified key has "
+            "left the data). Decide which it is: add it to EMITTED_ARTICLE_KEYS "
+            "and re-baseline if product source reads it, or to "
+            "DOCUMENTARY_ARTICLE_KEYS if it is prose")
+
+    def test_an_unclassified_article_key_fails_the_taxonomy_gate(self):
+        """The failure mode above, exercised rather than asserted — otherwise
+        the gate passes today and nobody knows whether it would fire."""
+        tmp = self.copy()
+        target = tmp / self.SNAPSHOT_2020
+        blob = json.loads(target.read_text(encoding="utf-8"))
+        blob["part_load_fheatplc"][0]["future_article"] = "9.9.9.9."
+        target.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        keys = article_named_data_keys(source_root=tmp)
+        self.assertIn("future_article", keys,
+                      "the taxonomy must SEE a new article-named key")
+        self.assertNotEqual(set(EMITTED_ARTICLE_KEYS) | set(DOCUMENTARY_ARTICLE_KEYS),
+                            keys,
+                            "and the classification check must then fail, rather "
+                            "than the key being silently ignored as trigger_article was")
 
     def test_the_documentary_key_exclusion_is_still_true(self):
         """The excluded keys must stay unread by product source.
