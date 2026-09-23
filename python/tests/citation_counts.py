@@ -293,6 +293,22 @@ def _data_scope(relative: str) -> str:
 #: baseline for edits that cannot change a single audit entry.
 EMITTED_ARTICLE_KEYS = ("article", "trigger_article")
 
+#: Data keys that LOOK like citations and are not: nothing in product source
+#: reads them, and their values are prose rather than article ids. Excluded
+#: deliberately, because guarding documentation would churn this baseline on
+#: wording edits that cannot move a single audit entry.
+#:
+#: ``test_the_documentary_key_exclusion_is_still_true`` keeps this list honest.
+#: An unchecked exclusion is precisely how the ``trigger_article`` hole opened:
+#: a key was assumed not to be emitted, and nothing failed when it was.
+DOCUMENTARY_ARTICLE_KEYS = (
+    "table_article",
+    "effectiveness_article",
+    "overshoot_article",
+    "reference_article",
+    "default_category_article",
+)
+
 
 def _article_values(node, found: list[str], *, where: str = "") -> None:
     """Every data value that reaches an audit as an article citation.
@@ -327,11 +343,29 @@ def _article_values(node, found: list[str], *, where: str = "") -> None:
                         "teach this gate the new shape rather than letting it "
                         "silently stop counting the value")
                 found.append(value)
-            elif key == "articles" and isinstance(value, dict):
-                # A manifest's key -> article-id registry. The sibling
-                # ``"articles"`` LIST in a provenance block is documentary and
-                # is left alone by this branch.
-                found.extend(v for v in value.values() if isinstance(v, str))
+            elif key == "articles" and where == "manifest.json":
+                # A manifest's key -> article-id registry, whose values reach
+                # the audit through ``ruleset.article(key)``.
+                #
+                # Restricted to the manifest by NAME rather than by shape. A
+                # bare ``key == "articles" and isinstance(value, dict)`` also
+                # matches both ``articles_8_4.json`` caches (52 and 57
+                # dict-valued entries), which contribute nothing only because a
+                # value-type filter drops them — reintroducing, one branch
+                # below the raise, exactly the silent skip that raise exists to
+                # forbid (Fable, PR #56).
+                if not isinstance(value, dict):
+                    raise TypeError(
+                        f"{where}: 'articles' holds {type(value).__name__}, not a "
+                        "key -> article-id mapping")
+                for registry_key, registry_value in value.items():
+                    if not isinstance(registry_value, str):
+                        raise TypeError(
+                            f"{where}: articles[{registry_key!r}] holds "
+                            f"{type(registry_value).__name__}, not str — teach this "
+                            "gate the new shape rather than letting it silently "
+                            "stop counting the value")
+                    found.append(registry_value)
             else:
                 _article_values(value, found, where=where)
     elif isinstance(node, list):

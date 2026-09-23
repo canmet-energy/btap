@@ -22,6 +22,8 @@ import unittest
 from pathlib import Path
 
 from tests.citation_counts import (
+    DOCUMENTARY_ARTICLE_KEYS,
+    EMITTED_ARTICLE_KEYS,
     _foreign_content,
     compute_citation_counts,
     compute_data_citation_counts,
@@ -381,6 +383,35 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         self.assertLess(after["necb2020"].get("8.4.4.13.(2)(c)", 0),
                         self.before()["necb2020"]["8.4.4.13.(2)(c)"],
                         "an article id held in the manifest registry must be guarded")
+
+    def test_the_documentary_key_exclusion_is_still_true(self):
+        """The excluded keys must stay unread by product source.
+
+        The exclusion is a claim about the code, so it is checked against the
+        code rather than asserted in a comment. This is exactly how the
+        `trigger_article` hole opened: a key was assumed not to be emitted, and
+        nothing failed when it turned out to be (Fable, PR #56).
+        """
+        source = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (Path(__file__).resolve().parents[1] / "btap").rglob("*.py"))
+        emitted = [key for key in DOCUMENTARY_ARTICLE_KEYS
+                   if f"'{key}'" in source or f'"{key}"' in source]
+        self.assertEqual(
+            [], emitted,
+            "these keys are excluded from the gate as documentary, but product "
+            "source now reads them — either they are emitted (add them to "
+            f"EMITTED_ARTICLE_KEYS and re-baseline) or the read is benign: {emitted}")
+
+    def test_every_emitted_key_is_actually_read_by_product_source(self):
+        """The converse, so the emitted list cannot rot into ceremony either."""
+        source = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (Path(__file__).resolve().parents[1] / "btap").rglob("*.py"))
+        unread = [key for key in EMITTED_ARTICLE_KEYS
+                  if f"'{key}'" not in source and f'"{key}"' not in source]
+        self.assertEqual([], unread,
+                         f"guarded as emitted but never read by product source: {unread}")
 
     def test_a_non_string_article_value_raises_rather_than_vanishing(self):
         """Skipping a non-string would open a hole quietly: the value stops

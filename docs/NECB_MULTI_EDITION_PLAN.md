@@ -3399,7 +3399,7 @@ harness is not trusted blind:
 | control: delete a literal `5.2.6.3.(1)` | MOVED | MOVED | MOVED | not run |
 | variable-bound `Table 8.4.3.5` → `9.9.9.9` | — | — | — | absent from all 45 |
 | data `8.4.5.2.` → `8.4.9.99.` | — | — | — | no baseline moved (in-tree run) |
-| data non-8.4 value deleted | — | — | — | **would move 16** |
+| data non-8.4 value deleted | — | — | — | **would move 8** |
 
 **How the 38 variable sites are actually bound** — measured twice, because
 the first measurement was reported as a stronger claim than it supported.
@@ -3418,16 +3418,33 @@ f-strings, **116** article-shaped constants remain, and they are version
 strings, report prose and headings.
 
 **Data half CLOSED (Sol, 2026-09-23, option B).** A third value-keyed gate,
-`compute_data_citation_counts`, counts JSON keys named exactly `article` under
-`btap/**/data/**/*.json`, keyed `{scope: {value: count}}` — scope being the
-edition snapshot, with `shared` reserved for the family-neutral
-`btap/codes/data/**`. Scoping is load-bearing rather than decorative, and the
-suite proves it: removing `3.1.1.5.` from 2020 while 2025 gains the same
-article leaves the repository total at 311 **and the global count of that exact
-article at 2**, so a scope-blind value-keyed gate stays silent while the scoped
-one fires. Four mutation tests plus a positive control that an unmutated copy
-measures exactly the baseline — without which every "count dropped" assertion
-would pass vacuously.
+`compute_data_citation_counts`, keyed `{scope: {value: count}}` — scope being
+the edition snapshot, with `shared` reserved for the family-neutral
+`btap/codes/data/**`. It counts the **three shapes the product actually
+emits**, 321 values in all:
+
+- `"article"`, read as `spec["article"]`;
+- `"trigger_article"`, read the same way from `checker.py` and
+  `energy_recovery.py` — four of the twenty-four subscript sites, and missed by
+  the first version of this gate;
+- a manifest's `"articles"` registry, reaching the audit through
+  `ruleset.article(key)`.
+
+Five `*_article` keys are excluded as documentary, and the exclusion is a
+CHECKED fact rather than a comment: a test asserts product source reads none of
+them, and its converse asserts every emitted key IS read. An unchecked
+exclusion is precisely how the `trigger_article` hole opened.
+
+Scoping is load-bearing rather than decorative, and the suite proves it:
+removing `3.1.1.5.` from 2020 while 2025 gains the same article leaves the
+repository total unchanged **and the global count of that exact article at 2**,
+so a scope-blind value-keyed gate stays silent while the scoped one fires.
+
+Seven mutation tests, each measured against a LIVE unmutated run rather than
+against the baseline file. That distinction is not pedantry: comparing against
+the baseline passes whenever the gate stops seeing a key at all — the count
+reads zero, which looks like a drop — and narrowing the key set made two of
+these tests pass anyway before it was fixed.
 
 **DF-16 stays OPEN for Python value flow.** Not "38 variables": every citation
 whose `article=` expression is guarded but whose resolved value can change
