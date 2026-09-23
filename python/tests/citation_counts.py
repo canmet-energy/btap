@@ -250,3 +250,102 @@ def compute_foreign_citation_counts(source_root: Path | None = None) -> dict:
 
 def load_foreign_baseline() -> dict:
     return json.loads(FOREIGN_BASELINE_PATH.read_text(encoding="utf-8"))
+
+
+DATA_BASELINE_PATH = Path(__file__).with_name("data") / "data_citation_counts_baseline.json"
+
+#: Packaged product DATA, wider than either edition snapshot because a family
+#: -neutral file that later grows an ``article`` key must land somewhere
+#: explicit rather than silently outside the gate.
+DATA_GLOB = "btap/**/data/**/*.json"
+
+
+def _data_scope(relative: str) -> str:
+    """Which snapshot OWNS this data file.
+
+    Scoping is the whole point rather than a tidy label: a repository-wide
+    total is blind to the commonest real regression here, a value deleted from
+    one edition while the other keeps it (or gains an unrelated one). Both
+    gates beside this one key by edition for the same reason.
+    """
+    match = re.search(r"btap/codes/necb/data/([^/]+)/", relative)
+    if match:
+        return match.group(1)
+    if "btap/codes/data/" in relative:
+        # decisions.json, the 8.4 disposition, ATTRIBUTION — deliberately
+        # code-family-neutral (see btap/codes/CLAUDE.md), so they get one
+        # shared scope rather than being attributed to an edition.
+        return "shared"
+    raise ValueError(
+        f"cannot attribute {relative} to a data scope — teach _data_scope "
+        "before adding article-bearing data outside the edition snapshots")
+
+
+def _article_values(node, found: list[str]) -> None:
+    """Every value of a key named exactly ``article``, at any depth.
+
+    The key name, never the shape of the string: prose that happens to contain
+    an article number is not a citation, and an article-shaped string under
+    some other key is not one either. Matching on shape instead was measured
+    and discarded — 197 article-shaped literals in product source are version
+    strings, report prose and headings.
+    """
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key == "article" and isinstance(value, str):
+                found.append(value)
+            else:
+                _article_values(value, found)
+    elif isinstance(node, list):
+        for item in node:
+            _article_values(item, found)
+
+
+def compute_data_citation_counts(source_root: Path | None = None) -> dict:
+    """Article citations that live in packaged DATA, not in Python (DF-16).
+
+    Both gates beside this one scan ``article=`` keyword arguments in Python.
+    Neither reads the rule files, so the ~24 sites that cite through a
+    subscript (``spec["article"]``, ``rule['article']``) are keyed by the
+    EXPRESSION, and the value they actually emit can be edited or deleted with
+    nothing moving anywhere. Measured on this tree: 311 ``article`` values
+    across 14 files, 213 distinct — and a mutation of any one of them was
+    invisible to the 8.4 gate, the foreign gate, the generated coverage
+    document and all 45 frozen scenario baselines.
+
+    Keyed ``{scope: {article value: count}}``. No file path enters the key, so
+    a rename inside a snapshot cannot invalidate the baseline — the rule the
+    other two gates follow — while the scope keeps edition ownership, so a
+    2020 deletion masked by a 2025 addition still fails.
+
+    This closes the DATA half of DF-16 and nothing else. The Python half —
+    every citation whose value flows in from somewhere the scanner cannot
+    resolve — stays open, because those values arrive as function parameters
+    and no static key can see them (Sol, 2026-09-23).
+    """
+    root = source_root or (REPO_ROOT / "python")
+    counts: dict[str, dict[str, int]] = {}
+    for path in sorted(root.glob(DATA_GLOB)):
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        found: list[str] = []
+        _article_values(blob, found)
+        if not found:
+            # Scope is resolved only for files that actually cite, so an
+            # unrelated data directory never has to be taught to this gate.
+            continue
+        try:
+            relative = path.relative_to(REPO_ROOT).as_posix()
+        except ValueError:  # a temp-directory copy, used by the mutation tests
+            relative = f"python/{path.relative_to(root).as_posix()}"
+        scope = _data_scope(relative)
+        for value in found:
+            counts.setdefault(scope, {}).setdefault(value, 0)
+            counts[scope][value] += 1
+    return counts
+
+
+def load_data_baseline() -> dict:
+    return json.loads(DATA_BASELINE_PATH.read_text(encoding="utf-8"))

@@ -3382,6 +3382,56 @@ becoming an `info` is silent because the dynamic key carries kind but the
 source of truth for level is the call. A real fix means citing through a
 checked accessor rather than a free-form keyword.
 
+**Measured 2026-09-23, before implementing anything.** `article=` sites across
+`btap/**/*.py`: 142 literal (49.5 %), 73 f-string (25.4 %), **38 variable
+(13.2 %)**, **24 data subscript (8.4 %)**, 10 Call/IfExp — **287 total, 62 of
+them value-blind**. Packaged data carries **311** `"article"` values across 14
+files, 213 distinct, 241 of them `8.4.*`. The entry above says "roughly 70
+non-8.4", which is right as far as it goes: it is 70 of 311, and the 8.4 ones
+in data are equally unguarded, because both gates scan Python and neither reads
+the rule files.
+
+Mutation results, each on a throwaway copy, **with a positive control** so the
+harness is not trusted blind:
+
+| mutation | 8.4 gate | foreign gate | coverage doc | frozen baselines |
+|---|---|---|---|---|
+| control: delete a literal `5.2.6.3.(1)` | MOVED | MOVED | MOVED | — |
+| variable-bound `Table 8.4.3.5` → `9.9.9.9` | — | — | — | absent from all 45 |
+| data `8.4.5.2.` → `8.4.9.99.` | — | — | — | no baseline moved |
+| data non-8.4 value deleted | — | — | — | — |
+
+**The finding that decided the scope: a better static scanner cannot close
+this.** Of the 38 variable sites, essentially none resolve to a literal in
+scope — the values arrive as FUNCTION PARAMETERS (19 in `hvac/reference.py`, 13
+mixed in `hvac/efficiency.py`). Scope-aware constant folding resolves 1 of 38.
+A blanket "count every article-shaped literal" gate was also measured and
+discarded: 197 such literals outside `article=` are version strings, report
+prose and headings, so it would churn constantly and mean nothing.
+
+**Data half CLOSED (Sol, 2026-09-23, option B).** A third value-keyed gate,
+`compute_data_citation_counts`, counts JSON keys named exactly `article` under
+`btap/**/data/**/*.json`, keyed `{scope: {value: count}}` — scope being the
+edition snapshot, with `shared` reserved for the family-neutral
+`btap/codes/data/**`. Scoping is load-bearing rather than decorative, and the
+suite proves it: removing `3.1.1.5.` from 2020 while 2025 gains the same
+article leaves the repository total at 311 **and the global count of that exact
+article at 2**, so a scope-blind value-keyed gate stays silent while the scoped
+one fires. Four mutation tests plus a positive control that an unmutated copy
+measures exactly the baseline — without which every "count dropped" assertion
+would pass vacuously.
+
+**DF-16 stays OPEN for Python value flow.** Not "38 variables": every citation
+whose `article=` expression is guarded but whose resolved value can change
+upstream — the 38 variable sites, the 10 Call/IfExp sites, and any f-string
+whose formatted value comes from an unguarded binding. Closing it needs
+citation through an enumerable checked source, and per Sol the next step is a
+narrower prototype with its blast radius measured and reviewed, not a 287-site
+rewrite: direct literals already covered by the two existing gates should not
+be churned merely to look uniform. Any such proposal must carry a mutation that
+changes an upstream binding while leaving the `article=` expression untouched —
+the failure this increment deliberately leaves open.
+
 **DF-11 increment B implemented as D-93, and re-frozen (clean tree at
 `44b72f6`).** 7 of 41 scenarios changed — the same seven that carry an
 8.4.x.14 transfer entry — **audit files only; no `report.json` moved in any

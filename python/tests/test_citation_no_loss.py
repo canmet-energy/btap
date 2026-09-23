@@ -15,6 +15,7 @@ that causes it, with the reason recorded in the baseline's ``_provenance``.
 from __future__ import annotations
 
 import ast
+import json
 import shutil
 import tempfile
 import unittest
@@ -23,8 +24,10 @@ from pathlib import Path
 from tests.citation_counts import (
     _foreign_content,
     compute_citation_counts,
+    compute_data_citation_counts,
     compute_foreign_citation_counts,
     load_baseline,
+    load_data_baseline,
     load_foreign_baseline,
 )
 
@@ -210,3 +213,166 @@ class TestForeignGateCatchesRealRegressions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDataCitationNoLoss(unittest.TestCase):
+    """No article value packaged in product DATA may lose a citation (DF-16).
+
+    The two gates above scan ``article=`` in Python. Neither reads the rule
+    files, so an id that reaches the audit through ``spec["article"]`` is keyed
+    by the EXPRESSION and its value could be edited or deleted with nothing
+    moving. Measured before this gate existed: 311 values across 14 files, and
+    a mutation of one was invisible to both citation gates, the generated
+    coverage document, and all 45 frozen scenario baselines.
+    """
+
+    def test_no_data_article_count_drops_below_baseline(self):
+        baseline = load_data_baseline()
+        current = compute_data_citation_counts()
+
+        regressions = []
+        for scope, articles in baseline.items():
+            if scope == "_provenance":
+                continue
+            for article, expected in articles.items():
+                actual = current.get(scope, {}).get(article, 0)
+                if actual < expected:
+                    regressions.append(
+                        f"{scope}/{article}: baseline {expected}, now {actual}")
+        self.assertEqual(
+            [], regressions,
+            "data article citation(s) lost relative to "
+            "tests/data/data_citation_counts_baseline.json:\n" + "\n".join(regressions))
+
+    def test_baseline_scopes_match_the_scanned_scopes(self):
+        baseline = load_data_baseline()
+        self.assertEqual(
+            set(compute_data_citation_counts()),
+            {key for key in baseline if key != "_provenance"})
+
+
+class TestDataGateCatchesRealRegressions(unittest.TestCase):
+    """The data gate's contracts, exercised by MUTATING a throwaway copy.
+
+    Asserting a baseline against itself proves only that the file was read.
+    Each case below changes one value and requires the gate to name it — and
+    the swap case is the one a repository-wide total could not catch.
+    """
+
+    #: Both anchors live in the 2020 efficiencies snapshot. The 8.4 one is a
+    #: part-load row; the other is a mixed legacy reference whose leading half
+    #: is a Part 5 table, so it is exactly the "not 8.4" population the 8.4
+    #: gate refuses by design.
+    EIGHT_FOUR = '"article": "8.4.5.2."'
+    FOREIGN = '"article": "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2."'
+    SNAPSHOT_2020 = "btap/codes/necb/data/necb2020/efficiencies.json"
+    SNAPSHOT_2025 = "btap/codes/necb/data/necb2025/efficiencies.json"
+
+    def copy(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        shutil.copytree(Path(__file__).resolve().parents[1] / "btap", tmp / "btap")
+        return tmp
+
+    def edit(self, tmp, relative, old, new, *, count=1):
+        target = tmp / relative
+        text = target.read_text(encoding="utf-8")
+        self.assertIn(old, text, f"anchor missing in {relative} — the fixture has moved")
+        target.write_text(text.replace(old, new, count), encoding="utf-8")
+
+    @staticmethod
+    def total(counts):
+        return sum(sum(values.values()) for values in counts.values())
+
+    def test_the_harness_measures_the_same_tree_as_the_baseline(self):
+        """Positive control. Every assertion below is a DROP against the
+        committed baseline, so all of them would pass vacuously if the copied
+        tree measured something else. This fails first if it does."""
+        baseline = {k: v for k, v in load_data_baseline().items() if k != "_provenance"}
+        self.assertEqual(baseline, compute_data_citation_counts(source_root=self.copy()),
+                         "an unmutated copy must measure exactly the baseline")
+
+    def test_changing_a_data_owned_8_4_value_is_caught(self):
+        tmp = self.copy()
+        self.edit(tmp, self.SNAPSHOT_2020, self.EIGHT_FOUR, '"article": "8.4.9.99."')
+        after = compute_data_citation_counts(source_root=tmp)
+        before = load_data_baseline()
+        self.assertLess(after["necb2020"].get("8.4.5.2.", 0),
+                        before["necb2020"]["8.4.5.2."],
+                        "an 8.4 article living in DATA must be guarded — the 8.4 "
+                        "gate never sees it, because it scans Python")
+
+    def test_deleting_a_non_8_4_value_is_caught(self):
+        tmp = self.copy()
+        self.edit(tmp, self.SNAPSHOT_2020, self.FOREIGN, '"article": "REMOVED"')
+        after = compute_data_citation_counts(source_root=tmp)
+        key = "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2."
+        self.assertEqual(0, after["necb2020"].get(key, 0))
+        self.assertEqual(1, load_data_baseline()["necb2020"][key],
+                         "the deleted value was in the baseline")
+
+    def test_an_edition_swap_is_caught_where_a_repository_TOTAL_would_not_be(self):
+        """The case that decides the key shape: remove a value from 2020 and
+        add one to 2025, so the repository-wide total is UNCHANGED and only the
+        edition scope can fire.
+
+        Edited structurally rather than by string replacement, because the
+        obvious string edits do not do what they appear to. Changing a value to
+        ``"REMOVED"`` keeps the count (the article moved, it did not go), and a
+        second ``"article"`` key pasted into the same object is silently
+        dropped by the JSON parser. A first draft of this test did both and
+        passed while neither edition had lost or gained anything.
+        """
+        shared = "3.1.1.5."          # one of 65 values carried by BOTH editions
+        rules = "btap/codes/necb/data/{}/envelope_rules.json"
+        tmp = self.copy()
+
+        def articles_of(edition):
+            # Two lists are named "articles" in this file; the coverage one
+            # holds dicts with an "article" key, which is what the gate counts.
+            # The provenance one is a list of plain strings and is invisible to
+            # it, exactly as intended.
+            path = tmp / rules.format(edition)
+            blob = json.loads(path.read_text(encoding="utf-8"))
+            return path, blob, blob["article_coverage"]["articles"]
+
+        path, blob, entries = articles_of("necb2020")
+        for entry in entries:
+            if entry.get("article") == shared:
+                del entry["article"]
+                break
+        else:
+            self.fail(f"{shared} missing from the 2020 snapshot — the fixture has moved")
+        path.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        path, blob, entries = articles_of("necb2025")
+        twin = next((e for e in entries if e.get("article") == shared), None)
+        self.assertIsNotNone(twin, f"{shared} must exist in 2025 for the swap to balance")
+        entries.append(dict(twin))
+        path.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        after = compute_data_citation_counts(source_root=tmp)
+        baseline = {k: v for k, v in load_data_baseline().items() if k != "_provenance"}
+
+        # Each half must do real work, or the swap proves nothing.
+        self.assertEqual(sum(baseline["necb2020"].values()) - 1,
+                         sum(after["necb2020"].values()), "2020 must lose exactly one")
+        self.assertEqual(sum(baseline["necb2025"].values()) + 1,
+                         sum(after["necb2025"].values()), "2025 must gain exactly one")
+        self.assertEqual(self.total(baseline), self.total(after),
+                         "the repository-wide total must be UNCHANGED")
+
+        # The point of choosing a SHARED value: the global count of this exact
+        # article is also unchanged, so a value-keyed gate WITHOUT a scope sees
+        # nothing either. Only the edition scope can fire.
+        global_before = (baseline["necb2020"].get(shared, 0)
+                         + baseline["necb2025"].get(shared, 0))
+        global_after = (after["necb2020"].get(shared, 0)
+                        + after["necb2025"].get(shared, 0))
+        self.assertEqual(global_before, global_after,
+                         f"{shared} must be globally unchanged — otherwise this test "
+                         "would pass on a scope-blind gate and prove nothing")
+
+        self.assertLess(after["necb2020"].get(shared, 0), baseline["necb2020"][shared],
+                        "the 2020 removal must fire even though 2025 gained the "
+                        "same article — this is what the edition scope is for")
