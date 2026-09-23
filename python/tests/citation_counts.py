@@ -281,24 +281,62 @@ def _data_scope(relative: str) -> str:
         "before adding article-bearing data outside the edition snapshots")
 
 
-def _article_values(node, found: list[str]) -> None:
-    """Every value of a key named exactly ``article``, at any depth.
+#: Data keys whose value is EMITTED as an ``article=`` citation, not merely
+#: documented next to one. ``trigger_article`` reaches the audit verbatim from
+#: ``checker.py`` and ``energy_recovery.py``; guarding only ``article`` left
+#: four of the twenty-four subscript sites open, which is exactly the
+#: population this gate exists to close (Fable, PR #56).
+#:
+#: Deliberately NOT included, because nothing emits them: ``table_article``,
+#: ``effectiveness_article``, ``overshoot_article``, ``reference_article``,
+#: ``default_category_article``. Guarding documentation would churn this
+#: baseline for edits that cannot change a single audit entry.
+EMITTED_ARTICLE_KEYS = ("article", "trigger_article")
 
-    The key name, never the shape of the string: prose that happens to contain
+
+def _article_values(node, found: list[str], *, where: str = "") -> None:
+    """Every data value that reaches an audit as an article citation.
+
+    The key NAME, never the shape of the string: prose that happens to contain
     an article number is not a citation, and an article-shaped string under
     some other key is not one either. Matching on shape instead was measured
-    and discarded — 197 article-shaped literals in product source are version
-    strings, report prose and headings.
+    and discarded: excluding docstrings, ``article=`` arguments themselves and
+    fragments inside other f-strings, 116 article-shaped constants remain in
+    product source, and they are version strings, report prose and headings. A
+    gate over those would churn constantly and mean nothing.
+
+    Three shapes, because the product emits three:
+
+    - ``"article": "8.4.5.2."`` — the common case, read by ``spec["article"]``;
+    - ``"trigger_article": "5.2.2.9."`` — read the same way, different key;
+    - a manifest's ``"articles"`` MAPPING, whose values reach the audit through
+      ``ruleset.article(key)``. That registry is the miniature of what DF-16
+      ultimately wants everywhere, so leaving it unguarded would be perverse.
+
+    A non-string under an emitted key RAISES rather than being skipped. Skipping
+    is a hole that opens quietly: the value stops being counted, the baseline is
+    re-recorded without it at the next re-baseline, and it is unguarded forever
+    with every test green.
     """
     if isinstance(node, dict):
         for key, value in node.items():
-            if key == "article" and isinstance(value, str):
+            if key in EMITTED_ARTICLE_KEYS:
+                if not isinstance(value, str):
+                    raise TypeError(
+                        f"{where}: {key!r} holds {type(value).__name__}, not str — "
+                        "teach this gate the new shape rather than letting it "
+                        "silently stop counting the value")
                 found.append(value)
+            elif key == "articles" and isinstance(value, dict):
+                # A manifest's key -> article-id registry. The sibling
+                # ``"articles"`` LIST in a provenance block is documentary and
+                # is left alone by this branch.
+                found.extend(v for v in value.values() if isinstance(v, str))
             else:
-                _article_values(value, found)
+                _article_values(value, found, where=where)
     elif isinstance(node, list):
         for item in node:
-            _article_values(item, found)
+            _article_values(item, found, where=where)
 
 
 def compute_data_citation_counts(source_root: Path | None = None) -> dict:
@@ -318,10 +356,19 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
     other two gates follow — while the scope keeps edition ownership, so a
     2020 deletion masked by a 2025 addition still fails.
 
-    This closes the DATA half of DF-16 and nothing else. The Python half —
-    every citation whose value flows in from somewhere the scanner cannot
-    resolve — stays open, because those values arrive as function parameters
-    and no static key can see them (Sol, 2026-09-23).
+    This closes the DATA half of DF-16 and nothing else. DF-16 stays open for
+    Python value flow: every citation whose ``article=`` expression is guarded
+    while the value reaching it can change upstream.
+
+    That residual is NOT "values the scanner cannot resolve". An earlier
+    version of this docstring said so, on a measurement that folded only
+    ``ast.Constant`` and resolved 1 of the 38 variable sites. Folding to the
+    assignment's SOURCE EXPRESSION instead — the key shape the foreign gate
+    already uses — resolves 13 of 38 with no interprocedural work, and most of
+    the 18 parameter sites have a same-module caller passing an f-string
+    (Fable, PR #56). So a narrower static approach is tractable; it is simply
+    not this increment, and the honest reason to defer it is blast radius, not
+    impossibility.
     """
     root = source_root or (REPO_ROOT / "python")
     counts: dict[str, dict[str, int]] = {}
@@ -331,7 +378,7 @@ def compute_data_citation_counts(source_root: Path | None = None) -> dict:
         except json.JSONDecodeError:
             continue
         found: list[str] = []
-        _article_values(blob, found)
+        _article_values(blob, found, where=path.name)
         if not found:
             # Scope is resolved only for files that actually cite, so an
             # unrelated data directory never has to be taught to this gate.

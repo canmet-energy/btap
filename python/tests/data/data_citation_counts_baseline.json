@@ -48,6 +48,8 @@
     "8.4.3.5.": 1,
     "8.4.2.7. (internal loads)": 1,
     "8.4.3.6.": 1,
+    "8.4.4": 2,
+    "8.4.4.13.(2)(c)": 1,
     "8.4.1.2.": 1,
     "8.4.1.5.": 1,
     "8.4.2.1.": 1,
@@ -78,7 +80,9 @@
     "8.4.4.14.(1)-(5)": 1,
     "5.2.6.3.(1); Table 5.2.6.3.": 1,
     "8.4.4.19.(1)-(2)": 1,
+    "5.2.10.1.(1); Tables 5.2.10.1.-A/-B": 1,
     "8.4.4.12.": 2,
+    "5.2.2.9.": 1,
     "Table 8.4.4.7.-B Note (1)": 1,
     "8.4.4.5.": 1,
     "8.4.4.6.(3)": 1,
@@ -187,6 +191,8 @@
     "8.4.3.5.": 1,
     "8.4.2.7. (internal loads)": 1,
     "8.4.3.6.": 1,
+    "8.4.5": 2,
+    "8.4.5.13.(2)(c)": 1,
     "8.4.1.2.": 1,
     "8.4.1.5.": 1,
     "8.4.2.1.": 1,
@@ -220,7 +226,9 @@
     "8.4.5.14.(1)-(5)": 1,
     "5.2.6.3.(1); Table 5.2.6.3.": 1,
     "8.4.5.19.(1)-(2)": 1,
+    "5.2.10.1.(1); Tables 5.2.10.1.-A/-B": 1,
     "8.4.5.12.": 2,
+    "5.2.2.9.": 1,
     "Table 8.4.5.7.-B Note (1)": 1,
     "8.4.5.5.": 1,
     "8.4.5.6.(3)": 1,
@@ -282,26 +290,27 @@
     "8.4.2.7. (SWH loads)": 1
   },
   "_provenance": {
-    "commit": "f5533ffb9d49db64d32bd6fbfb7620188b6f2fc1",
+    "commit": "d8817b88e99aff33c696e6c73ec3ae3e2595521f",
     "generated_by": "python/tests/citation_counts.py:compute_data_citation_counts",
     "key_shape": "{scope: {article value: count}}",
-    "source": "JSON keys named exactly \"article\" under btap/**/data/**/*.json",
+    "source": "values of ['article', 'trigger_article'] keys, plus each manifest \"articles\" registry mapping, under btap/**/data/**/*.json",
     "scopes": [
       "necb2020",
       "necb2025"
     ],
     "inventory_when_written": {
-      "values": 311,
-      "distinct": 213,
-      "starting_8_4": 241,
-      "not_8_4": 70,
+      "values": 321,
+      "distinct": 219,
+      "starting_8_4": 247,
+      "not_8_4": 74,
       "per_scope": {
-        "necb2020": 154,
-        "necb2025": 157
+        "necb2020": 159,
+        "necb2025": 162
       }
     },
-    "covers": "The DATA half of DF-16: article ids that reach the audit through a subscript (spec[\"article\"], rule[\"article\"]) rather than an article= literal. Before this gate, editing or deleting any of these was invisible to the 8.4 gate, the foreign gate, the generated coverage document and every frozen scenario baseline.",
-    "does_not_cover": "DF-16 stays OPEN for Python value flow: every citation whose article= expression is guarded but whose resolved value can change upstream — the 38 variable sites, the 10 Call/IfExp sites, and any f-string whose formatted value comes from an unguarded binding. Those values arrive as function parameters, so no static key can see them; closing that half needs citation through an enumerable checked source, prototyped and measured separately (Sol, 2026-09-23).",
-    "scope_rule": "Edition snapshots own their own values; btap/codes/data/** is \"shared\". Scoping is load-bearing: a repository-wide total cannot see a value deleted from one edition while the other keeps it."
+    "covers": "The DATA half of DF-16: article ids that reach an audit from packaged JSON rather than from an article= literal — read as spec[\"article\"] or rule[\"trigger_article\"], or resolved through ruleset.article(key) from a manifest registry. Before this gate, editing or deleting one moved neither citation gate nor the generated coverage document.",
+    "does_not_cover": "DF-16 stays OPEN for Python value flow: every citation whose article= expression is guarded while the value reaching it can change upstream — the 38 variable sites, the 10 Call/IfExp sites, and any f-string fed by an unguarded binding. NOT because those values are unresolvable: folding a name to its in-function assignment expression reaches 13 of 38, and most parameter sites have a same-module caller passing an f-string, so roughly 32 are reachable with one hop (Fable, PR #56). An earlier draft of this field claimed the values \"arrive as function parameters and no static key can see them\", on a measurement that folded only ast.Constant and resolved 1 of 38. Deferred on blast radius, not impossibility.",
+    "also_not_covered": "Presence, not emission. This gate proves a value still exists in a snapshot, not that any code path still emits it — so a value moved to an unread key within the same edition stays silent, the same limit the foreign gate has for dead code.",
+    "scope_rule": "Edition snapshots own their own values; btap/codes/data/** is \"shared\". Scoping is load-bearing: removing an article from 2020 while 2025 gains the same one leaves both the repository total AND the global count of that value unchanged, so only the scope can fire."
   }
 }

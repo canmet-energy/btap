@@ -3396,18 +3396,26 @@ harness is not trusted blind:
 
 | mutation | 8.4 gate | foreign gate | coverage doc | frozen baselines |
 |---|---|---|---|---|
-| control: delete a literal `5.2.6.3.(1)` | MOVED | MOVED | MOVED | — |
+| control: delete a literal `5.2.6.3.(1)` | MOVED | MOVED | MOVED | not run |
 | variable-bound `Table 8.4.3.5` → `9.9.9.9` | — | — | — | absent from all 45 |
-| data `8.4.5.2.` → `8.4.9.99.` | — | — | — | no baseline moved |
-| data non-8.4 value deleted | — | — | — | — |
+| data `8.4.5.2.` → `8.4.9.99.` | — | — | — | no baseline moved (in-tree run) |
+| data non-8.4 value deleted | — | — | — | **would move 16** |
 
-**The finding that decided the scope: a better static scanner cannot close
-this.** Of the 38 variable sites, essentially none resolve to a literal in
-scope — the values arrive as FUNCTION PARAMETERS (19 in `hvac/reference.py`, 13
-mixed in `hvac/efficiency.py`). Scope-aware constant folding resolves 1 of 38.
-A blanket "count every article-shaped literal" gate was also measured and
-discarded: 197 such literals outside `article=` are version strings, report
-prose and headings, so it would churn constantly and mean nothing.
+**How the 38 variable sites are actually bound** — measured twice, because
+the first measurement was reported as a stronger claim than it supported.
+Folding only `ast.Constant` resolves **1 of 38**, and an earlier draft of this
+entry turned that into "the values arrive as function parameters and no static
+key can see them". Folding to the assignment's SOURCE EXPRESSION instead — the
+key shape the foreign gate already uses — resolves **13**, with 18 parameters
+and 7 other; and most of those parameter sites have a same-module caller
+passing an f-string, so roughly 32 are reachable with one call-site hop (Fable,
+PR #56). A narrower static approach is therefore tractable. DF-16 stays open on
+BLAST RADIUS, not on impossibility.
+
+A blanket "count every article-shaped literal" gate was measured and discarded:
+excluding docstrings, `article=` arguments and fragments inside other
+f-strings, **116** article-shaped constants remain, and they are version
+strings, report prose and headings.
 
 **Data half CLOSED (Sol, 2026-09-23, option B).** A third value-keyed gate,
 `compute_data_citation_counts`, counts JSON keys named exactly `article` under

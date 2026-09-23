@@ -211,8 +211,6 @@ class TestForeignGateCatchesRealRegressions(unittest.TestCase):
             self.assertTrue(rebuilt, f"{key!r} must be re-parseable source, not a rendering")
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestDataCitationNoLoss(unittest.TestCase):
@@ -284,21 +282,43 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
     def total(counts):
         return sum(sum(values.values()) for values in counts.values())
 
-    def test_the_harness_measures_the_same_tree_as_the_baseline(self):
+    def before(self):
+        """The gate's own reading of the UNMUTATED tree.
+
+        Never the committed baseline. Comparing a mutation against the baseline
+        file passes whenever the gate stops seeing a key at all — the count
+        goes to zero, which reads as a drop — so a gate that quietly narrowed
+        its key set would satisfy every mutation test here. Measured live, that
+        same narrowing makes before and after equal and the assertion fails,
+        which is the property these tests are for (found by narrowing
+        EMITTED_ARTICLE_KEYS and watching two of them pass anyway).
+        """
+        return compute_data_citation_counts()
+
+    def test_the_harness_measures_the_same_tree_as_the_real_run(self):
         """Positive control. Every assertion below is a DROP against the
         committed baseline, so all of them would pass vacuously if the copied
-        tree measured something else. This fails first if it does."""
-        baseline = {k: v for k, v in load_data_baseline().items() if k != "_provenance"}
-        self.assertEqual(baseline, compute_data_citation_counts(source_root=self.copy()),
-                         "an unmutated copy must measure exactly the baseline")
+        tree measured something else. This fails first if it does.
+
+        Compared against a REAL run rather than against the baseline file: the
+        two sibling gates allow growth ("new keys and higher counts are fine"),
+        so pinning the copy to the baseline would quietly convert this gate
+        from no-LOSS to no-CHANGE, and adding one article to a rule file would
+        fail here with a message about the harness (Fable, PR #56). The
+        property this control actually needs is that copying the tree does not
+        change what the gate sees.
+        """
+        self.assertEqual(compute_data_citation_counts(),
+                         compute_data_citation_counts(source_root=self.copy()),
+                         "a copy of the tree must measure exactly what the real "
+                         "tree measures, or every drop assertion below is vacuous")
 
     def test_changing_a_data_owned_8_4_value_is_caught(self):
         tmp = self.copy()
         self.edit(tmp, self.SNAPSHOT_2020, self.EIGHT_FOUR, '"article": "8.4.9.99."')
         after = compute_data_citation_counts(source_root=tmp)
-        before = load_data_baseline()
         self.assertLess(after["necb2020"].get("8.4.5.2.", 0),
-                        before["necb2020"]["8.4.5.2."],
+                        self.before()["necb2020"]["8.4.5.2."],
                         "an 8.4 article living in DATA must be guarded — the 8.4 "
                         "gate never sees it, because it scans Python")
 
@@ -308,8 +328,73 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         after = compute_data_citation_counts(source_root=tmp)
         key = "NECB 2020 Table 5.2.12.1.-N; 8.4.5.2."
         self.assertEqual(0, after["necb2020"].get(key, 0))
-        self.assertEqual(1, load_data_baseline()["necb2020"][key],
-                         "the deleted value was in the baseline")
+        self.assertEqual(1, self.before()["necb2020"][key],
+                         "the deleted value was there before the mutation")
+
+    def test_a_trigger_article_is_guarded(self):
+        """``trigger_article`` is emitted verbatim as ``article=`` from
+        ``checker.py:167`` and ``energy_recovery.py:63,71,88,93``. Guarding only
+        the key spelled ``article`` left four of the twenty-four subscript
+        sites open — the exact population this gate claims to close (Fable,
+        PR #56)."""
+        tmp = self.copy()
+        rules = tmp / "btap/codes/necb/data/necb2020/reference_rules.json"
+        blob = json.loads(rules.read_text(encoding="utf-8"))
+
+        hits = []
+        def retarget(node):
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key == "trigger_article" and value == "5.2.2.9.":
+                        node[key] = "9.9.9.9."
+                        hits.append(value)
+                    else:
+                        retarget(value)
+            elif isinstance(node, list):
+                for item in node:
+                    retarget(item)
+        retarget(blob)
+        self.assertEqual(["5.2.2.9."], hits, "anchor missing — the fixture has moved")
+        rules.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        after = compute_data_citation_counts(source_root=tmp)
+        self.assertLess(after["necb2020"].get("5.2.2.9.", 0),
+                        self.before()["necb2020"]["5.2.2.9."],
+                        "a trigger_article reaches the audit like any other "
+                        "citation and must be guarded like one")
+
+    def test_a_manifest_article_registry_entry_is_guarded(self):
+        """A manifest's ``articles`` mapping reaches the audit through
+        ``ruleset.article(key)`` — ``heat_pump_aux_fuel`` lands at
+        ``efficiency.py:1557``. That registry is the miniature of what DF-16
+        ultimately wants everywhere, so leaving it unguarded would be
+        perverse."""
+        tmp = self.copy()
+        manifest = tmp / "btap/codes/necb/data/necb2020/manifest.json"
+        blob = json.loads(manifest.read_text(encoding="utf-8"))
+        self.assertEqual("8.4.4.13.(2)(c)", blob["articles"]["heat_pump_aux_fuel"],
+                         "anchor missing — the fixture has moved")
+        blob["articles"]["heat_pump_aux_fuel"] = "9.9.9.9."
+        manifest.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        after = compute_data_citation_counts(source_root=tmp)
+        self.assertLess(after["necb2020"].get("8.4.4.13.(2)(c)", 0),
+                        self.before()["necb2020"]["8.4.4.13.(2)(c)"],
+                        "an article id held in the manifest registry must be guarded")
+
+    def test_a_non_string_article_value_raises_rather_than_vanishing(self):
+        """Skipping a non-string would open a hole quietly: the value stops
+        being counted, the next re-baseline records its absence as normal, and
+        it is unguarded forever with every test green."""
+        tmp = self.copy()
+        target = tmp / self.SNAPSHOT_2020
+        blob = json.loads(target.read_text(encoding="utf-8"))
+        rows = blob["part_load_fheatplc"]
+        rows[0]["article"] = ["8.4.5.2.", "8.4.5.3."]
+        target.write_text(json.dumps(blob, indent=2), encoding="utf-8")
+
+        with self.assertRaises(TypeError):
+            compute_data_citation_counts(source_root=tmp)
 
     def test_an_edition_swap_is_caught_where_a_repository_TOTAL_would_not_be(self):
         """The case that decides the key shape: remove a value from 2020 and
@@ -352,7 +437,7 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         path.write_text(json.dumps(blob, indent=2), encoding="utf-8")
 
         after = compute_data_citation_counts(source_root=tmp)
-        baseline = {k: v for k, v in load_data_baseline().items() if k != "_provenance"}
+        baseline = self.before()
 
         # Each half must do real work, or the swap proves nothing.
         self.assertEqual(sum(baseline["necb2020"].values()) - 1,
@@ -376,3 +461,6 @@ class TestDataGateCatchesRealRegressions(unittest.TestCase):
         self.assertLess(after["necb2020"].get(shared, 0), baseline["necb2020"][shared],
                         "the 2020 removal must fire even though 2025 gained the "
                         "same article — this is what the edition scope is for")
+
+if __name__ == "__main__":
+    unittest.main()
