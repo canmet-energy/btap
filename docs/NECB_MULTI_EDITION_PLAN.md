@@ -3484,13 +3484,10 @@ What closing it actually requires, measured rather than sketched:
   No name-only tuple can classify that honestly; `_article_values` already
   scopes by `where == "manifest.json"` and the taxonomy would need the same.
 
-  **Treat the total as unstable, not as a fact.** 94 of the 116 are
-  `decisions.json`'s per-entry lists, so it moves with every `D-XX`: the same
-  tree measured 117 on `main` at `390cc99`, one entry later. An earlier draft
-  recorded 117 here — measured on `main` while reviewing this branch, and
-  confirmed by a second reader on the same wrong checkout. It is the D-95
-  `commit_semantics` failure in miniature, and the reason the count is now
-  given with the commit it was taken at.
+  The total is unstable: 94 of the 116 are `decisions.json`'s per-entry lists
+  — 31 of them empty, which is why "unread" is the classification rather than
+  an observation — so it moves with every `D-XX`. The same measurement on
+  `main` at `390cc99` gives 117.
 - **Whatever the tuple lists must be exactly what the matcher collects.** The
   manifest's `coverage/articles_8_4.json` key is not matched by that regex at
   all (`/` is not `_`), so listing it would fail the equality assertion
@@ -3499,9 +3496,9 @@ What closing it actually requires, measured rather than sketched:
   `DATA_GLOB`, so a citation column added there is invisible to the gate and to
   the taxonomy regardless of the matcher.
 
-The sweep-in is real: the regex newly collects `article_coverage` (12),
-`article_number` (44) and `articles` (117), each of which then needs a
-conscious classification rather than silent inclusion.
+The sweep-in is real: beyond the `articles` roles above, the regex newly
+collects `article_coverage` (12) and `article_number` (44), each of which then
+needs a conscious classification rather than silent inclusion.
 
 **Why this is drift worth guarding rather than an invented shape.** Two of
 those keys are repo-authored prefix/plural forms (`article_coverage`,
