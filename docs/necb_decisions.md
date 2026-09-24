@@ -5957,16 +5957,20 @@ in the plan log.
   merge commits, 7 squashes and 15 direct pushes — **zero rebases**. Both
   measured breakages were squashes, so the route now closed is the one that
   never bit. It is a route removed, not the risk removed.
-- **Why not a ruleset**, since one was proposed and declined — three reasons,
-  the last decisive. `allowed_merge_methods` belongs to a ruleset's
+- **Why not a ruleset**, since one was proposed and declined. The sufficient
+  reason is that `allowed_merge_methods` belongs to a ruleset's
   `pull_request` rule, which also REQUIRES a pull request before merging: a
   constraint nobody adjudicated, and one that would have blocked 15 of those
   60 commits. The repository toggle applies to every branch, which is stricter
-  than a `main`-scoped rule rather than looser. And **a ruleset binds only
-  actors who cannot bypass it, with bypass granted per ruleset rather than per
-  rule** — the repository admin who performed both squash merges is exactly
-  the actor it would not have bound, so the ruleset would not have prevented
-  either incident it was proposed for (Fable, PR #59).
+  than a `main`-scoped rule rather than looser.
+
+  A third reason was recorded here and **withdrawn as untrue**: that a ruleset
+  would not bind a repository admin, so it could not have prevented either
+  incident. Ruleset bypass is configured per ruleset in an explicit
+  `bypass_actors` list; admins are eligible to be granted bypass, not exempt by
+  default, so a ruleset with no admin entry binds them. It came from one
+  reviewer, was recorded as decisive without being checked, and was corrected
+  by the other (Sol, PR #59).
 - **The post-merge check now arrives as an assigned issue, and closes
   itself.** `test.yml`'s `main-red` job evaluates every push run on `main`: a
   failure opens an incident — or comments on the open one — assigned to

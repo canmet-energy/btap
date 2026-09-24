@@ -413,6 +413,7 @@ jobs:
           # Falls back to whoever pushed. The repository has zero subscribers,
           # so an unassigned bot issue notifies nobody (Sol, PR #59).
           ASSIGNEE: ${{ vars.MAIN_RED_ASSIGNEE != '' && vars.MAIN_RED_ASSIGNEE || github.actor }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SHA: ${{ github.sha }}
           LINT: ${{ needs.lint.result }}
@@ -454,7 +455,7 @@ jobs:
           branch check was green. (Rebase was the other route; it is disabled on
           this repository. Squash is the one still available and still wrong for
           these PRs.) Recovery is a re-freeze from this commit and a minimal
-          re-pin — see [D-95](docs/necb_decisions.md#d-95).
+          re-pin — see [D-95](${REPO_URL}/blob/main/docs/necb_decisions.md#d-95).
 
           Under D-94 the work item that caused this is not closed until a push
           run on \`main\` is green. This issue closes itself when one is.
