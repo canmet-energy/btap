@@ -5916,9 +5916,10 @@ in the plan log.
 - **Decision:** a PR that changes frozen baselines or the manifest provenance
   `freeze.py` produces is merged with a **merge commit** — not a squash, and
   not a rebase. Both of those give the merged commit a new SHA, and this
-  repository allows all three. Ordinary PRs keep the squash convention. Sol
-  ruled this on 2026-09-23, on a diagnosis Claude produced and Sol verified;
-  phylroy adopted it the same day.
+  repository allowed all three when the rule was written (rebase is now
+  disabled; see the enforcement note below). Ordinary PRs keep the squash
+  convention. Sol ruled this on 2026-09-23, on a diagnosis Claude produced and
+  Sol verified; phylroy adopted it the same day.
 - **The mechanism, so the rule does not look arbitrary.** `freeze.py` records
   the commit it RAN at, which is a PR-branch commit, and
   `test_manifest_integrity` requires that commit to be an ancestor of `HEAD` —
@@ -5950,7 +5951,54 @@ in the plan log.
   history" claim, and content equality is not a substitute for it. The gate's
   own comment says the common CI path must not routinely skip this check, so
   weakening it would reverse a review finding rather than tidy one up.
-- **The residual risk is human, and named.** This rule depends on someone
+- **One of the two routes is now closed mechanically (2026-09-24).** Rebase
+  merging is disabled repository-wide (`allow_rebase_merge=false`). Say the
+  honest thing about which one: of the last 60 first-parent commits, 38 are
+  merge commits, 7 squashes and 15 direct pushes — **zero rebases**. Both
+  measured breakages were squashes, so the route now closed is the one that
+  never bit. It is a route removed, not the risk removed.
+- **Why not a ruleset**, since one was proposed and declined. The sufficient
+  reason is that `allowed_merge_methods` belongs to a ruleset's
+  `pull_request` rule, which also REQUIRES a pull request before merging: a
+  constraint nobody adjudicated, and one that would have blocked 15 of those
+  60 commits. The repository toggle applies to every branch, which is stricter
+  than a `main`-scoped rule rather than looser.
+
+  A third reason was recorded here and **withdrawn as untrue**: that a ruleset
+  would not bind a repository admin, so it could not have prevented either
+  incident. Ruleset bypass is configured per ruleset in an explicit
+  `bypass_actors` list; admins are eligible to be granted bypass, not exempt by
+  default, so a ruleset with no admin entry binds them. It came from one
+  reviewer, was recorded as decisive without being checked, and was corrected
+  by the other (Sol, PR #59).
+- **The post-merge check now arrives as an assigned issue, and closes
+  itself.** `test.yml`'s `main-red` job evaluates every push run on `main`: a
+  failure opens an incident — or comments on the open one — assigned to
+  `vars.MAIN_RED_ASSIGNEE` or whoever pushed, carrying the run, the commit,
+  the per-job results and this article's recovery path; a green run comments
+  the recovery and closes it. A lifecycle rather than an alarm, because
+  alarm-only would leave a recovered `main` publicly red and append later,
+  unrelated failures to a stale incident (Sol, PR #59). The assignment is not
+  best-effort: an incident nobody is assigned is the failure this job exists to
+  end, so a failed assignment fails the job. It watches `lint`, `python` and
+  `verify` only — `parity` is dispatch-only, and a docs-only merge triggers no
+  run at all.
+- **Squash stays, and the residual is therefore the route in daily use.**
+  Removing the button (`allow_squash_merge=false`) would close the residual
+  completely, and was declined: D-95 keeps squash as the ordinary-PR
+  convention and makes freeze-carrying PRs the exception, so a repository-wide
+  toggle would reverse the policy for every PR in order to automate one
+  exception (Sol, 2026-09-24). Removing it would be a separate maintainer
+  decision that measures current PR practice and amends this article's
+  ordinary-PR rule.
+
+  And do not read the 38/7/15 aggregate as "squash is barely used" — it is
+  weighted by older migration history. On a recency check, **all six most
+  recently merged PRs (#53–#58) were squashes**, each merge SHA differing from
+  its PR head with a single parent. The open route is the one in daily use,
+  which makes this residual larger than the aggregate suggests, not smaller.
+- **The rest of the residual is human, and named.** The squash button is still
+  present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until
   after the merge. That is why [D-94](#d-94)'s stop condition now requires the
   post-merge `main` run to be checked. The relationship is asymmetric, in Sol's

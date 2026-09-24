@@ -194,8 +194,16 @@ which is a separate claim from the content hashes the manifest already pins.
 **Neither "Squash and merge" nor "Rebase and merge" will do.** Both give the
 merged commit a new SHA, so the recorded branch commit is no longer an
 ancestor and `main` goes red *after* the merge while every branch check was
-green. This is not theoretical: `main` failed that way for three days across
-two merges, with a different stale pointer each time.
+green. Rebase merging is disabled on this repository, so that route is closed
+mechanically — but it is the route that never bit: both measured breakages were
+squashes, and the squash button is still there and still wrong for these PRs.
+This is not theoretical: `main` failed that way for three days across two
+merges, with a different stale pointer each time.
+
+When it does happen the `main-red` job opens an issue naming the run and this
+recovery path, assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and
+closes it again when a push run on `main` is green. It tells someone; it does
+not block anything.
 
 If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
 and submit the minimal re-pin immediately; a pure repair moves only provenance
@@ -242,7 +250,7 @@ attribution together. Never hand-edit a golden. Full instructions are in
 
 ## CI
 
-The workflow has five jobs:
+The workflow has six jobs:
 
 | Job | Role |
 |---|---|
@@ -251,6 +259,7 @@ The workflow has five jobs:
 | `verify` | required SDK/EnergyPlus suite, NECB checks, sizing scenarios |
 | `parity` | live pinned oracle, SmallOffice gate, optional golden export |
 | `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
+| `main-red` | on a failed push run on `main`, opens/updates an assigned issue (D-94) |
 
 `parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
 declared. Run them whenever the oracle pin changes.
