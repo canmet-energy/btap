@@ -200,8 +200,10 @@ squashes, and the squash button is still there and still wrong for these PRs.
 This is not theoretical: `main` failed that way for three days across two
 merges, with a different stale pointer each time.
 
-When it does happen the `main-red` job opens an assigned issue naming the run
-and this recovery path. It tells someone; it does not block anything.
+When it does happen the `main-red` job opens an issue naming the run and this
+recovery path, assigned to `vars.MAIN_RED_ASSIGNEE` (or whoever pushed), and
+closes it again when a push run on `main` is green. It tells someone; it does
+not block anything.
 
 If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit
 and submit the minimal re-pin immediately; a pure repair moves only provenance

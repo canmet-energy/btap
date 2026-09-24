@@ -5967,12 +5967,18 @@ in the plan log.
   rule** — the repository admin who performed both squash merges is exactly
   the actor it would not have bound, so the ruleset would not have prevented
   either incident it was proposed for (Fable, PR #59).
-- **The post-merge check now arrives as an issue.** `test.yml`'s `main-red`
-  job opens one — or comments on the open one, assigned to whoever merged —
-  when a push-triggered run on `main` fails, carrying the run, the commit, the
-  per-job results and this article's recovery path. It watches `lint`, `python`
-  and `verify` only: `parity` is dispatch-only, and a docs-only merge triggers
-  no run at all.
+- **The post-merge check now arrives as an assigned issue, and closes
+  itself.** `test.yml`'s `main-red` job evaluates every push run on `main`: a
+  failure opens an incident — or comments on the open one — assigned to
+  `vars.MAIN_RED_ASSIGNEE` or whoever pushed, carrying the run, the commit,
+  the per-job results and this article's recovery path; a green run comments
+  the recovery and closes it. A lifecycle rather than an alarm, because
+  alarm-only would leave a recovered `main` publicly red and append later,
+  unrelated failures to a stale incident (Sol, PR #59). The assignment is not
+  best-effort: an incident nobody is assigned is the failure this job exists to
+  end, so a failed assignment fails the job. It watches `lint`, `python` and
+  `verify` only — `parity` is dispatch-only, and a docs-only merge triggers no
+  run at all.
 - **The rest of the residual is human, and named.** The squash button is still
   present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until

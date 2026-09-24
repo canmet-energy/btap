@@ -181,10 +181,11 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 - **`parity`**: dispatch-only live-oracle checks and the whole-building
   archetype gate. It is also where oracle goldens are exported.
 - **`parity-scenarios`**: dispatch-only annual frozen scenarios, beside `parity`.
-- **`main-red`**: when a push-triggered run on `main` fails, opens an issue —
-  or comments on the open one, assigned to whoever merged — naming the run and
-  pointing at D-95's provenance recovery. D-94's stop condition requires that
-  run to be green, and a failed-run email had already proved insufficient.
+- **`main-red`**: an incident lifecycle for `main`. A failed push run opens or
+  updates an issue assigned to `vars.MAIN_RED_ASSIGNEE` (else the pusher),
+  naming the run and pointing at D-95's provenance recovery; a green push run
+  closes it. D-94's stop condition requires that run to be green, and a
+  failed-run email had already proved insufficient.
 
 `verify`, `parity` and `parity-scenarios` run in the CI image
 `ghcr.io/canmet-energy/btap-ci` (`infra/ci-image/Dockerfile`: the OpenStudio

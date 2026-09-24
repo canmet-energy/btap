@@ -373,7 +373,12 @@ jobs:
   # exists because a squash-merged freeze breaks it. Neither rule enforces
   # itself: main was red for three days across two merges because the only
   # signal was a failed-run email to the merging actor, which nobody acted on.
-  # This turns "someone has to look" into "someone is told".
+  #
+  # This is an INCIDENT LIFECYCLE, not a failure alarm. It evaluates on every
+  # push run on main: a failure opens or updates an assigned issue, and a
+  # green run comments the recovery and CLOSES it. Alarm-only would leave a
+  # recovered main publicly red forever and append later, unrelated failures
+  # to a stale incident (Sol, PR #59).
   #
   # Scope, stated so a reader does not assume more: it watches the three jobs
   # that run on a push. parity and parity-scenarios are dispatch-only and are
@@ -384,40 +389,57 @@ jobs:
     needs: [lint, python, verify]
     # !cancelled() rather than always(): always() still schedules this on a
     # CANCELLED run, so a supersede that cancels python/verify after lint has
-    # already failed would open an issue naming a commit that is no longer the
-    # tip. The superseding run reports for itself if it is still red.
+    # already failed would report a commit that is no longer the tip. The
+    # superseding run reports for itself.
     if: >-
       !cancelled()
       && github.event_name == 'push'
       && github.ref == 'refs/heads/main'
-      && contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
-      - name: Tell someone main is red
+      - name: Open, update or close the main incident
         env:
           GH_TOKEN: ${{ github.token }}
           # gh resolves the repository from the git remote, and this job has no
           # checkout. It does NOT read GITHUB_REPOSITORY, so without GH_REPO
           # every gh call dies with "failed to run git: not a git repository"
-          # and the job fails silently having told nobody — the exact outcome
-          # it exists to prevent (Fable, PR #59).
+          # and the job fails having told nobody — the exact outcome it exists
+          # to prevent (Fable, PR #59).
           GH_REPO: ${{ github.repository }}
+          # A repository variable rather than a hardcoded login, so the
+          # recipient is configuration rather than policy buried in a workflow.
+          # Falls back to whoever pushed. The repository has zero subscribers,
+          # so an unassigned bot issue notifies nobody (Sol, PR #59).
+          ASSIGNEE: ${{ vars.MAIN_RED_ASSIGNEE != '' && vars.MAIN_RED_ASSIGNEE || github.actor }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SHA: ${{ github.sha }}
-          ACTOR: ${{ github.actor }}
           LINT: ${{ needs.lint.result }}
           PYTHON: ${{ needs.python.result }}
           VERIFY: ${{ needs.verify.result }}
         run: |
           set -euo pipefail
           label='main-red'
-          # Idempotent, and a label rather than a title search: label lookup
-          # uses the consistent issues listing instead of the eventually
-          # consistent search index, and cannot match someone's unrelated
-          # "why is main red" issue.
-          gh label create "$label" --force --color B60205             --description 'A push-triggered run on main failed (D-94)' >/dev/null
+          gh label create "$label" --force --color B60205 \
+            --description 'A push-triggered run on main failed (D-94)' >/dev/null
+          existing=$(gh issue list --state open --label "$label" \
+                       --json number --jq '.[0].number // empty')
+
+          if [ "$LINT" = success ] && [ "$PYTHON" = success ] && [ "$VERIFY" = success ]; then
+            [ -n "$existing" ] || exit 0
+            gh issue comment "$existing" --body "Recovered: \`${SHA}\` is green — ${RUN_URL}"
+            gh issue close "$existing"
+            exit 0
+          fi
+
+          case "${LINT}${PYTHON}${VERIFY}" in
+            *failure*) ;;
+            # Neither green nor failed (a skipped or part-cancelled run): say
+            # nothing rather than guess.
+            *) exit 0 ;;
+          esac
+
           body=$(cat <<EOF
           The push-triggered run on \`main\` failed.
 
@@ -426,23 +448,24 @@ jobs:
           - lint: ${LINT} · python: ${PYTHON} · verify: ${VERIFY}
 
           **Check the frozen-manifest provenance first.** The known cause of a
-          main-only failure is D-95: a PR carrying a re-freeze was merged with a
-          squash, so the commit \`freeze.py\` recorded is no longer an ancestor of
-          \`HEAD\` and \`test_manifest_integrity\` fails on \`main\` while every branch
-          check was green. Recovery is a re-freeze from this commit and a minimal
+          main-only failure is D-95: a PR carrying a re-freeze was SQUASH-merged,
+          so the commit \`freeze.py\` recorded is no longer an ancestor of
+          \`HEAD\` and \`test_manifest_integrity\` fails on \`main\` while every
+          branch check was green. (Rebase was the other route; it is disabled on
+          this repository. Squash is the one still available and still wrong for
+          these PRs.) Recovery is a re-freeze from this commit and a minimal
           re-pin — see [D-95](docs/necb_decisions.md#d-95).
 
-          Under D-94 the work item that caused this is not closed until this run
-          is green.
+          Under D-94 the work item that caused this is not closed until a push
+          run on \`main\` is green. This issue closes itself when one is.
           EOF
           )
-          existing=$(gh issue list --state open --label "$label"                        --json number --jq '.[0].number // empty')
+          # No `|| true` on assignment: an incident nobody is assigned is the
+          # failure mode this job exists to end, so it fails loudly instead.
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
-            gh issue edit "$existing" --add-assignee "$ACTOR" >/dev/null || true
+            gh issue edit "$existing" --add-assignee "$ASSIGNEE"
           else
-            # Assigned, not just opened: a bot-authored issue relies on someone
-            # watching the repository, which is the same inbox attention that
-            # failed for three days.
-            gh issue create --title "main is red — ${SHA:0:7}" --label "$label"               --assignee "$ACTOR" --body "$body"
+            gh issue create --title "main is red — ${SHA:0:7}" --label "$label" \
+              --assignee "$ASSIGNEE" --body "$body"
           fi
