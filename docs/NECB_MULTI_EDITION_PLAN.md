@@ -3462,22 +3462,35 @@ exist in the data:
 **The first prescription recorded here did not close its own table.** It said
 `(^|_)articles?(_|$)` case-insensitively; that has no boundary before a
 camel-case `Article`, so `triggerArticle` — one of the three missed rows —
-escapes it, as do `ArticleRef`, `articleId` and `refArticle`. Recorded because
-a remedy that does not work is worse than none: the next person builds on it.
-The same mistake, in the same entry, as DF-17's first remedy.
+escapes it, as do `ArticleRef`, `articleId` and `refArticle` — the same
+mistake DF-17's first remedy made.
 
 What closing it actually requires, measured rather than sketched:
 
 - **A matcher with a camel boundary**, or plain substring `article` — prefix
   and plural alone leave the camel forms open.
 - **File-scoped classification, not a third name tuple.** `articles` is
-  polysemous in this repository: an EMITTED registry in `manifest.json`
-  (`ruleset.article(key)`), a structural container in the six rule files whose
-  leaves are already guarded by their own `article`, a text cache in
-  `articles_8_4.json`, and an unread id list in `decisions.json` — 117
-  occurrences in total. No name-only tuple can classify that honestly;
-  `_article_values` already scopes by `where == "manifest.json"` and the
-  taxonomy would need the same.
+  polysemous in this repository — **116 occurrences at `e1bdbd7`, in five
+  distinct roles**:
+
+  | count | role | shape |
+  |---|---|---|
+  | 94 | `decisions.json`, one list per decision | list of ids, unread |
+  | 12 | `article_coverage.articles`, across six rule-file families × two editions | list of OBJECTS, whose leaves carry their own guarded `article` |
+  | 6 | `provenance.articles` (efficiencies, envelope, reference × two editions) | list of STRINGS — no inner `article` to fall back on |
+  | 2 | `manifest.json` | EMITTED registry, reached by `ruleset.article(key)` |
+  | 2 | `articles_8_4.json` | text-cache mapping |
+
+  No name-only tuple can classify that honestly; `_article_values` already
+  scopes by `where == "manifest.json"` and the taxonomy would need the same.
+
+  **Treat the total as unstable, not as a fact.** 94 of the 116 are
+  `decisions.json`'s per-entry lists, so it moves with every `D-XX`: the same
+  tree measured 117 on `main` at `390cc99`, one entry later. An earlier draft
+  recorded 117 here — measured on `main` while reviewing this branch, and
+  confirmed by a second reader on the same wrong checkout. It is the D-95
+  `commit_semantics` failure in miniature, and the reason the count is now
+  given with the commit it was taken at.
 - **Whatever the tuple lists must be exactly what the matcher collects.** The
   manifest's `coverage/articles_8_4.json` key is not matched by that regex at
   all (`/` is not `_`), so listing it would fail the equality assertion
