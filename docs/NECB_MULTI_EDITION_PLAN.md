@@ -3495,6 +3495,13 @@ What closing it actually requires, measured rather than sketched:
 - **The glob is JSON-only.** Eleven CSVs under `btap/costing/data/` are outside
   `DATA_GLOB`, so a citation column added there is invisible to the gate and to
   the taxonomy regardless of the matcher.
+- **The hostile cases above must become executable tests** against whichever
+  matcher and file-role classifier is chosen — `triggerArticle`, `ArticleRef`,
+  `articleId`, `refArticle`, `article-ref`, and each of the five `articles`
+  roles. Required rather than suggested (Sol): it is what stops another
+  plausible regex being accepted by inspection, which is how the one first
+  recorded here — endorsed by two reviewers — reached this entry without
+  anyone running it against its own table.
 
 The sweep-in is real: beyond the `articles` roles above, the regex newly
 collects `article_coverage` (12) and `article_number` (44), each of which then
