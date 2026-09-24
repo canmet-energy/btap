@@ -5983,6 +5983,20 @@ in the plan log.
   end, so a failed assignment fails the job. It watches `lint`, `python` and
   `verify` only — `parity` is dispatch-only, and a docs-only merge triggers no
   run at all.
+- **Squash stays, and the residual is therefore the route in daily use.**
+  Removing the button (`allow_squash_merge=false`) would close the residual
+  completely, and was declined: D-95 keeps squash as the ordinary-PR
+  convention and makes freeze-carrying PRs the exception, so a repository-wide
+  toggle would reverse the policy for every PR in order to automate one
+  exception (Sol, 2026-09-24). Removing it would be a separate maintainer
+  decision that measures current PR practice and amends this article's
+  ordinary-PR rule.
+
+  And do not read the 38/7/15 aggregate as "squash is barely used" — it is
+  weighted by older migration history. On a recency check, **all six most
+  recently merged PRs (#53–#58) were squashes**, each merge SHA differing from
+  its PR head with a single parent. The open route is the one in daily use,
+  which makes this residual larger than the aggregate suggests, not smaller.
 - **The rest of the residual is human, and named.** The squash button is still
   present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until
