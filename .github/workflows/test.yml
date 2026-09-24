@@ -455,7 +455,7 @@ jobs:
           branch check was green. (Rebase was the other route; it is disabled on
           this repository. Squash is the one still available and still wrong for
           these PRs.) Recovery is a re-freeze from this commit and a minimal
-          re-pin — see [D-95](${REPO_URL}/blob/main/docs/necb_decisions.md#d-95).
+          re-pin — see [D-95](${REPO_URL}/blob/main/docs/necb_decisions.md#d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase).
 
           Under D-94 the work item that caused this is not closed until a push
           run on \`main\` is green. This issue closes itself when one is.

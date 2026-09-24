@@ -5917,9 +5917,9 @@ in the plan log.
   `freeze.py` produces is merged with a **merge commit** — not a squash, and
   not a rebase. Both of those give the merged commit a new SHA, and this
   repository allowed all three when the rule was written (rebase is now
-  disabled; see the enforcement note below). Ordinary PRs keep the squash convention. Sol
-  ruled this on 2026-09-23, on a diagnosis Claude produced and Sol verified;
-  phylroy adopted it the same day.
+  disabled; see the enforcement note below). Ordinary PRs keep the squash
+  convention. Sol ruled this on 2026-09-23, on a diagnosis Claude produced and
+  Sol verified; phylroy adopted it the same day.
 - **The mechanism, so the rule does not look arbitrary.** `freeze.py` records
   the commit it RAN at, which is a PR-branch commit, and
   `test_manifest_integrity` requires that commit to be an ancestor of `HEAD` —
