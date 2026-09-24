@@ -373,34 +373,51 @@ jobs:
   # exists because a squash-merged freeze breaks it. Neither rule enforces
   # itself: main was red for three days across two merges because the only
   # signal was a failed-run email to the merging actor, which nobody acted on.
-  # This turns "someone has to look" into "someone is told", in a place they
-  # cannot miss.
+  # This turns "someone has to look" into "someone is told".
+  #
+  # Scope, stated so a reader does not assume more: it watches the three jobs
+  # that run on a push. parity and parity-scenarios are dispatch-only and are
+  # NOT in needs, so a parity-red main is invisible here. A docs-only merge
+  # triggers no run at all (paths-ignore), so nothing reports — freeze-carrying
+  # PRs always touch verification/, so D-95 breakages are covered.
   main-red:
     needs: [lint, python, verify]
-    # always() so this evaluates even when a dependency failed; contains(...)
-    # rather than failure() so a run CANCELLED by the concurrency group — the
-    # ordinary consequence of pushing twice — never opens an issue.
+    # !cancelled() rather than always(): always() still schedules this on a
+    # CANCELLED run, so a supersede that cancels python/verify after lint has
+    # already failed would open an issue naming a commit that is no longer the
+    # tip. The superseding run reports for itself if it is still red.
     if: >-
-      always()
+      !cancelled()
       && github.event_name == 'push'
       && github.ref == 'refs/heads/main'
       && contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       issues: write
     steps:
       - name: Tell someone main is red
         env:
           GH_TOKEN: ${{ github.token }}
+          # gh resolves the repository from the git remote, and this job has no
+          # checkout. It does NOT read GITHUB_REPOSITORY, so without GH_REPO
+          # every gh call dies with "failed to run git: not a git repository"
+          # and the job fails silently having told nobody — the exact outcome
+          # it exists to prevent (Fable, PR #59).
+          GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
           LINT: ${{ needs.lint.result }}
           PYTHON: ${{ needs.python.result }}
           VERIFY: ${{ needs.verify.result }}
         run: |
           set -euo pipefail
-          title='main is red'
+          label='main-red'
+          # Idempotent, and a label rather than a title search: label lookup
+          # uses the consistent issues listing instead of the eventually
+          # consistent search index, and cannot match someone's unrelated
+          # "why is main red" issue.
+          gh label create "$label" --force --color B60205             --description 'A push-triggered run on main failed (D-94)' >/dev/null
           body=$(cat <<EOF
           The push-triggered run on \`main\` failed.
 
@@ -409,20 +426,23 @@ jobs:
           - lint: ${LINT} · python: ${PYTHON} · verify: ${VERIFY}
 
           **Check the frozen-manifest provenance first.** The known cause of a
-          main-only failure here is D-95: a PR carrying a re-freeze was merged
-          with a squash or a rebase, so the commit \`freeze.py\` recorded is no
-          longer an ancestor of \`HEAD\` and \`test_manifest_integrity\` fails on
-          \`main\` while every branch check was green. The fix is a re-freeze
-          from this commit and a minimal re-pin — see D-95's recovery path.
+          main-only failure is D-95: a PR carrying a re-freeze was merged with a
+          squash, so the commit \`freeze.py\` recorded is no longer an ancestor of
+          \`HEAD\` and \`test_manifest_integrity\` fails on \`main\` while every branch
+          check was green. Recovery is a re-freeze from this commit and a minimal
+          re-pin — see [D-95](docs/necb_decisions.md#d-95).
 
           Under D-94 the work item that caused this is not closed until this run
           is green.
           EOF
           )
-          existing=$(gh issue list --state open --search "in:title \"$title\"" \
-                       --json number --jq '.[0].number // empty')
+          existing=$(gh issue list --state open --label "$label"                        --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
+            gh issue edit "$existing" --add-assignee "$ACTOR" >/dev/null || true
           else
-            gh issue create --title "$title — ${SHA:0:7}" --body "$body"
+            # Assigned, not just opened: a bot-authored issue relies on someone
+            # watching the repository, which is the same inbox attention that
+            # failed for three days.
+            gh issue create --title "main is red — ${SHA:0:7}" --label "$label"               --assignee "$ACTOR" --body "$body"
           fi

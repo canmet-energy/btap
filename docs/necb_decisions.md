@@ -5916,7 +5916,8 @@ in the plan log.
 - **Decision:** a PR that changes frozen baselines or the manifest provenance
   `freeze.py` produces is merged with a **merge commit** — not a squash, and
   not a rebase. Both of those give the merged commit a new SHA, and this
-  repository allows all three. Ordinary PRs keep the squash convention. Sol
+  repository allowed all three when the rule was written (rebase is now
+  disabled; see the enforcement note below). Ordinary PRs keep the squash convention. Sol
   ruled this on 2026-09-23, on a diagnosis Claude produced and Sol verified;
   phylroy adopted it the same day.
 - **The mechanism, so the rule does not look arbitrary.** `freeze.py` records
@@ -5950,13 +5951,22 @@ in the plan log.
   history" claim, and content equality is not a substitute for it. The gate's
   own comment says the common CI path must not routinely skip this check, so
   weakening it would reverse a review finding rather than tidy one up.
-- **Half the residual is now closed mechanically (2026-09-24).** Rebase
-  merging is disabled repository-wide (`allow_rebase_merge=false`), so the
-  rebase route cannot be taken by mistake. The GitHub ruleset that would scope
+- **One of the two routes is now closed mechanically (2026-09-24).** Rebase
+  merging is disabled repository-wide (`allow_rebase_merge=false`). Say the
+  honest thing about which one: of the last 60 first-parent commits, 38 are
+  merge commits, 7 squashes and 15 direct pushes — **zero rebases**. Both
+  measured breakages were squashes, so the route now closed is the one that
+  never bit. It is a route removed, not the risk removed. The GitHub ruleset that would scope
   `allowed_merge_methods` to `main` was deliberately NOT used: that parameter
   belongs to the ruleset's `pull_request` rule, which also REQUIRES a pull
   request before merging — a constraint nobody adjudicated. The repository
   toggle closes the same hole without imposing one.
+- **The post-merge check now arrives as an issue.** `test.yml`'s `main-red`
+  job opens one — or comments on the open one, assigned to whoever merged —
+  when a push-triggered run on `main` fails, carrying the run, the commit, the
+  per-job results and this article's recovery path. It watches `lint`, `python`
+  and `verify` only: `parity` is dispatch-only, and a docs-only merge triggers
+  no run at all.
 - **The rest of the residual is human, and named.** The squash button is still
   present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until
