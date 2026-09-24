@@ -194,7 +194,8 @@ which is a separate claim from the content hashes the manifest already pins.
 **Neither "Squash and merge" nor "Rebase and merge" will do.** Both give the
 merged commit a new SHA, so the recorded branch commit is no longer an
 ancestor and `main` goes red *after* the merge while every branch check was
-green. This is not theoretical: `main` failed that way for three days across
+green. Rebase merging is disabled on this repository, so that half is closed
+mechanically; the squash button is still there, and still wrong for these PRs. This is not theoretical: `main` failed that way for three days across
 two merges, with a different stale pointer each time.
 
 If one is squash- or rebase-merged by mistake, re-freeze from the resulting `main` commit

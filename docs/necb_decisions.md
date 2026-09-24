@@ -5950,7 +5950,15 @@ in the plan log.
   history" claim, and content equality is not a substitute for it. The gate's
   own comment says the common CI path must not routinely skip this check, so
   weakening it would reverse a review finding rather than tidy one up.
-- **The residual risk is human, and named.** This rule depends on someone
+- **Half the residual is now closed mechanically (2026-09-24).** Rebase
+  merging is disabled repository-wide (`allow_rebase_merge=false`), so the
+  rebase route cannot be taken by mistake. The GitHub ruleset that would scope
+  `allowed_merge_methods` to `main` was deliberately NOT used: that parameter
+  belongs to the ruleset's `pull_request` rule, which also REQUIRES a pull
+  request before merging — a constraint nobody adjudicated. The repository
+  toggle closes the same hole without imposing one.
+- **The rest of the residual is human, and named.** The squash button is still
+  present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until
   after the merge. That is why [D-94](#d-94)'s stop condition now requires the
   post-merge `main` run to be checked. The relationship is asymmetric, in Sol's

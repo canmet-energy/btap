@@ -368,3 +368,61 @@ jobs:
           BTAP_ENERGYPLUS=/usr/local/openstudio-3.11.0/EnergyPlus/energyplus \
           BTAP_SCENARIO_LANES=parity BTAP_SCENARIOS_REQUIRED=1 \
             /opt/btap-ci/pytest/bin/python -m pytest -q tests/necb/test_frozen_scenarios.py -p no:cacheprovider
+
+  # D-94's stop condition requires the merged-main run to be green, and D-95
+  # exists because a squash-merged freeze breaks it. Neither rule enforces
+  # itself: main was red for three days across two merges because the only
+  # signal was a failed-run email to the merging actor, which nobody acted on.
+  # This turns "someone has to look" into "someone is told", in a place they
+  # cannot miss.
+  main-red:
+    needs: [lint, python, verify]
+    # always() so this evaluates even when a dependency failed; contains(...)
+    # rather than failure() so a run CANCELLED by the concurrency group — the
+    # ordinary consequence of pushing twice — never opens an issue.
+    if: >-
+      always()
+      && github.event_name == 'push'
+      && github.ref == 'refs/heads/main'
+      && contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Tell someone main is red
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          LINT: ${{ needs.lint.result }}
+          PYTHON: ${{ needs.python.result }}
+          VERIFY: ${{ needs.verify.result }}
+        run: |
+          set -euo pipefail
+          title='main is red'
+          body=$(cat <<EOF
+          The push-triggered run on \`main\` failed.
+
+          - commit: ${SHA}
+          - run: ${RUN_URL}
+          - lint: ${LINT} · python: ${PYTHON} · verify: ${VERIFY}
+
+          **Check the frozen-manifest provenance first.** The known cause of a
+          main-only failure here is D-95: a PR carrying a re-freeze was merged
+          with a squash or a rebase, so the commit \`freeze.py\` recorded is no
+          longer an ancestor of \`HEAD\` and \`test_manifest_integrity\` fails on
+          \`main\` while every branch check was green. The fix is a re-freeze
+          from this commit and a minimal re-pin — see D-95's recovery path.
+
+          Under D-94 the work item that caused this is not closed until this run
+          is green.
+          EOF
+          )
+          existing=$(gh issue list --state open --search "in:title \"$title\"" \
+                       --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title — ${SHA:0:7}" --body "$body"
+          fi
