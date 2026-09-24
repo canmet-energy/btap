@@ -5956,11 +5956,17 @@ in the plan log.
   honest thing about which one: of the last 60 first-parent commits, 38 are
   merge commits, 7 squashes and 15 direct pushes — **zero rebases**. Both
   measured breakages were squashes, so the route now closed is the one that
-  never bit. It is a route removed, not the risk removed. The GitHub ruleset that would scope
-  `allowed_merge_methods` to `main` was deliberately NOT used: that parameter
-  belongs to the ruleset's `pull_request` rule, which also REQUIRES a pull
-  request before merging — a constraint nobody adjudicated. The repository
-  toggle closes the same hole without imposing one.
+  never bit. It is a route removed, not the risk removed.
+- **Why not a ruleset**, since one was proposed and declined — three reasons,
+  the last decisive. `allowed_merge_methods` belongs to a ruleset's
+  `pull_request` rule, which also REQUIRES a pull request before merging: a
+  constraint nobody adjudicated, and one that would have blocked 15 of those
+  60 commits. The repository toggle applies to every branch, which is stricter
+  than a `main`-scoped rule rather than looser. And **a ruleset binds only
+  actors who cannot bypass it, with bypass granted per ruleset rather than per
+  rule** — the repository admin who performed both squash merges is exactly
+  the actor it would not have bound, so the ruleset would not have prevented
+  either incident it was proposed for (Fable, PR #59).
 - **The post-merge check now arrives as an issue.** `test.yml`'s `main-red`
   job opens one — or comments on the open one, assigned to whoever merged —
   when a push-triggered run on `main` fails, carrying the run, the commit, the
