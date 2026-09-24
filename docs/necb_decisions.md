@@ -286,12 +286,12 @@ audit are drained and archived — see `docs/README.md`.
 ## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
 
 - **Decision:** implement, with these interpretive choices:
-  - **Superseded by [D-93](#d-93) (2026-09-19).** The interpretive choices
+  - **Superseded by [D-93](#d-93--the-reference-pumps-value-source-correspondence-then-the-sentence-that-governs-it) (2026-09-19).** The interpretive choices
     below are history: the value source is now decided per correspondence, by
     the sentence that governs it. Specifically reversed — "(1)-(3) through one
     mechanism", "intensity × reference flow, not absolute watts" (which gives
     578.6 W against the Code's own 861 W example), and loop-TYPE
-    correspondence. The mechanism half was already replaced by [D-92](#d-92).
+    correspondence. The mechanism half was already replaced by [D-92](#d-92--the-reference-pump-is-stated-as-head-efficiency-and-motor-efficiency-energyplus-derives-its-power).
   - Sentences (1)-(3) through **one mechanism**: the proposed loop-type's
     pumps' combined peak power intensity in W/(L/s) — sentence (3)'s own
     metric, which equals head/efficiency (P = V·head/eff, sentence (1)) and
@@ -312,7 +312,7 @@ audit are drained and archived — see `docs/README.md`.
     future data to a consumed rule block carrying the Table coefficients.
 - **Who/when:** phylroy chose "Implement" (2026-07-23); the interpretive
   sub-choices are Claude's under D-10 delegation.
-- **Mechanism superseded by [D-92](#d-92) (2026-09-16).** The value source
+- **Mechanism superseded by [D-92](#d-92--the-reference-pump-is-stated-as-head-efficiency-and-motor-efficiency-energyplus-derives-its-power) (2026-09-16).** The value source
   below — the proposed loop-type's combined W/(L/s) — still stands, but it no
   longer reaches the model as a hard-set rated power with the head bent
   afterwards. The reference pump's head, shaft coefficient and motor efficiency
@@ -5659,7 +5659,7 @@ in the plan log.
 
 - **Decision:** the efficiency pass writes each reference hydronic pump's rated
   head, its design shaft power per unit flow per unit head and its motor
-  efficiency, and leaves its rated power **autosized**. [D-11](#d-11)'s value
+  efficiency, and leaves its rated power **autosized**. [D-11](#d-11--84414-hydronic-pumps-implemented-intensity-transfer--table-curves)'s value
   source is unchanged — the proposed loop-type's combined W/(L/s) — so this
   replaces the MECHANISM only; [DF-11](NECB_MULTI_EDITION_PLAN.md) carries the
   value source.
@@ -5700,7 +5700,7 @@ in the plan log.
   the (2) combination, but not its efficiency, and the exclusion is audited.
   Because the stated efficiency is the one the engine computes,
   the fatal is unreachable by construction and `_reconcile_pump_head` is
-  deleted rather than suppressed. The 5.2.6.3 cap ([D-38](#d-38)) clamps
+  deleted rather than suppressed. The 5.2.6.3 cap ([D-38](#d-38--a3-adjudicated-phylroy-5263-pump-power-caps-applied-min-wins-over-the-84414-transfer)) clamps
   through **whichever field EnergyPlus actually reads** — a hard-set rated
   power, a `PowerPerFlow` intensity, or the head of a `PowerPerFlowPerPressure`
   pump — scaling the head alongside so the implied efficiency is unchanged.
@@ -5714,7 +5714,7 @@ in the plan log.
   sized 10 000 W). Each pump's power is computed from its own fields rather
   than re-read from a sizing SQL the pass has just invalidated. DF-12 closes
   with it: the release no longer touches a service-water circulator, which
-  [D-27](#d-27) puts outside 8.4.4.14.
+  [D-27](#d-27--swh-circulators-are-outside-84414-transfer-head-reconciled) puts outside 8.4.4.14.
 - **Input hardening** (Sol, PR #50, accepted with residual risk). The SDK
   refuses a motor efficiency outside (0, 1], a non-positive shaft coefficient
   and a non-finite head — but it **accepts** a negative or zero rated head and
@@ -5759,7 +5759,7 @@ in the plan log.
   `prepare_for_resizing`; `_reconcile_pump_head` and `DESIGN_PUMP_EFFICIENCY`
   deleted), `tests/necb/test_hvac_necb_pump_rules.py`,
   `tests/necb/test_plant_capacity_ownership.py`.
-- **Who/when:** Claude under [D-10](#d-10) delegation, with the user; Fable
+- **Who/when:** Claude under [D-10](#d-10--remaining-adjudications-delegated-to-claude-with-mandatory-logging) delegation, with the user; Fable
   reviews; Sol's D-58 scope ruling, 2026-09-16.
 
 ## D-93 — The reference pump's value source: correspondence, then the sentence that governs it
@@ -5769,7 +5769,7 @@ in the plan log.
   system it corresponds to, decides which of sentences (1), (2) and (3) that
   system's pumps put it under, and applies **that sentence's own formula**.
   Where no unambiguous correspondence exists it **declines and says so**.
-  [D-92](#d-92) settled the mechanism (state the pump, let EnergyPlus derive
+  [D-92](#d-92--the-reference-pump-is-stated-as-head-efficiency-and-motor-efficiency-energyplus-derives-its-power) settled the mechanism (state the pump, let EnergyPlus derive
   the power); this settles the value.
 - **The requirement.** (1) "each hydronic pump of the reference building shall
   have a total static head and efficiency identical to that of the
@@ -5782,7 +5782,7 @@ in the plan log.
   the reference plant's pumping flow (installed capacity, pure water, 16 °C
   drop) and 5.2.6.3.(1) caps "the combined pumping power demand required by the
   **motors**". Verified against the codes MCP.
-- **What was wrong.** [D-11](#d-11) collapsed all three sentences into one
+- **What was wrong.** [D-11](#d-11--84414-hydronic-pumps-implemented-intensity-transfer--table-curves) collapsed all three sentences into one
   mechanism — the proposed's combined W/(L/s) **blended by plant-loop type
   across the whole building**, applied as intensity × reference flow. Three
   defects follow. It is not (2): on the Code's own Appendix example it yields
@@ -5820,7 +5820,7 @@ in the plan log.
   not define it. A flow-weighted mean preserves shaft power while **leaking
   electrical power**; `η_m,ref = ΣS / ΣPₑ` (an electrical-weighted arithmetic
   mean, equivalently a shaft-power-weighted harmonic mean) conserves both at
-  once, and it is the electrical figure that [D-38](#d-38)'s Part 5 cap binds.
+  once, and it is the electrical figure that [D-38](#d-38--a3-adjudicated-phylroy-5263-pump-power-caps-applied-min-wins-over-the-84414-transfer)'s Part 5 cap binds.
 - **The denominator is the distribution flow**, counted once per fluid stream —
   the loop's own design maximum flow, hard value then autosized. Never the sum
   of the pumps' rated flows. **If it cannot be determined the transfer declines
@@ -5902,13 +5902,13 @@ in the plan log.
   change the workflow path-ignores entirely (documentation only), when no run
   was triggered at all, which is a real case rather than a quibble. If a run
   failed, the repair comes before the next item. Sol raised this, on a
-  diagnosis Claude produced and Sol verified; see [D-95](#d-95) for the merge
+  diagnosis Claude produced and Sol verified; see [D-95](#d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase) for the merge
   rule that removes the cause.
 - **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
   directly, so neither GitHub nor phylroy carries messages. Claude watches
   `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
   that runs terminal commands can iterate without being prompted.
-- **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
+- **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10--remaining-adjudications-delegated-to-claude-with-mandatory-logging), which delegated the
   adjudications themselves; this governs how the resulting work is signed off.
 
 ## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase
@@ -6000,7 +6000,7 @@ in the plan log.
 - **The rest of the residual is human, and named.** The squash button is still
   present and still wrong for these PRs, so the rule still depends on someone
   remembering the exception, and when they forget the failure is silent until
-  after the merge. That is why [D-94](#d-94)'s stop condition now requires the
+  after the merge. That is why [D-94](#d-94--development-and-sign-off-implement-sol-fable-then-stop)'s stop condition now requires the
   post-merge `main` run to be checked. The relationship is asymmetric, in Sol's
   own words: D-95 prevents the known cause when the exception is remembered;
   D-94 detects it when it is forgotten. Neither makes the other redundant.

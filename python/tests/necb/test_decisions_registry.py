@@ -154,3 +154,65 @@ class TestRuntimeCitations(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDecisionCrossReferencesResolve(unittest.TestCase):
+    """Every `#fragment` link into the decision log must hit a real heading.
+
+    GitHub derives a heading's anchor by slugging the WHOLE heading, so
+    ``## D-95 — Freeze-carrying PRs merge …`` is reachable at
+    ``#d-95--freeze-carrying-prs-merge-…`` and NOT at ``#d-95``. The document
+    used the short form in 13 places and none of them resolved: the link
+    silently opened a 6,000-line file at the top (Fable, PR #59).
+
+    Two properties, and the second is the one that keeps this from rotting:
+    every link resolves TODAY, and the `main-red` incident body's link into
+    this document resolves too. A heading retitled later changes its slug, and
+    this fails rather than leaving a dead pointer in the one place nobody
+    looks until an incident.
+    """
+
+    DOC = PYTHON_ROOT.parent / "docs" / "necb_decisions.md"
+    WORKFLOW = PYTHON_ROOT.parent / ".github" / "workflows" / "test.yml"
+
+    @staticmethod
+    def slug(heading: str) -> str:
+        """GitHub's heading-anchor rule: lowercase, drop punctuation, hyphens."""
+        text = heading.strip().lower()
+        text = re.sub(r"[^\w\s-]", "", text)
+        return re.sub(r"\s", "-", text)
+
+    def heading_slugs(self) -> set:
+        doc = self.DOC.read_text(encoding="utf-8")
+        return {self.slug(m.group(1)) for m in re.finditer(r"^## (.+)$", doc, re.M)}
+
+    def test_every_in_document_fragment_link_resolves(self):
+        doc = self.DOC.read_text(encoding="utf-8")
+        slugs = self.heading_slugs()
+        dangling = sorted({f for f in re.findall(r"\]\(#([^)]+)\)", doc) if f not in slugs})
+        self.assertEqual(
+            [], dangling,
+            "decision-log links point at anchors GitHub does not generate. The "
+            "anchor is the slug of the WHOLE heading, not the bare id:\n  "
+            + "\n  ".join(f"#{d} -> try #{next((s for s in slugs if s.startswith(d)), '?')}"
+                          for d in dangling))
+
+    def test_the_incident_body_links_a_real_anchor(self):
+        """`main-red` tells whoever merged where the recovery path is. A dead
+        fragment there costs most at the worst moment, and nothing else would
+        notice it."""
+        workflow = self.WORKFLOW.read_text(encoding="utf-8")
+        found = re.findall(r"necb_decisions\.md#([a-z0-9-]+)", workflow)
+        self.assertTrue(found, "the main-red body no longer links the decision log")
+        slugs = self.heading_slugs()
+        for fragment in found:
+            self.assertIn(fragment, slugs,
+                          f"main-red links #{fragment}, which is not a heading anchor")
+
+    def test_the_slug_rule_matches_a_known_heading(self):
+        """Non-vacuity: the rule must actually reproduce a live anchor, or both
+        tests above would pass by agreeing with a broken derivation."""
+        self.assertEqual(
+            "d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase",
+            self.slug("D-95 — Freeze-carrying PRs merge with a merge commit, "
+                      "not a squash or rebase"))
