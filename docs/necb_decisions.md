@@ -6133,15 +6133,6 @@ in the plan log.
   the modelled hydronic fluid circuit, and a `WaterToWaterComponent` exposes
   separate loops precisely because it transfers heat BETWEEN circuits.
 
-  **An earlier round of this implementation got that wrong**, classifying a
-  "hydraulically connected network" through heat exchangers, chillers and plant
-  heat pumps and requiring the overlapping loops to lie in separate networks.
-  Sol withdrew that wording as an over-expansion from common-fluid
-  primary-secondary pumping into arbitrary thermal and refrigerant coupling.
-  There is now no connectivity test in the predicate, and the completeness
-  questions about `ChillerElectricASHRAE205`'s oil-cooler and auxiliary
-  connections and `HeatPumpAirToWater`'s non-`WaterToWaterComponent` children
-  no longer govern this decision (Sol, PR #63).
 - **Rejected history, recorded so it is not re-derived.** Two readings were
   tried and withdrawn before the one above. First, that a block-set partition
   was *necessary but not sufficient* for independence, so it could not fire a

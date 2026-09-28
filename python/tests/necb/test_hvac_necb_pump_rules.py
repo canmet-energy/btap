@@ -761,7 +761,8 @@ class TestNecbPumpRules(unittest.TestCase):
         # The premise: the block sets DO partition, exactly.
         self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
                          'disjoint, and together exactly the reference blocks')
-        # And yet they are one network, through a loop of another role.
+        # They share equipment through ANOTHER fluid circuit, which is not
+        # hydraulic continuity between these two loops.
         # No connectivity test any more: a shared condenser loop couples the
         # EQUIPMENT and moves energy; it does not let the same hydronic fluid
         # circulate through both wings (Sol, PR #63).
@@ -809,8 +810,9 @@ class TestNecbPumpRules(unittest.TestCase):
             wings.append(wing)
 
         self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
-                         'the block sets partition the reference exactly — which is precisely '
-                         'why only the network classification can tell these apart')
+                         'the exact partition is what makes this eligible for D-97, '
+                         'independently of the shared source loop: the two load-side loops stay '
+                         'distinct fluid circuits')
         # A shared ground loop is a separate fluid circuit, not continuity.
 
         reference = openstudio.model.Model()
