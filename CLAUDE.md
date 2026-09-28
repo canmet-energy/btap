@@ -1,7 +1,7 @@
 # CLAUDE.md — canmet-btap repository guide
 
 This repository contains one product implementation: the Python distribution
-`canmet-btap` (import `btap`), licensed **LGPL-3.0-or-later**. It has five
+`canmet-btap` (import `btap`), licensed **GPL-3.0-or-later**. It has five
 subpackages: `btap.audit`, `btap.simulation`, `btap.modeling`, `btap.costing`,
 and `btap.codes`. `btap.codes` is the code-compliance layer, with the NECB
 family under `btap.codes.necb` (D-86 renamed and re-shaped that package at

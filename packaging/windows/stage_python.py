@@ -18,7 +18,7 @@ spawns `sys.executable`.
 Everything downloaded is recorded in PROVENANCE.json with its digest, and
 every installed distribution must account for its licence or the stage
 fails — the installer redistributes CPython, OpenStudio, EnergyPlus and
-the tbd chain, and that obligation is wider than this project's own LGPL.
+the tbd chain, and that obligation is wider than this project's own GPL.
 """
 
 from __future__ import annotations
@@ -244,7 +244,7 @@ def main() -> int:
     (stage / "bin").mkdir()
     shutil.copy2(HERE / "btap-compliance.cmd", stage / "bin" / "btap-compliance.cmd")
     shutil.copy2(HERE / "README-windows.txt", stage / "README-windows.txt")
-    # The installer's own licence page (iss LicenseFile) and the LGPL text
+    # The installer's own licence page (iss LicenseFile) and the GPL text
     # this project ships under.
     shutil.copy2(REPO_ROOT / "LICENSE", stage / "LICENSE")
 

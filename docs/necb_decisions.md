@@ -128,6 +128,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-93** — The reference pump's value source: correspondence, then the sentence that governs it _(runtime)_
 - **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
 - **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash or rebase _(process)_
+- **D-96** — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later _(process)_
 
 <!-- TOC END -->
 
@@ -6005,3 +6006,49 @@ in the plan log.
   own words: D-95 prevents the known cause when the exception is remembered;
   D-94 detects it when it is forgotten. Neither makes the other redundant.
 - **Who/when:** Sol ruled, phylroy adopted, 2026-09-23.
+
+<a id="d-96"></a>
+
+## D-96 — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later
+
+- **Decision:** `canmet-btap` is licensed **GPL-3.0-or-later**. phylroy
+  directed the change on 2026-09-28; this entry records it rather than
+  adjudicating it.
+- **What changed, concretely.** `LICENSE` and `python/LICENSE` now carry the
+  full GNU General Public License v3.0 text (674 lines, fetched from
+  gnu.org). The previous file was the LGPL-3.0 text, which is short because it
+  *incorporates* the GPL by reference rather than restating it — so this is a
+  document replacement, not an edit. `python/pyproject.toml`'s SPDX `license`
+  field, and the licence statements in `README.md`, `CLAUDE.md`, the two
+  `btap.codes` guides, `ATTRIBUTION.md` and the Windows packaging notes, all
+  now say GPL-3.0-or-later.
+- **`-or-later`, matching what was there.** The instruction said "GPL 3",
+  which is ambiguous between `GPL-3.0-only` and `GPL-3.0-or-later`. The
+  previous licence was `LGPL-3.0-or-later`, so the `-or-later` posture is
+  preserved rather than silently narrowed. Changing to `-only` is a one-line
+  follow-up if that was the intent.
+- **The mechanism is sound.** LGPL-3.0 section 2(b) expressly permits
+  conveying a covered work under the plain GPL-3.0, so no permission problem
+  arises from the outgoing licence itself.
+- **What it does NOT do, and what needs a human.** Relicensing binds only what
+  the copyright holder may bind. `LICENSE` carries no project copyright line —
+  the only copyright notice in it is the FSF's on the licence text — so the
+  holder is stated nowhere in this repository. **A maintainer should confirm
+  the holder (NRCan / His Majesty the King in Right of Canada) has authorised
+  this, and that no third-party contribution is licensed on terms that forbid
+  it.** That is a legal question, not a code one, and this entry does not
+  settle it.
+- **It is one-way for what is already released.** Anyone who received an
+  earlier version under LGPL keeps LGPL rights *to that version* permanently;
+  the change binds this version onward. Practically, downstream code that
+  links the library must now be GPL-compatible where LGPL previously allowed
+  proprietary linking.
+- **The Crown NECB text is unaffected.** It was never under the package
+  licence and still is not — `ATTRIBUTION.md` now says "outside the GPL"
+  where it said "outside the LGPL", which is the same carve-out with the new
+  name.
+- **Period wording preserved.** [D-83](#d-83) and [D-84](#d-84), and the two
+  review records in `docs/`, still say LGPL. They describe what was decided
+  when they were written, and the repository's rule is to keep that rather
+  than retouch history; this entry is where the change lives.
+- **Who/when:** phylroy, 2026-09-28.

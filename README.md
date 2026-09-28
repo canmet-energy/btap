@@ -37,7 +37,7 @@ Unmet hours  heating 0.8 / 24.8 h    cooling 13.5 / 0.0 h
 model passes and shows its work. It does not make a non-compliant building
 compliant, and it does not repair a model that is not ready to be checked.
 
-Licensed **LGPL-3.0-or-later** — see [LICENSE](LICENSE).
+Licensed **GPL-3.0-or-later** — see [LICENSE](LICENSE).
 
 ---
 
