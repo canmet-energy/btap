@@ -1148,6 +1148,23 @@ any result.
   baseboard ran before the always-on rooftop terminal in `SequentialLoad`.
   D-91 (decided by Sol) runs the rooftop terminal first in one-unit-per-block
   Systems 3/4. Evidence and the options measured are in D-90/D-91.
+  **CLOSED 2026-09-28, measured from the frozen determination rather than
+  re-run.** `determination-01-baseboard-gas-necb2025` IS the recorded output of
+  this scenario, so the answer needed no simulation:
+
+  | | when DF-1 was logged | now |
+  |---|---|---|
+  | reference heating unmet | 1268.75 → 945.5 → 842.75 → **801.0 h** | **0.0 h** |
+  | proposed heating unmet | 41.75 h | 41.75 h |
+  | 8.4.1.2.(3) | reference FAILS the 100 h limit | "unmet heating hours within 100 h for both buildings" |
+  | verdict | NON-COMPLIANT because of the reference | `compliant: true`, tier 1 |
+
+  D-90 and D-91 did not narrow this; they eliminated it. The proposed figure
+  being **unchanged at 41.75 h** is the control: the movement is in the
+  reference, which is where DF-1 diagnosed the cause (a plant frozen at the
+  proposed's size and never released). Proposed cooling remains vacuous under
+  sentence (4) — no mechanical cooling — as DF-1 also recorded.
+
 - **DF-8 — shared "single-zone" System 3/4 reference units.** D-28 keeps the
   single-zone families (Systems 1, 3, 4 and the heat-pump reference) on the
   proposed's selection grouping, a legacy-parity choice ("sys-3 school/retail
