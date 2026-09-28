@@ -1325,48 +1325,45 @@ any result.
   measuring it, never reasoning about it. Absence of baseline movement was
   treated as evidence three times and was not evidence any of them.
 
-- **DF-18 — correspondence treats a `PlantLoop` as a hydronic system, so an
-  HX-coupled multi-loop system is declined where sentence (2) governs it.**
-  Opened 2026-09-28 (Fable, PR #63), during the D-97 review; it predates D-97
-  and D-97 does not decide it.
+- **DF-18 — an exact match that is not the sole overlap dropped a pump
+  silently.** Opened 2026-09-28 (Fable, PR #63); **premise corrected and the
+  defect closed 2026-09-28** (Sol, PR #63).
 
-  `_corresponding_loop` matches one reference loop against proposed
-  **`PlantLoop`s**. [D-97](necb_decisions.md#d-97)'s unit — and Note
-  A-8.4.x.14.(2)'s — is the hydraulically connected network. They come apart
-  because one OpenStudio `PlantLoop` carries a single demand-side pump, so the
-  Note's own example (a primary plus a north- and a south-wing secondary) can
-  only be authored as a primary loop plus two `HeatExchangerFluidToFluid`-
-  coupled wing loops. That is three loops and **one** primary-secondary system.
+  **What this entry first claimed is withdrawn.** It said correspondence
+  wrongly treats a `PlantLoop` as a hydronic system, and that an HX-coupled
+  multi-loop set is one system where sentence (2) ought to govern all its
+  pumps. Sol ruled the opposite way on the boundary: a `PlantLoop` IS the
+  modelled hydronic fluid circuit, and a heat exchanger transfers heat BETWEEN
+  circuits rather than making them one. 5.2.6.3.(1)'s table note fixes the
+  thermal denominator at the peak demand of **the loop**, and 8.4.x.9.(6)(a)
+  distinguishes a plant from the systems served by it. So HX-separated loops are
+  NOT authority to aggregate pumps across them. See
+  [D-97](necb_decisions.md#d-97).
 
-  Measured on that model, built with the SDK:
+  **The measured defect was real, and had a different cause.** On the Note's own
+  example authored as a primary plus wing secondaries, with the reference serving
+  all the wings, the reference matched the PRIMARY loop one-to-one — the
+  primary's served set equals the reference's, because `_served_zone_names`
+  recurses through the heat exchanger — and transferred under (3) from the
+  primary pump alone: `proposed_pumps: 1, combined_electrical_w: 200.0` of the
+  system's 1000 W, at 139.53 W/(L/s). Both wing pumps were dropped with no
+  warning.
 
-  - With a third wing the reference does not serve, the pass reaches the N:1
-    branch and declines — where (2) should combine the three pumps.
-  - Without it, the reference matched the primary loop **one-to-one** and
-    transferred under (3) from the primary pump alone:
-    `proposed_pumps: 1, combined_electrical_w: 200.0` of the system's 1000 W,
-    at 139.53 W/(L/s). Both wing secondaries were dropped silently — on
-    exactly the shape sentence (2) most clearly covers.
+  That is an exact match which was not the only overlapping loop, and it is
+  fixed by the sole-overlap guard: one-to-one is now accepted only when the
+  single exact candidate is also the only loop overlapping the reference loop.
+  The same shape now declines loudly under D-93, naming every candidate.
+  `test_an_exact_match_that_is_not_the_only_overlap_declines` pins it, and
+  restoring the exact-first order fails that test and nothing else.
 
-  The second is the worse half: it is a wrong transferred value with no
-  warning, not a decline. Neither is a regression from D-97; both are D-93
-  behaviour the ruling made visible.
+  **Still open, and narrower than this entry first stated:** whether
+  `_served_zone_names` should follow a heat exchanger at all when attributing
+  served blocks. Following it is what made the primary's set equal the
+  reference's. The current behaviour is safe — the guard turns that shape into a
+  loud decline rather than a silent transfer — so this is a question about
+  attribution accuracy, not a live false-compliance risk.
 
-  **Remedy to evaluate, not yet adopted:** group loops into one hydronic system
-  through the heat-exchanger recursion `_served_zone_names` already performs
-  (`efficiency.py`), then correspond and apply (1)/(2)/(3) per *group*. Needs
-  its own adjudication — it changes which sentence fires on existing models,
-  so measure the blast radius on the frozen corpus first.
-
-  Related and still open: because our reference builder consolidates
-  (`builder.py` calls `plant_loops.hot_water` with `reuse=True`), the N:1 shape
-  D-97 declines on is partly a topology **we** choose; the Code nowhere says
-  the reference has one plant per building. A 1:1 reference topology would put
-  those cases back under (1)-(3) — but it also moves the 8.4.x.9.(6)(b)-(d)
-  staging bands, so it is a separate question for Sol, recorded here so it is
-  not lost.
-
-## Stage 1 — opened 2026-09-08
+## Stage 1 — opened 2026-09-08## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push
 blocked by network), so Stage 1 work stacks on `stage0-multi-edition`

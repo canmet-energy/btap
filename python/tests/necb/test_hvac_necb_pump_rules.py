@@ -22,7 +22,6 @@ from btap.codes.necb.hvac.efficiency import (
     DEFAULT_PUMP_EFFICIENCY,
     _corresponding_loop,
     _hydraulic_efficiency,
-    _hydronic_network,
     _loop_role,
     _pump_cap_basis,
     _pump_characteristics_known,
@@ -301,9 +300,9 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertIsNone(
             match, 'two proposed loops consolidated onto one reference loop is '
                    'an N:1 case increment B does not adjudicate')
-        self.assertIn('independent proposed hot_water systems are consolidated', reason)
-        self.assertTrue(n_to_1, 'the two loops partition {A, B} exactly AND share no hydraulic '
-                                'connection, which IS the shape D-97 adjudicated')
+        self.assertIn('distinct hydronic systems consolidated', reason)
+        self.assertTrue(n_to_1, 'the two loops partition {A, B} exactly, which IS the shape '
+                                'D-97 adjudicated')
 
     def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
         """The adjudicated equivalent motor efficiency, which nothing pinned.
@@ -556,15 +555,14 @@ class TestNecbPumpRules(unittest.TestCase):
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         warning = next((w for w in audit.warnings
-                        if 'independent proposed hot_water systems are consolidated'
-                        in w['action']), None)
+                        if 'distinct hydronic systems consolidated' in w['action']), None)
         self.assertIsNotNone(warning, 'the decline names the reason')
-        self.assertIn('share no hydraulic connection, directly or through any other loop',
-                      warning['action'],
-                      'independence is ESTABLISHED, not inferred from the partition. A block-set '
-                      'partition is necessary for independence and not sufficient, so the ruling '
-                      'fires only once the network classification shows the loops are separate '
-                      'hydronic systems (Sol, PR #63)')
+        self.assertIn("partition this one reference loop's thermal blocks", warning['action'],
+                      'the predicate is an exact disjoint partition of the reference blocks, and '
+                      'nothing more. An earlier round also required the loops to lie in separate '
+                      '"hydraulically connected networks"; Sol withdrew that, because sharing a '
+                      'source or rejection loop couples equipment and moves energy rather than '
+                      'letting one fluid circulate through both loops (Sol, PR #63)')
         self.assertEqual('D-93 D-97', warning['ruling'],
                          'the N:1 decline cites the ruling that decided it')
         self.assertIn('combines pumps only WITHIN one hydronic system', warning['action'],
@@ -760,9 +758,9 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
                          'disjoint, and together exactly the reference blocks')
         # And yet they are one network, through a loop of another role.
-        self.assertEqual(_hydronic_network(wings[0]), _hydronic_network(wings[1]),
-                         'both wings reach the same shared condenser loop, so the network '
-                         'classification puts them in ONE hydronic system')
+        # No connectivity test any more: a shared condenser loop couples the
+        # EQUIPMENT and moves energy; it does not let the same hydronic fluid
+        # circulate through both wings (Sol, PR #63).
 
         reference = openstudio.model.Model()
         ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.008,
@@ -770,13 +768,13 @@ class TestNecbPumpRules(unittest.TestCase):
         match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
 
         self.assertIsNone(match, 'neither wing corresponds on its own')
-        self.assertFalse(n_to_1,
-                         'an exact partition of ONE hydronic system is not several INDEPENDENT '
-                         "systems; D-97's premise is unestablished here, so it must not fire")
-        self.assertIn('are hydraulically connected', reason,
-                      'the reason must name what actually failed. Reporting "without '
-                      'partitioning its thermal blocks" here was false — they DO partition — '
-                      'and it hid the finding (Fable, PR #63)')
+        self.assertTrue(n_to_1,
+                        'two distinct hot-water PlantLoops are two hydronic systems even when '
+                        'their chillers share one condenser loop. 5.2.6.3.(1) fixes the unit at '
+                        'the LOOP and 8.4.x.9.(6)(a) distinguishes a plant from the systems it '
+                        'serves, so this IS several systems consolidated onto one reference '
+                        'loop (Sol, PR #63)')
+        self.assertIn('distinct hydronic systems consolidated', reason)
 
     def test_water_to_water_heat_pumps_on_one_source_loop_are_one_network(self):
         """Sol, PR #63. The coupler registry omitted a plant heat pump THIS
@@ -811,8 +809,7 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
                          'the block sets partition the reference exactly — which is precisely '
                          'why only the network classification can tell these apart')
-        self.assertEqual(_hydronic_network(wings[0]), _hydronic_network(wings[1]),
-                         'both wings reach the same ground loop through their W2W heat pumps')
+        # A shared ground loop is a separate fluid circuit, not continuity.
 
         reference = openstudio.model.Model()
         ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.008,
@@ -820,11 +817,10 @@ class TestNecbPumpRules(unittest.TestCase):
         match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
 
         self.assertIsNone(match)
-        self.assertFalse(n_to_1,
-                         'two wings on one shared source loop are ONE hydronic system; '
-                         'asserting independence here would be a false statement of fact')
-        self.assertIn('are hydraulically connected', reason,
-                      'the decline names the connection, not a partition failure')
+        self.assertTrue(n_to_1,
+                        'a shared GROUND loop is another fluid circuit; the two hot-water loops '
+                        'remain distinct hydronic systems, so this is D-97 consolidation')
+        self.assertIn('distinct hydronic systems consolidated', reason)
 
     def test_a_shared_tertiary_loop_is_still_one_network(self):
         """Sol, PR #63. Moving from a name list to the W2W class was still a
@@ -856,9 +852,7 @@ class TestNecbPumpRules(unittest.TestCase):
 
         self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
                          'the block sets partition the reference exactly')
-        self.assertEqual(_hydronic_network(wings[0]), _hydronic_network(wings[1]),
-                         'both reach the same heating loop through their central heat-pump '
-                         "systems' TERTIARY side")
+        # The shared heating loop is a third fluid circuit, not continuity.
 
         reference = openstudio.model.Model()
         ref_loop, _ = loop_with_vsd_pump(reference, 'Cooling', flow=0.008,
@@ -866,11 +860,11 @@ class TestNecbPumpRules(unittest.TestCase):
         match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
 
         self.assertIsNone(match)
-        self.assertFalse(n_to_1,
-                         'a shared tertiary loop is a hydraulic connection; asserting these are '
-                         'independent systems would be false')
-        self.assertIn('are hydraulically connected', reason,
-                      'the decline names the connection, not a partition failure')
+        self.assertTrue(n_to_1,
+                        'a shared tertiary heating loop transfers ENERGY between circuits; it is '
+                        'not hydraulic continuity, so the two chilled-water loops stay distinct '
+                        'hydronic systems')
+        self.assertIn('distinct hydronic systems consolidated', reason)
 
     def test_every_tertiary_load_cast_is_verified_against_the_sdk(self):
         """The list is a measured fact, not an assertion.
@@ -965,6 +959,55 @@ class TestNecbPumpRules(unittest.TestCase):
                          'the two loops cover {A,B,C} exactly but share Block B, so they are '
                          'not a partition — overlapping loops are not several systems '
                          'consolidated, and D-97 must not fire')
+
+    def test_an_exact_match_that_is_not_the_only_overlap_declines(self):
+        """Sol, PR #63. An exact match is one-to-one only if it is the ONLY
+        loop touching the reference loop.
+
+        Reference {A, B}; proposed {A, B} at 800 W and proposed {B} at 500 W.
+        The old order returned the exact candidate before computing overlaps,
+        so it transferred under (3) from that pump alone and dropped the second
+        loop's pump with NO warning. Two proposed loops serve block B, so it is
+        not an unambiguous one-to-one; their sets overlap, so it is not D-97's
+        disjoint partition either. It declines under D-93 and names both.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served, label in ((0.010, 800.0, ('Block A', 'Block B'), 'Exact AB'),
+                                           (0.004, 500.0, ('Block B',), 'Extra B')):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power, zones=None)
+            loop_.setName(label)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match, 'the exact candidate is not the sole overlap, so it is not an '
+                                 'unambiguous one-to-one correspondence')
+        self.assertFalse(n_to_1, "the proposed sets overlap at B, so this is not D-97's disjoint "
+                                 'partition either')
+        self.assertIn('the correspondence is ambiguous', reason)
+        for label in ('Exact AB', 'Extra B'):
+            self.assertIn(label, reason, 'both candidates are named, so a reviewer can see which '
+                                         "loops' pumps were NOT transferred")
+
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+        self.assertEqual([], [e for e in audit.entries if e['level'] == 'decision'
+                              and str(e.get('article') or '') in ('8.4.4.14.(1)', '8.4.4.14.(2)',
+                                                                  '8.4.4.14.(3)')],
+                         'nothing is transferred, so no pump is silently dropped')
+        decline = next((w for w in audit.warnings
+                        if 'the correspondence is ambiguous' in w['action']), None)
+        self.assertIsNotNone(decline, 'and the decline is loud')
+        self.assertEqual('D-93', decline['ruling'],
+                         'ambiguity is D-93 alone; D-97 ruled on the disjoint partition')
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()

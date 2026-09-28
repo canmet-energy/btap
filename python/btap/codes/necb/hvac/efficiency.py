@@ -1112,36 +1112,6 @@ def _w2w_loops(comp, sides):
     return tuple(loops)
 
 
-def _hydronic_network(loop_, _seen=None):
-    """Every plant loop hydraulically connected to this one, by HANDLE.
-
-    D-97 is scoped to INDEPENDENT proposed hydronic systems. Disjoint served
-    blocks do not establish that: the decision says in terms that zone-disjoint
-    branches can remain one hydronic system, so a block-set partition is
-    necessary for independence and not sufficient, and firing the ruling from it
-    would be proving one side of a distinction from the failure to prove the
-    other (Sol, PR #63).
-
-    This is the classifier that does establish it. Connection is UNDIRECTED and
-    transitive: two loops are in one network if load passes between them in
-    either direction, or through any chain of loops. The upward step matters
-    most — two same-role loops that never feed each other can still share one
-    plant through a third loop of a DIFFERENT role (two hot-water loops drawing
-    on one condenser loop), which the role-filtered candidate list never sees.
-    """
-    seen = _seen if _seen is not None else set()
-    if loop_.handle() in seen:
-        return seen
-
-    seen.add(loop_.handle())
-    # BOTH sides, and both of each component's loops — connection is undirected,
-    # so there is no need to reason about which side supplies which.
-    for comp in list(loop_.demandComponents()) + list(loop_.supplyComponents()):
-        for other in _coupled_loops(comp):
-            _hydronic_network(other, seen)
-    return seen
-
-
 def _served_zone_names(loop_, _seen=None):
     """The thermal zones this loop ultimately conditions, by NAME.
 
@@ -1278,82 +1248,62 @@ def _corresponding_loop(reference_loop, proposed):
     if not candidates:
         return None, f'the proposed building has no {role} loop', False
 
-    exact = [loop_ for loop_ in candidates if _served_zone_names(loop_) == reference_zones]
-    if len(exact) == 1:
-        return exact[0], 'one-to-one', False
+    # OVERLAPS FIRST. An exact candidate is a one-to-one correspondence only if
+    # it is the ONLY loop touching this reference loop: with reference {A,B},
+    # proposed {A,B} and proposed {B}, accepting the exact match transferred
+    # from its pump alone and dropped the second loop's pump SILENTLY. That is
+    # neither unambiguous (two proposed loops serve block B) nor D-97's disjoint
+    # partition (their sets overlap), so it declines under D-93 (Sol, PR #63).
+    served = {loop_.nameString(): _served_zone_names(loop_) for loop_ in candidates}
+    overlapping = [loop_ for loop_ in candidates if served[loop_.nameString()] & reference_zones]
+    exact = [loop_ for loop_ in candidates if served[loop_.nameString()] == reference_zones]
+    names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
+
     if len(exact) > 1:
         return None, (f'{len(exact)} proposed {role} loops serve exactly the same thermal blocks — '
                       'the correspondence is ambiguous'), False
+    if len(exact) == 1:
+        if len(overlapping) == 1:
+            return exact[0], 'one-to-one', False
+        return None, (f'one proposed {role} loop serves exactly this reference loop\'s thermal '
+                      f'blocks, but {len(overlapping)} overlap it in all ({names}) — the '
+                      'correspondence is ambiguous, and taking the exact one would drop the '
+                      "other loops' pumps without saying so"), False
 
-    overlapping = [loop_ for loop_ in candidates
-                   if _served_zone_names(loop_) & reference_zones]
     if len(overlapping) > 1:
-        served = {loop_.nameString(): _served_zone_names(loop_) for loop_ in overlapping}
-        names = ', '.join(sorted(served))
-        covered = set().union(*served.values())
-        # EXACT consolidation is the D-97 predicate, and "more than one
-        # overlapping loop" is not it. The decision is scoped to several
-        # proposed systems consolidated ONTO one reference loop; mere
-        # multiplicity also catches two loops serving the same block, two
-        # partial overlaps, and loops reaching blocks the reference does not
-        # have. Those leave reference blocks uncovered or add proposed ones,
-        # so they are multiple partial overlaps, not a consolidation — shapes
-        # D-97 never examined (Sol, PR #63).
+        covered = set().union(*(served[loop_.nameString()] for loop_ in overlapping))
+        # D-97's predicate is an EXACT DISJOINT PARTITION of the reference
+        # loop's blocks, and nothing more. "More than one overlapping loop" is
+        # not it: that also catches loops serving the same block, partial
+        # overlaps, and loops reaching blocks the reference does not have, which
+        # leave reference blocks uncovered or add proposed ones.
         #
-        # Disjointness also excludes the one-system case DF-18 records.
-        # `_served_zone_names` recurses THROUGH a HeatExchangerFluidToFluid,
-        # so an HX-coupled primary's set is a strict superset of its
-        # secondaries' — never disjoint from them. The Note's own
-        # primary-secondary example therefore fails this predicate and keeps
-        # D-93's unresolved-correspondence warning, rather than claiming D-97
-        # adjudicated a gap D-97 expressly leaves open.
-        disjoint = sum(len(blocks) for blocks in served.values()) == len(covered)
-        # INDEPENDENCE, established rather than inferred. The partition says the
-        # blocks are consolidated; only the network classification says the
-        # loops are separate hydronic systems, which is the premise D-97
-        # actually adjudicated (Sol, PR #63).
-        networks = [_hydronic_network(loop_) for loop_ in overlapping]
-        independent = all(a.isdisjoint(b)
-                          for i, a in enumerate(networks) for b in networks[i + 1:])
-        if disjoint and covered == reference_zones and independent:
-            # D-97: sentence (2) combines pumps only WITHIN one proposed
-            # hydronic system ("in a given hydronic system"). No sentence
-            # supplies a value across them: (1) has no single corresponding
-            # pump, (2) is same-system only, and (3) is a
-            # missing-CHARACTERISTICS fallback for a corresponding pump, not a
-            # fallback for missing correspondence.
-            #
-            # The reason now ASSERTS independence, because the classifier
-            # established it: no load passes between these loops in either
-            # direction, through any chain. It no longer rests on the
-            # partition alone.
-            return None, (f'{len(overlapping)} independent proposed {role} systems are '
-                          f"consolidated onto this one reference loop ({names}) — they partition "
-                          "its thermal blocks between them and share no hydraulic connection, "
-                          'directly or through any other loop. Sentence (2) combines pumps only '
-                          'WITHIN one hydronic system, so the Code prescribes no cross-system '
-                          'transfer value here'), True
+        # There is deliberately NO connectivity test here. An earlier round
+        # classified a "hydraulically connected network" through heat
+        # exchangers, chillers and plant heat pumps and required the loops to
+        # lie in separate networks. Sol withdrew that: a shared source,
+        # condenser, oil-cooler, auxiliary or heat-rejection loop, a heat
+        # exchanger, or a refrigerant circuit couples EQUIPMENT and transfers
+        # ENERGY — it does not let the same hydronic fluid circulate through
+        # both loops. 5.2.6.3.(1) fixes the unit at the LOOP (its table note
+        # makes the thermal denominator the peak demand of the loop), and
+        # 8.4.x.9.(6)(a) separately distinguishes a plant from the systems
+        # served by it. So distinct same-role proposed PlantLoops are distinct
+        # hydronic systems even when their equipment shares another loop.
+        disjoint = sum(len(served[loop_.nameString()]) for loop_ in overlapping) == len(covered)
         if disjoint and covered == reference_zones:
-            # The partition holds and independence is what failed, so say THAT.
-            # Reporting "without partitioning its thermal blocks" here was
-            # simply false on this shape, and it hid the actual finding
-            # (Fable, PR #63).
-            return None, (f'{len(overlapping)} proposed {role} loops partition this reference '
-                          f"loop's thermal blocks between them ({names}) but are hydraulically "
-                          'connected — directly or through another loop — so they are ONE '
-                          'hydronic system rather than several consolidated onto it, and '
-                          'sentence (2) combines pumps only within one system'), False
+            return None, (f'{len(overlapping)} proposed {role} loops partition this one reference '
+                          f"loop's thermal blocks between them ({names}) — they are distinct "
+                          'hydronic systems consolidated onto one reference loop. Sentence (2) '
+                          'combines pumps only WITHIN one hydronic system, so the Code prescribes '
+                          'no cross-system transfer value here'), True
         return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
                       f'({names}) without partitioning its thermal blocks between them — '
                       f'they cover {len(covered & reference_zones)} of its {len(reference_zones)} '
                       'blocks, and overlap each other or reach blocks it does not serve. That is '
                       'multiple partial overlaps, not a correspondence'), False
     if len(overlapping) == 1:
-        # Either direction reaches here — the proposed loop may serve blocks
-        # the reference one does not, or only some of the ones it does — so the
-        # reason names the overlap rather than asserting a direction it has not
-        # established.
-        proposed_zones = _served_zone_names(overlapping[0])
+        proposed_zones = served[overlapping[0].nameString()]
         shared = len(proposed_zones & reference_zones)
         # Both counts, because the shared count alone is ambiguous: a proposed
         # loop serving a strict SUPERSET reads as 'shares 1 of 1', which looks

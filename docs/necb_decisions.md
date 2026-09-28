@@ -6129,51 +6129,41 @@ in the plan log.
   system. So the partition alone cannot fire a ruling scoped to INDEPENDENT
   systems; firing it from the failure to prove the opposite would be proving one
   side of a distinction from the absence of the other (Sol, PR #63).
-- **Independence is established by a network classification, not inferred.**
-  `_hydronic_network` walks the plant-loop couplers in BOTH directions and
-  transitively, so two loops are one hydronic system if load passes between
-  them by any chain. The coupler boundary is the SDK's own
-  `WaterToWaterComponent` class rather than a list of type names: a list
-  omitted `HeatPumpWaterToWaterEquationFit*`, which this repository builds for
-  its HS14 GSHP system, so two wings on one shared ground loop were classified
-  independent and drew a D-97 citation that asserted, falsely, that they shared
-  no hydraulic connection (Sol, PR #63).
+- **The boundary is HYDRAULIC CONTINUITY, not energy coupling.** Two distinct
+  same-role proposed `PlantLoop`s are two hydronic systems, even when their
+  equipment shares another loop. A shared source, condenser, oil-cooler,
+  auxiliary or heat-rejection loop, a heat exchanger, a chiller's refrigerant
+  circuit or an air-to-water heat pump's refrigerant parent couples EQUIPMENT
+  and transfers ENERGY; it does not let the same hydronic fluid circulate
+  through both loops.
 
-  **The class is not a completeness proof, and an earlier draft of this entry
-  claimed it was.** `ChillerElectricASHRAE205` carries oil-cooler and auxiliary
-  connections the base class does not expose, and `HeatPumpAirToWater` joins
-  loops through child objects that are not `WaterToWaterComponent`s at all. A
-  model using either can still reach a false independence claim. What counts as
-  a hydraulic coupling for this purpose is an open question with Sol; it is
-  recorded here rather than papered over (Fable, PR #63).
+  The Code supplies the discriminant. 5.2.6.3.(1) uses the same phrase, "all
+  the pumps in a given hydronic system", and its table note makes the thermal
+  denominator the peak demand of **the loop**. Note A-8.4.x.14.(2)'s example is
+  one primary-secondary hot-water pumping system whose pumps circulate the
+  common system fluid. And 8.4.x.9.(6)(a) separately distinguishes a plant from
+  the systems served by it, so sharing plant equipment or heat rejection does
+  not merge those served systems. Operationally an OpenStudio `PlantLoop` is
+  the modelled hydronic fluid circuit, and a `WaterToWaterComponent` exposes
+  separate loops precisely because it transfers heat BETWEEN circuits.
 
-  The walk reads EVERY plant-loop connection the base exposes, including the
-  TERTIARY one. Naming the class was still a guess about its members:
-  `CentralHeatPumpSystem` is a three-loop component (cooling, source, heating),
-  so reading two sides left two chilled-water loops that share one heating loop
-  looking independent — the same false assertion, one loop further out. The
-  directed served-zone walk takes both LOAD sides for the same reason. A
-  two-loop component reports the third as uninitialized, so heat exchangers and
-  chillers are unaffected. D-97 fires
-  only when the overlapping loops partition the reference's blocks AND lie in
-  pairwise-disjoint networks; the warning then asserts independence, because it
-  was measured.
-
-  The upward step is what makes this more than a restatement of the partition:
-  two same-role loops that never feed each other can still share one plant
-  through a loop of a DIFFERENT role — two hot-water loops drawing on one
-  condenser loop — which the role-filtered candidate list never sees. That shape
-  partitions the blocks exactly and is nonetheless one system, and it keeps
-  D-93's decline.
-- **The partition predicate also excludes DF-18's case structurally.**
-  `_served_zone_names` recurses THROUGH a `HeatExchangerFluidToFluid`, so an
-  HX-coupled primary's block set is a strict superset of its secondaries' and
-  is never disjoint from them. Note A-8.4.x.14.(2)'s own primary-secondary
-  example therefore fails the predicate and keeps a D-93-only warning, rather
-  than attesting that D-97 adjudicated it. **The underlying gap is real:** an
-  HX-coupled multi-loop system is declined where sentence (2) ought to govern
-  it. Logged as DF-18 (group loops through the heat-exchanger recursion before
-  correspondence); it predates this ruling and is expressly not decided here.
+  **An earlier round of this implementation got that wrong**, classifying a
+  "hydraulically connected network" through heat exchangers, chillers and plant
+  heat pumps and requiring the overlapping loops to lie in separate networks.
+  Sol withdrew that wording as an over-expansion from common-fluid
+  primary-secondary pumping into arbitrary thermal and refrigerant coupling.
+  There is now no connectivity test in the predicate, and the completeness
+  questions about `ChillerElectricASHRAE205`'s oil-cooler and auxiliary
+  connections and `HeatPumpAirToWater`'s non-`WaterToWaterComponent` children
+  no longer govern this decision (Sol, PR #63).
+- **An exact match must be the SOLE overlap.** One-to-one is accepted only
+  when the single exact candidate is also the only loop overlapping the
+  reference loop. With reference {A,B}, proposed {A,B} and proposed {B}, the
+  earlier order returned the exact candidate before computing overlaps and
+  transferred under (3) from its pump alone, dropping the second loop's pump
+  **silently**. Two proposed loops serve block B, so that is not unambiguous;
+  their sets overlap, so it is not this decision's disjoint partition either.
+  It declines under D-93 alone, naming every candidate (Sol, PR #63).
 - **The legacy realisation offers no precedent.** The pinned gem
   (`f01da13a6b89`, verified against `legacy_pin/REF`) contains **zero**
   occurrences of `8.4.4.14`, `8.4.5.14`, "static head" or "corresponding pump"
