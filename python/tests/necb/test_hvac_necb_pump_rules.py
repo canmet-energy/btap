@@ -821,6 +821,51 @@ class TestNecbPumpRules(unittest.TestCase):
                          'asserting independence here would be a false statement of fact')
         self.assertIn('not a correspondence', reason)
 
+    def test_a_shared_tertiary_loop_is_still_one_network(self):
+        """Sol, PR #63. Moving from a name list to the W2W class was still a
+        guess about that class: it has THREE-loop members.
+
+        `CentralHeatPumpSystem` casts to `WaterToWaterComponent` and initializes
+        cooling, source AND heating connections. Reading only `plantLoop` and
+        `secondaryPlantLoop` left two chilled-water loops that share one heating
+        loop looking independent — the same false "share no hydraulic
+        connection" assertion the classifier exists to prevent, one loop further
+        out. The W2W EquationFit test cannot observe a third side at all.
+        """
+        proposed = openstudio.model.Model()
+        shared_heating = openstudio.model.PlantLoop(proposed)
+        shared_heating.setName('Shared Heating')
+        shared_heating.sizingPlant().setLoopType('Heating')
+
+        wings = []
+        for block, power in (('Block A', 300.0), ('Block B', 400.0)):
+            wing, _ = loop_with_vsd_pump(proposed, 'Cooling', flow=0.004, power=power,
+                                         zones=(block,))
+            source = openstudio.model.PlantLoop(proposed)
+            source.sizingPlant().setLoopType('Condenser')
+            chps = openstudio.model.CentralHeatPumpSystem(proposed)
+            wing.addSupplyBranchForComponent(chps)
+            source.addDemandBranchForComponent(chps)
+            chps.addToTertiaryNode(shared_heating.supplyInletNode())
+            wings.append(wing)
+
+        self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
+                         'the block sets partition the reference exactly')
+        self.assertEqual(_hydronic_network(wings[0]), _hydronic_network(wings[1]),
+                         'both reach the same heating loop through their central heat-pump '
+                         "systems' TERTIARY side")
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Cooling', flow=0.008,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'a shared tertiary loop is a hydraulic connection; asserting these are '
+                         'independent systems would be false')
+        self.assertIn('not a correspondence', reason)
+
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
         # 120 W/(L/s)

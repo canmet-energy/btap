@@ -6138,7 +6138,16 @@ in the plan log.
   independent and drew a D-97 citation that asserted, falsely, that they shared
   no hydraulic connection. An omission from a class test is not a silent false
   independence — it is a component that does not join loops at all (Sol,
-  PR #63). D-97 fires
+  PR #63).
+
+  The walk reads EVERY plant-loop connection the base exposes, including the
+  TERTIARY one. Naming the class was still a guess about its members:
+  `CentralHeatPumpSystem` is a three-loop component (cooling, source, heating),
+  so reading two sides left two chilled-water loops that share one heating loop
+  looking independent — the same false assertion, one loop further out. The
+  directed served-zone walk takes both LOAD sides for the same reason. A
+  two-loop component reports the third as uninitialized, so heat exchangers and
+  chillers are unaffected. D-97 fires
   only when the overlapping loops partition the reference's blocks AND lie in
   pairwise-disjoint networks; the warning then asserts independence, because it
   was measured.

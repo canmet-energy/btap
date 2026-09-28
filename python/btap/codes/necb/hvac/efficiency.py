@@ -1045,12 +1045,31 @@ def _coupled_loops(comp):
     here is not a silent false independence: it is a component that does not
     join loops at all.
     """
+    return _w2w_loops(comp, PLANT_LOOP_SIDES)
+
+
+#: EVERY plant-loop connection the W2W base exposes. Two of them was still a
+#: guess about the class: `CentralHeatPumpSystem` is a THREE-loop component
+#: (cooling, source, heating) and casts to the same base, so reading only two
+#: left two chilled-water loops sharing one heating loop looking independent —
+#: the same false assertion the classifier exists to prevent, one loop further
+#: out (Sol, PR #63). A two-loop component reports the third as uninitialized,
+#: so including it changes nothing for heat exchangers and chillers.
+PLANT_LOOP_SIDES = ('plantLoop', 'secondaryPlantLoop', 'tertiaryPlantLoop')
+
+#: The LOAD sides of a dual- or triple-loop component: the loops it serves,
+#: rather than the one supplying it. For a central heat-pump system that is
+#: both the cooling and the heating load loop.
+LOAD_LOOP_SIDES = ('plantLoop', 'tertiaryPlantLoop')
+
+
+def _w2w_loops(comp, sides):
     cast = getattr(comp, 'to_WaterToWaterComponent', None)
     if cast is None or not cast().is_initialized():
         return ()
     w2w = cast().get()
     loops = []
-    for accessor in ('plantLoop', 'secondaryPlantLoop'):
+    for accessor in sides:
         handle = getattr(w2w, accessor, None)
         if handle is not None and handle().is_initialized():
             loops.append(handle().get())
@@ -1129,11 +1148,8 @@ def _served_zone_names(loop_, _seen=None):
         # Same dual-loop class as the network walk, so the two cannot disagree
         # about what couples loops; here the DIRECTION matters, and the loop
         # this one serves is the component's supply-side loop.
-        cast = getattr(comp, 'to_WaterToWaterComponent', None)
-        if cast is not None and cast().is_initialized():
-            served = cast().get().plantLoop()
-            if served.is_initialized():
-                zones |= _served_zone_names(served.get(), seen)
+        for served in _w2w_loops(comp, LOAD_LOOP_SIDES):
+            zones |= _served_zone_names(served, seen)
     return zones
 
 
