@@ -244,7 +244,18 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: thematic break rather than an underline for the previous one. The
     #: unprefixed form alone let `> D-93` / `> ----` render a blockquoted
     #: heading that took the short slug (Sol, PR #60).
-    SETEXT_RULE = re.compile(r"^(?:[ \t]{0,3}>)*[ \t]{0,3}(=+|-+)[ \t]*$")
+    #: A dash/equal-only line at ANY indentation, behind any blockquote nesting.
+    #: A nested list's continuation indent can be four or more spaces, so the
+    #: three-space bound called `- outer` / `  - D-93` / `    ----` clean while
+    #: GitHub rendered the nested item as `<h2>D-93</h2>` (Sol, PR #60).
+    #:
+    #: Deliberately conservative rather than parsing nested lists: an indented
+    #: or container-prefixed thematic rule is simply illegal in this document.
+    #: The three forms that stay legal are pinned as positive tests — a
+    #: TOP-LEVEL rule after a blank line, a quoted rule after a quoted blank,
+    #: and a table separator. `- ----` also stays legal, because a list marker
+    #: opens a new item and GitHub renders it `<hr>`.
+    SETEXT_RULE = re.compile(r"^(?:[ \t]*>)*[ \t]*(=+|-+)[ \t]*$")
 
     #: Blockquote markers and indentation, stripped to reach a line's content.
     BQ_PREFIX = re.compile(r"^(?:[ \t]{0,3}>)*[ \t]*")
@@ -539,6 +550,16 @@ class TestDecisionLinksResolve(unittest.TestCase):
              '> - D-93\n>   ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
             ("doubly nested blockquote Setext",
              '> > D-93\n> > ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            # A nested list's continuation indent can exceed three spaces, so
+            # the earlier bound called these clean while GitHub rendered the
+            # nested item as `<h2>D-93</h2>` — verified with POST /markdown
+            # (Sol, PR #60).
+            ("nested-list Setext",
+             '- outer\n  - D-93\n    ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("deeper nested-list Setext",
+             '- a\n  - b\n    - D-93\n      ----\n\n<a id="d-93"></a>\n\n## D-93 — t\n'),
+            ("ordered nested Setext, six-space underline",
+             '1. a\n   1. D-93\n      ------\n\n<a id="d-93"></a>\n\n## D-93 — t\n'),
             ("anchor detached from its heading", '<a id="d-81"></a>\n\ntext\n\n## D-81\n'),
         ):
             with self.subTest(case=label):
@@ -567,6 +588,11 @@ class TestDecisionLinksResolve(unittest.TestCase):
             ("thematic break inside a quote", "## D-81\n\n> quoted\n>\n> ---\n"),
             ("a new list item of dashes", "## D-81\n\n- item one\n- ----\n"),
             ("a table separator row", "## D-81\n\n| a | b |\n|---|---|\n"),
+            # An INDENTED rule after a blank line is a thematic break, not an
+            # underline — GitHub returns `<p>prose</p><hr>`. The rejection is
+            # scoped to a rule that could underline nonblank content, which is
+            # what Sol's wording asks for.
+            ("an indented rule after a blank line", "## D-81\n\nprose\n\n  ---\n"),
         ):
             with self.subTest(allowed=label):
                 self.assertEqual([], self.grammar_violations(doc), label)
