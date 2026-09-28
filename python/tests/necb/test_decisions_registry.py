@@ -215,31 +215,111 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: ANY element, not just ``<a>``: GitHub keeps ``<div id="d-81">`` as
     #: ``id="user-content-d-81"`` too, and any rendered element id can collide
     #: with a heading's (Sol, PR #60).
-    ANCHOR = re.compile(r"""<\w+\b[^>]*\b(?:id|name)\s*=\s*["']?([^"'\s>/]+)""", re.I)
+    ANCHOR = re.compile(r'^<a id="([^"]+)"></a>$')
 
-    #: A fenced code block, and an HTML comment. Neither can contribute a live
-    #: target: GitHub escapes the first and removes the second. Scanning raw
-    #: source without them was the decisive false green — commenting out a
-    #: titled decision's anchor left every invariant in this class passing
-    #: while the rendered short fragment no longer existed (Sol, PR #60).
-    FENCE = re.compile(r"^(?P<f>```+|~~~+).*?^(?P=f)[ \t]*$", re.M | re.S)
-    COMMENT = re.compile(r"<!--.*?-->", re.S)
+    #: An ``id``/``name`` attribute carrying a short decision id, in ANY
+    #: spelling and ANY context — inline code, indented code, a fence, a
+    #: comment, a ``<div>``.
+    SHORT_ID_ATTR = re.compile(r"""(?:id|name)\s*=\s*["']?(d-\d+)""", re.I)
 
-    #: CommonMark allows up to three leading spaces on an ATX heading, and
-    #: GitHub renders a heading inside a blockquote. The old ``^#{1,6} `` at
-    #: column zero saw neither, so a real duplicate short target was missed.
-    HEADING = re.compile(r"^(?:[ ]{0,3}>[ ]?)*[ ]{0,3}(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$", re.M)
+    #: An ATX heading at column zero: the only heading form this document is
+    #: allowed to use. ``ATX_ANYWHERE`` is deliberately looser — it matches the
+    #: indented and blockquoted forms GitHub also renders, so the grammar check
+    #: can REJECT them rather than the model having to simulate them.
+    ATX = re.compile(r"^(#{1,6}) +(.+?) *#* *$")
+    ATX_ANYWHERE = re.compile(r"^[ >]*#{1,6} +\S")
+    SETEXT_RULE = re.compile(r"^ {0,3}(=+|-+) *$")
 
     @classmethod
-    def rendered_source(cls, doc: str) -> str:
-        """The document with what GitHub will not render stripped out.
+    def fenced(cls, lines) -> list:
+        """Per-line ``True`` inside a fenced code block, by CommonMark's actual
+        rule: the closing fence is the same character, at least as long as the
+        opener, and carries no info string.
 
-        Fences and comments are blanked rather than deleted, preserving line
-        structure so heading order — and therefore GitHub's duplicate-slug
-        counter — is unchanged.
+        :return: (per-line inside-a-fence mask, whether a fence was left open)
+
+        The previous version back-referenced the exact opening delimiter, so a
+        longer closing fence — which CommonMark permits and GitHub honours —
+        left the block open and its contents visible to the scanners (Sol,
+        PR #60).
         """
-        doc = cls.FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), doc)
-        return cls.COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), doc)
+        mask, fence = [], None
+        for line in lines:
+            match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+            if fence is None:
+                # An opening backtick fence may not carry a backtick in its
+                # info string; that is inline code, not a fence.
+                if match and not (match.group(1)[0] == "`" and "`" in match.group(2)):
+                    fence = match.group(1)
+                    mask.append(True)
+                    continue
+                mask.append(False)
+            else:
+                if (match and match.group(1)[0] == fence[0]
+                        and len(match.group(1)) >= len(fence)
+                        and not match.group(2).strip()):
+                    fence = None
+                mask.append(True)
+        return mask, fence is not None
+
+    @classmethod
+    def grammar_violations(cls, doc: str) -> list:
+        """Where the document leaves the canonical form this gate depends on.
+
+        Three rounds of this review were spent teaching a regex which Markdown
+        contexts GitHub does and does not render — fences, comments, inline
+        code, indented code, blockquotes, Setext, longer closing fences — and
+        each round left the same class open, because the gate was simulating a
+        CommonMark parser it does not have (Sol, PR #60).
+
+        So the document is CONSTRAINED instead. Under these three rules there is
+        exactly one place a ``d-NN`` target can come from, and correctness stops
+        depending on context analysis:
+
+        1. A ``d-NN`` id may appear ONLY as ``<a id="d-nn"></a>`` alone on its
+           line at column zero, immediately above its own ``## D-NN`` heading.
+           This rule is CONTEXT-FREE — an anchor commented out, put in a fence,
+           or wrapped in backticks is a violation, not a silently-dead target,
+           which is precisely the false green that survived every earlier fix.
+        2. Headings are ATX at column zero. Indented, blockquoted and Setext
+           headings are rejected rather than modelled.
+        3. Fences are balanced, so the heading walk's exclusions are sound.
+        """
+        lines = doc.splitlines()
+        mask, open_fence = cls.fenced(lines)
+        problems = []
+        if open_fence:
+            # An unterminated fence would silently swallow the tail of the file,
+            # so the heading walk's exclusions could not be trusted.
+            problems.append("unterminated code fence: the heading walk cannot be trusted")
+
+        for number, line in enumerate(lines, start=1):
+            found = cls.SHORT_ID_ATTR.search(line)
+            if found:
+                canonical = cls.ANCHOR.match(line)
+                if not canonical or canonical.group(1) != found.group(1):
+                    problems.append(
+                        f"line {number}: a d-NN id must be exactly "
+                        f'`<a id="{found.group(1)}"></a>` alone on its line; got {line.strip()!r}')
+                else:
+                    heading = lines[number + 1] if number + 1 < len(lines) else ""
+                    blank = lines[number] if number < len(lines) else ""
+                    want = found.group(1).upper()
+                    if blank.strip() or not heading.startswith(f"## {want}"):
+                        problems.append(
+                            f"line {number}: anchor {found.group(1)} must be followed by a blank "
+                            f"line and then `## {want}`; got {heading.strip()[:40]!r}")
+            if mask[number - 1]:
+                continue
+            if cls.ATX_ANYWHERE.match(line) and not cls.ATX.match(line):
+                problems.append(
+                    f"line {number}: headings must be ATX at column zero, not indented or "
+                    f"blockquoted; got {line.strip()[:40]!r}")
+            if (number >= 2 and cls.SETEXT_RULE.match(line) and lines[number - 2].strip()
+                    and not mask[number - 2] and not lines[number - 2].lstrip().startswith("|")):
+                problems.append(
+                    f"line {number}: Setext heading; use ATX so the slug model stays exact")
+        return problems
 
     @staticmethod
     def slug(heading: str) -> str:
@@ -256,13 +336,17 @@ class TestDecisionLinksResolve(unittest.TestCase):
         heading resolves to; both ``targets()`` and ``short_id_sources()`` walk
         it rather than each carrying a pattern of its own.
 
-        Takes the RENDERED source, so a heading inside a fence or a comment
-        contributes nothing, and recognises the indented and blockquoted forms
-        GitHub does render.
+        Only column-zero ATX headings outside fences, which
+        ``grammar_violations`` guarantees are the only headings present.
         """
+        lines = doc.splitlines()
+        mask, _ = cls.fenced(lines)
         seen: dict = {}
         slugs = []
-        for match in cls.HEADING.finditer(cls.rendered_source(doc)):
+        for number, line in enumerate(lines):
+            match = cls.ATX.match(line)
+            if match is None or mask[number]:
+                continue
             base = cls.slug(match.group(2))
             count = seen.get(base, 0)
             slugs.append(base if count == 0 else f"{base}-{count}")
@@ -278,7 +362,10 @@ class TestDecisionLinksResolve(unittest.TestCase):
         reject VALID links to the 40 level-3 headings here (Sol, PR #60).
         """
         doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
-        found = {m.group(1) for m in cls.ANCHOR.finditer(cls.rendered_source(doc))}
+        lines = doc.splitlines()
+        mask, _ = cls.fenced(lines)
+        found = {m.group(1) for number, line in enumerate(lines)
+                 if not mask[number] and (m := cls.ANCHOR.match(line))}
         found.update(cls.heading_slugs(doc))
         return found
 
@@ -315,8 +402,11 @@ class TestDecisionLinksResolve(unittest.TestCase):
         gate exists to assert (Sol, PR #60).
         """
         sources = {}
-        for match in cls.ANCHOR.finditer(cls.rendered_source(doc)):
-            if SHORT_ID.fullmatch(match.group(1)):
+        lines = doc.splitlines()
+        mask, _ = cls.fenced(lines)
+        for number, line in enumerate(lines):
+            match = cls.ANCHOR.match(line)
+            if match and not mask[number] and SHORT_ID.fullmatch(match.group(1)):
                 sources.setdefault(match.group(1).upper(), []).append("explicit anchor")
         # The heading side comes from the SAME walk `targets()` uses, not a
         # second narrower pattern. A private `^##\s+(D-\d+)\s*$` model missed
@@ -371,88 +461,54 @@ class TestDecisionLinksResolve(unittest.TestCase):
                          "a titled heading contributes no short-id slug, so its anchor is "
                          "the only source and is required")
 
-    def test_every_spelling_that_renders_a_duplicate_id_is_caught(self):
-        """Seven edits that each produce a duplicate ``user-content-d-81`` in
-        GitHub's render, and all seven passed the earlier two-model version.
+    def test_the_log_conforms_to_the_canonical_grammar(self):
+        """The keystone. Every other invariant in this class is exact only
+        because the document is in this restricted form."""
+        self.assertEqual([], self.grammar_violations(self.DOC.read_text(encoding="utf-8")))
 
-        The heading side read only ``^##\\s+(D-\\d+)\\s*$`` and the anchor side
-        only ``id="..."`` at line start, so a level-3 heading, a trailing
-        period, single quotes, a trailing space, indentation, a self-closing
-        tag, and ``name=`` all slipped through while rendering a real duplicate
-        (Fable, PR #60). The gate now shares ``targets()``' heading walk and
-        matches anchors however they are spelled.
+    def test_the_grammar_rejects_every_context_a_regex_had_to_simulate(self):
+        """Sol, PR #60 — and this is the point of constraining the document
+        rather than parsing it.
+
+        Each input below defeated a previous version of this gate. Three of
+        them render NO live ``#d-81`` (GitHub removes the comment, escapes both
+        code forms) while the raw-source scanners reported a live target; three
+        DO render one, duplicating a heading id, while the column-zero scanners
+        could not see them. Teaching a regex to tell those apart is writing a
+        CommonMark parser badly, and each round left the same class open.
+
+        Under the grammar they are all simply ILLEGAL, which needs no context
+        analysis at all: a ``d-NN`` id exists in exactly one place or the
+        document is rejected.
         """
         for label, doc in (
-            ("level-3 bare heading", '<a id="d-81"></a>\n\n### D-81\n'),
-            ("trailing period, punctuation dropped", '<a id="d-81"></a>\n\n## D-81.\n'),
+            ("commented-out anchor", '<!-- <a id="d-81"></a> -->\n\n## D-81\n'),
+            ("fenced anchor", '```\n<a id="d-81"></a>\n```\n\n## D-81\n'),
+            ("longer closing fence", '```\n<a id="d-81"></a>\n````\n\n## D-81\n'),
+            ("inline-code anchor", '`<a id="d-81"></a>`\n\n## D-81\n'),
+            ("indented-code anchor", '    <a id="d-81"></a>\n\n## D-81\n'),
             ("single-quoted anchor", "<a id='d-81'></a>\n\n## D-81\n"),
-            ("trailing space after the anchor", '<a id="d-81"></a> \n\n## D-81\n'),
-            ("indented anchor", '  <a id="d-81"></a>\n\n## D-81\n'),
-            ("self-closing anchor", '<a id="d-81"/>\n\n## D-81\n'),
+            ("trailing space", '<a id="d-81"></a> \n\n## D-81\n'),
+            ("self-closing", '<a id="d-81"/>\n\n## D-81\n'),
             ("name= instead of id=", '<a name="d-81"></a>\n\n## D-81\n'),
-        ):
-            with self.subTest(spelling=label):
-                sources = self.short_id_sources(doc)
-                self.assertEqual(
-                    2, len(sources.get("D-81", [])),
-                    f"{label}: renders a duplicate user-content-d-81, so the gate must see "
-                    f"two sources, not {sources.get('D-81')}")
-
-    def test_the_model_matches_what_github_actually_renders(self):
-        """Sol, PR #60. The previous version scanned raw source as though it
-        were rendered Markdown, so it both INVENTED targets GitHub removes and
-        MISSED headings GitHub renders.
-
-        Each case below was compared against GitHub's own ``POST /markdown``
-        before being pinned here, which is the only way this class has ever
-        caught a slug defect — a rule checked against itself agreed with the
-        bug three times on this branch.
-
-        The commented-anchor case is the decisive one: a titled decision whose
-        explicit anchor is commented out has NO live short fragment, yet every
-        invariant in this class passed because the raw text still matched.
-        """
-        for label, doc, want_target, want_sources in (
-            ("an anchor inside an HTML comment is removed by GitHub",
-             '<!-- <a id="d-81"></a> -->\n\n## D-81 — a title\n', False, 0),
-            ("an anchor inside a fence is escaped, not rendered",
-             '```\n<a id="d-81"></a>\n```\n\n## D-81 — a title\n', False, 0),
-            ("an indented heading still renders (CommonMark allows 3 spaces)",
-             '<a id="d-81"></a>\n\n   ## D-81\n', True, 2),
-            ("a heading inside a blockquote still renders",
-             '<a id="d-81"></a>\n\n> ## D-81\n', True, 2),
-            ("a non-anchor element keeps its id too",
-             '<div id="d-81"></div>\n\n## D-81\n', True, 2),
-            # The other side of the 3-space bound: FOUR spaces is an indented
-            # code block, so it is not a heading and contributes no slug.
-            # Verified against POST /markdown, which returns <pre><code>.
-            ("four spaces is an indented code block, not a heading",
-             '<a id="d-81"></a>\n\n    ## D-81\n', True, 1),
+            ("a non-anchor element", '<div id="d-81"></div>\n\n## D-81\n'),
+            ("indented heading", '<a id="d-81"></a>\n\n   ## D-81\n'),
+            ("blockquoted heading", '<a id="d-81"></a>\n\n> ## D-81\n'),
+            ("Setext heading", '<a id="d-81"></a>\n\nD-81\n====\n'),
+            ("anchor detached from its heading", '<a id="d-81"></a>\n\ntext\n\n## D-81\n'),
         ):
             with self.subTest(case=label):
-                self.assertEqual(want_target, "d-81" in self.targets(doc),
-                                 f"{label}: targets() disagrees with GitHub")
-                self.assertEqual(
-                    want_sources, len(self.short_id_sources(doc).get("D-81", [])),
-                    f"{label}: short_id_sources() disagrees with GitHub")
+                self.assertNotEqual([], self.grammar_violations(doc),
+                                    f"{label}: must be rejected by the grammar, not modelled")
 
-    def test_a_commented_out_anchor_loses_the_short_fragment(self):
-        """The false green, stated as its consequence rather than its form.
-
-        A titled heading's own slug is the full title, so its short `#d-NN`
-        exists ONLY because of the explicit anchor. Comment that anchor out and
-        the short fragment is gone from the rendered page — while the raw-source
-        gate still reported it present, which is the whole failure this class
-        exists to prevent (Sol, PR #60).
-        """
-        live = '<a id="d-93"></a>\n\n## D-93 — The reference pump\'s value source\n'
-        dead = '<!-- <a id="d-93"></a> -->\n\n## D-93 — The reference pump\'s value source\n'
-        self.assertIn("d-93", self.targets(live))
-        self.assertNotIn("d-93", self.targets(dead),
-                         "GitHub removes the comment, so nothing renders #d-93 any more")
-        self.assertEqual([], self.short_id_sources(dead).get("D-93", []),
-                         "and the entry has no short-id source at all, which the invariant "
-                         "must report as a MISSING target rather than a satisfied one")
+    def test_the_canonical_form_itself_is_accepted(self):
+        """Non-vacuity: a grammar that rejects everything would pass the test
+        above while making the document unwritable."""
+        self.assertEqual([], self.grammar_violations(
+            '<a id="d-81"></a>\n\n## D-81 — a title\n\n## Not a decision\n'))
+        self.assertEqual([], self.grammar_violations(
+            "## D-81\n\n```\n# a shell comment inside a fence is not a heading\n```\n"),
+            "fenced content is still allowed to contain anything but a d-NN id")
 
     def test_a_repeated_heading_is_not_reported_as_a_duplicate_id(self):
         """GitHub suffixes a repeated slug, so two ``## D-81`` headings render
