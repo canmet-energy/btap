@@ -1166,9 +1166,18 @@ def _corresponding_loop(reference_loop, proposed):
     overlapping = [loop_ for loop_ in candidates
                    if _served_zone_names(loop_) & reference_zones]
     if len(overlapping) > 1:
-        return None, (f'{len(overlapping)} proposed {role} loops are consolidated onto this one — '
-                      'cross-system correspondence is not defined by the Code and is adjudicated '
-                      'separately')
+        # D-97: sentence (2) combines pumps only WITHIN one proposed hydronic
+        # system ("in a given hydronic system"). Several independent proposed
+        # systems consolidated onto one reference loop is a different shape,
+        # and no sentence supplies a value for it: (1) has no single
+        # corresponding pump, (2) is same-system only, and (3) is a
+        # missing-CHARACTERISTICS fallback for a corresponding pump, not a
+        # fallback for missing correspondence.
+        names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
+        return None, (f'{len(overlapping)} independent proposed {role} systems are consolidated '
+                      f'onto this one reference loop ({names}). Sentence (2) combines pumps only '
+                      'WITHIN one hydronic system, so the Code prescribes no cross-system transfer '
+                      'value here')
     if len(overlapping) == 1:
         # Either direction reaches here — the proposed loop may serve blocks
         # the reference one does not, or only some of the ones it does — so the
@@ -1276,6 +1285,12 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     pump keeps the builder's default, which the Part 5 cap still binds. D-11
     inferred a whole-building intensity instead, which is a number no sentence
     of the Article asks for.
+
+    The N:1 case — several independent proposed systems consolidated onto one
+    reference loop — declines under D-97 rather than aggregating: sentence (2)
+    is scoped to one hydronic system, and zone disjointness is not system
+    independence. The declined default is an assumption of indeterminate
+    direction, not a safe floor.
     """
     reference_pumps = _applicable_pumps(reference_loop)
     if not reference_pumps:
@@ -1286,11 +1301,17 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
         if _loop_role(reference_loop) == 'service_water':
             return  # D-27 already said so, at the top of the pass
 
+        # The retained default is NOT a conservative bound. 5.2.6.3 is a
+        # ceiling only, so the default may sit above or below whatever a
+        # transfer would have produced and can bias the reference in either
+        # direction. Saying "conservative" here would be false comfort (D-97).
         return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
-                                        f'applied — {reason}. The pump keeps the modelling default, '
-                                        f'which is not a Code value; 5.2.6.3 still caps it',
+                                        f'applied — {reason}. The pump keeps the modelling default: '
+                                        'a declared assumption, not a Code value and not a '
+                                        'conservative bound — it may bias the reference in either '
+                                        'direction. 5.2.6.3 supplies only an upper cap',
                           target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                          ruling='D-93')
+                          ruling='D-93 D-97')
 
     proposed_pumps = _applicable_pumps(match)
     sentence = _governing_sentence(proposed_pumps)

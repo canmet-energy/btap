@@ -129,6 +129,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-94** — Development and sign-off: implement, Sol, Fable, then stop _(process)_
 - **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash or rebase _(process)_
 - **D-96** — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later _(process)_
+- **D-97** — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones _(runtime)_
 
 <!-- TOC END -->
 
@@ -5801,7 +5802,9 @@ in the plan log.
   an unambiguous **one-to-one** match: several proposed systems consolidated
   onto one reference loop is real (our own builders reuse a single hot-water
   loop) but the Code does not define correspondence across independently
-  consolidated systems, so it declines pending its own adjudication.
+  consolidated systems, so it declines. [D-97](#d-97) adjudicated that on
+  2026-09-28 and UPHELD the decline: sentence (2) combines pumps only within
+  one hydronic system, and zone disjointness is not system independence.
 - **Precedence**, at the correspondence-group level, which the Code does not
   state and which is therefore itself adjudicated: **if ANY applicable pump's
   head or hydraulic efficiency is unknown — defaulted, missing or physically
@@ -6052,3 +6055,72 @@ in the plan log.
   when they were written, and the repository's rule is to keep that rather
   than retouch history; this entry is where the change lives.
 - **Who/when:** phylroy, 2026-09-28.
+
+<a id="d-97"></a>
+
+## D-97 — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones
+
+- **Decision:** where several INDEPENDENT proposed hydronic systems are
+  consolidated onto one reference loop, sentence (2) does **not** aggregate
+  their pumps. The 8.4.x.14.(1)-(3) transfer declines. Sol ruled this on
+  2026-09-28; it closes the N:1 item [D-93](#d-93) left open.
+- **The scope word is "in a given hydronic system".** Sentence (2) reads "Where
+  the proposed building uses more than one pump **in a given hydronic system**,
+  the peak shaft power demand of the reference building's pump shall be modeled
+  as being identical to the combined peak shaft power demand of the proposed
+  building's pumps." That combines pumps WITHIN one system. Several systems
+  consolidated onto one reference loop is a different shape.
+- **Note A-8.4.x.14.(2) does not enlarge it.** The note is non-normative
+  (`normative: false` in the payload) and its plural "its hydronic systems" is
+  generic: the example immediately names ONE 200 kW boiler plant using one
+  primary-secondary pumping system. Its primary, north-wing secondary and
+  south-wing secondary pumps serve zone-disjoint branches but remain
+  hydraulically one system. **Zone disjointness is not system independence** —
+  the distinction this decision turns on.
+- **Two neighbouring provisions confirm the boundary.** 5.2.6.3.(1) uses the
+  same "all the pumps in a given hydronic system" phrase, and its table note
+  makes the thermal denominator the peak demand of THE LOOP. And
+  8.4.x.9.(6)(a) distinguishes the consolidated reference *plant* from the
+  several heating *systems served by the plant*, prescribing that their
+  CAPACITIES be summed — it never prescribes summing pumps across independent
+  proposed systems.
+- **No sentence supplies a value for N:1.** (1) has no single corresponding
+  pump; (2) is same-system only; (3) is a missing-CHARACTERISTICS fallback for
+  a corresponding pump, not a fallback for missing correspondence. So the
+  transfer declines rather than electing a loop, blending intensities, or
+  sending the group to (3).
+- **The declined default is NOT conservative, and the warning says so.**
+  5.2.6.3 is a ceiling only: the retained modelling default may sit above or
+  below whatever a transfer would have produced, and can bias the reference in
+  either direction. The audit entry states that the direction is
+  indeterminate, names the consolidated proposed loops so a manual reviewer can
+  find them, and cites `D-93 D-97`. It is a loud warning rather than a hard
+  error, because the Code supplies no value and D-93's declared-assumption
+  policy already governs unresolved model inputs.
+- **The legacy realisation offers no precedent.** The pinned gem
+  (`f01da13a6b89`, verified against `legacy_pin/REF`) contains **zero**
+  occurrences of `8.4.4.14`, `8.4.5.14`, "static head" or "corresponding pump"
+  in `lib/**/*.rb`. It never implements sentences (1)-(3); it applies only the
+  per-loop 5.2.6.3 cap (`apply_maximum_loop_pump_power`). The Code text and the
+  note carry the whole weight here.
+- **Nothing in D-93's same-system formulas changes.** In particular the two
+  efficiencies stay distinct: the hydraulic pump efficiency follows the note's
+  flow-weighted form, while the equivalent MOTOR efficiency remains the
+  separately adjudicated `η_m,ref = ΣS / ΣPₑ`. The 123 W leak that produced
+  that split came from flow-weighting the motor efficiency, not the hydraulic
+  one.
+- **Reachability, stated narrowly.** A catalog sweep built all 97 systems and
+  none produces more than one loop of one role, and no frozen scenario contains
+  the shape. That does **not** make it foreign-only: `plant_loops.hot_water(...,
+  reuse=False)` authors two same-role loops through the public modelling API,
+  and sample generation already uses that option. An earlier draft of this
+  entry called it foreign-only; Sol corrected it.
+- **Testing.** The hostile unit model discriminates the branch, so no frozen
+  scenario is required for this ruling alone; re-freeze only if a frozen output
+  actually moves. The Appendix-example test remains the positive control that
+  multiple pumps in ONE primary-secondary system still take (2).
+- **Both editions.** 2020's 8.4.4.14 and 2025's 8.4.5.14 are word-for-word
+  identical for (1)-(3), fetched live and carrying no `known_issue`.
+- **Who/when:** Sol ruled, 2026-09-28. Numbered D-97 rather than the D-96 the
+  ruling named, because D-96 was taken by the relicence while this question was
+  in flight.

@@ -1,0 +1,16 @@
+{
+  "fetched": "2026-09-28",
+  "decision": "D-97",
+  "why": "The N:1 ruling rests on the scope phrase \"in a given hydronic system\" in 8.4.5.14.(2) and on the non-normative status of Note A-8.4.5.14.(2). Archived so the ruling can be re-checked without a live HBIX call.",
+  "articles": {
+    "8.4.5.14": "necb 2025 Division B 8.4.5.14 \u2014 fetched live, no known_issue"
+  },
+  "notes": {
+    "A-8.4.5.14.(2)": "non-normative (normative: false); example is ONE 200 kW boiler plant with one primary-secondary system (primary + north/south wing secondaries), zone-disjoint but hydraulically one system"
+  },
+  "editions_identical_for_sentences_1_to_3": true,
+  "legacy_oracle": {
+    "ref": "f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
+    "finding": "zero occurrences of 8.4.4.14, 8.4.5.14, \"static head\" or \"corresponding pump\" in lib/**/*.rb; only the per-loop 5.2.6.3 cap (apply_maximum_loop_pump_power) is implemented, so the gem offers no precedent for cross-system correspondence"
+  }
+}

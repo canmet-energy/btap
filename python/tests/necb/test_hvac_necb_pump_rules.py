@@ -526,9 +526,21 @@ class TestNecbPumpRules(unittest.TestCase):
                          'head is stated; the efficiency it claims is not one a pump can have')
 
     def test_two_separate_proposed_systems_on_one_reference_loop_decline(self):
-        """N:1 consolidation. The Code does not define correspondence across
-        independently consolidated systems, so increment B declines and says
-        why rather than inferring a whole-building intensity."""
+        """N:1 consolidation, adjudicated as D-97.
+
+        Sentence (2) combines pumps only WITHIN one hydronic system — "in a
+        given hydronic system" is the scope word. Several independent proposed
+        systems consolidated onto one reference loop is a different shape, and
+        no sentence supplies a value: (1) has no single corresponding pump,
+        (2) is same-system only, and (3) is a missing-CHARACTERISTICS fallback
+        for a corresponding pump rather than a fallback for missing
+        correspondence.
+
+        Note A-8.4.x.14.(2) does not enlarge that scope. It is non-normative,
+        and its example — a primary and two wing secondaries — is ONE
+        primary-secondary system: zone disjointness is not system independence
+        (Sol, 2026-09-28).
+        """
         proposed = openstudio.model.Model()
         loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0, zones=('Block A',))
         loop_with_vsd_pump(proposed, 'Heating', flow=0.005, power=700.0, zones=('Block B',))
@@ -539,9 +551,23 @@ class TestNecbPumpRules(unittest.TestCase):
         audit = AuditLog()
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
-        warning = next((w for w in audit.warnings if 'consolidated onto this one' in w['action']), None)
+        warning = next((w for w in audit.warnings
+                        if 'independent proposed heating systems' in w['action']
+                        or 'independent proposed hot_water systems' in w['action']), None)
         self.assertIsNotNone(warning, 'the decline names the reason')
-        self.assertIn('adjudicated separately', warning['action'])
+        self.assertEqual('D-93 D-97', warning['ruling'],
+                         'the N:1 decline cites the ruling that decided it')
+        self.assertIn('combines pumps only WITHIN one hydronic system', warning['action'],
+                      'the warning states WHY, in the scope words the Code uses')
+        self.assertIn('not a Code value and not a conservative bound', warning['action'],
+                      'the retained default may bias the reference in either direction; '
+                      'calling it conservative would be false comfort')
+        self.assertIn('5.2.6.3 supplies only an upper cap', warning['action'],
+                      'a ceiling is not a substitute for a transferred value')
+        for name in ('Plant Loop 1', 'Plant Loop 2'):
+            self.assertIn(name, warning['action'],
+                          'the consolidated proposed loops are named, so a manual '
+                          'reviewer can identify them')
         # The (4)-(5) riding curve still applies — it needs no correspondence.
         # What must NOT happen is a value transfer under (1), (2) or (3).
         self.assertEqual([], [e for e in audit.entries if e['level'] == 'decision'
