@@ -206,21 +206,37 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: only the first let a reference-style definition through (Fable, PR #60).
     LINK = re.compile(r'(?:\]\(|\]:[ \t]*|href=")#([^)\s"]+)')
 
-    #: Any declared anchor, however spelled. GitHub's sanitiser rewrites BOTH
-    #: ``id`` and ``name`` to ``user-content-…``, and browsers resolve a
-    #: fragment to ``a[name]`` too, so a gate that reads only ``id="…"`` at
-    #: line start misses single quotes, a trailing space, indentation,
-    #: ``<a id="d-81"/>`` and ``<a name="d-81">`` — each of which still renders
-    #: a live duplicate (Fable, PR #60).
-    #: ANY element, not just ``<a>``: GitHub keeps ``<div id="d-81">`` as
-    #: ``id="user-content-d-81"`` too, and any rendered element id can collide
-    #: with a heading's (Sol, PR #60).
+    #: The ONE anchor spelling this document may use. Everything broader —
+    #: other elements, other quoting, ``name=``, a self-closing tag — is the
+    #: job of ``SHORT_ID_ATTR`` plus the raw-HTML rule below, which REJECT it
+    #: rather than model it. (This comment previously described the permissive
+    #: pattern it had replaced, which was stale and inverted — Fable, PR #60.)
     ANCHOR = re.compile(r'^<a id="([^"]+)"></a>$')
 
-    #: An ``id``/``name`` attribute carrying a short decision id, in ANY
-    #: spelling and ANY context — inline code, indented code, a fence, a
-    #: comment, a ``<div>``.
+    #: An ``id``/``name`` attribute carrying a short decision id, in any
+    #: spelling. Line-scoped, which is why ``RAW_HTML`` below forbids the
+    #: multi-line tag forms CommonMark permits (``<a id=\n"d-93">``).
     SHORT_ID_ATTR = re.compile(r"""(?:id|name)\s*=\s*["']?(d-\d+)""", re.I)
+
+    #: A line that OPENS raw HTML. CommonMark HTML blocks (types 1-7) swallow
+    #: following lines — a ``<!-- … -->`` or ``<pre>`` block spans blank lines —
+    #: and they were entirely invisible to this gate. That resurrected the
+    #: motivating false green one line further up: comment out a WHOLE titled
+    #: entry and the gate still reported one live ``#d-81`` source while GitHub
+    #: rendered nothing at all. A fence-looking line inside such a block also
+    #: inverted the fence mask for the rest of the file, producing a real
+    #: duplicate id (Fable, PR #60).
+    #:
+    #: So raw HTML is confined to the canonical anchor and a single-line
+    #: comment. The live document satisfies this: its only two prose lines
+    #: starting with ``<`` are ``< 5`` and ``<= 0``, which are comparisons.
+    RAW_HTML = re.compile(r"^<[A-Za-z!/?]")
+    ONE_LINE_COMMENT = re.compile(r"^<!--(?!.*<!--).*-->$")
+
+    #: An HTML entity. GitHub resolves these BEFORE slugging, so ``## D&#45;93``
+    #: renders at ``d-93`` while a raw-source slug gives ``d4593`` — invisible
+    #: to a duplicate check (Fable, PR #60).
+    ENTITY = re.compile(r"&(?:#\d+|#[xX][0-9a-fA-F]+|\w+);")
 
     #: An ATX heading at column zero: the only heading form this document is
     #: allowed to use. ``ATX_ANYWHERE`` is deliberately looser — it matches the
@@ -260,6 +276,14 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: Blockquote markers and indentation, stripped to reach a line's content.
     BQ_PREFIX = re.compile(r"^(?:[ \t]{0,3}>)*[ \t]*")
 
+    @staticmethod
+    def split(doc: str) -> list:
+        """Lines as CommonMark counts them. `str.splitlines()` also breaks on
+        \x0b, \x0c, \x1c-\x1e, \x85, \u2028 and \u2029, none of which are line
+        breaks in Markdown, so `prose\f## D-81` was a heading here and a
+        paragraph on GitHub (Fable, PR #60)."""
+        return doc.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+
     @classmethod
     def fenced(cls, lines) -> list:
         """Per-line ``True`` inside a fenced code block, by CommonMark's actual
@@ -275,7 +299,13 @@ class TestDecisionLinksResolve(unittest.TestCase):
         """
         mask, fence = [], None
         for line in lines:
-            match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+            # Column ZERO only. An opener indented 1-3 spaces directly after
+            # a list item is list-item CONTENT in CommonMark, so treating it as
+            # top-level inverted the mask for the rest of the document and let a
+            # later `## D-93` render as a real duplicate heading. Indented
+            # openers are rejected by `grammar_violations` instead of modelled
+            # (Fable, PR #60).
+            match = re.match(r"^(`{3,}|~{3,})(.*)$", line)
             if fence is None:
                 # An opening backtick fence may not carry a backtick in its
                 # info string; that is inline code, not a fence.
@@ -308,14 +338,28 @@ class TestDecisionLinksResolve(unittest.TestCase):
 
         1. A ``d-NN`` id may appear ONLY as ``<a id="d-nn"></a>`` alone on its
            line at column zero, immediately above its own ``## D-NN`` heading.
-           This rule is CONTEXT-FREE — an anchor commented out, put in a fence,
-           or wrapped in backticks is a violation, not a silently-dead target,
-           which is precisely the false green that survived every earlier fix.
+           An anchor wrapped in backticks, indented, or differently spelled is a
+           violation rather than a silently-dead target.
+
+           This was once described as CONTEXT-FREE. It is not, and saying so hid
+           a defect for a round: a MULTI-LINE HTML comment or a ``<div>`` block
+           hides everything inside it from every rule here, so commenting out a
+           whole entry left the gate reporting a live ``#d-NN`` while GitHub
+           rendered nothing. Rule 4 is what makes the claim true enough to rely
+           on — by forbidding the constructs whose context would matter, rather
+           than by the earlier rules being context-independent (Fable, PR #60).
         2. Headings are ATX at column zero. Indented, blockquoted and Setext
            headings are rejected rather than modelled.
-        3. Fences are balanced, so the heading walk's exclusions are sound.
+        3. Fences are balanced and open at column zero, so the heading walk's
+           exclusions are sound. An opener indented 1-3 spaces after a list item
+           is list CONTENT in CommonMark; treating it as top-level inverted the
+           mask for the rest of the file.
+        4. Raw HTML is confined to the canonical anchor and a single-line
+           comment; HTML entities, tabs and inline markup in a heading are
+           refused. Each of those would make the rendered id underivable from
+           the source, which is the only thing this gate can read.
         """
-        lines = doc.splitlines()
+        lines = cls.split(doc)
         mask, open_fence = cls.fenced(lines)
         problems = []
         if open_fence:
@@ -341,13 +385,41 @@ class TestDecisionLinksResolve(unittest.TestCase):
                             f"line and then `## {want}`; got {heading.strip()[:40]!r}")
             if mask[number - 1]:
                 continue
+            if (cls.RAW_HTML.match(line) and not cls.ANCHOR.match(line)
+                    and not cls.ONE_LINE_COMMENT.match(line)):
+                problems.append(
+                    f"line {number}: raw HTML may only be the canonical anchor or a "
+                    f"single-line comment; an HTML block hides what follows it from every "
+                    f"rule here. Got {line.strip()[:40]!r}")
+            if cls.ENTITY.search(line):
+                problems.append(
+                    f"line {number}: HTML entities are resolved before GitHub slugs a "
+                    f"heading, so the rendered id cannot be derived from this source; "
+                    f"write the character. Got {line.strip()[:40]!r}")
+            if re.match(r"^[ ]{1,3}(`{3,}|~{3,})", line):
+                problems.append(
+                    f"line {number}: a code fence must start at column zero — an indented "
+                    "opener is list-item content in CommonMark and desynchronises the mask")
+            if "\t" in line:
+                problems.append(f"line {number}: tabs change block structure; use spaces")
+            atx = cls.ATX.match(line)
+            if atx and ("<" in atx.group(2) or "[" in atx.group(2) and re.search(
+                    r"\[[ \t]*D-\d+[ \t]*\]", atx.group(2))):
+                problems.append(
+                    f"line {number}: a heading's rendered TEXT is what GitHub slugs, so "
+                    "inline HTML or a link whose text is a decision id makes the id "
+                    f"underivable from this source. Got {atx.group(2)[:40]!r}")
             if cls.ATX_ANYWHERE.match(line) and not cls.ATX.match(line):
                 problems.append(
                     f"line {number}: headings must be ATX at column zero, not indented or "
                     f"blockquoted; got {line.strip()[:40]!r}")
             previous = cls.BQ_PREFIX.sub("", lines[number - 2]) if number >= 2 else ""
+            # No table-separator exemption. A delimiter row always contains a
+            # pipe, so `SETEXT_RULE` never matched one and the carve-out
+            # protected nothing — while admitting `|D-93|` + `---`, which GitHub
+            # renders as `<h2>|D-93|</h2>` at id `d-93` (Fable, PR #60).
             if (number >= 2 and cls.SETEXT_RULE.match(line) and previous.strip()
-                    and not mask[number - 2] and not previous.startswith("|")):
+                    and not mask[number - 2]):
                 problems.append(
                     f"line {number}: Setext heading; use ATX so the slug model stays exact")
         return problems
@@ -370,7 +442,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
         Only column-zero ATX headings outside fences, which
         ``grammar_violations`` guarantees are the only headings present.
         """
-        lines = doc.splitlines()
+        lines = cls.split(doc)
         mask, _ = cls.fenced(lines)
         seen: dict = {}
         slugs = []
@@ -393,7 +465,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
         reject VALID links to the 40 level-3 headings here (Sol, PR #60).
         """
         doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
-        lines = doc.splitlines()
+        lines = cls.split(doc)
         mask, _ = cls.fenced(lines)
         found = {m.group(1) for number, line in enumerate(lines)
                  if not mask[number] and (m := cls.ANCHOR.match(line))}
@@ -433,7 +505,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
         gate exists to assert (Sol, PR #60).
         """
         sources = {}
-        lines = doc.splitlines()
+        lines = cls.split(doc)
         mask, _ = cls.fenced(lines)
         for number, line in enumerate(lines):
             match = cls.ANCHOR.match(line)
@@ -523,9 +595,14 @@ class TestDecisionLinksResolve(unittest.TestCase):
             ("self-closing", '<a id="d-81"/>\n\n## D-81\n'),
             ("name= instead of id=", '<a name="d-81"></a>\n\n## D-81\n'),
             ("a non-anchor element", '<div id="d-81"></div>\n\n## D-81\n'),
-            ("indented heading", '<a id="d-81"></a>\n\n   ## D-81\n'),
-            ("blockquoted heading", '<a id="d-81"></a>\n\n> ## D-81\n'),
-            ("Setext heading", '<a id="d-81"></a>\n\nD-81\n====\n'),
+            # These three sit AWAY from the anchor deliberately. Placed
+            # directly under it they were also rejected by the adjacency rule,
+            # so they passed even with `ATX_ANYWHERE` and `SETEXT_RULE`
+            # disabled entirely — they did not discriminate the rule they name
+            # (Fable, PR #60).
+            ("indented heading", '## D-81\n\nbody\n\n   ## Detail\n'),
+            ("blockquoted heading", '## D-81\n\nbody\n\n> ## Detail\n'),
+            ("Setext heading", '## D-81\n\nA Title\n=======\n'),
             # GitHub renders an ATX heading inside a list item, and it then owns
             # the natural short slug while the anchor declares the same id. The
             # rejection surface must cover every container prefix, not the
@@ -560,6 +637,31 @@ class TestDecisionLinksResolve(unittest.TestCase):
              '- a\n  - b\n    - D-93\n      ----\n\n<a id="d-93"></a>\n\n## D-93 — t\n'),
             ("ordered nested Setext, six-space underline",
              '1. a\n   1. D-93\n      ------\n\n<a id="d-93"></a>\n\n## D-93 — t\n'),
+            # HTML BLOCKS. CommonMark types 1-7 swallow following lines, and a
+            # comment or <pre> spans blank lines, so none of this was visible.
+            # The first resurrects the motivating false green one line further
+            # up: GitHub renders NOTHING and the gate still saw a live source
+            # (Fable, PR #60).
+            ("a whole entry commented out",
+             '<!--\n<a id="d-81"></a>\n\n## D-81 — title\n\nbody\n-->\n'),
+            ("a div-wrapped bare heading", '<div>\n## D-81\n</div>\n'),
+            ("a fence-looking line inside an HTML block",
+             '<a id="d-93"></a>\n\n## D-93 — t\n\n<div>\n```\n</div>\n\n## D-93\n\n```\n'),
+            ("an indented fence opener after a list item",
+             '<a id="d-93"></a>\n\n## D-93 — t\n\n- item\n   ```\n\n## D-93\n\n````\n'),
+            # A heading's rendered TEXT is what GitHub slugs, so anything the
+            # renderer resolves makes the id underivable from the source.
+            ("an entity in a heading", '## D&#45;93\n'),
+            ("inline HTML in a heading", '## <span>D-93</span>\n'),
+            ("a link whose text is a decision id", '## [D-93](https://example.com)\n'),
+            ("a tab after the closing hashes", '## D-93 ##\t\n'),
+            # CommonMark allows one line ending inside an open tag, so a
+            # line-scoped attribute scan cannot see these.
+            ("an attribute split across lines", '<a id=\n"d-93"></a>\n'),
+            ("an entity-encoded id", '<a id="&#100;-93"></a>\n'),
+            # The table-separator exemption protected nothing and admitted this,
+            # which GitHub renders as `<h2>|D-93|</h2>` at id `d-93`.
+            ("a pipe line underlined", '|D-93|\n---\n'),
             ("anchor detached from its heading", '<a id="d-81"></a>\n\ntext\n\n## D-81\n'),
         ):
             with self.subTest(case=label):
@@ -593,6 +695,12 @@ class TestDecisionLinksResolve(unittest.TestCase):
             # scoped to a rule that could underline nonblank content, which is
             # what Sol's wording asks for.
             ("an indented rule after a blank line", "## D-81\n\nprose\n\n  ---\n"),
+            ("a single-line HTML comment", "<!-- a note -->\n\n## D-81\n"),
+            # A form feed is NOT a Markdown line break. GitHub renders this as
+            # one paragraph, so there is no heading to reject — and now the gate
+            # agrees, because it splits on \n alone. `str.splitlines()` made it
+            # a heading here and a paragraph there (Fable, PR #60).
+            ("a form feed mid-paragraph", "## D-81\n\nprose\f## D-82\n"),
         ):
             with self.subTest(allowed=label):
                 self.assertEqual([], self.grammar_violations(doc), label)
