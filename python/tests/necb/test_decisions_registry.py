@@ -212,7 +212,34 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: line start misses single quotes, a trailing space, indentation,
     #: ``<a id="d-81"/>`` and ``<a name="d-81">`` — each of which still renders
     #: a live duplicate (Fable, PR #60).
-    ANCHOR = re.compile(r"""<a\b[^>]*\b(?:id|name)\s*=\s*["']?([^"'\s>/]+)""", re.I)
+    #: ANY element, not just ``<a>``: GitHub keeps ``<div id="d-81">`` as
+    #: ``id="user-content-d-81"`` too, and any rendered element id can collide
+    #: with a heading's (Sol, PR #60).
+    ANCHOR = re.compile(r"""<\w+\b[^>]*\b(?:id|name)\s*=\s*["']?([^"'\s>/]+)""", re.I)
+
+    #: A fenced code block, and an HTML comment. Neither can contribute a live
+    #: target: GitHub escapes the first and removes the second. Scanning raw
+    #: source without them was the decisive false green — commenting out a
+    #: titled decision's anchor left every invariant in this class passing
+    #: while the rendered short fragment no longer existed (Sol, PR #60).
+    FENCE = re.compile(r"^(?P<f>```+|~~~+).*?^(?P=f)[ \t]*$", re.M | re.S)
+    COMMENT = re.compile(r"<!--.*?-->", re.S)
+
+    #: CommonMark allows up to three leading spaces on an ATX heading, and
+    #: GitHub renders a heading inside a blockquote. The old ``^#{1,6} `` at
+    #: column zero saw neither, so a real duplicate short target was missed.
+    HEADING = re.compile(r"^(?:[ ]{0,3}>[ ]?)*[ ]{0,3}(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$", re.M)
+
+    @classmethod
+    def rendered_source(cls, doc: str) -> str:
+        """The document with what GitHub will not render stripped out.
+
+        Fences and comments are blanked rather than deleted, preserving line
+        structure so heading order — and therefore GitHub's duplicate-slug
+        counter — is unchanged.
+        """
+        doc = cls.FENCE.sub(lambda m: "\n" * m.group(0).count("\n"), doc)
+        return cls.COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), doc)
 
     @staticmethod
     def slug(heading: str) -> str:
@@ -227,11 +254,16 @@ class TestDecisionLinksResolve(unittest.TestCase):
         """Every heading's rendered slug, in document order, with GitHub's
         ``-1``/``-2`` suffix on a repeat. The single source of truth for what a
         heading resolves to; both ``targets()`` and ``short_id_sources()`` walk
-        it rather than each carrying a pattern of its own."""
+        it rather than each carrying a pattern of its own.
+
+        Takes the RENDERED source, so a heading inside a fence or a comment
+        contributes nothing, and recognises the indented and blockquoted forms
+        GitHub does render.
+        """
         seen: dict = {}
         slugs = []
-        for match in re.finditer(r"^#{1,6} (.+)$", doc, re.M):
-            base = cls.slug(match.group(1))
+        for match in cls.HEADING.finditer(cls.rendered_source(doc)):
+            base = cls.slug(match.group(2))
             count = seen.get(base, 0)
             slugs.append(base if count == 0 else f"{base}-{count}")
             seen[base] = count + 1
@@ -246,7 +278,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
         reject VALID links to the 40 level-3 headings here (Sol, PR #60).
         """
         doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
-        found = {m.group(1) for m in cls.ANCHOR.finditer(doc)}
+        found = {m.group(1) for m in cls.ANCHOR.finditer(cls.rendered_source(doc))}
         found.update(cls.heading_slugs(doc))
         return found
 
@@ -283,7 +315,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
         gate exists to assert (Sol, PR #60).
         """
         sources = {}
-        for match in cls.ANCHOR.finditer(doc):
+        for match in cls.ANCHOR.finditer(cls.rendered_source(doc)):
             if SHORT_ID.fullmatch(match.group(1)):
                 sources.setdefault(match.group(1).upper(), []).append("explicit anchor")
         # The heading side comes from the SAME walk `targets()` uses, not a
@@ -365,6 +397,62 @@ class TestDecisionLinksResolve(unittest.TestCase):
                     2, len(sources.get("D-81", [])),
                     f"{label}: renders a duplicate user-content-d-81, so the gate must see "
                     f"two sources, not {sources.get('D-81')}")
+
+    def test_the_model_matches_what_github_actually_renders(self):
+        """Sol, PR #60. The previous version scanned raw source as though it
+        were rendered Markdown, so it both INVENTED targets GitHub removes and
+        MISSED headings GitHub renders.
+
+        Each case below was compared against GitHub's own ``POST /markdown``
+        before being pinned here, which is the only way this class has ever
+        caught a slug defect — a rule checked against itself agreed with the
+        bug three times on this branch.
+
+        The commented-anchor case is the decisive one: a titled decision whose
+        explicit anchor is commented out has NO live short fragment, yet every
+        invariant in this class passed because the raw text still matched.
+        """
+        for label, doc, want_target, want_sources in (
+            ("an anchor inside an HTML comment is removed by GitHub",
+             '<!-- <a id="d-81"></a> -->\n\n## D-81 — a title\n', False, 0),
+            ("an anchor inside a fence is escaped, not rendered",
+             '```\n<a id="d-81"></a>\n```\n\n## D-81 — a title\n', False, 0),
+            ("an indented heading still renders (CommonMark allows 3 spaces)",
+             '<a id="d-81"></a>\n\n   ## D-81\n', True, 2),
+            ("a heading inside a blockquote still renders",
+             '<a id="d-81"></a>\n\n> ## D-81\n', True, 2),
+            ("a non-anchor element keeps its id too",
+             '<div id="d-81"></div>\n\n## D-81\n', True, 2),
+            # The other side of the 3-space bound: FOUR spaces is an indented
+            # code block, so it is not a heading and contributes no slug.
+            # Verified against POST /markdown, which returns <pre><code>.
+            ("four spaces is an indented code block, not a heading",
+             '<a id="d-81"></a>\n\n    ## D-81\n', True, 1),
+        ):
+            with self.subTest(case=label):
+                self.assertEqual(want_target, "d-81" in self.targets(doc),
+                                 f"{label}: targets() disagrees with GitHub")
+                self.assertEqual(
+                    want_sources, len(self.short_id_sources(doc).get("D-81", [])),
+                    f"{label}: short_id_sources() disagrees with GitHub")
+
+    def test_a_commented_out_anchor_loses_the_short_fragment(self):
+        """The false green, stated as its consequence rather than its form.
+
+        A titled heading's own slug is the full title, so its short `#d-NN`
+        exists ONLY because of the explicit anchor. Comment that anchor out and
+        the short fragment is gone from the rendered page — while the raw-source
+        gate still reported it present, which is the whole failure this class
+        exists to prevent (Sol, PR #60).
+        """
+        live = '<a id="d-93"></a>\n\n## D-93 — The reference pump\'s value source\n'
+        dead = '<!-- <a id="d-93"></a> -->\n\n## D-93 — The reference pump\'s value source\n'
+        self.assertIn("d-93", self.targets(live))
+        self.assertNotIn("d-93", self.targets(dead),
+                         "GitHub removes the comment, so nothing renders #d-93 any more")
+        self.assertEqual([], self.short_id_sources(dead).get("D-93", []),
+                         "and the entry has no short-id source at all, which the invariant "
+                         "must report as a MISSING target rather than a satisfied one")
 
     def test_a_repeated_heading_is_not_reported_as_a_duplicate_id(self):
         """GitHub suffixes a repeated slug, so two ``## D-81`` headings render
