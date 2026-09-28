@@ -4299,8 +4299,6 @@ messages describe a symptom, not necessarily the cause. Cf. [[verify-before-asse
 - **Who/when:** Claude, 2026-08-12, prompted by phylroy asking whether
   openstudio-envelope has a construction-adding function.
 
-<a id="d-76"></a>
-
 ## D-76
 
 **Decided:** Articles whose compliance is established by a FIELD TEST, not by a
@@ -4345,8 +4343,6 @@ and keeps warning. Cf. D-09.
 
 - **Who/when:** Claude, 2026-08-19, prompted by phylroy asking what the three
   not-implemented articles are and whether they can be implemented.
-
-<a id="d-77"></a>
 
 ## D-77
 
@@ -4395,8 +4391,6 @@ Coverage attribution switched from gem directories to DOMAIN labels
   insight from line-count analysis, the btap- prefix and flat modules and
   full rebrand chosen by phylroy.
 
-<a id="d-78"></a>
-
 ## D-78
 
 **Decided:** Verification for the Python migration is THREE-WAY, and all
@@ -4430,8 +4424,6 @@ Python `repr` render differently).
 - **Kind:** process — verification architecture; no runtime citation exists
   or should.
 - **Who/when:** phylroy (the three-way requirement) + Claude, 2026-08-26.
-
-<a id="d-79"></a>
 
 ## D-79
 
@@ -4596,8 +4588,6 @@ retire the compat branch — naturally paired with the pending pin bump).
   TBD rebaseline, the pin bump, the installer switch — as future
   adjudications).
 
-<a id="d-80"></a>
-
 ## D-80
 
 **Decided:** The btap Ruby gems will be RETIRED in favour of the Python
@@ -4695,8 +4685,6 @@ R1+R2 executed and review-closed (PRs #15–#17); the R3 primacy flip landed
 as [D-81](#d-81) — the registry authority is now the PYTHON side, with the
 Ruby copy generated.
 
-<a id="d-81"></a>
-
 ## D-81
 
 **Decided:** The Python implementation is PRIMARY and CANONICAL
@@ -4761,8 +4749,6 @@ and report parsing TOGETHER, in both implementations — the ceiling is
 recorded WITH its transition rule so it defines a path, not just a
 problem.
 
-<a id="d-82"></a>
-
 ## D-82
 
 **Decided:** The R4 verification handoff is COMPLETE (2026-08-29). The
@@ -4826,8 +4812,6 @@ exits 0/1 at unit level; live Leg B's annual tier only ever ran
 gate on one run. The PR-2 handoff run remains external evidence in its
 PR record — never written back here, which would invalidate the very run
 as head evidence.
-
-<a id="d-83"></a>
 
 ## D-83
 
@@ -4920,8 +4904,6 @@ first-run surprise plus the TLS-intercept failure the archive rung
 exists for); a frozen-scenario installer lane (it would edit the pinned
 gate for zero seal value).
 
-<a id="d-84"></a>
-
 ## D-84
 
 **Decided:** R6 retires the five `btap-*` Ruby gems. Python is the sole
@@ -4958,8 +4940,6 @@ gem-dependent verification drivers retire only after the post-handoff freeze
 is committed and validated. The oracle pin, oracle probes, goldens, request
 manifest, and frozen scenario machinery survive.
 
-<a id="d-85"></a>
-
 ## D-85
 
 **Decided:** Classic OpenStudio air-cooled VRF equipment selects its Table
@@ -4994,8 +4974,6 @@ rather than passing silently.
 **Evidence:** direct tests pin both editions' air-conditioner and air-source
 heat-pump rows, cooling-only classification, exact assignment from an initially
 better COP, independent cooling/heating handling, and article-cited warnings.
-
-<a id="d-86"></a>
 
 ## D-86
 
@@ -5051,8 +5029,6 @@ explicit allowlist naming the historical records that are deliberately never
 rewritten — `PORT_STATUS.md`, the R6 and D-80 reviews, the M6/M7 port review,
 the multi-edition plan itself, both ledgers' `old` columns, and dated wording
 inside this decision record.
-
-<a id="d-87"></a>
 
 ## D-87
 
@@ -5111,8 +5087,6 @@ ordering or count changes. `python/tests/necb/test_codes_registry.py`'s
 `python/tests/test_citation_no_loss.py` are unchanged; only the call sites
 are re-keyed to code ids, which is why that table is the proof that the
 citation surface survived the rename.
-
-<a id="d-88"></a>
 
 ## D-88
 
@@ -5217,8 +5191,6 @@ curves diverge from each other for the first time, which is why the loader
 validation or the code-qualified naming has to be in place before, not
 after, that re-freeze lands. This amendment changes no other part of the
 D-88 policy (origin-only, no forward references, no emitted comparison).
-
-<a id="d-89"></a>
 
 ## D-89
 

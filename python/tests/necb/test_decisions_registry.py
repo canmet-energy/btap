@@ -186,7 +186,7 @@ class TestDecisionLinksResolve(unittest.TestCase):
     LIVE_ANCHORS = {
         "D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase":
             "d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase",
-        "D-11 — 8.4.4.14 Hydronic Pumps: implemented (intensity transfer + table curves)":
+        "D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)":
             "d-11--84414-hydronic-pumps-implemented-intensity-transfer--table-curves",
         "D-93 — The reference pump's value source: correspondence, then the sentence that governs it":
             "d-93--the-reference-pumps-value-source-correspondence-then-the-sentence-that-governs-it",
@@ -227,21 +227,76 @@ class TestDecisionLinksResolve(unittest.TestCase):
         than derived here. My first rule collapsed the em-dash's two spaces
         into one hyphen and rewrote every link self-consistently wrong; only a
         comparison with a real anchor caught it."""
+        doc = self.DOC.read_text(encoding="utf-8")
         for heading, anchor in self.LIVE_ANCHORS.items():
             with self.subTest(heading=heading[:24]):
+                # The fixture must be the REAL heading, not a plausible one.
+                # Its D-11 key carried a colon the heading does not have; the
+                # slug rule folds case and drops punctuation, so it produced
+                # the right anchor from a heading that does not exist and the
+                # non-vacuity claim was hollow (Sol, PR #60).
+                self.assertIn(f"## {heading}\n", doc,
+                              "LIVE_ANCHORS claims a rendered heading; it must be the exact "
+                              "heading in the document, or the comparison proves nothing")
                 self.assertEqual(anchor, self.slug(heading))
 
-    def test_every_decision_entry_has_an_adjacent_anchor(self):
-        """One anchor per registry entry, immediately before its heading —
-        otherwise the short form silently stops resolving for that entry
-        alone, which is the failure this gate exists to prevent."""
+    @staticmethod
+    def short_id_sources(doc):
+        """Where each ``d-NN`` fragment comes from: explicit anchors and the
+        natural slugs of bare ``## D-NN`` headings, as a list per id so a
+        DUPLICATE is visible.
+
+        A set would hide the defect this models. Fourteen entries (D-76..D-89)
+        have bare headings whose own GitHub slug is already ``d-81`` and so on,
+        so adding an explicit anchor too put TWO elements with
+        ``id="user-content-d-81"`` in the rendered DOM. The links happened to
+        land because the two sit adjacent, but a duplicate HTML id makes the
+        fragment target ambiguous and undercuts the identity invariant this
+        gate exists to assert (Sol, PR #60).
+        """
+        sources = {}
+        for match in re.finditer(r'^<a id="(d-\d+)"></a>$', doc, re.M):
+            sources.setdefault(match.group(1).upper(), []).append("explicit anchor")
+        for match in re.finditer(r"^##\s+(D-\d+)\s*$", doc, re.M):
+            sources.setdefault(match.group(1).upper(), []).append("bare heading slug")
+        return sources
+
+    def test_every_decision_entry_resolves_by_short_id_exactly_once(self):
+        """Each registry id is reachable at ``#d-NN`` — and from ONE source.
+
+        Explicit anchors carry the 81 entries whose heading is titled, because
+        a titled heading's own slug is the full title and a rewording silently
+        invalidates every link to it, including links outside this repository
+        that no test can reach. The 14 bare headings already slug to their short
+        id, so an explicit anchor there would only duplicate the DOM id.
+
+        Retitling a bare heading later moves its natural slug off the short id.
+        This test then fails, which is the point: the same change must add the
+        explicit anchor, so the old short URL keeps working.
+        """
         doc = self.DOC.read_text(encoding="utf-8")
         ids = {item["id"] for item in
                json.loads(REGISTRY.read_text(encoding="utf-8"))["decisions"]}
-        adjacent = {m.group(1).upper() for m in
-                    re.finditer(r'^<a id="(d-\d+)"></a>\n\n## \1', doc, re.M | re.I)}
-        self.assertEqual(sorted(ids), sorted(adjacent),
-                         "every D-XX heading needs an <a id> on the line above it")
+        sources = self.short_id_sources(doc)
+
+        self.assertEqual(sorted(ids), sorted(sources),
+                         "every registry id must be reachable at #d-NN, and nothing else may be")
+        duplicated = {k: v for k, v in sources.items() if len(v) > 1}
+        self.assertEqual({}, duplicated,
+                         "these ids resolve from more than one source, so the rendered page "
+                         f"carries duplicate element ids: {duplicated}")
+
+    def test_a_duplicate_short_id_source_is_caught(self):
+        """The negative case, because the set-based predecessor could not see
+        it: an explicit anchor ON TOP of a bare heading is exactly the defect
+        this PR shipped and must fail loudly."""
+        sources = self.short_id_sources('<a id="d-81"></a>\n\n## D-81\n')
+        self.assertEqual(["explicit anchor", "bare heading slug"], sources["D-81"],
+                         "both sources are recorded, so the duplicate is visible")
+        titled = self.short_id_sources('<a id="d-93"></a>\n\n## D-93 — a title\n')
+        self.assertEqual(["explicit anchor"], titled["D-93"],
+                         "a titled heading contributes no short-id slug, so its anchor is "
+                         "the only source and is required")
 
     def test_every_fragment_link_in_the_log_resolves(self):
         doc = self.DOC.read_text(encoding="utf-8")
