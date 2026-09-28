@@ -6111,12 +6111,30 @@ in the plan log.
   primary-secondary example, authored the only way OpenStudio permits — a
   primary loop plus heat-exchanger-coupled wing loops, since one `PlantLoop`
   takes a single demand-side pump — is several loops and ONE system. The
-  warning therefore states what was observed: N proposed loops overlap this
-  reference loop and the pass cannot show them to be one hydronic system.
-  **This is a real gap, not just wording:** an HX-coupled multi-loop system is
-  declined where sentence (2) ought to govern it. Logged as a deferred finding
-  (group loops through the heat-exchanger recursion before correspondence);
-  it predates this ruling and is not decided here.
+  warning therefore states what was observed, and it is an EXACT PARTITION
+  rather than mere overlap.
+- **The implemented predicate is an exact consolidation.** The overlapping
+  proposed loops' block sets must be pairwise DISJOINT and must COVER the
+  reference loop's set exactly. "More than one overlapping loop" is not this
+  decision's shape and was the first implementation's error: against a
+  reference serving {A, B} it also caught `{A},{A}` (reference block B left
+  with no counterpart), `{A,C},{A,D}` and `{A,C},{B,D}` (reaching blocks the
+  reference does not serve). Those are multiple partial overlaps, which this
+  entry elsewhere calls a shape D-97 never considered; they keep D-93's
+  unresolved-correspondence decline (Sol, PR #63).
+
+  Disjoint coverage is **necessary for independence, not sufficient**, so the
+  warning never claims independence was proven — only that the blocks are
+  consolidated and the loops could not be shown to be one system.
+- **The partition predicate also excludes DF-18's case structurally.**
+  `_served_zone_names` recurses THROUGH a `HeatExchangerFluidToFluid`, so an
+  HX-coupled primary's block set is a strict superset of its secondaries' and
+  is never disjoint from them. Note A-8.4.x.14.(2)'s own primary-secondary
+  example therefore fails the predicate and keeps a D-93-only warning, rather
+  than attesting that D-97 adjudicated it. **The underlying gap is real:** an
+  HX-coupled multi-loop system is declined where sentence (2) ought to govern
+  it. Logged as DF-18 (group loops through the heat-exchanger recursion before
+  correspondence); it predates this ruling and is expressly not decided here.
 - **The legacy realisation offers no precedent.** The pinned gem
   (`f01da13a6b89`, verified against `legacy_pin/REF`) contains **zero**
   occurrences of `8.4.4.14`, `8.4.5.14`, "static head" or "corresponding pump"

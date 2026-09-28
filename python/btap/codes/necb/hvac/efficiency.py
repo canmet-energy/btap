@@ -1172,25 +1172,47 @@ def _corresponding_loop(reference_loop, proposed):
     overlapping = [loop_ for loop_ in candidates
                    if _served_zone_names(loop_) & reference_zones]
     if len(overlapping) > 1:
-        # D-97: sentence (2) combines pumps only WITHIN one proposed hydronic
-        # system ("in a given hydronic system"). Several independent proposed
-        # systems consolidated onto one reference loop is a different shape,
-        # and no sentence supplies a value for it: (1) has no single
-        # corresponding pump, (2) is same-system only, and (3) is a
-        # missing-CHARACTERISTICS fallback for a corresponding pump, not a
-        # fallback for missing correspondence.
+        served = {loop_.nameString(): _served_zone_names(loop_) for loop_ in overlapping}
+        names = ', '.join(sorted(served))
+        covered = set().union(*served.values())
+        # EXACT consolidation is the D-97 predicate, and "more than one
+        # overlapping loop" is not it. The decision is scoped to several
+        # proposed systems consolidated ONTO one reference loop; mere
+        # multiplicity also catches two loops serving the same block, two
+        # partial overlaps, and loops reaching blocks the reference does not
+        # have. Those leave reference blocks uncovered or add proposed ones,
+        # so they are multiple partial overlaps, not a consolidation — shapes
+        # D-97 never examined (Sol, PR #63).
         #
-        # The reason says OVERLAP, not independence. A PlantLoop is not a
-        # hydronic system: the Note's own primary-secondary example, authored
-        # the only way OpenStudio allows (a primary loop plus heat-exchanger
-        # coupled wing secondaries, one demand-side pump each), is several
-        # loops and ONE system. This pass cannot tell that apart from separate
-        # plants, so it states what it observed (Fable, PR #63).
-        names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
+        # Disjointness also excludes the one-system case DF-18 records.
+        # `_served_zone_names` recurses THROUGH a HeatExchangerFluidToFluid,
+        # so an HX-coupled primary's set is a strict superset of its
+        # secondaries' — never disjoint from them. The Note's own
+        # primary-secondary example therefore fails this predicate and keeps
+        # D-93's unresolved-correspondence warning, rather than claiming D-97
+        # adjudicated a gap D-97 expressly leaves open.
+        disjoint = sum(len(blocks) for blocks in served.values()) == len(covered)
+        if disjoint and covered == reference_zones:
+            # D-97: sentence (2) combines pumps only WITHIN one proposed
+            # hydronic system ("in a given hydronic system"). No sentence
+            # supplies a value across them: (1) has no single corresponding
+            # pump, (2) is same-system only, and (3) is a
+            # missing-CHARACTERISTICS fallback for a corresponding pump, not a
+            # fallback for missing correspondence.
+            #
+            # The reason still says PARTITION, not independence: disjoint
+            # coverage is necessary for independence, not sufficient.
+            return None, (f'{len(overlapping)} proposed {role} loops partition this one reference '
+                          f"loop's thermal blocks between them ({names}) — the blocks are "
+                          'consolidated onto one reference loop, and this pass cannot show the '
+                          'loops to be one hydronic system. Sentence (2) combines pumps only '
+                          'WITHIN one hydronic system, so the Code prescribes no cross-system '
+                          'transfer value here'), True
         return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
-                      f'({names}), and this pass cannot show them to be one hydronic system. '
-                      'Sentence (2) combines pumps only WITHIN one hydronic system, so the Code '
-                      'prescribes no cross-system transfer value here'), True
+                      f'({names}) without partitioning its thermal blocks between them — '
+                      f'they cover {len(covered & reference_zones)} of its {len(reference_zones)} '
+                      'blocks, and overlap each other or reach blocks it does not serve. That is '
+                      'multiple partial overlaps, not a correspondence'), False
     if len(overlapping) == 1:
         # Either direction reaches here — the proposed loop may serve blocks
         # the reference one does not, or only some of the ones it does — so the

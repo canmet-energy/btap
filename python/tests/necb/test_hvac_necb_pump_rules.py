@@ -299,8 +299,9 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertIsNone(
             match, 'two proposed loops consolidated onto one reference loop is '
                    'an N:1 case increment B does not adjudicate')
-        self.assertIn('overlap this one reference loop', reason)
-        self.assertTrue(n_to_1, 'this IS the shape D-97 adjudicated')
+        self.assertIn('partition this one reference', reason)
+        self.assertTrue(n_to_1, 'the two loops partition {A, B} exactly, which IS the shape '
+                                'D-97 adjudicated')
 
     def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
         """The adjudicated equivalent motor efficiency, which nothing pinned.
@@ -553,14 +554,13 @@ class TestNecbPumpRules(unittest.TestCase):
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         warning = next((w for w in audit.warnings
-                        if 'proposed hot_water loops overlap this one reference loop'
-                        in w['action']), None)
+                        if 'partition this one reference' in w['action']), None)
         self.assertIsNotNone(warning, 'the decline names the reason')
-        self.assertIn('cannot show them to be one hydronic system', warning['action'],
-                      'the reason states what was OBSERVED — overlap. A PlantLoop is not a '
-                      "hydronic system: the Note's own primary-secondary example authored with "
-                      'heat-exchanger coupled wing loops is several loops and one system, and '
-                      'this pass cannot tell that apart from separate plants (Fable, PR #63)')
+        self.assertIn('cannot show the loops to be one hydronic system', warning['action'],
+                      'the reason states what was OBSERVED — an exact partition. Disjoint '
+                      'coverage is NECESSARY for independence, not sufficient: a PlantLoop is '
+                      "not a hydronic system, so the pass never claims it proved independence "
+                      '(Fable, PR #63)')
         self.assertEqual('D-93 D-97', warning['ruling'],
                          'the N:1 decline cites the ruling that decided it')
         self.assertIn('combines pumps only WITHIN one hydronic system', warning['action'],
@@ -617,6 +617,112 @@ class TestNecbPumpRules(unittest.TestCase):
                       'D-93 question, not a side effect of the N:1 ruling')
         self.assertNotIn('D-97', warning['ruling'])
         self.assertNotIn('conservative bound', warning['action'])
+
+    def test_multiple_overlap_that_is_not_a_consolidation_does_not_cite_d97(self):
+        """Sol, PR #63. `len(overlapping) > 1` is not D-97's predicate.
+
+        D-97 is scoped to several proposed systems consolidated ONTO one
+        reference loop. Mere multiplicity also catches shapes that leave
+        reference blocks with no counterpart, or that reach blocks the
+        reference does not serve — multiple partial overlaps, which the D-97
+        record itself calls a shape D-97 never considered.
+
+        My previous negative test authored ONE overlapping loop, so it took the
+        `== 1` branch and could not falsify the `> 1` flag at all: a guard
+        aimed at a different branch from the broken one. These three cases,
+        against a reference serving {A, B}, are Sol's own counterexamples and
+        each reaches the `> 1` branch.
+        """
+        for label, first, second in (
+            ('both loops serve only A, so reference block B has no counterpart',
+             ('Block A',), ('Block A',)),
+            ('overlapping proposed sets that also reach outside the reference',
+             ('Block A', 'Block C'), ('Block A', 'Block D')),
+            ('disjoint proposed sets that reach outside the reference',
+             ('Block A', 'Block C'), ('Block B', 'Block D')),
+        ):
+            with self.subTest(shape=label):
+                proposed = openstudio.model.Model()
+                # The zones are authored ONCE and shared between the loops.
+                # `serve_zones` would create a second 'Block A', which
+                # OpenStudio renames to 'Block A 1' — the loops would then
+                # overlap nothing, take the `== 1` branch, and these fixtures
+                # would pass whatever the predicate does. Two of these three
+                # did exactly that before the mutation run caught it.
+                blocks = {}
+                for name in set(first) | set(second) | {'Block A', 'Block B'}:
+                    zone = openstudio.model.ThermalZone(proposed)
+                    zone.setName(name)
+                    blocks[name] = zone
+                for flow, power, served in ((0.010, 800.0, first), (0.005, 700.0, second)):
+                    loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow,
+                                                  power=power, zones=None)
+                    serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+                reference = openstudio.model.Model()
+                loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                   zones=('Block A', 'Block B'))
+                audit = AuditLog()
+                hvac.apply_efficiencies(reference, code='necb2020', audit=audit,
+                                        proposed=proposed)
+
+                declines = [w for w in audit.warnings if '14.(1)-(3) NOT applied' in w['action']]
+                self.assertTrue(declines, 'the shape still declines, loudly')
+                for warning in declines:
+                    self.assertEqual('D-93', warning['ruling'],
+                                     f'{label}: D-97 ruled on exact consolidation; citing it '
+                                     'here attributes a ruling to a shape it never examined')
+                    self.assertIn('not a correspondence', warning['action'])
+                    self.assertNotIn('conservative bound', warning['action'])
+
+    def test_the_notes_own_hx_coupled_system_is_not_claimed_as_n_to_1(self):
+        """DF-18's shape must not attest to D-97.
+
+        Note A-8.4.x.14.(2)'s example — a primary plus two wing secondaries —
+        can only be authored in OpenStudio as a primary loop plus
+        heat-exchanger-coupled wing loops, because one PlantLoop carries one
+        demand-side pump. That is several loops and ONE hydronic system, and
+        the D-97 record expressly leaves it undecided as DF-18. So it must not
+        arrive labelled 'D-97 adjudicated this'.
+
+        It is excluded structurally rather than by a special case:
+        `_served_zone_names` recurses THROUGH the heat exchanger, so the
+        primary's block set is a strict superset of the wings' and the sets are
+        not disjoint. The partition predicate rejects it.
+
+        The reference serves two of the three wings. That is deliberate: with
+        the reference serving ALL of them, the primary's set EQUALS the
+        reference's and the pass takes the one-to-one branch instead — which is
+        DF-18's other half, the silent transfer from the primary pump alone.
+        This test is about the N:1 branch, so it authors the shape that
+        actually reaches it.
+        """
+        proposed = openstudio.model.Model()
+        wings = [loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=power,
+                                    zones=(block,))[0]
+                 for block, power in (('Block A', 300.0), ('Block B', 400.0),
+                                      ('Block E', 500.0))]
+        primary, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.012, power=300.0,
+                                        zones=None)
+        for wing in wings:
+            hx = openstudio.model.HeatExchangerFluidToFluid(proposed)
+            primary.addDemandBranchForComponent(hx)
+            hx.addToNode(wing.supplyInletNode())
+
+        self.assertEqual({'Block A', 'Block B', 'Block E'}, _served_zone_names(primary),
+                         "the primary reaches the wings' blocks through the heat exchangers, "
+                         'which is what makes its set a superset and the partition fail')
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.016,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match, 'three overlapping loops; no single one corresponds')
+        self.assertFalse(n_to_1,
+                         'one primary-secondary system is NOT several systems consolidated; '
+                         'DF-18 is expressly undecided, so D-97 must not be cited here')
+        self.assertIn('not a correspondence', reason)
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
