@@ -32,6 +32,7 @@ No SDK import — bare-runner safe, like the sync gate beside it.
 import ast
 import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -154,95 +155,140 @@ class TestRuntimeCitations(unittest.TestCase):
 
 
 
-class TestDecisionCrossReferencesResolve(unittest.TestCase):
-    """Every `#fragment` link into the decision log must hit a real heading.
+class TestDecisionLinksResolve(unittest.TestCase):
+    """Every link into the decision log must land where it claims.
 
     GitHub derives a heading's anchor by slugging the WHOLE heading, so
-    ``## D-95 — Freeze-carrying PRs merge …`` is reachable at
-    ``#d-95--freeze-carrying-prs-merge-…`` and NOT at ``#d-95``. The document
-    used the short form in 13 places and none of them resolved: the link
-    silently opened a 6,000-line file at the top (Fable, PR #59).
+    ``## D-95 — Freeze-carrying PRs …`` renders at
+    ``#d-95--freeze-carrying-prs-…``. The document used the bare ``#d-XX``
+    form in 14 places and 13 of them resolved nowhere — the exception being
+    ``#d-81``, whose heading is a bare id, which is why the defect survived
+    (Fable, PR #59/#60).
 
-    Two properties, and the second is the one that keeps this from rotting:
-    every link resolves TODAY, and the `main-red` incident body's link into
-    this document resolves too. A heading retitled later changes its slug, and
-    this fails rather than leaving a dead pointer in the one place nobody
-    looks until an incident.
+    The fix is an explicit ``<a id="d-95"></a>`` before each heading, so the
+    SHORT form is real. The id is the identity and the title is prose: an entry
+    keeps its id forever, while a reworded heading silently invalidates every
+    full-slug link — including references outside this repository, which no
+    test can reach.
+
+    GitHub's sanitiser rewrites the id to ``user-content-d-95``, which is
+    exactly what it does to its own heading permalinks: all 137 in this file
+    carry ``id="user-content-X"`` with ``href="#X"``, so the short form
+    resolves through the same client-side mapping every heading link uses.
     """
 
     DOC = PYTHON_ROOT.parent / "docs" / "necb_decisions.md"
-    WORKFLOW = PYTHON_ROOT.parent / ".github" / "workflows" / "test.yml"
+    TREE = PYTHON_ROOT.parent
+
+    #: Anchors read from GitHub's own rendered blob, not derived here — a
+    #: derivation pinned against itself proves nothing, which is how a
+    #: whitespace bug once rewrote 13 links self-consistently wrong.
+    LIVE_ANCHORS = {
+        "D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase":
+            "d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase",
+        "D-11 — 8.4.4.14 Hydronic Pumps: implemented (intensity transfer + table curves)":
+            "d-11--84414-hydronic-pumps-implemented-intensity-transfer--table-curves",
+        "D-93 — The reference pump's value source: correspondence, then the sentence that governs it":
+            "d-93--the-reference-pumps-value-source-correspondence-then-the-sentence-that-governs-it",
+    }
+
+    #: ``](#x)``, ``[x]: #x`` and ``href="#x"`` all render as links; matching
+    #: only the first let a reference-style definition through (Fable, PR #60).
+    LINK = re.compile(r'(?:\]\(|\]:[ \t]*|href=")#([^)\s"]+)')
 
     @staticmethod
     def slug(heading: str) -> str:
-        """GitHub's heading-anchor rule: lowercase, drop punctuation, hyphens."""
+        """GitHub's heading-anchor rule: lowercase, drop punctuation, then one
+        hyphen PER SPACE — an em-dash leaves two spaces and so two hyphens."""
         text = heading.strip().lower()
         text = re.sub(r"[^\w\s-]", "", text)
         return re.sub(r"\s", "-", text)
 
     @classmethod
-    def heading_slugs(cls, doc: str | None = None) -> set:
-        """Every anchor GitHub generates, not just the level-2 ones.
+    def targets(cls, doc=None) -> set:
+        """Every fragment the page offers: heading anchors AND declared ids.
 
-        Levels 1-6 all get anchors, and a slug that repeats gets ``-1``,
-        ``-2`` appended in document order. Modelling only unique ``##``
-        headings made the gate reject VALID links — this document has 40
-        level-3 headings it could not see (Sol, PR #60).
+        Headings at all six levels, with GitHub's ``-1``/``-2`` suffix on a
+        repeated slug. Modelling only unique ``##`` headings made the gate
+        reject VALID links to the 40 level-3 headings here (Sol, PR #60).
         """
         doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
-        seen: dict[str, int] = {}
-        slugs = set()
+        seen = {}
+        found = set(re.findall(r'^<a id="([^"]+)"></a>$', doc, re.M))
         for match in re.finditer(r"^#{1,6} (.+)$", doc, re.M):
             base = cls.slug(match.group(1))
             count = seen.get(base, 0)
-            slugs.add(base if count == 0 else f"{base}-{count}")
+            found.add(base if count == 0 else f"{base}-{count}")
             seen[base] = count + 1
-        return slugs
+        return found
 
-    def test_every_in_document_fragment_link_resolves(self):
+    def test_the_slug_rule_reproduces_live_github_anchors(self):
+        """Non-vacuity, against anchors fetched from the rendered page rather
+        than derived here. My first rule collapsed the em-dash's two spaces
+        into one hyphen and rewrote every link self-consistently wrong; only a
+        comparison with a real anchor caught it."""
+        for heading, anchor in self.LIVE_ANCHORS.items():
+            with self.subTest(heading=heading[:24]):
+                self.assertEqual(anchor, self.slug(heading))
+
+    def test_every_decision_entry_has_an_adjacent_anchor(self):
+        """One anchor per registry entry, immediately before its heading —
+        otherwise the short form silently stops resolving for that entry
+        alone, which is the failure this gate exists to prevent."""
         doc = self.DOC.read_text(encoding="utf-8")
-        slugs = self.heading_slugs()
-        dangling = sorted({f for f in re.findall(r"\]\(#([^)]+)\)", doc) if f not in slugs})
+        ids = {item["id"] for item in
+               json.loads(REGISTRY.read_text(encoding="utf-8"))["decisions"]}
+        adjacent = {m.group(1).upper() for m in
+                    re.finditer(r'^<a id="(d-\d+)"></a>\n\n## \1', doc, re.M | re.I)}
+        self.assertEqual(sorted(ids), sorted(adjacent),
+                         "every D-XX heading needs an <a id> on the line above it")
+
+    def test_every_fragment_link_in_the_log_resolves(self):
+        doc = self.DOC.read_text(encoding="utf-8")
+        targets = self.targets(doc)
+        dangling = sorted({f for f in self.LINK.findall(doc) if f not in targets})
         self.assertEqual(
             [], dangling,
-            "decision-log links point at anchors GitHub does not generate. The "
-            "anchor is the slug of the WHOLE heading, not the bare id:\n  "
-            + "\n  ".join(f"#{d} -> try #{next((s for s in slugs if s.startswith(d)), '?')}"
-                          for d in dangling))
+            "decision-log links point at fragments the page does not offer:\n  "
+            + "\n  ".join(
+                f"#{d} -> try #{next((s for s in sorted(targets) if s.startswith(d + '--')), '(no match)')}"
+                for d in dangling))
 
-    def test_the_incident_body_links_a_real_anchor(self):
-        """`main-red` tells whoever merged where the recovery path is. A dead
-        fragment there costs most at the worst moment, and nothing else would
-        notice it."""
-        workflow = self.WORKFLOW.read_text(encoding="utf-8")
-        found = re.findall(r"necb_decisions\.md#([a-z0-9-]+)", workflow)
-        self.assertTrue(found, "the main-red body no longer links the decision log")
-        slugs = self.heading_slugs()
-        for fragment in found:
-            self.assertIn(fragment, slugs,
-                          f"main-red links #{fragment}, which is not a heading anchor")
+    def test_every_inbound_link_from_the_tree_resolves(self):
+        """Links from ANYWHERE tracked, not just the workflow.
 
-    def test_the_slug_rule_matches_a_known_heading(self):
-        """Non-vacuity: the rule must actually reproduce a live anchor, or both
-        tests above would pass by agreeing with a broken derivation."""
-        self.assertEqual(
-            "d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase",
-            self.slug("D-95 — Freeze-carrying PRs merge with a merge commit, "
-                      "not a squash or rebase"))
-    def test_the_model_covers_deeper_headings_and_duplicates(self):
-        """The two shapes the first version got wrong, as Sol specified.
-
-        A level-3 heading is a legitimate anchor, and a repeated slug gets a
-        numeric suffix. Modelling neither made the gate reject correct links
-        while reporting them as defects.
+        ``main-red``'s incident body is the one that costs most at the worst
+        moment, but scoping the check to that single file would miss the next
+        one someone adds in a doc or a docstring (Fable, PR #60). Tracked
+        files only — and via ``git ls-files`` rather than a walk, which also
+        keeps this off ``.venv`` and the frozen baselines.
         """
-        doc = ("## Same heading\n\n### Detail\n\n## Same heading\n\n"
-               "## Other\n")
-        slugs = self.heading_slugs(doc)
-        self.assertIn("detail", slugs, "level-3 headings get anchors too")
-        self.assertIn("same-heading", slugs, "first occurrence keeps the bare slug")
-        self.assertIn("same-heading-1", slugs, "a repeat gets GitHub's -1 suffix")
-        self.assertNotIn("other-1", slugs, "a unique slug must not gain a suffix")
+        targets = self.targets()
+        tracked = subprocess.run(["git", "-C", str(self.TREE), "ls-files"],
+                                 capture_output=True, text=True, check=True).stdout.split()
+        offenders = []
+        for name in tracked:
+            try:
+                text = (self.TREE / name).read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+            for fragment in re.findall(r'necb_decisions\.md#([^)\s"\']+)', text):
+                if fragment not in targets:
+                    offenders.append(f"{name}: #{fragment}")
+        self.assertEqual([], sorted(offenders),
+                         "links into the decision log that resolve nowhere:\n  "
+                         + "\n  ".join(sorted(offenders)))
+
+    def test_the_target_model_covers_deeper_headings_and_duplicates(self):
+        doc = ('<a id="custom"></a>\n\n## Same heading\n\n### Detail\n\n'
+               "## Same heading\n\n## Other\n")
+        targets = self.targets(doc)
+        self.assertIn("detail", targets, "level-3 headings get anchors too")
+        self.assertIn("same-heading", targets, "first occurrence keeps the bare slug")
+        self.assertIn("same-heading-1", targets, "a repeat gets GitHub's -1 suffix")
+        self.assertIn("custom", targets, "a declared <a id> is a target too")
+        self.assertNotIn("other-1", targets, "a unique slug must not gain a suffix")
+
 
 if __name__ == "__main__":
     unittest.main()
