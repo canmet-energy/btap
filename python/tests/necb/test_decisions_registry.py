@@ -152,8 +152,6 @@ class TestRuntimeCitations(unittest.TestCase):
                          f"cited at runtime but not kind:runtime: {stray}")
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestDecisionCrossReferencesResolve(unittest.TestCase):
@@ -182,9 +180,24 @@ class TestDecisionCrossReferencesResolve(unittest.TestCase):
         text = re.sub(r"[^\w\s-]", "", text)
         return re.sub(r"\s", "-", text)
 
-    def heading_slugs(self) -> set:
-        doc = self.DOC.read_text(encoding="utf-8")
-        return {self.slug(m.group(1)) for m in re.finditer(r"^## (.+)$", doc, re.M)}
+    @classmethod
+    def heading_slugs(cls, doc: str | None = None) -> set:
+        """Every anchor GitHub generates, not just the level-2 ones.
+
+        Levels 1-6 all get anchors, and a slug that repeats gets ``-1``,
+        ``-2`` appended in document order. Modelling only unique ``##``
+        headings made the gate reject VALID links — this document has 40
+        level-3 headings it could not see (Sol, PR #60).
+        """
+        doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
+        seen: dict[str, int] = {}
+        slugs = set()
+        for match in re.finditer(r"^#{1,6} (.+)$", doc, re.M):
+            base = cls.slug(match.group(1))
+            count = seen.get(base, 0)
+            slugs.add(base if count == 0 else f"{base}-{count}")
+            seen[base] = count + 1
+        return slugs
 
     def test_every_in_document_fragment_link_resolves(self):
         doc = self.DOC.read_text(encoding="utf-8")
@@ -216,3 +229,20 @@ class TestDecisionCrossReferencesResolve(unittest.TestCase):
             "d-95--freeze-carrying-prs-merge-with-a-merge-commit-not-a-squash-or-rebase",
             self.slug("D-95 — Freeze-carrying PRs merge with a merge commit, "
                       "not a squash or rebase"))
+    def test_the_model_covers_deeper_headings_and_duplicates(self):
+        """The two shapes the first version got wrong, as Sol specified.
+
+        A level-3 heading is a legitimate anchor, and a repeated slug gets a
+        numeric suffix. Modelling neither made the gate reject correct links
+        while reporting them as defects.
+        """
+        doc = ("## Same heading\n\n### Detail\n\n## Same heading\n\n"
+               "## Other\n")
+        slugs = self.heading_slugs(doc)
+        self.assertIn("detail", slugs, "level-3 headings get anchors too")
+        self.assertIn("same-heading", slugs, "first occurrence keeps the bare slug")
+        self.assertIn("same-heading-1", slugs, "a repeat gets GitHub's -1 suffix")
+        self.assertNotIn("other-1", slugs, "a unique slug must not gain a suffix")
+
+if __name__ == "__main__":
+    unittest.main()
