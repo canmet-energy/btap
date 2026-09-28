@@ -16,6 +16,7 @@ import openstudio
 import btap.modeling as modeling
 from btap.audit import AuditLog
 from btap.codes.necb import hvac
+from btap.codes.necb.hvac import efficiency
 from btap.codes.necb.hvac.efficiency import (
     DEFAULT_MOTOR_EFFICIENCY,
     DEFAULT_PUMP_EFFICIENCY,
@@ -772,7 +773,10 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertFalse(n_to_1,
                          'an exact partition of ONE hydronic system is not several INDEPENDENT '
                          "systems; D-97's premise is unestablished here, so it must not fire")
-        self.assertIn('not a correspondence', reason)
+        self.assertIn('are hydraulically connected', reason,
+                      'the reason must name what actually failed. Reporting "without '
+                      'partitioning its thermal blocks" here was false — they DO partition — '
+                      'and it hid the finding (Fable, PR #63)')
 
     def test_water_to_water_heat_pumps_on_one_source_loop_are_one_network(self):
         """Sol, PR #63. The coupler registry omitted a plant heat pump THIS
@@ -819,7 +823,8 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertFalse(n_to_1,
                          'two wings on one shared source loop are ONE hydronic system; '
                          'asserting independence here would be a false statement of fact')
-        self.assertIn('not a correspondence', reason)
+        self.assertIn('are hydraulically connected', reason,
+                      'the decline names the connection, not a partition failure')
 
     def test_a_shared_tertiary_loop_is_still_one_network(self):
         """Sol, PR #63. Moving from a name list to the W2W class was still a
@@ -864,7 +869,102 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertFalse(n_to_1,
                          'a shared tertiary loop is a hydraulic connection; asserting these are '
                          'independent systems would be false')
-        self.assertIn('not a correspondence', reason)
+        self.assertIn('are hydraulically connected', reason,
+                      'the decline names the connection, not a partition failure')
+
+    def test_every_tertiary_load_cast_is_verified_against_the_sdk(self):
+        """The list is a measured fact, not an assertion.
+
+        Each entry must expose an SDK accessor that NAMES its tertiary as a
+        load, and that accessor must be the same loop as `tertiaryPlantLoop`.
+        Absorption chillers must stay out, because theirs is `generatorLoop` —
+        a heat SOURCE (Fable, PR #63).
+        """
+        model = openstudio.model.Model()
+        for caster in efficiency.TERTIARY_LOAD_CASTS:
+            name = caster[len('to_'):]
+            cls = getattr(openstudio.model, name, None)
+            if cls is None:
+                continue  # not in this SDK version
+            with self.subTest(cls=name):
+                obj = cls(model)
+                named = [a for a in ('heatRecoveryLoop', 'heatingPlantLoop')
+                         if hasattr(obj, a)]
+                self.assertTrue(named,
+                                f'{name} is listed as having a LOAD tertiary but exposes no '
+                                'load-named accessor; the SDK name is the evidence')
+        for name in ('ChillerAbsorption', 'ChillerAbsorptionIndirect'):
+            cls = getattr(openstudio.model, name, None)
+            if cls is None:
+                continue
+            with self.subTest(cls=name):
+                obj = cls(model)
+                self.assertTrue(hasattr(obj, 'generatorLoop'),
+                                f'{name} draws heat FROM its tertiary')
+                self.assertNotIn(f'to_{name}', efficiency.TERTIARY_LOAD_CASTS,
+                                 f"{name}'s tertiary is a generator loop — a SOURCE. Listing it "
+                                 'would attribute its blocks to the loop that supplies it and '
+                                 'produce a silent false one-to-one transfer')
+
+    def test_an_absorption_generator_loop_is_not_a_served_loop(self):
+        """Fable, PR #63 — the regression this PR briefly introduced.
+
+        An absorption chiller draws heat from its generator loop. Treating
+        every tertiary as a load made that generator loop "served", so the
+        condenser loop inherited the generator's blocks, matched the reference
+        one-to-one, and transferred under (3) with NO warning — strictly worse
+        than the loud decline it replaced, because a wrong value with no warning
+        is invisible.
+        """
+        if not hasattr(openstudio.model, 'ChillerAbsorptionIndirect'):
+            self.skipTest('ChillerAbsorptionIndirect not in this SDK')
+        proposed = openstudio.model.Model()
+        chilled, _ = loop_with_vsd_pump(proposed, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        generator, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=200.0,
+                                          zones=('Block G',))
+        condenser, _ = loop_with_vsd_pump(proposed, 'Condenser', flow=0.006, power=400.0,
+                                          zones=None)
+        chiller = openstudio.model.ChillerAbsorptionIndirect(proposed)
+        chilled.addSupplyBranchForComponent(chiller)
+        condenser.addDemandBranchForComponent(chiller)
+        chiller.addToTertiaryNode(generator.demandInletNode())
+
+        self.assertEqual({'Block A'}, _served_zone_names(condenser),
+                         'the condenser serves the blocks its chiller COOLS. The generator '
+                         'loop supplies the chiller with heat; its blocks are not served '
+                         'through it, and attributing them creates a false correspondence')
+
+    def test_each_conjunct_of_the_d97_predicate_is_load_bearing(self):
+        """M4, Fable PR #63: a conjunct no test can falsify is not a conjunct.
+
+        `disjoint` had no discriminating case — every fixture that failed it
+        also failed the coverage check, so hard-coding it True passed the whole
+        suite. This is the shape that needs three blocks: two proposed loops
+        that together COVER the reference exactly but OVERLAP each other.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B', 'Block C'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served in ((0.010, 800.0, ('Block A', 'Block B')),
+                                    (0.005, 700.0, ('Block B', 'Block C'))):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power,
+                                          zones=None)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B', 'Block C'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'the two loops cover {A,B,C} exactly but share Block B, so they are '
+                         'not a partition — overlapping loops are not several systems '
+                         'consolidated, and D-97 must not fire')
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()

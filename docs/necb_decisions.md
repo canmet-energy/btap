@@ -6111,8 +6111,9 @@ in the plan log.
   primary-secondary example, authored the only way OpenStudio permits — a
   primary loop plus heat-exchanger-coupled wing loops, since one `PlantLoop`
   takes a single demand-side pump — is several loops and ONE system. The
-  warning therefore states what was observed, and it is an EXACT PARTITION
-  rather than mere overlap.
+  warning therefore states what was observed. Where the loops partition the
+  blocks but ARE connected, the decline says exactly that rather than reporting
+  a partition failure that did not occur.
 - **The implemented predicate is an exact consolidation.** The overlapping
   proposed loops' block sets must be pairwise DISJOINT and must COVER the
   reference loop's set exactly. "More than one overlapping loop" is not this
@@ -6136,9 +6137,15 @@ in the plan log.
   omitted `HeatPumpWaterToWaterEquationFit*`, which this repository builds for
   its HS14 GSHP system, so two wings on one shared ground loop were classified
   independent and drew a D-97 citation that asserted, falsely, that they shared
-  no hydraulic connection. An omission from a class test is not a silent false
-  independence — it is a component that does not join loops at all (Sol,
-  PR #63).
+  no hydraulic connection (Sol, PR #63).
+
+  **The class is not a completeness proof, and an earlier draft of this entry
+  claimed it was.** `ChillerElectricASHRAE205` carries oil-cooler and auxiliary
+  connections the base class does not expose, and `HeatPumpAirToWater` joins
+  loops through child objects that are not `WaterToWaterComponent`s at all. A
+  model using either can still reach a false independence claim. What counts as
+  a hydraulic coupling for this purpose is an open question with Sol; it is
+  recorded here rather than papered over (Fable, PR #63).
 
   The walk reads EVERY plant-loop connection the base exposes, including the
   TERTIARY one. Naming the class was still a guess about its members:

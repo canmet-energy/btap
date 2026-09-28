@@ -1023,13 +1023,20 @@ def _holder_zones(holder):
 
 
 def _coupled_loops(comp):
-    """The two plant loops a dual-loop component joins, or ().
+    """Every plant loop a multi-loop component joins, or ().
 
-    The boundary is the SDK's own class, not a list of type names.
-    `WaterToWaterComponent` is precisely OpenStudio's dual-loop equipment —
-    heat exchangers, chillers, and every plant heat pump including the
-    `…EquationFit…` variants — and a single-loop component such as a pump does
-    not cast to it.
+    The boundary is the SDK's own class rather than a list of type names:
+    `WaterToWaterComponent` covers heat exchangers, chillers, and every plant
+    heat pump including the `…EquationFit…` variants, and a single-loop
+    component such as a pump does not cast to it.
+
+    It is NOT all of OpenStudio's multi-loop equipment, and this comment said
+    so once. `ChillerElectricASHRAE205` carries oil-cooler and auxiliary
+    connections the base does not expose, and `HeatPumpAirToWater` joins loops
+    through child objects that are `StraightComponent`s. Both are open with Sol
+    as a boundary question (Fable, PR #63); until he rules, a component outside
+    this class is not treated as joining loops, so such a model can still reach
+    a false independence claim.
 
     A name list was wrong here twice over. It omitted
     `HeatPumpWaterToWaterEquationFit*`, which this repository itself builds for
@@ -1041,9 +1048,10 @@ def _coupled_loops(comp):
     carries a comment about — my own commit message had claimed one registry
     while a more complete one sat two modules away.
 
-    A class test cannot go stale as the SDK gains components, and an omission
-    here is not a silent false independence: it is a component that does not
-    join loops at all.
+    A class test does not go stale as the SDK gains ordinary dual-loop
+    components. It is not a proof of completeness, and the earlier claim that
+    "an omission here is a component that does not join loops at all" was
+    false — see the two exceptions above.
     """
     return _w2w_loops(comp, PLANT_LOOP_SIDES)
 
@@ -1057,10 +1065,38 @@ def _coupled_loops(comp):
 #: so including it changes nothing for heat exchangers and chillers.
 PLANT_LOOP_SIDES = ('plantLoop', 'secondaryPlantLoop', 'tertiaryPlantLoop')
 
-#: The LOAD sides of a dual- or triple-loop component: the loops it serves,
-#: rather than the one supplying it. For a central heat-pump system that is
-#: both the cooling and the heating load loop.
-LOAD_LOOP_SIDES = ('plantLoop', 'tertiaryPlantLoop')
+#: Casts whose TERTIARY connection is a load the component SERVES. Direction is
+#: a per-class fact that no generic accessor carries, and the SDK's own named
+#: accessor is the evidence: `heatRecoveryLoop` and `heatingPlantLoop` receive
+#: heat, so they are loads.
+#:
+#: `ChillerAbsorption` and `ChillerAbsorptionIndirect` are deliberately ABSENT.
+#: Their tertiary is `generatorLoop`, a heat SOURCE the chiller draws from.
+#: Treating every tertiary as a load made an absorption chiller's generator loop
+#: "served", which over-attributed its blocks to the condenser loop and produced
+#: a FALSE one-to-one match — a silent (3) transfer where the previous code
+#: declined loudly (Fable, PR #63). That is the D-93 false-correspondence class
+#: that caused two false-compliance results earlier in this work.
+#:
+#: An omission from this list costs a loud decline, never a silent transfer,
+#: which is why it defaults to "not a load". `test_every_tertiary_load_cast_is
+#: _verified_against_the_sdk` pins each entry against the SDK's own accessor, so
+#: the list is a measured fact rather than an assertion.
+TERTIARY_LOAD_CASTS = ('to_ChillerElectricEIR', 'to_ChillerElectricReformulatedEIR',
+                       'to_CentralHeatPumpSystem', 'to_HeatPumpPlantLoopEIRHeating',
+                       'to_HeatPumpPlantLoopEIRCooling')
+
+
+def _load_loops(comp):
+    """The loops this component SERVES: its supply-side loop, plus the tertiary
+    where that tertiary is verified to be a load rather than a source."""
+    loops = list(_w2w_loops(comp, ('plantLoop',)))
+    for caster in TERTIARY_LOAD_CASTS:
+        candidate = getattr(comp, caster, None)
+        if candidate is not None and candidate().is_initialized():
+            loops.extend(_w2w_loops(comp, ('tertiaryPlantLoop',)))
+            break
+    return tuple(loops)
 
 
 def _w2w_loops(comp, sides):
@@ -1148,7 +1184,7 @@ def _served_zone_names(loop_, _seen=None):
         # Same dual-loop class as the network walk, so the two cannot disagree
         # about what couples loops; here the DIRECTION matters, and the loop
         # this one serves is the component's supply-side loop.
-        for served in _w2w_loops(comp, LOAD_LOOP_SIDES):
+        for served in _load_loops(comp):
             zones |= _served_zone_names(served, seen)
     return zones
 
@@ -1297,6 +1333,16 @@ def _corresponding_loop(reference_loop, proposed):
                           'directly or through any other loop. Sentence (2) combines pumps only '
                           'WITHIN one hydronic system, so the Code prescribes no cross-system '
                           'transfer value here'), True
+        if disjoint and covered == reference_zones:
+            # The partition holds and independence is what failed, so say THAT.
+            # Reporting "without partitioning its thermal blocks" here was
+            # simply false on this shape, and it hid the actual finding
+            # (Fable, PR #63).
+            return None, (f'{len(overlapping)} proposed {role} loops partition this reference '
+                          f"loop's thermal blocks between them ({names}) but are hydraulically "
+                          'connected — directly or through another loop — so they are ONE '
+                          'hydronic system rather than several consolidated onto it, and '
+                          'sentence (2) combines pumps only within one system'), False
         return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
                       f'({names}) without partitioning its thermal blocks between them — '
                       f'they cover {len(covered & reference_zones)} of its {len(reference_zones)} '
