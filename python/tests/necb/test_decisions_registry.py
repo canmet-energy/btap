@@ -238,7 +238,16 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: The trailing `[ \t]+\S` is what keeps prose safe: `- #d-81 resolves` and
     #: `PR #53` have no space after the hashes, so neither is a heading marker.
     ATX_ANYWHERE = re.compile(r"^(?:[ \t]*(?:[-*+]|\d{1,9}[.)]|>)[ \t]*)*[ \t]*#{1,6}[ \t]+\S")
-    SETEXT_RULE = re.compile(r"^ {0,3}(=+|-+) *$")
+    #: A Setext underline, behind any blockquote nesting. Indentation and `>`
+    #: are allowed because they CONTINUE the paragraph above; a LIST marker is
+    #: deliberately not, because `- ----` opens a new list item and is a
+    #: thematic break rather than an underline for the previous one. The
+    #: unprefixed form alone let `> D-93` / `> ----` render a blockquoted
+    #: heading that took the short slug (Sol, PR #60).
+    SETEXT_RULE = re.compile(r"^(?:[ \t]{0,3}>)*[ \t]{0,3}(=+|-+)[ \t]*$")
+
+    #: Blockquote markers and indentation, stripped to reach a line's content.
+    BQ_PREFIX = re.compile(r"^(?:[ \t]{0,3}>)*[ \t]*")
 
     @classmethod
     def fenced(cls, lines) -> list:
@@ -325,8 +334,9 @@ class TestDecisionLinksResolve(unittest.TestCase):
                 problems.append(
                     f"line {number}: headings must be ATX at column zero, not indented or "
                     f"blockquoted; got {line.strip()[:40]!r}")
-            if (number >= 2 and cls.SETEXT_RULE.match(line) and lines[number - 2].strip()
-                    and not mask[number - 2] and not lines[number - 2].lstrip().startswith("|")):
+            previous = cls.BQ_PREFIX.sub("", lines[number - 2]) if number >= 2 else ""
+            if (number >= 2 and cls.SETEXT_RULE.match(line) and previous.strip()
+                    and not mask[number - 2] and not previous.startswith("|")):
                 problems.append(
                     f"line {number}: Setext heading; use ATX so the slug model stays exact")
         return problems
@@ -517,6 +527,18 @@ class TestDecisionLinksResolve(unittest.TestCase):
              '  - ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
             ("list inside a blockquote",
              '> - ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            # Setext behind a blockquote marker. GitHub's POST /markdown
+            # returns `<blockquote><h2>D-93</h2></blockquote>`, so the quoted
+            # heading owns the natural short slug while the anchor declares the
+            # same id. The unprefixed underline rule could not see it, which is
+            # the ATX list-prefix gap repeated on the other heading form
+            # (Sol, PR #60).
+            ("blockquoted Setext",
+             '> D-93\n> ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("Setext in a list in a blockquote",
+             '> - D-93\n>   ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("doubly nested blockquote Setext",
+             '> > D-93\n> > ----\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
             ("anchor detached from its heading", '<a id="d-81"></a>\n\ntext\n\n## D-81\n'),
         ):
             with self.subTest(case=label):
@@ -536,6 +558,18 @@ class TestDecisionLinksResolve(unittest.TestCase):
         self.assertEqual([], self.grammar_violations(
             "## D-81\n\n- see #d-81 and PR #53 for the history\n"),
             "a bare #fragment or issue number in a list item is not a heading")
+        # Ordinary horizontal rules must stay legal. Each was checked against
+        # POST /markdown: all three render `<hr>` or plain text, never a
+        # heading, so rejecting them would make the document unwritable while
+        # fixing nothing (Sol, PR #60).
+        for label, doc in (
+            ("thematic break after a paragraph", "## D-81\n\nsome prose\n\n---\n"),
+            ("thematic break inside a quote", "## D-81\n\n> quoted\n>\n> ---\n"),
+            ("a new list item of dashes", "## D-81\n\n- item one\n- ----\n"),
+            ("a table separator row", "## D-81\n\n| a | b |\n|---|---|\n"),
+        ):
+            with self.subTest(allowed=label):
+                self.assertEqual([], self.grammar_violations(doc), label)
 
     def test_a_repeated_heading_is_not_reported_as_a_duplicate_id(self):
         """GitHub suffixes a repeated slug, so two ``## D-81`` headings render
