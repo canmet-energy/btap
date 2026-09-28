@@ -43,6 +43,11 @@ ID_TOKEN = re.compile(r"\bD-\d{2}\b")
 LITERAL_GRAMMAR = re.compile(r"\AD-\d{2}( D-\d{2})*\Z")
 AUDIT_METHODS = frozenset({"decision", "info", "warn"})
 
+#: A short decision fragment, ``d-95``. Deliberately NOT matching ``d-95-1``:
+#: GitHub's duplicate suffix makes that a different target, so a repeated
+#: heading is a registry-sync problem, not a duplicate element id.
+SHORT_ID = re.compile(r"d-\d+", re.I)
+
 #: A future forwarding call that legitimately passes a variable would be
 #: allowed HERE, by exact (file, method) pair — never by a general rule.
 NONLITERAL_EXCEPTIONS = frozenset()
@@ -190,11 +195,24 @@ class TestDecisionLinksResolve(unittest.TestCase):
             "d-11--84414-hydronic-pumps-implemented-intensity-transfer--table-curves",
         "D-93 — The reference pump's value source: correspondence, then the sentence that governs it":
             "d-93--the-reference-pumps-value-source-correspondence-then-the-sentence-that-governs-it",
+        # Non-ASCII, because the other three pin only ASCII punctuation and the
+        # em-dash bug proved this rule's weak point is exactly what it does with
+        # characters it does not expect (Fable, PR #60).
+        "D-58 — The proposed\u2192reference matrix (97 catalog systems): residential compatible-cooling and HP detection go fact-based":
+            "d-58--the-proposedreference-matrix-97-catalog-systems-residential-compatible-cooling-and-hp-detection-go-fact-based",
     }
 
     #: ``](#x)``, ``[x]: #x`` and ``href="#x"`` all render as links; matching
     #: only the first let a reference-style definition through (Fable, PR #60).
     LINK = re.compile(r'(?:\]\(|\]:[ \t]*|href=")#([^)\s"]+)')
+
+    #: Any declared anchor, however spelled. GitHub's sanitiser rewrites BOTH
+    #: ``id`` and ``name`` to ``user-content-…``, and browsers resolve a
+    #: fragment to ``a[name]`` too, so a gate that reads only ``id="…"`` at
+    #: line start misses single quotes, a trailing space, indentation,
+    #: ``<a id="d-81"/>`` and ``<a name="d-81">`` — each of which still renders
+    #: a live duplicate (Fable, PR #60).
+    ANCHOR = re.compile(r"""<a\b[^>]*\b(?:id|name)\s*=\s*["']?([^"'\s>/]+)""", re.I)
 
     @staticmethod
     def slug(heading: str) -> str:
@@ -205,6 +223,21 @@ class TestDecisionLinksResolve(unittest.TestCase):
         return re.sub(r"\s", "-", text)
 
     @classmethod
+    def heading_slugs(cls, doc) -> list:
+        """Every heading's rendered slug, in document order, with GitHub's
+        ``-1``/``-2`` suffix on a repeat. The single source of truth for what a
+        heading resolves to; both ``targets()`` and ``short_id_sources()`` walk
+        it rather than each carrying a pattern of its own."""
+        seen: dict = {}
+        slugs = []
+        for match in re.finditer(r"^#{1,6} (.+)$", doc, re.M):
+            base = cls.slug(match.group(1))
+            count = seen.get(base, 0)
+            slugs.append(base if count == 0 else f"{base}-{count}")
+            seen[base] = count + 1
+        return slugs
+
+    @classmethod
     def targets(cls, doc=None) -> set:
         """Every fragment the page offers: heading anchors AND declared ids.
 
@@ -213,13 +246,8 @@ class TestDecisionLinksResolve(unittest.TestCase):
         reject VALID links to the 40 level-3 headings here (Sol, PR #60).
         """
         doc = cls.DOC.read_text(encoding="utf-8") if doc is None else doc
-        seen = {}
-        found = set(re.findall(r'^<a id="([^"]+)"></a>$', doc, re.M))
-        for match in re.finditer(r"^#{1,6} (.+)$", doc, re.M):
-            base = cls.slug(match.group(1))
-            count = seen.get(base, 0)
-            found.add(base if count == 0 else f"{base}-{count}")
-            seen[base] = count + 1
+        found = {m.group(1) for m in cls.ANCHOR.finditer(doc)}
+        found.update(cls.heading_slugs(doc))
         return found
 
     def test_the_slug_rule_reproduces_live_github_anchors(self):
@@ -240,8 +268,8 @@ class TestDecisionLinksResolve(unittest.TestCase):
                               "heading in the document, or the comparison proves nothing")
                 self.assertEqual(anchor, self.slug(heading))
 
-    @staticmethod
-    def short_id_sources(doc):
+    @classmethod
+    def short_id_sources(cls, doc):
         """Where each ``d-NN`` fragment comes from: explicit anchors and the
         natural slugs of bare ``## D-NN`` headings, as a list per id so a
         DUPLICATE is visible.
@@ -255,10 +283,23 @@ class TestDecisionLinksResolve(unittest.TestCase):
         gate exists to assert (Sol, PR #60).
         """
         sources = {}
-        for match in re.finditer(r'^<a id="(d-\d+)"></a>$', doc, re.M):
-            sources.setdefault(match.group(1).upper(), []).append("explicit anchor")
-        for match in re.finditer(r"^##\s+(D-\d+)\s*$", doc, re.M):
-            sources.setdefault(match.group(1).upper(), []).append("bare heading slug")
+        for match in cls.ANCHOR.finditer(doc):
+            if SHORT_ID.fullmatch(match.group(1)):
+                sources.setdefault(match.group(1).upper(), []).append("explicit anchor")
+        # The heading side comes from the SAME walk `targets()` uses, not a
+        # second narrower pattern. A private `^##\s+(D-\d+)\s*$` model missed
+        # every heading that still slugs to a short id by another route — a
+        # level-3 `### D-95`, a trailing period (`## D-81.`, punctuation is
+        # dropped exactly as `8.4.4.14` becomes `84414`) — and the anchor side
+        # missed single quotes, a trailing space, indentation, `<a id="d-81"/>`
+        # and `<a name=...>`, all of which the sanitiser still renders as
+        # `user-content-d-81`. Seven such edits produced a duplicate rendered id
+        # and passed. Three rounds on this branch were each a model narrower
+        # than the thing it checks; this is the fourth, so the two models are
+        # now one (Fable, PR #60).
+        for slug in cls.heading_slugs(doc):
+            if SHORT_ID.fullmatch(slug):
+                sources.setdefault(slug.upper(), []).append("heading slug")
         return sources
 
     def test_every_decision_entry_resolves_by_short_id_exactly_once(self):
@@ -291,12 +332,51 @@ class TestDecisionLinksResolve(unittest.TestCase):
         it: an explicit anchor ON TOP of a bare heading is exactly the defect
         this PR shipped and must fail loudly."""
         sources = self.short_id_sources('<a id="d-81"></a>\n\n## D-81\n')
-        self.assertEqual(["explicit anchor", "bare heading slug"], sources["D-81"],
+        self.assertEqual(["explicit anchor", "heading slug"], sources["D-81"],
                          "both sources are recorded, so the duplicate is visible")
         titled = self.short_id_sources('<a id="d-93"></a>\n\n## D-93 — a title\n')
         self.assertEqual(["explicit anchor"], titled["D-93"],
                          "a titled heading contributes no short-id slug, so its anchor is "
                          "the only source and is required")
+
+    def test_every_spelling_that_renders_a_duplicate_id_is_caught(self):
+        """Seven edits that each produce a duplicate ``user-content-d-81`` in
+        GitHub's render, and all seven passed the earlier two-model version.
+
+        The heading side read only ``^##\\s+(D-\\d+)\\s*$`` and the anchor side
+        only ``id="..."`` at line start, so a level-3 heading, a trailing
+        period, single quotes, a trailing space, indentation, a self-closing
+        tag, and ``name=`` all slipped through while rendering a real duplicate
+        (Fable, PR #60). The gate now shares ``targets()``' heading walk and
+        matches anchors however they are spelled.
+        """
+        for label, doc in (
+            ("level-3 bare heading", '<a id="d-81"></a>\n\n### D-81\n'),
+            ("trailing period, punctuation dropped", '<a id="d-81"></a>\n\n## D-81.\n'),
+            ("single-quoted anchor", "<a id='d-81'></a>\n\n## D-81\n"),
+            ("trailing space after the anchor", '<a id="d-81"></a> \n\n## D-81\n'),
+            ("indented anchor", '  <a id="d-81"></a>\n\n## D-81\n'),
+            ("self-closing anchor", '<a id="d-81"/>\n\n## D-81\n'),
+            ("name= instead of id=", '<a name="d-81"></a>\n\n## D-81\n'),
+        ):
+            with self.subTest(spelling=label):
+                sources = self.short_id_sources(doc)
+                self.assertEqual(
+                    2, len(sources.get("D-81", [])),
+                    f"{label}: renders a duplicate user-content-d-81, so the gate must see "
+                    f"two sources, not {sources.get('D-81')}")
+
+    def test_a_repeated_heading_is_not_reported_as_a_duplicate_id(self):
+        """GitHub suffixes a repeated slug, so two ``## D-81`` headings render
+        ``d-81`` and ``d-81-1`` — distinct ids, not a collision. Calling that a
+        duplicate element id would be the right alarm with the wrong diagnosis
+        (Fable, PR #60); a repeated decision heading is the registry sync's
+        business, and `test_decisions_registry_sync` is what fails on it."""
+        sources = self.short_id_sources("## D-81\n\n## D-81\n")
+        self.assertEqual(["heading slug"], sources["D-81"],
+                         "only the FIRST resolves at #d-81; the second is #d-81-1")
+        self.assertIn("d-81-1", self.targets("## D-81\n\n## D-81\n"),
+                      "and the suffixed slug is still offered as a target")
 
     def test_every_fragment_link_in_the_log_resolves(self):
         doc = self.DOC.read_text(encoding="utf-8")
@@ -319,8 +399,13 @@ class TestDecisionLinksResolve(unittest.TestCase):
         keeps this off ``.venv`` and the frozen baselines.
         """
         targets = self.targets()
-        tracked = subprocess.run(["git", "-C", str(self.TREE), "ls-files"],
-                                 capture_output=True, text=True, check=True).stdout.split()
+        # -z, because plain `ls-files` output split on whitespace drops any
+        # tracked path containing a space and mangles the quoted form git uses
+        # for non-ASCII names — a real inbound link in such a file would never
+        # be read (Fable, PR #60).
+        tracked = [name for name in subprocess.run(
+            ["git", "-C", str(self.TREE), "ls-files", "-z"],
+            capture_output=True, text=True, check=True).stdout.split("\0") if name]
         offenders = []
         for name in tracked:
             try:
