@@ -197,7 +197,7 @@ learns *why* we read the article that way.
 - The NECB 8.4 article text is versioned, offline reference data with a
   packaged read API (`btap.codes.coverage`) and a console entry point
   (`btap-necb-coverage`). The Crown NECB text is attributed and explicitly
-  outside the LGPL that covers the code.
+  outside the GPL that covers the code.
 - The HBIX fetch that refreshes those caches stays an explicit **maintainer**
   operation. Ordinary runtime is offline.
 - **Every loader resolves through `btap.codes.necb._data_root()` at CALL
