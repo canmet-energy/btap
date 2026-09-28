@@ -227,7 +227,17 @@ class TestDecisionLinksResolve(unittest.TestCase):
     #: indented and blockquoted forms GitHub also renders, so the grammar check
     #: can REJECT them rather than the model having to simulate them.
     ATX = re.compile(r"^(#{1,6}) +(.+?) *#* *$")
-    ATX_ANYWHERE = re.compile(r"^[ >]*#{1,6} +\S")
+    #: The REJECTION surface, deliberately broader than any form this gate
+    #: models. A heading marker may sit behind any mix of indentation,
+    #: blockquote markers and LIST markers — GitHub renders `- ## D-93` inside
+    #: an `<li>` as a real heading, and it then owns the natural `d-93` slug
+    #: while the explicit anchor declares the same id (Sol, PR #60). The
+    #: positive grammar stays column-zero ATX; this only has to be wide enough
+    #: that an unmodelled rendered heading cannot take the first slug.
+    #:
+    #: The trailing `[ \t]+\S` is what keeps prose safe: `- #d-81 resolves` and
+    #: `PR #53` have no space after the hashes, so neither is a heading marker.
+    ATX_ANYWHERE = re.compile(r"^(?:[ \t]*(?:[-*+]|\d{1,9}[.)]|>)[ \t]*)*[ \t]*#{1,6}[ \t]+\S")
     SETEXT_RULE = re.compile(r"^ {0,3}(=+|-+) *$")
 
     @classmethod
@@ -495,6 +505,18 @@ class TestDecisionLinksResolve(unittest.TestCase):
             ("indented heading", '<a id="d-81"></a>\n\n   ## D-81\n'),
             ("blockquoted heading", '<a id="d-81"></a>\n\n> ## D-81\n'),
             ("Setext heading", '<a id="d-81"></a>\n\nD-81\n====\n'),
+            # GitHub renders an ATX heading inside a list item, and it then owns
+            # the natural short slug while the anchor declares the same id. The
+            # rejection surface must cover every container prefix, not the
+            # indent-and-blockquote pair I first assumed (Sol, PR #60).
+            ("unordered-list heading",
+             '- ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("ordered-list heading",
+             '1. ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("nested-list heading",
+             '  - ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
+            ("list inside a blockquote",
+             '> - ## D-93\n\n<a id="d-93"></a>\n\n## D-93 — title\n'),
             ("anchor detached from its heading", '<a id="d-81"></a>\n\ntext\n\n## D-81\n'),
         ):
             with self.subTest(case=label):
@@ -509,6 +531,11 @@ class TestDecisionLinksResolve(unittest.TestCase):
         self.assertEqual([], self.grammar_violations(
             "## D-81\n\n```\n# a shell comment inside a fence is not a heading\n```\n"),
             "fenced content is still allowed to contain anything but a d-NN id")
+        # The rejection surface must not swallow ordinary prose. A hash with no
+        # space after it is not a heading marker in any container.
+        self.assertEqual([], self.grammar_violations(
+            "## D-81\n\n- see #d-81 and PR #53 for the history\n"),
+            "a bare #fragment or issue number in a list item is not a heading")
 
     def test_a_repeated_heading_is_not_reported_as_a_duplicate_id(self):
         """GitHub suffixes a repeated slug, so two ``## D-81`` headings render
