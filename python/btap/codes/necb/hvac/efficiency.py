@@ -1022,12 +1022,39 @@ def _holder_zones(holder):
     }
 
 
-#: Equipment that carries load from one plant loop to another. One registry, so
-#: the served-zone walk and the network walk cannot drift apart — a coupler
-#: known to one and not the other would make two loops look independent to the
-#: classifier while sharing zones in the correspondence.
-LOOP_COUPLERS = ('to_ChillerElectricEIR', 'to_HeatExchangerFluidToFluid',
-                 'to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpPlantLoopEIRCooling')
+def _coupled_loops(comp):
+    """The two plant loops a dual-loop component joins, or ().
+
+    The boundary is the SDK's own class, not a list of type names.
+    `WaterToWaterComponent` is precisely OpenStudio's dual-loop equipment —
+    heat exchangers, chillers, and every plant heat pump including the
+    `…EquationFit…` variants — and a single-loop component such as a pump does
+    not cast to it.
+
+    A name list was wrong here twice over. It omitted
+    `HeatPumpWaterToWaterEquationFit*`, which this repository itself builds for
+    the HS14 GSHP system (`hp_plant_fancoils.py`), so two wings on one shared
+    ground loop looked INDEPENDENT and drew a false `D-97` citation asserting
+    they "share no hydraulic connection" (Sol, PR #63). And `classify.py`
+    already carried a third, longer list of its own, which is exactly the
+    "currently in agreement, not shared" failure the zone-serving coil registry
+    carries a comment about — my own commit message had claimed one registry
+    while a more complete one sat two modules away.
+
+    A class test cannot go stale as the SDK gains components, and an omission
+    here is not a silent false independence: it is a component that does not
+    join loops at all.
+    """
+    cast = getattr(comp, 'to_WaterToWaterComponent', None)
+    if cast is None or not cast().is_initialized():
+        return ()
+    w2w = cast().get()
+    loops = []
+    for accessor in ('plantLoop', 'secondaryPlantLoop'):
+        handle = getattr(w2w, accessor, None)
+        if handle is not None and handle().is_initialized():
+            loops.append(handle().get())
+    return tuple(loops)
 
 
 def _hydronic_network(loop_, _seen=None):
@@ -1052,24 +1079,11 @@ def _hydronic_network(loop_, _seen=None):
         return seen
 
     seen.add(loop_.handle())
-    for comp in loop_.demandComponents():
-        # Downward: loads this loop serves.
-        for caster in LOOP_COUPLERS:
-            candidate = getattr(comp, caster, None)
-            if candidate is None or not candidate().is_initialized():
-                continue
-            served = candidate().get().plantLoop()
-            if served.is_initialized():
-                _hydronic_network(served.get(), seen)
-    for comp in loop_.supplyComponents():
-        # Upward: the loop that supplies this one.
-        for caster in LOOP_COUPLERS:
-            candidate = getattr(comp, caster, None)
-            if candidate is None or not candidate().is_initialized():
-                continue
-            source = getattr(candidate().get(), 'secondaryPlantLoop', None)
-            if source is not None and source().is_initialized():
-                _hydronic_network(source().get(), seen)
+    # BOTH sides, and both of each component's loops — connection is undirected,
+    # so there is no need to reason about which side supplies which.
+    for comp in list(loop_.demandComponents()) + list(loop_.supplyComponents()):
+        for other in _coupled_loops(comp):
+            _hydronic_network(other, seen)
     return seen
 
 
@@ -1112,12 +1126,12 @@ def _served_zone_names(loop_, _seen=None):
             continue
 
         # Equipment that passes the load on to another loop rather than a zone.
-        for caster in LOOP_COUPLERS:
-            candidate = getattr(comp, caster, None)
-            if candidate is None or not candidate().is_initialized():
-                continue
-
-            served = candidate().get().plantLoop()
+        # Same dual-loop class as the network walk, so the two cannot disagree
+        # about what couples loops; here the DIRECTION matters, and the loop
+        # this one serves is the component's supply-side loop.
+        cast = getattr(comp, 'to_WaterToWaterComponent', None)
+        if cast is not None and cast().is_initialized():
+            served = cast().get().plantLoop()
             if served.is_initialized():
                 zones |= _served_zone_names(served.get(), seen)
     return zones

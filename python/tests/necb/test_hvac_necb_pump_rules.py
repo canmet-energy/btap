@@ -774,6 +774,53 @@ class TestNecbPumpRules(unittest.TestCase):
                          "systems; D-97's premise is unestablished here, so it must not fire")
         self.assertIn('not a correspondence', reason)
 
+    def test_water_to_water_heat_pumps_on_one_source_loop_are_one_network(self):
+        """Sol, PR #63. The coupler registry omitted a plant heat pump THIS
+        repository builds.
+
+        `HeatPumpWaterToWaterEquationFitHeating` is what `hp_plant_fancoils.py`
+        wires to the GLHX source loop for the HS14 GSHP system, and
+        `classify.py` already listed both EquationFit variants in its own
+        registry. The network walk's four-name tuple did not, so two hot-water
+        wings on one shared ground loop were classified INDEPENDENT and drew a
+        `D-97` citation whose warning text asserted, falsely, that they "share
+        no hydraulic connection, directly or through any other loop".
+
+        The fix is not a fifth name. The boundary is now the SDK's own
+        `WaterToWaterComponent` class, so no dual-loop component can be missing
+        from it.
+        """
+        proposed = openstudio.model.Model()
+        source = openstudio.model.PlantLoop(proposed)
+        source.setName('Ground Loop')
+        source.sizingPlant().setLoopType('Condenser')
+
+        wings = []
+        for block, power in (('Block A', 300.0), ('Block B', 400.0)):
+            wing, _ = loop_with_vsd_pump(proposed, 'Heating', flow=0.004, power=power,
+                                         zones=(block,))
+            hp = openstudio.model.HeatPumpWaterToWaterEquationFitHeating(proposed)
+            hp.addToNode(wing.supplyInletNode())
+            source.addDemandBranchForComponent(hp)
+            wings.append(wing)
+
+        self.assertEqual([{'Block A'}, {'Block B'}], [_served_zone_names(w) for w in wings],
+                         'the block sets partition the reference exactly — which is precisely '
+                         'why only the network classification can tell these apart')
+        self.assertEqual(_hydronic_network(wings[0]), _hydronic_network(wings[1]),
+                         'both wings reach the same ground loop through their W2W heat pumps')
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.008,
+                                         zones=('Block A', 'Block B'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'two wings on one shared source loop are ONE hydronic system; '
+                         'asserting independence here would be a false statement of fact')
+        self.assertIn('not a correspondence', reason)
+
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
         # 120 W/(L/s)

@@ -6129,9 +6129,16 @@ in the plan log.
   systems; firing it from the failure to prove the opposite would be proving one
   side of a distinction from the absence of the other (Sol, PR #63).
 - **Independence is established by a network classification, not inferred.**
-  `_hydronic_network` walks the plant-loop couplers — heat exchangers, chillers
-  and plant-loop heat pumps — in BOTH directions and transitively, so two loops
-  are one hydronic system if load passes between them by any chain. D-97 fires
+  `_hydronic_network` walks the plant-loop couplers in BOTH directions and
+  transitively, so two loops are one hydronic system if load passes between
+  them by any chain. The coupler boundary is the SDK's own
+  `WaterToWaterComponent` class rather than a list of type names: a list
+  omitted `HeatPumpWaterToWaterEquationFit*`, which this repository builds for
+  its HS14 GSHP system, so two wings on one shared ground loop were classified
+  independent and drew a D-97 citation that asserted, falsely, that they shared
+  no hydraulic connection. An omission from a class test is not a silent false
+  independence — it is a component that does not join loops at all (Sol,
+  PR #63). D-97 fires
   only when the overlapping loops partition the reference's blocks AND lie in
   pairwise-disjoint networks; the warning then asserts independence, because it
   was measured.
