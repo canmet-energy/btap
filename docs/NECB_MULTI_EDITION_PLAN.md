@@ -1363,7 +1363,7 @@ any result.
   loud decline rather than a silent transfer — so this is a question about
   attribution accuracy, not a live false-compliance risk.
 
-## Stage 1 — opened 2026-09-08## Stage 1 — opened 2026-09-08
+## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push
 blocked by network), so Stage 1 work stacks on `stage0-multi-edition`

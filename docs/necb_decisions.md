@@ -6105,15 +6105,6 @@ in the plan log.
   mis-citation. The other six declines keep D-93's existing wording. That the
   same "not conservative" caution is arguably true of them too is a D-93
   question, not a side effect of this one (Fable, PR #63).
-- **What the pass can actually establish is OVERLAP, not independence.** Its
-  unit of "system" is one `PlantLoop`; this ruling's unit is the hydraulically
-  connected network, and the two are not the same. Note A-8.4.x.14.(2)'s own
-  primary-secondary example, authored the only way OpenStudio permits — a
-  primary loop plus heat-exchanger-coupled wing loops, since one `PlantLoop`
-  takes a single demand-side pump — is several loops and ONE system. The
-  warning therefore states what was observed. Where the loops partition the
-  blocks but ARE connected, the decline says exactly that rather than reporting
-  a partition failure that did not occur.
 - **The implemented predicate is an exact consolidation.** The overlapping
   proposed loops' block sets must be pairwise DISJOINT and must COVER the
   reference loop's set exactly. "More than one overlapping loop" is not this
@@ -6124,11 +6115,6 @@ in the plan log.
   entry elsewhere calls a shape D-97 never considered; they keep D-93's
   unresolved-correspondence decline (Sol, PR #63).
 
-  Disjoint coverage is **necessary for independence, not sufficient** — this
-  decision says in terms that zone-disjoint branches can remain one hydronic
-  system. So the partition alone cannot fire a ruling scoped to INDEPENDENT
-  systems; firing it from the failure to prove the opposite would be proving one
-  side of a distinction from the absence of the other (Sol, PR #63).
 - **The boundary is HYDRAULIC CONTINUITY, not energy coupling.** Two distinct
   same-role proposed `PlantLoop`s are two hydronic systems, even when their
   equipment shares another loop. A shared source, condenser, oil-cooler,
@@ -6156,6 +6142,17 @@ in the plan log.
   questions about `ChillerElectricASHRAE205`'s oil-cooler and auxiliary
   connections and `HeatPumpAirToWater`'s non-`WaterToWaterComponent` children
   no longer govern this decision (Sol, PR #63).
+- **Rejected history, recorded so it is not re-derived.** Two readings were
+  tried and withdrawn before the one above. First, that a block-set partition
+  was *necessary but not sufficient* for independence, so it could not fire a
+  ruling scoped to independent systems. Second, that independence should
+  therefore be established by classifying a "hydraulically connected network"
+  through heat exchangers, chillers and plant heat pumps, and that an
+  HX-coupled set of loops is several loops but ONE system. **Neither governs.**
+  The unit is the `PlantLoop`, because that is the modelled fluid circuit, and
+  no energy coupling merges two circuits. Earlier drafts of this entry asserted
+  both readings alongside the ruling that replaced them, which left it saying
+  two opposite things at once (Sol, PR #63).
 - **An exact match must be the SOLE overlap.** One-to-one is accepted only
   when the single exact candidate is also the only loop overlapping the
   reference loop. With reference {A,B}, proposed {A,B} and proposed {B}, the

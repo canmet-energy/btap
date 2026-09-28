@@ -726,19 +726,23 @@ class TestNecbPumpRules(unittest.TestCase):
                          'DF-18 is expressly undecided, so D-97 must not be cited here')
         self.assertIn('not a correspondence', reason)
 
-    def test_an_exact_partition_that_shares_a_plant_is_not_independent(self):
-        """Sol, PR #63. The partition is NECESSARY for independence, not
-        sufficient, so it cannot fire a ruling scoped to independent systems.
+    def test_sharing_a_condenser_loop_does_not_merge_two_hydronic_systems(self):
+        """Sol, PR #63. A shared plant loop is not hydraulic continuity.
 
-        This is the shape that separates the two. Two hot-water loops each
-        serve one block, so they partition the reference's blocks exactly — but
-        both draw on ONE shared condenser loop through heat exchangers, so they
-        are one hydraulically connected network. The connecting loop has a
-        DIFFERENT role, so the role-filtered candidate list never sees it and
-        the block sets alone cannot reveal it.
+        Two hot-water loops each serve one block, so they partition the
+        reference's blocks exactly, and both draw on ONE shared condenser loop
+        through heat exchangers. They remain TWO hydronic systems: the heat
+        exchangers transfer energy between separate fluid circuits rather than
+        letting one fluid circulate through both loops. 5.2.6.3.(1)'s table note
+        fixes the unit at the LOOP and 8.4.x.9.(6)(a) distinguishes a plant from
+        the systems it serves, so this IS several systems consolidated onto one
+        reference loop and D-97 fires.
 
-        D-97 says in terms that zone-disjoint branches can remain one hydronic
-        system. This is that case, so it must keep D-93's decline.
+        An earlier round asserted the opposite here, on a "hydraulically
+        connected network" reading Sol withdrew as an over-expansion from
+        common-fluid primary-secondary pumping into arbitrary thermal coupling.
+        The name and this docstring are part of that correction: a test whose
+        stated purpose teaches the rejected model invites its restoration.
         """
         proposed = openstudio.model.Model()
         shared_plant = openstudio.model.PlantLoop(proposed)
@@ -776,21 +780,19 @@ class TestNecbPumpRules(unittest.TestCase):
                         'loop (Sol, PR #63)')
         self.assertIn('distinct hydronic systems consolidated', reason)
 
-    def test_water_to_water_heat_pumps_on_one_source_loop_are_one_network(self):
-        """Sol, PR #63. The coupler registry omitted a plant heat pump THIS
-        repository builds.
+    def test_water_to_water_heat_pumps_on_one_source_loop_stay_distinct(self):
+        """Two wings on one shared ground loop remain two hydronic systems.
 
         `HeatPumpWaterToWaterEquationFitHeating` is what `hp_plant_fancoils.py`
-        wires to the GLHX source loop for the HS14 GSHP system, and
-        `classify.py` already listed both EquationFit variants in its own
-        registry. The network walk's four-name tuple did not, so two hot-water
-        wings on one shared ground loop were classified INDEPENDENT and drew a
-        `D-97` citation whose warning text asserted, falsely, that they "share
-        no hydraulic connection, directly or through any other loop".
+        wires to the GLHX source loop for the HS14 GSHP system, so this is the
+        repository's own topology. The shared ground loop is a third fluid
+        circuit: the heat pumps move energy between it and each wing, so the
+        wings' fluid never mixes and they stay distinct hydronic systems. Their
+        block sets partition the reference exactly, so D-97 fires.
 
-        The fix is not a fifth name. The boundary is now the SDK's own
-        `WaterToWaterComponent` class, so no dual-loop component can be missing
-        from it.
+        This test was written to prove the opposite, under a network-classifier
+        reading Sol later withdrew (PR #63). It is kept because the topology is
+        worth pinning; only the expected answer and the reason changed.
         """
         proposed = openstudio.model.Model()
         source = openstudio.model.PlantLoop(proposed)
@@ -822,16 +824,18 @@ class TestNecbPumpRules(unittest.TestCase):
                         'remain distinct hydronic systems, so this is D-97 consolidation')
         self.assertIn('distinct hydronic systems consolidated', reason)
 
-    def test_a_shared_tertiary_loop_is_still_one_network(self):
-        """Sol, PR #63. Moving from a name list to the W2W class was still a
-        guess about that class: it has THREE-loop members.
+    def test_a_shared_tertiary_loop_does_not_merge_two_systems(self):
+        """A shared TERTIARY loop is a third circuit, not continuity.
 
-        `CentralHeatPumpSystem` casts to `WaterToWaterComponent` and initializes
-        cooling, source AND heating connections. Reading only `plantLoop` and
-        `secondaryPlantLoop` left two chilled-water loops that share one heating
-        loop looking independent — the same false "share no hydraulic
-        connection" assertion the classifier exists to prevent, one loop further
-        out. The W2W EquationFit test cannot observe a third side at all.
+        `CentralHeatPumpSystem` initializes cooling, source AND heating
+        connections. Two chilled-water loops whose systems share one heating
+        loop through their tertiary sides therefore share a PLANT — which under
+        Sol's ruling is energy transfer between circuits, not one hydronic
+        system. Their block sets partition the reference exactly, so D-97 fires.
+
+        The three-loop shape is still worth pinning: it is the only place the
+        tertiary side is exercised, and reading only two sides was a real defect
+        in an earlier round. What changed is the expected answer, not the model.
         """
         proposed = openstudio.model.Model()
         shared_heating = openstudio.model.PlantLoop(proposed)

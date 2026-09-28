@@ -1022,49 +1022,6 @@ def _holder_zones(holder):
     }
 
 
-def _coupled_loops(comp):
-    """Every plant loop a multi-loop component joins, or ().
-
-    The boundary is the SDK's own class rather than a list of type names:
-    `WaterToWaterComponent` covers heat exchangers, chillers, and every plant
-    heat pump including the `…EquationFit…` variants, and a single-loop
-    component such as a pump does not cast to it.
-
-    It is NOT all of OpenStudio's multi-loop equipment, and this comment said
-    so once. `ChillerElectricASHRAE205` carries oil-cooler and auxiliary
-    connections the base does not expose, and `HeatPumpAirToWater` joins loops
-    through child objects that are `StraightComponent`s. Both are open with Sol
-    as a boundary question (Fable, PR #63); until he rules, a component outside
-    this class is not treated as joining loops, so such a model can still reach
-    a false independence claim.
-
-    A name list was wrong here twice over. It omitted
-    `HeatPumpWaterToWaterEquationFit*`, which this repository itself builds for
-    the HS14 GSHP system (`hp_plant_fancoils.py`), so two wings on one shared
-    ground loop looked INDEPENDENT and drew a false `D-97` citation asserting
-    they "share no hydraulic connection" (Sol, PR #63). And `classify.py`
-    already carried a third, longer list of its own, which is exactly the
-    "currently in agreement, not shared" failure the zone-serving coil registry
-    carries a comment about — my own commit message had claimed one registry
-    while a more complete one sat two modules away.
-
-    A class test does not go stale as the SDK gains ordinary dual-loop
-    components. It is not a proof of completeness, and the earlier claim that
-    "an omission here is a component that does not join loops at all" was
-    false — see the two exceptions above.
-    """
-    return _w2w_loops(comp, PLANT_LOOP_SIDES)
-
-
-#: EVERY plant-loop connection the W2W base exposes. Two of them was still a
-#: guess about the class: `CentralHeatPumpSystem` is a THREE-loop component
-#: (cooling, source, heating) and casts to the same base, so reading only two
-#: left two chilled-water loops sharing one heating loop looking independent —
-#: the same false assertion the classifier exists to prevent, one loop further
-#: out (Sol, PR #63). A two-loop component reports the third as uninitialized,
-#: so including it changes nothing for heat exchangers and chillers.
-PLANT_LOOP_SIDES = ('plantLoop', 'secondaryPlantLoop', 'tertiaryPlantLoop')
-
 #: Casts whose TERTIARY connection is a load the component SERVES. Direction is
 #: a per-class fact that no generic accessor carries, and the SDK's own named
 #: accessor is the evidence: `heatRecoveryLoop` and `heatingPlantLoop` receive
