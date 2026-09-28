@@ -1022,6 +1022,57 @@ def _holder_zones(holder):
     }
 
 
+#: Equipment that carries load from one plant loop to another. One registry, so
+#: the served-zone walk and the network walk cannot drift apart — a coupler
+#: known to one and not the other would make two loops look independent to the
+#: classifier while sharing zones in the correspondence.
+LOOP_COUPLERS = ('to_ChillerElectricEIR', 'to_HeatExchangerFluidToFluid',
+                 'to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpPlantLoopEIRCooling')
+
+
+def _hydronic_network(loop_, _seen=None):
+    """Every plant loop hydraulically connected to this one, by HANDLE.
+
+    D-97 is scoped to INDEPENDENT proposed hydronic systems. Disjoint served
+    blocks do not establish that: the decision says in terms that zone-disjoint
+    branches can remain one hydronic system, so a block-set partition is
+    necessary for independence and not sufficient, and firing the ruling from it
+    would be proving one side of a distinction from the failure to prove the
+    other (Sol, PR #63).
+
+    This is the classifier that does establish it. Connection is UNDIRECTED and
+    transitive: two loops are in one network if load passes between them in
+    either direction, or through any chain of loops. The upward step matters
+    most — two same-role loops that never feed each other can still share one
+    plant through a third loop of a DIFFERENT role (two hot-water loops drawing
+    on one condenser loop), which the role-filtered candidate list never sees.
+    """
+    seen = _seen if _seen is not None else set()
+    if loop_.handle() in seen:
+        return seen
+
+    seen.add(loop_.handle())
+    for comp in loop_.demandComponents():
+        # Downward: loads this loop serves.
+        for caster in LOOP_COUPLERS:
+            candidate = getattr(comp, caster, None)
+            if candidate is None or not candidate().is_initialized():
+                continue
+            served = candidate().get().plantLoop()
+            if served.is_initialized():
+                _hydronic_network(served.get(), seen)
+    for comp in loop_.supplyComponents():
+        # Upward: the loop that supplies this one.
+        for caster in LOOP_COUPLERS:
+            candidate = getattr(comp, caster, None)
+            if candidate is None or not candidate().is_initialized():
+                continue
+            source = getattr(candidate().get(), 'secondaryPlantLoop', None)
+            if source is not None and source().is_initialized():
+                _hydronic_network(source().get(), seen)
+    return seen
+
+
 def _served_zone_names(loop_, _seen=None):
     """The thermal zones this loop ultimately conditions, by NAME.
 
@@ -1061,8 +1112,7 @@ def _served_zone_names(loop_, _seen=None):
             continue
 
         # Equipment that passes the load on to another loop rather than a zone.
-        for caster in ('to_ChillerElectricEIR', 'to_HeatExchangerFluidToFluid',
-                       'to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpPlantLoopEIRCooling'):
+        for caster in LOOP_COUPLERS:
             candidate = getattr(comp, caster, None)
             if candidate is None or not candidate().is_initialized():
                 continue
@@ -1192,7 +1242,14 @@ def _corresponding_loop(reference_loop, proposed):
         # D-93's unresolved-correspondence warning, rather than claiming D-97
         # adjudicated a gap D-97 expressly leaves open.
         disjoint = sum(len(blocks) for blocks in served.values()) == len(covered)
-        if disjoint and covered == reference_zones:
+        # INDEPENDENCE, established rather than inferred. The partition says the
+        # blocks are consolidated; only the network classification says the
+        # loops are separate hydronic systems, which is the premise D-97
+        # actually adjudicated (Sol, PR #63).
+        networks = [_hydronic_network(loop_) for loop_ in overlapping]
+        independent = all(a.isdisjoint(b)
+                          for i, a in enumerate(networks) for b in networks[i + 1:])
+        if disjoint and covered == reference_zones and independent:
             # D-97: sentence (2) combines pumps only WITHIN one proposed
             # hydronic system ("in a given hydronic system"). No sentence
             # supplies a value across them: (1) has no single corresponding
@@ -1200,12 +1257,14 @@ def _corresponding_loop(reference_loop, proposed):
             # missing-CHARACTERISTICS fallback for a corresponding pump, not a
             # fallback for missing correspondence.
             #
-            # The reason still says PARTITION, not independence: disjoint
-            # coverage is necessary for independence, not sufficient.
-            return None, (f'{len(overlapping)} proposed {role} loops partition this one reference '
-                          f"loop's thermal blocks between them ({names}) — the blocks are "
-                          'consolidated onto one reference loop, and this pass cannot show the '
-                          'loops to be one hydronic system. Sentence (2) combines pumps only '
+            # The reason now ASSERTS independence, because the classifier
+            # established it: no load passes between these loops in either
+            # direction, through any chain. It no longer rests on the
+            # partition alone.
+            return None, (f'{len(overlapping)} independent proposed {role} systems are '
+                          f"consolidated onto this one reference loop ({names}) — they partition "
+                          "its thermal blocks between them and share no hydraulic connection, "
+                          'directly or through any other loop. Sentence (2) combines pumps only '
                           'WITHIN one hydronic system, so the Code prescribes no cross-system '
                           'transfer value here'), True
         return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '

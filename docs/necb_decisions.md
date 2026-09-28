@@ -6123,9 +6123,25 @@ in the plan log.
   entry elsewhere calls a shape D-97 never considered; they keep D-93's
   unresolved-correspondence decline (Sol, PR #63).
 
-  Disjoint coverage is **necessary for independence, not sufficient**, so the
-  warning never claims independence was proven — only that the blocks are
-  consolidated and the loops could not be shown to be one system.
+  Disjoint coverage is **necessary for independence, not sufficient** — this
+  decision says in terms that zone-disjoint branches can remain one hydronic
+  system. So the partition alone cannot fire a ruling scoped to INDEPENDENT
+  systems; firing it from the failure to prove the opposite would be proving one
+  side of a distinction from the absence of the other (Sol, PR #63).
+- **Independence is established by a network classification, not inferred.**
+  `_hydronic_network` walks the plant-loop couplers — heat exchangers, chillers
+  and plant-loop heat pumps — in BOTH directions and transitively, so two loops
+  are one hydronic system if load passes between them by any chain. D-97 fires
+  only when the overlapping loops partition the reference's blocks AND lie in
+  pairwise-disjoint networks; the warning then asserts independence, because it
+  was measured.
+
+  The upward step is what makes this more than a restatement of the partition:
+  two same-role loops that never feed each other can still share one plant
+  through a loop of a DIFFERENT role — two hot-water loops drawing on one
+  condenser loop — which the role-filtered candidate list never sees. That shape
+  partitions the blocks exactly and is nonetheless one system, and it keeps
+  D-93's decline.
 - **The partition predicate also excludes DF-18's case structurally.**
   `_served_zone_names` recurses THROUGH a `HeatExchangerFluidToFluid`, so an
   HX-coupled primary's block set is a strict superset of its secondaries' and
