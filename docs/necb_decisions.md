@@ -6097,6 +6097,26 @@ in the plan log.
   find them, and cites `D-93 D-97`. It is a loud warning rather than a hard
   error, because the Code supplies no value and D-93's declared-assumption
   policy already governs unresolved model inputs.
+- **`D-93 D-97` is cited on the N:1 branch ALONE.** D-93 declines on seven
+  shapes; this ruling examined one. The first implementation put the citation
+  and the "not a conservative bound" wording in the shared decline branch, so a
+  partial overlap — a shape D-97 never considered — attested to it, and the
+  frozen `corpus-sizing-18-vav-hw-subset-reheat` moved to record the
+  mis-citation. The other six declines keep D-93's existing wording. That the
+  same "not conservative" caution is arguably true of them too is a D-93
+  question, not a side effect of this one (Fable, PR #63).
+- **What the pass can actually establish is OVERLAP, not independence.** Its
+  unit of "system" is one `PlantLoop`; this ruling's unit is the hydraulically
+  connected network, and the two are not the same. Note A-8.4.x.14.(2)'s own
+  primary-secondary example, authored the only way OpenStudio permits — a
+  primary loop plus heat-exchanger-coupled wing loops, since one `PlantLoop`
+  takes a single demand-side pump — is several loops and ONE system. The
+  warning therefore states what was observed: N proposed loops overlap this
+  reference loop and the pass cannot show them to be one hydronic system.
+  **This is a real gap, not just wording:** an HX-coupled multi-loop system is
+  declined where sentence (2) ought to govern it. Logged as a deferred finding
+  (group loops through the heat-exchanger recursion before correspondence);
+  it predates this ruling and is not decided here.
 - **The legacy realisation offers no precedent.** The pinned gem
   (`f01da13a6b89`, verified against `legacy_pin/REF`) contains **zero**
   occurrences of `8.4.4.14`, `8.4.5.14`, "static head" or "corresponding pump"
@@ -6120,7 +6140,12 @@ in the plan log.
   actually moves. The Appendix-example test remains the positive control that
   multiple pumps in ONE primary-secondary system still take (2).
 - **Both editions.** 2020's 8.4.4.14 and 2025's 8.4.5.14 are word-for-word
-  identical for (1)-(3), fetched live and carrying no `known_issue`.
+  identical for (1)-(3) save the Note's own number — 2020 embeds "(See Note
+  A-8.4.4.14.(2).)" and 2025 "(See Note A-8.4.5.14.(2).)". Both were fetched
+  live, carry no `known_issue`, and both Notes are `normative: false`. The four
+  payloads are archived verbatim under each edition's `provenance/`, so the
+  scope phrase and the Note's example can be re-read without a live HBIX call —
+  an earlier draft archived only a summary while claiming that (Fable, PR #63).
 - **Who/when:** Sol ruled, 2026-09-28. Numbered D-97 rather than the D-96 the
   ruling named, because D-96 was taken by the relicence while this question was
   in flight.

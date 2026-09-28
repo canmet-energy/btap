@@ -1325,6 +1325,47 @@ any result.
   measuring it, never reasoning about it. Absence of baseline movement was
   treated as evidence three times and was not evidence any of them.
 
+- **DF-18 — correspondence treats a `PlantLoop` as a hydronic system, so an
+  HX-coupled multi-loop system is declined where sentence (2) governs it.**
+  Opened 2026-09-28 (Fable, PR #63), during the D-97 review; it predates D-97
+  and D-97 does not decide it.
+
+  `_corresponding_loop` matches one reference loop against proposed
+  **`PlantLoop`s**. [D-97](necb_decisions.md#d-97)'s unit — and Note
+  A-8.4.x.14.(2)'s — is the hydraulically connected network. They come apart
+  because one OpenStudio `PlantLoop` carries a single demand-side pump, so the
+  Note's own example (a primary plus a north- and a south-wing secondary) can
+  only be authored as a primary loop plus two `HeatExchangerFluidToFluid`-
+  coupled wing loops. That is three loops and **one** primary-secondary system.
+
+  Measured on that model, built with the SDK:
+
+  - With a third wing the reference does not serve, the pass reaches the N:1
+    branch and declines — where (2) should combine the three pumps.
+  - Without it, the reference matched the primary loop **one-to-one** and
+    transferred under (3) from the primary pump alone:
+    `proposed_pumps: 1, combined_electrical_w: 200.0` of the system's 1000 W,
+    at 139.53 W/(L/s). Both wing secondaries were dropped silently — on
+    exactly the shape sentence (2) most clearly covers.
+
+  The second is the worse half: it is a wrong transferred value with no
+  warning, not a decline. Neither is a regression from D-97; both are D-93
+  behaviour the ruling made visible.
+
+  **Remedy to evaluate, not yet adopted:** group loops into one hydronic system
+  through the heat-exchanger recursion `_served_zone_names` already performs
+  (`efficiency.py`), then correspond and apply (1)/(2)/(3) per *group*. Needs
+  its own adjudication — it changes which sentence fires on existing models,
+  so measure the blast radius on the frozen corpus first.
+
+  Related and still open: because our reference builder consolidates
+  (`builder.py` calls `plant_loops.hot_water` with `reuse=True`), the N:1 shape
+  D-97 declines on is partly a topology **we** choose; the Code nowhere says
+  the reference has one plant per building. A 1:1 reference topology would put
+  those cases back under (1)-(3) — but it also moves the 8.4.x.9.(6)(b)-(d)
+  staging bands, so it is a separate question for Sol, recorded here so it is
+  not lost.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push

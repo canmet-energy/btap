@@ -294,12 +294,13 @@ class TestNecbPumpRules(unittest.TestCase):
         serve_zones(reference, consolidated,
                     ('Zone A (reheat)', 'Zone B (no reheat)'))
 
-        match, reason = _corresponding_loop(consolidated, proposed)
+        match, reason, n_to_1 = _corresponding_loop(consolidated, proposed)
 
         self.assertIsNone(
             match, 'two proposed loops consolidated onto one reference loop is '
                    'an N:1 case increment B does not adjudicate')
-        self.assertIn('consolidated onto this one', reason)
+        self.assertIn('overlap this one reference loop', reason)
+        self.assertTrue(n_to_1, 'this IS the shape D-97 adjudicated')
 
     def test_sentence_2_conserves_electrical_power_across_unequal_motors(self):
         """The adjudicated equivalent motor efficiency, which nothing pinned.
@@ -552,9 +553,14 @@ class TestNecbPumpRules(unittest.TestCase):
         hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
 
         warning = next((w for w in audit.warnings
-                        if 'independent proposed heating systems' in w['action']
-                        or 'independent proposed hot_water systems' in w['action']), None)
+                        if 'proposed hot_water loops overlap this one reference loop'
+                        in w['action']), None)
         self.assertIsNotNone(warning, 'the decline names the reason')
+        self.assertIn('cannot show them to be one hydronic system', warning['action'],
+                      'the reason states what was OBSERVED — overlap. A PlantLoop is not a '
+                      "hydronic system: the Note's own primary-secondary example authored with "
+                      'heat-exchanger coupled wing loops is several loops and one system, and '
+                      'this pass cannot tell that apart from separate plants (Fable, PR #63)')
         self.assertEqual('D-93 D-97', warning['ruling'],
                          'the N:1 decline cites the ruling that decided it')
         self.assertIn('combines pumps only WITHIN one hydronic system', warning['action'],
@@ -574,6 +580,43 @@ class TestNecbPumpRules(unittest.TestCase):
                               and str(e.get('article') or '') in ('8.4.4.14.(1)', '8.4.4.14.(2)',
                                                                   '8.4.4.14.(3)')],
                          'nothing is transferred on a correspondence the Code does not define')
+
+    def test_the_other_declines_do_not_cite_the_ruling_that_never_saw_them(self):
+        """D-97 adjudicated N:1 and nothing else.
+
+        The first implementation put the citation and the "not a conservative
+        bound" wording in the shared ``match is None`` branch, so a
+        partial-overlap decline — a shape D-97 never considered — attested to
+        it, and the frozen sizing scenario `corpus-sizing-18-vav-hw-subset-reheat`
+        moved to record the mis-citation. A ruling axis that fires on shapes its
+        ruling never examined is worse than no citation: it makes the rulings
+        appendix report D-97 as applied in runs that contain no N:1 at all
+        (Fable, PR #63).
+
+        One proposed loop overlapping partially is the cheapest of the four
+        non-N:1 declines to author, and it is the one that actually regressed.
+        """
+        proposed = openstudio.model.Model()
+        loop_with_vsd_pump(proposed, 'Heating', flow=0.010, power=800.0,
+                           zones=('Block A', 'Block C'))
+
+        reference = openstudio.model.Model()
+        loop_with_vsd_pump(reference, 'Heating', flow=0.020, zones=('Block A', 'Block B'))
+        audit = AuditLog()
+        hvac.apply_efficiencies(reference, code='necb2020', audit=audit, proposed=proposed)
+
+        warning = next((w for w in audit.warnings
+                        if 'a partial overlap is not a correspondence' in w['action']), None)
+        self.assertIsNotNone(warning, 'the partial overlap still declines, loudly')
+        self.assertEqual('D-93', warning['ruling'],
+                         'D-97 ruled on N:1; citing it here attributes a ruling to a shape it '
+                         'never considered')
+        self.assertIn('which is not a Code value; 5.2.6.3 still caps it', warning['action'],
+                      "D-93's existing wording is unchanged — generalising D-97's 'not a "
+                      'conservative bound\' language to every decline is arguably right but is a '
+                      'D-93 question, not a side effect of the N:1 ruling')
+        self.assertNotIn('D-97', warning['ruling'])
+        self.assertNotIn('conservative bound', warning['action'])
 
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()

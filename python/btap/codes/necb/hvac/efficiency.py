@@ -1137,31 +1137,37 @@ def _corresponding_loop(reference_loop, proposed):
 
     Increment B is scoped to an UNAMBIGUOUS one-to-one match. Several proposed
     systems consolidated onto one reference loop is a real case (our own
-    builders reuse a single hot-water loop) but the Code does not define
-    correspondence across independently consolidated systems; that is a
-    separate adjudication, so it declines here rather than guessing.
+    builders reuse a single hot-water loop); D-97 adjudicated it and upheld the
+    decline, because sentence (2) is scoped to one hydronic system.
 
-    :return: (proposed loop, 'one-to-one') or (None, reason)
+    The third element flags THAT branch alone. D-97 adjudicated the N:1 shape
+    and nothing else, so citing it on the other four declines would attribute a
+    ruling to shapes it never considered and make D-97 read as fired in runs
+    that contain no N:1 (Fable, PR #63).
+
+    :return: (proposed loop, 'one-to-one', False) or (None, reason, is_n_to_1)
     """
     role = _loop_role(reference_loop)
     if role in (None, 'service_water'):
-        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}'
+        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}', False
 
     reference_zones = _served_zone_names(reference_loop)
     if not reference_zones:
-        return None, 'the reference loop serves no thermal block, so no correspondence can be drawn'
+        return (None,
+                'the reference loop serves no thermal block, so no correspondence can be drawn',
+                False)
 
     candidates = [loop_ for loop_ in sorted_by_name(proposed.getPlantLoops())
                   if _loop_role(loop_) == role]
     if not candidates:
-        return None, f'the proposed building has no {role} loop'
+        return None, f'the proposed building has no {role} loop', False
 
     exact = [loop_ for loop_ in candidates if _served_zone_names(loop_) == reference_zones]
     if len(exact) == 1:
-        return exact[0], 'one-to-one'
+        return exact[0], 'one-to-one', False
     if len(exact) > 1:
         return None, (f'{len(exact)} proposed {role} loops serve exactly the same thermal blocks — '
-                      'the correspondence is ambiguous')
+                      'the correspondence is ambiguous'), False
 
     overlapping = [loop_ for loop_ in candidates
                    if _served_zone_names(loop_) & reference_zones]
@@ -1173,11 +1179,18 @@ def _corresponding_loop(reference_loop, proposed):
         # corresponding pump, (2) is same-system only, and (3) is a
         # missing-CHARACTERISTICS fallback for a corresponding pump, not a
         # fallback for missing correspondence.
+        #
+        # The reason says OVERLAP, not independence. A PlantLoop is not a
+        # hydronic system: the Note's own primary-secondary example, authored
+        # the only way OpenStudio allows (a primary loop plus heat-exchanger
+        # coupled wing secondaries, one demand-side pump each), is several
+        # loops and ONE system. This pass cannot tell that apart from separate
+        # plants, so it states what it observed (Fable, PR #63).
         names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
-        return None, (f'{len(overlapping)} independent proposed {role} systems are consolidated '
-                      f'onto this one reference loop ({names}). Sentence (2) combines pumps only '
-                      'WITHIN one hydronic system, so the Code prescribes no cross-system transfer '
-                      'value here')
+        return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
+                      f'({names}), and this pass cannot show them to be one hydronic system. '
+                      'Sentence (2) combines pumps only WITHIN one hydronic system, so the Code '
+                      'prescribes no cross-system transfer value here'), True
     if len(overlapping) == 1:
         # Either direction reaches here — the proposed loop may serve blocks
         # the reference one does not, or only some of the ones it does — so the
@@ -1190,8 +1203,8 @@ def _corresponding_loop(reference_loop, proposed):
         # like a full match being called partial (Fable, PR #53).
         return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
                       f"loop's {len(reference_zones)} thermal blocks and serves "
-                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence')
-    return None, f'no proposed {role} loop serves these thermal blocks'
+                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence'), False
+    return None, f'no proposed {role} loop serves these thermal blocks', False
 
 
 def _applicable_pumps(loop_):
@@ -1286,32 +1299,44 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     inferred a whole-building intensity instead, which is a number no sentence
     of the Article asks for.
 
-    The N:1 case — several independent proposed systems consolidated onto one
-    reference loop — declines under D-97 rather than aggregating: sentence (2)
-    is scoped to one hydronic system, and zone disjointness is not system
-    independence. The declined default is an assumption of indeterminate
-    direction, not a safe floor.
+    The N:1 case — several proposed loops consolidated onto one reference loop
+    — declines under D-97 rather than aggregating: sentence (2) is scoped to
+    one hydronic system, and zone disjointness is not system independence. That
+    declined default is an assumption of indeterminate direction, not a safe
+    floor. D-97 is cited on that branch ALONE; the other four declines remain
+    D-93's, which is the ruling that actually examined them.
     """
     reference_pumps = _applicable_pumps(reference_loop)
     if not reference_pumps:
         return
 
-    match, reason = _corresponding_loop(reference_loop, proposed)
+    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed)
     if match is None:
         if _loop_role(reference_loop) == 'service_water':
             return  # D-27 already said so, at the top of the pass
 
-        # The retained default is NOT a conservative bound. 5.2.6.3 is a
-        # ceiling only, so the default may sit above or below whatever a
-        # transfer would have produced and can bias the reference in either
-        # direction. Saying "conservative" here would be false comfort (D-97).
+        # D-97 adjudicated the N:1 shape ONLY, so only that branch cites it and
+        # carries its wording. On N:1 the retained default is not a
+        # conservative bound: 5.2.6.3 is a ceiling, so the default may sit
+        # above or below whatever a transfer would have produced and can bias
+        # the reference in either direction. Calling it conservative would be
+        # false comfort. The other four declines keep D-93's existing text —
+        # the same is arguably true of them, but that is a D-93 question and
+        # not a side effect of this ruling (Fable, PR #63).
+        if n_to_1:
+            return audit.warn('efficiency',
+                              f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT applied — '
+                              f'{reason}. The pump keeps the modelling default: a declared '
+                              'assumption, not a Code value and not a conservative bound — it may '
+                              'bias the reference in either direction. 5.2.6.3 supplies only an '
+                              'upper cap',
+                              target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
+                              ruling='D-93 D-97')
         return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
-                                        f'applied — {reason}. The pump keeps the modelling default: '
-                                        'a declared assumption, not a Code value and not a '
-                                        'conservative bound — it may bias the reference in either '
-                                        'direction. 5.2.6.3 supplies only an upper cap',
+                                        f'applied — {reason}. The pump keeps the modelling default, '
+                                        f'which is not a Code value; 5.2.6.3 still caps it',
                           target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
-                          ruling='D-93 D-97')
+                          ruling='D-93')
 
     proposed_pumps = _applicable_pumps(match)
     sentence = _governing_sentence(proposed_pumps)
