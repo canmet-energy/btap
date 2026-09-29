@@ -1432,7 +1432,7 @@ any result.
   **Exposure in this repository is nil**: no builder wires any tertiary
   (`grep addToTertiaryNode btap/modeling` finds nothing; `hp_plant_fancoils.py`
   uses the EIR heat pumps without one), and no frozen baseline contains one. The
-  risk is a foreign model — the same population as [DF-19](#).
+  risk is a foreign model — the same population as DF-19.
 
   **Remedy to evaluate:** a component whose `tertiaryPlantLoop()` IS this loop,
   and whose class is in `TERTIARY_LOAD_CASTS`, is a SUPPLIER of this loop rather
