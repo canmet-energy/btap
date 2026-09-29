@@ -210,7 +210,14 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
 
     #: ``](#x)``, ``[x]: #x`` and ``href="#x"`` all render as links; matching
     #: only the first let a reference-style definition through (Fable, PR #60).
-    LINK = re.compile(r'(?:\]\(|\]:[ \t]*|href=")#([^)\s"]+)')
+    #: Every spelling GitHub renders as a link. Verified against POST
+    #: /markdown: `[x](<#d>)`, `[x]( #d)`, `[x]: <#d>` and a
+    #: single-quoted href all become real links, and the previous
+    #: pattern saw none of them — so a dead fragment in any of those
+    #: spellings passed silently (Fable, PR #60).
+    LINK = re.compile(
+        r'(?:\]\([ \t]*<?|\]:[ \t]*<?|href\s*=\s*[\x22\x27]?)'
+        r'#([^)>\s\x22\x27]+)')
 
     #: The explicit anchor, and the bare heading whose natural GitHub slug is
     #: already the short id. Fourteen entries use the second form and need no
@@ -229,11 +236,13 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         (found while re-running Fable's PR #60 mutation matrix against my own
         fix for it).
         """
-        # Membership alone is sufficient and the short-form check was dead:
-        # every declared id is `D-NN`, so a fragment whose uppercase is in
-        # `declared` necessarily matches `d-\d+`. A full heading slug fails
-        # membership, which is what rejects it. Keeping both clauses meant one
-        # of them could not be falsified by any input (mutation matrix, PR #60).
+        # A previous comment here called the short-form `re.fullmatch` clause
+        # DEAD. That was wrong: `.upper()` is many-to-one, so `#D-93` passes
+        # membership while failing the fullmatch — the clause was live and
+        # case-sensitive. Dropping it is safe for a different reason, which Fable
+        # established: GitHub's own client lowercases the fragment before looking
+        # up `user-content-<id>`, so a case variant still lands. Case variants
+        # are the only inputs whose acceptance changed (Fable, PR #60).
         return sorted({f for f in cls.LINK.findall(doc) if f.upper() not in declared})
 
     @classmethod
@@ -359,6 +368,30 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
                          "a non-decision fragment AND a full heading slug must both be "
                          "rejected — the full slug is the form that breaks on a reword")
 
+    def test_link_sees_every_spelling_github_renders(self):
+        """F8, Fable PR #60 — and a test I should have written with the widening.
+
+        Narrowing `LINK` back to its previous form survived the whole suite: I
+        widened the pattern and added nothing that exercises the new spellings.
+        Each of these renders a real link (verified against POST /markdown), so
+        a dead fragment in any of them previously passed silently.
+        """
+        cases = {
+            "](#d-01)": "plain",
+            "](<#d-02>)": "angle-bracketed destination",
+            "]( #d-03)": "leading space before the destination",
+            "]: <#d-04>": "angle-bracketed reference definition",
+            "href=\x22#d-05\x22": "double-quoted href",
+            "href='#d-06'": "single-quoted href",
+            "href = #d-07": "spaced, unquoted href",
+        }
+        for spelling, label in cases.items():
+            with self.subTest(spelling=label):
+                found = self.LINK.findall(f"text {spelling} more")
+                self.assertEqual(1, len(found),
+                                 f"{label}: GitHub renders this as a link, so a dead fragment "
+                                 f"spelled this way must not pass unseen — got {found}")
+
     def test_the_scans_are_not_vacuous(self):
         """Floors, so a broken scanner cannot go green-silent — the same
         protection `TestRuntimeCitations.test_scan_is_not_vacuous` already gives
@@ -415,9 +448,48 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         self.assertNotEqual([], self.hidden_declaration_risk(
             "<!-- TOC BEGIN -->\n<!-- TOC END -->\n<!-- a stray note -->\n"),
             "a third well-formed comment is still a place a declaration could be hidden")
+        # Isolates the WELL-FORMEDNESS clause, which guards a real dead link.
+        # Exactly two markers, both TOC-named, so the count and name clauses
+        # both pass — while GitHub renders the whole span as `<p>after</p>` and
+        # `sources()` still reports D-81 from inside it. Only this clause caught
+        # it, and nothing could tell if it were deleted (Fable, PR #60).
+        spanning = '<!-- TOC BEGIN\n<a id="d-81"></a>\n\n## D-81\nTOC END -->\n\nafter\n'
+        self.assertEqual(2, len(self.comment_markers(spanning)),
+                         "the count and name clauses cannot see this one")
+        self.assertNotEqual([], self.hidden_declaration_risk(spanning),
+                            "a comment opening on one line and closing on another spans the "
+                            "declaration between them, which renders as nothing")
+        # Isolates the NAME clause.
+        self.assertNotEqual([], self.hidden_declaration_risk(
+            "<!-- something else -->\n<!-- and another -->\n"),
+            "two well-formed comments that are not the TOC's are not this document's")
         self.assertEqual(["D-81"], sorted(self.sources(hidden)),
                          "and the raw scan still counts the hidden declaration as live, which "
                          "is exactly the dead link the guard exists to prevent")
+
+    @classmethod
+    def unresolved_inbound(cls, text, declared):
+        """Inbound decision-log fragments that name no declared id.
+
+        A classmethod so the negative below exercises the SAME predicate the
+        tree scan uses. Dropping the membership test survived 15/15 before this
+        existed: the vacuity floor proved the regex finds a link, not that a bad
+        one is rejected (Fable, PR #60).
+        """
+        found = re.findall(r"necb_decisions\.md#([^)\s\x22\x27]+)", text)
+        return sorted({f for f in found if f.upper() not in declared})
+
+    def test_a_bad_inbound_link_is_rejected(self):
+        # The document name and the `#` are joined at RUNTIME so this file does
+        # not itself become an inbound link the tree scan then reports. Writing
+        # the literal here made the scan flag its own fixture.
+        doc = "necb_decisions" ".md"
+        text = " ".join(f"see {doc}#{f}" for f in
+                        ("d-95", "d-99", "d-95--full-slug", "D-95"))
+        self.assertEqual(["d-95--full-slug", "d-99"],
+                         self.unresolved_inbound(text, {"D-95"}),
+                         "an unknown id and a full heading slug are rejected; a case variant "
+                         "is accepted, because GitHub's client lowercases the fragment")
 
     def test_every_inbound_link_from_the_tree_resolves(self):
         """Links from ANYWHERE tracked, not just the workflow.
