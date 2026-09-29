@@ -1,4 +1,4 @@
-"""The decisions drift gate must be reachable from a docs-only change.
+"""The decisions drift gate is PATH-UNFILTERED and must stay that way.
 
 `docs/decisions/D-NN.md` is the canonical source of the runtime registry. While
 that registry was itself the canonical file, under `python/`, `test.yml`'s
@@ -33,6 +33,8 @@ WORKFLOWS = REPO_ROOT / ".github" / "workflows"
 GATE = WORKFLOWS / "decisions.yml"
 MAIN = WORKFLOWS / "test.yml"
 CHECK = "generate_decisions.py --check"
+#: The whole command, as its own executed line.
+EXACT_CHECK = "python3 python/scripts/generate_decisions.py --check"
 
 
 COMMENT_RE = re.compile(r"(?m)^\s*#.*$|(?<=\s)#.*$")
@@ -85,17 +87,29 @@ def carries_path_filter(text: str):
     return [key for key in PATH_FILTER_KEYS if key in block]
 
 
+def exact_run_lines(text: str):
+    """Executed lines, stripped and whole, for exact comparison.
+
+    `run_lines` is used for substring questions such as "is there a pip
+    install". This one answers "is this EXACT command a line of its own", which
+    is what makes a swallowed exit status detectable without modelling the
+    shell.
+    """
+    return [line.strip() for line in run_lines(text).split("\n") if line.strip()]
+
+
 def top_level_on_block(text: str) -> str:
     """The `on:` block, to the next top-level key, comments stripped."""
     match = re.search(r"(?m)^on:\s*$(.*?)(?=^\S)", uncommented(text), re.DOTALL)
     return match.group(1) if match else ""
 
 
-class TestDecisionsGateIsUnskippable(unittest.TestCase):
+class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
     def test_the_gate_workflow_exists(self):
         self.assertTrue(GATE.is_file(),
-                        f"{GATE.name} is the unskippable drift gate; without it a "
-                        "docs-only push can merge a stale runtime registry")
+                        f"{GATE.name} is the PATH-UNFILTERED drift gate; without "
+                        "it a docs-only push can merge a stale runtime registry "
+                        "with no run at all")
 
     def test_the_gate_has_no_path_filter(self):
         """The whole point. A filter here would recreate the hole."""
@@ -133,32 +147,41 @@ class TestDecisionsGateIsUnskippable(unittest.TestCase):
         for event in ("push:", "pull_request:"):
             self.assertIn(event, block, f"{GATE.name} must run on {event}")
 
-    def test_the_gate_actually_runs_the_check(self):
-        """A workflow that runs on everything and checks nothing is worse than
-        none, because it looks like coverage.
+    def test_the_gate_runs_the_check_as_a_failing_command(self):
+        """The check must be able to FAIL the step, not merely be executed.
 
-        Asserted against the lines the workflow EXECUTES. Against raw text this
-        passed with the step commented out, because the literal survived inside
-        the `#` that disabled it (Fable, PR #64).
+        Substring matching on the executed lines was not enough: `--check
+        || true`, `--check; true` and `echo ...--check` all satisfied it while
+        the step could no longer fail (Sol, PR #64). Rather than model shell
+        semantics, the contract is deliberately rigid — one exact normalized
+        line, nothing appended.
         """
-        executed = run_lines(GATE.read_text(encoding="utf-8"))
-        self.assertIn(CHECK, executed,
-                      f"{GATE.name} must RUN `{CHECK}`, not merely mention it")
+        self.assertIn(EXACT_CHECK, exact_run_lines(GATE.read_text(encoding="utf-8")),
+                      f"{GATE.name} must run exactly `{EXACT_CHECK}` as its own "
+                      "line, with nothing appended that could swallow its exit "
+                      "status")
 
-    def test_the_check_is_not_merely_mentioned(self):
-        """The vacuity floor for the assertion above.
+    def test_a_neutralized_check_does_not_satisfy_the_contract(self):
+        """The falsifying half, through the same predicate.
 
-        Its siblings in `test_decisions_registry.py` carry
-        `test_the_scans_are_not_vacuous` and `test_the_link_scan_can_fail` for
-        this reason; this module was written positive-only.
+        Each of these executes the command and cannot fail the step.
         """
-        commented = ("jobs:\n  decisions:\n    steps:\n"
-                     "      - run: echo skip  # " + CHECK + "\n")
-        self.assertIn(CHECK, commented, "precondition: the literal is present")
-        self.assertNotIn(CHECK, run_lines(commented),
-                         "a commented-out check must not satisfy the assertion")
-        real = "jobs:\n  decisions:\n    steps:\n      - run: " + CHECK + "\n"
-        self.assertIn(CHECK, run_lines(real))
+        for suffix, why in ((" || true", "or-true"), ("; true", "semicolon-true"),
+                            (" || exit 0", "or-exit-zero"), (" &", "backgrounded")):
+            with self.subTest(form=why):
+                neutered = ("jobs:\n  d:\n    steps:\n      - run: "
+                            + EXACT_CHECK + suffix + "\n")
+                self.assertNotIn(EXACT_CHECK, exact_run_lines(neutered),
+                                 f"{why} must not satisfy the contract")
+        for prefix, why in (("echo ", "echoed"), ("# ", "commented")):
+            with self.subTest(form=why):
+                neutered = ("jobs:\n  d:\n    steps:\n      - run: "
+                            + prefix + EXACT_CHECK + "\n")
+                self.assertNotIn(EXACT_CHECK, exact_run_lines(neutered),
+                                 f"{why} must not satisfy the contract")
+        real = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
+        self.assertIn(EXACT_CHECK, exact_run_lines(real),
+                      "and the real form must satisfy it")
 
     def test_the_on_block_extractor_can_fail(self):
         """`top_level_on_block` returning everything, or nothing, must not pass.

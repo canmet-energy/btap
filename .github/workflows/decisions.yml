@@ -2,6 +2,10 @@ name: decisions
 
 # NO `paths` OR `paths-ignore`, DELIBERATELY.
 #
+# The property this enforces is PATH-UNFILTERED AND REACHABLE on pushes to
+# main/develop, pull requests, merge groups and manual dispatch. Not
+# "unskippable" and not merge-blocking: see the note on the check step.
+#
 # `test.yml` path-ignores `**.md` and `docs/**`, which was safe while the
 # canonical decision registry lived under `python/`: every canonical edit
 # necessarily touched a non-ignored file and so ran CI. It stopped being safe
@@ -19,7 +23,7 @@ name: decisions
 # `paths-ignore` cannot be narrowed to exclude `docs/decisions/**` without
 # switching to `paths` with `!` negation, whose override semantics would then
 # have to be modelled in a test to be trusted. An absent filter needs no model,
-# and `python/tests/test_decisions_gate_is_unskippable.py` asserts it stays
+# and `python/tests/test_decisions_gate_is_path_unfiltered.py` asserts it stays
 # absent.
 #
 # Cheap by construction: stdlib only, no venv, no SDK, no EnergyPlus.
@@ -47,8 +51,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # The one gate that must never be skippable: both generated artifacts
-      # regenerate byte-identically from docs/decisions/.
+      # Path-unfiltered, so this is reachable from a docs-only change. It is
+      # NOT unskippable: `[skip ci]` skips it, and nothing requires it —
+      # `main` has no branch protection. It makes the failure visible.
       - name: generate_decisions.py --check
         run: python3 python/scripts/generate_decisions.py --check
 

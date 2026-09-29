@@ -265,8 +265,8 @@ attribution together. Never hand-edit a golden. Full instructions are in
 | `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
 | `main-red` | on a failed push run on `main`, opens/updates an assigned issue (D-94) |
 
-Beside it, `.github/workflows/decisions.yml` is a **separate always-run gate**,
-not a seventh job. It carries no `paths`/`paths-ignore` deliberately, and runs
+Beside it, `.github/workflows/decisions.yml` is a **separate path-unfiltered
+gate**, not a seventh job. The property it enforces is exactly: path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch. It carries no `paths`/`paths-ignore` deliberately, and runs
 `generate_decisions.py --check` plus
 `tests.necb.test_decisions_registry{,_sync}` and
 `tests.necb.test_decisions_generator` through stdlib `unittest` — no venv, no
@@ -274,7 +274,8 @@ dependency install, no SDK. It exists because `docs/decisions/D-NN.md` is the
 canonical source of the runtime registry while `test.yml` path-ignores
 `docs/**`: editing a source without regenerating touches only ignored paths, so
 `test.yml` would not run, and `main` has no branch protection to require it.
-`python/tests/test_decisions_gate_is_unskippable.py` keeps the filter absent.
+`python/tests/test_decisions_gate_is_path_unfiltered.py` keeps the filter
+absent and the check runnable as a failing command.
 
 What the gate does NOT do: block a merge. `main` carries no branch protection
 and no rulesets, and `main-red` is a job inside `test.yml` gated on that

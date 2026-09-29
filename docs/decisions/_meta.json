@@ -22,7 +22,7 @@
     "must be cited by at least one `ruling:` literal in Python code.",
     "python/tests/necb/test_decisions_registry.py, test_decisions_registry_sync.py and",
     "test_decisions_generator.py enforce the source schema, both generated outputs,",
-    "the runtime-citation invariant and short-link resolution. The unskippable drift",
+    "the runtime-citation invariant and short-link resolution. The path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch drift",
     "gate is .github/workflows/decisions.yml, which carries no path filter.",
     "Summaries are PARAPHRASE — never reproduce NECB text verbatim here (D-01 governs where",
     "code text may be reproduced, and this file is not one of those places)."

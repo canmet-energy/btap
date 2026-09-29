@@ -176,7 +176,7 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 ## CI
 
 `.github/workflows/test.yml` has six jobs, and
-`.github/workflows/decisions.yml` is a separate always-run gate beside it:
+`.github/workflows/decisions.yml` is a separate PATH-UNFILTERED gate beside it:
 
 - **`lint`**: stdlib-oriented Python checks, coverage pointers/doc drift, and
   the decisions registry.
@@ -205,13 +205,15 @@ but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
 deleting the variable falls back to `ubuntu-latest`.
 
 `.github/workflows/decisions.yml` is a SEPARATE workflow, not a seventh job,
-and carries **no `paths` or `paths-ignore`** deliberately. It runs
+and carries **no `paths` or `paths-ignore`** deliberately. The property it
+enforces is exactly: **path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch**. It is not
+"unskippable" — `[skip ci]` skips it — and it is not merge-blocking. It runs
 `generate_decisions.py --check` plus the three decision test modules on every
 push and pull request, stdlib-only with no dependency install. It exists because
 `docs/decisions/D-NN.md` is the canonical source of the RUNTIME registry while
 `test.yml` path-ignores `docs/**`: a source edit WITHOUT a regenerate touches
 only ignored paths, so `test.yml` would not run at all, and `main` has no branch
-protection to require it. `python/tests/test_decisions_gate_is_unskippable.py`
+protection to require it. `python/tests/test_decisions_gate_is_path_unfiltered.py`
 asserts the filter stays absent.
 
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`

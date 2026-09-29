@@ -190,11 +190,11 @@ def validate(name: str, meta: dict, body: str) -> None:
         raise ValueError("{}: body must end with exactly one newline".format(name))
 
 
-#: Editor and OS debris that is not a lost decision. `.D-01.md.swp` exists while
-#: a vim buffer is OPEN, so counting it would stop a developer running the
-#: repository's own drift gate until they closed the editor — behaviour that
-#: trains people around a gate rather than through it (Fable, PR #64).
-#: `Path.rglob` includes dotfiles, unlike `glob.glob`.
+#: Only a Markdown suffix can be a lost decision. This is what tolerates editor
+#: and OS debris without a blanket dotfile rule: `.D-01.md.swp` exists while a
+#: vim buffer is OPEN, and failing on it would stop a developer running the
+#: repository's own drift gate until they closed the editor (Fable, PR #64) —
+#: but exempting every dotfile then hid `.D-98.md` (Sol, PR #64).
 SOURCE_SUFFIXES = frozenset({".md", ".markdown"})
 
 
@@ -221,16 +221,23 @@ def stray_files(source_dir: Path = SOURCE_DIR):
     found = []
     for path in sorted(source_dir.rglob("*")):
         relative = path.relative_to(source_dir).as_posix()
-        if relative in keep:
-            continue
-        # A directory SYMLINK is not descended by rglob and is not is_file(), so
-        # a linked-in directory of sources slipped past entirely (Fable, PR #64).
+        # is_symlink() is tested BEFORE the keep-set exemption. Checking keep
+        # first accepted a symlink NAMED `D-98.md`, and symlinked `_preamble.md`
+        # and `_meta.json` with it: the name was exempted and the link followed
+        # to its target (Sol, PR #64). A canonical input must be a real file.
         if path.is_symlink():
             found.append(f"{relative} (symlink)")
             continue
+        if relative in keep:
+            continue
         if not path.is_file():
             continue
-        if path.name.startswith(".") or path.name.endswith("~"):
+        # Bounded debris shapes only. A blanket "starts with a dot" exemption
+        # hid `.D-98.md` — a decision-shaped Markdown source — and none of the
+        # debris needs it: `.D-01.md.swp` is excluded by its `.swp` suffix,
+        # `.DS_Store` and `.gitkeep` carry no Markdown suffix at all, and
+        # `D-01.md~` ends with a tilde (Sol, PR #64).
+        if path.name.endswith("~"):
             continue
         if path.suffix.lower() not in SOURCE_SUFFIXES:
             continue
