@@ -160,7 +160,7 @@ class TestRuntimeCitations(unittest.TestCase):
 
 
 class TestDecisionShortIdsResolve(unittest.TestCase):
-    """Every `#d-NN` link into the decision log lands on a real target.
+    r"""Every `#d-NN` link into the decision log lands on a real target.
 
     **The declaration half of this gate is gone, because generation replaced
     it.** Its predecessor tried to prove that every id was declared exactly
