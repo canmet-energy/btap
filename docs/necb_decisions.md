@@ -6097,12 +6097,14 @@ in the plan log.
   find them, and cites `D-93 D-97`. It is a loud warning rather than a hard
   error, because the Code supplies no value and D-93's declared-assumption
   policy already governs unresolved model inputs.
-- **`D-93 D-97` is cited on the N:1 branch ALONE.** D-93 declines on seven
-  shapes; this ruling examined one. The first implementation put the citation
+- **`D-93 D-97` is cited on the consolidation branch ALONE.** D-93 declines on
+  several other shapes; this ruling examined one. (Counts are deliberately not
+  stated: this entry said "seven … the other six" while the code said "four",
+  and the measured number was seven — Fable, PR #63.) The first implementation put the citation
   and the "not a conservative bound" wording in the shared decline branch, so a
   partial overlap — a shape D-97 never considered — attested to it, and the
   frozen `corpus-sizing-18-vav-hw-subset-reheat` moved to record the
-  mis-citation. The other six declines keep D-93's existing wording. That the
+  mis-citation. Every other decline keeps D-93's existing wording. That the
   same "not conservative" caution is arguably true of them too is a D-93
   question, not a side effect of this one (Fable, PR #63).
 - **The implemented predicate is an exact consolidation.** The overlapping

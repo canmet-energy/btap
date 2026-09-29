@@ -1015,6 +1015,99 @@ class TestNecbPumpRules(unittest.TestCase):
         self.assertEqual('D-93', decline['ruling'],
                          'ambiguity is D-93 alone; D-97 ruled on the disjoint partition')
 
+    def test_disjoint_loops_that_under_cover_the_reference_do_not_fire_d97(self):
+        """Fable, PR #63. The coverage conjunct was tested in ONE direction.
+
+        Weakening `covered == reference_zones` to `<=` survived the whole suite,
+        because no fixture had disjoint loops that under-cover: reference
+        {A,B,C} against proposed {A},{B} would then fire D-97 and claim the
+        loops "partition this one reference loop's thermal blocks" while block C
+        has no counterpart at all. That is the mis-citation class the earlier
+        rounds were about.
+        """
+        proposed = openstudio.model.Model()
+        blocks = {}
+        for name in ('Block A', 'Block B'):
+            zone = openstudio.model.ThermalZone(proposed)
+            zone.setName(name)
+            blocks[name] = zone
+        for flow, power, served in ((0.010, 800.0, ('Block A',)), (0.005, 700.0, ('Block B',))):
+            loop_, _ = loop_with_vsd_pump(proposed, 'Heating', flow=flow, power=power, zones=None)
+            serve_existing_zones(proposed, loop_, [blocks[n] for n in served])
+
+        reference = openstudio.model.Model()
+        ref_loop, _ = loop_with_vsd_pump(reference, 'Heating', flow=0.020,
+                                         zones=('Block A', 'Block B', 'Block C'))
+        match, reason, n_to_1 = _corresponding_loop(ref_loop, proposed)
+
+        self.assertIsNone(match)
+        self.assertFalse(n_to_1,
+                         'the loops are disjoint but leave Block C with no counterpart, so they '
+                         'do not partition the reference loop and D-97 must not fire')
+        # And the reason must name what actually failed. It previously asserted
+        # a disjunction — "overlap each other or reach blocks it does not serve"
+        # — of which NEITHER clause holds on this shape (Fable, PR #63).
+        self.assertIn('together they cover only 2 of its 3 thermal blocks', reason)
+        self.assertNotIn('they overlap each other', reason)
+
+    def test_a_listed_tertiary_load_cast_actually_contributes_served_blocks(self):
+        """Fable, PR #63. The POSITIVE half of `TERTIARY_LOAD_CASTS` was unpinned.
+
+        Removing `to_CentralHeatPumpSystem`, removing `to_ChillerElectricEIR`,
+        or emptying the list entirely all left the suite green: nothing showed a
+        heat-recovery or `heatingPlantLoop` tertiary contributing blocks. The
+        omission direction is safe — a loud decline, not a silent value — but an
+        unpinned rule is not a rule.
+        """
+        if not hasattr(openstudio.model, 'CentralHeatPumpSystem'):
+            self.skipTest('CentralHeatPumpSystem not in this SDK')
+        model = openstudio.model.Model()
+        cooling, _ = loop_with_vsd_pump(model, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        heating, _ = loop_with_vsd_pump(model, 'Heating', flow=0.004, power=300.0,
+                                       zones=('Block H',))
+        source, _ = loop_with_vsd_pump(model, 'Condenser', flow=0.008, power=400.0, zones=None)
+        chps = openstudio.model.CentralHeatPumpSystem(model)
+        cooling.addSupplyBranchForComponent(chps)
+        source.addDemandBranchForComponent(chps)
+        chps.addToTertiaryNode(heating.supplyInletNode())
+
+        self.assertEqual({'Block A', 'Block H'}, _served_zone_names(source),
+                         'the source loop serves BOTH load sides of a central heat-pump '
+                         "system: the cooling loop through plantLoop() and the heating loop "
+                         'through the tertiary. Dropping the tertiary from TERTIARY_LOAD_CASTS '
+                         'must lose Block H here')
+
+    def test_a_heat_recovery_chillers_tertiary_contributes_served_blocks(self):
+        """The second listed cast, pinned behaviourally.
+
+        `ChillerElectricEIR`'s tertiary is `heatRecoveryLoop` — a LOAD, since the
+        chiller rejects heat into it. Removing it from `TERTIARY_LOAD_CASTS`
+        survived the suite until this fixture existed.
+
+        The wiring is worth recording: `addToTertiaryNode` succeeds on the
+        recovery loop's DEMAND inlet and is refused on its supply inlet or
+        supply outlet, so the obvious "it supplies heat, put it on the supply
+        side" reading does not build.
+        """
+        model = openstudio.model.Model()
+        chilled, _ = loop_with_vsd_pump(model, 'Cooling', flow=0.004, power=300.0,
+                                        zones=('Block A',))
+        recovery, _ = loop_with_vsd_pump(model, 'Heating', flow=0.004, power=300.0,
+                                         zones=('Block R',))
+        condenser, _ = loop_with_vsd_pump(model, 'Condenser', flow=0.008, power=400.0, zones=None)
+        chiller = openstudio.model.ChillerElectricEIR(model)
+        chilled.addSupplyBranchForComponent(chiller)
+        condenser.addDemandBranchForComponent(chiller)
+        self.assertTrue(chiller.addToTertiaryNode(recovery.demandInletNode()),
+                        'the recovery loop DEMAND inlet is the connection the SDK accepts')
+        self.assertTrue(chiller.heatRecoveryLoop().is_initialized())
+
+        self.assertEqual({'Block A', 'Block R'}, _served_zone_names(condenser),
+                         "the condenser reaches the chiller's cooling load through plantLoop() "
+                         'and its heat-recovery load through the tertiary; dropping '
+                         'to_ChillerElectricEIR from TERTIARY_LOAD_CASTS must lose Block R')
+
     def test_constant_speed_reference_pump_gets_transfer_but_no_curve(self):
         proposed = openstudio.model.Model()
         # 120 W/(L/s)

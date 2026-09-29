@@ -1363,6 +1363,43 @@ any result.
   loud decline rather than a silent transfer — so this is a question about
   attribution accuracy, not a live false-compliance risk.
 
+- **DF-19 — a headered pump bank is invisible to the pump enumerator, and a
+  bank plus one ordinary pump transfers a value 16x low with no warning.**
+  Opened 2026-09-29 (Fable, PR #63). **Pre-existing D-93 behaviour, unchanged
+  since PR #53 — not introduced by D-97.** Needs Sol before it can be fixed.
+
+  `_applicable_pumps` casts only `to_PumpVariableSpeed` and
+  `to_PumpConstantSpeed`. `HeaderedPumpsVariableSpeed.to_PumpVariableSpeed()` is
+  not initialized, so a bank is not seen at all. Measured on a valid SDK model —
+  proposed hot-water loop serving one block with a 3-pump headered bank
+  (0.010 m3/s, 3000 W) on the supply inlet plus a 200 W secondary on the demand
+  inlet, reference loop serving the same block:
+
+  ```text
+  correspondence   one-to-one
+  decision         8.4.4.14.(3): 20.0 W/(L/s), proposed_pumps: 1,
+                                combined_electrical_w: 200.0
+  expected                       320 W/(L/s)  (3200 W over 10 L/s)
+  warning          none
+  ```
+
+  A bank ALONE gives the loud "has no pump" warning, so the dangerous case is a
+  bank beside an ordinary pump: the enumerator finds one pump, is confident, and
+  is 16x low. 5.2.6.3's cap uses the same enumerator, so the Part 5 ceiling is
+  computed on the same understatement.
+
+  **Not fixable without an adjudication.** Sentence (2) applies "where the
+  proposed building uses more than one pump in a given hydronic system", and a
+  headered bank of N is a single OpenStudio object standing for N physical
+  pumps. Whether that is one pump or N for (2)'s trigger — and whether its
+  `totalRatedFlowRate`/`ratedPowerConsumption` are the per-pump or bank values
+  for D-93's combined shaft power and the (3) denominator — is Sol's call.
+
+  **Exposure today is nil in this repository**: no builder constructs a headered
+  bank (`catalog_report.py` recognises the class; nothing creates one), and no
+  frozen baseline contains one. The risk is a foreign model, which is exactly
+  the population the costing path accepts.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push

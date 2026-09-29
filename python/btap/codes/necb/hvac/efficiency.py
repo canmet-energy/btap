@@ -1036,9 +1036,11 @@ def _holder_zones(holder):
 #: that caused two false-compliance results earlier in this work.
 #:
 #: An omission from this list costs a loud decline, never a silent transfer,
-#: which is why it defaults to "not a load". `test_every_tertiary_load_cast_is
-#: _verified_against_the_sdk` pins each entry against the SDK's own accessor, so
-#: the list is a measured fact rather than an assertion.
+#: which is why it defaults to "not a load". Its test pins each entry against
+#: the SDK exposing a load-named accessor, and pins that a listed class's
+#: tertiary really is attributed as served. It does NOT prove the named accessor
+#: and `tertiaryPlantLoop` are the same loop; an earlier comment here claimed
+#: that check existed when it did not (Fable, PR #63).
 TERTIARY_LOAD_CASTS = ('to_ChillerElectricEIR', 'to_ChillerElectricReformulatedEIR',
                        'to_CentralHeatPumpSystem', 'to_HeatPumpPlantLoopEIRHeating',
                        'to_HeatPumpPlantLoopEIRCooling')
@@ -1184,9 +1186,9 @@ def _corresponding_loop(reference_loop, proposed):
     decline, because sentence (2) is scoped to one hydronic system.
 
     The third element flags THAT branch alone. D-97 adjudicated the N:1 shape
-    and nothing else, so citing it on the other four declines would attribute a
+    and nothing else, so citing it on any other decline would attribute a
     ruling to shapes it never considered and make D-97 read as fired in runs
-    that contain no N:1 (Fable, PR #63).
+    that contain no consolidation at all (Fable, PR #63).
 
     :return: (proposed loop, 'one-to-one', False) or (None, reason, is_n_to_1)
     """
@@ -1254,11 +1256,24 @@ def _corresponding_loop(reference_loop, proposed):
                           'hydronic systems consolidated onto one reference loop. Sentence (2) '
                           'combines pumps only WITHIN one hydronic system, so the Code prescribes '
                           'no cross-system transfer value here'), True
+        # The reason names whichever condition actually failed. It used to
+        # assert a disjunction — "overlap each other or reach blocks it does not
+        # serve" — and on disjoint loops that merely UNDER-cover the reference,
+        # neither clause holds (Fable, PR #63).
+        inside = covered & reference_zones
+        faults = []
+        if not disjoint:
+            faults.append('they overlap each other')
+        if inside != reference_zones:
+            faults.append(f'together they cover only {len(inside)} of its '
+                          f'{len(reference_zones)} thermal blocks')
+        if covered - reference_zones:
+            faults.append(f'{len(covered - reference_zones)} of the blocks they serve are not on '
+                          'this reference loop')
         return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
-                      f'({names}) without partitioning its thermal blocks between them — '
-                      f'they cover {len(covered & reference_zones)} of its {len(reference_zones)} '
-                      'blocks, and overlap each other or reach blocks it does not serve. That is '
-                      'multiple partial overlaps, not a correspondence'), False
+                      f'({names}) without partitioning its thermal blocks between them: '
+                      f"{'; '.join(faults)}. That is multiple partial overlaps, not a "
+                      'correspondence'), False
     if len(overlapping) == 1:
         proposed_zones = served[overlapping[0].nameString()]
         shared = len(proposed_zones & reference_zones)
@@ -1363,12 +1378,18 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     inferred a whole-building intensity instead, which is a number no sentence
     of the Article asks for.
 
-    The N:1 case — several proposed loops consolidated onto one reference loop
-    — declines under D-97 rather than aggregating: sentence (2) is scoped to
-    one hydronic system, and zone disjointness is not system independence. That
-    declined default is an assumption of indeterminate direction, not a safe
-    floor. D-97 is cited on that branch ALONE; the other four declines remain
-    D-93's, which is the ruling that actually examined them.
+    The consolidation case — several proposed loops partitioning one reference
+    loop's blocks between them — declines under D-97 rather than aggregating:
+    sentence (2) is scoped to one hydronic system, and two distinct `PlantLoop`s
+    are two hydronic systems however their equipment is coupled. That declined
+    default is an assumption of indeterminate direction, not a safe floor. D-97
+    is cited on that branch ALONE; every other decline remains D-93's, which is
+    the ruling that actually examined them.
+
+    An earlier draft of this docstring said "zone disjointness is not system
+    independence". That was the withdrawn partition premise, and under the final
+    ruling a disjoint partition across distinct loops is precisely what fires
+    D-97 (Fable, PR #63).
     """
     reference_pumps = _applicable_pumps(reference_loop)
     if not reference_pumps:
