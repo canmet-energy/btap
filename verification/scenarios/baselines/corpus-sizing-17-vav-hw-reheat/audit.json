@@ -1575,7 +1575,7 @@
  },
  {
   "step": "coverage",
-  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
+  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
   "inputs": {
    "status": "implemented",
    "decisions_citing": 3,

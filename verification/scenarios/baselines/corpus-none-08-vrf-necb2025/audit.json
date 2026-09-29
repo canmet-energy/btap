@@ -1953,7 +1953,7 @@
    "areal_mass_kg_m2": 40.8,
    "heat_capacity_kj_m2k": 45.5
   },
-  "article": "8.4.5.4.(1) (Note A-8.4.4.4.(1): light-frame example mass/heat capacity)",
+  "article": "8.4.5.4.(1) (Note A-8.4.5.4.(1): light-frame example mass/heat capacity)",
   "ruling": "D-35",
   "building": "reference building",
   "level": "decision"
@@ -2209,10 +2209,10 @@
  },
  {
   "step": "coverage",
-  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
+  "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 3,
    "code": [
     "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
    ]
