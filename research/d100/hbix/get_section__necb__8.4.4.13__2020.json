@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.13",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.13",
+    "server_known_issue": null,
+    "sha256": "efe9084da76f7f2869d642e89f0c8ca2b2efa85066378490846c1bae27d0285b",
+    "state": "present",
+    "state_note": "",
+    "title": "Heat Pumps"
+  },
+  "payload": {
+    "article_number": "8.4.4.13",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "(See Note A-8.4.4.13.)\n1) Except as provided in Sentence (2), where the proposed building's HVAC system includes a water loop heat pump that supplies conditioned air to a thermal block or conditioned water to a hydronic loop, the reference building's HVAC system for that thermal block shall be selected using Table 8.4.4.7.-A. (See Note A-8.4.4.13.(1).)\n2) Where the proposed building's HVAC system includes an air-source, water-source or ground-source heat pump that supplies conditioned air to a thermal block or conditioned water to a hydronic loop,\na) the reference building's HVAC system for that thermal block or for the thermal blocks supplied by the hydronic loop shall be an air-source heat pump described in Table 8.4.4.13.,\nb) the heat pump's cooling capacity shall be set based on the peak cooling load, without oversizing,\nc) the heat pump's heating capacity at an outdoor air temperature of 8.3°C shall be identical to its cooling capacity and reduced to 50% at -8.3°C,\nd) the heat pump shall not operate in heating mode when the outdoor air temperature is below -10°C,\ne) the heat pump's part-load performance shall be modeled in accordance with Subsection 8.4.5.,\nf) the terminal heating's capacity or the heat pump's auxiliary heating capacity shall be set based on the peak heating load of the thermal block and the requirements of Subsections 8.4.1., 8.4.2. and 8.4.4.,\ng) except as provided in Clause (h), the energy type of the heat pump's terminal heating or auxiliary heating shall be\ni) for an air-source heat pump, the energy type used for terminal or auxiliary heating of the thermal blocks of the proposed building served by that heat pump and having the largest annual energy use, provided the heat pump exceeds 33% of the total annual energy use for space heating for these thermal blocks, or\nii) for a water-source or ground-source heat pump, the energy type used for terminal or auxiliary heating of the thermal blocks of the proposed building served by all the heat pumps connected to the same water loop and having the largest annual energy use, provided the heat pump exceeds 33% of the total annual energy use for space heating for these thermal blocks, and\nh) where the heat pump is not an air-, water- or ground-source pump, the energy type of the heat pump's terminal heating or auxiliary heating shall be electricity.\nTable 8.4.4.13. Heat Pump System Description Forming Part of Sentences 8.4.4.13.(2), 8.4.4.14.(6) and 8.4.4.18.(6)\nNotes to Table 8.4.4.13.:\n(1) System number is based on building or space type determined in accordance with Table 8.4.4.7.-A.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 219,
+    "page_start": 218,
+    "part_number": "8",
+    "reference": "8.4.4.13",
+    "section_number": "8.4.4.13",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of System",
+          "Applicable Article for Cooling with Outside Air"
+        ],
+        "note": "Use get_table('necb', '8.4.4.12') for full structured rows.",
+        "row_count": 3,
+        "table_number": "8.4.4.12",
+        "title": "Applicable Requirements for Cooling with Outside Air According to Type of HVAC System"
+      },
+      {
+        "headers": [
+          "System Number(1)",
+          "Type of System",
+          "Fan Control",
+          "Type of Terminal or Auxiliary Heating"
+        ],
+        "note": "Use get_table('necb', '8.4.4.13') for full structured rows.",
+        "row_count": 3,
+        "table_number": "8.4.4.13",
+        "title": "Heat Pump System Description"
+      }
+    ],
+    "title": "Heat Pumps"
+  }
+}

@@ -1,0 +1,6824 @@
+{
+  "1.4.1.2.": {
+    "cited_by": [
+      "D-23",
+      "D-24"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        ". Air-supported structure* means a structure consisting of a pliable membrane that achieve"
+      ],
+      [
+        "delete",
+        "+",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " Existing building* means a building that was constructed at least five years ago. (See No"
+      ],
+      [
+        "insert",
+        "",
+        "Heritage building* means an existing building that is formally recognized by a federal, pr"
+      ],
+      [
+        "delete",
+        ", in watts,",
+        ""
+      ],
+      [
+        "replace",
+        "1",
+        "r"
+      ],
+      [
+        "delete",
+        " Symbols and Other Abbreviations",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "11.4.1.1.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "3.1.1.7.(4)": {
+    "cited_by": [
+      "D-24"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "W",
+        "For t"
+      ],
+      [
+        "insert",
+        "",
+        " pu"
+      ],
+      [
+        "delete",
+        "e a com",
+        ""
+      ],
+      [
+        "replace",
+        "n",
+        "s"
+      ],
+      [
+        "replace",
+        "nt",
+        "s"
+      ],
+      [
+        "delete",
+        "e building envelope ",
+        ""
+      ],
+      [
+        "replace",
+        "p",
+        "A"
+      ],
+      [
+        "delete",
+        "o",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "icl"
+      ],
+      [
+        "replace",
+        "cted",
+        ","
+      ],
+      [
+        "replace",
+        "by",
+        "wall"
+      ],
+      [
+        "replace",
+        "n",
+        "ssemblies"
+      ],
+      [
+        "replace",
+        "e",
+        "i"
+      ],
+      [
+        "delete",
+        "osed uncond",
+        ""
+      ],
+      [
+        "delete",
+        "tio",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "le"
+      ],
+      [
+        "delete",
+        "pace, such a",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "th"
+      ],
+      [
+        "delete",
+        " su",
+        ""
+      ],
+      [
+        "replace",
+        "p",
+        "60° fr"
+      ],
+      [
+        "replace",
+        "rch, enclosed veranda or vestibule,",
+        "m"
+      ],
+      [
+        "replace",
+        "unc",
+        "horiz"
+      ],
+      [
+        "delete",
+        "di",
+        ""
+      ],
+      [
+        "replace",
+        "ioned",
+        "al"
+      ],
+      [
+        "replace",
+        "enc",
+        "sha"
+      ],
+      [
+        "replace",
+        "osure may",
+        "l"
+      ],
+      [
+        "insert",
+        "",
+        "as roof assemblies, and roof assemblies inclined 60° or more from "
+      ],
+      [
+        "replace",
+        "o",
+        "he"
+      ],
+      [
+        "insert",
+        "",
+        "orizont"
+      ],
+      [
+        "insert",
+        "",
+        "l shall be considered as wall assemblies. Section 3.2. Prescripti"
+      ],
+      [
+        "insert",
+        "",
+        "P"
+      ],
+      [
+        "insert",
+        "",
+        "th 3.2.1. Ge"
+      ],
+      [
+        "delete",
+        " ov",
+        ""
+      ],
+      [
+        "delete",
+        "l thermal transmittance of 6.25 W/(m²xK). (See Note A-3.1.1.7.(4).)",
+        ""
+      ]
+    ],
+    "fragment": "(4)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "3.2.1.4.": {
+    "cited_by": [
+      "D-74"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "3.2.2.2.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        ") Table 3.2.2.2. Overall Thermal Transmittance of Above-ground Opaque Building Assemblies "
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "3.2.2.3.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "3.2.3.1.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "3.2.3.3.(3)": {
+    "cited_by": [
+      "D-32"
+    ],
+    "diff_spans": [],
+    "fragment": "(3)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "3.2.4.1.": {
+    "cited_by": [
+      "D-76"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "3.2.4.2.": {
+    "cited_by": [
+      "D-76"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "substantively identical"
+  },
+  "3.2.4.2.(1)(c)": {
+    "cited_by": [
+      "D-21"
+    ],
+    "diff_spans": [],
+    "fragment": "(1)(c)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "substantively identical"
+  },
+  "4.2.1.6.": {
+    "cited_by": [
+      "D-02",
+      "D-61"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "4.2.2.1.(10)": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [],
+    "fragment": "(10)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "4.2.2.1.(12)": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [],
+    "fragment": "(12)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "substantively identical"
+  },
+  "4.2.2.1.(13)": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [],
+    "fragment": "(13)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "4.2.2.1.(15)": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "."
+      ]
+    ],
+    "fragment": "(15)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "4.2.2.3.": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        " Determination of Daylighted Area Under Roof Monitors"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "4.2.2.4.": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "4.2.2.5.": {
+    "cited_by": [
+      "D-57"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "4.2.3.1.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "5.2.10.1.": {
+    "cited_by": [
+      "D-06",
+      "D-17",
+      "D-61",
+      "D-65"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        " Table 5.2.10.1.-A (Continued)"
+      ],
+      [
+        "replace",
+        "t least 50%",
+        "n"
+      ],
+      [
+        "replace",
+        "d",
+        "of at l"
+      ],
+      [
+        "insert",
+        "",
+        "as"
+      ],
+      [
+        "replace",
+        "ermin",
+        " 50% calculat"
+      ],
+      [
+        "replace",
+        "a",
+        "u"
+      ],
+      [
+        "replace",
+        " a cha",
+        "i"
+      ],
+      [
+        "delete",
+        "e in",
+        ""
+      ],
+      [
+        "replace",
+        "e",
+        "followi"
+      ],
+      [
+        "replace",
+        "thalpy of the outdoor air supply",
+        "g"
+      ],
+      [
+        "delete",
+        "l to 50% of the difference between the outdoor air and return air enthalpies at design con",
+        ""
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "ra",
+        "RA"
+      ],
+      [
+        "replace",
+        "0",
+        "o"
+      ],
+      [
+        "replace",
+        "Standard l",
+        "L"
+      ],
+      [
+        "delete",
+        "where ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ",entering"
+      ],
+      [
+        "insert",
+        "",
+        "= enthalpy of the outdoor air entering the energy recovery system, kJ/kg dry air h_OA,"
+      ],
+      [
+        "delete",
+        "_",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " air"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.10.1.(4)": {
+    "cited_by": [
+      "D-15"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "t least 50%",
+        "n"
+      ],
+      [
+        "replace",
+        "d",
+        "of at l"
+      ],
+      [
+        "insert",
+        "",
+        "as"
+      ],
+      [
+        "replace",
+        "ermin",
+        " 50% calculat"
+      ],
+      [
+        "replace",
+        "a",
+        "u"
+      ],
+      [
+        "replace",
+        " a cha",
+        "i"
+      ],
+      [
+        "delete",
+        "e in",
+        ""
+      ],
+      [
+        "replace",
+        "e",
+        "followi"
+      ],
+      [
+        "replace",
+        "thalpy of the outdoor air supply",
+        "g"
+      ],
+      [
+        "delete",
+        "l to 50% of the difference between the outdoor air and return air enthalpies at design con",
+        ""
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "ra",
+        "RA"
+      ],
+      [
+        "replace",
+        "0",
+        "o"
+      ]
+    ],
+    "fragment": "(4)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.10.1.(6)": {
+    "cited_by": [
+      "D-15"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "where ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ",entering"
+      ],
+      [
+        "insert",
+        "",
+        "= enthalpy of the outdoor air entering the energy recovery system, kJ/kg dry air h_OA,"
+      ],
+      [
+        "delete",
+        "_",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " air"
+      ]
+    ],
+    "fragment": "(6)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.12.1.": {
+    "cited_by": [
+      "D-31",
+      "D-60",
+      "D-59"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        " Table 5.2.12.1.-P Performance Requirements for Other Fuel-Burning Equipment and Appliance",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "."
+      ],
+      [
+        "replace",
+        "=",
+        "corresponds"
+      ],
+      [
+        "replace",
+        "(",
+        "to the ratio of "
+      ],
+      [
+        "replace",
+        ")/(",
+        " to the "
+      ],
+      [
+        "replace",
+        ")",
+        ". CAN/ANSI/AHRI 1330"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.12.2.": {
+    "cited_by": [
+      "D-60",
+      "D-59"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "(4) The R-717 test fluid refers to ammonia, and the R-448A test fluid is a zeotropic refri",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.2.7.(1)": {
+    "cited_by": [
+      "D-22"
+    ],
+    "diff_spans": [],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "5.2.2.8.": {
+    "cited_by": [
+      "D-20"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "5.2.2.8.(4)-(5)": {
+    "cited_by": [
+      "D-62"
+    ],
+    "diff_spans": [],
+    "fragment": "(4)-(5)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "5.2.2.9.": {
+    "cited_by": [
+      "D-56"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "SO",
+        "so"
+      ],
+      [
+        "replace",
+        "so",
+        "SO"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "5.2.6.3.": {
+    "cited_by": [
+      "D-61"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "5.2.6.3.(1)": {
+    "cited_by": [
+      "D-38",
+      "D-92"
+    ],
+    "diff_spans": [],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "8.4.1.2.(3)": {
+    "cited_by": [
+      "D-64",
+      "D-91"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "both ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "building "
+      ],
+      [
+        "insert",
+        "",
+        ", where applicable, for the"
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ]
+    ],
+    "fragment": "(3)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.1.2.(4)": {
+    "cited_by": [
+      "D-42",
+      "D-91"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "for which mechanical cooling is provided "
+      ],
+      [
+        "insert",
+        "",
+        " a) not exceed 100 hours in a simulated year for the proposed building when complying with"
+      ],
+      [
+        "insert",
+        "",
+        " or 20 hours, whichever is greater,"
+      ],
+      [
+        "replace",
+        "t",
+        "during w"
+      ],
+      [
+        "replace",
+        "at",
+        "ich"
+      ],
+      [
+        "insert",
+        "",
+        " for each thermal block"
+      ],
+      [
+        "insert",
+        "",
+        " when complying with Subsection 8"
+      ],
+      [
+        "insert",
+        "",
+        "4.REF."
+      ]
+    ],
+    "fragment": "(4)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.1.2.(5)": {
+    "cited_by": [
+      "D-43",
+      "D-64",
+      "D-90"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "building "
+      ],
+      [
+        "insert",
+        "",
+        " the"
+      ],
+      [
+        "insert",
+        "",
+        ", where applicable,"
+      ]
+    ],
+    "fragment": "(5)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.2.10.(2)": {
+    "cited_by": [
+      "D-91"
+    ],
+    "diff_spans": [],
+    "fragment": "(2)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "8.4.2.2.": {
+    "cited_by": [
+      "D-09"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "con",
+        "u"
+      ],
+      [
+        "replace",
+        "umption",
+        "e"
+      ],
+      [
+        "replace",
+        "If a comput",
+        "En"
+      ],
+      [
+        "insert",
+        "",
+        "gy"
+      ],
+      [
+        "replace",
+        "p",
+        "modeling softwa"
+      ],
+      [
+        "replace",
+        "ogr",
+        "e th"
+      ],
+      [
+        "replace",
+        "m",
+        "t"
+      ],
+      [
+        "replace",
+        "t",
+        "f"
+      ],
+      [
+        "delete",
+        " ca",
+        ""
+      ],
+      [
+        "delete",
+        "ry out the compliance calculations, the calculation methods employed in",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " calculations"
+      ],
+      [
+        "delete",
+        "ANSI/ASHRAE 140, \"Standard Me",
+        ""
+      ],
+      [
+        "replace",
+        "od",
+        "e"
+      ],
+      [
+        "replace",
+        "of T",
+        "t"
+      ],
+      [
+        "insert",
+        "",
+        "ing requirements"
+      ],
+      [
+        "delete",
+        "th",
+        ""
+      ],
+      [
+        "delete",
+        " Evaluation of Building E",
+        ""
+      ],
+      [
+        "replace",
+        "A",
+        "modeli"
+      ],
+      [
+        "insert",
+        "",
+        "g softw"
+      ],
+      [
+        "replace",
+        "ly",
+        "re "
+      ],
+      [
+        "replace",
+        "is Compu",
+        "ta"
+      ],
+      [
+        "insert",
+        "",
+        "d in A"
+      ],
+      [
+        "insert",
+        "",
+        "ticle"
+      ],
+      [
+        "replace",
+        "Programs",
+        "8.4.2.11."
+      ],
+      [
+        "delete",
+        "\"",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " 6) Building systems, materials or devices that cannot be modeled by the energy modeling s"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.2.3.": {
+    "cited_by": [
+      "D-09"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "(See Note A-8.4.2.3.) ",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.2.9.(2)": {
+    "cited_by": [
+      "D-19",
+      "D-21"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        " X"
+      ],
+      [
+        "delete",
+        " /",
+        ""
+      ],
+      [
+        "replace",
+        "C = ((5 Pa)/(75 Pa))^n I_75Pa = (Q)/(S) -",
+        "where"
+      ],
+      [
+        "delete",
+        " ",
+        ""
+      ],
+      [
+        "delete",
+        " ",
+        ""
+      ],
+      [
+        "replace",
+        "^2",
+        "²"
+      ],
+      [
+        "insert",
+        "",
+        "where $"
+      ],
+      [
+        "insert",
+        "",
+        "$"
+      ],
+      [
+        "insert",
+        "",
+        " flow exponent, which shall be"
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "replace",
+        "I_75Pa = assumed or measured",
+        "if"
+      ],
+      [
+        "replace",
+        "rma",
+        " who"
+      ],
+      [
+        "delete",
+        "ized air leakage rate of th",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "t"
+      ],
+      [
+        "insert",
+        "",
+        "st result is available, or the calculated value, if whole buildi"
+      ],
+      [
+        "replace",
+        "v",
+        "g t"
+      ],
+      [
+        "insert",
+        "",
+        "sting is carried out in accordance with Artic"
+      ],
+      [
+        "insert",
+        "",
+        "e 3.2.4.2, and a series "
+      ],
+      [
+        "replace",
+        "p",
+        "f t"
+      ],
+      [
+        "insert",
+        "",
+        "sts are conducted"
+      ],
+      [
+        "replace",
+        "a p",
+        "diffe"
+      ],
+      [
+        "replace",
+        "ssure",
+        "nt"
+      ],
+      [
+        "delete",
+        "of 75 Pa, in L/(s · m^2) I_75Pa = (Q)/(S) Q = volume of air flowing through the building e",
+        ""
+      ],
+      [
+        "delete",
+        " differential of 75 Pa, in L/",
+        ""
+      ],
+      [
+        "replace",
+        " S = total area of the building envelope, in m^2 A_AGW = total area of above-ground walls,",
+        "."
+      ],
+      [
+        "delete",
+        " ",
+        ""
+      ],
+      [
+        "replace",
+        "^2",
+        "²"
+      ],
+      [
+        "insert",
+        "",
+        " n = flow exponent, which shall be 0.60, if no whole building test result is available, or"
+      ],
+      [
+        "delete",
+        " ",
+        ""
+      ],
+      [
+        "replace",
+        "assumed or measured normalized air leakage rate of the building envelope at a pressure dif",
+        "(Q)"
+      ],
+      [
+        "replace",
+        "s",
+        "S)"
+      ],
+      [
+        "replace",
+        "× m^2)",
+        "-"
+      ],
+      [
+        "delete",
+        "S = total area of the building envelope, in m^2 A_AGW = total area of above-ground walls, ",
+        ""
+      ],
+      [
+        "delete",
+        ", and",
+        ""
+      ]
+    ],
+    "fragment": "(2)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "8.4.3.1.(2)": {
+    "cited_by": [
+      "D-02"
+    ],
+    "diff_spans": [],
+    "fragment": "(2)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "8.4.3.2.(1)": {
+    "cited_by": [
+      "D-14"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "repre",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "t i"
+      ],
+      [
+        "insert",
+        "",
+        " accordance wi"
+      ],
+      [
+        "insert",
+        "",
+        "h "
+      ],
+      [
+        "insert",
+        "",
+        ") Ar"
+      ],
+      [
+        "replace",
+        "v",
+        "cl"
+      ],
+      [
+        "replace",
+        "of",
+        "8.4.4.2.,"
+      ],
+      [
+        "replace",
+        "t",
+        "w"
+      ],
+      [
+        "insert",
+        "",
+        "n"
+      ],
+      [
+        "insert",
+        "",
+        "com"
+      ],
+      [
+        "delete",
+        "roposed bui",
+        ""
+      ],
+      [
+        "replace",
+        "d",
+        "y"
+      ],
+      [
+        "replace",
+        "'",
+        " with Sub"
+      ],
+      [
+        "delete",
+        " typ",
+        ""
+      ],
+      [
+        "delete",
+        " or space fun",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " 8.4.4., or b) Sentence"
+      ],
+      [
+        "insert",
+        "",
+        " (2) and (3), when complying with Subsection 8.4.REF"
+      ],
+      [
+        "replace",
+        "S",
+        "s"
+      ],
+      [
+        "insert",
+        "",
+        "(b))"
+      ],
+      [
+        "delete",
+        ")",
+        ""
+      ]
+    ],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.3.3.(3)": {
+    "cited_by": [
+      "D-19"
+    ],
+    "diff_spans": [],
+    "fragment": "(3)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "substantively identical"
+  },
+  "8.4.3.6.(1)(a)": {
+    "cited_by": [
+      "D-05"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        " a) in accordance with Article 8.4.4.2., when complying with Subsection 8.4.4., or b)"
+      ],
+      [
+        "insert",
+        "",
+        ", when complying with Subsection 8.4.REF"
+      ],
+      [
+        "insert",
+        "",
+        ")(b"
+      ]
+    ],
+    "fragment": "(1)(a)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.4.1.": {
+    "cited_by": [
+      "D-16",
+      "D-61"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "his Subsection shall only be used to demonstrate compliance where 90% or more of the sum o"
+      ],
+      [
+        "insert",
+        "",
+        " (BET), in kWh per year,"
+      ],
+      [
+        "delete",
+        "b",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " follows: BET = Σ (Ai X EUIi) + PL i=1 wh"
+      ],
+      [
+        "insert",
+        "",
+        "re i = i"
+      ],
+      [
+        "insert",
+        "",
+        "entifier"
+      ],
+      [
+        "insert",
+        "",
+        "f a buildi"
+      ],
+      [
+        "insert",
+        "",
+        "g"
+      ],
+      [
+        "replace",
+        "t",
+        "arc"
+      ],
+      [
+        "insert",
+        "",
+        "type"
+      ],
+      [
+        "replace",
+        "parame",
+        "lis"
+      ],
+      [
+        "delete",
+        "ers describ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "Table 8.4.4.1. "
+      ],
+      [
+        "insert",
+        "",
+        "at "
+      ],
+      [
+        "replace",
+        "S",
+        "associated with a space "
+      ],
+      [
+        "delete",
+        "b",
+        ""
+      ],
+      [
+        "delete",
+        "ction. 2) The components and systems",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "building, n = total number of building archetypes listed in Table 8.4.4.1. that a"
+      ],
+      [
+        "replace",
+        "f",
+        " associated with the building, Ai = gross int"
+      ],
+      [
+        "insert",
+        "",
+        "ior floor ar"
+      ],
+      [
+        "replace",
+        "nc",
+        "a of th"
+      ],
+      [
+        "insert",
+        "",
+        "archetype i, in m², calculated in accordance with Sentence (3), EUI1 = energy use intensit"
+      ],
+      [
+        "insert",
+        "",
+        "be the sum of the interior floor areas of all conditioned spaces that are associated with "
+      ],
+      [
+        "insert",
+        "",
+        "asured from the inside of exterior walls or the middle line of partitions separating a spa"
+      ],
+      [
+        "insert",
+        "",
+        "ype from a space use represented by another building archetype. (See Note A-8.4.4.1.(3).) "
+      ],
+      [
+        "delete",
+        "s 3.2.,",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " [Verified formulas for this article] - BET = sum_i=1^n (A_i × EUI_i) + PL i = identifier "
+      ],
+      [
+        "replace",
+        "5.",
+        "in m^"
+      ],
+      [
+        "delete",
+        ".",
+        ""
+      ],
+      [
+        "replace",
+        "6.2.",
+        "calculated in"
+      ],
+      [
+        "insert",
+        "",
+        "ccorda"
+      ],
+      [
+        "replace",
+        "d",
+        "ce"
+      ],
+      [
+        "replace",
+        "7.2.",
+        "with"
+      ],
+      [
+        "insert",
+        "",
+        "Sentence ("
+      ],
+      [
+        "replace",
+        "The",
+        "EUI_i ="
+      ],
+      [
+        "insert",
+        "",
+        "use intensity, in kWh/"
+      ],
+      [
+        "insert",
+        "",
+        "^2 per year, listed in Table 8.4.4.1. f"
+      ],
+      [
+        "insert",
+        "",
+        "r buil"
+      ],
+      [
+        "insert",
+        "",
+        "ing arch"
+      ],
+      [
+        "insert",
+        "",
+        "type i, and PL = annua"
+      ],
+      [
+        "insert",
+        "",
+        " energy use of the process loads accounted for in the"
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "shall include all",
+        "of"
+      ],
+      [
+        "insert",
+        "",
+        " annual"
+      ],
+      [
+        "insert",
+        "",
+        "cons"
+      ],
+      [
+        "replace",
+        "ses addressed in Sec",
+        "mp"
+      ],
+      [
+        "delete",
+        "s 3.2., 4.2., 5.2., 6.2. and 7.2. 4) Except as noted otherwise in this Subsection, the fol",
+        ""
+      ],
+      [
+        "replace",
+        ":",
+        ", in excess of the default peak receptacle loads set in Table 8.4.4.2., in kWh per year - "
+      ],
+      [
+        "replace",
+        ")",
+        " building archetype listed in Table 8.4.4.1. that is associated with a space use of the bu"
+      ],
+      [
+        "insert",
+        "",
+        " number of building archetypes listed in Table 8.4.4.1. that are associated with the build"
+      ],
+      [
+        "delete",
+        "conditioned and unconditioned spaces, b) use of building spaces, c) number, type and condi",
+        ""
+      ],
+      [
+        "delete",
+        "ermal blocks, d) shape and exterior dimensions, and e) orientation. 5) The presence or abs",
+        ""
+      ],
+      [
+        "replace",
+        "s",
+        "arc"
+      ],
+      [
+        "replace",
+        "all b",
+        "etyp"
+      ],
+      [
+        "replace",
+        "modeled",
+        "i"
+      ],
+      [
+        "replace",
+        "as",
+        ","
+      ],
+      [
+        "delete",
+        "be",
+        ""
+      ],
+      [
+        "delete",
+        "g",
+        ""
+      ],
+      [
+        "replace",
+        "id",
+        "m^2 - EUI_1 = "
+      ],
+      [
+        "replace",
+        "tical",
+        "ergy"
+      ],
+      [
+        "replace",
+        "to tho",
+        "u"
+      ],
+      [
+        "insert",
+        "",
+        "tensity, in kWh/m^2 per year, listed in Table 8.4.4.1. for building archetype i - PL = ann"
+      ],
+      [
+        "delete",
+        ". 6) Climatic data used in the compliance calculations for the proposed building shall be ",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "8.4.4.1.(1)": {
+    "cited_by": [
+      "D-04"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "he building energy target of the reference building shall be calculated based on the param",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " shall only be used to demonstrate compliance where 90% or more of the sum of the gross in"
+      ],
+      [
+        "insert",
+        "",
+        "4.4.1. (See Note A-8.4.4.1.(1).)"
+      ]
+    ],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.4.1.(2)": {
+    "cited_by": [
+      "D-04"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "T",
+        "For t"
+      ],
+      [
+        "insert",
+        "",
+        " purpose of"
+      ],
+      [
+        "insert",
+        "",
+        "liance with this Subsecti"
+      ],
+      [
+        "insert",
+        "",
+        ", the building "
+      ],
+      [
+        "insert",
+        "",
+        "ergy "
+      ],
+      [
+        "replace",
+        "s",
+        "arget"
+      ],
+      [
+        "insert",
+        "",
+        "(BET), in kWh per ye"
+      ],
+      [
+        "replace",
+        "nd systems",
+        "r,"
+      ],
+      [
+        "replace",
+        "m",
+        "b"
+      ],
+      [
+        "insert",
+        "",
+        " calculated as follows: BET = Σ (Ai X EUIi) + PL i=1 where i = identifier of a building ar"
+      ],
+      [
+        "insert",
+        "",
+        "ype listed in Table 8.4.4.1. that is associated with a space use of the building, n = tota"
+      ],
+      [
+        "insert",
+        "",
+        "oc"
+      ],
+      [
+        "insert",
+        "",
+        "s loads a"
+      ],
+      [
+        "insert",
+        "",
+        "counted fo"
+      ],
+      [
+        "insert",
+        "",
+        " "
+      ],
+      [
+        "insert",
+        "",
+        "n the calculation of the annual energy consum"
+      ],
+      [
+        "replace",
+        "v",
+        "on of th"
+      ],
+      [
+        "insert",
+        "",
+        " proposed building, in excess of the default peak"
+      ],
+      [
+        "replace",
+        "q",
+        "ceptacle loads set in Table 8.4.4.2., in kWh per year. Table 8.4.4.1. Energy Use Intensiti"
+      ],
+      [
+        "insert",
+        "",
+        "lding A"
+      ],
+      [
+        "insert",
+        "",
+        "ch"
+      ],
+      [
+        "insert",
+        "",
+        "types For"
+      ],
+      [
+        "replace",
+        "e",
+        "i"
+      ],
+      [
+        "insert",
+        "",
+        "g Par"
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "nten"
+      ],
+      [
+        "replace",
+        "tion",
+        "e"
+      ],
+      [
+        "replace",
+        "3",
+        "8"
+      ],
+      [
+        "replace",
+        "2",
+        "4"
+      ],
+      [
+        "insert",
+        "",
+        "4.1.(1)"
+      ],
+      [
+        "replace",
+        "4.",
+        "("
+      ],
+      [
+        "replace",
+        "., 5.2., 6.2.",
+        ")"
+      ],
+      [
+        "replace",
+        "7",
+        "(4) Notes to Table 8"
+      ],
+      [
+        "insert",
+        "",
+        "4.4.1.: (1) For heating degree-days of building location (HDD) < 9000 Celsius degree-days."
+      ],
+      [
+        "insert",
+        "",
+        ") See Note A-Table 8"
+      ],
+      [
+        "insert",
+        "",
+        "4.4.1. (3) For all heating energy types."
+      ]
+    ],
+    "fragment": "(2)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "8.4.4.1.(3)": {
+    "cited_by": [
+      "D-04"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "gross int"
+      ],
+      [
+        "insert",
+        "",
+        "rior floor area of a building archetype shall be the sum of the interior floor areas of al"
+      ],
+      [
+        "insert",
+        "",
+        "d spaces that a"
+      ],
+      [
+        "insert",
+        "",
+        "e associated with this buildin"
+      ],
+      [
+        "insert",
+        "",
+        " archet"
+      ],
+      [
+        "insert",
+        "",
+        "pe, as"
+      ],
+      [
+        "insert",
+        "",
+        "ed"
+      ],
+      [
+        "replace",
+        "c",
+        "in the proposed building, measured from the inside of exterior w"
+      ],
+      [
+        "delete",
+        "cu",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "s or the middle line of p"
+      ],
+      [
+        "insert",
+        "",
+        "rti"
+      ],
+      [
+        "replace",
+        "h",
+        "ep"
+      ],
+      [
+        "replace",
+        "ll ",
+        "rat"
+      ],
+      [
+        "replace",
+        "clude",
+        "g"
+      ],
+      [
+        "delete",
+        "ll",
+        ""
+      ],
+      [
+        "replace",
+        "th",
+        "spac"
+      ],
+      [
+        "delete",
+        " energy",
+        ""
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "add",
+        "rep"
+      ],
+      [
+        "replace",
+        "s",
+        "ent"
+      ],
+      [
+        "insert",
+        "",
+        "by this build"
+      ],
+      [
+        "insert",
+        "",
+        "g"
+      ],
+      [
+        "replace",
+        "S",
+        "arch"
+      ],
+      [
+        "insert",
+        "",
+        "type from a spa"
+      ],
+      [
+        "insert",
+        "",
+        "e use represen"
+      ],
+      [
+        "replace",
+        "ions",
+        "ed"
+      ],
+      [
+        "replace",
+        "3.2., 4.2., 5.2., 6.2.",
+        "by"
+      ],
+      [
+        "insert",
+        "",
+        "other buil"
+      ],
+      [
+        "insert",
+        "",
+        "ing"
+      ],
+      [
+        "replace",
+        "7",
+        "archetype"
+      ],
+      [
+        "replace",
+        "2",
+        " (See Note A-8"
+      ],
+      [
+        "insert",
+        "",
+        "4.4.1.(3).)"
+      ]
+    ],
+    "fragment": "(3)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.4.1.(5)": {
+    "cited_by": [
+      "D-39"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "T",
+        "Where t"
+      ],
+      [
+        "replace",
+        "p",
+        "exte"
+      ],
+      [
+        "replace",
+        "esence ",
+        "i"
+      ],
+      [
+        "replace",
+        "absence of ",
+        "lig"
+      ],
+      [
+        "delete",
+        "ea",
+        ""
+      ],
+      [
+        "delete",
+        "an",
+        ""
+      ],
+      [
+        "replace",
+        "/or ",
+        "evi"
+      ],
+      [
+        "replace",
+        "ooling ",
+        "e"
+      ],
+      [
+        "delete",
+        "ystems in each conditioned thermal block",
+        ""
+      ],
+      [
+        "delete",
+        " the reference building shall be modeled as being identical to those in",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " do not comply with the prescriptive requirements of Part 4, their annual energy use shall"
+      ],
+      [
+        "insert",
+        "",
+        "2. [Verified formulas for this article] - BET = sum_i=1^n (A_i × EUI_i) + PL i = identifie"
+      ]
+    ],
+    "fragment": "(5)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.4.10.(6)": {
+    "cited_by": [
+      "D-90"
+    ],
+    "fragment": "(6)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.10.(7)": {
+    "cited_by": [
+      "D-50"
+    ],
+    "fragment": "(7)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.10.(8)": {
+    "cited_by": [
+      "D-46",
+      "D-47",
+      "D-48",
+      "D-65"
+    ],
+    "fragment": "(8)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.11.(2)-(3)": {
+    "cited_by": [
+      "D-26",
+      "D-59"
+    ],
+    "fragment": "(2)-(3)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.12.": {
+    "cited_by": [
+      "D-20",
+      "D-22",
+      "D-56",
+      "D-62"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(1)": {
+    "cited_by": [
+      "D-37"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(1)-(2)": {
+    "cited_by": [
+      "D-58"
+    ],
+    "fragment": "(1)-(2)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(2)": {
+    "cited_by": [
+      "D-37"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(2)(b)": {
+    "cited_by": [
+      "D-52"
+    ],
+    "fragment": "(2)(b)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(2)(c)": {
+    "cited_by": [
+      "D-22"
+    ],
+    "fragment": "(2)(c)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(2)(g)": {
+    "cited_by": [
+      "D-52"
+    ],
+    "fragment": "(2)(g)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.13.(2)(h)": {
+    "cited_by": [
+      "D-52"
+    ],
+    "fragment": "(2)(h)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.14": {
+    "cited_by": [
+      "D-92",
+      "D-93"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.14.": {
+    "cited_by": [
+      "D-11",
+      "D-27",
+      "D-38",
+      "D-61",
+      "D-97"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.14.(1)": {
+    "cited_by": [
+      "D-93"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.14.(2)": {
+    "cited_by": [
+      "D-93"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.14.(3)": {
+    "cited_by": [
+      "D-92",
+      "D-93"
+    ],
+    "fragment": "(3)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.15.(1)": {
+    "cited_by": [
+      "D-22"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.15.(2)": {
+    "cited_by": [
+      "D-54"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.16.": {
+    "cited_by": [
+      "D-12"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.18.(3)": {
+    "cited_by": [
+      "D-22"
+    ],
+    "fragment": "(3)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.19.": {
+    "cited_by": [
+      "D-65"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.2.(1)": {
+    "cited_by": [
+      "D-04",
+      "D-05"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "Except as p",
+        "Fo"
+      ],
+      [
+        "delete",
+        "ovided in Sentence (3), and except as needed to model",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "purp"
+      ],
+      [
+        "insert",
+        "",
+        "se of "
+      ],
+      [
+        "replace",
+        "cu",
+        "om"
+      ],
+      [
+        "insert",
+        "",
+        "li"
+      ],
+      [
+        "replace",
+        "y",
+        "e"
+      ],
+      [
+        "insert",
+        "",
+        "with this Subse"
+      ],
+      [
+        "insert",
+        "",
+        "ti"
+      ],
+      [
+        "replace",
+        "trols required in",
+        ","
+      ],
+      [
+        "insert",
+        "",
+        "opos"
+      ],
+      [
+        "replace",
+        "scriptive path, the reference",
+        "d"
+      ],
+      [
+        "insert",
+        "",
+        "and internal and service water heating loads "
+      ],
+      [
+        "replace",
+        "mod",
+        "s"
+      ],
+      [
+        "delete",
+        "led as being iden",
+        ""
+      ],
+      [
+        "delete",
+        "ical",
+        ""
+      ],
+      [
+        "delete",
+        "os",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "sche"
+      ],
+      [
+        "insert",
+        "",
+        "ul"
+      ],
+      [
+        "insert",
+        "",
+        "s and values indica"
+      ],
+      [
+        "replace",
+        "rm",
+        "d "
+      ],
+      [
+        "insert",
+        "",
+        " Tabl"
+      ],
+      [
+        "replace",
+        "d",
+        " 8.4.4.2."
+      ],
+      [
+        "insert",
+        "",
+        "a"
+      ],
+      [
+        "delete",
+        "ro",
+        ""
+      ],
+      [
+        "replace",
+        "os",
+        "licabl"
+      ],
+      [
+        "delete",
+        "d",
+        ""
+      ],
+      [
+        "replace",
+        "in S",
+        "arch"
+      ],
+      [
+        "delete",
+        "n",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "yp"
+      ],
+      [
+        "delete",
+        "nce 8.4.3.2.(1)",
+        ""
+      ],
+      [
+        "replace",
+        "REF",
+        "4"
+      ],
+      [
+        "insert",
+        "",
+        " Table 8.4.4.2. Modeling Inputs for the Proposed Building Forming Part of Sentence 8.4.4.2"
+      ]
+    ],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.4.20.": {
+    "cited_by": [
+      "D-41"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.3.(6)": {
+    "cited_by": [
+      "D-19"
+    ],
+    "fragment": "(6)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.4.(1)": {
+    "cited_by": [
+      "D-35"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.5.(9)-(12)": {
+    "cited_by": [
+      "D-51",
+      "D-57"
+    ],
+    "fragment": "(9)-(12)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.6.(1)": {
+    "cited_by": [
+      "D-89"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.6.(1)-(2)": {
+    "cited_by": [
+      "D-58"
+    ],
+    "fragment": "(1)-(2)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.7.(4)": {
+    "cited_by": [
+      "D-34"
+    ],
+    "fragment": "(4)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.8.": {
+    "cited_by": [
+      "D-22"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.9.(3)": {
+    "cited_by": [
+      "D-50",
+      "D-91"
+    ],
+    "fragment": "(3)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.9.(6)": {
+    "cited_by": [
+      "D-90"
+    ],
+    "fragment": "(6)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.4.9.(7)": {
+    "cited_by": [
+      "D-46",
+      "D-47",
+      "D-48",
+      "D-49"
+    ],
+    "fragment": "(7)",
+    "kind": "article",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.10.(6)": {
+    "cited_by": [
+      "D-90"
+    ],
+    "fragment": "(6)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.10.(7)": {
+    "cited_by": [
+      "D-50"
+    ],
+    "fragment": "(7)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.10.(8)": {
+    "cited_by": [
+      "D-46",
+      "D-47",
+      "D-48"
+    ],
+    "fragment": "(8)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.12.": {
+    "cited_by": [
+      "D-56",
+      "D-62"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.13.(2)(g)": {
+    "cited_by": [
+      "D-52"
+    ],
+    "fragment": "(2)(g)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.14": {
+    "cited_by": [
+      "D-92",
+      "D-93"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.14.": {
+    "cited_by": [
+      "D-97"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.14.(1)": {
+    "cited_by": [
+      "D-93"
+    ],
+    "fragment": "(1)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.14.(2)": {
+    "cited_by": [
+      "D-93"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.14.(3)": {
+    "cited_by": [
+      "D-92",
+      "D-93"
+    ],
+    "fragment": "(3)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.15.(2)": {
+    "cited_by": [
+      "D-54"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.2.": {
+    "cited_by": [
+      "D-89"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        ") Except as provided in Sentence (3), and except as needed to model the occupancy controls"
+      ],
+      [
+        "insert",
+        "",
+        "re"
+      ],
+      [
+        "insert",
+        "",
+        "erence b"
+      ],
+      [
+        "insert",
+        "",
+        "ilding's int"
+      ],
+      [
+        "insert",
+        "",
+        "rna"
+      ],
+      [
+        "insert",
+        "",
+        "and servi"
+      ],
+      [
+        "replace",
+        "onsump",
+        "e water hea"
+      ],
+      [
+        "delete",
+        "o",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "g"
+      ],
+      [
+        "delete",
+        "at part-",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "s"
+      ],
+      [
+        "insert",
+        "",
+        "shall be modeled as being identi"
+      ],
+      [
+        "insert",
+        "",
+        "al t"
+      ],
+      [
+        "insert",
+        "",
+        " those determi"
+      ],
+      [
+        "insert",
+        "",
+        "ed for the proposed buil"
+      ],
+      [
+        "delete",
+        "tio",
+        ""
+      ],
+      [
+        "replace",
+        "s, Fuelpartload,",
+        "g"
+      ],
+      [
+        "replace",
+        "B",
+        "Sen"
+      ],
+      [
+        "replace",
+        "u/h,",
+        "ence"
+      ],
+      [
+        "replace",
+        "o",
+        "8.4.3.2.(2). 3) I"
+      ],
+      [
+        "replace",
+        "con",
+        "buil"
+      ],
+      [
+        "delete",
+        "ens",
+        ""
+      ],
+      [
+        "replace",
+        "or",
+        "is"
+      ],
+      [
+        "insert",
+        "",
+        "a semi-heated buildi"
+      ],
+      [
+        "replace",
+        "o",
+        "g, as defi"
+      ],
+      [
+        "replace",
+        "-",
+        "ed in Senten"
+      ],
+      [
+        "replace",
+        "o",
+        "e 1.2.1.2.(2), a"
+      ],
+      [
+        "insert",
+        "",
+        " th"
+      ],
+      [
+        "insert",
+        "",
+        " capacity of the i"
+      ],
+      [
+        "insert",
+        "",
+        "talled heat"
+      ],
+      [
+        "insert",
+        "",
+        "equipment in the semi-heated proposed "
+      ],
+      [
+        "replace",
+        "o",
+        "u"
+      ],
+      [
+        "insert",
+        "",
+        "ding is no mor"
+      ],
+      [
+        "insert",
+        "",
+        " than the semi-heated p"
+      ],
+      [
+        "insert",
+        "",
+        "oposed building's peak heating load plus 5%, it"
+      ],
+      [
+        "insert",
+        "",
+        "mo"
+      ],
+      [
+        "replace",
+        "riv",
+        "l"
+      ],
+      [
+        "replace",
+        "by",
+        "with"
+      ],
+      [
+        "replace",
+        "pplying",
+        ")"
+      ],
+      [
+        "delete",
+        "n",
+        ""
+      ],
+      [
+        "delete",
+        "adju",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "e"
+      ],
+      [
+        "replace",
+        "me",
+        "-poi"
+      ],
+      [
+        "delete",
+        "fac",
+        ""
+      ],
+      [
+        "delete",
+        "or to th",
+        ""
+      ],
+      [
+        "delete",
+        " fuel consu",
+        ""
+      ],
+      [
+        "replace",
+        "tion ",
+        "er"
+      ],
+      [
+        "delete",
+        " design conditions: F",
+        ""
+      ],
+      [
+        "delete",
+        "elpartload = Fueldesign FHeatPLC whe",
+        ""
+      ],
+      [
+        "replace",
+        "Fueldesign",
+        "of"
+      ],
+      [
+        "replace",
+        "= fuel consumption at design conditions, in Btu/h",
+        "18°C"
+      ],
+      [
+        "replace",
+        "FH",
+        "b) th"
+      ],
+      [
+        "insert",
+        "",
+        "rmal characteristics th"
+      ],
+      [
+        "delete",
+        "PLC",
+        ""
+      ],
+      [
+        "replace",
+        "=",
+        "are"
+      ],
+      [
+        "replace",
+        "fu",
+        "bas"
+      ],
+      [
+        "replace",
+        "l",
+        "d on the"
+      ],
+      [
+        "delete",
+        "part-load efficiency curve ",
+        ""
+      ],
+      [
+        "replace",
+        "t",
+        "gr"
+      ],
+      [
+        "delete",
+        "rmin",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "-"
+      ],
+      [
+        "replace",
+        " in",
+        "ays"
+      ],
+      [
+        "replace",
+        "cc",
+        "t 18°C "
+      ],
+      [
+        "delete",
+        "rdance with Sentence (2). 2) The ",
+        ""
+      ],
+      [
+        "delete",
+        "uel heating part-load efficiency curve, FHeatPLC, shall be calculated using",
+        ""
+      ],
+      [
+        "replace",
+        "fo",
+        "bui"
+      ],
+      [
+        "replace",
+        "low",
+        "d"
+      ],
+      [
+        "insert",
+        "",
+        "'s"
+      ],
+      [
+        "replace",
+        "equ",
+        "loc"
+      ],
+      [
+        "replace",
+        ":",
+        "."
+      ],
+      [
+        "replace",
+        "FH",
+        "(S"
+      ],
+      [
+        "delete",
+        "atPLC = a +b x Qpartload +cx Qpartload ) 2 wher",
+        ""
+      ],
+      [
+        "replace",
+        "Qpar",
+        "No"
+      ],
+      [
+        "delete",
+        "load = boiler capacity at part-load conditions, in Btu/h, Qdesign = boiler capacity at des",
+        ""
+      ],
+      [
+        "replace",
+        "coefficients from Table ",
+        "A-"
+      ],
+      [
+        "delete",
+        "P",
+        ""
+      ],
+      [
+        "delete",
+        ".2.-A. Table 8.4.PRE.2.-A Coefficients Used in the Calculation of ",
+        ""
+      ],
+      [
+        "delete",
+        "HeatPLC for Condensing and Non-Condensing Boilers Forming Part of Sentence 8.4.PRE.2.(2) 3",
+        ""
+      ],
+      [
+        "delete",
+        " and 8",
+        ""
+      ],
+      [
+        "delete",
+        "4.PRE.3.(3",
+        ""
+      ],
+      [
+        "delete",
+        " [Verified formulas for this article] - Fuel_partload = Fuel_design × FHeatPLC where Fuel_",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.3.": {
+    "cited_by": [
+      "D-89"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        ") Except as provided in Sentence (2), the solar absorptance of each opaque building assemb"
+      ],
+      [
+        "insert",
+        "",
+        "solar absorptance o"
+      ],
+      [
+        "insert",
+        "",
+        " roof assemblies shall be a) if the actual solar absorptance for the proposed building is "
+      ],
+      [
+        "insert",
+        "",
+        " used in the proposed building, or b) if the actua"
+      ],
+      [
+        "insert",
+        "",
+        "solar absorptan"
+      ],
+      [
+        "insert",
+        "",
+        "e f"
+      ],
+      [
+        "insert",
+        "",
+        "r the proposed buildi"
+      ],
+      [
+        "insert",
+        "",
+        "g i"
+      ],
+      [
+        "insert",
+        "",
+        " "
+      ],
+      [
+        "replace",
+        "mp",
+        "sed, set to 0.7. 3) If the total vertical fenestra"
+      ],
+      [
+        "replace",
+        "t",
+        "nd"
+      ],
+      [
+        "replace",
+        "p",
+        "door "
+      ],
+      [
+        "insert",
+        "",
+        "ea "
+      ],
+      [
+        "replace",
+        "-",
+        "o gross wa"
+      ],
+      [
+        "replace",
+        "o",
+        "l "
+      ],
+      [
+        "replace",
+        "d",
+        "rea"
+      ],
+      [
+        "replace",
+        "condi",
+        "ra"
+      ],
+      [
+        "insert",
+        "",
+        " (FDWR) of the proposed buildi"
+      ],
+      [
+        "insert",
+        "",
+        "g differ"
+      ],
+      [
+        "insert",
+        "",
+        " from the maximum permitted by Article 3.2.1.4."
+      ],
+      [
+        "insert",
+        "",
+        "the "
+      ],
+      [
+        "replace",
+        "uelpartload, in Btu/h,",
+        "DWR"
+      ],
+      [
+        "replace",
+        "con",
+        "buil"
+      ],
+      [
+        "delete",
+        "ens",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "shall be adjusted proportionally along each orientation until it complies with that Articl"
+      ],
+      [
+        "insert",
+        "",
+        "shading provided by a nearby structure or building, the reference building shall also be m"
+      ],
+      [
+        "delete",
+        "mospheric furnac",
+        ""
+      ],
+      [
+        "delete",
+        "d",
+        ""
+      ],
+      [
+        "replace",
+        "rived by ",
+        "qu"
+      ],
+      [
+        "delete",
+        "pp",
+        ""
+      ],
+      [
+        "delete",
+        "ying an adjustment factor",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "de"
+      ],
+      [
+        "insert",
+        "",
+        "a"
+      ],
+      [
+        "delete",
+        "e",
+        ""
+      ],
+      [
+        "delete",
+        " consumption a",
+        ""
+      ],
+      [
+        "replace",
+        "r",
+        "v"
+      ],
+      [
+        "replace",
+        "ted conditions: F",
+        "l"
+      ],
+      [
+        "delete",
+        "elpartload = Fuelrateᵈ FHeatPLC where Fuelrateᵈ = fuel consumption at rated conditions, in",
+        ""
+      ],
+      [
+        "delete",
+        "accordance with Sentence (2). 2) The fuel heating part-load efficiency curve, FHeatPLC, sh",
+        ""
+      ],
+      [
+        "replace",
+        "PRE",
+        "3"
+      ],
+      [
+        "replace",
+        "2",
+        "3). 7"
+      ],
+      [
+        "replace",
+        "3)",
+        "Heat"
+      ],
+      [
+        "replace",
+        "F",
+        "transfer through interi"
+      ],
+      [
+        "delete",
+        "modulating furnaces, values for Q",
+        ""
+      ],
+      [
+        "replace",
+        "load/Qra",
+        "i"
+      ],
+      [
+        "replace",
+        "ed and corresp",
+        "i"
+      ],
+      [
+        "delete",
+        "ding value",
+        ""
+      ],
+      [
+        "delete",
+        " for FHeatPLC",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "modeled as being identical to that of the proposed building. 8) Except for overall thermal"
+      ],
+      [
+        "replace",
+        "li",
+        "u"
+      ],
+      [
+        "delete",
+        "t",
+        ""
+      ],
+      [
+        "delete",
+        " in Table 8.4.PRE.2.-B. [Verified formulas",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "e proposed bu"
+      ],
+      [
+        "delete",
+        "s artic",
+        ""
+      ],
+      [
+        "delete",
+        "e] - Fuel_",
+        ""
+      ],
+      [
+        "delete",
+        "esign = fuel consumption at design conditions, in Btu/h FHeat_PLC = fuel heat",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "."
+      ],
+      [
+        "replace",
+        "part-load efficiency curve determined in accordance with ",
+        "("
+      ],
+      [
+        "delete",
+        "ntence (2) - # Coefficients for Calculation of FHeatPLC ## Non-condensing Boiler | Coeffic",
+        ""
+      ],
+      [
+        "replace",
+        "n-condensing & 0.082597 & 0.996764 & -0.079361 hlin",
+        "t"
+      ],
+      [
+        "replace",
+        "end{array} Fuel_rated = fuel consumption at rated conditions, in Btu/h ",
+        "A"
+      ],
+      [
+        "delete",
+        " F_HeatPLC = a + b × frac{Q_partload}{Q_rated} + c × (frac{Q_partload}{Q_rated})^2 Non-con",
+        ""
+      ],
+      [
+        "delete",
+        "P",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "F"
+      ],
+      [
+        "insert",
+        "",
+        ".(8).)"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.5.(9)-(12)": {
+    "cited_by": [
+      "D-51",
+      "D-57"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "1",
+        "9"
+      ],
+      [
+        "replace",
+        "T",
+        "W"
+      ],
+      [
+        "insert",
+        "",
+        "er"
+      ],
+      [
+        "insert",
+        "",
+        "hotocontrols "
+      ],
+      [
+        "replace",
+        "t-loa",
+        "e require"
+      ],
+      [
+        "replace",
+        "p",
+        "by Subs"
+      ],
+      [
+        "delete",
+        "rformance chara",
+        ""
+      ],
+      [
+        "delete",
+        "er",
+        ""
+      ],
+      [
+        "replace",
+        "stics",
+        "on"
+      ],
+      [
+        "replace",
+        "of",
+        "4.2.2.,"
+      ],
+      [
+        "insert",
+        "",
+        "ir"
+      ],
+      [
+        "delete",
+        "r",
+        ""
+      ],
+      [
+        "replace",
+        "erence el",
+        "f"
+      ],
+      [
+        "delete",
+        "ric chiller",
+        ""
+      ],
+      [
+        "delete",
+        "adjusted for cooling capacity by applying Sentence (2) and adjusted for power draw by appl",
+        ""
+      ],
+      [
+        "delete",
+        "porator and condenser conditions sha",
+        ""
+      ],
+      [
+        "delete",
+        "l be calculated using the following eq",
+        ""
+      ],
+      [
+        "delete",
+        "ion: Qavailable = CAP_FTEC Qrated where CAP_FTEC = cooling capacity adjustment determin",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "s"
+      ],
+      [
+        "replace",
+        "3",
+        "10"
+      ],
+      [
+        "delete",
+        ", and Qrated = rated capacity at AHRI test conditions, in Btu/h. 3) The cooling capacity a",
+        ""
+      ],
+      [
+        "delete",
+        "rated efficiency due to changes in load determined in accordance with Sentence ",
+        ""
+      ],
+      [
+        "replace",
+        "5), EIR_FT = electric input ratio adjustment to rated efficiency due to environmental vari",
+        "1"
+      ],
+      [
+        "delete",
+        " 7) The electric input ratio adjustment to the rated efficiency due to environmental varia",
+        ""
+      ]
+    ],
+    "fragment": "(9)-(12)",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "8.4.5.5.-C": {
+    "cited_by": [
+      "D-03"
+    ],
+    "fragment": "",
+    "kind": "table_prefix_omitted",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.5.6.(1)": {
+    "cited_by": [
+      "D-89"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "T",
+        "Where a primary heating system of t"
+      ],
+      [
+        "delete",
+        "a",
+        ""
+      ],
+      [
+        "delete",
+        "t-l",
+        ""
+      ],
+      [
+        "replace",
+        "a",
+        "pose"
+      ],
+      [
+        "insert",
+        "",
+        "building uses "
+      ],
+      [
+        "replace",
+        "e",
+        "u"
+      ],
+      [
+        "delete",
+        "formance ",
+        ""
+      ],
+      [
+        "replace",
+        "ract",
+        "sed en"
+      ],
+      [
+        "replace",
+        "istics of",
+        "gy,"
+      ],
+      [
+        "insert",
+        "",
+        "building's "
+      ],
+      [
+        "insert",
+        "",
+        "rresp"
+      ],
+      [
+        "replace",
+        "l",
+        "nd"
+      ],
+      [
+        "insert",
+        "",
+        "sys"
+      ],
+      [
+        "delete",
+        "ow",
+        ""
+      ],
+      [
+        "replace",
+        "r",
+        "m"
+      ],
+      [
+        "insert",
+        "",
+        "modeled in accordance with the requirements of Article 8.4.REF.9. "
+      ],
+      [
+        "insert",
+        "",
+        "as "
+      ],
+      [
+        "insert",
+        "",
+        "llows: a) one gas-fired modulating boile"
+      ],
+      [
+        "insert",
+        "",
+        "mplying with Secti"
+      ],
+      [
+        "insert",
+        "",
+        "n 5.2. sha"
+      ],
+      [
+        "insert",
+        "",
+        "l be used to represent the purchased energy equipment, and b) the total capacity of the bo"
+      ],
+      [
+        "insert",
+        "",
+        ", shall correspond to the ratio of the proposed building's purchased energy capacity divid"
+      ],
+      [
+        "insert",
+        "",
+        "its tot"
+      ],
+      [
+        "delete",
+        "pp",
+        ""
+      ],
+      [
+        "replace",
+        "y",
+        " heat"
+      ],
+      [
+        "replace",
+        "Sen",
+        "capaci"
+      ],
+      [
+        "replace",
+        "ence (2)",
+        "y"
+      ]
+    ],
+    "fragment": "(1)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.9.(2)": {
+    "cited_by": [
+      "D-53"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "T",
+        "Where t"
+      ],
+      [
+        "replace",
+        "f",
+        "proposed b"
+      ],
+      [
+        "replace",
+        "e",
+        "i"
+      ],
+      [
+        "replace",
+        " heat",
+        "d"
+      ],
+      [
+        "insert",
+        "",
+        "uses "
+      ],
+      [
+        "insert",
+        "",
+        "urch"
+      ],
+      [
+        "replace",
+        "rt-loa",
+        "se"
+      ],
+      [
+        "replace",
+        "ff",
+        "nergy, Art"
+      ],
+      [
+        "replace",
+        "i",
+        "l"
+      ],
+      [
+        "delete",
+        "ncy",
+        ""
+      ],
+      [
+        "replace",
+        "curve, ",
+        "8.4.RE"
+      ],
+      [
+        "replace",
+        "HeatPLC,",
+        ".6."
+      ],
+      [
+        "replace",
+        "be",
+        "apply"
+      ],
+      [
+        "delete",
+        "calcula",
+        ""
+      ],
+      [
+        "replace",
+        "ed using",
+        "o"
+      ],
+      [
+        "insert",
+        "",
+        "re"
+      ],
+      [
+        "delete",
+        "ollowing equation: FHeatPLC = a + b x + c x (Qartload) 2 wh",
+        ""
+      ],
+      [
+        "delete",
+        "e partload = service water heater capacity at part-load conditions, in Btu/h, Qdesign = se",
+        ""
+      ],
+      [
+        "replace",
+        "(2) - F",
+        "b"
+      ],
+      [
+        "replace",
+        "e",
+        "i"
+      ],
+      [
+        "delete",
+        "_",
+        ""
+      ],
+      [
+        "delete",
+        "esign = fuel consumption at design conditions, in Btu/h, and FHeat_PLC = fuel heat",
+        ""
+      ],
+      [
+        "delete",
+        " part-load efficiency curve determined in accordance with - Fuel_design = fuel consumption",
+        ""
+      ],
+      [
+        "delete",
+        "021826 b = 0.977630 c = 0.000543 - where Q_partload = service water heater capacity at par",
+        ""
+      ]
+    ],
+    "fragment": "(2)",
+    "granularity": "cited fragment",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.9.(3)": {
+    "cited_by": [
+      "D-50",
+      "D-91"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "1",
+        "3"
+      ],
+      [
+        "replace",
+        "T",
+        "W"
+      ],
+      [
+        "insert",
+        "",
+        "re"
+      ],
+      [
+        "replace",
+        "fu",
+        "Tabl"
+      ],
+      [
+        "replace",
+        "l",
+        "s"
+      ],
+      [
+        "insert",
+        "",
+        "8.4.REF.7.-A and 8.4.REF.7.-B indi"
+      ],
+      [
+        "replace",
+        "onsump",
+        "a"
+      ],
+      [
+        "replace",
+        "ion",
+        "e"
+      ],
+      [
+        "insert",
+        "",
+        "th"
+      ],
+      [
+        "delete",
+        "p",
+        ""
+      ],
+      [
+        "replace",
+        "rt-lo",
+        " he"
+      ],
+      [
+        "delete",
+        "d condi",
+        ""
+      ],
+      [
+        "delete",
+        "o",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "g "
+      ],
+      [
+        "replace",
+        ",",
+        "ystem"
+      ],
+      [
+        "replace",
+        "F",
+        "is req"
+      ],
+      [
+        "insert",
+        "",
+        "ir"
+      ],
+      [
+        "delete",
+        "lpartloa",
+        ""
+      ],
+      [
+        "delete",
+        ",",
+        ""
+      ],
+      [
+        "delete",
+        " Btu/h, of",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "seconda"
+      ],
+      [
+        "insert",
+        "",
+        "y syst"
+      ],
+      [
+        "replace",
+        "f",
+        "m as well as in a t"
+      ],
+      [
+        "insert",
+        "",
+        "minal d"
+      ],
+      [
+        "delete",
+        "nce fuel-fired ser",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "delete",
+        "wa",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "h"
+      ],
+      [
+        "delete",
+        "r",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "ing capacity of "
+      ],
+      [
+        "replace",
+        "r",
+        "ach type of equipment"
+      ],
+      [
+        "replace",
+        "d",
+        "s"
+      ],
+      [
+        "replace",
+        "rived by",
+        "t"
+      ],
+      [
+        "replace",
+        "pp",
+        "s fo"
+      ],
+      [
+        "replace",
+        "ying",
+        "lows:"
+      ],
+      [
+        "replace",
+        "n adjustment factor to",
+        ")"
+      ],
+      [
+        "delete",
+        " fuel consumption at full load: Fuelpartload = Fueldesign FHeatPLC where Fueldesign = fuel",
+        ""
+      ],
+      [
+        "delete",
+        " part-load efficiency curve determined in accordance with Sentence (2). 2) The fuel heatin",
+        ""
+      ],
+      [
+        "replace",
+        "a",
+        "of "
+      ],
+      [
+        "insert",
+        "",
+        "he"
+      ],
+      [
+        "replace",
+        "pa",
+        "te"
+      ],
+      [
+        "replace",
+        "t-load conditions, ",
+        "m"
+      ],
+      [
+        "insert",
+        "",
+        "al"
+      ],
+      [
+        "delete",
+        "Btu/h, Q",
+        ""
+      ],
+      [
+        "delete",
+        "sign = ser",
+        ""
+      ],
+      [
+        "replace",
+        "w",
+        "sh"
+      ],
+      [
+        "insert",
+        "",
+        "ll mee"
+      ],
+      [
+        "insert",
+        "",
+        " the th"
+      ],
+      [
+        "replace",
+        " heater capacity at design conditions, in Btu/h, a = 0.021826, b = 0.977630, and C = 0.000",
+        "m"
+      ],
+      [
+        "delete",
+        "Statements 8.5.1. O",
+        ""
+      ],
+      [
+        "delete",
+        "jective and Functional Statements [Verified formulas for this article] - Fuel_part",
+        ""
+      ],
+      [
+        "replace",
+        "ad = Fuel_de",
+        "ck'"
+      ],
+      [
+        "delete",
+        "ign × FHeatPLC where Fuel_design = fuel consumption at design conditions, in Btu/h FHeatPL",
+        ""
+      ],
+      [
+        "delete",
+        "part-",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "du"
+      ],
+      [
+        "insert",
+        "",
+        " to the trans"
+      ],
+      [
+        "insert",
+        "",
+        "er o"
+      ],
+      [
+        "replace",
+        "ici",
+        " "
+      ],
+      [
+        "replace",
+        "c",
+        "erg"
+      ],
+      [
+        "replace",
+        "c",
+        "thro"
+      ],
+      [
+        "replace",
+        "r",
+        "gh the building en"
+      ],
+      [
+        "insert",
+        "",
+        "lope"
+      ],
+      [
+        "replace",
+        "d",
+        "only, b) th"
+      ],
+      [
+        "replace",
+        "ter",
+        " co"
+      ],
+      [
+        "insert",
+        "",
+        "b"
+      ],
+      [
+        "delete",
+        " in accordance with Sentence (2) - Fuel_design = fuel consumption at design conditions, in",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "ca"
+      ],
+      [
+        "delete",
+        "rt-load effi",
+        ""
+      ],
+      [
+        "delete",
+        "iency curve determined in accordance with - Fuel_design = fuel consumption at design cond",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "es "
+      ],
+      [
+        "replace",
+        "ns,",
+        "f"
+      ],
+      [
+        "delete",
+        "in B",
+        ""
+      ],
+      [
+        "delete",
+        "u/",
+        ""
+      ],
+      [
+        "delete",
+        " FH",
+        ""
+      ],
+      [
+        "delete",
+        "at_PLC = fuel",
+        ""
+      ],
+      [
+        "replace",
+        "par",
+        "sys"
+      ],
+      [
+        "replace",
+        "-load",
+        "ems"
+      ],
+      [
+        "delete",
+        "eff",
+        ""
+      ],
+      [
+        "delete",
+        "cie",
+        ""
+      ],
+      [
+        "delete",
+        "cy",
+        ""
+      ],
+      [
+        "replace",
+        "curv",
+        "th"
+      ],
+      [
+        "delete",
+        "de",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "al d"
+      ],
+      [
+        "replace",
+        "d ",
+        "v"
+      ],
+      [
+        "delete",
+        "n accordan",
+        ""
+      ],
+      [
+        "replace",
+        "wi",
+        "and secondary system shall meet "
+      ],
+      [
+        "delete",
+        " Sentenc",
+        ""
+      ],
+      [
+        "replace",
+        "(2)",
+        "peak"
+      ],
+      [
+        "replace",
+        "- FH",
+        "h"
+      ],
+      [
+        "replace",
+        "PLC",
+        "ing"
+      ],
+      [
+        "delete",
+        "= a + b × frac{Q_partload}{Q_design} + c × (frac{Q_partload}{Q_design})^2 Q_part",
+        ""
+      ],
+      [
+        "replace",
+        "=",
+        "of the thermal blocks"
+      ],
+      [
+        "replace",
+        "ic",
+        "ed by thos"
+      ],
+      [
+        "replace",
+        "wa",
+        "sys"
+      ],
+      [
+        "replace",
+        "r heater capacity",
+        "ms,"
+      ],
+      [
+        "replace",
+        "t part-loa",
+        "n"
+      ],
+      [
+        "insert",
+        "",
+        ") the applicable "
+      ],
+      [
+        "replace",
+        "nd",
+        "vers"
+      ],
+      [
+        "insert",
+        "",
+        "ze fac"
+      ],
+      [
+        "delete",
+        "i",
+        ""
+      ],
+      [
+        "replace",
+        "n",
+        "r "
+      ],
+      [
+        "replace",
+        ",",
+        "hall"
+      ],
+      [
+        "replace",
+        "in",
+        "apply"
+      ],
+      [
+        "delete",
+        "B",
+        ""
+      ],
+      [
+        "replace",
+        "u/",
+        "o eac"
+      ],
+      [
+        "replace",
+        "Q_design = servic",
+        "typ"
+      ],
+      [
+        "replace",
+        "wa",
+        "of equipmen"
+      ],
+      [
+        "delete",
+        "er heater capacity at design conditions, in Btu/h a = 0",
+        ""
+      ],
+      [
+        "delete",
+        "021826 b = 0.977630 c = 0.000543 - where Q_partload = service water heater capacity at par",
+        ""
+      ]
+    ],
+    "fragment": "(3)",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.9.(6)": {
+    "cited_by": [
+      "D-90"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "1",
+        "6"
+      ],
+      [
+        "replace",
+        "T",
+        "W"
+      ],
+      [
+        "insert",
+        "",
+        "re"
+      ],
+      [
+        "replace",
+        "fu",
+        "a hydronic system is mod"
+      ],
+      [
+        "replace",
+        " consumption at part-loa",
+        "e"
+      ],
+      [
+        "delete",
+        " conditions, Fuelpartload,",
+        ""
+      ],
+      [
+        "delete",
+        " Btu/h, of",
+        ""
+      ],
+      [
+        "replace",
+        "f",
+        "b"
+      ],
+      [
+        "insert",
+        "",
+        "ilding, th"
+      ],
+      [
+        "delete",
+        "l-fired service water",
+        ""
+      ],
+      [
+        "replace",
+        "er",
+        "ing plant"
+      ],
+      [
+        "insert",
+        "",
+        "mo"
+      ],
+      [
+        "replace",
+        "riv",
+        "l"
+      ],
+      [
+        "replace",
+        "by",
+        "as follows:"
+      ],
+      [
+        "replace",
+        "pplying an adjustment factor to",
+        ")"
+      ],
+      [
+        "replace",
+        "fuel consumption at full load: Fuelpartload = Fueldesign FH",
+        "h"
+      ],
+      [
+        "replace",
+        "PLC",
+        "ing"
+      ],
+      [
+        "replace",
+        "w",
+        "capacity of t"
+      ],
+      [
+        "delete",
+        "re Fueldesign = fuel consumption at design conditions, in Btu/h, and FHeatPLC = fuel",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "l"
+      ],
+      [
+        "replace",
+        "r",
+        "n"
+      ],
+      [
+        "replace",
+        "-",
+        " sha"
+      ],
+      [
+        "insert",
+        "",
+        "l be the sum "
+      ],
+      [
+        "insert",
+        "",
+        "f the he"
+      ],
+      [
+        "replace",
+        "d",
+        "ting"
+      ],
+      [
+        "replace",
+        "effi",
+        "capa"
+      ],
+      [
+        "insert",
+        "",
+        "ti"
+      ],
+      [
+        "replace",
+        "nc",
+        "s of the s"
+      ],
+      [
+        "insert",
+        "",
+        "stems"
+      ],
+      [
+        "replace",
+        "cu",
+        "se"
+      ],
+      [
+        "insert",
+        "",
+        "d"
+      ],
+      [
+        "insert",
+        "",
+        "by the plant, multiplie"
+      ],
+      [
+        "insert",
+        "",
+        " by th"
+      ],
+      [
+        "insert",
+        "",
+        " applicable oversize factor, b) where the heating capacity is not grea"
+      ],
+      [
+        "delete",
+        "mined",
+        ""
+      ],
+      [
+        "replace",
+        "i",
+        "tha"
+      ],
+      [
+        "replace",
+        "accordance",
+        "176"
+      ],
+      [
+        "replace",
+        "wi",
+        "kW, "
+      ],
+      [
+        "delete",
+        " S",
+        ""
+      ],
+      [
+        "delete",
+        "ntence (2). 2) The fuel",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "l"
+      ],
+      [
+        "replace",
+        "r",
+        "n"
+      ],
+      [
+        "delete",
+        "-load efficiency curve, FHeatPLC,",
+        ""
+      ],
+      [
+        "replace",
+        "ca",
+        "mode"
+      ],
+      [
+        "delete",
+        "culat",
+        ""
+      ],
+      [
+        "replace",
+        "u",
+        "with one "
+      ],
+      [
+        "replace",
+        " ",
+        "le-s"
+      ],
+      [
+        "replace",
+        "h",
+        "ag"
+      ],
+      [
+        "replace",
+        "f",
+        "b"
+      ],
+      [
+        "insert",
+        "",
+        "i"
+      ],
+      [
+        "delete",
+        "lowing ",
+        ""
+      ],
+      [
+        "replace",
+        "quation: FHeatPLC = a + b x +",
+        "r,"
+      ],
+      [
+        "delete",
+        " x (Qartload",
+        ""
+      ],
+      [
+        "delete",
+        " 2",
+        ""
+      ],
+      [
+        "delete",
+        "par",
+        ""
+      ],
+      [
+        "replace",
+        "load = s",
+        "h"
+      ],
+      [
+        "delete",
+        "rvice water",
+        ""
+      ],
+      [
+        "replace",
+        "er",
+        "ing"
+      ],
+      [
+        "insert",
+        "",
+        "is gre"
+      ],
+      [
+        "insert",
+        "",
+        "er than 176 kW and not greater than 352 kW, the heating"
+      ],
+      [
+        "insert",
+        "",
+        "l"
+      ],
+      [
+        "insert",
+        "",
+        "nt shall be modeled to ope"
+      ],
+      [
+        "insert",
+        "",
+        "a"
+      ],
+      [
+        "replace",
+        "-",
+        "e as required by the reference building's "
+      ],
+      [
+        "replace",
+        "cond",
+        "w"
+      ],
+      [
+        "insert",
+        "",
+        "h "
+      ],
+      [
+        "insert",
+        "",
+        ") tw"
+      ],
+      [
+        "replace",
+        "n",
+        " boiler"
+      ],
+      [
+        "insert",
+        "",
+        " of equal capacity"
+      ],
+      [
+        "insert",
+        "",
+        " or ii) a two-staged boiler that operates"
+      ],
+      [
+        "replace",
+        "B",
+        "s"
+      ],
+      [
+        "replace",
+        "u/",
+        "ages wit"
+      ],
+      [
+        "insert",
+        "",
+        " a 1:2 ratio"
+      ],
+      [
+        "delete",
+        "Q",
+        ""
+      ],
+      [
+        "replace",
+        "esign",
+        ")"
+      ],
+      [
+        "replace",
+        "= s",
+        "wh"
+      ],
+      [
+        "delete",
+        "vic",
+        ""
+      ],
+      [
+        "delete",
+        "wa",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "h"
+      ],
+      [
+        "delete",
+        "r",
+        ""
+      ],
+      [
+        "replace",
+        "er",
+        "ing"
+      ],
+      [
+        "replace",
+        "at ",
+        "excee"
+      ],
+      [
+        "delete",
+        "esign conditions, in Btu/h, a = 0.021826, b = 0.977630, and C = 0.000543. Section 8.5. Obj",
+        ""
+      ],
+      [
+        "replace",
+        "8.",
+        "3"
+      ],
+      [
+        "replace",
+        ".1.",
+        "2"
+      ],
+      [
+        "replace",
+        "Objective and Functional Statements [Verified formulas for",
+        "kW,"
+      ],
+      [
+        "delete",
+        "is articl",
+        ""
+      ],
+      [
+        "delete",
+        "] - Fuel_partload = Fuel_design × FHeatPLC where Fuel_design = fuel consumption at design ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "l"
+      ],
+      [
+        "replace",
+        "r",
+        "n"
+      ],
+      [
+        "replace",
+        "-",
+        " sha"
+      ],
+      [
+        "replace",
+        "oad",
+        "l"
+      ],
+      [
+        "replace",
+        "efficiency curv",
+        "b"
+      ],
+      [
+        "insert",
+        "",
+        "mo"
+      ],
+      [
+        "replace",
+        "termin",
+        "l"
+      ],
+      [
+        "delete",
+        " in accordance",
+        ""
+      ],
+      [
+        "replace",
+        "S",
+        "a boil"
+      ],
+      [
+        "replace",
+        "n",
+        "r "
+      ],
+      [
+        "replace",
+        "ence",
+        "hat"
+      ],
+      [
+        "replace",
+        "(2) - Fuel_de",
+        "i"
+      ],
+      [
+        "delete",
+        "ign =",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "lly modulating down to 25% of its capacity, e) the pumping system shall be mod"
+      ],
+      [
+        "insert",
+        "",
+        "ed as a primary system with"
+      ],
+      [
+        "replace",
+        "um",
+        "tant s"
+      ],
+      [
+        "insert",
+        "",
+        "eed opera"
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "insert",
+        "",
+        "f) the peak pumping flow r"
+      ],
+      [
+        "insert",
+        "",
+        "e"
+      ],
+      [
+        "replace",
+        "d",
+        "shall b"
+      ],
+      [
+        "insert",
+        "",
+        " "
+      ],
+      [
+        "replace",
+        "ign",
+        "et"
+      ],
+      [
+        "insert",
+        "",
+        "si"
+      ],
+      [
+        "insert",
+        "",
+        "er"
+      ],
+      [
+        "insert",
+        "",
+        "ng i) "
+      ],
+      [
+        "replace",
+        "ions,",
+        "he"
+      ],
+      [
+        "replace",
+        " B",
+        "s"
+      ],
+      [
+        "delete",
+        "u/h, ",
+        ""
+      ],
+      [
+        "replace",
+        "n",
+        "lle"
+      ],
+      [
+        "delete",
+        " FHeat_PLC = fuel",
+        ""
+      ],
+      [
+        "delete",
+        "art-",
+        ""
+      ],
+      [
+        "delete",
+        "oad efficiency curve determined in accord",
+        ""
+      ],
+      [
+        "delete",
+        "ce wi",
+        ""
+      ],
+      [
+        "replace",
+        "h - Fuel_de",
+        "'"
+      ],
+      [
+        "delete",
+        "ign = fuel consumption at design conditions, in Btu/h FHeat_PLC = fuel heating part-load e",
+        ""
+      ],
+      [
+        "delete",
+        " at part-load conditions",
+        ""
+      ],
+      [
+        "replace",
+        "n",
+        "i)"
+      ],
+      [
+        "delete",
+        "Bt",
+        ""
+      ],
+      [
+        "delete",
+        "/h Q_design = ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " of pu"
+      ],
+      [
+        "delete",
+        "vic",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "insert",
+        "",
+        "and iii) a 16°C temperature drop, g) t"
+      ],
+      [
+        "insert",
+        "",
+        " pump's oper"
+      ],
+      [
+        "insert",
+        "",
+        "ing sch"
+      ],
+      [
+        "replace",
+        "r",
+        "dule"
+      ],
+      [
+        "insert",
+        "",
+        "shall be modeled as being identi"
+      ],
+      [
+        "replace",
+        "paci",
+        "l "
+      ],
+      [
+        "replace",
+        "y",
+        "o"
+      ],
+      [
+        "insert",
+        "",
+        "th"
+      ],
+      [
+        "insert",
+        "",
+        "of the propose"
+      ],
+      [
+        "replace",
+        "es",
+        " bu"
+      ],
+      [
+        "insert",
+        "",
+        "ldin"
+      ],
+      [
+        "replace",
+        "n",
+        ","
+      ],
+      [
+        "replace",
+        "co",
+        "a"
+      ],
+      [
+        "replace",
+        "i",
+        " h) "
+      ],
+      [
+        "delete",
+        "ions, in Btu/h a = 0.021826 b = 0.977630 c = 0.000543 - w",
+        ""
+      ],
+      [
+        "delete",
+        "re",
+        ""
+      ],
+      [
+        "replace",
+        "Q_par",
+        "ho"
+      ],
+      [
+        "delete",
+        "load = service",
+        ""
+      ],
+      [
+        "replace",
+        "h",
+        "supply t"
+      ],
+      [
+        "insert",
+        "",
+        "mper"
+      ],
+      [
+        "insert",
+        "",
+        "ure shall be reset to i) 82°C for an outside air temp"
+      ],
+      [
+        "insert",
+        "",
+        "ature"
+      ],
+      [
+        "replace",
+        "capacity",
+        "of -16°C,"
+      ],
+      [
+        "replace",
+        "t part-loa",
+        "n"
+      ],
+      [
+        "replace",
+        "c",
+        "ii) 60°C f"
+      ],
+      [
+        "replace",
+        "nditions,",
+        "r"
+      ],
+      [
+        "replace",
+        "i",
+        "a"
+      ],
+      [
+        "replace",
+        "B",
+        "outside air tempera"
+      ],
+      [
+        "delete",
+        "/h, Q_design = se",
+        ""
+      ],
+      [
+        "delete",
+        "vic",
+        ""
+      ],
+      [
+        "delete",
+        "water heater capacity at design c",
+        ""
+      ],
+      [
+        "replace",
+        "nditions, in Btu/h, - Q_partload = service water heater capacity at part-load conditions, ",
+        "f"
+      ],
+      [
+        "insert",
+        "",
+        "°C"
+      ],
+      [
+        "delete",
+        "021826 b = 0.977630",
+        ""
+      ]
+    ],
+    "fragment": "(6)",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.5.9.(7)": {
+    "cited_by": [
+      "D-46",
+      "D-47",
+      "D-48",
+      "D-49"
+    ],
+    "diff_spans": [
+      [
+        "replace",
+        "1",
+        "7"
+      ],
+      [
+        "replace",
+        "T",
+        "W"
+      ],
+      [
+        "replace",
+        " fu",
+        "r"
+      ],
+      [
+        "delete",
+        "l consumption at part-load conditions, Fuelpartload, in Btu/h, of",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "building contains a "
+      ],
+      [
+        "delete",
+        "el-fi",
+        ""
+      ],
+      [
+        "replace",
+        "ed servi",
+        "na"
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "replace",
+        "wa",
+        "i"
+      ],
+      [
+        "delete",
+        "er heater",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "mo"
+      ],
+      [
+        "replace",
+        "riv",
+        "l"
+      ],
+      [
+        "replace",
+        "by",
+        "as follows:"
+      ],
+      [
+        "replace",
+        "pplying an adjustment factor to",
+        ")"
+      ],
+      [
+        "delete",
+        " fuel consumption at full load: Fuelpartload = Fueldesign FHeatPLC where Fueldesign = fuel",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "ca"
+      ],
+      [
+        "delete",
+        "rt-load effi",
+        ""
+      ],
+      [
+        "replace",
+        "enc",
+        "t"
+      ],
+      [
+        "replace",
+        "curve",
+        "of"
+      ],
+      [
+        "delete",
+        "de",
+        ""
+      ],
+      [
+        "delete",
+        "ermined in accordance with Sentence (2). 2) T",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "rnac"
+      ],
+      [
+        "delete",
+        "l heating part-load efficiency curve, FHeatPLC,",
+        ""
+      ],
+      [
+        "replace",
+        "c",
+        "the sum of the heating loads of the therm"
+      ],
+      [
+        "insert",
+        "",
+        " blo"
+      ],
+      [
+        "replace",
+        "ulat",
+        "ks serv"
+      ],
+      [
+        "replace",
+        "using",
+        "by"
+      ],
+      [
+        "replace",
+        "o",
+        "urnace, mu"
+      ],
+      [
+        "delete",
+        "lowing equa",
+        ""
+      ],
+      [
+        "replace",
+        "on:",
+        "plied"
+      ],
+      [
+        "replace",
+        "FH",
+        "by th"
+      ],
+      [
+        "delete",
+        "atPLC =",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "pplicable"
+      ],
+      [
+        "replace",
+        "+",
+        "oversize factor,"
+      ],
+      [
+        "delete",
+        " x + c x (Qartload",
+        ""
+      ],
+      [
+        "delete",
+        " 2",
+        ""
+      ],
+      [
+        "delete",
+        "par",
+        ""
+      ],
+      [
+        "replace",
+        "load = s",
+        "h"
+      ],
+      [
+        "delete",
+        "rvice water",
+        ""
+      ],
+      [
+        "replace",
+        "er",
+        "ing"
+      ],
+      [
+        "replace",
+        "a",
+        "is no"
+      ],
+      [
+        "replace",
+        "pa",
+        "g"
+      ],
+      [
+        "delete",
+        "t-load conditions, in Btu/h, Qd",
+        ""
+      ],
+      [
+        "delete",
+        "sign = service w",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "than 66 kW, the furnace shall be modeled with two stages of equal capacity, and c) where t"
+      ],
+      [
+        "replace",
+        "er",
+        "ing"
+      ],
+      [
+        "replace",
+        "at",
+        "is"
+      ],
+      [
+        "replace",
+        "d",
+        "gr"
+      ],
+      [
+        "delete",
+        "sign conditions, in Btu/h, a = 0.021826, b = 0.977630, and C = 0.000543. Section 8.5. Obje",
+        ""
+      ],
+      [
+        "delete",
+        "ments 8.5.1. Objective and Functional Statements [Verified formulas fo",
+        ""
+      ],
+      [
+        "delete",
+        "is ",
+        ""
+      ],
+      [
+        "delete",
+        "rticle] - Fuel_partload = Fuel_desig",
+        ""
+      ],
+      [
+        "replace",
+        "×",
+        "66"
+      ],
+      [
+        "replace",
+        "FHea",
+        "kW, "
+      ],
+      [
+        "delete",
+        "PLC w",
+        ""
+      ],
+      [
+        "delete",
+        "re Fuel_design =",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "rnace shall be mod"
+      ],
+      [
+        "delete",
+        " consumption at design conditions, in Btu/h FHeatPLC = fuel heating part-load efficiency c",
+        ""
+      ],
+      [
+        "delete",
+        " in accordance",
+        ""
+      ],
+      [
+        "replace",
+        "Se",
+        "a "
+      ],
+      [
+        "delete",
+        "tence (2) - Fuel_design = fuel cons",
+        ""
+      ],
+      [
+        "delete",
+        "ption at design conditions, in Btu/h, and FHeat_PLC = fuel heating part-load efficiency cu",
+        ""
+      ],
+      [
+        "delete",
+        " × frac{Q_partload}{Q_design} + c × (frac{Q_partload}{Q_design})^2 Q_partload = service wa",
+        ""
+      ],
+      [
+        "replace",
+        "h",
+        "of stag"
+      ],
+      [
+        "insert",
+        "",
+        "s equ"
+      ],
+      [
+        "insert",
+        "",
+        "l "
+      ],
+      [
+        "replace",
+        "er",
+        "o its"
+      ],
+      [
+        "insert",
+        "",
+        "divided by 66 kW "
+      ],
+      [
+        "insert",
+        "",
+        "nd rounded up "
+      ],
+      [
+        "insert",
+        "",
+        "o"
+      ],
+      [
+        "replace",
+        "p",
+        "the ne"
+      ],
+      [
+        "insert",
+        "",
+        "es"
+      ],
+      [
+        "delete",
+        "-load conditions,",
+        ""
+      ],
+      [
+        "delete",
+        " B",
+        ""
+      ],
+      [
+        "delete",
+        "u/h Q_d",
+        ""
+      ],
+      [
+        "delete",
+        "si",
+        ""
+      ],
+      [
+        "delete",
+        "n = s",
+        ""
+      ],
+      [
+        "delete",
+        "vice water heater capacity at design conditions, in Btu/h a = 0",
+        ""
+      ],
+      [
+        "delete",
+        "021826 b = 0.977630 c = 0.000543 - where Q_partload = service water heater capacity at par",
+        ""
+      ]
+    ],
+    "fragment": "(7)",
+    "granularity": "whole article",
+    "kind": "article",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "8.4.6.2.": {
+    "cited_by": [
+      "D-89"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.6.3.": {
+    "cited_by": [
+      "D-89"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.6.5.": {
+    "cited_by": [
+      "D-13"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.6.5.-C": {
+    "cited_by": [
+      "D-03"
+    ],
+    "fragment": "",
+    "kind": "table_prefix_omitted",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.6.6.": {
+    "cited_by": [
+      "D-07"
+    ],
+    "fragment": "",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "8.4.6.9.(2)": {
+    "cited_by": [
+      "D-53"
+    ],
+    "fragment": "(2)",
+    "kind": "article",
+    "note": "one side is mcp_empty / present — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "present",
+    "verdict": "not comparable at this address"
+  },
+  "Note A-8.4.4.13": {
+    "cited_by": [
+      "D-37",
+      "D-58"
+    ],
+    "fragment": "",
+    "kind": "note",
+    "note": "one side is present / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "present",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 3.2.2.2.": {
+    "cited_by": [
+      "D-24"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        ") Table 3.2.2.2. Overall Thermal Transmittance of Above-ground Opaque Building Assemblies "
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "table",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "Table 3.2.3.1.": {
+    "cited_by": [
+      "D-32"
+    ],
+    "diff_spans": [],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "table",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "substantively identical"
+  },
+  "Table 5.2.12.1.-I": {
+    "cited_by": [
+      "D-85"
+    ],
+    "fragment": "",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 5.2.12.2": {
+    "cited_by": [
+      "D-22",
+      "D-26"
+    ],
+    "diff_spans": [
+      [
+        "delete",
+        "(4) The R-717 test fluid refers to ammonia, and the R-448A test fluid is a zeotropic refri",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "table",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "Table 6.2.2.1": {
+    "cited_by": [
+      "D-63"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "UEF = uniform energy factor "
+      ],
+      [
+        "insert",
+        "",
+        "UEF = uniform energy factor "
+      ],
+      [
+        "delete",
+        " of tank",
+        ""
+      ],
+      [
+        "replace",
+        "an ",
+        "erm"
+      ],
+      [
+        "delete",
+        "n",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "lectric"
+      ],
+      [
+        "replace",
+        "me",
+        "d i"
+      ],
+      [
+        "delete",
+        "t applies",
+        ""
+      ],
+      [
+        "replace",
+        "o a giv",
+        "h"
+      ],
+      [
+        "delete",
+        "n expanded capacity sized contribution",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "of publication Important equipment regulated in the European Regulations at the time of "
+      ],
+      [
+        "replace",
+        "p",
+        "disclosu"
+      ],
+      [
+        "replace",
+        "oc",
+        "e T"
+      ],
+      [
+        "replace",
+        "s us",
+        "t"
+      ],
+      [
+        "insert",
+        "",
+        " an electro-storage range specified on"
+      ],
+      [
+        "replace",
+        "lis",
+        "wa"
+      ],
+      [
+        "delete",
+        "d fo",
+        ""
+      ],
+      [
+        "replace",
+        "s",
+        "hea"
+      ],
+      [
+        "insert",
+        "",
+        "er n"
+      ],
+      [
+        "replace",
+        "ndby ",
+        "mep"
+      ],
+      [
+        "replace",
+        "oss",
+        "at"
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "by",
+        "ards"
+      ],
+      [
+        "replace",
+        "d",
+        "vis"
+      ],
+      [
+        "delete",
+        "r",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ";"
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "insert",
+        "",
+        " UEF = uniform energy factor V_r = rated volume of tank as measured in accordance with the"
+      ],
+      [
+        "delete",
+        "requirements of one ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        ","
+      ],
+      [
+        "replace",
+        "Imp",
+        "as "
+      ],
+      [
+        "delete",
+        "rtant: O",
+        ""
+      ],
+      [
+        "delete",
+        " requirement applies to a given tank as measured in accordance with the Energy Efficiency ",
+        ""
+      ],
+      [
+        "replace",
+        "o",
+        "he"
+      ],
+      [
+        "replace",
+        "the",
+        "a"
+      ],
+      [
+        "replace",
+        "vo",
+        "fi"
+      ],
+      [
+        "replace",
+        "t",
+        "l"
+      ],
+      [
+        "insert",
+        "",
+        "sto"
+      ],
+      [
+        "delete",
+        "n",
+        ""
+      ],
+      [
+        "replace",
+        "s",
+        "ty"
+      ],
+      [
+        "replace",
+        "cifi",
+        " serv"
+      ],
+      [
+        "delete",
+        " on the",
+        ""
+      ],
+      [
+        "delete",
+        "st",
+        ""
+      ],
+      [
+        "delete",
+        " standby losses propane",
+        ""
+      ],
+      [
+        "replace",
+        "nn",
+        "rticl"
+      ],
+      [
+        "delete",
+        "x",
+        ""
+      ],
+      [
+        "replace",
+        ".",
+        " - UEF = uniform energy factor V_s = rated volume, as specified V_r = volume of tank, as m"
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "table",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [],
+    "verdict": "differs"
+  },
+  "Table 8.4.4.1.": {
+    "cited_by": [
+      "D-04"
+    ],
+    "diff_spans": [
+      [
+        "insert",
+        "",
+        "his Subsection shall only be used to demonstrate compliance where 90% or more of the sum o"
+      ],
+      [
+        "insert",
+        "",
+        " (BET), in kWh per year,"
+      ],
+      [
+        "delete",
+        "b",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " follows: BET = Σ (Ai X EUIi) + PL i=1 wh"
+      ],
+      [
+        "insert",
+        "",
+        "re i = i"
+      ],
+      [
+        "insert",
+        "",
+        "entifier"
+      ],
+      [
+        "insert",
+        "",
+        "f a buildi"
+      ],
+      [
+        "insert",
+        "",
+        "g"
+      ],
+      [
+        "replace",
+        "t",
+        "arc"
+      ],
+      [
+        "insert",
+        "",
+        "type"
+      ],
+      [
+        "replace",
+        "parame",
+        "lis"
+      ],
+      [
+        "delete",
+        "ers describ",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "Table 8.4.4.1. "
+      ],
+      [
+        "insert",
+        "",
+        "at "
+      ],
+      [
+        "replace",
+        "S",
+        "associated with a space "
+      ],
+      [
+        "delete",
+        "b",
+        ""
+      ],
+      [
+        "delete",
+        "ction. 2) The components and systems",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        "building, n = total number of building archetypes listed in Table 8.4.4.1. that a"
+      ],
+      [
+        "replace",
+        "f",
+        " associated with the building, Ai = gross int"
+      ],
+      [
+        "insert",
+        "",
+        "ior floor ar"
+      ],
+      [
+        "replace",
+        "nc",
+        "a of th"
+      ],
+      [
+        "insert",
+        "",
+        "archetype i, in m², calculated in accordance with Sentence (3), EUI1 = energy use intensit"
+      ],
+      [
+        "insert",
+        "",
+        "be the sum of the interior floor areas of all conditioned spaces that are associated with "
+      ],
+      [
+        "insert",
+        "",
+        "asured from the inside of exterior walls or the middle line of partitions separating a spa"
+      ],
+      [
+        "insert",
+        "",
+        "ype from a space use represented by another building archetype. (See Note A-8.4.4.1.(3).) "
+      ],
+      [
+        "delete",
+        "s 3.2.,",
+        ""
+      ],
+      [
+        "insert",
+        "",
+        " [Verified formulas for this article] - BET = sum_i=1^n (A_i × EUI_i) + PL i = identifier "
+      ],
+      [
+        "replace",
+        "5.",
+        "in m^"
+      ],
+      [
+        "delete",
+        ".",
+        ""
+      ],
+      [
+        "replace",
+        "6.2.",
+        "calculated in"
+      ],
+      [
+        "insert",
+        "",
+        "ccorda"
+      ],
+      [
+        "replace",
+        "d",
+        "ce"
+      ],
+      [
+        "replace",
+        "7.2.",
+        "with"
+      ],
+      [
+        "insert",
+        "",
+        "Sentence ("
+      ],
+      [
+        "replace",
+        "The",
+        "EUI_i ="
+      ],
+      [
+        "insert",
+        "",
+        "use intensity, in kWh/"
+      ],
+      [
+        "insert",
+        "",
+        "^2 per year, listed in Table 8.4.4.1. f"
+      ],
+      [
+        "insert",
+        "",
+        "r buil"
+      ],
+      [
+        "insert",
+        "",
+        "ing arch"
+      ],
+      [
+        "insert",
+        "",
+        "type i, and PL = annua"
+      ],
+      [
+        "insert",
+        "",
+        " energy use of the process loads accounted for in the"
+      ],
+      [
+        "delete",
+        "s",
+        ""
+      ],
+      [
+        "replace",
+        "shall include all",
+        "of"
+      ],
+      [
+        "insert",
+        "",
+        " annual"
+      ],
+      [
+        "insert",
+        "",
+        "cons"
+      ],
+      [
+        "replace",
+        "ses addressed in Sec",
+        "mp"
+      ],
+      [
+        "delete",
+        "s 3.2., 4.2., 5.2., 6.2. and 7.2. 4) Except as noted otherwise in this Subsection, the fol",
+        ""
+      ],
+      [
+        "replace",
+        ":",
+        ", in excess of the default peak receptacle loads set in Table 8.4.4.2., in kWh per year - "
+      ],
+      [
+        "replace",
+        ")",
+        " building archetype listed in Table 8.4.4.1. that is associated with a space use of the bu"
+      ],
+      [
+        "insert",
+        "",
+        " number of building archetypes listed in Table 8.4.4.1. that are associated with the build"
+      ],
+      [
+        "delete",
+        "conditioned and unconditioned spaces, b) use of building spaces, c) number, type and condi",
+        ""
+      ],
+      [
+        "delete",
+        "ermal blocks, d) shape and exterior dimensions, and e) orientation. 5) The presence or abs",
+        ""
+      ],
+      [
+        "replace",
+        "s",
+        "arc"
+      ],
+      [
+        "replace",
+        "all b",
+        "etyp"
+      ],
+      [
+        "replace",
+        "modeled",
+        "i"
+      ],
+      [
+        "replace",
+        "as",
+        ","
+      ],
+      [
+        "delete",
+        "be",
+        ""
+      ],
+      [
+        "delete",
+        "g",
+        ""
+      ],
+      [
+        "replace",
+        "id",
+        "m^2 - EUI_1 = "
+      ],
+      [
+        "replace",
+        "tical",
+        "ergy"
+      ],
+      [
+        "replace",
+        "to tho",
+        "u"
+      ],
+      [
+        "insert",
+        "",
+        "tensity, in kWh/m^2 per year, listed in Table 8.4.4.1. for building archetype i - PL = ann"
+      ],
+      [
+        "delete",
+        ". 6) Climatic data used in the compliance calculations for the proposed building shall be ",
+        ""
+      ]
+    ],
+    "fragment": "",
+    "granularity": "whole article",
+    "kind": "table",
+    "state_2020": "present",
+    "state_2025": "present",
+    "superscripts_present": [
+      "²"
+    ],
+    "verdict": "differs"
+  },
+  "Table 8.4.4.7.-A": {
+    "cited_by": [
+      "D-45",
+      "D-58"
+    ],
+    "fragment": "",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 8.4.4.7.-B": {
+    "cited_by": [
+      "D-39"
+    ],
+    "fragment": "",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 8.4.4.7.-B Note (1)": {
+    "cited_by": [
+      "D-55"
+    ],
+    "fragment": "Note (1)",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 8.4.4.7.-B Note (3)": {
+    "cited_by": [
+      "D-18",
+      "D-28"
+    ],
+    "fragment": "Note (3)",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 8.4.5.7.-A": {
+    "cited_by": [
+      "D-60"
+    ],
+    "fragment": "",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  },
+  "Table 8.4.5.7.-B Note (1)": {
+    "cited_by": [
+      "D-55"
+    ],
+    "fragment": "Note (1)",
+    "kind": "table",
+    "note": "one side is mcp_empty / mcp_empty — an empty answer is not proven Code absence; the paired provision must be established positively",
+    "state_2020": "mcp_empty",
+    "state_2025": "mcp_empty",
+    "verdict": "not comparable at this address"
+  }
+}

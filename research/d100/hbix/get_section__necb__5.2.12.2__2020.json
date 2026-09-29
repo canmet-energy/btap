@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.12.2",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "5.2.12.2",
+    "server_known_issue": null,
+    "sha256": "97b10d94f929a68060eb99fb21aeae5e16024c38952b307ef7b49bf3404f9346",
+    "state": "present",
+    "state_note": "",
+    "title": "Heat Rejection Equipment"
+  },
+  "payload": {
+    "article_number": "5.2.12.2",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) Except for equipment covered by Article 5.2.12.1. whose performance includes heat rejection energy, this Article applies to standalone heat rejection equipment. (See Note A-5.2.12.2.(1).)\n2) Standalone heat rejection equipment and their components shall comply with the performance requirements stated in Table 5.2.12.2.\n3) Constant speed fans shall operate with cycling control to maintain the leaving fluid temperature or condensing temperature/pressure of the heat rejection equipment at the set-point.\nTable 5.2.12.2. (Continued)\n(4) The R-717 test fluid refers to ammonia, and the R-448A test fluid is a zeotropic refrigerant. Evaporative condensers intended for use with halocarbon refrigerants other than R-448A must meet the minimum performance requirements listed in the Table with R-448A as the test fluid. For ammonia, the condensing temperature is defined as the saturation temperature corresponding to the refrigerant pressure at the condenser entrance. For R-448A, the condensing temperature is defined as the arithmetic average of the dew point and the bubble point temperatures corresponding to the refrigerant pressure at the condenser entrance.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 5",
+      "Section 5.2",
+      "Subsection 5.2.12"
+    ],
+    "page_end": 166,
+    "page_start": 164,
+    "part_number": "5",
+    "reference": "5.2.12.2",
+    "section_number": "5.2.12.2",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of Equipment",
+          "Cooling or Heating Capacity, kW",
+          "Performance Testing Standard",
+          "Rating Conditions",
+          "Minimum Performance"
+        ],
+        "note": "Use get_table('necb', '5.2.12.1.-P') for full structured rows.",
+        "row_count": 5,
+        "table_number": "5.2.12.1.-P",
+        "title": "Copyright © NRC 1941 2022 World Rights Reserved © CNRC 1941-2022 Droits réservés pour tous pays"
+      },
+      {
+        "headers": [
+          "Equipment Category",
+          "Type of Equipment",
+          "Heat Rejection Capacity",
+          "Performance Testing Standard",
+          "Rating Conditions",
+          "Performance Requirements(1), electrical kW / thermal kW(2)"
+        ],
+        "note": "Use get_table('necb', '5.2.12.2') for full structured rows.",
+        "row_count": 20,
+        "table_number": "5.2.12.2",
+        "title": "Heat Rejection Equipment Performance Requirements"
+      }
+    ],
+    "title": "Heat Rejection Equipment"
+  }
+}

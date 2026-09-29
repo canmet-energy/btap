@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.15",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.5.15",
+    "server_known_issue": null,
+    "sha256": "5520305c1da4372a19472ddf54018c6dbb35c7d6ed996204c07c07aedba7f366",
+    "state": "present",
+    "state_note": "",
+    "title": "Outdoor Air"
+  },
+  "payload": {
+    "article_number": "8.4.5.15",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) The peak outdoor air ventilation rates for the reference building shall be identical to those determined for the proposed building in Sentence 8.4.3.6.(1).\n2) Where demand control ventilation strategies required by Article 5.2.3.4. are implemented in the proposed building, the reference building shall be modeled with those same strategies.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "page_end": 227,
+    "page_start": 227,
+    "part_number": "8",
+    "reference": "8.4.5.15",
+    "section_number": "8.4.5.15",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Coefficients",
+          "Pump Riding its Curve (Type of Pump)",
+          "Pump with Variable Speed Drive (Type of Pump)"
+        ],
+        "note": "Use get_table('necb', '8.4.5.14') for full structured rows.",
+        "row_count": 5,
+        "table_number": "8.4.5.14",
+        "title": "Coefficients Used in Calculating Pump Power versus Flow Rate"
+      }
+    ],
+    "title": "Outdoor Air"
+  }
+}

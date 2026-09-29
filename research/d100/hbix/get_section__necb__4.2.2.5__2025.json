@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.2.5",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "4.2.2.5",
+    "server_known_issue": null,
+    "sha256": "b1e7ce4b7e0aeb6814be01b2ac09f050de2a63384c02576f068ba22e6f8de92e",
+    "state": "present",
+    "state_note": "",
+    "title": "Determination of Daylighted Area Under Skylights"
+  },
+  "payload": {
+    "article_number": "4.2.2.5",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) The daylighted area under skylights shall refer to the combined daylighted area under each skylight without double-counting overlapping areas. (See Note A-4.2.2.4.(1) and 4.2.2.5.(1).)\n2) The daylighted area under each skylight shall be calculated as the area of the skylight's projection from the ceiling onto the floor plus the horizontal distances\nextending from that projection assessed separately in each direction using the smallest of the following values:\na) 70% of the ceiling height,\nb) the distance to any primary sidelighted area, as determined in accordance with Article 4.2.2.3., or the daylighted area under roof monitors, or\nc) the distance to the nearest face of any vertical obstruction where any part of the obstruction is farther away than 70% of the distance between the top of the obstruction and the ceiling.\n(See Note A-4.2.2.5.(2).)",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 4",
+      "Section 4.2",
+      "Subsection 4.2.2"
+    ],
+    "page_end": 106,
+    "page_start": 105,
+    "part_number": "4",
+    "reference": "4.2.2.5",
+    "section_number": "4.2.2.5",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Lighting Zone",
+          "Description"
+        ],
+        "note": "Use get_table('necb', '4.2.3.1.-A') for full structured rows.",
+        "row_count": 5,
+        "table_number": "4.2.3.1.-A",
+        "title": "Lighting Zones Used to Determine Exterior Lighting Allowances"
+      }
+    ],
+    "title": "Determination of Daylighted Area Under Skylights"
+  }
+}

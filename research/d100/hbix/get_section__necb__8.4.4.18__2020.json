@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.18",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.18",
+    "server_known_issue": null,
+    "sha256": "f031096e1696008c986b2693bb745dc73779709be3ec37e97874d8d9d95db6a6",
+    "state": "present",
+    "state_note": "",
+    "title": "Supply Air Systems"
+  },
+  "payload": {
+    "article_number": "8.4.4.18",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) The supply airflow rate provided by secondary systems shall be modeled as being equal to the sum of the airflow rates supplied to each of the thermal blocks calculated in accordance with Sentence (2).\n2) The supply airflow rate to a thermal block shall be modeled as being the greater of\na) the airflow rate for heating, based on the peak heating load and a temperature difference of 21°C,\nb) the airflow rate for cooling, based on the peak cooling load and a temperature difference of 11°C, or\nc) the outdoor air ventilation rate supplied to the thermal block in the proposed building.\n3) Except as provided in Sentence (6), HVAC systems 1 to 5 of Table 8.4.4.7.-B shall be modeled with\na) a supply air temperature that is reset according to the thermal block's load,\nb) a supply fan that has a static pressure of 640 Pa and a combined fan-motor efficiency of 40%, and\nc) no return fan.\n4) Except as provided in Sentence (6), HVAC system 6 of Table 8.4.4.7.-B shall be modeled with\na) a default supply air temperature of 13°C, with the supply air temperature reset in accordance with Article 5.2.8.9.,\nb) a supply fan that has a static pressure of 1 000 Pa and a combined fan-motor efficiency of 55%, and\nc) a return fan that has a static pressure of 250 Pa and a combined fan-motor efficiency of 30%.\n5) Where the proposed building's secondary system does not meet the requirements of Clause 5.2.3.1.(1)(b), the reference building's secondary system shall be modeled as having an identical fan power demand.\n6) Where a secondary system defined in Tables 8.4.4.7.-A and 8.4.4.13. comprises equipment whose fan energy is included in the minimum performance level required by Tables 5.2.12.1.-A to 5.2.12.1.-P, the capacity and performance of its heating and cooling equipment shall be adjusted so the maximum power demand of the secondary system, including fan power demand, meets the requirements of Article 5.2.12.1.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 222,
+    "page_start": 221,
+    "part_number": "8",
+    "reference": "8.4.4.18",
+    "section_number": "8.4.4.18",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of Fan",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "note": "Use get_table('necb', '8.4.4.17') for full structured rows.",
+        "row_count": 4,
+        "table_number": "8.4.4.17",
+        "title": "Coefficients Used in Calculating Fan Power versus Flow Rate"
+      }
+    ],
+    "title": "Supply Air Systems"
+  }
+}

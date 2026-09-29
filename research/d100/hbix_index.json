@@ -1,1966 +1,2768 @@
 {
-  "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
   "index": {
-    "1.4.1.2@2020": {
+    "get_section__necb__1.4.1.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "1.4.1.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "1.4.1.2",
+      "server_known_issue": null,
       "sha256": "0ba1e115f5b2830893f7b2b52af04ce5a062805808b96826ebfa19f4db7f7aed",
-      "known_issue": null,
-      "title": "Defined Terms",
-      "article_number": "1.4.1.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Defined Terms"
     },
-    "1.4.1.2@2025": {
+    "get_section__necb__1.4.1.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "1.4.1.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "1.4.1.2",
+      "server_known_issue": null,
       "sha256": "3c06df31ada8e18bfe318797ff283deea2c07f8db26f731b6ca2926ff7aa866b",
-      "known_issue": null,
-      "title": "Defined Terms",
-      "article_number": "1.4.1.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Defined Terms"
     },
-    "11.4.1.1@2020": {
+    "get_section__necb__11.4.1.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "11.4.1.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "11.4.1.1@2025": {
+    "get_section__necb__11.4.1.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "11.4.1.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "11.4.1.1",
+      "server_known_issue": null,
       "sha256": "13d265a27272e9d599da53cdb8c2f4921c364ffe446f06f9ad580acf71e1fc3e",
-      "known_issue": null,
-      "title": "Compliance",
-      "article_number": "11.4.1.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Compliance"
     },
-    "3.1.1.7@2020": {
+    "get_section__necb__3.1.1.7__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "3.1.1.7",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.1.1.7",
+      "server_known_issue": null,
       "sha256": "86573efaa0288a717798708ad237bb3954b65ec6d0c0c5ff672ec083c1893efa",
-      "known_issue": null,
-      "title": "Calculation of Overall Thermal Transmittance",
-      "article_number": "3.1.1.7"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation of Overall Thermal Transmittance"
     },
-    "3.1.1.7@2025": {
+    "get_section__necb__3.1.1.7__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.1.1.7",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.1.1.7",
+      "server_known_issue": null,
       "sha256": "7bb62f3d0a37970c95a2a00c05f1bf49c8061aa3023cd63a46c9d3001af9586b",
-      "known_issue": null,
-      "title": "Calculation of Overall Thermal Transmittance",
-      "article_number": "3.1.1.7"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation of Overall Thermal Transmittance"
     },
-    "3.2.1.4@2020": {
+    "get_section__necb__3.2.1.4__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "3.2.1.4",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.1.4",
+      "server_known_issue": null,
       "sha256": "b9f6dfc04fade4486e7fddf619307fc9bb9f701947af9d73c0c34c838957cfe4",
-      "known_issue": null,
-      "title": "Allowable Fenestration and Door Area",
-      "article_number": "3.2.1.4"
+      "state": "present",
+      "state_note": "",
+      "title": "Allowable Fenestration and Door Area"
     },
-    "3.2.1.4@2025": {
+    "get_section__necb__3.2.1.4__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.2.1.4",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.1.4",
+      "server_known_issue": null,
       "sha256": "4df80518edaa3d35acdd9c97fb303399e5784e0ca553dee0be5b3e5a54f12eca",
-      "known_issue": null,
-      "title": "Allowable Fenestration and Door Area",
-      "article_number": "3.2.1.4"
+      "state": "present",
+      "state_note": "",
+      "title": "Allowable Fenestration and Door Area"
     },
-    "3.2.2.2@2020": {
+    "get_section__necb__3.2.2.2.__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.2.2",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "3.2.2.2.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.2",
+      "server_known_issue": null,
       "sha256": "1dd90a2d9f6352b3606fab76cda15b9117edb43565ea5b674532b73ae0b50032",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies",
-      "article_number": "3.2.2.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies"
     },
-    "3.2.2.2@2025": {
+    "get_section__necb__3.2.2.2.__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.2.2",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "3.2.2.2.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.2",
+      "server_known_issue": null,
       "sha256": "fd691b5051508e046e8dcb183ac13b52e33dfc03742ae0e93732493d64a5d943",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies",
-      "article_number": "3.2.2.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies"
     },
-    "3.2.2.3@2020": {
+    "get_section__necb__3.2.2.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.2.3",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "3.2.2.2",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.2",
+      "server_known_issue": null,
+      "sha256": "1dd90a2d9f6352b3606fab76cda15b9117edb43565ea5b674532b73ae0b50032",
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies"
+    },
+    "get_section__necb__3.2.2.2__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "3.2.2.2",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.2",
+      "server_known_issue": null,
+      "sha256": "fd691b5051508e046e8dcb183ac13b52e33dfc03742ae0e93732493d64a5d943",
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies"
+    },
+    "get_section__necb__3.2.2.3__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "3.2.2.3",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.3",
+      "server_known_issue": null,
       "sha256": "171ac5bbc0c612b3beb650b42d7a91a4d8dc10f76caacae61ddee1ccaba9d099",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Fenestration",
-      "article_number": "3.2.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Fenestration"
     },
-    "3.2.2.3@2025": {
+    "get_section__necb__3.2.2.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.2.2.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.2.3",
+      "server_known_issue": null,
       "sha256": "eb32cc4ed1e303f2d5fb1304f8d69e6ee7325b86ee668948c4f81a9492ca9582",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Fenestration",
-      "article_number": "3.2.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Fenestration"
     },
-    "3.2.3.1@2020": {
+    "get_section__necb__3.2.3.1.__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.3.1",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "3.2.3.1.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.1",
+      "server_known_issue": null,
       "sha256": "4572e3bba8c437a37c91b17ecc4292614f55801ae904c128a81a8310295404af",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Walls in Contact with the Ground",
-      "article_number": "3.2.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Walls in Contact with the Ground"
     },
-    "3.2.3.1@2025": {
+    "get_section__necb__3.2.3.1.__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.3.1",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "3.2.3.1.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.1",
+      "server_known_issue": null,
       "sha256": "a7e7670f2e4f8f777d1ff89327c8c8353e3180ffaa5d01b93dbad0f64076ac32",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Walls in Contact with the Ground",
-      "article_number": "3.2.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Walls in Contact with the Ground"
     },
-    "3.2.3.3@2020": {
+    "get_section__necb__3.2.3.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "3.2.3.3",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "3.2.3.1",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.1",
+      "server_known_issue": null,
+      "sha256": "4572e3bba8c437a37c91b17ecc4292614f55801ae904c128a81a8310295404af",
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Walls in Contact with the Ground"
+    },
+    "get_section__necb__3.2.3.1__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "3.2.3.1",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.1",
+      "server_known_issue": null,
+      "sha256": "a7e7670f2e4f8f777d1ff89327c8c8353e3180ffaa5d01b93dbad0f64076ac32",
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Walls in Contact with the Ground"
+    },
+    "get_section__necb__3.2.3.3__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "3.2.3.3",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.3",
+      "server_known_issue": null,
       "sha256": "b85755cd7b8489d218929ab6c3b4b372703295735a5c416c04cd008c25f1d399",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Floors in Contact with the Ground",
-      "article_number": "3.2.3.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Floors in Contact with the Ground"
     },
-    "3.2.3.3@2025": {
+    "get_section__necb__3.2.3.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.2.3.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.3.3",
+      "server_known_issue": null,
       "sha256": "2aff0d511cec5b8eb40fa2d356f694f763ebdfb530a665a56dabf122f496742a",
-      "known_issue": null,
-      "title": "Thermal Characteristics of Floors in Contact with the Ground",
-      "article_number": "3.2.3.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Characteristics of Floors in Contact with the Ground"
     },
-    "3.2.4.1@2020": {
+    "get_section__necb__3.2.4.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "3.2.4.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.4.1",
+      "server_known_issue": null,
       "sha256": "94978dd9d575bed09e5c1434fd6304912ceda7dd19101ecb7eef4a1ff33231d5",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "3.2.4.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "3.2.4.1@2025": {
+    "get_section__necb__3.2.4.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.2.4.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.4.1",
+      "server_known_issue": null,
       "sha256": "062429bffe2153ae994fb02a5019e3b1bb7322e5b531dbe41ed79c2f86892ef4",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "3.2.4.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "3.2.4.2@2020": {
+    "get_section__necb__3.2.4.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "3.2.4.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.4.2",
+      "server_known_issue": null,
       "sha256": "43748bcb4fca2bbf6fed2b269fe82090fef8ef5c28ebc11033a4fdf47c8a171c",
-      "known_issue": null,
-      "title": "Air Barrier System",
-      "article_number": "3.2.4.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Air Barrier System"
     },
-    "3.2.4.2@2025": {
+    "get_section__necb__3.2.4.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "3.2.4.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "3.2.4.2",
+      "server_known_issue": null,
       "sha256": "3884a35891c9b2a3206b45290ca7b83b3634c09d4229bd27ad992455758001ab",
-      "known_issue": null,
-      "title": "Air Barrier System",
-      "article_number": "3.2.4.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Air Barrier System"
     },
-    "4.2.1.6@2020": {
+    "get_section__necb__4.2.1.6__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.1.6",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.1.6",
+      "server_known_issue": null,
       "sha256": "7edd38688d2bc1cb1d4aa488ff9f58a185559c77a77c3db7d5f999d5b623e99e",
-      "known_issue": null,
-      "title": "Calculation of Interior Lighting Power Allowance Using the Space-by-Space Method",
-      "article_number": "4.2.1.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation of Interior Lighting Power Allowance Using the Space-by-Space Method"
     },
-    "4.2.1.6@2025": {
+    "get_section__necb__4.2.1.6__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.1.6",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.1.6",
+      "server_known_issue": null,
       "sha256": "8e10b87a123c8aae1d5f625356c23cb023570550dbe2e5570fb1b4843b1a000c",
-      "known_issue": null,
-      "title": "Calculation of Interior Lighting Power Allowance Using the Space-by-Space Method",
-      "article_number": "4.2.1.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation of Interior Lighting Power Allowance Using the Space-by-Space Method"
     },
-    "4.2.2.1@2020": {
+    "get_section__necb__4.2.2.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.2.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.1",
+      "server_known_issue": null,
       "sha256": "e4256110831384920ec0070b5f612571b0fe52879406174a5cacf68bb9c8ef43",
-      "known_issue": null,
-      "title": "Interior Lighting Controls",
-      "article_number": "4.2.2.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Interior Lighting Controls"
     },
-    "4.2.2.1@2025": {
+    "get_section__necb__4.2.2.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.2.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.1",
+      "server_known_issue": null,
       "sha256": "b4ea613ce9059a2dbf24b24992aa38a0d7fb554af33f496b6051045edd7353cc",
-      "known_issue": null,
-      "title": "Interior Lighting Controls",
-      "article_number": "4.2.2.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Interior Lighting Controls"
     },
-    "4.2.2.3@2020": {
+    "get_section__necb__4.2.2.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.2.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.3",
+      "server_known_issue": null,
       "sha256": "fba094952ddbe444bee45edd5ca6cf506d5689ef8aaf44659af1fc742cfa778e",
-      "known_issue": null,
-      "title": "Determination of Primary and Secondary Sidelighted Areas",
-      "article_number": "4.2.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Primary and Secondary Sidelighted Areas"
     },
-    "4.2.2.3@2025": {
+    "get_section__necb__4.2.2.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.2.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.3",
+      "server_known_issue": null,
       "sha256": "3c227f4e21dcd58959ea0bc5b5d9a54cda98dc6595abe964ef96fbfb6f73aefc",
-      "known_issue": null,
-      "title": "Determination of Primary and Secondary Sidelighted Areas",
-      "article_number": "4.2.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Primary and Secondary Sidelighted Areas"
     },
-    "4.2.2.4@2020": {
+    "get_section__necb__4.2.2.4__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.2.4",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.4",
+      "server_known_issue": null,
       "sha256": "3466e28719a25a0162a3872b88aace31c7380f468b775e4de9be31be493fbcf1",
-      "known_issue": null,
-      "title": "Determination of Daylighted Area Under Roof Monitors",
-      "article_number": "4.2.2.4"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Daylighted Area Under Roof Monitors"
     },
-    "4.2.2.4@2025": {
+    "get_section__necb__4.2.2.4__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.2.4",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.4",
+      "server_known_issue": null,
       "sha256": "6db937d96af58260d8359e6d915205c83bf92cae802606030858df3e76544e65",
-      "known_issue": null,
-      "title": "",
-      "article_number": "4.2.2.4"
+      "state": "present",
+      "state_note": "",
+      "title": ""
     },
-    "4.2.2.5@2020": {
+    "get_section__necb__4.2.2.5__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.2.5",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.5",
+      "server_known_issue": null,
       "sha256": "0a78eb51f5eda87aacc6846d3ee5050b0cb349adaf65a7281aa665095309057f",
-      "known_issue": null,
-      "title": "Determination of Daylighted Area Under Skylights",
-      "article_number": "4.2.2.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Daylighted Area Under Skylights"
     },
-    "4.2.2.5@2025": {
+    "get_section__necb__4.2.2.5__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.2.5",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.2.5",
+      "server_known_issue": null,
       "sha256": "b1e7ce4b7e0aeb6814be01b2ac09f050de2a63384c02576f068ba22e6f8de92e",
-      "known_issue": null,
-      "title": "Determination of Daylighted Area Under Skylights",
-      "article_number": "4.2.2.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Daylighted Area Under Skylights"
     },
-    "4.2.3.1@2020": {
+    "get_section__necb__4.2.3.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "4.2.3.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.3.1",
+      "server_known_issue": null,
       "sha256": "a8e2686f355e13981994237cb6fd2578693e91f7dd776570cabe4064b473b635",
-      "known_issue": null,
-      "title": "Exterior Lighting",
-      "article_number": "4.2.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Exterior Lighting"
     },
-    "4.2.3.1@2025": {
+    "get_section__necb__4.2.3.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "4.2.3.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "4.2.3.1",
+      "server_known_issue": null,
       "sha256": "2ed65bff4aa5c20edce636f84ce72e334347dc308e53a9904f2f28c757eabb7c",
-      "known_issue": null,
-      "title": "Exterior Lighting",
-      "article_number": "4.2.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Exterior Lighting"
     },
-    "5.2.10.1@2020": {
+    "get_section__necb__5.2.10.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.10.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.10.1",
+      "server_known_issue": null,
       "sha256": "1477aceaedfea05ed722bf8e34473a654e911ccf8690390e055809b4ff163e4a",
-      "known_issue": null,
-      "title": "Energy Recovery Systems",
-      "article_number": "5.2.10.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Energy Recovery Systems"
     },
-    "5.2.10.1@2025": {
+    "get_section__necb__5.2.10.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.10.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.10.1",
+      "server_known_issue": null,
       "sha256": "8a8c74297f5676140497afe204954eef9f1ad7e9e66ea5a83e270a43c1a9298a",
-      "known_issue": null,
-      "title": "Energy Recovery Systems",
-      "article_number": "5.2.10.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Energy Recovery Systems"
     },
-    "5.2.12.1@2020": {
+    "get_section__necb__5.2.12.1.-I__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "5.2.12.1",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "5.2.12.1.-I",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__5.2.12.1.-I__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "5.2.12.1.-I",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__5.2.12.1__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "5.2.12.1",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.1",
+      "server_known_issue": null,
       "sha256": "943cbeb8f8733ab68621897179dc96a697f3cd68e6368c80e32a16550c9a1f7d",
-      "known_issue": null,
-      "title": "Unitary and Packaged HVAC Equipment",
-      "article_number": "5.2.12.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Unitary and Packaged HVAC Equipment"
     },
-    "5.2.12.1@2025": {
+    "get_section__necb__5.2.12.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.12.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.1",
+      "server_known_issue": null,
       "sha256": "b64a8c3b7c1ea27e1d42376f22735b20c6f47e310b33facd93df3b740c77c74f",
-      "known_issue": null,
-      "title": "Unitary and Packaged HVAC Equipment",
-      "article_number": "5.2.12.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Unitary and Packaged HVAC Equipment"
     },
-    "5.2.12.2@2020": {
+    "get_section__necb__5.2.12.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.12.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.2",
+      "server_known_issue": null,
       "sha256": "97b10d94f929a68060eb99fb21aeae5e16024c38952b307ef7b49bf3404f9346",
-      "known_issue": null,
-      "title": "Heat Rejection Equipment",
-      "article_number": "5.2.12.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Rejection Equipment"
     },
-    "5.2.12.2@2025": {
+    "get_section__necb__5.2.12.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.12.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.2",
+      "server_known_issue": null,
       "sha256": "c281c3563705d3b796c92f46771bda398cc87419b7c52ef5ab6c126bb33eee07",
-      "known_issue": null,
-      "title": "Heat Rejection Equipment",
-      "article_number": "5.2.12.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Rejection Equipment"
     },
-    "5.2.2.7@2020": {
+    "get_section__necb__5.2.2.7__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.2.7",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.7",
+      "server_known_issue": null,
       "sha256": "197e5f7a8e3ffe1297b34aeb4dedc3b9749de1a05fedb4539e074d1618c7919b",
-      "known_issue": null,
-      "title": "Cooling with Outdoor Air",
-      "article_number": "5.2.2.7"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling with Outdoor Air"
     },
-    "5.2.2.7@2025": {
+    "get_section__necb__5.2.2.7__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.2.7",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.7",
+      "server_known_issue": null,
       "sha256": "c8cdc145e2c5a51eb2e43deaa1aea82aea35de5a8330c58a862fe51f0139fa50",
-      "known_issue": null,
-      "title": "Cooling with Outdoor Air",
-      "article_number": "5.2.2.7"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling with Outdoor Air"
     },
-    "5.2.2.8@2020": {
+    "get_section__necb__5.2.2.8__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.2.8",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.8",
+      "server_known_issue": null,
       "sha256": "51a809118a98e9dc79287a1693870351a7d4a24967aef8e69c0c3b63d5121a9d",
-      "known_issue": null,
-      "title": "Cooling by Direct Use of Outdoor Air (Air Economizer System)",
-      "article_number": "5.2.2.8"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling by Direct Use of Outdoor Air (Air Economizer System)"
     },
-    "5.2.2.8@2025": {
+    "get_section__necb__5.2.2.8__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.2.8",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.8",
+      "server_known_issue": null,
       "sha256": "616077ff7804279c69ee8d5a396a09c5afd0009267f81b482c509077799cc1ca",
-      "known_issue": null,
-      "title": "Cooling by Direct Use of Outdoor Air (Air Economizer System)",
-      "article_number": "5.2.2.8"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling by Direct Use of Outdoor Air (Air Economizer System)"
     },
-    "5.2.2.9@2020": {
+    "get_section__necb__5.2.2.9__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.2.9",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.9",
+      "server_known_issue": null,
       "sha256": "f81696c9fb098dd825e4a93815ce080f70987b701469cf8ea90bf938a7909876",
-      "known_issue": null,
-      "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)",
-      "article_number": "5.2.2.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)"
     },
-    "5.2.2.9@2025": {
+    "get_section__necb__5.2.2.9__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.2.9",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.2.9",
+      "server_known_issue": null,
       "sha256": "dbbd8a5664fa72f234a49d5bf7a50c3acbc67653ed7af52b4b25103eecd0c906",
-      "known_issue": null,
-      "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)",
-      "article_number": "5.2.2.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)"
     },
-    "5.2.6.3@2020": {
+    "get_section__necb__5.2.6.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "5.2.6.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.6.3",
+      "server_known_issue": null,
       "sha256": "27889dcc750a69415bb54cd41aff4b041620bc6b428238f3e1da687cc0fee61e",
-      "known_issue": null,
-      "title": "Pumping Power Demand",
-      "article_number": "5.2.6.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Pumping Power Demand"
     },
-    "5.2.6.3@2025": {
+    "get_section__necb__5.2.6.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "5.2.6.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.6.3",
+      "server_known_issue": null,
       "sha256": "5fd4293ae16f0d08546d4be3af7110bf2e12e363b38821c63d58f6d89e29c382",
-      "known_issue": null,
-      "title": "Pumping Power Demand",
-      "article_number": "5.2.6.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Pumping Power Demand"
     },
-    "6.2.2.1@2020": {
+    "get_section__necb__6.2.2.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "6.2.2.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "6.2.2.1",
+      "server_known_issue": null,
       "sha256": "943faabe6dcfe02444ac4d16605ce9e0a06f397aa70ab4d5957d394aa93b91a5",
-      "known_issue": null,
-      "title": "Equipment Efficiency",
-      "article_number": "6.2.2.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Equipment Efficiency"
     },
-    "6.2.2.1@2025": {
+    "get_section__necb__6.2.2.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "6.2.2.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "6.2.2.1",
+      "server_known_issue": null,
       "sha256": "fd40edefff8d2ad893f80ab9eb7f0519b6fe43ff3215fb564d661387dd572e5e",
-      "known_issue": null,
-      "title": "Equipment Efficiency",
-      "article_number": "6.2.2.1"
+      "state": "present",
+      "state_note": "",
+      "title": "Equipment Efficiency"
     },
-    "8.4.1.2@2020": {
+    "get_section__necb__8.4.1.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.1.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.1.2",
+      "server_known_issue": null,
       "sha256": "493897ddd924c30246d59d2c74d20c97585549914952e452cb824dd571069b5c",
-      "known_issue": null,
-      "title": "Determination of Compliance",
-      "article_number": "8.4.1.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Compliance"
     },
-    "8.4.1.2@2025": {
+    "get_section__necb__8.4.1.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.1.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.1.2",
+      "server_known_issue": null,
       "sha256": "2d68b02ae887aa7bd786700f41a13140bf374b20f25ddffabcc54aa2aee8a41c",
-      "known_issue": null,
-      "title": "Determination of Compliance",
-      "article_number": "8.4.1.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Determination of Compliance"
     },
-    "8.4.2.10@2020": {
+    "get_section__necb__8.4.2.10__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.2.10",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.10",
+      "server_known_issue": null,
       "sha256": "fe8d5518518c46e93281558d2e5842c50db6f7e4da0df74bfc5ca7e22f22d154",
-      "known_issue": null,
-      "title": "HVAC Systems Calculations",
-      "article_number": "8.4.2.10"
+      "state": "present",
+      "state_note": "",
+      "title": "HVAC Systems Calculations"
     },
-    "8.4.2.10@2025": {
+    "get_section__necb__8.4.2.10__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.2.10",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.10",
+      "server_known_issue": null,
       "sha256": "b4ca9ea87f72e4d239dd0428be2586ada4368e08201275af3ff03b37a31036c0",
-      "known_issue": null,
-      "title": "HVAC Systems",
-      "article_number": "8.4.2.10"
+      "state": "present",
+      "state_note": "",
+      "title": "HVAC Systems"
     },
-    "8.4.2.2@2020": {
+    "get_section__necb__8.4.2.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.2.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.2",
+      "server_known_issue": null,
       "sha256": "a74ceec5a3417edba72dfee550d4efc10b6a1fb43334fc6c0dc78617aa16576c",
-      "known_issue": null,
-      "title": "Calculation Methods",
-      "article_number": "8.4.2.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation Methods"
     },
-    "8.4.2.2@2025": {
+    "get_section__necb__8.4.2.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.2.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.2",
+      "server_known_issue": null,
       "sha256": "c373ef3d0ea0e3e905f18e3e8faac0177a7430804dd18cce0b1d7ec4693639ff",
-      "known_issue": null,
-      "title": "Calculation Methods",
-      "article_number": "8.4.2.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Calculation Methods"
     },
-    "8.4.2.3@2020": {
+    "get_section__necb__8.4.2.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.2.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.3",
+      "server_known_issue": null,
       "sha256": "b49e2d0de8632e33e4a50ff34d4e673e0ce0a4c4591b3e2ff9c8622aab6028fe",
-      "known_issue": null,
-      "title": "Climatic Data",
-      "article_number": "8.4.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Climatic Data"
     },
-    "8.4.2.3@2025": {
+    "get_section__necb__8.4.2.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.2.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.3",
+      "server_known_issue": null,
       "sha256": "1d5f1149a5ddc93bce7c7d07148e5d2c51e22500a5d9aa0454d4f5c81ec28689",
-      "known_issue": null,
-      "title": "Climatic Data (See Note A-8.4.2.3.)",
-      "article_number": "8.4.2.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Climatic Data (See Note A-8.4.2.3.)"
     },
-    "8.4.2.9@2020": {
+    "get_section__necb__8.4.2.9__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.2.9",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.9",
+      "server_known_issue": null,
       "sha256": "26c6615df4646d2a2b1428f92ed0ee2a4b25a0f8e4b1b96f2bc08f1f060e39f0",
-      "known_issue": null,
-      "title": "Air Leakage",
-      "article_number": "8.4.2.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Air Leakage"
     },
-    "8.4.2.9@2025": {
+    "get_section__necb__8.4.2.9__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.2.9",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.2.9",
+      "server_known_issue": null,
       "sha256": "04faa6b9fa30bbe8416880d8fd968ddd6bb25a9db955dbb5a63623827d045c6e",
-      "known_issue": null,
-      "title": "Air Leakage",
-      "article_number": "8.4.2.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Air Leakage"
     },
-    "8.4.3.1@2020": {
+    "get_section__necb__8.4.3.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.3.1",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.1",
+      "server_known_issue": null,
       "sha256": "1d56211eff0cb5159a7ede36c3cc88bd793c92974764d3ef76e717989da211ec",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "8.4.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.3.1@2025": {
+    "get_section__necb__8.4.3.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.3.1",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.1",
+      "server_known_issue": null,
       "sha256": "4fb7e368dd8c04d36ab6d241c9f863cbd6110c0d828ea1f124ff4bcdb469c232",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "8.4.3.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.3.2@2020": {
+    "get_section__necb__8.4.3.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.3.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.2",
+      "server_known_issue": null,
       "sha256": "a20db42b823ce50084040a108d1422b6b0368ce809415d2a0c916eca640f6d8e",
-      "known_issue": null,
-      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
-      "article_number": "8.4.3.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature"
     },
-    "8.4.3.2@2025": {
+    "get_section__necb__8.4.3.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.3.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.2",
+      "server_known_issue": null,
       "sha256": "404a55e6795f2018ec46553fdbd80f94a2ce1f4946d1eabcc47ef23f9140b690",
-      "known_issue": null,
-      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
-      "article_number": "8.4.3.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature"
     },
-    "8.4.3.3@2020": {
+    "get_section__necb__8.4.3.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.3.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.3",
+      "server_known_issue": null,
       "sha256": "c8ca66110feaf4026df761928b51f6c9d7e2996d6d5a3eb95a5fccaa145a7ced",
-      "known_issue": null,
-      "title": "Building Envelope Components",
-      "article_number": "8.4.3.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Building Envelope Components"
     },
-    "8.4.3.3@2025": {
+    "get_section__necb__8.4.3.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.3.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.3",
+      "server_known_issue": null,
       "sha256": "df94b8bb4bc77de4701caa884f118d7cf3fae50a9b96cef1df7f8c39b4a88b38",
-      "known_issue": null,
-      "title": "Building Envelope Components",
-      "article_number": "8.4.3.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Building Envelope Components"
     },
-    "8.4.3.6@2020": {
+    "get_section__necb__8.4.3.6__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.3.6",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.6",
+      "server_known_issue": null,
       "sha256": "fd619938e5123f8ff48659b89f62993bebad6966f52a10a837404fec8617b324",
-      "known_issue": null,
-      "title": "Outdoor Air",
-      "article_number": "8.4.3.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Outdoor Air"
     },
-    "8.4.3.6@2025": {
+    "get_section__necb__8.4.3.6__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.3.6",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.3.6",
+      "server_known_issue": null,
       "sha256": "fe720d06d7d9c5c2600176b1781df433bd932c855ea88ac3baacf3fc53c3b3ac",
-      "known_issue": null,
-      "title": "Outdoor Air",
-      "article_number": "8.4.3.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Outdoor Air"
     },
-    "8.4.4.1@2020": {
+    "get_section__necb__8.4.4.1.__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.1",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.4.1.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.1",
+      "server_known_issue": null,
       "sha256": "1d83bad851c0ee11a8bfb9f94f69661cf732476801b92f0ea5c9dbb573756f7e",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "8.4.4.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.4.1@2025": {
+    "get_section__necb__8.4.4.1.__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.1",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "8.4.4.1.",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.1",
+      "server_known_issue": null,
       "sha256": "d6f79b77965a1f31a54e04041bf5622991c0d79883388cac49f3b7c01a94a373",
-      "known_issue": null,
-      "title": "General",
-      "article_number": "8.4.4.1"
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.4.10@2020": {
+    "get_section__necb__8.4.4.10__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.10",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.10",
+      "server_known_issue": null,
       "sha256": "f51297ef225151a1a448040ded5b17cfa7dddeb2cdb7795c4bd1182a3962ae18",
-      "known_issue": null,
-      "title": "Cooling Systems",
-      "article_number": "8.4.4.10"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling Systems"
     },
-    "8.4.4.10@2025": {
+    "get_section__necb__8.4.4.10__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.10",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.11@2020": {
+    "get_section__necb__8.4.4.11__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.11",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.11",
+      "server_known_issue": null,
       "sha256": "0dae8fd5f0f207588f7d549405536378c2e1d929e915745bd6e27b21697cd6fe",
-      "known_issue": null,
-      "title": "Cooling Tower Systems",
-      "article_number": "8.4.4.11"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling Tower Systems"
     },
-    "8.4.4.11@2025": {
+    "get_section__necb__8.4.4.11__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.11",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.12@2020": {
+    "get_section__necb__8.4.4.12__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.12",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.12",
+      "server_known_issue": null,
       "sha256": "0f2df6b59ce3edd1d439752d99dbee31b3a3221f356b071aa679031a59859a11",
-      "known_issue": null,
-      "title": "Cooling with Outside Air",
-      "article_number": "8.4.4.12"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling with Outside Air"
     },
-    "8.4.4.12@2025": {
+    "get_section__necb__8.4.4.12__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.12",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.13@2020": {
+    "get_section__necb__8.4.4.13__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.13",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.13",
+      "server_known_issue": null,
       "sha256": "efe9084da76f7f2869d642e89f0c8ca2b2efa85066378490846c1bae27d0285b",
-      "known_issue": null,
-      "title": "Heat Pumps",
-      "article_number": "8.4.4.13"
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Pumps"
     },
-    "8.4.4.13@2025": {
+    "get_section__necb__8.4.4.13__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.13",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.14@2020": {
+    "get_section__necb__8.4.4.14__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.14",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.14",
+      "server_known_issue": null,
       "sha256": "5786e0e0f60b59b0bf91cfea347033c3accbdca915f0b5c9c89dfc7e66ae1847",
-      "known_issue": null,
-      "title": "Hydronic Pumps",
-      "article_number": "8.4.4.14"
+      "state": "present",
+      "state_note": "",
+      "title": "Hydronic Pumps"
     },
-    "8.4.4.14@2025": {
+    "get_section__necb__8.4.4.14__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.14",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.15@2020": {
+    "get_section__necb__8.4.4.15__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.15",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.15",
+      "server_known_issue": null,
       "sha256": "ff4df0deee42c34b8303edcb4bde4ac48f7757176d607c1b35cd8d92ecb35e50",
-      "known_issue": null,
-      "title": "Outdoor Air",
-      "article_number": "8.4.4.15"
+      "state": "present",
+      "state_note": "",
+      "title": "Outdoor Air"
     },
-    "8.4.4.15@2025": {
+    "get_section__necb__8.4.4.15__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.15",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.16@2020": {
+    "get_section__necb__8.4.4.16__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.16",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.16",
+      "server_known_issue": null,
       "sha256": "823016cb67ad4dc23d36f1ecc40e5a4e37f6b8d508d20ceefc8ed9da34b717e5",
-      "known_issue": null,
-      "title": "Space Temperature Control",
-      "article_number": "8.4.4.16"
+      "state": "present",
+      "state_note": "",
+      "title": "Space Temperature Control"
     },
-    "8.4.4.16@2025": {
+    "get_section__necb__8.4.4.16__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.16",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.18@2020": {
+    "get_section__necb__8.4.4.18__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.18",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.18",
+      "server_known_issue": null,
       "sha256": "f031096e1696008c986b2693bb745dc73779709be3ec37e97874d8d9d95db6a6",
-      "known_issue": null,
-      "title": "Supply Air Systems",
-      "article_number": "8.4.4.18"
+      "state": "present",
+      "state_note": "",
+      "title": "Supply Air Systems"
     },
-    "8.4.4.18@2025": {
+    "get_section__necb__8.4.4.18__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.18",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.19@2020": {
+    "get_section__necb__8.4.4.19__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.19",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.19",
+      "server_known_issue": null,
       "sha256": "133c8ddf1a8613f664225990d4543d29184ff01de4c21a452e1a2d5d4bcbf351",
-      "known_issue": null,
-      "title": "Energy Recovery Systems",
-      "article_number": "8.4.4.19"
+      "state": "present",
+      "state_note": "",
+      "title": "Energy Recovery Systems"
     },
-    "8.4.4.19@2025": {
+    "get_section__necb__8.4.4.19__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.19",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.2@2020": {
+    "get_section__necb__8.4.4.1__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.2",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.4.1",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
-      "sha256": "1ca38274a204887c5c6b36b72cd2729fba60cc8e4b2a9112a6e1477455dfb169",
-      "known_issue": null,
-      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature",
-      "article_number": "8.4.4.2"
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.1",
+      "server_known_issue": null,
+      "sha256": "1d83bad851c0ee11a8bfb9f94f69661cf732476801b92f0ea5c9dbb573756f7e",
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.4.2@2025": {
+    "get_section__necb__8.4.4.1__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.2",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "8.4.4.1",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
-      "sha256": "fcaad685871234f60a11fa0f48aa53251caaf740e327dea95f3ece89c0c312db",
-      "known_issue": null,
-      "title": "Operating Schedules, Internal Loads and Service Water Heating Loads",
-      "article_number": "8.4.4.2"
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.1",
+      "server_known_issue": null,
+      "sha256": "d6f79b77965a1f31a54e04041bf5622991c0d79883388cac49f3b7c01a94a373",
+      "state": "present",
+      "state_note": "",
+      "title": "General"
     },
-    "8.4.4.20@2020": {
+    "get_section__necb__8.4.4.20__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.20",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.20",
+      "server_known_issue": null,
       "sha256": "dbe8ef32eb3a155507e58605928b94f0458a9803d18155e7e7e5d9d0c6d3f205",
-      "known_issue": null,
-      "title": "Service Water Heating Systems",
-      "article_number": "8.4.4.20"
+      "state": "present",
+      "state_note": "",
+      "title": "Service Water Heating Systems"
     },
-    "8.4.4.20@2025": {
+    "get_section__necb__8.4.4.20__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.20",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.3@2020": {
+    "get_section__necb__8.4.4.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.3",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.4.2",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.2",
+      "server_known_issue": null,
+      "sha256": "1ca38274a204887c5c6b36b72cd2729fba60cc8e4b2a9112a6e1477455dfb169",
+      "state": "present",
+      "state_note": "",
+      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-point Temperature"
+    },
+    "get_section__necb__8.4.4.2__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.4.2",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.2",
+      "server_known_issue": null,
+      "sha256": "fcaad685871234f60a11fa0f48aa53251caaf740e327dea95f3ece89c0c312db",
+      "state": "present",
+      "state_note": "",
+      "title": "Operating Schedules, Internal Loads and Service Water Heating Loads"
+    },
+    "get_section__necb__8.4.4.3__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.4.3",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.3",
+      "server_known_issue": null,
       "sha256": "475ad4f3547ff8e62d65ac8562ede3c48653613d8b43c28000553a52cde4f386",
-      "known_issue": null,
-      "title": "Building Envelope Components",
-      "article_number": "8.4.4.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Building Envelope Components"
     },
-    "8.4.4.3@2025": {
+    "get_section__necb__8.4.4.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.4@2020": {
+    "get_section__necb__8.4.4.4__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.4",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.4",
+      "server_known_issue": null,
       "sha256": "41dcf0aff418db8e6477409e801da8716330cf0f71579fe3e22d7479fc217746",
-      "known_issue": null,
-      "title": "Thermal Mass",
-      "article_number": "8.4.4.4"
+      "state": "present",
+      "state_note": "",
+      "title": "Thermal Mass"
     },
-    "8.4.4.4@2025": {
+    "get_section__necb__8.4.4.4__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.4",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.5@2020": {
+    "get_section__necb__8.4.4.5__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.5",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.5",
+      "server_known_issue": null,
       "sha256": "4e32ec4222af22adea2f12b534fe747ff065ac658588c68ed356450148f9858a",
-      "known_issue": null,
-      "title": "Lighting",
-      "article_number": "8.4.4.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Lighting"
     },
-    "8.4.4.5@2025": {
+    "get_section__necb__8.4.4.5__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.5",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.6@2020": {
+    "get_section__necb__8.4.4.6__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.6",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.6",
+      "server_known_issue": null,
       "sha256": "dae9466f29dd3d229a794aca0aad11e9f9a8e945b0c91e387a4853b0ca613a7f",
-      "known_issue": null,
-      "title": "Purchased Energy",
-      "article_number": "8.4.4.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Purchased Energy"
     },
-    "8.4.4.6@2025": {
+    "get_section__necb__8.4.4.6__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.6",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.7@2020": {
+    "get_section__necb__8.4.4.7.-A__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.4.7",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.4.7.-A",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.4.7.-A__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.4.7.-A",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.4.7.-B__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.4.7.-B",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.4.7.-B__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.4.7.-B",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.4.7__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.4.7",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.7",
+      "server_known_issue": null,
       "sha256": "d2bfb51cb7d0314f6395d188a573936a1e54da84d1bfb7cd4dddd4acf4a03f8c",
-      "known_issue": null,
-      "title": "HVAC System Selection",
-      "article_number": "8.4.4.7"
+      "state": "present",
+      "state_note": "",
+      "title": "HVAC System Selection"
     },
-    "8.4.4.7@2025": {
+    "get_section__necb__8.4.4.7__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.7",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.8@2020": {
+    "get_section__necb__8.4.4.8__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.8",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.8",
+      "server_known_issue": null,
       "sha256": "10172911c02945edaf9c136b31ea502741504eafa25a244e4556ca1c1313373a",
-      "known_issue": null,
-      "title": "Equipment Oversizing",
-      "article_number": "8.4.4.8"
+      "state": "present",
+      "state_note": "",
+      "title": "Equipment Oversizing"
     },
-    "8.4.4.8@2025": {
+    "get_section__necb__8.4.4.8__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.8",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.4.9@2020": {
+    "get_section__necb__8.4.4.9__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.4.9",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.9",
+      "server_known_issue": null,
       "sha256": "74a9a635fc0cc428c5ae7840be7dd7f3e01d61179e3cd0a88647de9338a15010",
-      "known_issue": null,
-      "title": "Heating System",
-      "article_number": "8.4.4.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Heating System"
     },
-    "8.4.4.9@2025": {
+    "get_section__necb__8.4.4.9__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.4.9",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.10@2020": {
+    "get_section__necb__8.4.5.10__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.10",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.10@2025": {
+    "get_section__necb__8.4.5.10__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.10",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.10",
+      "server_known_issue": null,
       "sha256": "f9018751a38041f1c1325d238dc091af94eb777df852241498b3585924d83867",
-      "known_issue": null,
-      "title": "Cooling Systems",
-      "article_number": "8.4.5.10"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling Systems"
     },
-    "8.4.5.12@2020": {
+    "get_section__necb__8.4.5.12__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.12",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.12@2025": {
+    "get_section__necb__8.4.5.12__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.12",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.12",
+      "server_known_issue": null,
       "sha256": "2a53b73b3d06bf827f639a911ed747bfdede9f14663be402f4ccdfe230ca8996",
-      "known_issue": null,
-      "title": "Cooling with Outside Air",
-      "article_number": "8.4.5.12"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling with Outside Air"
     },
-    "8.4.5.13@2020": {
+    "get_section__necb__8.4.5.13__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.13",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.13@2025": {
+    "get_section__necb__8.4.5.13__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.13",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.13",
+      "server_known_issue": null,
       "sha256": "0210076a19eb882f08ac395bd9f648a4579a393c9423fadb63d598b984f5bb93",
-      "known_issue": null,
-      "title": "Heat Pumps",
-      "article_number": "8.4.5.13"
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Pumps"
     },
-    "8.4.5.14@2020": {
+    "get_section__necb__8.4.5.14__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.14",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.14@2025": {
+    "get_section__necb__8.4.5.14__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.14",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.14",
+      "server_known_issue": null,
       "sha256": "6f01168f784ed8f1c1a32fe334a08e1519afef70204648c0062c08e573b0f71e",
-      "known_issue": null,
-      "title": "Hydronic Pumps",
-      "article_number": "8.4.5.14"
+      "state": "present",
+      "state_note": "",
+      "title": "Hydronic Pumps"
     },
-    "8.4.5.15@2020": {
+    "get_section__necb__8.4.5.15__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.15",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.15@2025": {
+    "get_section__necb__8.4.5.15__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.15",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.15",
+      "server_known_issue": null,
       "sha256": "5520305c1da4372a19472ddf54018c6dbb35c7d6ed996204c07c07aedba7f366",
-      "known_issue": null,
-      "title": "Outdoor Air",
-      "article_number": "8.4.5.15"
+      "state": "present",
+      "state_note": "",
+      "title": "Outdoor Air"
     },
-    "8.4.5.2@2020": {
+    "get_section__necb__8.4.5.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.2",
+      "server_known_issue": null,
       "sha256": "3261aa97651021b68c759a378d4ce94ac975f7a1e2c66d46d667ee8fd6014e53",
-      "known_issue": null,
-      "title": "Boiler",
-      "article_number": "8.4.5.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Boiler"
     },
-    "8.4.5.2@2025": {
+    "get_section__necb__8.4.5.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.2",
+      "server_known_issue": null,
       "sha256": "09187bb93454400102c6456451456711838a23c9270f55e9a0e660747a679b80",
-      "known_issue": null,
-      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
-      "article_number": "8.4.5.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature"
     },
-    "8.4.5.3@2020": {
+    "get_section__necb__8.4.5.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.3",
+      "server_known_issue": null,
       "sha256": "2e2c9bb646f3bcfc792d8fc26af13e783628eb0cf07bac60db96d44d99ee296d",
-      "known_issue": null,
-      "title": "Furnace",
-      "article_number": "8.4.5.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Furnace"
     },
-    "8.4.5.3@2025": {
+    "get_section__necb__8.4.5.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.3",
+      "server_known_issue": null,
       "sha256": "fb10973123b0915445af0fbcc2aa979e8e0b1daaf13a0fc9be66dc9799b33dee",
-      "known_issue": null,
-      "title": "Building Envelope Components",
-      "article_number": "8.4.5.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Building Envelope Components"
     },
-    "8.4.5.5@2020": {
+    "get_section__necb__8.4.5.5.-C__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.5.5",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.5.5.-C",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.5.5.-C__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.5.5.-C",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.5.5__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.5.5",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.5",
+      "server_known_issue": null,
       "sha256": "ad0b801d93fd746b1e4ed6986a35a9c22c1cb2863b07a79627b0e745ae10417f",
-      "known_issue": null,
-      "title": "Electric Chiller",
-      "article_number": "8.4.5.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Electric Chiller"
     },
-    "8.4.5.5@2025": {
+    "get_section__necb__8.4.5.5__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.5",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.5",
+      "server_known_issue": null,
       "sha256": "55b07de03fd5797ea18926cc0878e2a98b5a88c0e643c156cfd63386008eac58",
-      "known_issue": null,
-      "title": "Lighting",
-      "article_number": "8.4.5.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Lighting"
     },
-    "8.4.5.6@2020": {
+    "get_section__necb__8.4.5.6__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.6",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.6",
+      "server_known_issue": null,
       "sha256": "3a61e6a9b8c3772767fe53fa949e54c0a8a8e3f5c4e1e19a4f0de9e41b6d7c32",
-      "known_issue": null,
-      "title": "Cooling Tower",
-      "article_number": "8.4.5.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling Tower"
     },
-    "8.4.5.6@2025": {
+    "get_section__necb__8.4.5.6__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.6",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.6",
+      "server_known_issue": null,
       "sha256": "7baa87d63d32e8c75d53cb05e2dd3691cdaa611e5c013e96b96321d07c895709",
-      "known_issue": null,
-      "title": "Purchased Energy",
-      "article_number": "8.4.5.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Purchased Energy"
     },
-    "8.4.5.7@2020": {
+    "get_section__necb__8.4.5.7.-A__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.5.7",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.5.7.-A",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
-      "sha256": "fc5f29ecd46254ac5cefdd229806bcb8c35e053c14305fc3dc6d50cf79e3b88f",
-      "known_issue": null,
-      "title": "Electric Air-Source Heat Pump",
-      "article_number": "8.4.5.7"
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.7@2025": {
+    "get_section__necb__8.4.5.7.-A__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.5.7",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "8.4.5.7.-A",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
-      "sha256": "a2730bd42d9cda43109cce60a4ab2176dfb8c3f39db383f2505d2e02210f1543",
-      "known_issue": null,
-      "title": "HVAC System Selection",
-      "article_number": "8.4.5.7"
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.5.9@2020": {
+    "get_section__necb__8.4.5.7.-B__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.5.7.-B",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.5.7.-B__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.5.7.-B",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.5.9__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.5.9",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.9",
+      "server_known_issue": null,
       "sha256": "96045398e78586521cc13a69da7bcb66702e7c30d9f1478b7f8ea4945b06576c",
-      "known_issue": null,
-      "title": "Fuel-Fired Service Water Heater",
-      "article_number": "8.4.5.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Fuel-Fired Service Water Heater"
     },
-    "8.4.5.9@2025": {
+    "get_section__necb__8.4.5.9__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.5.9",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.9",
+      "server_known_issue": null,
       "sha256": "b04f7e18379a91915986f9a83dd6241ca3145ec302d5231f1cf384ae873998fa",
-      "known_issue": null,
-      "title": "Heating System",
-      "article_number": "8.4.5.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Heating System"
     },
-    "8.4.6.2@2020": {
+    "get_section__necb__8.4.6.2__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.6.2",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.6.2@2025": {
+    "get_section__necb__8.4.6.2__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.6.2",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.2",
+      "server_known_issue": null,
       "sha256": "0262d927242efd0e907eb7ed8672baaa9cd5fbf018630fd8a4f5b6dadf1b076d",
-      "known_issue": null,
-      "title": "Boiler",
-      "article_number": "8.4.6.2"
+      "state": "present",
+      "state_note": "",
+      "title": "Boiler"
     },
-    "8.4.6.3@2020": {
+    "get_section__necb__8.4.6.3__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.6.3",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.6.3@2025": {
+    "get_section__necb__8.4.6.3__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.6.3",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.3",
+      "server_known_issue": null,
       "sha256": "3316372b69a2e7124499add9f96ab783ae792f4773b34f45a3c6def2580bcd60",
-      "known_issue": null,
-      "title": "Furnace",
-      "article_number": "8.4.6.3"
+      "state": "present",
+      "state_note": "",
+      "title": "Furnace"
     },
-    "8.4.6.5@2020": {
+    "get_section__necb__8.4.6.5.-C__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.6.5",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "8.4.6.5.-C",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.6.5@2025": {
+    "get_section__necb__8.4.6.5.-C__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "8.4.6.5",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "8.4.6.5.-C",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.6.5__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "section_number": "8.4.6.5",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_section__necb__8.4.6.5__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "section_number": "8.4.6.5",
+        "tool": "get_section"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.5",
+      "server_known_issue": null,
       "sha256": "dacae4c02b410896e0d1c1b73210479dd7f64dbad780f3323d1b72d2d4719fe0",
-      "known_issue": null,
-      "title": "Electric Chiller",
-      "article_number": "8.4.6.5"
+      "state": "present",
+      "state_note": "",
+      "title": "Electric Chiller"
     },
-    "8.4.6.6@2020": {
+    "get_section__necb__8.4.6.6__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.6.6",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.6.6@2025": {
+    "get_section__necb__8.4.6.6__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.6.6",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.6",
+      "server_known_issue": null,
       "sha256": "5e4b6c1a1f091482c57b80c97ce48d9fb2343280b3a74429a7aa5bc442381007",
-      "known_issue": null,
-      "title": "Cooling Tower",
-      "article_number": "8.4.6.6"
+      "state": "present",
+      "state_note": "",
+      "title": "Cooling Tower"
     },
-    "8.4.6.9@2020": {
+    "get_section__necb__8.4.6.9__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2020",
         "section_number": "8.4.6.9",
-        "edition": "2020"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
     },
-    "8.4.6.9@2025": {
+    "get_section__necb__8.4.6.9__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
+        "edition": "2025",
         "section_number": "8.4.6.9",
-        "edition": "2025"
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.9",
+      "server_known_issue": null,
       "sha256": "4e6d0cf29a9bd58a5625924c84a76e4865ebbc1ea6b26b4b30d5fb30e656a68d",
-      "known_issue": null,
-      "title": "Fuel-Fired Service Water Heater",
-      "article_number": "8.4.6.9"
+      "state": "present",
+      "state_note": "",
+      "title": "Fuel-Fired Service Water Heater"
     },
-    "Note A-8.4.4.13@2020": {
+    "get_section__necb__A-8.4.4.13__2020": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "Note A-8.4.4.13",
-        "edition": "2020"
+        "edition": "2020",
+        "section_number": "A-8.4.4.13",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
-      "exists": true,
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "A-8.4.4.13",
+      "server_known_issue": null,
       "sha256": "baf300cd3d4a155e6e5158954eabdc510adce6eccecc0b4fb4309730f3ed7242",
-      "known_issue": null,
-      "title": "Heat Pump Definitions",
-      "article_number": "A-8.4.4.13"
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Pump Definitions"
     },
-    "Note A-8.4.4.13@2025": {
+    "get_section__necb__A-8.4.4.13__2025": {
       "request": {
-        "tool": "get_section",
         "code": "necb",
-        "section_number": "Note A-8.4.4.13",
-        "edition": "2025"
+        "edition": "2025",
+        "section_number": "A-8.4.4.13",
+        "tool": "get_section"
       },
-      "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
-      "exists": false,
-      "absence_reported_as": "get_section: empty result content",
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
       "sha256": null,
-      "known_issue": null,
-      "title": null,
-      "article_number": null
+      "state": "mcp_empty",
+      "state_note": "get_section: empty result content",
+      "title": null
+    },
+    "get_table__necb__3.2.2.2.__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "3.2.2.2.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__3.2.2.2.__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "3.2.2.2.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__3.2.3.1.__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "3.2.3.1.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__3.2.3.1.__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "3.2.3.1.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__5.2.12.1.-I__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "5.2.12.1.-I",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.1.-I",
+      "server_known_issue": null,
+      "sha256": "d8ab34f9359e3148149acef415adbba76015d36696352ba19b323f0903449217",
+      "state": "present",
+      "state_note": "",
+      "title": "Performance Requirements for Variable Refrigerant Flow Systems"
+    },
+    "get_table__necb__5.2.12.1.-I__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "5.2.12.1.-I",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.1.-I",
+      "server_known_issue": null,
+      "sha256": "376061e59be0612ed3d1e772b6fdd8dc8a8a6cbd279646d7ca30dcaf39394438",
+      "state": "present",
+      "state_note": "",
+      "title": "Performance Requirements for Variable Refrigerant Flow Systems"
+    },
+    "get_table__necb__5.2.12.2__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "5.2.12.2",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.2",
+      "server_known_issue": null,
+      "sha256": "b5fc5aa0113a9b01c831c055a6a5e178ba4f7f39abdf0eb6ab98db0277fce626",
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Rejection Equipment Performance Requirements"
+    },
+    "get_table__necb__5.2.12.2__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "5.2.12.2",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "5.2.12.2",
+      "server_known_issue": null,
+      "sha256": "8a85175220ab58ace70ab4d55ea0e5ecd3f956347f3b7ae0a0cff6a2575db6e3",
+      "state": "present",
+      "state_note": "",
+      "title": "Heat Rejection Equipment Performance Requirements"
+    },
+    "get_table__necb__6.2.2.1__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "6.2.2.1",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "6.2.2.1",
+      "server_known_issue": null,
+      "sha256": "71db285dad454c589660a0a7034312756c66e9511d9b2a13a406e8f68d172846",
+      "state": "present",
+      "state_note": "",
+      "title": "Service Water Heating Equipment Performance Requirements"
+    },
+    "get_table__necb__6.2.2.1__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "6.2.2.1",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "6.2.2.1",
+      "server_known_issue": null,
+      "sha256": "37f5fe29cd3a9d941cb8e32c87c583956519302b96e04d03cfcde93e88e522e5",
+      "state": "present",
+      "state_note": "",
+      "title": "Service Water Heating Equipment Performance Requirements"
+    },
+    "get_table__necb__8.4.4.1.__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.4.1.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.4.1.__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.4.1.",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.4.7.-A__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.4.7.-A",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.7.-A",
+      "server_known_issue": null,
+      "sha256": "e481544ccc13652e1c78affd5b7dae4f37437c46f1a54a08c18988b3a258f0ce",
+      "state": "present",
+      "state_note": "",
+      "title": "HVAC System Selection for the Reference Building"
+    },
+    "get_table__necb__8.4.4.7.-A__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.4.7.-A",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.4.7.-B__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.4.7.-B",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.4.7.-B",
+      "server_known_issue": null,
+      "sha256": "0d0c49443242209ded4d497b8b43d00dc07ff0090ac28a7fc6d9567f7d8e02ae",
+      "state": "present",
+      "state_note": "",
+      "title": "Descriptions of HVAC Systems 1 to 6"
+    },
+    "get_table__necb__8.4.4.7.-B__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.4.7.-B",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.5.5.-C__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.5.5.-C",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.5.-C",
+      "server_known_issue": {
+        "affected_rows": [
+          {
+            "chiller_type": "Scroll",
+            "coefficient": "d",
+            "cooling_type": "Water-cooled",
+            "printed": "-0.0128136",
+            "rating_point_value": 0.018,
+            "suspected_correct": "-0.00128136"
+          },
+          {
+            "chiller_type": "Reciprocating",
+            "coefficient": "b",
+            "cooling_type": "Water-cooled",
+            "printed": "-0.0882156",
+            "rating_point_value": -2.49,
+            "suspected_correct": "-0.00882156"
+          },
+          {
+            "chiller_type": "Screw",
+            "coefficient": "a",
+            "cooling_type": "Air-cooled",
+            "printed": "0.013545636",
+            "rating_point_value": 0.88,
+            "suspected_correct": "0.13545636 (approx; fit 1.005)"
+          }
+        ],
+        "guidance": "Do not use the Water-cooled Scroll/Reciprocating or Air-cooled Screw EIR_FT rows without correction; verify each polynomial at its rating point before use.",
+        "reference": "services/codes/docs/errata-necb-chiller-eir-ft.md",
+        "summary": "Electric-chiller EIR_FT coefficients: 3 rows fail the AHRI 550/590 rating-point normalization (EIR_FT must equal 1.0 at 44°F CHW / 85°F cond. water, 95°F cond. air). Values are transcribed faithfully from the printed NECB; the defect is in the source publication, not this database, and is identical in NECB 2020 (8.4.5.5-C) and 2025 (8.4.6.5-C).",
+        "type": "suspected_source_error"
+      },
+      "sha256": "cf04ed4c132969c2b2fcb5d95e49138126f8972257bb78e0bcd0963b686e8dde",
+      "state": "present",
+      "state_note": "",
+      "title": "Efficiency Coefficients Used in the Calculation of EIR_FT"
+    },
+    "get_table__necb__8.4.5.5.-C__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.5.5.-C",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.5.7.-A__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.5.7.-A",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.5.7.-A__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.5.7.-A",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.7.-A",
+      "server_known_issue": null,
+      "sha256": "b229eb0f7b5dd7c8e06c67687e46f8a9b046db163b23a14c97a6cc0197bf4c8e",
+      "state": "present",
+      "state_note": "",
+      "title": "HVAC System Selection for the Reference Building"
+    },
+    "get_table__necb__8.4.5.7.-B__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.5.7.-B",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.5.7.-B__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.5.7.-B",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.5.7.-B",
+      "server_known_issue": null,
+      "sha256": "b838f735d6e83983e043a2a11a38edaa15a0ba64a250504c123564025717c91f",
+      "state": "present",
+      "state_note": "",
+      "title": "Descriptions of HVAC Systems 1 to 6"
+    },
+    "get_table__necb__8.4.6.5.-C__2020": {
+      "request": {
+        "code": "necb",
+        "edition": "2020",
+        "table_number": "8.4.6.5.-C",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": null,
+      "server_known_issue": null,
+      "sha256": null,
+      "state": "mcp_empty",
+      "state_note": "get_table: empty result content",
+      "title": null
+    },
+    "get_table__necb__8.4.6.5.-C__2025": {
+      "request": {
+        "code": "necb",
+        "edition": "2025",
+        "table_number": "8.4.6.5.-C",
+        "tool": "get_table"
+      },
+      "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+      "returned_number": "8.4.6.5.-C",
+      "server_known_issue": {
+        "affected_rows": [
+          {
+            "chiller_type": "Scroll",
+            "coefficient": "d",
+            "cooling_type": "Water-cooled",
+            "printed": "-0.0128136",
+            "rating_point_value": 0.018,
+            "suspected_correct": "-0.00128136"
+          },
+          {
+            "chiller_type": "Reciprocating",
+            "coefficient": "b",
+            "cooling_type": "Water-cooled",
+            "printed": "-0.0882156",
+            "rating_point_value": -2.49,
+            "suspected_correct": "-0.00882156"
+          },
+          {
+            "chiller_type": "Screw",
+            "coefficient": "a",
+            "cooling_type": "Air-cooled",
+            "printed": "0.013545636",
+            "rating_point_value": 0.88,
+            "suspected_correct": "0.13545636 (approx; fit 1.005)"
+          }
+        ],
+        "guidance": "Do not use the Water-cooled Scroll/Reciprocating or Air-cooled Screw EIR_FT rows without correction; verify each polynomial at its rating point before use.",
+        "reference": "services/codes/docs/errata-necb-chiller-eir-ft.md",
+        "summary": "Electric-chiller EIR_FT coefficients: 3 rows fail the AHRI 550/590 rating-point normalization (EIR_FT must equal 1.0 at 44°F CHW / 85°F cond. water, 95°F cond. air). Values are transcribed faithfully from the printed NECB; the defect is in the source publication, not this database, and is identical in NECB 2020 (8.4.5.5-C) and 2025 (8.4.6.5-C).",
+        "type": "suspected_source_error"
+      },
+      "sha256": "09a3246043ef304e2408778a62d0b6ac0ce74f1e21262decdfe008b4e293619d",
+      "state": "present",
+      "state_note": "",
+      "title": "Efficiency Coefficients Used in the Calculation of EIR_FT"
     }
-  }
+  },
+  "request_count": 180,
+  "retrieved_utc": "2026-09-29T18:18:26.640582+00:00"
 }

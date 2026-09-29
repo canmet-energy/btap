@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.1.1.7",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "3.1.1.7",
+    "server_known_issue": null,
+    "sha256": "7bb62f3d0a37970c95a2a00c05f1bf49c8061aa3023cd63a46c9d3001af9586b",
+    "state": "present",
+    "state_note": "",
+    "title": "Calculation of Overall Thermal Transmittance"
+  },
+  "payload": {
+    "article_number": "3.1.1.7",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) For the purpose of compliance with this Part, the calculated overall thermal transmittance of opaque assemblies shall include the effect of thermal bridging for all elements of the assembly, including\na) point thermal bridges,\nb) linear thermal bridges, and\nc) thermal bridges at junctions between building envelope materials, components and assemblies.\n(See Note A-3.1.1.7.(1).)\n2) In calculating the overall thermal transmittance of the assemblies in Sentence (1), penetrations through the assemblies by components of the building's mechanical, electrical and plumbing systems need not be taken into account. (See Note A-3.1.1.7.(2).)\n3) Where a component of the building envelope is protected by an enclosed unconditioned space, such as a sun porch, enclosed veranda or vestibule, the unconditioned enclosure may be considered to have an overall thermal transmittance of 6.25 W/(m²xK). (See Note A-3.1.1.7.(3).)\n4) For the purposes of this Article, wall assemblies inclined less than 60° from the horizontal shall be considered as roof assemblies, and roof assemblies inclined 60° or more from the horizontal shall be considered as wall assemblies.\nSection 3.2. Prescriptive Path\n3.2.1. General",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.1",
+      "Subsection 3.1.1"
+    ],
+    "page_end": 71,
+    "page_start": 71,
+    "part_number": "3",
+    "reference": "3.1.1.7",
+    "section_number": "3.1.1.7",
+    "sentences": [],
+    "title": "Calculation of Overall Thermal Transmittance"
+  }
+}

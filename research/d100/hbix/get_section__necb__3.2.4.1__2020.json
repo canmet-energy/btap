@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.4.1",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "3.2.4.1",
+    "server_known_issue": null,
+    "sha256": "94978dd9d575bed09e5c1434fd6304912ceda7dd19101ecb7eef4a1ff33231d5",
+    "state": "present",
+    "state_note": "",
+    "title": "General"
+  },
+  "payload": {
+    "article_number": "3.2.4.1",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) To control air leakage into and out of the conditioned space, the building envelope shall be designed and constructed with a continuous air barrier system comprised of air barrier assemblies by complying with\na) Article 3.2.4.2., or\nb) Article 3.2.4.3.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.2",
+      "Subsection 3.2.4"
+    ],
+    "page_end": 76,
+    "page_start": 76,
+    "part_number": "3",
+    "reference": "3.2.4.1",
+    "section_number": "3.2.4.1",
+    "sentences": [],
+    "title": "General"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.16",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.16",
+    "server_known_issue": null,
+    "sha256": "823016cb67ad4dc23d36f1ecc40e5a4e37f6b8d508d20ceefc8ed9da34b717e5",
+    "state": "present",
+    "state_note": "",
+    "title": "Space Temperature Control"
+  },
+  "payload": {
+    "article_number": "8.4.4.16",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) If an in-floor, in-ceiling or in-wall radiant heating and/or cooling system is used in the proposed building but the energy model calculations do not allow for modeling of radiant effects, each conditioned thermal block in the reference building shall be modeled using heating and/or cooling temperature schedules, as applicable, that are 2°C warmer and 2°C cooler respectively than those used for the proposed building in Sentence 8.4.3.2.(1).\n2) The throttling range of the heating and cooling equipment shall be modeled as being identical to that determined for the proposed building in Sentence 8.4.3.7.(1).",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 220,
+    "page_start": 220,
+    "part_number": "8",
+    "reference": "8.4.4.16",
+    "section_number": "8.4.4.16",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Coefficients",
+          "Pump Riding its Curve (Type of Pump)",
+          "Pump with Variable Speed Drive (Type of Pump)"
+        ],
+        "note": "Use get_table('necb', '8.4.4.14') for full structured rows.",
+        "row_count": 5,
+        "table_number": "8.4.4.14",
+        "title": "Coefficients Used in Calculating Pump Power versus Flow Rate"
+      }
+    ],
+    "title": "Space Temperature Control"
+  }
+}

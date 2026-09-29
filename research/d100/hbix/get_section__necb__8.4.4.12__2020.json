@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.12",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.12",
+    "server_known_issue": null,
+    "sha256": "0f2df6b59ce3edd1d439752d99dbee31b3a3221f356b071aa679031a59859a11",
+    "state": "present",
+    "state_note": "",
+    "title": "Cooling with Outside Air"
+  },
+  "payload": {
+    "article_number": "8.4.4.12",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) Where Article 5.2.2.7. applies to a proposed building's HVAC system, the HVAC systems of the corresponding thermal blocks in the reference building shall be modeled in accordance with that Article and Table 8.4.4.12.\nTable 8.4.4.12.\nApplicable Requirements for Cooling with Outside Air According to Type of HVAC System Forming Part of Sentence 8.4.4.12.(1)\nNotes to Table 8.4.4.12.:\n(1) See Table 8.4.4.7.-B.\n(2) See Table 8.4.4.13.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 218,
+    "page_start": 218,
+    "part_number": "8",
+    "reference": "8.4.4.12",
+    "section_number": "8.4.4.12",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of System",
+          "Applicable Article for Cooling with Outside Air"
+        ],
+        "note": "Use get_table('necb', '8.4.4.12') for full structured rows.",
+        "row_count": 3,
+        "table_number": "8.4.4.12",
+        "title": "Applicable Requirements for Cooling with Outside Air According to Type of HVAC System"
+      }
+    ],
+    "title": "Cooling with Outside Air"
+  }
+}

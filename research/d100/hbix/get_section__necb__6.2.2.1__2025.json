@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "6.2.2.1",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "6.2.2.1",
+    "server_known_issue": null,
+    "sha256": "fd40edefff8d2ad893f80ab9eb7f0519b6fe43ff3215fb564d661387dd572e5e",
+    "state": "present",
+    "state_note": "",
+    "title": "Equipment Efficiency"
+  },
+  "payload": {
+    "article_number": "6.2.2.1",
+    "division": "B",
+    "edition": "2025",
+    "equations": [
+      {
+        "latex": "\\text{UEF} = \\text{uniform energy factor}\n\nV_s = \\text{rated volume, as measured in accordance with the listed test standard, in L}\n\nV_e = \\text{volume of tank, as measured in accordance with the listed test standard, in L}\n\n\\text{More thermoelectric performance required in the Energy Efficiency Regulations at the time of publication}\n\n\\text{Important equipment regulated in the European Regulations at the time of the public disclosure}\n\n\\text{Testing an electro-storage range specified on the water heater nameplate. Also, when needed for}\n\n\\text{standards advises the performance efficiency of electric instantaneous service water heaters;}\n\n\\text{Article 6.2.2.3}",
+        "raw_text": "Vₛ = volume of tank, as measured in accordance with the listed test standard, in L",
+        "text": "UEF = uniform energy factor\n\nV_s = rated volume, as measured in accordance with the listed test standard, in L\n\nV_e = volume of tank, as measured in accordance with the listed test standard, in L\n\nMore thermoelectric performance required in the Energy Efficiency Regulations at the time of publication\n\nImportant equipment regulated in the European Regulations at the time of the public disclosure\n\nTesting an electro-storage range specified on the water heater nameplate. Also, when needed for\n\nstandards advises the performance efficiency of electric instantaneous service water heaters;\n\nArticle 6.2.2.3"
+      },
+      {
+        "latex": "V_r = \\text{rated volume, as specified by the manufacturer}\n\nUEF = \\text{uniform energy factor}\n\nV_r = \\text{rated volume of tank as measured in accordance with the}\n\nV_s = \\text{volume of tank as measured in accordance with the performance requirement applies to a given tank, as one performance regulated in the Energy Efficiency Regulation}\n\n\\text{the centre of a fillage storage type served water heater and also Article 6.2.2.3}",
+        "raw_text": "Vr = rated volume, as specified by the manufacturer",
+        "text": "V_r = rated volume, as specified by the manufacturer\n\nUEF = uniform energy factor\n\nV_r = rated volume of tank as measured in accordance with the\n\nV_s = volume of tank as measured in accordance with the performance requirement applies to a given tank, as one performance regulated in the Energy Efficiency Regulation\n\nthe centre of a fillage storage type served water heater and also Article 6.2.2.3"
+      },
+      {
+        "latex": "\\text{UEF} = \\text{uniform energy factor}\n\n\n\nV_s = \\text{rated volume, as specified}\n\n\n\nV_r = \\text{volume of tank, as measured}",
+        "raw_text": "UEF = uniform energy factor",
+        "text": "UEF = uniform energy factor\n\n\n\nV_s = rated volume, as specified\n\n\n\nV_r = volume of tank, as measured"
+      }
+    ],
+    "full_text": "1) Service water heaters and pool heaters with the capacities listed in Table 6.2.2.1. shall comply with the performance requirements stated therein. (See Notes A-6.2.2.1.(1) and A-5.2.12.1.(1) and 6.2.2.1.(1).)\n6.2.2.1.\nTable 6.2.2.1. Service Water Heating Equipment Performance Requirements Forming Part of Sentences 5.2.12.4.(1), 6.2.2.1.(1), 6.2.2.4.(2) and 6.2.2.5.(1)\n6-2 Division B\n6.2.2.1.\n(5) When testing an electric storage-type service water heater for standby losses using the test procedure described in the referenced standard, the electrical supply voltage shall be maintained within +1% of the centre of the voltage range specified on the water heater nameplate. Also, when needed for calculations, the thermal efficiency (Eₜ) shall be 98%.\n(3) Where more than one performance requirement applies to a given type/capacity/size combination, the equipment must comply with at least one of them.\n(6) No standards address the performance efficiency of electric instantaneous service water heaters; however, their efficiency typically approaches 100%.\n(4) Components or equipment regulated in the \"Energy Efficiency Regulations\" at the time of publication of the Code (see Article 1.1.1.3. of Division A).\nUEF = uniform energy factor Vr = rated volume, as specified by the manufacturer Vₛ = volume of tank, as measured in accordance with the listed test standard, in L\n(8) See also Article 6.2.2.3.\n(7) Includes propane.\n6-4 Division B\n\n[Verified formulas for this article]\n- UEF = uniform energy factor\n\nV_s = rated volume, as measured in accordance with the listed test standard, in L\n\nV_e = volume of tank, as measured in accordance with the listed test standard, in L\n\nMore thermoelectric performance required in the Energy Efficiency Regulations at the time of publication\n\nImportant equipment regulated in the European Regulations at the time of the public disclosure\n\nTesting an electro-storage range specified on the water heater nameplate. Also, when needed for\n\nstandards advises the performance efficiency of electric instantaneous service water heaters;\n\nArticle 6.2.2.3\n- V_r = rated volume, as specified by the manufacturer\n\nUEF = uniform energy factor\n\nV_r = rated volume of tank as measured in accordance with the\n\nV_s = volume of tank as measured in accordance with the performance requirement applies to a given tank, as one performance regulated in the Energy Efficiency Regulation\n\nthe centre of a fillage storage type served water heater and also Article 6.2.2.3\n- UEF = uniform energy factor\n\n\n\nV_s = rated volume, as specified\n\n\n\nV_r = volume of tank, as measured",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 6",
+      "Section 6.2",
+      "Subsection 6.2.2"
+    ],
+    "page_end": 186,
+    "page_start": 183,
+    "part_number": "6",
+    "reference": "6.2.2.1",
+    "section_number": "6.2.2.1",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Equipment Category",
+          "Equipment Subcategory",
+          "Type of Equipment",
+          "Input Power",
+          "Rated Storage Capacity (Vᵣ), L",
+          "Volume of Tank (Vₛ), L",
+          "Input/Vₛ, W/L",
+          "Performance Testing Standard",
+          "Rating Conditions",
+          "Performance Requirement"
+        ],
+        "note": "Use get_table('necb', '6.2.2.1') for full structured rows.",
+        "row_count": 32,
+        "table_number": "6.2.2.1",
+        "title": "Service Water Heating Equipment Performance Requirements"
+      }
+    ],
+    "title": "Equipment Efficiency"
+  }
+}

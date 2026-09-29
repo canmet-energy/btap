@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.9",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.5.9",
+    "server_known_issue": null,
+    "sha256": "b04f7e18379a91915986f9a83dd6241ca3145ec302d5231f1cf384ae873998fa",
+    "state": "present",
+    "state_note": "",
+    "title": "Heating System"
+  },
+  "payload": {
+    "article_number": "8.4.5.9",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) Except as provided in Sentence (2), the heating system serving each thermal block of the reference building shall be determined in accordance with Table 8.4.5.7.-A and this Article.\n2) Where the proposed building uses purchased energy, Article 8.4.5.6. shall apply to the reference building.\n3) Where Tables 8.4.5.7.-A and 8.4.5.7.-B indicate that a heating system is required in the secondary system as well as in a terminal device, the heating capacity of each type of equipment shall be set as follows:\na) the heating capacity of the terminal device shall meet the thermal block's heating load due to the transfer of energy through the building envelope only,\nb) the combined heating capacities of the heating systems in the terminal device and secondary system shall meet the peak heating load of the thermal blocks served by those systems, and\nc) the applicable oversize factor shall apply to each type of equipment.\n4) Except as provided in Sentence (5), the energy type of the reference building's heating system shall be modeled as being identical to the energy type of the proposed building's heating system.\n5) Where more than one energy type is used by the proposed building's heating system,\na) the heating capacities of the reference building's heating equipment shall match the ratio of the proposed building's heating equipment capacity allocation, and\nb) the operating schedule, priority of use and other operational characteristics of the proposed building's use of energy types shall apply.\n6) Where a hydronic system is modeled in the reference building, the heating plant shall be modeled as follows:\na) the heating capacity of the heating plant shall be the sum of the heating capacities of the systems served by the plant, multiplied by the applicable oversize factor,\nb) where the heating capacity is not greater than 176 kW, the heating plant shall be modeled with one single-stage boiler,\nc) where the heating capacity is greater than 176 kW and not greater than 352 kW, the heating plant shall be modeled to operate as required by the reference building's load with\ni) two boilers of equal capacity, or\nii) a two-staged boiler that operates in stages with a 1:2 ratio,\nd) where the heating capacity exceeds 352 kW, the heating plant shall be modeled with a boiler that is fully modulating down to 25% of its capacity,\ne) the pumping system shall be modeled as a primary system with constant speed operation,\nf) the peak pumping flow rate shall be set considering\ni) the installed heating plant's capacity,\nii) use of pure water, and\niii) a 16°C temperature drop,\ng) the pump's operating schedule shall be modeled as being identical to that of the proposed building, and\nh) the hot water supply temperature shall be reset to\ni) 82°C for an outside air temperature of -16°C, and\nii) 60°C for an outside air temperature of 0°C.\n7) Where the reference building contains a furnace, it shall be modeled as follows:\na) the heating capacity of the furnace shall be the sum of the heating loads of the thermal blocks served by the furnace, multiplied by the applicable oversize factor,\nb) where the heating capacity is not greater than 66 kW, the furnace shall be modeled with two stages of equal capacity, and\nc) where the heating capacity is greater than 66 kW, the furnace shall be modeled with a number of stages equal to its capacity divided by 66 kW and rounded up to the nearest integer.\n8) Heating equipment performance characteristics as a function of part-load shall be modeled in accordance with the part-load performance curves found in Subsection 8.4.6.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "page_end": 223,
+    "page_start": 222,
+    "part_number": "8",
+    "reference": "8.4.5.9",
+    "section_number": "8.4.5.9",
+    "sentences": [],
+    "title": "Heating System"
+  }
+}

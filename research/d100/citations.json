@@ -1,0 +1,4427 @@
+{
+  "citations": {
+    "1.4.1.2.": {
+      "base": "1.4.1.2",
+      "cited_by": [
+        "D-23",
+        "D-24"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "1.4.1.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "1.4.1.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "11.4.1.1.": {
+      "base": "11.4.1.1",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "11.4.1.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "11.4.1.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.1.1.7.(4)": {
+      "base": "3.1.1.7",
+      "cited_by": [
+        "D-24"
+      ],
+      "fragment": "(4)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.1.1.7",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.1.1.7",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.1.4.": {
+      "base": "3.2.1.4",
+      "cited_by": [
+        "D-74"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.1.4",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.1.4",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.2.2.": {
+      "base": "3.2.2.2",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.2.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.2.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.2.3.": {
+      "base": "3.2.2.3",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.2.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.2.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.3.1.": {
+      "base": "3.2.3.1",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.3.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.3.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.3.3.(3)": {
+      "base": "3.2.3.3",
+      "cited_by": [
+        "D-32"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.3.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.3.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.4.1.": {
+      "base": "3.2.4.1",
+      "cited_by": [
+        "D-76"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.4.2.": {
+      "base": "3.2.4.2",
+      "cited_by": [
+        "D-76"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.4.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.4.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "3.2.4.2.(1)(c)": {
+      "base": "3.2.4.2",
+      "cited_by": [
+        "D-21"
+      ],
+      "fragment": "(1)(c)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.4.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.4.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.1.6.": {
+      "base": "4.2.1.6",
+      "cited_by": [
+        "D-02",
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.1.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.1.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.1.(10)": {
+      "base": "4.2.2.1",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "(10)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.1.(12)": {
+      "base": "4.2.2.1",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "(12)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.1.(13)": {
+      "base": "4.2.2.1",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "(13)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.1.(15)": {
+      "base": "4.2.2.1",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "(15)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.3.": {
+      "base": "4.2.2.3",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.4.": {
+      "base": "4.2.2.4",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.4",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.4",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.2.5.": {
+      "base": "4.2.2.5",
+      "cited_by": [
+        "D-57"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.2.5",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.2.5",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "4.2.3.1.": {
+      "base": "4.2.3.1",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "4.2.3.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "4.2.3.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.10.1.": {
+      "base": "5.2.10.1",
+      "cited_by": [
+        "D-06",
+        "D-17",
+        "D-61",
+        "D-65"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.10.1.(4)": {
+      "base": "5.2.10.1",
+      "cited_by": [
+        "D-15"
+      ],
+      "fragment": "(4)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.10.1.(6)": {
+      "base": "5.2.10.1",
+      "cited_by": [
+        "D-15"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.10.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.12.1.": {
+      "base": "5.2.12.1",
+      "cited_by": [
+        "D-31",
+        "D-60",
+        "D-59"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.12.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.12.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.12.2.": {
+      "base": "5.2.12.2",
+      "cited_by": [
+        "D-60",
+        "D-59"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.12.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.12.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.2.7.(1)": {
+      "base": "5.2.2.7",
+      "cited_by": [
+        "D-22"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.2.7",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.2.7",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.2.8.": {
+      "base": "5.2.2.8",
+      "cited_by": [
+        "D-20"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.2.8",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.2.8",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.2.8.(4)-(5)": {
+      "base": "5.2.2.8",
+      "cited_by": [
+        "D-62"
+      ],
+      "fragment": "(4)-(5)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.2.8",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.2.8",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.2.9.": {
+      "base": "5.2.2.9",
+      "cited_by": [
+        "D-56"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.2.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.2.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.6.3.": {
+      "base": "5.2.6.3",
+      "cited_by": [
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.6.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.6.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "5.2.6.3.(1)": {
+      "base": "5.2.6.3",
+      "cited_by": [
+        "D-38",
+        "D-92"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.6.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.6.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.1.2.(3)": {
+      "base": "8.4.1.2",
+      "cited_by": [
+        "D-64",
+        "D-91"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.1.2.(4)": {
+      "base": "8.4.1.2",
+      "cited_by": [
+        "D-42",
+        "D-91"
+      ],
+      "fragment": "(4)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.1.2.(5)": {
+      "base": "8.4.1.2",
+      "cited_by": [
+        "D-43",
+        "D-64",
+        "D-90"
+      ],
+      "fragment": "(5)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.1.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.2.10.(2)": {
+      "base": "8.4.2.10",
+      "cited_by": [
+        "D-91"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.2.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.2.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.2.2.": {
+      "base": "8.4.2.2",
+      "cited_by": [
+        "D-09"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.2.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.2.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.2.3.": {
+      "base": "8.4.2.3",
+      "cited_by": [
+        "D-09"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.2.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.2.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.2.9.(2)": {
+      "base": "8.4.2.9",
+      "cited_by": [
+        "D-19",
+        "D-21"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.2.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.2.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.3.1.(2)": {
+      "base": "8.4.3.1",
+      "cited_by": [
+        "D-02"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.3.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.3.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.3.2.(1)": {
+      "base": "8.4.3.2",
+      "cited_by": [
+        "D-14"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.3.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.3.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.3.3.(3)": {
+      "base": "8.4.3.3",
+      "cited_by": [
+        "D-19"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.3.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.3.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.3.6.(1)(a)": {
+      "base": "8.4.3.6",
+      "cited_by": [
+        "D-05"
+      ],
+      "fragment": "(1)(a)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.3.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.3.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.1.": {
+      "base": "8.4.4.1",
+      "cited_by": [
+        "D-16",
+        "D-61"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.1.(1)": {
+      "base": "8.4.4.1",
+      "cited_by": [
+        "D-04"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.1.(2)": {
+      "base": "8.4.4.1",
+      "cited_by": [
+        "D-04"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.1.(3)": {
+      "base": "8.4.4.1",
+      "cited_by": [
+        "D-04"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.1.(5)": {
+      "base": "8.4.4.1",
+      "cited_by": [
+        "D-39"
+      ],
+      "fragment": "(5)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.10.(6)": {
+      "base": "8.4.4.10",
+      "cited_by": [
+        "D-90"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.10.(7)": {
+      "base": "8.4.4.10",
+      "cited_by": [
+        "D-50"
+      ],
+      "fragment": "(7)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.10.(8)": {
+      "base": "8.4.4.10",
+      "cited_by": [
+        "D-46",
+        "D-47",
+        "D-48",
+        "D-65"
+      ],
+      "fragment": "(8)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.11.(2)-(3)": {
+      "base": "8.4.4.11",
+      "cited_by": [
+        "D-26",
+        "D-59"
+      ],
+      "fragment": "(2)-(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.11",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.11",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.12.": {
+      "base": "8.4.4.12",
+      "cited_by": [
+        "D-20",
+        "D-22",
+        "D-56",
+        "D-62"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.12",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.12",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(1)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-37"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(1)-(2)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-58"
+      ],
+      "fragment": "(1)-(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(2)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-37"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(2)(b)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-52"
+      ],
+      "fragment": "(2)(b)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(2)(c)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-22"
+      ],
+      "fragment": "(2)(c)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(2)(g)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-52"
+      ],
+      "fragment": "(2)(g)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.13.(2)(h)": {
+      "base": "8.4.4.13",
+      "cited_by": [
+        "D-52"
+      ],
+      "fragment": "(2)(h)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.14": {
+      "base": "8.4.4.14",
+      "cited_by": [
+        "D-92",
+        "D-93"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.14.": {
+      "base": "8.4.4.14",
+      "cited_by": [
+        "D-11",
+        "D-27",
+        "D-38",
+        "D-61",
+        "D-97"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.14.(1)": {
+      "base": "8.4.4.14",
+      "cited_by": [
+        "D-93"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.14.(2)": {
+      "base": "8.4.4.14",
+      "cited_by": [
+        "D-93"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.14.(3)": {
+      "base": "8.4.4.14",
+      "cited_by": [
+        "D-92",
+        "D-93"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.15.(1)": {
+      "base": "8.4.4.15",
+      "cited_by": [
+        "D-22"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.15",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.15",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.15.(2)": {
+      "base": "8.4.4.15",
+      "cited_by": [
+        "D-54"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.15",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.15",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.16.": {
+      "base": "8.4.4.16",
+      "cited_by": [
+        "D-12"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.16",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.16",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.18.(3)": {
+      "base": "8.4.4.18",
+      "cited_by": [
+        "D-22"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.18",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.18",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.19.": {
+      "base": "8.4.4.19",
+      "cited_by": [
+        "D-65"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.19",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.19",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.2.(1)": {
+      "base": "8.4.4.2",
+      "cited_by": [
+        "D-04",
+        "D-05"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.20.": {
+      "base": "8.4.4.20",
+      "cited_by": [
+        "D-41"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.20",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.20",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.3.(6)": {
+      "base": "8.4.4.3",
+      "cited_by": [
+        "D-19"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.4.(1)": {
+      "base": "8.4.4.4",
+      "cited_by": [
+        "D-35"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.4",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.4",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.5.(9)-(12)": {
+      "base": "8.4.4.5",
+      "cited_by": [
+        "D-51",
+        "D-57"
+      ],
+      "fragment": "(9)-(12)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.5",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.5",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.6.(1)": {
+      "base": "8.4.4.6",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.6.(1)-(2)": {
+      "base": "8.4.4.6",
+      "cited_by": [
+        "D-58"
+      ],
+      "fragment": "(1)-(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.7.(4)": {
+      "base": "8.4.4.7",
+      "cited_by": [
+        "D-34"
+      ],
+      "fragment": "(4)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.7",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.7",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.8.": {
+      "base": "8.4.4.8",
+      "cited_by": [
+        "D-22"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.8",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.8",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.9.(3)": {
+      "base": "8.4.4.9",
+      "cited_by": [
+        "D-50",
+        "D-91"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.9.(6)": {
+      "base": "8.4.4.9",
+      "cited_by": [
+        "D-90"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.4.9.(7)": {
+      "base": "8.4.4.9",
+      "cited_by": [
+        "D-46",
+        "D-47",
+        "D-48",
+        "D-49"
+      ],
+      "fragment": "(7)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.10.(6)": {
+      "base": "8.4.5.10",
+      "cited_by": [
+        "D-90"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.10.(7)": {
+      "base": "8.4.5.10",
+      "cited_by": [
+        "D-50"
+      ],
+      "fragment": "(7)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.10.(8)": {
+      "base": "8.4.5.10",
+      "cited_by": [
+        "D-46",
+        "D-47",
+        "D-48"
+      ],
+      "fragment": "(8)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.10",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.12.": {
+      "base": "8.4.5.12",
+      "cited_by": [
+        "D-56",
+        "D-62"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.12",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.12",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.13.(2)(g)": {
+      "base": "8.4.5.13",
+      "cited_by": [
+        "D-52"
+      ],
+      "fragment": "(2)(g)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.14": {
+      "base": "8.4.5.14",
+      "cited_by": [
+        "D-92",
+        "D-93"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.14.": {
+      "base": "8.4.5.14",
+      "cited_by": [
+        "D-97"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.14.(1)": {
+      "base": "8.4.5.14",
+      "cited_by": [
+        "D-93"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.14.(2)": {
+      "base": "8.4.5.14",
+      "cited_by": [
+        "D-93"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.14.(3)": {
+      "base": "8.4.5.14",
+      "cited_by": [
+        "D-92",
+        "D-93"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.14",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.15.(2)": {
+      "base": "8.4.5.15",
+      "cited_by": [
+        "D-54"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.15",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.15",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.2.": {
+      "base": "8.4.5.2",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.3.": {
+      "base": "8.4.5.3",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.5.(9)-(12)": {
+      "base": "8.4.5.5",
+      "cited_by": [
+        "D-51",
+        "D-57"
+      ],
+      "fragment": "(9)-(12)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.5",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.5",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.5.-C": {
+      "base": "8.4.5.5.-C",
+      "cited_by": [
+        "D-03"
+      ],
+      "fragment": "",
+      "kind": "table_prefix_omitted",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.5.5.-C",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.5.-C",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.5.5.-C",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.5.-C",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.6.(1)": {
+      "base": "8.4.5.6",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "(1)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.9.(2)": {
+      "base": "8.4.5.9",
+      "cited_by": [
+        "D-53"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.9.(3)": {
+      "base": "8.4.5.9",
+      "cited_by": [
+        "D-50",
+        "D-91"
+      ],
+      "fragment": "(3)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.9.(6)": {
+      "base": "8.4.5.9",
+      "cited_by": [
+        "D-90"
+      ],
+      "fragment": "(6)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.5.9.(7)": {
+      "base": "8.4.5.9",
+      "cited_by": [
+        "D-46",
+        "D-47",
+        "D-48",
+        "D-49"
+      ],
+      "fragment": "(7)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.2.": {
+      "base": "8.4.6.2",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.3.": {
+      "base": "8.4.6.3",
+      "cited_by": [
+        "D-89"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.3",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.3",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.5.": {
+      "base": "8.4.6.5",
+      "cited_by": [
+        "D-13"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.5",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.5",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.5.-C": {
+      "base": "8.4.6.5.-C",
+      "cited_by": [
+        "D-03"
+      ],
+      "fragment": "",
+      "kind": "table_prefix_omitted",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.6.5.-C",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.5.-C",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.6.5.-C",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.5.-C",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.6.": {
+      "base": "8.4.6.6",
+      "cited_by": [
+        "D-07"
+      ],
+      "fragment": "",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.6",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.6",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "8.4.6.9.(2)": {
+      "base": "8.4.6.9",
+      "cited_by": [
+        "D-53"
+      ],
+      "fragment": "(2)",
+      "kind": "article",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.6.9",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.6.9",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Note A-8.4.4.13": {
+      "base": "A-8.4.4.13",
+      "cited_by": [
+        "D-37",
+        "D-58"
+      ],
+      "fragment": "",
+      "kind": "note",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "A-8.4.4.13",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "A-8.4.4.13",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 3.2.2.2.": {
+      "base": "3.2.2.2.",
+      "cited_by": [
+        "D-24"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "3.2.2.2.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.2.2.",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "3.2.2.2.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.2.2.",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 3.2.3.1.": {
+      "base": "3.2.3.1.",
+      "cited_by": [
+        "D-32"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "3.2.3.1.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "3.2.3.1.",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "3.2.3.1.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "3.2.3.1.",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 5.2.12.1.-I": {
+      "base": "5.2.12.1.-I",
+      "cited_by": [
+        "D-85"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "5.2.12.1.-I",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.12.1.-I",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "5.2.12.1.-I",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.12.1.-I",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 5.2.12.2": {
+      "base": "5.2.12.2",
+      "cited_by": [
+        "D-22",
+        "D-26"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "5.2.12.2",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "5.2.12.2",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "5.2.12.2",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "5.2.12.2",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 6.2.2.1": {
+      "base": "6.2.2.1",
+      "cited_by": [
+        "D-63"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "6.2.2.1",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "6.2.2.1",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "6.2.2.1",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "6.2.2.1",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.4.1.": {
+      "base": "8.4.4.1.",
+      "cited_by": [
+        "D-04"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.4.1.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.1.",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.4.1.",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.1.",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.4.7.-A": {
+      "base": "8.4.4.7.-A",
+      "cited_by": [
+        "D-45",
+        "D-58"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.4.7.-A",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.7.-A",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.4.7.-A",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.7.-A",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.4.7.-B": {
+      "base": "8.4.4.7.-B",
+      "cited_by": [
+        "D-39"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.4.7.-B Note (1)": {
+      "base": "8.4.4.7.-B",
+      "cited_by": [
+        "D-55"
+      ],
+      "fragment": "Note (1)",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.4.7.-B Note (3)": {
+      "base": "8.4.4.7.-B",
+      "cited_by": [
+        "D-18",
+        "D-28"
+      ],
+      "fragment": "Note (3)",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.4.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.4.7.-B",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.5.7.-A": {
+      "base": "8.4.5.7.-A",
+      "cited_by": [
+        "D-60"
+      ],
+      "fragment": "",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.5.7.-A",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.7.-A",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.5.7.-A",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.7.-A",
+            "tool": "get_section"
+          }
+        ]
+      }
+    },
+    "Table 8.4.5.7.-B Note (1)": {
+      "base": "8.4.5.7.-B",
+      "cited_by": [
+        "D-55"
+      ],
+      "fragment": "Note (1)",
+      "kind": "table",
+      "requests": {
+        "necb2020": [
+          {
+            "code": "necb",
+            "edition": "2020",
+            "table_number": "8.4.5.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2020",
+            "section_number": "8.4.5.7.-B",
+            "tool": "get_section"
+          }
+        ],
+        "necb2025": [
+          {
+            "code": "necb",
+            "edition": "2025",
+            "table_number": "8.4.5.7.-B",
+            "tool": "get_table"
+          },
+          {
+            "code": "necb",
+            "edition": "2025",
+            "section_number": "8.4.5.7.-B",
+            "tool": "get_section"
+          }
+        ]
+      }
+    }
+  },
+  "editions": [
+    "necb2020",
+    "necb2025"
+  ],
+  "requests": [
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.1.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.1.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.5.5.-C",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.5.-C",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.5.5.-C",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.5.-C",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.6.5.-C",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.5.-C",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.6.5.-C",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.5.-C",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.4.1.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.1.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.4.1.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.1.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.3.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.3.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.10.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.10.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.2.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.2.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.14",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.14",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.16",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.16",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.3.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.3.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.4.7.-B",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.7.-B",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.4.7.-B",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.7.-B",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.3.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.3.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.2.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.2.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.12",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.12",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.2.8",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.2.8",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.4.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.4.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.8",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.8",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.15",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.15",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.18",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.18",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.2.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.2.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "5.2.12.2",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.12.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "5.2.12.2",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.12.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "1.4.1.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "1.4.1.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "3.2.2.2.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.2.2.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "3.2.2.2.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.2.2.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.1.1.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.1.1.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.11",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.11",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.12.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.12.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "3.2.3.1.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.3.1.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "3.2.3.1.",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.3.1.",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.3.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.3.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.7",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "A-8.4.4.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "A-8.4.4.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.6.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.6.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.20",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.20",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.1.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.1.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.4.7.-A",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.7.-A",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.4.7.-A",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.7.-A",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.13",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.5.7.-A",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.7.-A",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.5.7.-A",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.7.-A",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.15",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.15",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.5.7.-B",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.7.-B",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.5.7.-B",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.7.-B",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.12",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.12",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.2.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.2.9",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.2.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.2.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.2.5",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.2.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.2.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.2.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "4.2.3.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "11.4.1.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "11.4.1.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "6.2.2.1",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "6.2.2.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "6.2.2.1",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "6.2.2.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.19",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.19",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.1.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.1.4",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.2.4.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.4.1",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "5.2.12.1.-I",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "5.2.12.1.-I",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "5.2.12.1.-I",
+      "tool": "get_table"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.12.1.-I",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.2",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.6.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.6.3",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.6",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.2.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.2.10",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.14",
+      "tool": "get_section"
+    },
+    {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.5.14",
+      "tool": "get_section"
+    }
+  ],
+  "unclassified": []
+}

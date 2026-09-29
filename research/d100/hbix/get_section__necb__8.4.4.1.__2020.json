@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.1.",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.1",
+    "server_known_issue": null,
+    "sha256": "1d83bad851c0ee11a8bfb9f94f69661cf732476801b92f0ea5c9dbb573756f7e",
+    "state": "present",
+    "state_note": "",
+    "title": "General"
+  },
+  "payload": {
+    "article_number": "8.4.4.1",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) The building energy target of the reference building shall be calculated based on the parameters described in this Subsection.\n2) The components and systems of the reference building shall meet the prescriptive requirements of Sections 3.2., 4.2., 5.2., 6.2. and 7.2.\n3) The energy model calculations shall include all the energy uses addressed in Sections 3.2., 4.2., 5.2., 6.2. and 7.2.\n4) Except as noted otherwise in this Subsection, the following characteristics of the reference building shall be modeled as being identical to those of the proposed building:\na) total floor area of conditioned and unconditioned spaces,\nb) use of building spaces,\nc) number, type and conditioning of thermal blocks,\nd) shape and exterior dimensions, and\ne) orientation.\n5) The presence or absence of heating and/or cooling systems in each conditioned thermal block of the reference building shall be modeled as being identical to those in the proposed building.\n6) Climatic data used in the compliance calculations for the proposed building shall be applied.\n7) The simulation shall account for the effect of part-load operation on equipment performance.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 211,
+    "page_start": 210,
+    "part_number": "8",
+    "reference": "8.4.4.1",
+    "section_number": "8.4.4.1",
+    "sentences": [],
+    "title": "General"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.4.7.-A",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.7.-A",
+    "server_known_issue": null,
+    "sha256": "e481544ccc13652e1c78affd5b7dae4f37437c46f1a54a08c18988b3a258f0ce",
+    "state": "present",
+    "state_note": "",
+    "title": "HVAC System Selection for the Reference Building"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2020",
+    "headers": [
+      "Building or Space Type of the Proposed Building",
+      "Size of Building or Space(1)(2)",
+      "Type of HVAC System Required(3)"
+    ],
+    "page_number": 213,
+    "row_count": 16,
+    "rows": [
+      {
+        "Building or Space Type of the Proposed Building": "Assembly Area: exhibit space, conference/meeting/multi-purpose",
+        "Size of Building or Space(1)(2)": "Maximum 4 storeys",
+        "Type of HVAC System Required(3)": "System 3"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "room, performing arts/motion picture theatre, courtroom, classroom/lecture/trainin room, place of worship, fellowship hall, sports centre, arena and swimming pool seating area, waiting room",
+        "Size of Building or Space(1)(2)": "More than 4 storeys",
+        "Type of HVAC System Required(3)": "System 6"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Automotive Area: repair garage or storage garage, fire engine room, indoor truck dock, indoor bus or train platform",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 4"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Data Processing Area: control room, data centre",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "Where the proposed building or space has a cooling capacity exceeding 20 kW, the reference building or space shall use System 2; otherwise, the reference building or space shall use System 1."
+      },
+      {
+        "Building or Space Type of the Proposed Building": "General Area: office, banking, healthcare clinic, library, retail/mall",
+        "Size of Building or Space(1)(2)": "Maximum 2 storeys",
+        "Type of HVAC System Required(3)": "System 3"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "concourse, gymnasium, athletic play area, swimming pool, exercise centre, dressing room, lighting control room, atrium",
+        "Size of Building or Space(1)(2)": "More than 2 storeys",
+        "Type of HVAC System Required(3)": "System 6"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Historical Collections Area: archival library, museum and gallery archives",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 2"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Hospital Area: operating theatre, emergency room, patient/recovery room, clean room, hospital laboratories, forensics laboratory",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 3"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Indoor Arena: ice rinks, curling rinks",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 2"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Industrial Area: industrial manufacturing and workshop without dust-exhausting hood",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 3 Where the reference building or space is a single zone, it can be divided into multiple units as long as it matches the proposed building or space's units."
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Residential/Accommodation Area: multi-unit residential, hotel/motel guest room",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "Where the proposed building or space is heated only, the reference building or space shall use System 1."
+      },
+      {
+        "Building or Space Type of the Proposed Building": "",
+        "Size of Building or Space(1)(2)": "",
+        "Type of HVAC System Required(3)": "Where the proposed building or space is heated as well as being cooled with an air-cooled unitary, packaged terminal or room air conditioner (or heat pumps), or fan coils, the reference building or space's HVAC system shall be modeled as being identical to that of the proposed building or space; otherwise, the reference building or space shall use through-the-wall systems."
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Sleeping Area: dormitory, detention cell, sleeping quarters",
+        "Size of Building or Space(1)(2)": "All sizes",
+        "Type of HVAC System Required(3)": "System 3"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Supermarket/Food Service Area: grocery store, bar lounge/leisure, cafeteria, fast food, family dining, food preparation without kitchen hood or vented appliance(4) food preparation with kitchen hood or vented appliance(4)",
+        "Size of Building or Space(1)(2)": "All sizes All sizes",
+        "Type of HVAC System Required(3)": "System 3 System 4"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "Warehouse Area: fine, medium and bulky material storage, self-storage, material handling/sorting/baggage areas",
+        "Size of Building or Space(1)(2)": "All sizes of non-refrigerated space",
+        "Type of HVAC System Required(3)": "System 4"
+      },
+      {
+        "Building or Space Type of the Proposed Building": "",
+        "Size of Building or Space(1)(2)": "All sizes of refrigerated space",
+        "Type of HVAC System Required(3)": "System 5"
+      }
+    ],
+    "table_number": "8.4.4.7.-A",
+    "title": "HVAC System Selection for the Reference Building"
+  }
+}

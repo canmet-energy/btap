@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.4",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "4.2.2.4",
+    "server_known_issue": null,
+    "sha256": "3466e28719a25a0162a3872b88aace31c7380f468b775e4de9be31be493fbcf1",
+    "state": "present",
+    "state_note": "",
+    "title": "Determination of Daylighted Area Under Roof Monitors"
+  },
+  "payload": {
+    "article_number": "4.2.2.4",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "(See Note A-4.2.2.4.)\n1) The daylighted area under roof monitors shall refer to the combined daylighted area under each roof monitor without double-counting overlapping areas. (See Note A-4.2.2.4.(1) and 4.2.2.5.(1).)\n2) The daylighted area under each roof monitor shall be calculated as the product of Clauses (a) and (b):\na) the width of the vertical glazing above the ceiling plus the smallest of the following measurements applied to each side of the glazing:\ni) 0.6 m,\nii) the distance to any vertical obstruction that is 1.5 m or more in height, or\niii) the distance to the edge of any primary sidelighted area, and\nb) the smallest of the following measurements applied horizontally from the bottom edge of the glazing:\ni) the monitor's sill height, which is the vertical distance from the floor to the bottom edge of the monitor's glazing, or\nii) the distance to the nearest face of any vertical obstruction where any part of the obstruction is farther away than the difference between the height of the obstruction and the monitor's sill height.\n(See Note A-4.2.2.4.(2).)",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 4",
+      "Section 4.2",
+      "Subsection 4.2.2"
+    ],
+    "page_end": 103,
+    "page_start": 103,
+    "part_number": "4",
+    "reference": "4.2.2.4",
+    "section_number": "4.2.2.4",
+    "sentences": [],
+    "title": "Determination of Daylighted Area Under Roof Monitors"
+  }
+}

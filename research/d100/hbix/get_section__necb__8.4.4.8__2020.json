@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.8",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.8",
+    "server_known_issue": null,
+    "sha256": "10172911c02945edaf9c136b31ea502741504eafa25a244e4556ca1c1313373a",
+    "state": "present",
+    "state_note": "",
+    "title": "Equipment Oversizing"
+  },
+  "payload": {
+    "article_number": "8.4.4.8",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "(See Note A-8.4.4.8.)\n1) The heating equipment of the reference building shall be modeled as being oversized by the lesser of\na) the percentage of oversizing applied to the proposed building, or\nb) 30%.\n2) The cooling equipment of the reference building shall be modeled as being oversized by the lesser of\na) the percentage of oversizing applied to the proposed building, or\nb) 10%.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 215,
+    "page_start": 215,
+    "part_number": "8",
+    "reference": "8.4.4.8",
+    "section_number": "8.4.4.8",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "System Number",
+          "Type of HVAC System",
+          "Fan Control",
+          "Type of Cooling System",
+          "Type of Heating System"
+        ],
+        "note": "Use get_table('necb', '8.4.4.7.-B') for full structured rows.",
+        "row_count": 6,
+        "table_number": "8.4.4.7.-B",
+        "title": "Descriptions of HVAC Systems 1 to 6"
+      }
+    ],
+    "title": "Equipment Oversizing"
+  }
+}

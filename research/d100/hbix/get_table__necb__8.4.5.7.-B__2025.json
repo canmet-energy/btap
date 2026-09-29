@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.5.7.-B",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.5.7.-B",
+    "server_known_issue": null,
+    "sha256": "b838f735d6e83983e043a2a11a38edaa15a0ba64a250504c123564025717c91f",
+    "state": "present",
+    "state_note": "",
+    "title": "Descriptions of HVAC Systems 1 to 6"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2025",
+    "headers": [
+      "System Number",
+      "Type of HVAC System",
+      "Fan Control",
+      "Type of Cooling System",
+      "Type of Heating System"
+    ],
+    "page_number": 221,
+    "row_count": 6,
+    "rows": [
+      {
+        "Fan Control": "Constant-volume",
+        "System Number": "System 1",
+        "Type of Cooling System": "Air-cooled direct-expansion with remote condenser",
+        "Type of HVAC System": "Unitary air conditioner with baseboard heating(2)",
+        "Type of Heating System": "Hot water with fuel-fired water boiler or electric resistance baseboard"
+      },
+      {
+        "Fan Control": "Constant-volume",
+        "System Number": "System 2",
+        "Type of Cooling System": "Water-cooled water chiller",
+        "Type of HVAC System": "Four-pipe fan-coil(2)",
+        "Type of Heating System": "Fuel-fired or electric resistance water boiler"
+      },
+      {
+        "Fan Control": "Constant-volume",
+        "System Number": "System 3",
+        "Type of Cooling System": "Air-cooled direct-expansion",
+        "Type of HVAC System": "Single-zone packaged rooftop unit with baseboard heating",
+        "Type of Heating System": "Fuel-fired or electric resistance furnace for rooftop, hot water with fuel-fired boiler, or electric resistance for baseboards"
+      },
+      {
+        "Fan Control": "Constant-volume",
+        "System Number": "System 4",
+        "Type of Cooling System": "Air-cooled direct-expansion",
+        "Type of HVAC System": "Single-zone make-up air unit with baseboard heating",
+        "Type of Heating System": "Make-up air unit: electric or indirect fuel-fired furnace; Baseboards: electric resistance or hydronic with fuel-fired boiler"
+      },
+      {
+        "Fan Control": "Constant-volume",
+        "System Number": "System 5",
+        "Type of Cooling System": "Water-cooled water chiller",
+        "Type of HVAC System": "Two-pipe fan-coil(2)",
+        "Type of Heating System": "None"
+      },
+      {
+        "Fan Control": "Variable-volume",
+        "System Number": "System 6(3)",
+        "Type of Cooling System": "Water-cooled water chiller",
+        "Type of HVAC System": "Multi-zone built-up system with baseboard heating",
+        "Type of Heating System": "Baseboards: electric resistance or hydronic with fuel-fired boiler"
+      }
+    ],
+    "table_number": "8.4.5.7.-B",
+    "title": "Descriptions of HVAC Systems 1 to 6"
+  }
+}

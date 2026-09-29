@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.4.2",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "3.2.4.2",
+    "server_known_issue": null,
+    "sha256": "3884a35891c9b2a3206b45290ca7b83b3634c09d4229bd27ad992455758001ab",
+    "state": "present",
+    "state_note": "",
+    "title": "Air Barrier System"
+  },
+  "payload": {
+    "article_number": "3.2.4.2",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) The air barrier system shall have a normalized air leakage rate not greater than 1.50 L/(sxm²) when tested in accordance with ASTM E3158, \"Standard Test Method for Measuring the Air Leakage Rate of a Large or Multizone Building,\" at a pressure differential of 75 Pa, using the following criteria:\na) the building shall be prepared in accordance with the building envelope test described in the standard,\nb) the air leakage test shall be conducted under both pressurized and depressurized conditions, and\nc) the air leakage area used to determine the normalized air leakage rate shall include all the surfaces separating conditioned space from unconditioned space.\n(See Note A-3.2.4.2.(1).)\n2) The air leakage rates measured in accordance with Sentence (1) shall be averaged.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.2",
+      "Subsection 3.2.4"
+    ],
+    "page_end": 76,
+    "page_start": 76,
+    "part_number": "3",
+    "reference": "3.2.4.2",
+    "section_number": "3.2.4.2",
+    "sentences": [],
+    "title": "Air Barrier System"
+  }
+}

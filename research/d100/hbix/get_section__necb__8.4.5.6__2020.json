@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.5.6",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.5.6",
+    "server_known_issue": null,
+    "sha256": "3a61e6a9b8c3772767fe53fa949e54c0a8a8e3f5c4e1e19a4f0de9e41b6d7c32",
+    "state": "present",
+    "state_note": "",
+    "title": "Cooling Tower"
+  },
+  "payload": {
+    "article_number": "8.4.5.6",
+    "division": "B",
+    "edition": "2020",
+    "equations": [
+      {
+        "latex": "t_{\\text{chws}} = \\text{chilled water supply temperature, in } °\\text{F}\n\nt_{\\text{ews}} = \\text{condenser water supply temperature, in } °\\text{F}\n\na, b, c, d, e, f = \\text{applicable coefficients from Table 8.4.5.5.-A}",
+        "raw_text": "tcwₛ = condenser water supply temperature, in °F, and",
+        "text": "t_chws = chilled water supply temperature, in °F\n\nt_ews = condenser water supply temperature, in °F\n\na, b, c, d, e, f = applicable coefficients from Table 8.4.5.5.-A"
+      },
+      {
+        "latex": "Q_{\\text{available}} = Q_{\\text{rated}} \\times \\text{FWB} \\times \\frac{t_R}{10}\n\n\nwhere\n\n\nQ_{\\text{rated}} = \\text{rated cooling capacity at CTI test conditions, in Btu/h,}\n\n\n\n\\text{FWB} = \\text{ratio of available capacity to rated capacity, in gpm/gpm, determined in}\n\n\n\n\\text{accordance with Sentence (3), and}\n\n\n\nt_R = \\text{tower range, in °F, determined in accordance with Sentence (5).}",
+        "raw_text": "Qavailable = Qrated X FWB X",
+        "text": "Q_available = Q_rated × FWB × (t_R)/(10)\n\n\nwhere\n\n\nQ_rated = rated cooling capacity at CTI test conditions, in Btu/h,\n\n\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in\n\n\n\naccordance with Sentence (3), and\n\n\n\nt_R = tower range, in °F, determined in accordance with Sentence (5)."
+      },
+      {
+        "latex": "Q_{\\text{rated}} = \\text{rated cooling capacity at CTI test conditions, in Btu/h}\n\n\\text{FWB} = \\text{ratio of available capacity to rated capacity, in gpm/gpm}",
+        "raw_text": "Qrated = rated cooling capacity at CTI test conditions, in Btu/h,",
+        "text": "Q_rated = rated cooling capacity at CTI test conditions, in Btu/h\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm"
+      },
+      {
+        "latex": "Q_{\\text{rated}} = \\text{rated cooling capacity at CTI test conditions, in Btu/h,}\n\n\\text{FWB} = \\text{ratio of available capacity to rated capacity, in gpm/gpm, determined in accordance with Sentence (3), and}",
+        "raw_text": "FWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in",
+        "text": "Q_rated = rated cooling capacity at CTI test conditions, in Btu/h,\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in accordance with Sentence (3), and"
+      },
+      {
+        "latex": "t_R = \\text{tower range, in °F, determined in accordance with Sentence (5)}",
+        "raw_text": "tR = tower range, in °F, determined in accordance with Sentence (5).",
+        "text": "t_R = tower range, in °F, determined in accordance with Sentence (5)"
+      },
+      {
+        "latex": "\\text{FWB} = a + (b \\times \\text{FRA}) + (c \\times \\text{FRA}^2) + (d \\times t_{\\text{cwb}}) + (e \\times t_{\\text{cwb}}^2) + (f \\times \\text{FRA} \\times t_{\\text{cwb}})\n\n\\text{FRA} = \\text{intermediate capacity curve based on range and approach determined in accordance with Sentence (4)}\n\nt_{\\text{cwb}} = \\text{outdoor-air wet-bulb temperature, in } °\\text{F}\n\na = 0.60531402\n\nb = -0.03554536\n\nc = 0.00804083\n\nd = -0.02860259\n\ne = 0.00024972\n\nf = 0.00490857",
+        "raw_text": "FWB = a + (b X FRA) + FRA²) + X tcwb) + (e X tcwb²) + (f X FRA X tcwb)",
+        "text": "FWB = a + (b × FRA) + (c × FRA^2) + (d × t_cwb) + (e × t_cwb^2) + (f × FRA × t_cwb)\n\nFRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4)\n\nt_cwb = outdoor-air wet-bulb temperature, in °F\n\na = 0.60531402\n\nb = -0.03554536\n\nc = 0.00804083\n\nd = -0.02860259\n\ne = 0.00024972\n\nf = 0.00490857"
+      },
+      {
+        "latex": "\\text{FRA} = \\text{intermediate capacity curve based on range and approach determined in accordance with Sentence (4)}",
+        "raw_text": "FRA = intermediate capacity curve based on range and approach determined in",
+        "text": "FRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4)"
+      },
+      {
+        "latex": "t_{cwb} = \\text{outdoor-air wet-bulb temperature, in °F}\n\na = 0.60531402\n\nb = 0.03554536",
+        "raw_text": "tcwb = outdoor-air wet-bulb temperature, in °F,",
+        "text": "t_cwb = outdoor-air wet-bulb temperature, in °F\n\na = 0.60531402\n\nb = 0.03554536"
+      },
+      {
+        "latex": "t_R = \\text{tower range, in } °F\\text{, determined in accordance with Sentence (5)}",
+        "raw_text": "tR = tower range, in °F, determined in accordance with Sentence (5),",
+        "text": "t_R = tower range, in °F, determined in accordance with Sentence (5)"
+      },
+      {
+        "latex": "t_R = \\text{tower range, in } °\\text{F, determined in accordance with Sentence (5)}\n\nt_A = \\text{tower approach, in } °\\text{F, determined in accordance with Sentence (6)}\n\na = -2.22888899\n\nb = -0.16679543",
+        "raw_text": "tA = tower approach, in °F, determined in accordance with Sentence (6),",
+        "text": "t_R = tower range, in °F, determined in accordance with Sentence (5)\n\nt_A = tower approach, in °F, determined in accordance with Sentence (6)\n\na = -2.22888899\n\nb = -0.16679543"
+      },
+      {
+        "latex": "t_{\\text{cwr}} = \\text{condenser water return temperature, in °F, and}\n\nt_{\\text{cws}} = \\text{condenser water supply temperature, in °F.}",
+        "raw_text": "tcwr = condenser water return temperature, in °F, and",
+        "text": "t_cwr = condenser water return temperature, in °F, and\n\nt_cws = condenser water supply temperature, in °F."
+      },
+      {
+        "latex": "t_{cws} = \\text{condenser water supply temperature, in } °\\text{F}\n\nt_{cwr} = \\text{condenser water return temperature, in } °\\text{F}",
+        "raw_text": "tᶜwₛ = condenser water supply temperature, in °F.",
+        "text": "t_cws = condenser water supply temperature, in °F\n\nt_cwr = condenser water return temperature, in °F"
+      },
+      {
+        "latex": "t_{cws} = \\text{condenser water supply temperature, in °F}\n\nt_{owb} = \\text{outdoor-air wet-bulb temperature, in °F}",
+        "raw_text": "tₒwb = outdoor-air wet-bulb temperature, in °F.",
+        "text": "t_cws = condenser water supply temperature, in °F\n\nt_owb = outdoor-air wet-bulb temperature, in °F"
+      },
+      {
+        "latex": "t_{cws} = \\text{condenser water supply temperature, in } °F\n\na_2 = 0.86173749\n\nb = 0.00708917 \\text{ and}",
+        "raw_text": "tcwₛ = condenser water supply temperature, in °F,",
+        "text": "t_cws = condenser water supply temperature, in °F\n\na_2 = 0.86173749\n\nb = 0.00708917 and"
+      }
+    ],
+    "full_text": "1) The part-load performance characteristics of the reference cooling tower shall be adjusted for cooling capacity by applying Sentence (2).\n2) The available total cooling capacity, Qavailable, in Btu/h, of the reference cooling tower as a function of present outdoor-air wet-bulb, condenser water supply and condenser water return temperatures shall be calculated using the following equation:\nQavailable = Qrated X FWB X 10\nwhere\nQrated = rated cooling capacity at CTI test conditions, in Btu/h, FWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in accordance with Sentence (3), and\ntR = tower range, in °F, determined in accordance with Sentence (5).\n3) The ratio of available capacity to rated capacity, FWB, shall be calculated using the following equation:\nFWB = a + (b X FRA) + FRA²) + X tcwb) + (e X tcwb²) + (f X FRA X tcwb)\nwhere\nFRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4),\ntcwb = outdoor-air wet-bulb temperature, in °F,\na = 0.60531402,\nb = -0.03554536,\nC = 0.00804083,\nd = -0.02860259,\ne = 0.00024972, and\nf = 0.00490857.\n4) The intermediate capacity curve based on range and approach, FRA, shall be calculated using the following equation:\n-d (f x tᵣ) + + (f - 4 X e X [a + (b X tᵣ) + X tᵣ²) - tA] FRA = 2 x e\nwhere\ntR = tower range, in °F, determined in accordance with Sentence (5),\ntA = tower approach, in °F, determined in accordance with Sentence (6),\na = -2.22888899,\nb = 0.16679543,\nC = -0.01410247,\nd = 0.03222333,\ne = 0.18560214, and\nf = 0.24251871.\n5) The tower range, tᵣ, shall be calculated using the following equation:\ntR = tcwr tcws\nwhere\ntcwr = condenser water return temperature, in °F, and tᶜwₛ = condenser water supply temperature, in °F.\n6) The tower approach, tA, shall be calculated using the following equation:\ntA = tcws towb\nwhere\ntcwₛ = condenser water supply temperature, in °F, and tₒwb = outdoor-air wet-bulb temperature, in °F.\n\n[Verified formulas for this article]\n- t_chws = chilled water supply temperature, in °F\n\nt_ews = condenser water supply temperature, in °F\n\na, b, c, d, e, f = applicable coefficients from Table 8.4.5.5.-A\n- Q_available = Q_rated × FWB × (t_R)/(10)\n\n\nwhere\n\n\nQ_rated = rated cooling capacity at CTI test conditions, in Btu/h,\n\n\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in\n\n\n\naccordance with Sentence (3), and\n\n\n\nt_R = tower range, in °F, determined in accordance with Sentence (5).\n- Q_rated = rated cooling capacity at CTI test conditions, in Btu/h\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm\n- Q_rated = rated cooling capacity at CTI test conditions, in Btu/h,\n\nFWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in accordance with Sentence (3), and\n- t_R = tower range, in °F, determined in accordance with Sentence (5)\n- FWB = a + (b × FRA) + (c × FRA^2) + (d × t_cwb) + (e × t_cwb^2) + (f × FRA × t_cwb)\n\nFRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4)\n\nt_cwb = outdoor-air wet-bulb temperature, in °F\n\na = 0.60531402\n\nb = -0.03554536\n\nc = 0.00804083\n\nd = -0.02860259\n\ne = 0.00024972\n\nf = 0.00490857\n- FRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4)\n- t_cwb = outdoor-air wet-bulb temperature, in °F\n\na = 0.60531402\n\nb = 0.03554536\n- t_R = tower range, in °F, determined in accordance with Sentence (5)\n- t_R = tower range, in °F, determined in accordance with Sentence (5)\n\nt_A = tower approach, in °F, determined in accordance with Sentence (6)\n\na = -2.22888899\n\nb = -0.16679543\n- t_cwr = condenser water return temperature, in °F, and\n\nt_cws = condenser water supply temperature, in °F.\n- t_cws = condenser water supply temperature, in °F\n\nt_cwr = condenser water return temperature, in °F\n- t_cws = condenser water supply temperature, in °F\n\nt_owb = outdoor-air wet-bulb temperature, in °F\n- t_cws = condenser water supply temperature, in °F\n\na_2 = 0.86173749\n\nb = 0.00708917 and",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "page_end": 230,
+    "page_start": 229,
+    "part_number": "8",
+    "reference": "8.4.5.6",
+    "section_number": "8.4.5.6",
+    "sentences": [],
+    "title": "Cooling Tower"
+  }
+}

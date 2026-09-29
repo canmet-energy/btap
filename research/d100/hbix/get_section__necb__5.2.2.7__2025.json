@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.2.7",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "5.2.2.7",
+    "server_known_issue": null,
+    "sha256": "c8cdc145e2c5a51eb2e43deaa1aea82aea35de5a8330c58a862fe51f0139fa50",
+    "state": "present",
+    "state_note": "",
+    "title": "Cooling with Outdoor Air"
+  },
+  "payload": {
+    "article_number": "5.2.2.7",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) Except for HVAC systems serving only dwelling units or hotel or motel rooms, each system that incorporates mechanical cooling and has an air-handling capacity of more than 1 500 L/s or a cooling capacity of more than 20 kW shall be designed to use outdoor air to reduce mechanical cooling energy by one of the means covered in Articles 5.2.2.8. and 5.2.2.9.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 5",
+      "Section 5.2",
+      "Subsection 5.2.2"
+    ],
+    "page_end": 142,
+    "page_start": 142,
+    "part_number": "5",
+    "reference": "5.2.2.7",
+    "section_number": "5.2.2.7",
+    "sentences": [],
+    "title": "Cooling with Outdoor Air"
+  }
+}

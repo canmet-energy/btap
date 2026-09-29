@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.4.3",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.4.3",
+    "server_known_issue": null,
+    "sha256": "475ad4f3547ff8e62d65ac8562ede3c48653613d8b43c28000553a52cde4f386",
+    "state": "present",
+    "state_note": "",
+    "title": "Building Envelope Components"
+  },
+  "payload": {
+    "article_number": "8.4.4.3",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) Except as provided in Sentence (2), the solar absorptance of each opaque building assembly shall be modeled as being identical to that determined for the proposed building in Sentence 8.4.3.3.(1).\n2) The solar absorptance of roof assemblies shall be\na) if the actual solar absorptance for the proposed building is not used, set to the same value used in the proposed building, or\nb) if the actual solar absorptance for the proposed building is used, set to 0.7.\n3) If the total vertical fenestration and door area to gross wall area ratio (FDWR) of the proposed building differs from the maximum permitted by Article 3.2.1.4., the FDWR of the reference building shall be adjusted proportionally along each orientation until it complies with that Article.\n4) Permanent fenestration shading devices and projections shall not be modeled in the reference building.\n5) If the proposed building is modeled with exterior shading provided by a nearby structure or building, the reference building shall also be modeled as such.\n6) The air leakage rate shall be equal to the default value determined in Sentence 8.4.3.3.(3).\n7) Heat transfer through interior partitions shall be modeled as being identical to that of the proposed building.\n8) Except for overall thermal transmittance, fenestration shall be modeled with thermal and optical properties that are identical to those used for the proposed building. (See Note A-8.4.4.3.(8).)",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "page_end": 211,
+    "page_start": 211,
+    "part_number": "8",
+    "reference": "8.4.4.3",
+    "section_number": "8.4.4.3",
+    "sentences": [],
+    "title": "Building Envelope Components"
+  }
+}

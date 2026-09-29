@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "3.1.1.7",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "3.1.1.7",
+    "server_known_issue": null,
+    "sha256": "86573efaa0288a717798708ad237bb3954b65ec6d0c0c5ff672ec083c1893efa",
+    "state": "present",
+    "state_note": "",
+    "title": "Calculation of Overall Thermal Transmittance"
+  },
+  "payload": {
+    "article_number": "3.1.1.7",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) In calculating the overall thermal transmittance of assemblies for purposes of comparison with the provisions in Section 3.2., the effect of thermal bridging shall be considered for\na) closely spaced repetitive structural members, such as studs and joists, and ancillary members, such as lintels, sills and plates,\nb) major structural elements that penetrate or intersect the building envelope (see Note A-3.1.1.7.(1)(b)),\nc) the junctions between the following building envelope materials, components, and assemblies:\ni) glazing assemblies,\nii) spandrels,\niii) parapets,\niv) roof-to-wall junctions,\nv) corners, and\nvi) edges of walls or floors, and\nd) secondary structural members (see Note A-3.1.1.7.(1)(d)).\n2) In calculating the overall thermal transmittance of assemblies for purposes of comparison with the provisions in Section 3.2., pipes, ducts, equipment with through-the-wall venting, packaged terminal air conditioners or heat pumps need not be taken into account. (See Note A-3.1.1.7.(2).)\n3) In calculating the overall thermal transmittance of assemblies for purposes of comparison with the provisions in Section 3.2., fasteners need not be taken into account.\n4) Where a component of the building envelope is protected by an enclosed unconditioned space, such as a sun porch, enclosed veranda or vestibule, the unconditioned enclosure may be considered to have an overall thermal transmittance of 6.25 W/(m²xK). (See Note A-3.1.1.7.(4).)\n5) For the purposes of this Article, roof assemblies shall be considered to include all related structural framing.\n6) For the purposes of this Article, wall assemblies inclined less than 60° from the horizontal shall be considered as roof assemblies, and roof assemblies inclined 60° or more from the horizontal shall be considered as wall assemblies.\n7) For the purposes of this Article, wall assemblies shall be considered to include all related structural framing and perimeter areas of intersecting interior walls.\n8) For the purposes of this Article, floor assemblies shall be considered to include all related structural framing.\nSection 3.2. Prescriptive Path\n3.2.1. General",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.1",
+      "Subsection 3.1.1"
+    ],
+    "page_end": 71,
+    "page_start": 70,
+    "part_number": "3",
+    "reference": "3.1.1.7",
+    "section_number": "3.1.1.7",
+    "sentences": [],
+    "title": "Calculation of Overall Thermal Transmittance"
+  }
+}

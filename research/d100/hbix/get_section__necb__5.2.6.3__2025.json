@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.6.3",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "5.2.6.3",
+    "server_known_issue": null,
+    "sha256": "5fd4293ae16f0d08546d4be3af7110bf2e12e363b38821c63d58f6d89e29c382",
+    "state": "present",
+    "state_note": "",
+    "title": "Pumping Power Demand"
+  },
+  "payload": {
+    "article_number": "5.2.6.3",
+    "division": "B",
+    "edition": "2025",
+    "equations": [
+      {
+        "latex": "W_{\\text{motorpower}} = \\text{combined power of the pump motors}\n\nkW_{\\text{thermalpeak}} = \\text{peak thermal demand of the loop at design conditions}",
+        "raw_text": "kWthermalpeak = peak thermal demand of the loop at design conditions",
+        "text": "W_motorpower = combined power of the pump motors\n\nkW_thermalpeak = peak thermal demand of the loop at design conditions"
+      }
+    ],
+    "full_text": "1) The combined pumping power demand required by the motors of all the pumps in a given hydronic system shall not exceed the values stated in Table 5.2.6.3. for the applicable system.\nTable 5.2.6.3. Maximum Pumping Power Demand of Pump Motors Forming Part of Sentence 5.2.6.3.(1)\nNotes to Table 5.2.6.3.:\n(1) Wmotorpower = combined power of the pump motors kWthermalpeak = peak thermal demand of the loop at design conditions\n5.2.7. Equipment Installed Outdoors\n\n[Verified formulas for this article]\n- W_motorpower = combined power of the pump motors\n\nkW_thermalpeak = peak thermal demand of the loop at design conditions",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 5",
+      "Section 5.2",
+      "Subsection 5.2.6"
+    ],
+    "page_end": 147,
+    "page_start": 147,
+    "part_number": "5",
+    "reference": "5.2.6.3",
+    "section_number": "5.2.6.3",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of Hydronic System",
+          "Maximum Combined Pumping Power Demand of Pump Motors, Wmotorpower/KWhermalpeak1"
+        ],
+        "note": "Use get_table('necb', '5.2.6.3') for full structured rows.",
+        "row_count": 4,
+        "table_number": "5.2.6.3",
+        "title": "Maximum Pumping Power Demand of Pump Motors"
+      }
+    ],
+    "title": "Pumping Power Demand"
+  }
+}

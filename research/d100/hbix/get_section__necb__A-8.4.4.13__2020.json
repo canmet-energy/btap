@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "A-8.4.4.13",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "A-8.4.4.13",
+    "server_known_issue": null,
+    "sha256": "baf300cd3d4a155e6e5158954eabdc510adce6eccecc0b4fb4309730f3ed7242",
+    "state": "present",
+    "state_note": "",
+    "title": "Heat Pump Definitions"
+  },
+  "payload": {
+    "article_number": "A-8.4.4.13",
+    "division": "B",
+    "edition": "2020",
+    "explains": "8.4.4.13",
+    "full_text": "The following types of heat pump systems are the most commonly used:\nWater-loop heat pump system: a heat pump system connected to an internal water loop used as a heat source and/or sink. The loop may include an auxiliary heat source (e.g. a boiler) and/or heat rejection device (e.g. a cooling tower)\nAir-source heat pump system: a heat pump system using the outside air as a heat source and/or sink\nWater-source heat pump system: a water-loop heat pump system using surface water (e.g. river, pond or lake), groundwater, or a water loop carrying waste heat generated outside the building as a heat source and/or sink, either directly, or indirectly through the use of a heat exchanger that separates the source from an internal water loop\nGround-source heat pump system: a heat pump system using the ground as a heat source and/or sink through the use of a ground-heat exchanger in which circulates either a refrigerant supplied by the heat pump or a heat transfer liquid coming from an internal water loop",
+    "hierarchy_level": "note",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "normative": false,
+    "page_end": 259,
+    "page_start": 259,
+    "part_number": "8",
+    "reference": "A-8.4.4.13",
+    "section_number": "A-8.4.4.13",
+    "sentences": [],
+    "title": "Heat Pump Definitions"
+  }
+}

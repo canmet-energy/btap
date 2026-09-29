@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "3.2.1.4",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "3.2.1.4",
+    "server_known_issue": null,
+    "sha256": "4df80518edaa3d35acdd9c97fb303399e5784e0ca553dee0be5b3e5a54f12eca",
+    "state": "present",
+    "state_note": "",
+    "title": "Allowable Fenestration and Door Area"
+  },
+  "payload": {
+    "article_number": "3.2.1.4",
+    "division": "B",
+    "edition": "2025",
+    "equations": [
+      {
+        "latex": "\\text{FDWR} = 0.40 \\text{ for } \\text{HDD} \\leq 4000\n\n\\text{FDWR} = \\frac{2000 - 0.2 \\times \\text{HDD}}{3000} \\text{ for } 4000 < \\text{HDD} < 7000\n\n\\text{FDWR} = 0.20 \\text{ for } \\text{HDD} \\geq 7000\n\n\\text{HDD} = \\text{the heating degree-days of the location of the building}",
+        "raw_text": "FDWR = 0.40 for HDD ≤ 4000,",
+        "text": "FDWR = 0.40 for HDD ≤ 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "latex": "\\text{FDWR} = 0.40 \\text{ for } \\text{HDD} < 4000\n\n\\text{FDWR} = \\frac{2000 - 0.2 \\times \\text{HDD}}{3000} \\text{ for } 4000 < \\text{HDD} < 7000\n\n\\text{FDWR} = 0.20 \\text{ for } \\text{HDD} \\geq 7000\n\n\\text{HDD} = \\text{the heating degree-days of the location of the building}",
+        "raw_text": "FDWR = (2000 0.2 X HDD) /3000 for 4000 < HDD < 7000, and",
+        "text": "FDWR = 0.40 for HDD < 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "latex": "\\text{FDWR} = \\frac{2000 - 0.2 \\times \\text{HDD}}{3000} \\text{ for } 4000 < \\text{HDD} < 7000\n\n\\text{FDWR} = 0.20 \\text{ for } \\text{HDD} \\geq 7000\n\n\\text{HDD} = \\text{the heating degree-days of the location of the building}",
+        "raw_text": "FDWR = 0.20 for HDD ≥ 7000,",
+        "text": "FDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "latex": "\\text{HDD} = \\text{the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1).}",
+        "raw_text": "HDD = the heating degree-days of the location of the building determined according",
+        "text": "HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1)."
+      }
+    ],
+    "full_text": "1) The maximum allowable total vertical fenestration and door area to gross wall area ratio (FDWR), determined in accordance with Article 3.1.1.6., shall be as follows:\nFDWR = 0.40 for HDD ≤ 4000, FDWR = (2000 0.2 X HDD) /3000 for 4000 < HDD < 7000, and FDWR = 0.20 for HDD ≥ 7000,\nwhere HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1).\n(See Note A-3.2.1.4.(1).)\n2) The total skylight area shall be less than 2% of the gross roof area as determined in Article 3.1.1.6.\n3.2.2. Above-ground Components of the Building Envelope\n\n[Verified formulas for this article]\n- FDWR = 0.40 for HDD ≤ 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- FDWR = 0.40 for HDD < 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- FDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1).",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.2",
+      "Subsection 3.2.1"
+    ],
+    "page_end": 72,
+    "page_start": 72,
+    "part_number": "3",
+    "reference": "3.2.1.4",
+    "section_number": "3.2.1.4",
+    "sentences": [],
+    "title": "Allowable Fenestration and Door Area"
+  }
+}

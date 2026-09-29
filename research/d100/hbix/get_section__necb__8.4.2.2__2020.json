@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "8.4.2.2",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "8.4.2.2",
+    "server_known_issue": null,
+    "sha256": "a74ceec5a3417edba72dfee550d4efc10b6a1fb43334fc6c0dc78617aa16576c",
+    "state": "present",
+    "state_note": "",
+    "title": "Calculation Methods"
+  },
+  "payload": {
+    "article_number": "8.4.2.2",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "1) Except as provided in Sentence (5), the energy model calculations shall account for the annual energy consumption of\na) space-heating equipment,\nb) space-cooling equipment,\nc) fans,\nd) interior and exterior lighting devices,\ne) service water heating equipment,\nf) pumps,\ng) auxiliary HVAC equipment (see Note A-8.4.2.2.(1)(g)),\nh) receptacle loads and miscellaneous equipment as per Article 8.4.2.7.,\ni) appliances, and\nj) elevators and escalators.\n2) The energy model calculations shall be performed for a one-year period (8 760 hours) using time intervals no greater than one hour.\n3) Operating schedules and climatic data input in the energy model shall use a time interval no greater than one hour.\n4) If a computer program is used to carry out the compliance calculations, the calculation methods employed in the energy model shall conform to\na) ANSI/ASHRAE 140, \"Standard Method of Test for the Evaluation of Building Energy Analysis Computer Programs,\" or\nb) an equivalent test method.\n5) Redundant or back-up equipment is permitted to be excluded from the energy model, provided it is equipped with controls that operate the equipment only when the primary equipment is not operating.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "page_end": 205,
+    "page_start": 205,
+    "part_number": "8",
+    "reference": "8.4.2.2",
+    "section_number": "8.4.2.2",
+    "sentences": [],
+    "title": "Calculation Methods"
+  }
+}

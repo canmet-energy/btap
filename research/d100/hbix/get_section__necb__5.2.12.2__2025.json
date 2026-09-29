@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "5.2.12.2",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "5.2.12.2",
+    "server_known_issue": null,
+    "sha256": "c281c3563705d3b796c92f46771bda398cc87419b7c52ef5ab6c126bb33eee07",
+    "state": "present",
+    "state_note": "",
+    "title": "Heat Rejection Equipment"
+  },
+  "payload": {
+    "article_number": "5.2.12.2",
+    "division": "B",
+    "edition": "2025",
+    "full_text": "1) Except for equipment covered by Article 5.2.12.1. whose performance includes heat rejection energy, this Article applies to standalone heat rejection equipment. (See Note A-5.2.12.2.(1).)\n2) Standalone heat rejection equipment and their components shall comply with the performance requirements stated in Table 5.2.12.2.\n3) Constant speed fans shall operate with cycling control to maintain the leaving fluid temperature or condensing temperature/pressure of the heat rejection equipment at the set-point.\nTable 5.2.12.2. (Continued)\nentrance. For R-448A, the condensing temperature is defined as the arithmetic average of the dew point and the bubble point temperatures corresponding to the refrigerant pressure at the condenser entrance.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 5",
+      "Section 5.2",
+      "Subsection 5.2.12"
+    ],
+    "page_end": 168,
+    "page_start": 166,
+    "part_number": "5",
+    "reference": "5.2.12.2",
+    "section_number": "5.2.12.2",
+    "sentences": [],
+    "tables": [
+      {
+        "headers": [
+          "Type of Equipment",
+          "Cooling or Heating Capacity, kW",
+          "Performance Testing Standard",
+          "Rating Conditions",
+          "Minimum Performance"
+        ],
+        "note": "Use get_table('necb', '5.2.12.1.-P') for full structured rows.",
+        "row_count": 5,
+        "table_number": "5.2.12.1.-P",
+        "title": "Performance Requirements for Other Fuel-Burning Equipment and Appliances"
+      },
+      {
+        "headers": [
+          "Equipment Category",
+          "Type of Equipment",
+          "Heat Rejection Capacity",
+          "Performance Testing Standard",
+          "Rating Conditions",
+          "Performance Requirements(1), electrical kW / thermal kW(2)"
+        ],
+        "note": "Use get_table('necb', '5.2.12.2') for full structured rows.",
+        "row_count": 10,
+        "table_number": "5.2.12.2",
+        "title": "Heat Rejection Equipment Performance Requirements"
+      }
+    ],
+    "title": "Heat Rejection Equipment"
+  }
+}

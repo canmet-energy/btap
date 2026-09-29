@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "section_number": "4.2.2.3",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": "4.2.2.3",
+    "server_known_issue": null,
+    "sha256": "fba094952ddbe444bee45edd5ca6cf506d5689ef8aaf44659af1fc742cfa778e",
+    "state": "present",
+    "state_note": "",
+    "title": "Determination of Primary and Secondary Sidelighted Areas"
+  },
+  "payload": {
+    "article_number": "4.2.2.3",
+    "division": "B",
+    "edition": "2020",
+    "full_text": "(See Note A-4.2.2.3.)\n1) The total primary sidelighted area shall refer to the combined primary sidelighted areas without double-counting overlapping areas. (See Note A-4.2.2.3.(1) and (5).)\n2) Each primary sidelighted area, which is the floor area directly adjacent to vertical glazing below the ceiling, shall be calculated as the product of the width of the primary sidelighted area, as determined in Sentence (3), and its depth, as determined in Sentence (4).\n3) The width of the primary sidelighted area shall be calculated as the width of the window plus, on each side, the smaller of the following values:\na) ½ of the window head height, or\nb) the distance to any vertical obstruction that is 1.5 m or more in height.\n4) The depth of the primary sidelighted area shall be calculated as the horizontal distance perpendicular to the glazing that is the smaller of the following values:\na) one window head height, which is the distance from the floor to the top of the glazing, or\nb) the distance to any vertical obstruction that is 1.5 m or more in height.\n5) The total secondary sidelighted area shall refer to the combined secondary sidelighted areas without double-counting overlapping areas. (See Note A-4.2.2.3.(1) and (5).)\n6) Each secondary sidelighted area, which is the floor area directly adjacent to a primary sidelighted area, shall be calculated as the product of the width of the secondary sidelighted area, as determined in Sentence (7), and its depth, as determined in Sentence (8).\n7) Except as provided in Sentence (9), the width of a secondary sidelighted area shall be calculated as the width of the window plus, on each side, the smaller of the following values:\na) ½ of the window head height, or\nb) the distance to any vertical obstruction that is 1.5 m or more in height.\n8) Except as provided in Sentence (9), the depth of a secondary sidelighted area shall be calculated as the horizontal distance perpendicular to the glazing, which begins at the primary sidelighted area and ends at the smaller of the following values:\na) one window head height, which is the distance from the floor to the top of the glazing, or\nb) the distance to any vertical obstruction that is 1.5 m or more in height.\n9) Where the adjacent primary sidelighted area ends at a vertical obstruction that is 1.5 m or higher or extends beyond the limit of an adjacent daylighted area under skylight or primary sidelighted area, then no secondary sidelighted area exists beyond such obstruction or the limit of such areas.",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 4",
+      "Section 4.2",
+      "Subsection 4.2.2"
+    ],
+    "page_end": 103,
+    "page_start": 102,
+    "part_number": "4",
+    "reference": "4.2.2.3",
+    "section_number": "4.2.2.3",
+    "sentences": [],
+    "title": "Determination of Primary and Secondary Sidelighted Areas"
+  }
+}

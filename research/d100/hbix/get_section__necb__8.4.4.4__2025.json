@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "section_number": "8.4.4.4",
+      "tool": "get_section"
+    },
+    "retrieved_utc": "2026-09-29T18:18:26.640582+00:00",
+    "returned_number": null,
+    "server_known_issue": null,
+    "sha256": null,
+    "state": "mcp_empty",
+    "state_note": "get_section: empty result content",
+    "title": null
+  },
+  "payload": null
+}
