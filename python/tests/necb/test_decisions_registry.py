@@ -326,8 +326,12 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
             -> <p>text <a id="user-content-d-81"></a> more text</p>
 
             ### D-81
-            -> a level-3 heading, slugged from its text like any other, so it
-               owns `d-81` exactly as `## D-81` would
+            -> a level-3 heading, slugged from its text like any other. Beside
+               one of the 81 ANCHORED entries it owns `d-81` outright, because
+               the slugger does not see `<a id>` — a duplicate id. Beside one of
+               the 14 BARE `## D-81` headings, GitHub dedupes it to `d-81-1`, a
+               distinct target rather than a collision. The 045 migration gives
+               every entry an anchor, which makes the first case universal.
 
         So each is an ACCEPTED RENDERER BLIND SPOT of this interim gate, listed
         alongside the fence and HTML-block routes in the class docstring: either
@@ -430,7 +434,7 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
                 text = (self.TREE / name).read_text(encoding="utf-8")
             except (UnicodeDecodeError, OSError):
                 continue
-            inbound += len(re.findall(r'necb_decisions\.md#([^)\s"\']+)', text))
+            inbound += len(self.inbound_fragments(text))
         self.assertGreaterEqual(
             inbound, 1,
             "main-red's incident body links into the decision log; finding zero inbound "
@@ -488,6 +492,19 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
                          "is exactly the dead link the guard exists to prevent")
 
     @classmethod
+    def inbound_fragments(cls, text):
+        """Every inbound decision-log fragment in `text`.
+
+        The ONE extraction. Both `unresolved_inbound` and the vacuity floor call
+        it: the floor previously carried its own copy of this expression, so
+        changing the helper's regex left the floor passing on its copy while the
+        live tree scan inspected zero links — the whole file green with the
+        inbound gate silently disabled. That is the THIRD instance of a test
+        agreeing with a duplicate implementation in this file (Fable, PR #60).
+        """
+        return re.findall(r"necb_decisions\.md#([^)\s\x22\x27]+)", text)
+
+    @classmethod
     def unresolved_inbound(cls, text, declared):
         """Inbound decision-log fragments that name no declared id.
 
@@ -501,8 +518,8 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         because GitHub's client lowercases the fragment before looking up
         `user-content-<id>` (Sol, PR #60).
         """
-        found = re.findall(r"necb_decisions\.md#([^)\s\x22\x27]+)", text)
-        return sorted({f for f in found if f.upper() not in declared})
+        return sorted({f for f in cls.inbound_fragments(text)
+                       if f.upper() not in declared})
 
     def test_a_bad_inbound_link_is_rejected(self):
         # The document name and the `#` are joined at RUNTIME so this file does
