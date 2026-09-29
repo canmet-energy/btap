@@ -196,6 +196,8 @@ def validate(name: str, meta: dict, body: str) -> None:
 #: repository's own drift gate until they closed the editor (Fable, PR #64) —
 #: but exempting every dotfile then hid `.D-98.md` (Sol, PR #64).
 SOURCE_SUFFIXES = frozenset({".md", ".markdown"})
+#: A filename that looks like a decision whatever its extension.
+DECISION_SHAPED_NAME_RE = re.compile(r"^d[-_ ]?\d", re.IGNORECASE)
 
 
 def stray_files(source_dir: Path = SOURCE_DIR):
@@ -239,7 +241,13 @@ def stray_files(source_dir: Path = SOURCE_DIR):
         # `D-01.md~` ends with a tilde (Sol, PR #64).
         if path.name.endswith("~"):
             continue
-        if path.suffix.lower() not in SOURCE_SUFFIXES:
+        # Either a Markdown suffix OR a decision-shaped name. Suffix alone
+        # silently ignored `D-98` with no extension, `D-98.txt`, `D-98.md.bak`
+        # and — the one that will actually happen — `D-98.md ` with a trailing
+        # space, which survives copy-paste and is visually identical to a correct
+        # filename (Fable, PR #64).
+        if (path.suffix.lower() not in SOURCE_SUFFIXES
+                and not DECISION_SHAPED_NAME_RE.match(path.name)):
             continue
         found.append(relative)
     return sorted(found)
@@ -249,11 +257,26 @@ def read_sources(source_dir: Path = SOURCE_DIR):
     meta = json.loads((source_dir / META_FILE).read_text(encoding="utf-8"))
     # Front matter refuses an unexpected key; this refused nothing, so an edit
     # here could silently take no effect (Fable, PR #64).
-    extra = sorted(set(meta) - set(META_FIELDS))
+    # A leading underscore is the conventional "annotation, not data" marker —
+    # `decisions.json` itself uses `_comment` for exactly that two directories
+    # away — so refusing it repeated the mistake of refusing a `.DS_Store`
+    # (Fable, PR #64).
+    extra = sorted(key for key in set(meta) - set(META_FIELDS)
+                   if not key.startswith("_"))
     missing = sorted(set(META_FIELDS) - set(meta))
     if extra or missing:
-        raise ValueError("{}: unexpected {} / missing {}".format(
-            META_FILE, extra, missing))
+        raise ValueError("{}: unexpected {} / missing {} (keys beginning with "
+                         "'_' are annotations and are ignored)".format(
+                             META_FILE, extra, missing))
+    # Every front-matter field is type-checked; this one was not, so a plain
+    # string passed validation and shipped a `str` where every reader of
+    # decisions.json's `_comment` expects a list (Fable, PR #64).
+    comment = meta["registry_comment"]
+    if not isinstance(comment, list) or not all(
+            isinstance(line, str) for line in comment):
+        raise ValueError(
+            "{}: registry_comment must be a list of strings, got {}".format(
+                META_FILE, type(comment).__name__))
     preamble = (source_dir / PREAMBLE_FILE).read_text(encoding="utf-8")
     entries = {}
     sources = sorted(source_dir.glob("D-*.md"))

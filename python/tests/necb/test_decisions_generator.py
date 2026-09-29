@@ -272,8 +272,14 @@ class TestStrayFilesAreRefused(unittest.TestCase):
         return directory
 
     def test_a_missed_decision_filename_is_refused(self):
+        # The list is the THREAT MODEL, not the implementation's coverage. The
+        # first version mirrored what the predicate already caught, so four real
+        # shapes were missing from it -- including `D-98.md ` with a trailing
+        # space, which survives copy-paste and is visually identical to a correct
+        # filename (Fable, PR #64).
         for name in ("d-98.md", "D-98.MD", "D98.md", "D-98.markdown",
-                     "README.md", "_template.md"):
+                     "README.md", "_template.md",
+                     "D-98", "D-98.txt", "D-98.md.bak", "D-98.md ", "D_98.md"):
             with self.subTest(name=name):
                 directory = self.sources()
                 (directory / name).write_text(
@@ -311,7 +317,7 @@ class TestStrayFilesAreRefused(unittest.TestCase):
         """
         directory = self.sources()
         for name in (".DS_Store", ".D-01.md.swp", "D-01.md~", ".gitkeep",
-                     "notes.txt"):
+                     "notes.txt", "LICENSE", "README.txt"):
             (directory / name).write_text("x", encoding="utf-8")
         self.assertEqual([], G.stray_files(directory))
         G.read_sources(directory)          # must not raise
@@ -326,6 +332,28 @@ class TestStrayFilesAreRefused(unittest.TestCase):
         with self.assertRaises(ValueError) as caught:
             G.read_sources(directory)
         self.assertIn("doc_title", str(caught.exception))
+
+    def test_an_underscore_annotation_is_allowed(self):
+        """`_`-prefixed keys are the conventional annotation marker, and
+        `decisions.json` uses `_comment` for exactly that. Refusing one repeated
+        the mistake of refusing a `.DS_Store` (Fable, PR #64)."""
+        directory = self.sources()
+        (directory / G.META_FILE).write_text(
+            json.dumps({"registry_comment": ["x"], "_comment": "a note"}) + "\n",
+            encoding="utf-8")
+        G.read_sources(directory)          # must not raise
+
+    def test_registry_comment_must_be_a_list_of_strings(self):
+        """Every front-matter field is type-checked; this one was not, so a plain
+        string shipped a `str` where readers expect a list (Fable, PR #64)."""
+        for value in ("a plain string", 42, {"a": 1}, ["ok", 3]):
+            with self.subTest(value=value):
+                directory = self.sources()
+                (directory / G.META_FILE).write_text(
+                    json.dumps({"registry_comment": value}) + "\n", encoding="utf-8")
+                with self.assertRaises(ValueError) as caught:
+                    G.read_sources(directory)
+                self.assertIn("registry_comment", str(caught.exception))
 
 
 class TestCheckReportsStaleWithoutWriting(unittest.TestCase):

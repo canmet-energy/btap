@@ -282,7 +282,7 @@ and no rulesets, and `main-red` is a job inside `test.yml` gated on that
 workflow's own jobs — so a docs-only push to `main` with stale outputs turns
 `decisions` red while `test.yml` never runs and no incident issue is opened. The
 gate moves that failure from invisible to visible; someone still has to look.
-
+`[skip ci]` in a head commit message skips it as it would any workflow.
 
 `parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
 declared. Run them whenever the oracle pin changes.

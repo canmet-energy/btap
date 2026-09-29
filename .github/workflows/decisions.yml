@@ -4,7 +4,9 @@ name: decisions
 #
 # The property this enforces is PATH-UNFILTERED AND REACHABLE on pushes to
 # main/develop, pull requests, merge groups and manual dispatch. Not
-# "unskippable" and not merge-blocking: see the note on the check step.
+# "unskippable" and not merge-blocking: `[skip ci]` / `[ci skip]` in a head
+# commit message skips it like any other push- or PR-triggered workflow, and
+# nothing requires it. See the note on the check step.
 #
 # `test.yml` path-ignores `**.md` and `docs/**`, which was safe while the
 # canonical decision registry lived under `python/`: every canonical edit

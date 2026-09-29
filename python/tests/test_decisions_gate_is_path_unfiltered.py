@@ -1,25 +1,39 @@
-"""The decisions drift gate is PATH-UNFILTERED and must stay that way.
+"""The decisions drift gate is PATH-UNFILTERED, and must stay that way.
 
 `docs/decisions/D-NN.md` is the canonical source of the runtime registry. While
-that registry was itself the canonical file, under `python/`, `test.yml`'s
-`paths-ignore: ['**.md', 'docs/**']` was harmless: every canonical edit touched
-a non-ignored path and so ran CI. Once the canonical source moved into the
-ignored region, the gate became anti-correlated with need (Fable, PR #64):
+that registry was itself canonical, under `python/`, `test.yml`'s
+`paths-ignore: ['**.md', 'docs/**']` was harmless: every canonical edit touched a
+non-ignored path and so ran CI. Once the canonical source moved into the ignored
+region the gate became anti-correlated with need (Fable, PR #64):
 
     edit a source AND regenerate -> decisions.json changes -> test.yml runs
     edit a source and FORGET     -> only docs/** changed   -> NOTHING runs
 
-and `main` carries no branch protection or rulesets, so a skipped workflow does
-not block a merge. A forgotten regenerate could merge green with a stale runtime
-registry.
+## What is mechanised here, and what is not
 
-These tests assert the structural fix rather than a filter's semantics: a
-dedicated workflow with NO path filter at all. Modelling GitHub's `paths`
-override rules in order to trust a narrowed `paths-ignore` is the same mistake
-as modelling its Markdown renderer, which cost five review rounds on this PR.
+Mechanised: the workflow exists; its `on:` block declares no path filter; the
+check runs as its own exact command that can fail the step; the workflow
+declares no step- or job-level escape (`if:`, `continue-on-error:`); it needs no
+dependency install.
 
-stdlib only, no YAML dependency: the assertions are about the presence and
-absence of keys, which is answerable from the text.
+**Not mechanised, and deliberately not attempted:** that the workflow *gates*.
+"The literal appears in a `run:` value" cannot express that, and trying to make
+it express that is a losing game — a first attempt closed one spelling
+(commenting out) and left `|| true`, `; true`, `echo`, `if: false` and
+`continue-on-error: true`; closing those three by exact-line matching still left
+the last two, and the parser began rejecting valid workflows (`run: >`) into the
+bargain (Fable, PR #64). This module therefore refuses the escape keys by NAME —
+bounded, exact, no shell or YAML semantics modelled — and constrains the `run:`
+form of a file this repository owns rather than parsing the general language.
+
+The residual is stated rather than implied: GitHub-side disabling, `[skip ci]` in
+a head commit message, and a filter or escape introduced somewhere this module
+does not read are bounded by review, not by this test. `--check`'s own gating
+behaviour IS mechanised, in
+`tests/necb/test_decisions_generator.py::TestCheckReportsStaleWithoutWriting`.
+
+stdlib only: every assertion is about the presence or absence of exact text,
+which needs no YAML dependency.
 """
 
 from __future__ import annotations
@@ -32,70 +46,57 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
 GATE = WORKFLOWS / "decisions.yml"
 MAIN = WORKFLOWS / "test.yml"
-CHECK = "generate_decisions.py --check"
+
 #: The whole command, as its own executed line.
 EXACT_CHECK = "python3 python/scripts/generate_decisions.py --check"
-
+#: Keys that let a step or job run without being able to fail the workflow.
+ESCAPE_KEYS = ("if:", "continue-on-error:")
+PATH_FILTER_KEYS = ("paths:", "paths-ignore:")
 
 COMMENT_RE = re.compile(r"(?m)^\s*#.*$|(?<=\s)#.*$")
+#: The one `run:` form this workflow is allowed to use. Constraining the form of
+#: a file we own is what removes the need to parse the forms we do not use: a
+#: rewrite into `run: >` or flow style fails loudly and deliberately, instead of
+#: silently passing an assertion that no longer finds the command.
+PLAIN_RUN_RE = re.compile(r"(?m)^\s*(?:-\s+)?run:\s*(?:\||$)|^\s*(?:-\s+)?run:\s*(\S.*)$")
 
 
 def uncommented(text: str) -> str:
     """``text`` with YAML comments removed.
 
-    Every membership assertion below runs on this. Asserting against raw text
-    meant a gate could be NEUTERED rather than deleted and still pass: the
-    literal survived inside the `#` that disabled it, which is exactly what a
-    person does to a gate they find inconvenient (Fable, PR #64).
+    Every membership assertion runs on this. Against raw text a gate could be
+    NEUTERED rather than deleted and still pass: the literal survived inside the
+    `#` that disabled it, which is what a person does to a gate they find
+    inconvenient (Fable, PR #64).
     """
     return COMMENT_RE.sub("", text)
 
 
-def run_lines(text: str) -> str:
-    """Only what the workflow actually EXECUTES: `run:` values and the block
-    scalars under them, comments stripped."""
+def executed_lines(text: str):
+    """Every line the workflow executes, stripped, comments removed.
+
+    Covers only the two `run:` forms the gate is allowed to use — a plain
+    command, and a `|` literal block. That is not a general YAML reader and does
+    not pretend to be; `test_the_gate_uses_only_the_plain_run_form` is what makes
+    the restriction safe by refusing any other form outright.
+    """
     kept, in_block, indent = [], False, 0
     for line in uncommented(text).split("\n"):
         stripped = line.strip()
-        if re.match(r"^-?\s*run:\s*\|", stripped) or re.match(r"^run:\s*\|", stripped):
+        if re.match(r"^-?\s*run:\s*\|", stripped):
             in_block, indent = True, len(line) - len(line.lstrip())
             continue
         if in_block:
             if stripped and (len(line) - len(line.lstrip())) <= indent:
                 in_block = False
             else:
-                kept.append(stripped)
+                if stripped:
+                    kept.append(stripped)
                 continue
         match = re.match(r"^-?\s*run:\s*(\S.*)$", stripped)
         if match:
-            kept.append(match.group(1))
-    return "\n".join(kept)
-
-
-PATH_FILTER_KEYS = ("paths:", "paths-ignore:")
-
-
-def carries_path_filter(text: str):
-    """Which path-filter keys ``text``'s `on:` block declares.
-
-    ONE predicate, called by the live assertion and by the synthetic pair
-    below. Written inline, the live assertion could be neutered — pointing it at
-    an empty string instead of the block — with nothing failing (Fable, PR #64).
-    That is the same shape as the stray-file guard it sits beside.
-    """
-    block = top_level_on_block(text)
-    return [key for key in PATH_FILTER_KEYS if key in block]
-
-
-def exact_run_lines(text: str):
-    """Executed lines, stripped and whole, for exact comparison.
-
-    `run_lines` is used for substring questions such as "is there a pip
-    install". This one answers "is this EXACT command a line of its own", which
-    is what makes a swallowed exit status detectable without modelling the
-    shell.
-    """
-    return [line.strip() for line in run_lines(text).split("\n") if line.strip()]
+            kept.append(match.group(1).strip())
+    return kept
 
 
 def top_level_on_block(text: str) -> str:
@@ -104,117 +105,144 @@ def top_level_on_block(text: str) -> str:
     return match.group(1) if match else ""
 
 
+def carries_path_filter(text: str):
+    """Which path-filter keys ``text``'s `on:` block declares.
+
+    ONE predicate, exercised below against the live file and synthetic cases in
+    a single table, so redirecting the call cannot go unnoticed (Fable, PR #64).
+    """
+    block = top_level_on_block(text)
+    return [key for key in PATH_FILTER_KEYS if key in block]
+
+
+def carries_escape_key(text: str):
+    """Which step/job escape keys ``text`` declares anywhere.
+
+    Refused by NAME rather than by evaluating what they would do. `if: false` and
+    `continue-on-error: true` each leave the command executed and the workflow
+    unable to fail, and no amount of `run:` parsing sees them (Fable, PR #64).
+    A legitimate future need for either must change this contract deliberately.
+    """
+    body = uncommented(text)
+    return [key for key in ESCAPE_KEYS
+            if re.search(r"(?m)^\s*(?:-\s+)?" + re.escape(key), body)]
+
+
 class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
     def test_the_gate_workflow_exists(self):
         self.assertTrue(GATE.is_file(),
-                        f"{GATE.name} is the PATH-UNFILTERED drift gate; without "
+                        f"{GATE.name} is the path-unfiltered drift gate; without "
                         "it a docs-only push can merge a stale runtime registry "
                         "with no run at all")
 
-    def test_the_gate_has_no_path_filter(self):
-        """The whole point. A filter here would recreate the hole."""
+    def test_no_path_filter_live_or_synthetic(self):
+        """One predicate, one table, live case and falsifying cases together.
+
+        Asserting the live case alone left the call redirectable to an empty
+        string with nothing failing. Putting both in one table mechanises that
+        mutation instead of bounding it by review (Fable, PR #64).
+        """
+        live = GATE.read_text(encoding="utf-8")
+        # The precondition is what actually mechanises the redirect mutation.
+        # A shared table does NOT: the live row expects [], so swapping its
+        # input for "" — which also yields [] — passes. Reproduced against
+        # Fable's suggested table before adding this line.
+        self.assertIn(EXACT_CHECK, live,
+                      "precondition: the live case must really be the gate file")
+        cases = [
+            (live, [], "the committed gate"),
+            ("on:\n  push:\n    paths-ignore: ['docs/**']\njobs:\n",
+             ["paths-ignore:"], "a paths-ignore filter"),
+            ("on:\n  push:\n    paths: ['python/**']\njobs:\n",
+             ["paths:"], "a paths filter"),
+            ("on:\n  push:\n  pull_request:\njobs:\n", [], "an unfiltered block"),
+        ]
+        for text, expected, label in cases:
+            with self.subTest(case=label):
+                self.assertEqual(expected, carries_path_filter(text))
+
+    def test_the_gate_runs_on_every_relevant_event(self):
         block = top_level_on_block(GATE.read_text(encoding="utf-8"))
         self.assertTrue(block.strip(), "could not find the gate's on: block")
-        self.assertIn("push:", block, "vacuity floor: the block must be real")
-        # Called on the file inline, with no local to swap. Pointing this at
-        # anything else is then visibly wrong on the line itself. That bound is
-        # REVIEW, not mechanism: a test can always be deleted or redirected, and
-        # no test catches its own deletion. What is mechanised is the predicate,
-        # which `test_a_path_filter_would_be_detected` falsifies.
-        self.assertEqual(
-            [], carries_path_filter(GATE.read_text(encoding="utf-8")),
-            f"{GATE.name} must carry NO paths/paths-ignore — the gate exists "
-            "because a path filter made the drift check unreachable from the "
-            "change that causes drift")
-
-    def test_a_path_filter_would_be_detected(self):
-        """The falsifying half, through the SAME predicate.
-
-        Without this, the assertion above could be pointed at an empty string
-        and nothing would fail (Fable, PR #64).
-        """
-        for key in PATH_FILTER_KEYS:
-            with self.subTest(key=key):
-                filtered = ("on:\n  push:\n    " + key + " ['docs/**']\n"
-                            "  pull_request:\njobs:\n")
-                self.assertEqual([key], carries_path_filter(filtered),
-                                 "a real filter must be detected")
-        self.assertEqual([], carries_path_filter("on:\n  push:\njobs:\n"),
-                         "and an unfiltered block must report none")
-
-    def test_the_gate_runs_on_push_and_pull_request(self):
-        block = top_level_on_block(GATE.read_text(encoding="utf-8"))
-        for event in ("push:", "pull_request:"):
+        for event in ("push:", "pull_request:", "merge_group:"):
             self.assertIn(event, block, f"{GATE.name} must run on {event}")
 
-    def test_the_gate_runs_the_check_as_a_failing_command(self):
-        """The check must be able to FAIL the step, not merely be executed.
+    def test_the_check_runs_as_a_command_that_can_fail(self):
+        """Exact line, nothing appended.
 
-        Substring matching on the executed lines was not enough: `--check
-        || true`, `--check; true` and `echo ...--check` all satisfied it while
-        the step could no longer fail (Sol, PR #64). Rather than model shell
-        semantics, the contract is deliberately rigid — one exact normalized
-        line, nothing appended.
+        `--check || true`, `--check; true` and `echo ...--check` each execute the
+        command and cannot fail the step (Sol, PR #64), so substring matching on
+        executed lines is not enough.
         """
-        self.assertIn(EXACT_CHECK, exact_run_lines(GATE.read_text(encoding="utf-8")),
+        self.assertIn(EXACT_CHECK, executed_lines(GATE.read_text(encoding="utf-8")),
                       f"{GATE.name} must run exactly `{EXACT_CHECK}` as its own "
                       "line, with nothing appended that could swallow its exit "
                       "status")
 
     def test_a_neutralized_check_does_not_satisfy_the_contract(self):
-        """The falsifying half, through the same predicate.
-
-        Each of these executes the command and cannot fail the step.
-        """
-        for suffix, why in ((" || true", "or-true"), ("; true", "semicolon-true"),
-                            (" || exit 0", "or-exit-zero"), (" &", "backgrounded")):
+        for form, why in ((EXACT_CHECK + " || true", "or-true"),
+                          (EXACT_CHECK + "; true", "semicolon-true"),
+                          (EXACT_CHECK + " || exit 0", "or-exit-zero"),
+                          (EXACT_CHECK + " &", "backgrounded"),
+                          ("echo " + EXACT_CHECK, "echoed"),
+                          ("# " + EXACT_CHECK, "commented")):
             with self.subTest(form=why):
-                neutered = ("jobs:\n  d:\n    steps:\n      - run: "
-                            + EXACT_CHECK + suffix + "\n")
-                self.assertNotIn(EXACT_CHECK, exact_run_lines(neutered),
-                                 f"{why} must not satisfy the contract")
-        for prefix, why in (("echo ", "echoed"), ("# ", "commented")):
-            with self.subTest(form=why):
-                neutered = ("jobs:\n  d:\n    steps:\n      - run: "
-                            + prefix + EXACT_CHECK + "\n")
-                self.assertNotIn(EXACT_CHECK, exact_run_lines(neutered),
+                text = "jobs:\n  d:\n    steps:\n      - run: " + form + "\n"
+                self.assertNotIn(EXACT_CHECK, executed_lines(text),
                                  f"{why} must not satisfy the contract")
         real = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
-        self.assertIn(EXACT_CHECK, exact_run_lines(real),
+        self.assertIn(EXACT_CHECK, executed_lines(real),
                       "and the real form must satisfy it")
 
-    def test_the_on_block_extractor_can_fail(self):
-        """`top_level_on_block` returning everything, or nothing, must not pass.
+    def test_the_gate_declares_no_escape_key(self):
+        """`if:` and `continue-on-error:` leave a step executed but unfailing.
 
-        Both mutations survived: an always-empty extractor and one returning the
-        whole file. The latter slipped through because this module's own header
-        writes `paths-ignore` without a colon, so the membership test did not
-        fire on it (Fable, PR #64).
+        No `run:` parsing sees these, which is why they are refused by name
+        (Fable, PR #64).
         """
-        self.assertEqual("", top_level_on_block("name: x\njobs: {}\n"),
-                         "no on: block means no block")
-        block = top_level_on_block("on:\n  push:\n    paths-ignore: ['a']\njobs:\n")
-        self.assertIn("paths-ignore:", block,
-                      "a real filter must be visible to the assertions")
-        self.assertNotIn("jobs:", block,
-                         "the extractor must stop at the next top-level key")
+        self.assertEqual(
+            [], carries_escape_key(GATE.read_text(encoding="utf-8")),
+            f"{GATE.name} must declare no {' or '.join(ESCAPE_KEYS)} — either "
+            "lets the check run without being able to fail the workflow. A real "
+            "need for one must change this contract deliberately")
+
+    def test_an_escape_key_would_be_detected(self):
+        for key in ESCAPE_KEYS:
+            with self.subTest(key=key):
+                text = ("jobs:\n  d:\n    steps:\n      - name: x\n        "
+                        + key + " false\n        run: " + EXACT_CHECK + "\n")
+                self.assertEqual([key], carries_escape_key(text))
+        clean = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
+        self.assertEqual([], carries_escape_key(clean))
+
+    def test_the_gate_uses_only_the_plain_run_form(self):
+        """A style constraint on a file we own, in place of a YAML parser.
+
+        `executed_lines` reads a plain command and a `|` block and nothing else.
+        Rather than widen it to folded scalars and flow mappings — where a first
+        attempt produced FALSE failures on valid workflows (Fable, PR #64) — the
+        workflow is required to keep the form the reader covers. A deliberate
+        rewrite must update this contract; a silent one fails here.
+        """
+        body = uncommented(GATE.read_text(encoding="utf-8"))
+        for offending, why in ((r"(?m)^\s*(?:-\s+)?run:\s*>", "a folded scalar"),
+                               (r"(?m)^\s*-\s*\{", "a flow-style step mapping")):
+            self.assertIsNone(
+                re.search(offending, body),
+                f"{GATE.name} uses {why}, which this module's reader does not "
+                "cover; keep the plain `run:` form or update the contract")
+        self.assertTrue(executed_lines(body), "vacuity floor: something must run")
 
     def test_the_gate_needs_no_dependency_install(self):
-        """It runs on every push, so it must stay stdlib-only and cheap.
-
-        `-m unittest` rather than pytest, and no `pip install`, so the gate
-        cannot be slowed or broken by the dependency set.
-        """
-        executed = run_lines(GATE.read_text(encoding="utf-8"))
+        """It runs on every push, so it stays stdlib-only and cheap."""
+        executed = "\n".join(executed_lines(GATE.read_text(encoding="utf-8")))
         self.assertIn("-m unittest", executed)
-        # Against raw text this would fail wrongly on a comment mentioning pip.
         self.assertNotIn("pip install", executed)
 
     def test_the_main_workflow_still_ignores_docs_which_is_why_this_exists(self):
-        """Pins the premise. If `test.yml` ever stops ignoring `docs/**`, this
-        gate becomes redundant rather than load-bearing, and whoever changes
-        that should see this test and decide deliberately.
-        """
+        """Pins the premise. If `test.yml` stops ignoring `docs/**`, this gate
+        becomes redundant rather than load-bearing, and whoever changes that
+        should see this test and decide deliberately."""
         block = top_level_on_block(MAIN.read_text(encoding="utf-8"))
         self.assertIn("paths-ignore", block,
                       "test.yml no longer filters paths — re-read whether "

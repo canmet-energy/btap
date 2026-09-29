@@ -207,7 +207,8 @@ deleting the variable falls back to `ubuntu-latest`.
 `.github/workflows/decisions.yml` is a SEPARATE workflow, not a seventh job,
 and carries **no `paths` or `paths-ignore`** deliberately. The property it
 enforces is exactly: **path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch**. It is not
-"unskippable" — `[skip ci]` skips it — and it is not merge-blocking. It runs
+"unskippable" — `[skip ci]` or `[ci skip]` in a head commit message skips it,
+like any push- or PR-triggered workflow — and it is not merge-blocking. It runs
 `generate_decisions.py --check` plus the three decision test modules on every
 push and pull request, stdlib-only with no dependency install. It exists because
 `docs/decisions/D-NN.md` is the canonical source of the RUNTIME registry while
