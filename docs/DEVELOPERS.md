@@ -126,7 +126,7 @@ python3 python/scripts/necb_orphan_keys.py
 python3 python/scripts/necb_8_4_6_curve_probe.py
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py --check
 cd python && python3 scripts/wheel_smoke.py
 ```
 
@@ -152,11 +152,15 @@ assert btap.__file__.startswith(EXPORT)   # never skip this check
 
 ## Decisions and generated docs
 
-The canonical registry is `python/btap/codes/data/decisions.json`; the authored
-record is [necb_decisions.md](necb_decisions.md). The registry tests enforce
-unique ordered ids, document/registry agreement, generated TOC agreement, and
-runtime citations. Regenerate the TOC with
-`python3 python/scripts/generate_decisions_toc.py`; use `--check` in gates.
+One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
+(`id`, `title`, `kind`, `articles`, `summary`) followed by the authored Markdown
+body, whose first line is its own `## D-NN —` heading. Those files are
+canonical. Both [necb_decisions.md](necb_decisions.md) and
+`python/btap/codes/data/decisions.json` are generated from them, in numeric id
+order, by `python3 python/scripts/generate_decisions.py`; use `--check` in
+gates. To add or change a decision, edit the one source file and regenerate --
+never the two outputs. The registry tests enforce the source schema, both
+generated outputs, short-link resolution and runtime citations.
 
 The two generated coverage documents are
 [NECB_COVERAGE.md](NECB_COVERAGE.md) and

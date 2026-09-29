@@ -153,11 +153,13 @@ learns *why* we read the article that way.
 - TOP-LEVEL keyword, never inside `inputs=`; a string LITERAL; several ids as
   one space-separated string (`ruling='D-19 D-21'`), scanned as
   `\bD-\d{2}\b`.
-- **`data/decisions.json` is CANONICAL — edit it directly.** This inverted at
-  R6: the Ruby mirror and `sync_decisions_registry.py` are both gone. Edit
-  this file plus the `## D-XX` section in `docs/necb_decisions.md`, then run
-  `python3 python/scripts/generate_decisions_toc.py` for the TOC.
-- **Adding a `## D-XX` heading means adding a registry entry**, and a
+- **`data/decisions.json` is GENERATED — do not edit it.** The canonical
+  source is one file per decision, `docs/decisions/D-NN.md`: TOML front matter
+  (`id`, `title`, `kind`, `articles`, `summary`) plus the authored body. Edit
+  that file, then run `python3 python/scripts/generate_decisions.py`, which
+  rewrites this registry and `docs/necb_decisions.md` together in numeric id
+  order. `--check` is the drift gate.
+- **A source file is a registry entry**, and a
   `kind: runtime` entry must be cited by ≥1 `ruling=` tag.
   `tests/necb/test_decisions_registry.py` enforces both directions with an
   **AST walker** — a name, an f-string, or a `**{'ruling': …}` expansion on an

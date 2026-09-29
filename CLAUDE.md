@@ -74,7 +74,7 @@ python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
 ```
 
@@ -84,16 +84,23 @@ runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
 ## Decisions and coverage
 
-`python/btap/codes/data/decisions.json` is canonical. The authored document is
-`docs/necb_decisions.md`; its TOC is generated. Adding a `## D-XX` heading means
-adding the registry entry, and vice versa. A `kind: runtime` entry must be cited
-by product Python source.
+One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
+(`id`, `title`, `kind`, `articles`, `summary`) plus the authored Markdown body,
+whose first line is its own `## D-NN —` heading. That file is CANONICAL.
+Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
+GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
+are never hand-edited. Anchors and the index are inserted by the generator, so a
+body never declares its own `d-NN` anchor; the front-matter `title` is the
+compact index title and the body's heading is authored prose, which differ on
+purpose. A `kind: runtime` entry must be cited by product Python source.
 
 ```bash
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py        # regenerate both outputs
+python3 python/scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
-  tests.necb.test_decisions_registry
+  tests.necb.test_decisions_registry \
+  tests.necb.test_decisions_generator
 ```
 
 Coverage is declared at the depth the evidence supports. Match article ids by
