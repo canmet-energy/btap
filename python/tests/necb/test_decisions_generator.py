@@ -197,6 +197,20 @@ class TestSourceValidation(unittest.TestCase):
             "- D-01\n  ----": "Setext inside a list item",
             "> D-01": "a short id alone inside a blockquote",
             "1. D-01": "a short id alone inside an ordered list",
+            # A child list sits FOUR spaces under its parent, past the
+            # three-space cap a top-level block is measured by. The complete
+            # parent/child source, because an isolated marker did not
+            # reproduce it (Sol, PR #64).
+            "- parent\n    - D-01\n      ----": "Setext in a nested child list",
+            "- parent\n    - D-01": "a short id alone in a nested child list",
+            # Inline markup leaves the heading's VISIBLE text as the id, so
+            # each of these renders a heading slugged d-01 exactly as a plain
+            # one does, while a rule reading raw syntax sees something else.
+            "### **D-01**": "bold inside an ATX heading",
+            "**D-01**\n---": "bold inside a Setext heading",
+            "### [D-01](https://example.com)": "a link whose text is the id",
+            "### `D-01`": "code span inside a heading",
+            "### <em>D-01</em>": "an inline HTML element inside a heading",
         }
         for claim, why in claims.items():
             with self.subTest(claim=why):
@@ -227,7 +241,10 @@ class TestSourceValidation(unittest.TestCase):
                        "<a id=d-01-note>a longer unquoted id</a>",
                        '<a id="d-01-note">a longer quoted id</a>',
                        "- D-01 is discussed in this list item",
-                       "D-01 opens a sentence that continues."):
+                       "D-01 opens a sentence that continues.",
+                       "**D-01** is cited inline in a sentence.",
+                       "see [D-01](#d-01) for the detail",
+                       "| D-01 | a table cell |"):
             with self.subTest(benign=benign[:44]):
                 _meta, body = self.parse(body=GOOD_BODY + "\n" + benign + "\n")
                 self.assertIn(benign, body)
@@ -248,9 +265,51 @@ class TestSourceValidation(unittest.TestCase):
         for line, expected in (("   D-01", "D-01"), ("- D-01", "D-01"),
                                ("> D-01", "D-01"), ("  1. D-01", "D-01"),
                                ("- > D-01", "D-01"), ("D-01 and more", "D-01 and more"),
-                               ("    D-01", "D-01")):
+                               ("    D-01", "D-01"),
+                               # past the three-space cap: a nested child list
+                               ("    - D-01", "D-01"),
+                               ("      - D-01", "D-01"),
+                               ("  - - D-01", "D-01")):
             with self.subTest(line=line):
                 self.assertEqual(expected, G.unprefixed(line))
+
+    def test_visible_text_strips_inline_markup_but_keeps_the_words(self):
+        """What a line RENDERS as, approximately -- the judgement surface.
+
+        Over-eager by design: calling a line's visible text shorter than a
+        renderer would can only refuse a source, never admit a second owner.
+        """
+        for raw, expected in (("**D-01**", "D-01"), ("`D-01`", "D-01"),
+                              ("[D-01](https://example.com)", "D-01"),
+                              ("[D-01][ref]", "D-01"), ("<em>D-01</em>", "D-01"),
+                              ("_D-01_", "D-01"), ("~~D-01~~", "D-01"),
+                              ("D-01 and more words", "D-01 and more words"),
+                              ("see [D-01](#d-01) here", "see D-01 here")):
+            with self.subTest(raw=raw):
+                self.assertEqual(expected, G.visible_text(raw))
+
+    def test_trailing_newline_discipline(self):
+        self.rejects("exactly one newline", body=GOOD_BODY.rstrip("\n"))
+        self.rejects("exactly one newline", body=GOOD_BODY + "\n")
+
+    def test_a_malformed_front_matter_fence_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "D-01.md"
+            path.write_text('id = "D-01"\n\n' + GOOD_BODY, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                G.parse_source(path)
+            path.write_text(G.FENCE + '\nid = "D-01"\n\n' + GOOD_BODY, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                G.parse_source(path)
+
+    def test_the_closing_fence_needs_its_blank_line(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "D-01.md"
+            path.write_text(G.front_matter(GOOD_META) + "\n" + GOOD_BODY,
+                            encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                G.parse_source(path)
+            self.assertIn("blank line", str(caught.exception))
 
 
 class TestRendering(unittest.TestCase):

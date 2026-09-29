@@ -82,43 +82,78 @@ HTML_SHORT_ID_RE = re.compile(
     re.IGNORECASE | re.DOTALL)
 
 #: Markdown block prefixes a reader strips before recognising a heading:
-#: up to three spaces of indentation, blockquote markers, and list markers.
-#: Applied repeatedly so a nested list is normalised too.
-BLOCK_PREFIX_RE = re.compile(r"^[ \t]{0,3}(?:>[ \t]?|[-*+][ \t]+|\d{1,9}[.)][ \t]+)")
-#: After normalising, a line that is nothing but a short id is refused
-#: outright. This is deliberately broader than "a Setext heading": modelling
-#: which standalone ``D-NN`` lines GitHub turns into a heading is the
-#: column-zero game that leaked indented, list-nested and blockquoted forms
-#: through three separate attempts. A source has no need of a standalone
-#: ``D-NN`` paragraph, so none is allowed and the underline never has to be
-#: inspected (Sol, PR #64).
-STANDALONE_SHORT_ID_RE = re.compile(r"^(D-\d{2,})$")
-#: A bare ``D-NN`` ATX heading, optionally closed with trailing hashes.
-BARE_ATX_RE = re.compile(r"^#{1,6}[ \t]+(D-\d{2,})[ \t]*#*$")
+#: blockquote markers and list markers. Leading whitespace is removed
+#: separately and WITHOUT a column limit, because a child list sits four
+#: spaces under its parent and a three-space cap declined it (Sol, PR #64).
+BLOCK_PREFIX_RE = re.compile(r"^(?:>[ \t]?|[-*+][ \t]+|\d{1,9}[.)][ \t]+)")
+#: An ATX heading, capturing its text so the text can be judged rather than
+#: the syntax around it.
+ATX_HEADING_RE = re.compile(r"^#{1,6}[ \t]+(.*?)[ \t]*#*$")
+#: Inline constructs that leave the id as the visible text: a link keeps its
+#: label, an HTML tag contributes nothing, and emphasis/code/strikethrough
+#: markers vanish.
+INLINE_LINK_RE = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+INLINE_REFLINK_RE = re.compile(r"\[([^\]]*)\]\[[^\]]*\]")
+INLINE_TAG_RE = re.compile(r"<[^>]*>")
+INLINE_MARKUP_RE = re.compile(r"[*_`~\\\[\]]")
+#: The exact short id, and nothing else.
+SHORT_ID_ONLY_RE = re.compile(r"^(D-\d{2,})$")
 
 
 def unprefixed(line: str) -> str:
-    """``line`` with Markdown block prefixes and surrounding space removed."""
+    """``line`` with Markdown block prefixes and surrounding space removed.
+
+    Whitespace is stripped before EVERY prefix pass, so arbitrarily indented
+    and nested list items normalise. Capping the indent at three spaces, the
+    way CommonMark counts a top-level block, let ``    - D-01`` under a parent
+    list through (Sol, PR #64).
+    """
     while True:
-        match = BLOCK_PREFIX_RE.match(line)
+        stripped = line.lstrip()
+        match = BLOCK_PREFIX_RE.match(stripped)
         if match is None:
-            return line.strip()
-        line = line[match.end():]
+            return stripped.strip()
+        line = stripped[match.end():]
+
+
+def visible_text(text: str) -> str:
+    """An approximation of what ``text`` RENDERS as, with inline markup gone.
+
+    Deliberately an approximation, and deliberately over-eager. ``### **D-01**``
+    renders as a heading whose visible text is exactly ``D-01``, so it owns the
+    same slug as ``### D-01`` -- but a rule that reads raw syntax sees two
+    different lines and accepted the first (Sol, PR #64). The alternative was a
+    real CommonMark/GFM implementation, which these stdlib-only tests cannot
+    carry and which is the modelling that has repeatedly been narrower than
+    GitHub. So this strips rather than parses: it may call a line's visible
+    text shorter than a renderer would, which can only cause a REFUSAL of a
+    source that had other ways to say the same thing.
+    """
+    text = INLINE_LINK_RE.sub(r"\1", text)
+    text = INLINE_REFLINK_RE.sub(r"\1", text)
+    text = INLINE_TAG_RE.sub("", text)
+    text = INLINE_MARKUP_RE.sub("", text)
+    return " ".join(text.split())
 
 
 def short_id_owners(text):
     """Every construct in ``text`` that claims a ``d-NN`` element id.
 
-    Returns ``(line, kind, id)`` tuples. ONE implementation, shared: the
-    validator refuses any owner inside an authored body, and the generated
-    document's uniqueness test asserts exactly one owner per decision over the
-    same set of spellings. A split -- a rule in the parser and a narrower count
-    in the test -- is what let authored forms create a second owner with the
-    suite green, twice.
+    Returns ``(line, kind, id)`` tuples. ONE implementation, shared by the
+    validator and by the generated document's uniqueness assertion -- though
+    sharing is not what makes it right: an incomplete scanner shared by both
+    callers simply makes them agree, which is how three rounds of holes stayed
+    green (Sol, PR #64).
 
-    No line is exempt. The body's required titled heading carries text after
-    the id, so it matches neither heading arm; exempting line 1 wholesale
-    instead had accepted ``## D-01 -- Main <a name="d-01"></a>``.
+    The policy is a BAN, not a model. A line whose visible text is nothing but
+    a short id is refused, whether it is a heading, a list item, a blockquote
+    or a bare paragraph, and whatever inline markup wraps it. Nothing decides
+    which of those a renderer promotes to a heading, because none of them is
+    allowed. A source has no need of a standalone ``D-NN`` line, and none of
+    the committed bodies contains one.
+
+    No line is exempt: a body's required titled heading carries text after the
+    id, so its visible text is not the id alone.
     """
     owners = []
     for match in HTML_SHORT_ID_RE.finditer(text):
@@ -127,12 +162,12 @@ def short_id_owners(text):
                        (match.group("quoted") or match.group("bare")).lower()))
     for number, line in enumerate(text.split("\n"), start=1):
         normalised = unprefixed(line)
-        standalone = STANDALONE_SHORT_ID_RE.match(normalised)
-        if standalone:
-            owners.append((number, "standalone short id", standalone.group(1).lower()))
-        bare = BARE_ATX_RE.match(normalised)
-        if bare:
-            owners.append((number, "bare ATX heading", bare.group(1).lower()))
+        heading = ATX_HEADING_RE.match(normalised)
+        kind = "bare ATX heading" if heading else "standalone short id"
+        only = SHORT_ID_ONLY_RE.match(
+            visible_text(heading.group(1) if heading else normalised))
+        if only:
+            owners.append((number, kind, only.group(1).lower()))
     return sorted(owners)
 
 
