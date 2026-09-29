@@ -4,9 +4,12 @@
   "edition": "2025",
   "label": "NECB 2025",
   "articles": {
-    "reference_subsection": "8.4.5",
+    "assembly_inclination": "3.1.1.7.(4)",
+    "enclosed_unconditioned_credit": "3.1.1.7.(3)",
+    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)",
     "lighting_subsection": "8.4.5",
-    "heat_pump_aux_fuel": "8.4.5.13.(2)(c)"
+    "reference_subsection": "8.4.5",
+    "thermal_mass_note": "A-8.4.5.4.(1)"
   },
   "literal_remaps": {
     "8.4.4.": "8.4.5."

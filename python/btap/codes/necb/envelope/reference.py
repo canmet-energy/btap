@@ -39,7 +39,9 @@ from btap.modeling.envelope import geometry as Geometry
 AIR_LEAKAGE_I75 = 1.50   # L/(s.m2) @ 75 Pa, 8.4.3.3.(3)
 AIR_LEAKAGE_N = 0.60     # flow exponent, 8.4.2.9.(2)
 
-# Note A-8.4.4.4.(1) wood-frame example assembly (Figure/Table 1-1):
+# The thermal-mass Note's wood-frame example assembly (Figure/Table 1-1);
+# the Note is edition-owned (2020 A-8.4.4.4.(1), 2025 A-8.4.5.4.(1)) and is
+# cited through ruleset.article("thermal_mass_note"):
 # 40.8 kg/m2 areal mass, 45.5 kJ/(m2.K) heat capacity. The rebuilt lightweight
 # layer is calibrated to these at a fixed 0.15 m thickness (density and cp
 # derived; conductivity from the target resistance).
@@ -194,14 +196,20 @@ def _strip_shading(model, prefix, audit):
 def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
     """8.4.4.4.(1): reference envelope thermal characteristics = lightweight
     construction. Implemented by rebuilding each exterior/ground opaque
-    assembly as a single MASSLESS layer at the identical (already-prescriptive)
-    resistance — zero thermal mass with unchanged Ut. NOTE: the canonical layer
-    set of Note A-8.4.4.4.(1) is not machine-retrievable; the massless
-    interpretation is documented in the coverage manifest.
+    assembly as a single calibrated light-frame layer at the identical
+    (already-prescriptive) resistance — unchanged Ut, with the Note's own
+    wood-frame example mass and heat capacity. D-35 replaced an earlier
+    MASSLESS reading of "lightweight": the Note prescribes following the
+    proposed assembly's layer structure, and its examples are light FRAME
+    constructions, so zero mass was wrong. The single calibrated layer stands
+    in for the Note's layer-structure guidance, and that approximation is what
+    the coverage manifest records.
 
-    (PORT NOTE: this header is STALE in the Ruby too — D-35 replaced the
-    massless reading with the light-frame StandardOpaqueMaterial rebuild
-    below. Ported verbatim rather than silently corrected.)"""
+    (This docstring described the superseded MASSLESS reading long after D-35
+    replaced it. It was stale in the Ruby, ported verbatim rather than
+    silently corrected, and stayed stale through the port — corrected in the
+    applicability review that also found the same claim in both editions'
+    envelope_rules.json.)"""
     cache = {}
     rebuilt = 0
     for surface in sorted_by_name(model.getSurfaces()):
@@ -224,8 +232,8 @@ def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
         if conductance <= 0:
             continue
 
-        # The massless rebuild must CARRY OVER the outer layer's absorptances:
-        # a fresh MasslessOpaqueMaterial defaults to solar 0.7 / thermal 0.9 /
+        # The rebuild must CARRY OVER the outer layer's absorptances: a fresh
+        # material defaults to solar 0.7 / thermal 0.9 /
         # visible 0.7, which silently overwrote the proposed values on EVERY
         # opaque surface — violating the 8.4.4.3.(2)(a) keep-the-proposed
         # promise, and making the (2)(b) set-to-0.7 branch "work" only by
@@ -281,8 +289,9 @@ def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
                    inputs={"surfaces": rebuilt, "unique_assemblies": len(cache),
                            "areal_mass_kg_m2": LIGHTWEIGHT_MASS_KG_M2,
                            "heat_capacity_kj_m2k": LIGHTWEIGHT_HEAT_CAPACITY_J_M2K / 1000.0},
-                   article=f"{prefix}.4.(1) (Note A-8.4.4.4.(1): light-frame example "
-                           "mass/heat capacity)",
+                   article="{}.4.(1) (Note {}: light-frame example "
+                           "mass/heat capacity)".format(
+                               prefix, ruleset.article("thermal_mass_note")),
                    ruling="D-35")
 
 
