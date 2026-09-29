@@ -1022,6 +1022,55 @@ def _holder_zones(holder):
     }
 
 
+#: Casts whose TERTIARY connection is a load the component SERVES. Direction is
+#: a per-class fact that no generic accessor carries, and the SDK's own named
+#: accessor is the evidence: `heatRecoveryLoop` and `heatingPlantLoop` receive
+#: heat, so they are loads.
+#:
+#: `ChillerAbsorption` and `ChillerAbsorptionIndirect` are deliberately ABSENT.
+#: Their tertiary is `generatorLoop`, a heat SOURCE the chiller draws from.
+#: Treating every tertiary as a load made an absorption chiller's generator loop
+#: "served", which over-attributed its blocks to the condenser loop and produced
+#: a FALSE one-to-one match — a silent (3) transfer where the previous code
+#: declined loudly (Fable, PR #63). That is the D-93 false-correspondence class
+#: that caused two false-compliance results earlier in this work.
+#:
+#: An omission from this list costs a loud decline, never a silent transfer,
+#: which is why it defaults to "not a load". Its test pins each entry against
+#: the SDK exposing a load-named accessor, and pins that a listed class's
+#: tertiary really is attributed as served. It does NOT prove the named accessor
+#: and `tertiaryPlantLoop` are the same loop; an earlier comment here claimed
+#: that check existed when it did not (Fable, PR #63).
+TERTIARY_LOAD_CASTS = ('to_ChillerElectricEIR', 'to_ChillerElectricReformulatedEIR',
+                       'to_CentralHeatPumpSystem', 'to_HeatPumpPlantLoopEIRHeating',
+                       'to_HeatPumpPlantLoopEIRCooling')
+
+
+def _load_loops(comp):
+    """The loops this component SERVES: its supply-side loop, plus the tertiary
+    where that tertiary is verified to be a load rather than a source."""
+    loops = list(_w2w_loops(comp, ('plantLoop',)))
+    for caster in TERTIARY_LOAD_CASTS:
+        candidate = getattr(comp, caster, None)
+        if candidate is not None and candidate().is_initialized():
+            loops.extend(_w2w_loops(comp, ('tertiaryPlantLoop',)))
+            break
+    return tuple(loops)
+
+
+def _w2w_loops(comp, sides):
+    cast = getattr(comp, 'to_WaterToWaterComponent', None)
+    if cast is None or not cast().is_initialized():
+        return ()
+    w2w = cast().get()
+    loops = []
+    for accessor in sides:
+        handle = getattr(w2w, accessor, None)
+        if handle is not None and handle().is_initialized():
+            loops.append(handle().get())
+    return tuple(loops)
+
+
 def _served_zone_names(loop_, _seen=None):
     """The thermal zones this loop ultimately conditions, by NAME.
 
@@ -1061,15 +1110,20 @@ def _served_zone_names(loop_, _seen=None):
             continue
 
         # Equipment that passes the load on to another loop rather than a zone.
-        for caster in ('to_ChillerElectricEIR', 'to_HeatExchangerFluidToFluid',
-                       'to_HeatPumpPlantLoopEIRHeating', 'to_HeatPumpPlantLoopEIRCooling'):
-            candidate = getattr(comp, caster, None)
-            if candidate is None or not candidate().is_initialized():
-                continue
-
-            served = candidate().get().plantLoop()
-            if served.is_initialized():
-                zones |= _served_zone_names(served.get(), seen)
+        # Same dual-loop class as the network walk, so the two cannot disagree
+        # about what couples loops; here the DIRECTION matters.
+        #
+        # `_load_loops` returns the component's supply-side loop, plus a tertiary
+        # verified to be a load. That is right when this loop SUPPLIES the
+        # component — but it is wrong when this loop is itself the component's
+        # load tertiary, because the SDK puts a heat-recovery connection on the
+        # recovery loop's DEMAND side. Walking the recovery loop then finds the
+        # chiller and attributes the CHILLED-water blocks to the HEATING loop the
+        # chiller merely heats, which is a false one-to-one. Pre-existing and
+        # identical on 25d8795; logged as DF-20 rather than repaired here,
+        # because the repair moves attribution (Fable, PR #63).
+        for served in _load_loops(comp):
+            zones |= _served_zone_names(served, seen)
     return zones
 
 
@@ -1137,52 +1191,108 @@ def _corresponding_loop(reference_loop, proposed):
 
     Increment B is scoped to an UNAMBIGUOUS one-to-one match. Several proposed
     systems consolidated onto one reference loop is a real case (our own
-    builders reuse a single hot-water loop) but the Code does not define
-    correspondence across independently consolidated systems; that is a
-    separate adjudication, so it declines here rather than guessing.
+    builders reuse a single hot-water loop); D-97 adjudicated it and upheld the
+    decline, because sentence (2) is scoped to one hydronic system.
 
-    :return: (proposed loop, 'one-to-one') or (None, reason)
+    The third element flags THAT branch alone. D-97 adjudicated the N:1 shape
+    and nothing else, so citing it on any other decline would attribute a
+    ruling to shapes it never considered and make D-97 read as fired in runs
+    that contain no consolidation at all (Fable, PR #63).
+
+    :return: (proposed loop, 'one-to-one', False) or (None, reason, is_n_to_1)
     """
     role = _loop_role(reference_loop)
     if role in (None, 'service_water'):
-        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}'
+        return None, f'{role or "unclassified"} loop is outside {LITERAL_PUMP_ARTICLE}', False
 
     reference_zones = _served_zone_names(reference_loop)
     if not reference_zones:
-        return None, 'the reference loop serves no thermal block, so no correspondence can be drawn'
+        return (None,
+                'the reference loop serves no thermal block, so no correspondence can be drawn',
+                False)
 
     candidates = [loop_ for loop_ in sorted_by_name(proposed.getPlantLoops())
                   if _loop_role(loop_) == role]
     if not candidates:
-        return None, f'the proposed building has no {role} loop'
+        return None, f'the proposed building has no {role} loop', False
 
-    exact = [loop_ for loop_ in candidates if _served_zone_names(loop_) == reference_zones]
-    if len(exact) == 1:
-        return exact[0], 'one-to-one'
+    # OVERLAPS FIRST. An exact candidate is a one-to-one correspondence only if
+    # it is the ONLY loop touching this reference loop: with reference {A,B},
+    # proposed {A,B} and proposed {B}, accepting the exact match transferred
+    # from its pump alone and dropped the second loop's pump SILENTLY. That is
+    # neither unambiguous (two proposed loops serve block B) nor D-97's disjoint
+    # partition (their sets overlap), so it declines under D-93 (Sol, PR #63).
+    served = {loop_.nameString(): _served_zone_names(loop_) for loop_ in candidates}
+    overlapping = [loop_ for loop_ in candidates if served[loop_.nameString()] & reference_zones]
+    exact = [loop_ for loop_ in candidates if served[loop_.nameString()] == reference_zones]
+    names = ', '.join(sorted(loop_.nameString() for loop_ in overlapping))
+
     if len(exact) > 1:
         return None, (f'{len(exact)} proposed {role} loops serve exactly the same thermal blocks — '
-                      'the correspondence is ambiguous')
+                      'the correspondence is ambiguous'), False
+    if len(exact) == 1:
+        if len(overlapping) == 1:
+            return exact[0], 'one-to-one', False
+        return None, (f'one proposed {role} loop serves exactly this reference loop\'s thermal '
+                      f'blocks, but {len(overlapping)} overlap it in all ({names}) — the '
+                      'correspondence is ambiguous, and taking the exact one would drop the '
+                      "other loops' pumps without saying so"), False
 
-    overlapping = [loop_ for loop_ in candidates
-                   if _served_zone_names(loop_) & reference_zones]
     if len(overlapping) > 1:
-        return None, (f'{len(overlapping)} proposed {role} loops are consolidated onto this one — '
-                      'cross-system correspondence is not defined by the Code and is adjudicated '
-                      'separately')
+        covered = set().union(*(served[loop_.nameString()] for loop_ in overlapping))
+        # D-97's predicate is an EXACT DISJOINT PARTITION of the reference
+        # loop's blocks, and nothing more. "More than one overlapping loop" is
+        # not it: that also catches loops serving the same block, partial
+        # overlaps, and loops reaching blocks the reference does not have, which
+        # leave reference blocks uncovered or add proposed ones.
+        #
+        # There is deliberately NO connectivity test here. An earlier round
+        # classified a "hydraulically connected network" through heat
+        # exchangers, chillers and plant heat pumps and required the loops to
+        # lie in separate networks. Sol withdrew that: a shared source,
+        # condenser, oil-cooler, auxiliary or heat-rejection loop, a heat
+        # exchanger, or a refrigerant circuit couples EQUIPMENT and transfers
+        # ENERGY — it does not let the same hydronic fluid circulate through
+        # both loops. 5.2.6.3.(1) fixes the unit at the LOOP (its table note
+        # makes the thermal denominator the peak demand of the loop), and
+        # 8.4.x.9.(6)(a) separately distinguishes a plant from the systems
+        # served by it. So distinct same-role proposed PlantLoops are distinct
+        # hydronic systems even when their equipment shares another loop.
+        disjoint = sum(len(served[loop_.nameString()]) for loop_ in overlapping) == len(covered)
+        if disjoint and covered == reference_zones:
+            return None, (f'{len(overlapping)} proposed {role} loops partition this one reference '
+                          f"loop's thermal blocks between them ({names}) — they are distinct "
+                          'hydronic systems consolidated onto one reference loop. Sentence (2) '
+                          'combines pumps only WITHIN one hydronic system, so the Code prescribes '
+                          'no cross-system transfer value here'), True
+        # The reason names whichever condition actually failed. It used to
+        # assert a disjunction — "overlap each other or reach blocks it does not
+        # serve" — and on disjoint loops that merely UNDER-cover the reference,
+        # neither clause holds (Fable, PR #63).
+        inside = covered & reference_zones
+        faults = []
+        if not disjoint:
+            faults.append('they overlap each other')
+        if inside != reference_zones:
+            faults.append(f'together they cover only {len(inside)} of its '
+                          f'{len(reference_zones)} thermal blocks')
+        if covered - reference_zones:
+            faults.append(f'{len(covered - reference_zones)} of the blocks they serve are not on '
+                          'this reference loop')
+        return None, (f'{len(overlapping)} proposed {role} loops overlap this one reference loop '
+                      f'({names}) without partitioning its thermal blocks between them: '
+                      f"{'; '.join(faults)}. That is multiple partial overlaps, not a "
+                      'correspondence'), False
     if len(overlapping) == 1:
-        # Either direction reaches here — the proposed loop may serve blocks
-        # the reference one does not, or only some of the ones it does — so the
-        # reason names the overlap rather than asserting a direction it has not
-        # established.
-        proposed_zones = _served_zone_names(overlapping[0])
+        proposed_zones = served[overlapping[0].nameString()]
         shared = len(proposed_zones & reference_zones)
         # Both counts, because the shared count alone is ambiguous: a proposed
         # loop serving a strict SUPERSET reads as 'shares 1 of 1', which looks
         # like a full match being called partial (Fable, PR #53).
         return None, (f'the one overlapping proposed {role} loop shares {shared} of this reference '
                       f"loop's {len(reference_zones)} thermal blocks and serves "
-                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence')
-    return None, f'no proposed {role} loop serves these thermal blocks'
+                      f'{len(proposed_zones)} in all — a partial overlap is not a correspondence'), False
+    return None, f'no proposed {role} loop serves these thermal blocks', False
 
 
 def _applicable_pumps(loop_):
@@ -1276,16 +1386,46 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
     pump keeps the builder's default, which the Part 5 cap still binds. D-11
     inferred a whole-building intensity instead, which is a number no sentence
     of the Article asks for.
+
+    The consolidation case — several proposed loops partitioning one reference
+    loop's blocks between them — declines under D-97 rather than aggregating:
+    sentence (2) is scoped to one hydronic system, and two distinct `PlantLoop`s
+    are two hydronic systems however their equipment is coupled. That declined
+    default is an assumption of indeterminate direction, not a safe floor. D-97
+    is cited on that branch ALONE; every other decline remains D-93's, which is
+    the ruling that actually examined them.
+
+    An earlier draft of this docstring said "zone disjointness is not system
+    independence". That was the withdrawn partition premise, and under the final
+    ruling a disjoint partition across distinct loops is precisely what fires
+    D-97 (Fable, PR #63).
     """
     reference_pumps = _applicable_pumps(reference_loop)
     if not reference_pumps:
         return
 
-    match, reason = _corresponding_loop(reference_loop, proposed)
+    match, reason, n_to_1 = _corresponding_loop(reference_loop, proposed)
     if match is None:
         if _loop_role(reference_loop) == 'service_water':
             return  # D-27 already said so, at the top of the pass
 
+        # D-97 adjudicated the N:1 shape ONLY, so only that branch cites it and
+        # carries its wording. On N:1 the retained default is not a
+        # conservative bound: 5.2.6.3 is a ceiling, so the default may sit
+        # above or below whatever a transfer would have produced and can bias
+        # the reference in either direction. Calling it conservative would be
+        # false comfort. Every other decline keeps D-93's existing text —
+        # the same is arguably true of them, but that is a D-93 question and
+        # not a side effect of this ruling (Fable, PR #63).
+        if n_to_1:
+            return audit.warn('efficiency',
+                              f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT applied — '
+                              f'{reason}. The pump keeps the modelling default: a declared '
+                              'assumption, not a Code value and not a conservative bound — it may '
+                              'bias the reference in either direction. 5.2.6.3 supplies only an '
+                              'upper cap',
+                              target=reference_loop.nameString(), article=f'{prefix}.14.(1)-(3)',
+                              ruling='D-93 D-97')
         return audit.warn('efficiency', f'{reference_loop.nameString()}: {prefix}.14.(1)-(3) NOT '
                                         f'applied — {reason}. The pump keeps the modelling default, '
                                         f'which is not a Code value; 5.2.6.3 still caps it',

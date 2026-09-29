@@ -1342,6 +1342,122 @@ any result.
   measuring it, never reasoning about it. Absence of baseline movement was
   treated as evidence three times and was not evidence any of them.
 
+- **DF-18 — an exact match that is not the sole overlap dropped a pump
+  silently.** Opened 2026-09-28 (Fable, PR #63); **premise corrected and the
+  defect closed 2026-09-28** (Sol, PR #63).
+
+  **What this entry first claimed is withdrawn.** It said correspondence
+  wrongly treats a `PlantLoop` as a hydronic system, and that an HX-coupled
+  multi-loop set is one system where sentence (2) ought to govern all its
+  pumps. Sol ruled the opposite way on the boundary: a `PlantLoop` IS the
+  modelled hydronic fluid circuit, and a heat exchanger transfers heat BETWEEN
+  circuits rather than making them one. 5.2.6.3.(1)'s table note fixes the
+  thermal denominator at the peak demand of **the loop**, and 8.4.x.9.(6)(a)
+  distinguishes a plant from the systems served by it. So HX-separated loops are
+  NOT authority to aggregate pumps across them. See
+  [D-97](necb_decisions.md#d-97).
+
+  **The measured defect was real, and had a different cause.** On the Note's own
+  example authored as a primary plus wing secondaries, with the reference serving
+  all the wings, the reference matched the PRIMARY loop one-to-one — the
+  primary's served set equals the reference's, because `_served_zone_names`
+  recurses through the heat exchanger — and transferred under (3) from the
+  primary pump alone: `proposed_pumps: 1, combined_electrical_w: 200.0` of the
+  system's 1000 W, at 139.53 W/(L/s). Both wing pumps were dropped with no
+  warning.
+
+  That is an exact match which was not the only overlapping loop, and it is
+  fixed by the sole-overlap guard: one-to-one is now accepted only when the
+  single exact candidate is also the only loop overlapping the reference loop.
+  The same shape now declines loudly under D-93, naming every candidate.
+  `test_an_exact_match_that_is_not_the_only_overlap_declines` pins it, and
+  restoring the exact-first order fails that test and nothing else.
+
+  **Still open, and narrower than this entry first stated:** whether
+  `_served_zone_names` should follow a heat exchanger at all when attributing
+  served blocks. Following it is what made the primary's set equal the
+  reference's. The current behaviour is safe — the guard turns that shape into a
+  loud decline rather than a silent transfer — so this is a question about
+  attribution accuracy, not a live false-compliance risk.
+
+- **DF-19 — a headered pump bank is invisible to the pump enumerator, and a
+  bank plus one ordinary pump transfers a value 16x low with no warning.**
+  Opened 2026-09-29 (Fable, PR #63). **Pre-existing D-93 behaviour, unchanged
+  since PR #53 — not introduced by D-97.** Needs Sol before it can be fixed.
+
+  `_applicable_pumps` casts only `to_PumpVariableSpeed` and
+  `to_PumpConstantSpeed`. `HeaderedPumpsVariableSpeed.to_PumpVariableSpeed()` is
+  not initialized, so a bank is not seen at all. Measured on a valid SDK model —
+  proposed hot-water loop serving one block with a 3-pump headered bank
+  (0.010 m3/s, 3000 W) on the supply inlet plus a 200 W secondary on the demand
+  inlet, reference loop serving the same block:
+
+  ```text
+  correspondence   one-to-one
+  decision         8.4.4.14.(3): 20.0 W/(L/s), proposed_pumps: 1,
+                                combined_electrical_w: 200.0
+  expected                       320 W/(L/s)  (3200 W over 10 L/s)
+  warning          none
+  ```
+
+  A bank ALONE gives the loud "has no pump" warning, so the dangerous case is a
+  bank beside an ordinary pump: the enumerator finds one pump, is confident, and
+  is 16x low. 5.2.6.3's cap uses the same enumerator, so the Part 5 ceiling is
+  computed on the same understatement.
+
+  **Not fixable without an adjudication.** Sentence (2) applies "where the
+  proposed building uses more than one pump in a given hydronic system", and a
+  headered bank of N is a single OpenStudio object standing for N physical
+  pumps. Whether that is one pump or N for (2)'s trigger — and whether its
+  `totalRatedFlowRate`/`ratedPowerConsumption` are the per-pump or bank values
+  for D-93's combined shaft power and the (3) denominator — is Sol's call.
+
+  **Exposure today is nil in this repository**: no builder constructs a headered
+  bank (`catalog_report.py` recognises the class; nothing creates one), and no
+  frozen baseline contains one. The risk is a foreign model, which is exactly
+  the population the costing path accepts.
+
+- **DF-20 — a loop is attributed its SUPPLIER's thermal blocks when the
+  supplier reaches it through a load tertiary, producing a silent false
+  one-to-one.** Opened 2026-09-29 (Fable, PR #63). **Pre-existing: identical on
+  `25d8795`.** Not repaired in PR #63 because the repair moves attribution.
+
+  `_served_zone_names` treats every `WaterToWaterComponent` on a loop's DEMAND
+  side as equipment passing load onward, and takes its `plantLoop()`. But the SDK
+  places a heat-recovery connection on the recovery loop's **demand** side —
+  `ChillerElectricEIR.addToTertiaryNode` succeeds on `demandInletNode` and is
+  refused on the supply inlet or outlet. Walking the recovery loop therefore finds
+  the chiller and attributes the **chilled-water** loop's blocks to the
+  **heating** loop the chiller merely heats.
+
+  Measured, and the same on head and on `25d8795`:
+
+  ```text
+  served(Recovery HW)          ['Block A', 'Block R']   physically {Block R}
+  reference {A,R} vs Recovery HW   'one-to-one'   -> (3) transfers, silently
+  reference {R}   vs Recovery HW   partial overlap decline  <- the physically right pair
+  ```
+
+  So a proposed heating loop that physically serves one block matches one-to-one
+  with a reference loop serving two, and (3) transfers from its pump with no
+  warning. That is the D-93 false-correspondence class — the same one the
+  absorption-chiller fix in PR #63 closed from the other direction.
+
+  `HeatPumpPlantLoopEIRHeating`/`Cooling` accept a tertiary on `demandInlet` too,
+  so they share the shape.
+
+  **Exposure in this repository is nil**: no builder wires any tertiary
+  (`grep addToTertiaryNode btap/modeling` finds nothing; `hp_plant_fancoils.py`
+  uses the EIR heat pumps without one), and no frozen baseline contains one. The
+  risk is a foreign model — the same population as DF-19.
+
+  **Remedy to evaluate:** a component whose `tertiaryPlantLoop()` IS this loop,
+  and whose class is in `TERTIARY_LOAD_CASTS`, is a SUPPLIER of this loop rather
+  than a load of it, so its `plantLoop()` blocks must not be attributed here. One
+  condition, but it changes served-zone attribution and therefore which sentence
+  fires on existing models — so it belongs with DF-19's repair on a branch based
+  on the landed D-97 code, with a measured blast radius.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push
