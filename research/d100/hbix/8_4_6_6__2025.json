@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.6.6",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "5e4b6c1a1f091482c57b80c97ce48d9fb2343280b3a74429a7aa5bc442381007",
+    "known_issue": null,
+    "title": "Cooling Tower",
+    "article_number": "8.4.6.6"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.6.6",
+    "article_number": "8.4.6.6",
+    "reference": "8.4.6.6",
+    "title": "Cooling Tower",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.6"
+    ],
+    "part_number": "8",
+    "full_text": "1) The part-load performance characteristics of the reference cooling tower shall be adjusted for cooling capacity by applying Sentence (2).\n2) The available total cooling capacity, Qavailable in Btu/h, of the reference cooling tower as a function of present outdoor-air wet-bulb, condenser water supply and condenser water return temperatures shall be calculated using the following equation:\nQavailable = Qrated FWB 10\nwhere\nQrated = rated cooling capacity at CTI test conditions, in Btu/h, FWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in accordance with Sentence (3), and\ntR = tower range, in °F, determined in accordance with Sentence (5).\n3) The ratio of available capacity to rated capacity, FWB, shall be calculated using the following equation:\nFWB = a + (b X FRA) + (c X FRA²) + (d X tcwb) + (e X tcwb²) + (f X FRA X tcwb)\nwhere\nFRA = intermediate capacity curve based on range and approach determined in accordance with Sentence (4),\ntcwb = outdoor-air wet-bulb temperature, in °F,\na = 0.60531402,\nb = -0.03554536,\nC = 0.00804083,\nd = -0.02860259,\ne = 0.00024972, and\nf = 0.00490857.\n4) The intermediate capacity curve based on range and approach, FRA, shall be calculated using the following equation:\n(f x tᵣ) + + (f 4 X [a + (b X + tᵣ²) tA] FRA = 2 x e\nwhere\ntᵣ = tower range, in °F, determined in accordance with Sentence (5), tA = tower approach, in °F, determined in accordance with Sentence (6),\na = -2.22888899, b = 0.16679543, C = -0.01410247, d = 0.03222333, e = 0.18560214, and f = 0.24251871.\n5) The tower range, tR, shall be calculated using the following equation:\ntR = tcwr tcws\nwhere\ntcwr = condenser water return temperature, in °F, and tᶜₘₛ = condenser water supply temperature, in °F.\n6) The tower approach, t₄, shall be calculated using the following equation:\ntA = tcws towb\nwhere\ntcwₛ = condenser water supply temperature, in °F, and\ntₒwb = outdoor-air wet-bulb temperature, in °F.\nElectric Air-Source Heat Pump\n\n[Verified formulas for this article]\n- CAP_FT_ec = cooling capacity adjustment determined in accordance with Sentence (3)\n\nQ_rated = rated capacity at AHRI test conditions, in Btu/h\n\nt_cws = condenser water supply temperature, in °F\n- begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b · x + c · x^2 + d · y + e · y^2 + f · x · y\n- begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nQ_rated = rated cooling capacity at CTI test conditions, in Btu/h\n- begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n- EIR_FT = a + b · tR + c · tR^2 + d · oaT + e · oaT^2 + f · tR · oaT\n\n\nAir-cooled Scroll:\n\na = 0.99006553\n\nb = -0.00584144\n\nc = 0.00016454\n\nd = -0.00661136\n\ne = 0.00016808\n\nf = -0.00022501\n- begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b × FRA + c × FRA^2 + d × t_cwb + e × t_cwb^2 + f × FRA × t_cwb\n- begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b · x + c · x^2 + d · y + e · y^2 + f · x · y\n- t_cwb = outdoor-air wet-bulb temperature, in °F\n\nbegin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066113 & 0.00016808 & -0.00022501 \nhline\nend{array}\n- begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT coefficients for air-cooled scroll chiller\n- begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n- t_cwr = condenser water return temperature, in °F, and\n\nt_cws = condenser water supply temperature, in °F\n- t_cwr = condenser water return temperature, in °F\n\nt_cws = condenser water supply temperature, in °F\n\nt_Lambda = tower approach\n- t_owb = outdoor-air wet-bulb temperature, in °F\n- where\n\nt_cws = condenser water supply temperature, in °F,\n\na_2 = 0.86173749,\n\nb = 0.00708917 and",
+    "page_start": 235,
+    "page_end": 236,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "tcwₛ = condenser water supply temperature, in °F, and",
+        "latex": "\\text{CAP\\_FT}_{ec} = \\text{cooling capacity adjustment determined in accordance with Sentence (3)}\n\n\\text{Q}_{\\text{rated}} = \\text{rated capacity at AHRI test conditions, in Btu/h}\n\nt_{\\text{cws}} = \\text{condenser water supply temperature, in °F}",
+        "text": "CAP_FT_ec = cooling capacity adjustment determined in accordance with Sentence (3)\n\nQ_rated = rated capacity at AHRI test conditions, in Btu/h\n\nt_cws = condenser water supply temperature, in °F"
+      },
+      {
+        "raw_text": "Qavailable = Qrated FWB",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}\n\n\n\\text{EIR\\_FT} = a + b \\cdot x + c \\cdot x^2 + d \\cdot y + e \\cdot y^2 + f \\cdot x \\cdot y",
+        "text": "begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b · x + c · x^2 + d · y + e · y^2 + f · x · y"
+      },
+      {
+        "raw_text": "Qrated = rated cooling capacity at CTI test conditions, in Btu/h,",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}\n\n\nQ_{\\text{rated}} = \\text{rated cooling capacity at CTI test conditions, in Btu/h}",
+        "text": "begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nQ_rated = rated cooling capacity at CTI test conditions, in Btu/h"
+      },
+      {
+        "raw_text": "FWB = ratio of available capacity to rated capacity, in gpm/gpm, determined in",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}",
+        "text": "begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}"
+      },
+      {
+        "raw_text": "tR = tower range, in °F, determined in accordance with Sentence (5).",
+        "latex": "\\text{EIR\\_FT} = a + b \\cdot tR + c \\cdot tR^2 + d \\cdot oaT + e \\cdot oaT^2 + f \\cdot tR \\cdot oaT\n\n\n\\text{Air-cooled Scroll:}\n\na = 0.99006553\n\nb = -0.00584144\n\nc = 0.00016454\n\nd = -0.00661136\n\ne = 0.00016808\n\nf = -0.00022501",
+        "text": "EIR_FT = a + b · tR + c · tR^2 + d · oaT + e · oaT^2 + f · tR · oaT\n\n\nAir-cooled Scroll:\n\na = 0.99006553\n\nb = -0.00584144\n\nc = 0.00016454\n\nd = -0.00661136\n\ne = 0.00016808\n\nf = -0.00022501"
+      },
+      {
+        "raw_text": "FWB = a + (b X FRA) + (c X FRA²) + (d X tcwb) + (e X tcwb²) + (f X FRA X tcwb)",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}\n\n\n\\text{EIR\\_FT} = a + b \\times \\text{FRA} + c \\times \\text{FRA}^2 + d \\times t_{cwb} + e \\times t_{cwb}^2 + f \\times \\text{FRA} \\times t_{cwb}",
+        "text": "begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b × FRA + c × FRA^2 + d × t_cwb + e × t_cwb^2 + f × FRA × t_cwb"
+      },
+      {
+        "raw_text": "FRA = intermediate capacity curve based on range and approach determined in",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}\n\n\nEIR_{FT} = a + b \\cdot x + c \\cdot x^2 + d \\cdot y + e \\cdot y^2 + f \\cdot x \\cdot y",
+        "text": "begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT = a + b · x + c · x^2 + d · y + e · y^2 + f · x · y"
+      },
+      {
+        "raw_text": "tcwb = outdoor-air wet-bulb temperature, in °F,",
+        "latex": "\\text{t}_{\\text{cwb}} = \\text{outdoor-air wet-bulb temperature, in } °\\text{F}\n\n\\begin{array}{|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066113 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}",
+        "text": "t_cwb = outdoor-air wet-bulb temperature, in °F\n\nbegin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.0058414 & 0.00016454 & -0.0066113 & 0.00016808 & -0.00022501 \nhline\nend{array}"
+      },
+      {
+        "raw_text": "tᵣ = tower range, in °F, determined in accordance with Sentence (5),",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}\n\n\n\\text{EIR\\_FT coefficients for air-cooled scroll chiller}",
+        "text": "begin{array}{|c|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}\n\n\nEIR_FT coefficients for air-cooled scroll chiller"
+      },
+      {
+        "raw_text": "tA = tower approach, in °F, determined in accordance with Sentence (6),",
+        "latex": "\\begin{array}{|c|c|c|c|c|c|c|}\n\\hline\n\\text{Type of Electric Chiller} & a & b & c & d & e & f \\\\\n\\hline\n\\text{Air-cooled Scroll} & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \\\\\n\\hline\n\\end{array}",
+        "text": "begin{array}{|c|c|c|c|c|c|c|}\nhline\nType of Electric Chiller & a & b & c & d & e & f \nhline\nAir-cooled Scroll & 0.99006553 & -0.00584144 & 0.00016454 & -0.00661136 & 0.00016808 & -0.00022501 \nhline\nend{array}"
+      },
+      {
+        "raw_text": "tcwr = condenser water return temperature, in °F, and",
+        "latex": "t_{cwr} = \\text{condenser water return temperature, in } °\\text{F, and}\n\nt_{cws} = \\text{condenser water supply temperature, in } °\\text{F}",
+        "text": "t_cwr = condenser water return temperature, in °F, and\n\nt_cws = condenser water supply temperature, in °F"
+      },
+      {
+        "raw_text": "tᶜₘₛ = condenser water supply temperature, in °F.",
+        "latex": "t_{\\text{cwr}} = \\text{condenser water return temperature, in } °\\text{F}\n\nt_{\\text{cws}} = \\text{condenser water supply temperature, in } °\\text{F}\n\nt_{\\Lambda} = \\text{tower approach}",
+        "text": "t_cwr = condenser water return temperature, in °F\n\nt_cws = condenser water supply temperature, in °F\n\nt_Lambda = tower approach"
+      },
+      {
+        "raw_text": "tₒwb = outdoor-air wet-bulb temperature, in °F.",
+        "latex": "t_{owb} = \\text{outdoor-air wet-bulb temperature, in °F}",
+        "text": "t_owb = outdoor-air wet-bulb temperature, in °F"
+      },
+      {
+        "raw_text": "tcwₛ = condenser water supply temperature, in °F,",
+        "latex": "\\text{where}\n\nt_{\\text{cws}} = \\text{condenser water supply temperature, in } °\\text{F,}\n\na_2 = 0.86173749,\n\nb = 0.00708917 \\text{ and}",
+        "text": "where\n\nt_cws = condenser water supply temperature, in °F,\n\na_2 = 0.86173749,\n\nb = 0.00708917 and"
+      }
+    ],
+    "tables": [
+      {
+        "table_number": "8.4.6.5.-C",
+        "title": "Efficiency Coefficients Used in the Calculation of EIR_FT",
+        "headers": [
+          "Cooling Type",
+          "Chiller Type",
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f"
+        ],
+        "row_count": 8,
+        "note": "Use get_table('necb', '8.4.6.5.-C') for full structured rows."
+      }
+    ]
+  }
+}

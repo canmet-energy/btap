@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.3.2",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "404a55e6795f2018ec46553fdbd80f94a2ce1f4946d1eabcc47ef23f9140b690",
+    "known_issue": null,
+    "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
+    "article_number": "8.4.3.2"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.3.2",
+    "article_number": "8.4.3.2",
+    "reference": "8.4.3.2",
+    "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.3"
+    ],
+    "part_number": "8",
+    "full_text": "1) The operating schedules relating to the presence of occupants and of loads due to the operation of lighting, receptacle equipment, and heating, cooling and service water heating systems shall be set in accordance with\na) Article 8.4.4.2., when complying with Subsection 8.4.4., or\nb) Sentences (2) and (3), when complying with Subsection 8.4.5. (see Note A-8.4.3.2.(1)(b)).\n2) Internal loads, service water heating loads, and illuminance levels used in the energy compliance calculations shall be representative of the proposed building's type or space functions. (See Note A-8.4.3.2.(2).)\n3) For semi-heated buildings, as defined in Sentence 1.2.1.2.(2), the set-point temperature of the proposed building shall be that shown in the specifications.",
+    "page_start": 213,
+    "page_end": 214,
+    "sentences": []
+  }
+}

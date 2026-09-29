@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.2.10",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "b4ca9ea87f72e4d239dd0428be2586ada4368e08201275af3ff03b37a31036c0",
+    "known_issue": null,
+    "title": "HVAC Systems",
+    "article_number": "8.4.2.10"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.2.10",
+    "article_number": "8.4.2.10",
+    "reference": "8.4.2.10",
+    "title": "HVAC Systems",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "part_number": "8",
+    "full_text": "1) For the purpose of compliance calculations in accordance with the requirements of Subsection 8.4.5., the reference building's HVAC systems determined in accordance with Article 8.4.5.7. shall be modeled without substituting their components with thermodynamically similar components or using approximated calculations.\n2) The energy model calculations shall account for the effect of terminal devices, primary systems and secondary systems having limited capacities on space temperature and energy use.\n3) Where applicable, the energy modeling of secondary systems shall account for\na) temperature rise of supply air due to heat from supply fan,\nb) temperature rise of return air due to heat from return fan,\nc) temperature rise of return air due to heat gain from lights,\nd) fan power as a function of supply airflow,\ne) temperature and humidity rise or drop of supply or return air due to heat (sensible and latent energy) transferred from a heat-recovery device, and\nf) temperature rise of the outside air due to preheaters.\n4) The energy model calculations shall determine how many hours the primary system, secondary system and terminal device loads are not met.\n5) The energy model calculations shall account for the efficiency and capacity of the HVAC equipment as a function of part load and parameters such as, but not limited to, the temperatures of entering fluids and climatic conditions.",
+    "page_start": 212,
+    "page_end": 212,
+    "sentences": []
+  }
+}

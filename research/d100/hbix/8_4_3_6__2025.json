@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.3.6",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "fe720d06d7d9c5c2600176b1781df433bd932c855ea88ac3baacf3fc53c3b3ac",
+    "known_issue": null,
+    "title": "Outdoor Air",
+    "article_number": "8.4.3.6"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.3.6",
+    "article_number": "8.4.3.6",
+    "reference": "8.4.3.6",
+    "title": "Outdoor Air",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.3"
+    ],
+    "part_number": "8",
+    "full_text": "1) For the purpose of compliance calculations, the peak outdoor air ventilation rates shall be set\na) in accordance with Article 8.4.4.2., when complying with Subsection 8.4.4., or\nb) to the minimum rates required by the applicable ventilation standard, based on the proposed building's specifications, when complying with Subsection 8.4.5. (See Note A-8.4.3.6.(1)(b).) (See also Note A-5.2.3.4.(1).)",
+    "page_start": 215,
+    "page_end": 215,
+    "sentences": [],
+    "tables": [
+      {
+        "table_number": "8.4.3.5",
+        "title": "Type and Performance Levels of Chiller Providing Purchased Energy",
+        "headers": [
+          "Cooling Capacity, kW (Btu/h)",
+          "Type",
+          "COP",
+          "IPLV"
+        ],
+        "row_count": 2,
+        "note": "Use get_table('necb', '8.4.3.5') for full structured rows."
+      }
+    ]
+  }
+}

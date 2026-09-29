@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.2.9",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "04faa6b9fa30bbe8416880d8fd968ddd6bb25a9db955dbb5a63623827d045c6e",
+    "known_issue": null,
+    "title": "Air Leakage",
+    "article_number": "8.4.2.9"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.2.9",
+    "article_number": "8.4.2.9",
+    "reference": "8.4.2.9",
+    "title": "Air Leakage",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "part_number": "8",
+    "full_text": "1) The energy model calculations shall account for air leakage through the building envelope.\n2) The air leakage rate of the building envelope shall be adjusted using the following equation:\nIAGW = C X I₇₅Pₐ X AAGW S\nwhere\nIAGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(sxm²),\nC = (5 Pa 75 Pa)n, where n = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2. and a series of tests are conducted at different differential pressures,\nI75Pa = assumed or measured normalized air leakage rate of the building envelope at a pressure differential of 75 Pa, in L/(sxm²),\nwhere the measured air leakage rate at a pressure differential of 75 Pa is calculated as I75Pa = Q/S,\nwhere Q = volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa, determined in accordance with ASTM E779, \"Standard Test Method for Determining Air Leakage Rate by Fan Pressurization,\" in L/s, and\nS = total area of the building envelope, as per Sentence 3.2.4.2.(1), in m², and AAGW = total area of above-ground walls, in m². (See Note A-8.4.2.9.(2).)\n\n[Verified formulas for this article]\n- I_AGW = C × I_75Pa × frac{S}{A_AGW}\n\n\nwhere\n\n\nI_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\n\n\nC = ((5 Pa)/(75 Pa))^n\n\n\nwhere $n$ = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2, and a series of tests are conducted at different differential pressures.\n- I_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\nC = ((5 Pa)/(75 Pa))^n\n\nn = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2. and a series of tests are conducted at different differential pressures\n- I_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\nC = ((5 Pa)/(75 Pa))^n\n\nn = 0.60\n- I_75Pa = assumed or measured normalized air leakage rate of the building envelope at a pressure differential of 75 Pa, in L/(s·m^2)\n\nI_75Pa = (Q)/(S)\n\nQ = volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa, in L/s\n\nS = total area of the building envelope, in m^2\n\nA_AGW = total area of above-ground walls, in m^2\n- I_75Pa = (Q)/(S)\n- I_75Pa = (Q)/(S)\n\nQ = volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa\n- S = total area of the building envelope, as per Sentence 3.2.4.2.(1), in m^2\n\nA_AGW = total area of above-ground walls, in m^2\n- S = total area of the building envelope, in m^2\n\nA_AGW = total area of above-ground walls, in m^2",
+    "page_start": 211,
+    "page_end": 212,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "IAGW = C X I₇₅Pₐ X AAGW S",
+        "latex": "I_{AGW} = C \\times I_{75Pa} \\times \\frac{S}{A_{AGW}}\n\n\nwhere\n\n\nI_{AGW} = \\text{adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)}\n\n\n\nC = \\left(\\frac{5 \\text{ Pa}}{75 \\text{ Pa}}\\right)^n\n\n\nwhere $n$ = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2, and a series of tests are conducted at different differential pressures.",
+        "text": "I_AGW = C × I_75Pa × frac{S}{A_AGW}\n\n\nwhere\n\n\nI_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\n\n\nC = ((5 Pa)/(75 Pa))^n\n\n\nwhere $n$ = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2, and a series of tests are conducted at different differential pressures."
+      },
+      {
+        "raw_text": "IAGW = adjusted air leakage rate of the building envelope at a typical operating",
+        "latex": "I_{AGW} = \\text{adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)}\n\nC = \\left(\\frac{5 \\text{ Pa}}{75 \\text{ Pa}}\\right)^n\n\nn = \\text{flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2. and a series of tests are conducted at different differential pressures}",
+        "text": "I_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\nC = ((5 Pa)/(75 Pa))^n\n\nn = flow exponent, which shall be 0.60, if no whole building test result is available, or the calculated value, if whole building testing is carried out in accordance with Article 3.2.4.2. and a series of tests are conducted at different differential pressures"
+      },
+      {
+        "raw_text": "C = (5 Pa 75 Pa)n, where n = flow exponent, which shall be 0.60, if no whole",
+        "latex": "I_{AGW} = \\text{adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)}\n\nC = \\left(\\frac{5 \\text{ Pa}}{75 \\text{ Pa}}\\right)^n\n\nn = 0.60",
+        "text": "I_AGW = adjusted air leakage rate of the building envelope at a typical operating pressure differential of 5 Pa and relative to the area of the above-ground walls, in L/(s·m²)\n\nC = ((5 Pa)/(75 Pa))^n\n\nn = 0.60"
+      },
+      {
+        "raw_text": "I75Pa = assumed or measured normalized air leakage rate of the building envelope at",
+        "latex": "I_{75Pa} = \\text{assumed or measured normalized air leakage rate of the building envelope at a pressure differential of 75 Pa, in L/(s·m}^2\\text{)}\n\nI_{75Pa} = \\frac{Q}{S}\n\nQ = \\text{volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa, in L/s}\n\nS = \\text{total area of the building envelope, in m}^2\n\nA_{AGW} = \\text{total area of above-ground walls, in m}^2",
+        "text": "I_75Pa = assumed or measured normalized air leakage rate of the building envelope at a pressure differential of 75 Pa, in L/(s·m^2)\n\nI_75Pa = (Q)/(S)\n\nQ = volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa, in L/s\n\nS = total area of the building envelope, in m^2\n\nA_AGW = total area of above-ground walls, in m^2"
+      },
+      {
+        "raw_text": "calculated as I75Pa = Q/S,",
+        "latex": "I_{75\\text{Pa}} = \\frac{Q}{S}",
+        "text": "I_75Pa = (Q)/(S)"
+      },
+      {
+        "raw_text": "where Q = volume of air flowing through the building envelope when subjected",
+        "latex": "I_{75\\text{Pa}} = \\frac{Q}{S}\n\nQ = \\text{volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa}",
+        "text": "I_75Pa = (Q)/(S)\n\nQ = volume of air flowing through the building envelope when subjected to a pressure differential of 75 Pa"
+      },
+      {
+        "raw_text": "S = total area of the building envelope, as per Sentence 3.2.4.2.(1), in m², and",
+        "latex": "S = \\text{total area of the building envelope, as per Sentence 3.2.4.2.(1), in } \\text{m}^2\n\nA_{\\text{AGW}} = \\text{total area of above-ground walls, in } \\text{m}^2",
+        "text": "S = total area of the building envelope, as per Sentence 3.2.4.2.(1), in m^2\n\nA_AGW = total area of above-ground walls, in m^2"
+      },
+      {
+        "raw_text": "AAGW = total area of above-ground walls, in m².",
+        "latex": "S = \\text{total area of the building envelope, in } m^2\n\nA_{AGW} = \\text{total area of above-ground walls, in } m^2",
+        "text": "S = total area of the building envelope, in m^2\n\nA_AGW = total area of above-ground walls, in m^2"
+      }
+    ]
+  }
+}

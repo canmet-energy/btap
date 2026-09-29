@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "3.2.1.4",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "b9f6dfc04fade4486e7fddf619307fc9bb9f701947af9d73c0c34c838957cfe4",
+    "known_issue": null,
+    "title": "Allowable Fenestration and Door Area",
+    "article_number": "3.2.1.4"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "3.2.1.4",
+    "article_number": "3.2.1.4",
+    "reference": "3.2.1.4",
+    "title": "Allowable Fenestration and Door Area",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 3",
+      "Section 3.2",
+      "Subsection 3.2.1"
+    ],
+    "part_number": "3",
+    "full_text": "1) The maximum allowable total vertical fenestration and door area to gross wall area ratio (FDWR), determined in accordance with Article 3.1.1.6., shall be as follows:\nFDWR = 0.40 for HDD ≤ 4000, FDWR = (2000 0.2 X HDD) /3000 for 4000 < HDD < 7000, and FDWR = 0.20 for HDD ≥ 7000,\nwhere HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1). (See Note A-3.2.1.4.(1).)\n2) The total skylight area shall be less than 2% of the gross roof area as determined in Article 3.1.1.6.\n3.2.2. Above-ground Components of the Building Envelope\n\n[Verified formulas for this article]\n- FDWR = 0.40 for HDD ≤ 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- FDWR = 0.40 for HDD < 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- FDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building\n- HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1).",
+    "page_start": 72,
+    "page_end": 72,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "FDWR = 0.40 for HDD ≤ 4000,",
+        "latex": "FDWR = 0.40 \\text{ for } HDD \\leq 4000\n\nFDWR = \\frac{2000 - 0.2 \\times HDD}{3000} \\text{ for } 4000 < HDD < 7000\n\nFDWR = 0.20 \\text{ for } HDD \\geq 7000\n\nHDD = \\text{the heating degree-days of the location of the building}",
+        "text": "FDWR = 0.40 for HDD ≤ 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "raw_text": "FDWR = (2000 0.2 X HDD) /3000 for 4000 < HDD < 7000, and",
+        "latex": "\\text{FDWR} = 0.40 \\text{ for } \\text{HDD} < 4000\n\n\\text{FDWR} = \\frac{2000 - 0.2 \\times \\text{HDD}}{3000} \\text{ for } 4000 < \\text{HDD} < 7000\n\n\\text{FDWR} = 0.20 \\text{ for } \\text{HDD} \\geq 7000\n\n\\text{HDD} = \\text{the heating degree-days of the location of the building}",
+        "text": "FDWR = 0.40 for HDD < 4000\n\nFDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "raw_text": "FDWR = 0.20 for HDD ≥ 7000,",
+        "latex": "\\text{FDWR} = \\frac{2000 - 0.2 \\times \\text{HDD}}{3000} \\text{ for } 4000 < \\text{HDD} < 7000\n\n\\text{FDWR} = 0.20 \\text{ for } \\text{HDD} \\geq 7000\n\n\\text{HDD} = \\text{the heating degree-days of the location of the building}",
+        "text": "FDWR = (2000 - 0.2 × HDD)/(3000) for 4000 < HDD < 7000\n\nFDWR = 0.20 for HDD ≥ 7000\n\nHDD = the heating degree-days of the location of the building"
+      },
+      {
+        "raw_text": "HDD = the heating degree-days of the location of the building determined according",
+        "latex": "HDD = \\text{the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1).}",
+        "text": "HDD = the heating degree-days of the location of the building determined according to Sentence 1.1.4.1.(1)."
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.2.3",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "1d5f1149a5ddc93bce7c7d07148e5d2c51e22500a5d9aa0454d4f5c81ec28689",
+    "known_issue": null,
+    "title": "Climatic Data (See Note A-8.4.2.3.)",
+    "article_number": "8.4.2.3"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.2.3",
+    "article_number": "8.4.2.3",
+    "reference": "8.4.2.3",
+    "title": "Climatic Data (See Note A-8.4.2.3.)",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "part_number": "8",
+    "full_text": "1) The energy model calculations shall be performed using values of climatic data, including temperature, humidity and insolation, that are derived from measured climatic data and shown to be good representations of climate at the building site compared to the average of at least 10 years of measured data collected at the weather station nearest to the building site.\n2) For urban regions with several climatic data sets and for locations where weather data are not available, the energy model calculations shall be performed using available weather data that best represents the climate at the building site.",
+    "page_start": 210,
+    "page_end": 210,
+    "sentences": []
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.3.6",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "fd619938e5123f8ff48659b89f62993bebad6966f52a10a837404fec8617b324",
+    "known_issue": null,
+    "title": "Outdoor Air",
+    "article_number": "8.4.3.6"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.3.6",
+    "article_number": "8.4.3.6",
+    "reference": "8.4.3.6",
+    "title": "Outdoor Air",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.3"
+    ],
+    "part_number": "8",
+    "full_text": "1) For the purpose of compliance calculations, the peak outdoor air ventilation rates shall be set to the minimum rates required by the applicable ventilation standard, based on the proposed building's specifications. (See Note A-8.4.3.6.(1).) (See also Note A-5.2.3.4.(1).)",
+    "page_start": 210,
+    "page_end": 210,
+    "sentences": []
+  }
+}

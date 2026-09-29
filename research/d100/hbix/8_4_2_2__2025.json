@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.2.2",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "c373ef3d0ea0e3e905f18e3e8faac0177a7430804dd18cce0b1d7ec4693639ff",
+    "known_issue": null,
+    "title": "Calculation Methods",
+    "article_number": "8.4.2.2"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.2.2",
+    "article_number": "8.4.2.2",
+    "reference": "8.4.2.2",
+    "title": "Calculation Methods",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "part_number": "8",
+    "full_text": "1) Except as provided in Sentence (5), the energy model calculations shall account for the annual energy use of\na) space-heating equipment,\nb) space-cooling equipment,\nc) fans,\nd) interior and exterior lighting devices,\ne) service water heating equipment,\nf) pumps,\ng) auxiliary HVAC equipment (see Note A-8.4.2.2.(1)(g)),\nh) receptacle loads and miscellaneous equipment as per Article 8.4.2.7.,\ni) appliances, and\nj) elevators and escalators.\n2) The energy model calculations shall be performed for a one-year period (8 760 hours) using time intervals no greater than one hour.\n3) Operating schedules and climatic data input in the energy model shall use a time interval no greater than one hour.\n4) Energy modeling software that is used for the energy model calculations shall conform to\na) the testing requirements for energy modeling software stated in Article 8.4.2.11., or\nb) an equivalent test method.\n5) Redundant or back-up equipment is permitted to be excluded from the energy model, provided it is equipped with controls that operate the equipment only when the primary equipment is not operating.\n6) Building systems, materials or devices that cannot be modeled by the energy modeling software in Sentence (4) shall be modeled using an exceptional calculation method in accordance with Article 8.4.2.12.",
+    "page_start": 209,
+    "page_end": 209,
+    "sentences": []
+  }
+}

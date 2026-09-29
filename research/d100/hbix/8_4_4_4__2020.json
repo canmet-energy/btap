@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.4.4",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "41dcf0aff418db8e6477409e801da8716330cf0f71579fe3e22d7479fc217746",
+    "known_issue": null,
+    "title": "Thermal Mass",
+    "article_number": "8.4.4.4"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.4.4",
+    "article_number": "8.4.4.4",
+    "reference": "8.4.4.4",
+    "title": "Thermal Mass",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "part_number": "8",
+    "full_text": "1) The thermal characteristics of the reference building's building envelope assembly shall be modeled as being identical to those of lightweight construction. (See Note A-8.4.4.4.(1).)\n2) The thermal characteristics of the reference building's space shall be modeled as being identical to those of the proposed building. (See Note A-8.4.4.4.(2).)",
+    "page_start": 211,
+    "page_end": 211,
+    "sentences": []
+  }
+}

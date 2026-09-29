@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "5.2.2.9",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "f81696c9fb098dd825e4a93815ce080f70987b701469cf8ea90bf938a7909876",
+    "known_issue": null,
+    "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)",
+    "article_number": "5.2.2.9"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "5.2.2.9",
+    "article_number": "5.2.2.9",
+    "reference": "5.2.2.9",
+    "title": "Cooling by Indirect Use of Outdoor Air (Water Economizer System)",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 5",
+      "Section 5.2",
+      "Subsection 5.2.2"
+    ],
+    "part_number": "5",
+    "full_text": "1) HVAC systems that reduce mechanical cooling energy use by using outdoor air to chill cooling distribution fluid by direct evaporation, indirect evaporation, or both, shall be capable of cooling supply air SO as to provide 100% of the cooling load when the outdoor air wet-bulb temperature is 7°C or lower.\n2) HVAC systems that reduce mechanical cooling energy use by using outdoor air to chill cooling distribution fluid by sensible heat transfer shall be capable of cooling supply air so as to provide 100% of the cooling load when the outdoor-air dry-bulb temperature is 10°C or lower.\n5.2.3. Fan System Design",
+    "page_start": 140,
+    "page_end": 141,
+    "sentences": []
+  }
+}

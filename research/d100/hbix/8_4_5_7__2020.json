@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.5.7",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "fc5f29ecd46254ac5cefdd229806bcb8c35e053c14305fc3dc6d50cf79e3b88f",
+    "known_issue": null,
+    "title": "Electric Air-Source Heat Pump",
+    "article_number": "8.4.5.7"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.5.7",
+    "article_number": "8.4.5.7",
+    "reference": "8.4.5.7",
+    "title": "Electric Air-Source Heat Pump",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "1) The heating part-load performance characteristics of the reference electric air-source heat pump shall be adjusted for heating capacity by applying Sentence (2) and adjusted for power draw by applying Sentence (4).\n2) The available heating capacity, Qavailable in Btu/h, of the reference heat pump as a function of present evaporator and condenser conditions shall be calculated using the following equation:\nQavailable = CAP_FTEAS Qrated\nwhere\nCAP_FTEAS = heating capacity adjustment determined in accordance with Sentence (3), and\nQrated = rated capacity at AHRI test conditions, in Btu/h.\n3) The heating capacity adjustment, CAP_FTEAS, shall be calculated using the following equation:\nCAP_FTEAS = a + (b + tₒdb²) + (d x t₀db³)\nwhere\ntodb = outdoor-air dry-bulb temperature, in °F, a = 0.2536714, b = 0.0104351, c = 0.0001861, and d = -0.0000015.\n4) The power draw, Poperating, in kW, of the reference heat pump as a function of present evaporator and condenser conditions and part-load ratio shall be calculated using the following equation:\nPoperating = Pᵣₐₜₑd EIR_FPLR EIR_FT CAP_FTEAS\nwhere\nPrated = rated power draw at AHRI test conditions, in kW, EIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat pump load determined in accordance with Sentence (5), EIR_FT = electric input ratio adjustment to rated efficiency due to environmental variables determined in accordance with Sentence (7), and CAP_FTEAS = heating capacity adjustment determined in accordance with Sentence (3).\n5) The electric input ratio adjustment to the rated efficiency due to changes in heat pump load, EIR_FPLR, shall be calculated using the following equation:\nEIR_FPLR = a + (b PLR) + PLR²) + (d PLR³)\nwhere\nPLR = part-load ratio based on available capacity (not rated capacity) determined in accordance with Sentence (6), a = 0.0856522, b = 0.9388137, C = -0.1834361, and d = 0.1589702.\n6) The part-load ratio based on available capacity, PLR, shall be calculated using the following equation:\nPLR = Qoperating Qavailable\nwhere Qoperating = present load on heat pump, in Btu/h, and Qavailable = available capacity of heat pump at present evaporator and condenser conditions, in Btu/h, determined in accordance with Sentence (2).\n7) The electric input ratio adjustment to the rated efficiency due to environmental variables, EIR_FT, shall be calculated using the following equation:\nEIR_FT = a + (b tₒdb) + + (d\nwhere\ntodb = outdoor-air dry-bulb temperature, in °F,\na = 2.4600298,\nb = -0.0622539,\nC = 0.0008800, and\nd = -0.0000046.\n\n[Verified formulas for this article]\n- Type of Furnace: Atmospheric \na = 0.0186100 \nb = 1.0942090 \nc = -0.1128190 \nQ_rated = rated capacity at AHRI test conditions, in Btu/h\n- begin{array}{|c|c|c|c|}\nhline\nType of Furnace & a & b & c \nhline\nAtmospheric & 0.0186100 & 1.0942090 & -0.1128190 \nhline\nend{array}\n\n\nP_rated = rated power draw at AHRI test conditions, in kW\n- begin{array}{|c|c|c|c|}\nhline\nType of Furnace & a & b & c \nhline\nAtmospheric & 0.0186100 & 1.0942090 & -0.1128190 \nhline\nend{array}\n\nEIR_FT = electric input ratio adjustment to rated efficiency due to environmental\n- PLR = part-load ratio based on available capacity (not rated capacity) determined in accordance with Sentence (6)\n- PLR = frac{Q_operating}{Q_available}\n\nQ_operating = present load on electric DX coil, in Btu/h\n\nQ_available = available capacity of electric DX coil at present evaporator and condenser conditions, in Btu/h\n- Q_available = CAP_FT_EAS × Q_rated\n\nCAP_FT_EAS = heating capacity adjustment determined in accordance with Sentence (3)\n\nQ_rated = rated capacity at AHRI test conditions, in Btu/h\n- CAP_FT_EAS = heating capacity adjustment determined in accordance with Sentence (3)\n- CAP_FT_EAS = a + (b × t_odb) + (c × t_odb^2) + (d × t_odb^3)\n\nt_odb = outdoor-air dry-bulb temperature, in °F\n\na = 0.2536714\n\nb = 0.0104351\n\nc = 0.0001861\n\nd = -0.0000015\n- t_odb = outdoor-air dry-bulb temperature, in °F\n\na = 0.2536714\n\nb = 0.0104351\n- P_operating = P_rated × EIR_FPLR × EIR_FT × CAP_FT_EAS\n\nP_rated = rated power draw at AHRI test conditions, in kW\n\nEIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat pump load\n\nEIR_FT = electric input ratio adjustment to rated efficiency due to environmental variables\n\nCAP_FT_EAS = heating capacity adjustment\n- P_rated = rated power draw at AHRI test conditions, in kW\n\nEIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat pump load\n\nEIR_ET = electric input ratio adjustment to rated efficiency due to environmental\n- EIR_FPLR = a + (b × PLR) + (c × PLR^2) + (d × PLR^3)\n\nPLR = part-load ratio based on available capacity (not rated capacity)\n\na = 0.0856522\n\nb = 0.9388137\n\nc = -0.1834361\n\nd = 0.1589702\n- Q_operating = present load on heat pump, in Btu/h, and\n\nQ_available = available capacity of heat pump at present evaporator and condenser\n- Q_operating = present load on heat pump, in Btu/h, and\n\nQ_available = available capacity of heat pump at present evaporator and condenser conditions, in Btu/h, determined in accordance with Sentence (2).\n- EIR_FT = a + (b × t_odb) + (c × t_odb^2) + (d × t_odb^3)\n\nwhere\n\nt_odb = outdoor-air dry-bulb temperature, in °F\n\na = 2.4600298\n\nb = -0.0622539\n\nc = 0.0008800\n\nd = -0.0000046",
+    "page_start": 230,
+    "page_end": 231,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "Qrated = rated capacity at AHRI test conditions, in Btu/h.",
+        "latex": "\\text{Type of Furnace: Atmospheric} \\\\\na = 0.0186100 \\\\\nb = 1.0942090 \\\\\nc = -0.1128190 \\\\\nQ_{\\text{rated}} = \\text{rated capacity at AHRI test conditions, in Btu/h}",
+        "text": "Type of Furnace: Atmospheric \na = 0.0186100 \nb = 1.0942090 \nc = -0.1128190 \nQ_rated = rated capacity at AHRI test conditions, in Btu/h"
+      },
+      {
+        "raw_text": "Prated = rated power draw at AHRI test conditions, in kW,",
+        "latex": "\\begin{array}{|c|c|c|c|}\n\\hline\n\\text{Type of Furnace} & a & b & c \\\\\n\\hline\n\\text{Atmospheric} & 0.0186100 & 1.0942090 & -0.1128190 \\\\\n\\hline\n\\end{array}\n\n\n\\text{P}_{\\text{rated}} = \\text{rated power draw at AHRI test conditions, in kW}",
+        "text": "begin{array}{|c|c|c|c|}\nhline\nType of Furnace & a & b & c \nhline\nAtmospheric & 0.0186100 & 1.0942090 & -0.1128190 \nhline\nend{array}\n\n\nP_rated = rated power draw at AHRI test conditions, in kW"
+      },
+      {
+        "raw_text": "EIR_FT = electric input ratio adjustment to rated efficiency due to environmental",
+        "latex": "\\begin{array}{|c|c|c|c|}\n\\hline\n\\text{Type of Furnace} & a & b & c \\\\\n\\hline\n\\text{Atmospheric} & 0.0186100 & 1.0942090 & -0.1128190 \\\\\n\\hline\n\\end{array}\n\n\\text{EIR\\_FT} = \\text{electric input ratio adjustment to rated efficiency due to environmental}",
+        "text": "begin{array}{|c|c|c|c|}\nhline\nType of Furnace & a & b & c \nhline\nAtmospheric & 0.0186100 & 1.0942090 & -0.1128190 \nhline\nend{array}\n\nEIR_FT = electric input ratio adjustment to rated efficiency due to environmental"
+      },
+      {
+        "raw_text": "PLR = part-load ratio based on available capacity (not rated capacity) determined",
+        "latex": "\\text{PLR} = \\text{part-load ratio based on available capacity (not rated capacity) determined in accordance with Sentence (6)}",
+        "text": "PLR = part-load ratio based on available capacity (not rated capacity) determined in accordance with Sentence (6)"
+      },
+      {
+        "raw_text": "PLR = Qoperating Qavailable",
+        "latex": "\\text{PLR} = \\frac{Q_{\\text{operating}}}{Q_{\\text{available}}}\n\nQ_{\\text{operating}} = \\text{present load on electric DX coil, in Btu/h}\n\nQ_{\\text{available}} = \\text{available capacity of electric DX coil at present evaporator and condenser conditions, in Btu/h}",
+        "text": "PLR = frac{Q_operating}{Q_available}\n\nQ_operating = present load on electric DX coil, in Btu/h\n\nQ_available = available capacity of electric DX coil at present evaporator and condenser conditions, in Btu/h"
+      },
+      {
+        "raw_text": "Qavailable = CAP_FTEAS Qrated",
+        "latex": "Q_{\\text{available}} = \\text{CAP\\_FT}_{\\text{EAS}} \\times Q_{\\text{rated}}\n\n\\text{CAP\\_FT}_{\\text{EAS}} = \\text{heating capacity adjustment determined in accordance with Sentence (3)}\n\nQ_{\\text{rated}} = \\text{rated capacity at AHRI test conditions, in Btu/h}",
+        "text": "Q_available = CAP_FT_EAS × Q_rated\n\nCAP_FT_EAS = heating capacity adjustment determined in accordance with Sentence (3)\n\nQ_rated = rated capacity at AHRI test conditions, in Btu/h"
+      },
+      {
+        "raw_text": "CAP_FTEAS = heating capacity adjustment determined in accordance with",
+        "latex": "\\text{CAP\\_FT}_{\\text{EAS}} = \\text{heating capacity adjustment determined in accordance with Sentence (3)}",
+        "text": "CAP_FT_EAS = heating capacity adjustment determined in accordance with Sentence (3)"
+      },
+      {
+        "raw_text": "CAP_FTEAS = a + (b + tₒdb²) + (d x t₀db³)",
+        "latex": "\\text{CAP\\_FT}_{\\text{EAS}} = a + (b \\times t_{\\text{odb}}) + (c \\times t_{\\text{odb}}^2) + (d \\times t_{\\text{odb}}^3)\n\nt_{\\text{odb}} = \\text{outdoor-air dry-bulb temperature, in } °\\text{F}\n\na = 0.2536714\n\nb = 0.0104351\n\nc = 0.0001861\n\nd = -0.0000015",
+        "text": "CAP_FT_EAS = a + (b × t_odb) + (c × t_odb^2) + (d × t_odb^3)\n\nt_odb = outdoor-air dry-bulb temperature, in °F\n\na = 0.2536714\n\nb = 0.0104351\n\nc = 0.0001861\n\nd = -0.0000015"
+      },
+      {
+        "raw_text": "todb = outdoor-air dry-bulb temperature, in °F,",
+        "latex": "t_{\\text{odb}} = \\text{outdoor-air dry-bulb temperature, in } °\\text{F}\n\na = 0.2536714\n\nb = 0.0104351",
+        "text": "t_odb = outdoor-air dry-bulb temperature, in °F\n\na = 0.2536714\n\nb = 0.0104351"
+      },
+      {
+        "raw_text": "Poperating = Pᵣₐₜₑd EIR_FPLR EIR_FT CAP_FTEAS",
+        "latex": "P_{\\text{operating}} = P_{\\text{rated}} \\times \\text{EIR\\_FPLR} \\times \\text{EIR\\_FT} \\times \\text{CAP\\_FT}_{\\text{EAS}}\n\nP_{\\text{rated}} = \\text{rated power draw at AHRI test conditions, in kW}\n\n\\text{EIR\\_FPLR} = \\text{electric input ratio adjustment to rated efficiency due to changes in heat pump load}\n\n\\text{EIR\\_FT} = \\text{electric input ratio adjustment to rated efficiency due to environmental variables}\n\n\\text{CAP\\_FT}_{\\text{EAS}} = \\text{heating capacity adjustment}",
+        "text": "P_operating = P_rated × EIR_FPLR × EIR_FT × CAP_FT_EAS\n\nP_rated = rated power draw at AHRI test conditions, in kW\n\nEIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat pump load\n\nEIR_FT = electric input ratio adjustment to rated efficiency due to environmental variables\n\nCAP_FT_EAS = heating capacity adjustment"
+      },
+      {
+        "raw_text": "EIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat",
+        "latex": "P_{\\text{rated}} = \\text{rated power draw at AHRI test conditions, in kW}\n\n\\text{EIR\\_FPLR} = \\text{electric input ratio adjustment to rated efficiency due to changes in heat pump load}\n\n\\text{EIR\\_ET} = \\text{electric input ratio adjustment to rated efficiency due to environmental}",
+        "text": "P_rated = rated power draw at AHRI test conditions, in kW\n\nEIR_FPLR = electric input ratio adjustment to rated efficiency due to changes in heat pump load\n\nEIR_ET = electric input ratio adjustment to rated efficiency due to environmental"
+      },
+      {
+        "raw_text": "EIR_FPLR = a + (b PLR) + PLR²) + (d PLR³)",
+        "latex": "\\text{EIR\\_FPLR} = a + (b \\times \\text{PLR}) + (c \\times \\text{PLR}^2) + (d \\times \\text{PLR}^3)\n\n\\text{PLR} = \\text{part-load ratio based on available capacity (not rated capacity)}\n\na = 0.0856522\n\nb = 0.9388137\n\nc = -0.1834361\n\nd = 0.1589702",
+        "text": "EIR_FPLR = a + (b × PLR) + (c × PLR^2) + (d × PLR^3)\n\nPLR = part-load ratio based on available capacity (not rated capacity)\n\na = 0.0856522\n\nb = 0.9388137\n\nc = -0.1834361\n\nd = 0.1589702"
+      },
+      {
+        "raw_text": "Qoperating = present load on heat pump, in Btu/h, and",
+        "latex": "Q_{\\text{operating}} = \\text{present load on heat pump, in Btu/h, and}\n\nQ_{\\text{available}} = \\text{available capacity of heat pump at present evaporator and condenser}",
+        "text": "Q_operating = present load on heat pump, in Btu/h, and\n\nQ_available = available capacity of heat pump at present evaporator and condenser"
+      },
+      {
+        "raw_text": "Qavailable = available capacity of heat pump at present evaporator and condenser",
+        "latex": "Q_{\\text{operating}} = \\text{present load on heat pump, in Btu/h, and}\n\nQ_{\\text{available}} = \\text{available capacity of heat pump at present evaporator and condenser conditions, in Btu/h, determined in accordance with Sentence (2).}",
+        "text": "Q_operating = present load on heat pump, in Btu/h, and\n\nQ_available = available capacity of heat pump at present evaporator and condenser conditions, in Btu/h, determined in accordance with Sentence (2)."
+      },
+      {
+        "raw_text": "EIR_FT = a + (b tₒdb) + + (d",
+        "latex": "\\text{EIR\\_FT} = a + (b \\times t_{\\text{odb}}) + (c \\times t_{\\text{odb}}^2) + (d \\times t_{\\text{odb}}^3)\n\n\\text{where}\n\nt_{\\text{odb}} = \\text{outdoor-air dry-bulb temperature, in °F}\n\na = 2.4600298\n\nb = -0.0622539\n\nc = 0.0008800\n\nd = -0.0000046",
+        "text": "EIR_FT = a + (b × t_odb) + (c × t_odb^2) + (d × t_odb^3)\n\nwhere\n\nt_odb = outdoor-air dry-bulb temperature, in °F\n\na = 2.4600298\n\nb = -0.0622539\n\nc = 0.0008800\n\nd = -0.0000046"
+      }
+    ]
+  }
+}

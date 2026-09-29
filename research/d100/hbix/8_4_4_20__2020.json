@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.4.20",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "dbe8ef32eb3a155507e58605928b94f0458a9803d18155e7e7e5d9d0c6d3f205",
+    "known_issue": null,
+    "title": "Service Water Heating Systems",
+    "article_number": "8.4.4.20"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.4.20",
+    "article_number": "8.4.4.20",
+    "reference": "8.4.4.20",
+    "title": "Service Water Heating Systems",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.4"
+    ],
+    "part_number": "8",
+    "full_text": "1) Except as provided in Sentences (2) to (4), the reference building's service water heating system shall be modeled as being identical to that of the proposed building as regards the following characteristics:\na) storage capacity,\nb) power input, and\nc) energy type.\n2) Where the energy type of the proposed building's service water heating system is an air-, water- or ground-source heat pump, the energy type of the reference building's service water heating system shall be an air-source heat pump.\n3) Where the energy type of the proposed building's service water heating system is an immersion coil supplied by a boiler, the energy type of the reference building's service water heating system shall be the same as that of the boiler.\n4) Where more than one energy type is used by the proposed building's service water heating system,\na) the heating capacities of the reference building's service water heating equipment shall match the ratio of the proposed building's service water heating equipment capacity allocation (see Note A-8.4.4.20.(4)(a)), and\nb) the operating schedule, priority of use and other operational characteristics of the proposed building's use of energy types shall apply.\n5) Service water heating equipment performance characteristics as a function of part-load shall be modeled in accordance with the part-load performance curves found in Subsection 8.4.5.\n6) The service water heating system's supply temperature shall be modeled as being identical to that of the proposed building. (See Note A-8.4.4.20.(6).)\n7) Where a storage tank is to be modeled, the service water heating system's storage temperature shall be modeled as being identical to that of the proposed building. (See Note A-8.4.4.20.(7).)\n8) Where the proposed building's service water heating system comprises multiple water heaters, the reference building's service water heating system shall be modeled with the same number of water heaters.\n9) Where the proposed building's service water heating system is a recirculation system, the circulation pumps shall be modeled as a single pump with\na) constant speed operation, and\nb) a total flow rate and pumping power, in W/(L/s), that are identical to that of the proposed building's circulation pumps.\n8.4.5. Part-Load Performance Characteristics",
+    "page_start": 222,
+    "page_end": 223,
+    "sentences": []
+  }
+}

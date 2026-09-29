@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.5.2",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "09187bb93454400102c6456451456711838a23c9270f55e9a0e660747a679b80",
+    "known_issue": null,
+    "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
+    "article_number": "8.4.5.2"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.5.2",
+    "article_number": "8.4.5.2",
+    "reference": "8.4.5.2",
+    "title": "Operating Schedules, Internal Loads, Service Water Heating Loads and Set-Point Temperature",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "1) Except as provided in Sentence (3), and except as needed to model the occupancy controls required in the prescriptive path, the reference building's operating schedules shall be modeled as being identical to those determined for the proposed building in Sentence 8.4.3.2.(1). (See Note A-8.4.5.2.(1).)\n2) The reference building's internal and service water heating loads shall be modeled as being identical to those determined for the proposed building in Sentence 8.4.3.2.(2).\n3) If the reference building is a semi-heated building, as defined in Sentence 1.2.1.2.(2), and the capacity of the installed heating equipment in the\nsemi-heated proposed building is no more than the semi-heated proposed building's peak heating load plus 5%, it shall be modeled with\na) a set-point temperature of 18°C, and\nb) thermal characteristics that are based on the heating degree-days at 18°C of the building's location.\n(See Note A-8.4.5.2.(3).)",
+    "page_start": 217,
+    "page_end": 218,
+    "sentences": [],
+    "tables": [
+      {
+        "table_number": "8.4.4.2",
+        "title": "Modeling Inputs for the Proposed Building",
+        "headers": [
+          "Building Archetype",
+          "Occupant Density, m²/occupant",
+          "Peak Receptacle Load, W/m²",
+          "Peak Service Water Heating Load, L/h/occupant",
+          "Operating Schedule in Note A-8.4.3.2.(1)(b)"
+        ],
+        "row_count": 3,
+        "note": "Use get_table('necb', '8.4.4.2') for full structured rows."
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.3.1",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "4fb7e368dd8c04d36ab6d241c9f863cbd6110c0d828ea1f124ff4bcdb469c232",
+    "known_issue": null,
+    "title": "General",
+    "article_number": "8.4.3.1"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.3.1",
+    "article_number": "8.4.3.1",
+    "reference": "8.4.3.1",
+    "title": "General",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.3"
+    ],
+    "part_number": "8",
+    "full_text": "1) The annual energy consumption of the proposed building shall be calculated as described in this Subsection.\n2) Except as stated otherwise in this Subsection, the energy model shall be consistent with the proposed building's specifications including proper accounting of\na) fenestration, doors and opaque building assembly types and areas,\nb) lighting systems and controls,\nc) HVAC system types, capacities and controls,\nd) service water heating system types, capacities and controls, and\ne) electrical systems.\n3) The energy model calculations shall include\na) all the energy use addressed in Sections 3.2., 4.2., 5.2., 6.2. and 7.2., and\nb) all spaces within the building.\n4) Each conditioned thermal block in the proposed building shall be modeled as being\na) heated, if only heating systems are provided,\nb) cooled, if only cooling systems are provided, and\nc) heated and cooled, if complete heating and cooling systems or only rough-ins are provided.\n5) For the purpose of compliance calculations, where a building system or part of a building system has not been fully specified, it shall be assumed that it complies with the prescriptive requirements.\n6) Where a building envelope assembly covers less than 5% of the total area of that assembly type, it is permitted to be excluded from the energy model, provided its area is included in an adjacent assembly having a similar U-value and the same orientation.\n7) The energy model calculations shall not include manually operated fenestration shading devices, such as blinds or shades.\n8) The energy model calculations shall include permanent fenestration shading devices, such as fins, overhangs, and light shelves.",
+    "page_start": 213,
+    "page_end": 213,
+    "sentences": []
+  }
+}

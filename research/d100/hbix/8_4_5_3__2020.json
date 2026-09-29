@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.5.3",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "2e2c9bb646f3bcfc792d8fc26af13e783628eb0cf07bac60db96d44d99ee296d",
+    "known_issue": null,
+    "title": "Furnace",
+    "article_number": "8.4.5.3"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.5.3",
+    "article_number": "8.4.5.3",
+    "reference": "8.4.5.3",
+    "title": "Furnace",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "1) The fuel consumption at part-load conditions, Fuelpartload, in Btu/h, of the reference condensing or atmospheric furnace shall be derived by applying an adjustment factor to the fuel consumption at rated conditions:\nFuelpartload = Fuelᵣₐₜₑᵈ FHeatPLC\nwhere Fuelᵣₐₜₑᵈ = fuel consumption at rated conditions, in Btu/h, and FHeatPLC = fuel heating part-load efficiency curve determined in accordance with Sentence (2).\n2) The fuel heating part-load efficiency curve, FHeatPLC, shall be calculated using the following equation:\nFHeatPLC = a +bx Qpartload Qrated +cx (Qartload)\nwhere Qpartload = furnace capacity at part-load conditions, in Btu/h, Qrated = furnace capacity at rated conditions, in Btu/h, and a, b, C = applicable coefficients from Table 8.4.5.3.\nTable 8.4.5.3. Coefficients Used in the Calculation of FHeatPLC for Condensing and Atmospheric Furnaces Forming Part of Sentence 8.4.5.3.(2)\n3) For modulating furnaces, values for Qpartload/Qrated and corresponding values for FHeatPLC shall be those listed in Table 8.4.5.2.-B.\n\n[Verified formulas for this article]\n- Fuel_design = fuel consumption at design conditions, in Btu/h\n\nFHeat_PLC = fuel heating part-load efficiency curve determined in accordance with Sentence (2)\n- # Coefficients for Calculation of FHeatPLC\n\n## Non-condensing Boiler\n\n| Coefficient | Value |\n|---|---|\n| a | 0.082597 |\n| b | 0.996764 |\n| c | -0.079361 |\n\n## Equation\n\nF_uel partload = F_uel rated × F_Heat PLC\n\nWhere:\n\nF_Heat PLC = a + b × PLC + c × PLC^2\n\nFor non-condensing boilers:\n\nF_Heat PLC = 0.082597 + 0.996764 × PLC - 0.079361 × PLC^2\n- Coefficients for Calculation of F_HeatPLC\n\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}\n\n\nFuel_rated = fuel consumption at rated conditions, in Btu/h\n- F_HeatPLC = a + b × frac{Q_partload}{Q_rated} + c × (frac{Q_partload}{Q_rated})^2\n\nNon-condensing boiler: quad a = 0.082597, quad b = 0.996764, quad c = -0.079361\n- Coefficients for Calculation of F_HeatPLC\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}\n- Coefficients for Calculation of F_HeatPLC\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}\n\nQ_rated = furnace capacity at rated conditions, in Btu/h\n- a, b, c = applicable coefficients from Table 8.4.5.3",
+    "page_start": 224,
+    "page_end": 225,
+    "sentences": [],
+    "equations": [
+      {
+        "raw_text": "FHeatPLC = fuel heating part-load efficiency curve determined in accordance with",
+        "latex": "\\text{Fuel}_{\\text{design}} = \\text{fuel consumption at design conditions, in Btu/h}\n\n\\text{FHeat}_{\\text{PLC}} = \\text{fuel heating part-load efficiency curve determined in accordance with Sentence (2)}",
+        "text": "Fuel_design = fuel consumption at design conditions, in Btu/h\n\nFHeat_PLC = fuel heating part-load efficiency curve determined in accordance with Sentence (2)"
+      },
+      {
+        "raw_text": "Fuelpartload = Fuelᵣₐₜₑᵈ FHeatPLC",
+        "latex": "# Coefficients for Calculation of FHeatPLC\n\n## Non-condensing Boiler\n\n| Coefficient | Value |\n|---|---|\n| a | 0.082597 |\n| b | 0.996764 |\n| c | -0.079361 |\n\n## Equation\n\nF_{\\text{uel partload}} = F_{\\text{uel rated}} \\times F_{\\text{Heat PLC}}\n\nWhere:\n\nF_{\\text{Heat PLC}} = a + b \\times PLC + c \\times PLC^2\n\nFor non-condensing boilers:\n\nF_{\\text{Heat PLC}} = 0.082597 + 0.996764 \\times PLC - 0.079361 \\times PLC^2",
+        "text": "# Coefficients for Calculation of FHeatPLC\n\n## Non-condensing Boiler\n\n| Coefficient | Value |\n|---|---|\n| a | 0.082597 |\n| b | 0.996764 |\n| c | -0.079361 |\n\n## Equation\n\nF_uel partload = F_uel rated × F_Heat PLC\n\nWhere:\n\nF_Heat PLC = a + b × PLC + c × PLC^2\n\nFor non-condensing boilers:\n\nF_Heat PLC = 0.082597 + 0.996764 × PLC - 0.079361 × PLC^2"
+      },
+      {
+        "raw_text": "Fuelᵣₐₜₑᵈ = fuel consumption at rated conditions, in Btu/h, and",
+        "latex": "\\text{Coefficients for Calculation of } F_{\\text{HeatPLC}}\n\n\n\\begin{array}{|c|c|c|c|}\n\\hline\n\\text{Type of Boiler} & a & b & c \\\\\n\\hline\n\\text{Non-condensing} & 0.082597 & 0.996764 & -0.079361 \\\\\n\\hline\n\\end{array}\n\n\n\\text{Fuel}_{\\text{rated}} = \\text{fuel consumption at rated conditions, in Btu/h}",
+        "text": "Coefficients for Calculation of F_HeatPLC\n\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}\n\n\nFuel_rated = fuel consumption at rated conditions, in Btu/h"
+      },
+      {
+        "raw_text": "FHeatPLC = a +bx Qpartload Qrated +cx (Qartload)",
+        "latex": "F_{\\text{HeatPLC}} = a + b \\times \\frac{Q_{\\text{partload}}}{Q_{\\text{rated}}} + c \\times \\left(\\frac{Q_{\\text{partload}}}{Q_{\\text{rated}}}\\right)^2\n\n\\text{Non-condensing boiler:} \\quad a = 0.082597, \\quad b = 0.996764, \\quad c = -0.079361",
+        "text": "F_HeatPLC = a + b × frac{Q_partload}{Q_rated} + c × (frac{Q_partload}{Q_rated})^2\n\nNon-condensing boiler: quad a = 0.082597, quad b = 0.996764, quad c = -0.079361"
+      },
+      {
+        "raw_text": "Qpartload = furnace capacity at part-load conditions, in Btu/h,",
+        "latex": "\\text{Coefficients for Calculation of } F_{\\text{HeatPLC}}\n\n\\begin{array}{|c|c|c|c|}\n\\hline\n\\text{Type of Boiler} & a & b & c \\\\\n\\hline\n\\text{Non-condensing} & 0.082597 & 0.996764 & -0.079361 \\\\\n\\hline\n\\end{array}",
+        "text": "Coefficients for Calculation of F_HeatPLC\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}"
+      },
+      {
+        "raw_text": "Qrated = furnace capacity at rated conditions, in Btu/h, and",
+        "latex": "\\text{Coefficients for Calculation of } F_{\\text{HeatPLC}}\n\n\\begin{array}{|c|c|c|c|}\n\\hline\n\\text{Type of Boiler} & a & b & c \\\\\n\\hline\n\\text{Non-condensing} & 0.082597 & 0.996764 & -0.079361 \\\\\n\\hline\n\\end{array}\n\nQ_{\\text{rated}} = \\text{furnace capacity at rated conditions, in Btu/h}",
+        "text": "Coefficients for Calculation of F_HeatPLC\n\nbegin{array}{|c|c|c|c|}\nhline\nType of Boiler & a & b & c \nhline\nNon-condensing & 0.082597 & 0.996764 & -0.079361 \nhline\nend{array}\n\nQ_rated = furnace capacity at rated conditions, in Btu/h"
+      },
+      {
+        "raw_text": "a, b, C = applicable coefficients from Table 8.4.5.3.",
+        "latex": "a, b, c = \\text{applicable coefficients from Table 8.4.5.3}",
+        "text": "a, b, c = applicable coefficients from Table 8.4.5.3"
+      }
+    ],
+    "tables": [
+      {
+        "table_number": "8.4.5.2.-A",
+        "title": "Coefficients Used in the Calculation of FHeatPLC for Condensing and Non-Condensing Boilers",
+        "headers": [
+          "Type of Boiler",
+          "a",
+          "b",
+          "c"
+        ],
+        "row_count": 2,
+        "note": "Use get_table('necb', '8.4.5.2.-A') for full structured rows."
+      },
+      {
+        "table_number": "8.4.5.2.-B",
+        "title": "Values for Qpartload, Qᵣₐₜₑᵈ and Qdesign and FHeatPLC for Modulating Boilers and Furnaces",
+        "headers": [
+          "Qpartload, Qrated and Qdesign (Part-Load Ratio)",
+          "FHeatPLC"
+        ],
+        "row_count": 10,
+        "note": "Use get_table('necb', '8.4.5.2.-B') for full structured rows."
+      },
+      {
+        "table_number": "8.4.5.3",
+        "title": "Coefficients Used in the Calculation of FHeatPLC for Condensing and Atmospheric Furnaces",
+        "headers": [
+          "Type of Furnace",
+          "a",
+          "b",
+          "c"
+        ],
+        "row_count": 2,
+        "note": "Use get_table('necb', '8.4.5.3') for full structured rows."
+      }
+    ]
+  }
+}

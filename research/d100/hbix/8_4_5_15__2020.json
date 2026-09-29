@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.5.15",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:22:08.678667+00:00",
+    "exists": false,
+    "absence_reported_as": "get_section: empty result content",
+    "sha256": null,
+    "known_issue": null,
+    "title": null,
+    "article_number": null
+  },
+  "payload": null
+}

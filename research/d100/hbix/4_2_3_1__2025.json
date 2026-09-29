@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "4.2.3.1",
+      "edition": "2025"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "2ed65bff4aa5c20edce636f84ce72e334347dc308e53a9904f2f28c757eabb7c",
+    "known_issue": null,
+    "title": "Exterior Lighting",
+    "article_number": "4.2.3.1"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "4.2.3.1",
+    "article_number": "4.2.3.1",
+    "reference": "4.2.3.1",
+    "title": "Exterior Lighting",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 4",
+      "Section 4.2",
+      "Subsection 4.2.3"
+    ],
+    "part_number": "4",
+    "full_text": "1) Exterior lighting allowances shall be based on the lighting zone in which the building is located, as determined from Table 4.2.3.1.-A.\nTable 4.2.3.1.-A Lighting Zones Used to Determine Exterior Lighting Allowances Forming Part of Sentence 4.2.3.1.(1)\n2) The basic site allowance to be applied in the calculation of maximum connected exterior lighting power in Sentences (3) to (5) shall not exceed the limits specified in Table 4.2.3.1.-B for the applicable lighting zone.\n3) Except as provided in Sentence (6), the connected exterior lighting power for each specific building exterior application listed in Table 4.2.3.1.-C that is to be\nilluminated shall not be greater than the individual allowance for that application taken from Table 4.2.3.1.-C for the applicable lighting zone plus any unused power applied from the basic site allowance listed in Table 4.2.3.1.-B. (See Note A-4.2.3.1.(3).)\nTable 4.2.3.1.-B Basic Site Allowances for Exterior Lighting Forming Part of Sentences 4.2.3.1.(2) and (3)\n4) Except as provided in Sentence (6), the connected exterior lighting power for all general building exterior applications not listed in Table 4.2.3.1.-C that are to be illuminated shall not be greater than the sum of the individual allowances for these applications provided in Table 4.2.3.1.-D for the applicable lighting zone plus any remaining basic site allowance not used in compliance with Sentence (3). (See Note A-4.2.3.1.(4).)\nTable 4.2.3.1.-C Lighting Power Allowances for Specific Building Exterior Applications Forming Part of Sentences 4.2.3.1.(3) and (4)\n5) Except as provided in Sentence (6), the connected exterior lighting power for all building exterior applications not listed in Table 4.2.3.1.-D that are to be illuminated shall not be greater than the sum of the individual allowances for these applications provided in Table 4.2.3.1.-E for the applicable lighting zone plus any remaining basic site allowance not used in compliance with Sentences (3) and (4). (See Note A-4.2.3.1.(5).)\n6) The following exterior lighting applications need not comply with Sentences (1) to (5) where the lighting is equipped with an independent control device that complies with the requirements of Subsection 4.2.4.:\na) specialized signal, directional, and marker lighting associated with transportation,\nb) lighting for advertising and directional signage,\nc) lighting integral to equipment or instrumentation and installed by its manufacturer,\nd) lighting for theatrical purposes, including performance, stage, film and video production,\ne) lighting for athletic activity areas,\nf) temporary lighting,\ng) lighting for industrial production, material handling, transportation sites, and associated storage areas for industrial sites,\nh) lighting for theme elements in theme/amusement parks, and\ni) lighting used to highlight features of art objects, public monuments and designated national or provincial historic sites.\nTable 4.2.3.1.-D Lighting Power Allowances for General Building Exterior Applications Forming Part of Sentences 4.2.3.1.(4) and (5)\nTable 4.2.3.1.-E Lighting Power Allowances for Building Exterior Applications Not Covered in Article 4.2.3.1. Forming Part of Sentence 4.2.3.1.(5)\n4.2.4. Exterior Lighting Controls",
+    "page_start": 106,
+    "page_end": 109,
+    "sentences": [],
+    "tables": [
+      {
+        "table_number": "4.2.3.1.-A",
+        "title": "Lighting Zones Used to Determine Exterior Lighting Allowances",
+        "headers": [
+          "Lighting Zone",
+          "Description"
+        ],
+        "row_count": 5,
+        "note": "Use get_table('necb', '4.2.3.1.-A') for full structured rows."
+      },
+      {
+        "table_number": "4.2.3.1.-B",
+        "title": "Basic Site Allowances for Exterior Lighting",
+        "headers": [
+          "Zone 0",
+          "Zone 1",
+          "Zone 2",
+          "Zone 3",
+          "Zone 4"
+        ],
+        "row_count": 1,
+        "note": "Use get_table('necb', '4.2.3.1.-B') for full structured rows."
+      },
+      {
+        "table_number": "4.2.3.1.-C",
+        "title": "Lighting Power Allowances for Specific Building Exterior Applications",
+        "headers": [
+          "Exterior Application",
+          "Zone 0",
+          "Zone 1",
+          "Zone 2",
+          "Zone 3",
+          "Zone 4"
+        ],
+        "row_count": 6,
+        "note": "Use get_table('necb', '4.2.3.1.-C') for full structured rows."
+      },
+      {
+        "table_number": "4.2.3.1.-D",
+        "title": "Lighting Power Allowances for General Building Exterior Applications",
+        "headers": [
+          "Exterior Application",
+          "Category",
+          "Zone 0",
+          "Zone 1",
+          "Zone 2",
+          "Zone 3",
+          "Zone 4"
+        ],
+        "row_count": 13,
+        "note": "Use get_table('necb', '4.2.3.1.-D') for full structured rows."
+      },
+      {
+        "table_number": "4.2.3.1.-E",
+        "title": "Lighting Power Allowances for Building Exterior Applications Not Covered in Article 4.2.3.1.",
+        "headers": [
+          "Exterior Application",
+          "Zone 0",
+          "Zone 1",
+          "Zone 2",
+          "Zone 3",
+          "Zone 4"
+        ],
+        "row_count": 1,
+        "note": "Use get_table('necb', '4.2.3.1.-E') for full structured rows."
+      }
+    ]
+  }
+}

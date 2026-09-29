@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.3.3",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "c8ca66110feaf4026df761928b51f6c9d7e2996d6d5a3eb95a5fccaa145a7ced",
+    "known_issue": null,
+    "title": "Building Envelope Components",
+    "article_number": "8.4.3.3"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.3.3",
+    "article_number": "8.4.3.3",
+    "reference": "8.4.3.3",
+    "title": "Building Envelope Components",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.3"
+    ],
+    "part_number": "8",
+    "full_text": "1) Where the solar absorptance of a building envelope component is not known, the energy model shall use a constant value of 0.7.\n2) Where the energy model does not include a detailed calculation of fenestration shading, the actual solar heat gain coefficient of the fenestration shall be multiplied by an adjustment factor of 0.8. (See Note A-8.4.3.3.(2).)\n3) Except as provided in Sentence (4), the normalized air leakage rate shall be assumed to be 1.50 L/(sxm²) at a pressure differential of 75 Pa and adjusted for the air leakage rate through the above-ground wall areas at the typical operating pressure differential in accordance with Sentence 8.4.2.9.(2).\n4) Where an air leakage rate is determined in accordance with Article 3.2.4.2., the normalized air leakage rate at a pressure differential of 75 Pa and the flow exponent from the test are permitted to be used in Sentence 8.4.2.9.(2) to obtain the air leakage rate at a typical operating pressure differential and applied to the above-ground wall areas.",
+    "page_start": 209,
+    "page_end": 209,
+    "sentences": [],
+    "tables": [
+      {
+        "table_number": "8.4.3.5",
+        "title": "Type and Performance Levels of Chiller Providing Purchased Energy",
+        "headers": [
+          "Cooling Capacity, kW (Btu/h)",
+          "Type",
+          "COP",
+          "IPLV"
+        ],
+        "row_count": 2,
+        "note": "Use get_table('necb', '8.4.3.5') for full structured rows."
+      }
+    ]
+  }
+}

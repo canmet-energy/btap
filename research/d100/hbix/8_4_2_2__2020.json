@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "request": {
+      "tool": "get_section",
+      "code": "necb",
+      "section_number": "8.4.2.2",
+      "edition": "2020"
+    },
+    "retrieved_utc": "2026-09-29T16:21:12.062184+00:00",
+    "exists": true,
+    "sha256": "a74ceec5a3417edba72dfee550d4efc10b6a1fb43334fc6c0dc78617aa16576c",
+    "known_issue": null,
+    "title": "Calculation Methods",
+    "article_number": "8.4.2.2"
+  },
+  "payload": {
+    "edition": "2020",
+    "section_number": "8.4.2.2",
+    "article_number": "8.4.2.2",
+    "reference": "8.4.2.2",
+    "title": "Calculation Methods",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.2"
+    ],
+    "part_number": "8",
+    "full_text": "1) Except as provided in Sentence (5), the energy model calculations shall account for the annual energy consumption of\na) space-heating equipment,\nb) space-cooling equipment,\nc) fans,\nd) interior and exterior lighting devices,\ne) service water heating equipment,\nf) pumps,\ng) auxiliary HVAC equipment (see Note A-8.4.2.2.(1)(g)),\nh) receptacle loads and miscellaneous equipment as per Article 8.4.2.7.,\ni) appliances, and\nj) elevators and escalators.\n2) The energy model calculations shall be performed for a one-year period (8 760 hours) using time intervals no greater than one hour.\n3) Operating schedules and climatic data input in the energy model shall use a time interval no greater than one hour.\n4) If a computer program is used to carry out the compliance calculations, the calculation methods employed in the energy model shall conform to\na) ANSI/ASHRAE 140, \"Standard Method of Test for the Evaluation of Building Energy Analysis Computer Programs,\" or\nb) an equivalent test method.\n5) Redundant or back-up equipment is permitted to be excluded from the energy model, provided it is equipped with controls that operate the equipment only when the primary equipment is not operating.",
+    "page_start": 205,
+    "page_end": 205,
+    "sentences": []
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "request": {
+      "section_number": "8.4.5.8",
+      "edition": "2025"
+    },
+    "exists": true,
+    "sha256": "de26d2d6cbdfcd014409f733a28da047525005709b2a305a9d25172ca53a148b"
+  },
+  "payload": {
+    "edition": "2025",
+    "section_number": "8.4.5.8",
+    "article_number": "8.4.5.8",
+    "reference": "8.4.5.8",
+    "title": "Equipment Oversizing",
+    "division": "B",
+    "hierarchy_level": "article",
+    "hierarchy_path": [
+      "Division B",
+      "Part 8",
+      "Section 8.4",
+      "Subsection 8.4.5"
+    ],
+    "part_number": "8",
+    "full_text": "(See Note A-8.4.5.8.)\n1) The heating equipment of the reference building shall be modeled as being oversized by the lesser of\na) the percentage of oversizing applied to the proposed building, or\nb) 30%.\n2) The cooling equipment of the reference building shall be modeled as being oversized by the lesser of\na) the percentage of oversizing applied to the proposed building, or\nb) 10%.",
+    "page_start": 222,
+    "page_end": 222,
+    "sentences": []
+  }
+}
