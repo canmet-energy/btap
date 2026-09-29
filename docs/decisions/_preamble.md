@@ -32,7 +32,8 @@ tests. `python3 python/scripts/generate_decisions.py --check` is the drift gate
 and runs in CI. The front-matter `title` is the compact title this index and
 the runtime registry carry; the body's heading is authored prose and the two
 deliberately differ for most decisions. Anchors and this index are inserted by
-the generator, so a source body never declares its own `d-NN` anchor. A
+the generator; by convention a source body does not declare its own `d-NN`
+anchor, so that each decision has one owner of that target. A
 `kind: "runtime"` entry must be cited by at least one Python `ruling:` tag.
 Registry summaries are PARAPHRASE — never NECB text verbatim (D-01 scopes
 verbatim reproduction to the generated coverage docs).

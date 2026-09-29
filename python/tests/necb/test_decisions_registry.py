@@ -174,15 +174,22 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     RENDER -- inside a code fence or a multi-line HTML comment -- was counted
     as live by every raw-source scan.
 
-    `docs/decisions/D-NN.md` closed all of it structurally. The anchors are
-    emitted by `generate_decisions.py`, one per decision, outside every
-    authored body; a source may not declare its own (`validate` refuses an
-    explicit anchor or a second bare heading), and `--check` refuses a
-    hand-edited document. So "declared exactly once" is now a property of the
-    generator, asserted against the generated document in
-    `test_decisions_registry_sync.py`, and no Markdown model is needed for it.
-    Commenting a body out can no longer orphan a fragment, because the anchor
-    is not in the body.
+    `docs/decisions/D-NN.md` closed the dead-link half structurally. Every
+    anchor is emitted by `generate_decisions.py`, one per decision, OUTSIDE
+    every authored body, and `--check` refuses a hand-edited document. So
+    commenting a body out can no longer orphan a fragment, and "one generated
+    anchor per decision" is a property of the generator, asserted against the
+    generated document in `test_decisions_registry_sync.py` with no Markdown
+    model at all.
+
+    What is NOT closed: an authored body could still introduce a second owner
+    of the same `d-NN` target -- `<a name="d-01">`, `### **D-01**`, an escaped
+    `D\-01`, and others. A rule refusing those was built and cut from PR #64
+    after five review rounds each found a further spelling, at a cost out of
+    proportion to the consequence: a duplicate id makes a fragment AMBIGUOUS
+    between two spellings of the same decision, it does not break the link.
+    No committed body does this. If the rule returns it will be its own
+    change.
 
     What generation does NOT establish is that an authored `[D-XX](#d-99)`, or
     an inbound link from elsewhere in the tree, names a decision that exists.

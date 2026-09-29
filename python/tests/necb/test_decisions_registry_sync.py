@@ -9,7 +9,6 @@ its validation -- is exercised in ``test_decisions_generator.py``.
 
 from __future__ import annotations
 
-import collections
 import json
 import re
 import subprocess
@@ -121,26 +120,22 @@ class TestGeneratedOutputsAreInStep(unittest.TestCase):
         self.assertIn(G.INDEX_HEADING, self.doc)
         self.assertNotIn("chronological", self.doc.split(G.END_MARK)[0])
 
-    def test_every_decision_has_exactly_one_short_id_owner(self):
-        """One owner per id, counted over EVERY spelling that can claim one.
+    def test_every_decision_has_exactly_one_generated_anchor(self):
+        """The structural gate: generation emits one anchor per decision.
 
-        The previous version of this test counted only the generated
-        ``<a id="d-NN"></a>`` spelling, so an authored ``<a name="d-NN">``,
-        a ``<span id="d-NN">``, an ``<h3 id="d-NN">`` or a bare Setext
-        ``D-NN`` heading could create a second owner while it reported exactly
-        one (Sol, PR #64). It now shares ``short_id_owners`` with the validator
-        that refuses those forms in a source.
+        This checks the LITERAL form the generator writes, which is exact and
+        needs no model of Markdown. It does NOT establish that an authored
+        body cannot introduce a second owner of the same short id in some
+        other spelling -- that rule was cut from this PR after five review
+        rounds kept finding further spellings, and the residual risk is an
+        ambiguous `#d-NN` fragment rather than a dead link. The dead-link
+        class is closed structurally, because every anchor is emitted outside
+        every authored body.
         """
-        owners = G.short_id_owners(self.doc)
-        counts = collections.Counter(short for _line, _kind, short in owners)
-        duplicated = {k: v for k, v in counts.items() if v > 1}
-        self.assertEqual({}, duplicated,
-                         "these short ids have more than one owner in the generated "
-                         f"document, so the fragment is ambiguous: {duplicated}")
-        self.assertEqual({i.lower() for i in self.entries}, set(counts),
-                         "every decision must own its short id, and nothing else may")
-        self.assertEqual({"html id attribute"}, {kind for _l, kind, _s in owners},
-                         "the only owner of a short id is the generated anchor")
+        anchors = re.findall(r'^<a id="(d-\d{2})"></a>$', self.doc, re.MULTILINE)
+        self.assertEqual(len(anchors), len(set(anchors)), "duplicate generated anchor")
+        self.assertEqual({i.lower() for i in self.entries}, set(anchors),
+                         "every decision must carry its generated anchor")
         for decision_id in self.entries:
             with self.subTest(decision=decision_id):
                 self.assertIn(

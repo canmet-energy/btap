@@ -89,8 +89,9 @@ One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
 whose first line is its own `## D-NN —` heading. That file is CANONICAL.
 Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
 GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
-are never hand-edited. Anchors and the index are inserted by the generator, so a
-body never declares its own `d-NN` anchor; the front-matter `title` is the
+are never hand-edited. Anchors and the index are inserted by the generator; by
+convention a body does not declare its own `d-NN` anchor. The front-matter
+`title` is the
 compact index title and the body's heading is authored prose, which differ on
 purpose. A `kind: runtime` entry must be cited by product Python source.
 
