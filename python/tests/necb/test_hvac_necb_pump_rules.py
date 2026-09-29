@@ -876,7 +876,9 @@ class TestNecbPumpRules(unittest.TestCase):
         """The list is a measured fact, not an assertion.
 
         Each entry must expose an SDK accessor that NAMES its tertiary as a
-        load, and that accessor must be the same loop as `tertiaryPlantLoop`.
+        load. It does NOT check that the named accessor and `tertiaryPlantLoop`
+        are the same loop — an earlier version of this docstring claimed it did,
+        which the module comment on `TERTIARY_LOAD_CASTS` already corrects.
         Absorption chillers must stay out, because theirs is `generatorLoop` —
         a heat SOURCE (Fable, PR #63).
         """

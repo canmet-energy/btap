@@ -1111,8 +1111,17 @@ def _served_zone_names(loop_, _seen=None):
 
         # Equipment that passes the load on to another loop rather than a zone.
         # Same dual-loop class as the network walk, so the two cannot disagree
-        # about what couples loops; here the DIRECTION matters, and the loop
-        # this one serves is the component's supply-side loop.
+        # about what couples loops; here the DIRECTION matters.
+        #
+        # `_load_loops` returns the component's supply-side loop, plus a tertiary
+        # verified to be a load. That is right when this loop SUPPLIES the
+        # component — but it is wrong when this loop is itself the component's
+        # load tertiary, because the SDK puts a heat-recovery connection on the
+        # recovery loop's DEMAND side. Walking the recovery loop then finds the
+        # chiller and attributes the CHILLED-water blocks to the HEATING loop the
+        # chiller merely heats, which is a false one-to-one. Pre-existing and
+        # identical on 25d8795; logged as DF-20 rather than repaired here,
+        # because the repair moves attribution (Fable, PR #63).
         for served in _load_loops(comp):
             zones |= _served_zone_names(served, seen)
     return zones
@@ -1405,7 +1414,7 @@ def _transfer_by_correspondence(reference_loop, proposed, prefix, audit):
         # conservative bound: 5.2.6.3 is a ceiling, so the default may sit
         # above or below whatever a transfer would have produced and can bias
         # the reference in either direction. Calling it conservative would be
-        # false comfort. The other four declines keep D-93's existing text —
+        # false comfort. Every other decline keeps D-93's existing text —
         # the same is arguably true of them, but that is a D-93 question and
         # not a side effect of this ruling (Fable, PR #63).
         if n_to_1:

@@ -1400,6 +1400,47 @@ any result.
   frozen baseline contains one. The risk is a foreign model, which is exactly
   the population the costing path accepts.
 
+- **DF-20 — a loop is attributed its SUPPLIER's thermal blocks when the
+  supplier reaches it through a load tertiary, producing a silent false
+  one-to-one.** Opened 2026-09-29 (Fable, PR #63). **Pre-existing: identical on
+  `25d8795`.** Not repaired in PR #63 because the repair moves attribution.
+
+  `_served_zone_names` treats every `WaterToWaterComponent` on a loop's DEMAND
+  side as equipment passing load onward, and takes its `plantLoop()`. But the SDK
+  places a heat-recovery connection on the recovery loop's **demand** side —
+  `ChillerElectricEIR.addToTertiaryNode` succeeds on `demandInletNode` and is
+  refused on the supply inlet or outlet. Walking the recovery loop therefore finds
+  the chiller and attributes the **chilled-water** loop's blocks to the
+  **heating** loop the chiller merely heats.
+
+  Measured, and the same on head and on `25d8795`:
+
+  ```text
+  served(Recovery HW)          ['Block A', 'Block R']   physically {Block R}
+  reference {A,R} vs Recovery HW   'one-to-one'   -> (3) transfers, silently
+  reference {R}   vs Recovery HW   partial overlap decline  <- the physically right pair
+  ```
+
+  So a proposed heating loop that physically serves one block matches one-to-one
+  with a reference loop serving two, and (3) transfers from its pump with no
+  warning. That is the D-93 false-correspondence class — the same one the
+  absorption-chiller fix in PR #63 closed from the other direction.
+
+  `HeatPumpPlantLoopEIRHeating`/`Cooling` accept a tertiary on `demandInlet` too,
+  so they share the shape.
+
+  **Exposure in this repository is nil**: no builder wires any tertiary
+  (`grep addToTertiaryNode btap/modeling` finds nothing; `hp_plant_fancoils.py`
+  uses the EIR heat pumps without one), and no frozen baseline contains one. The
+  risk is a foreign model — the same population as [DF-19](#).
+
+  **Remedy to evaluate:** a component whose `tertiaryPlantLoop()` IS this loop,
+  and whose class is in `TERTIARY_LOAD_CASTS`, is a SUPPLIER of this loop rather
+  than a load of it, so its `plantLoop()` blocks must not be attributed here. One
+  condition, but it changes served-zone attribution and therefore which sentence
+  fires on existing models — so it belongs with DF-19's repair on a branch based
+  on the landed D-97 code, with a measured blast radius.
+
 ## Stage 1 — opened 2026-09-08
 
 Opened on the user's instruction before the Stage 0 PR is merged (push
