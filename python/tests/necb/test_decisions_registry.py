@@ -26,7 +26,8 @@ reusing the keyword name cannot masquerade as audit evidence.
 The audit-surface check is deliberately SYNTACTIC: any attribute call
 named decision/info/warn counts — the scanner enforces the project's
 audit-call convention, it does not resolve receiver types (a stdlib-only
-test cannot, and Leg B verifies the actual audit output anyway). An
+test cannot, and the frozen scenarios in ``verification/scenarios/`` compare
+the actual audit output). An
 expanded keyword dictionary (``**{"ruling": ...}``) on an audit-surface
 call is REFUSED outright: the AST sees it as an anonymous keyword that
 would bypass grammar, resolution, and the inventory.

@@ -65,26 +65,45 @@ SPLIT_HEADING_RE = re.compile("^## (D-\\d{2})(?: " + EM_DASH + " (.+))?$")
 ANCHOR_RE = re.compile(r'^<a id="d-\d{2}"></a>$')
 
 #: Generation owns the short ``d-NN`` element-id surface, and these are the
-#: constructs that can claim it. An earlier version recognised only
-#: ``<a id=...>`` and an ATX bare heading, which let three other real spellings
-#: through the parser while the uniqueness test -- which counted only the
-#: generated spelling -- stayed green (Sol, PR #64).
+#: constructs that can claim it.
 #:
 #: The attribute form is matched INSIDE an HTML tag, for any element, either
 #: attribute name, any quoting and any case: GitHub's sanitiser rewrites both
 #: ``id`` and ``name`` to ``user-content-d-NN``, so ``<a name="d-01">`` and
 #: ``<span id="d-01">`` own the target exactly as ``<a id="d-01">`` does.
-#: Requiring the tag context is what keeps it from matching a TOML ``id =``
-#: assignment. ``re.S`` because a tag may wrap across lines.
+#: Requiring the tag context is what keeps it off a TOML ``id =`` assignment,
+#: and requiring whitespace before the attribute keeps ``data-id`` out. An
+#: unquoted value must end at whitespace or ``>``, so ``id=d-01-note`` is a
+#: different id and not a claim (Sol, PR #64). ``re.S`` because a tag may wrap.
 HTML_SHORT_ID_RE = re.compile(
-    r"""<[a-zA-Z][^>]*?\b(?P<attr>id|name)\s*=\s*(?P<q>["']|)\s*(?P<id>d-\d{2,})\s*(?P=q)""",
+    r"""<[a-zA-Z][^>]*?\s(?P<attr>id|name)\s*=\s*"""
+    r"""(?:(?P<q>["'])\s*(?P<quoted>d-\d{2,})\s*(?P=q)"""
+    r"""|(?P<bare>d-\d{2,})(?=[\s>]))""",
     re.IGNORECASE | re.DOTALL)
-#: A bare ``D-NN`` heading slugs to the short id on its own. Both spellings
-#: count: ATX (``## D-01``, optionally closed with trailing hashes) and Setext
-#: (``D-01`` underlined by ``=`` or ``-``).
-BARE_ATX_RE = re.compile(r"^#{1,6}[ \t]+(D-\d{2,})[ \t]*#*[ \t]*$")
-BARE_TEXT_RE = re.compile(r"^(D-\d{2,})[ \t]*$")
-SETEXT_UNDERLINE_RE = re.compile(r"^(?:=+|-+)[ \t]*$")
+
+#: Markdown block prefixes a reader strips before recognising a heading:
+#: up to three spaces of indentation, blockquote markers, and list markers.
+#: Applied repeatedly so a nested list is normalised too.
+BLOCK_PREFIX_RE = re.compile(r"^[ \t]{0,3}(?:>[ \t]?|[-*+][ \t]+|\d{1,9}[.)][ \t]+)")
+#: After normalising, a line that is nothing but a short id is refused
+#: outright. This is deliberately broader than "a Setext heading": modelling
+#: which standalone ``D-NN`` lines GitHub turns into a heading is the
+#: column-zero game that leaked indented, list-nested and blockquoted forms
+#: through three separate attempts. A source has no need of a standalone
+#: ``D-NN`` paragraph, so none is allowed and the underline never has to be
+#: inspected (Sol, PR #64).
+STANDALONE_SHORT_ID_RE = re.compile(r"^(D-\d{2,})$")
+#: A bare ``D-NN`` ATX heading, optionally closed with trailing hashes.
+BARE_ATX_RE = re.compile(r"^#{1,6}[ \t]+(D-\d{2,})[ \t]*#*$")
+
+
+def unprefixed(line: str) -> str:
+    """``line`` with Markdown block prefixes and surrounding space removed."""
+    while True:
+        match = BLOCK_PREFIX_RE.match(line)
+        if match is None:
+            return line.strip()
+        line = line[match.end():]
 
 
 def short_id_owners(text):
@@ -93,24 +112,27 @@ def short_id_owners(text):
     Returns ``(line, kind, id)`` tuples. ONE implementation, shared: the
     validator refuses any owner inside an authored body, and the generated
     document's uniqueness test asserts exactly one owner per decision over the
-    same set of spellings. The previous split -- a narrow rule in the parser
-    and a narrower count in the test -- is why four authored forms could create
-    a second owner with the suite green.
+    same set of spellings. A split -- a rule in the parser and a narrower count
+    in the test -- is what let authored forms create a second owner with the
+    suite green, twice.
+
+    No line is exempt. The body's required titled heading carries text after
+    the id, so it matches neither heading arm; exempting line 1 wholesale
+    instead had accepted ``## D-01 -- Main <a name="d-01"></a>``.
     """
     owners = []
-    lines = text.split("\n")
     for match in HTML_SHORT_ID_RE.finditer(text):
-        line = text.count("\n", 0, match.start()) + 1
-        owners.append((line, "html {} attribute".format(match.group("attr").lower()),
-                       match.group("id").lower()))
-    for number, line in enumerate(lines, start=1):
-        bare = BARE_ATX_RE.match(line)
+        owners.append((text.count("\n", 0, match.start()) + 1,
+                       "html {} attribute".format(match.group("attr").lower()),
+                       (match.group("quoted") or match.group("bare")).lower()))
+    for number, line in enumerate(text.split("\n"), start=1):
+        normalised = unprefixed(line)
+        standalone = STANDALONE_SHORT_ID_RE.match(normalised)
+        if standalone:
+            owners.append((number, "standalone short id", standalone.group(1).lower()))
+        bare = BARE_ATX_RE.match(normalised)
         if bare:
             owners.append((number, "bare ATX heading", bare.group(1).lower()))
-        text_line = BARE_TEXT_RE.match(line)
-        if (text_line and number < len(lines)
-                and SETEXT_UNDERLINE_RE.match(lines[number])):
-            owners.append((number, "bare Setext heading", text_line.group(1).lower()))
     return sorted(owners)
 
 
@@ -234,9 +256,7 @@ def validate(name: str, meta: dict, body: str) -> None:
     if heading.group(1) != meta["id"]:
         raise ValueError("{}: heading declares {}, front matter {}".format(
             name, heading.group(1), meta["id"]))
-    # The body's own first line is an ATX heading, but a TITLED one, so it
-    # never claims the short id; every other owner is refused.
-    owners = [owner for owner in short_id_owners(body) if owner[0] != 1]
+    owners = short_id_owners(body)
     if owners:
         line, kind, short = owners[0]
         raise ValueError(

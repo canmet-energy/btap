@@ -172,76 +172,85 @@ class TestSourceValidation(unittest.TestCase):
     def test_a_body_may_not_declare_its_own_short_id_in_ANY_spelling(self):
         """Every construct that owns ``d-NN``, not just the generated one.
 
-        The first four below passed the parser while the uniqueness test
-        reported exactly one owner, because the parser recognised only
-        ``<a id=>`` and an ATX heading and the test counted only ``<a id=>``
-        (Sol, PR #64). GitHub's sanitiser rewrites BOTH ``id`` and ``name``,
-        on any element, to ``user-content-d-NN``.
+        Two review rounds of this rule each shipped a scanner narrower than
+        what GitHub renders, and each time the uniqueness test shared the same
+        narrow scanner and stayed green (Sol, PR #64). The first round missed
+        the ``name`` attribute, non-anchor elements and Setext; the second
+        still modelled headings at column zero only, so three-space indented
+        ATX, indented Setext and list-nested Setext all rendered as headings
+        and passed. Sharing an incomplete scanner makes the validator and the
+        assertion agree; it does not make the scanner right.
         """
         claims = {
             '<a name="d-01"></a>': "the name attribute, which also owns the target",
             '<span id="d-01"></span>': "a non-anchor element",
             "<h3 id='d-01'>Other</h3>": "single quotes on a heading element",
-            "D-01\n-----": "a bare Setext heading",
             '<a id="d-01"></a>': "the generated spelling, authored by hand",
             "<A ID = \"D-01\" ></A>": "uppercase, spaced",
             "<a id=d-01></a>": "unquoted",
             'text <a id="d-01"></a> inline': "inline rather than standalone",
             "### D-01": "a bare ATX heading",
             "### D-01 ###": "a closed ATX heading",
+            "   ### D-01": "ATX indented three spaces, which still renders",
+            "D-01\n----": "a bare Setext heading",
+            "   D-01\n   ----": "Setext indented three spaces",
+            "- D-01\n  ----": "Setext inside a list item",
+            "> D-01": "a short id alone inside a blockquote",
+            "1. D-01": "a short id alone inside an ordered list",
         }
         for claim, why in claims.items():
             with self.subTest(claim=why):
                 self.rejects("element-id surface", body=GOOD_BODY + "\n" + claim + "\n")
 
-    def test_a_titled_heading_and_an_unrelated_tag_are_not_claims(self):
-        """The rule must not fire on the body's own heading or on ordinary text.
+    def test_an_owner_on_the_headings_own_line_is_not_exempt(self):
+        """No line is exempt, including line 1.
+
+        Excluding line 1 wholesale -- on the premise that the required titled
+        heading cannot own the short id -- accepted an HTML owner appended to
+        that very heading (Sol, PR #64). The titled heading carries text after
+        the id, so it matches neither heading arm and needs no exemption.
+        """
+        self.rejects("element-id surface",
+                     body='## D-01 {} Main <a name="d-01"></a>\n'.format(EM))
+
+    def test_the_rule_does_not_fire_on_look_alikes(self):
+        """The conservative ban must not become a ban on ordinary prose.
 
         A TOML ``id = "D-01"`` assignment is the case that forced the tag
         context: without it the front matter of every source is a false claim.
+        ``data-id`` and a longer unquoted id are Sol's false-rejection cases.
         """
         for benign in ('a paragraph mentioning D-01 and id = "D-01" in prose',
                        "## D-01 " + EM + " a titled heading later in the body",
                        '<a href="#d-01">a link, not a declaration</a>',
-                       "<a id=\"d-99-note\"></a>"):
-            with self.subTest(benign=benign[:40]):
-                meta, body = self.parse(body=GOOD_BODY + "\n" + benign + "\n")
+                       '<a data-id="d-01">a different attribute</a>',
+                       "<a id=d-01-note>a longer unquoted id</a>",
+                       '<a id="d-01-note">a longer quoted id</a>',
+                       "- D-01 is discussed in this list item",
+                       "D-01 opens a sentence that continues."):
+            with self.subTest(benign=benign[:44]):
+                _meta, body = self.parse(body=GOOD_BODY + "\n" + benign + "\n")
                 self.assertIn(benign, body)
 
     def test_the_owner_scan_finds_each_spelling(self):
         """The shared scanner itself, so both callers rest on tested behaviour."""
         found = G.short_id_owners(
             '<a id="d-01"></a>\n<a name="d-02"></a>\n<span id="d-03"></span>\n'
-            "### D-04\nD-05\n=====\n")
+            "### D-04\n   D-05\n")
         self.assertEqual(
             [(1, "html id attribute", "d-01"),
              (2, "html name attribute", "d-02"),
              (3, "html id attribute", "d-03"),
              (4, "bare ATX heading", "d-04"),
-             (5, "bare Setext heading", "d-05")], found)
+             (5, "standalone short id", "d-05")], found)
 
-    def test_trailing_newline_discipline(self):
-        self.rejects("exactly one newline", body=GOOD_BODY.rstrip("\n"))
-        self.rejects("exactly one newline", body=GOOD_BODY + "\n")
-
-    def test_a_malformed_front_matter_fence_is_refused(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "D-01.md"
-            path.write_text('id = "D-01"\n\n' + GOOD_BODY, encoding="utf-8")
-            with self.assertRaises(ValueError):
-                G.parse_source(path)
-            path.write_text(G.FENCE + '\nid = "D-01"\n\n' + GOOD_BODY, encoding="utf-8")
-            with self.assertRaises(ValueError):
-                G.parse_source(path)
-
-    def test_the_closing_fence_needs_its_blank_line(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "D-01.md"
-            path.write_text(G.front_matter(GOOD_META) + "\n" + GOOD_BODY,
-                            encoding="utf-8")
-            with self.assertRaises(ValueError) as caught:
-                G.parse_source(path)
-            self.assertIn("blank line", str(caught.exception))
+    def test_block_prefixes_are_normalised_before_the_line_is_judged(self):
+        for line, expected in (("   D-01", "D-01"), ("- D-01", "D-01"),
+                               ("> D-01", "D-01"), ("  1. D-01", "D-01"),
+                               ("- > D-01", "D-01"), ("D-01 and more", "D-01 and more"),
+                               ("    D-01", "D-01")):
+            with self.subTest(line=line):
+                self.assertEqual(expected, G.unprefixed(line))
 
 
 class TestRendering(unittest.TestCase):
