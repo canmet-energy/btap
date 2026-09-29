@@ -254,6 +254,80 @@ class TestRendering(unittest.TestCase):
             G.generate(directory)
 
 
+class TestStrayFilesAreRefused(unittest.TestCase):
+    """A decision the `D-*.md` glob misses must be REFUSED, not skipped.
+
+    This module's contract is that each rule is shown to reject something. The
+    first fix for this had no rejection test at all, and the positive assertion
+    that "covered" it reimplemented the production expression, so the guard
+    could be deleted with the suite green (Fable, PR #64).
+    """
+
+    def sources(self):
+        directory = Path(tempfile.mkdtemp())
+        write(directory)
+        (directory / G.PREAMBLE_FILE).write_text("# Log\n\n---\n", encoding="utf-8")
+        (directory / G.META_FILE).write_text(
+            json.dumps({"registry_comment": ["generated"]}) + "\n", encoding="utf-8")
+        return directory
+
+    def test_a_missed_decision_filename_is_refused(self):
+        for name in ("d-98.md", "D-98.MD", "D98.md", "D-98.markdown",
+                     "README.md", "_template.md"):
+            with self.subTest(name=name):
+                directory = self.sources()
+                (directory / name).write_text(
+                    G.source_text(dict(GOOD_META, id="D-98"),
+                                  "## D-98 {} Heading\n".format(EM)),
+                    encoding="utf-8")
+                self.assertEqual([name], G.stray_files(directory))
+                with self.assertRaises(ValueError) as caught:
+                    G.read_sources(directory)
+                self.assertIn(name, str(caught.exception))
+
+    def test_a_nested_or_symlinked_directory_is_refused(self):
+        """`rglob` does not descend a directory symlink and never calls
+        `is_file()` on it, so a linked-in directory of sources slipped past."""
+        directory = self.sources()
+        nested = directory / "sub"
+        nested.mkdir()
+        (nested / "D-98.md").write_text("x", encoding="utf-8")
+        self.assertEqual(["sub/D-98.md"], G.stray_files(directory))
+
+        linked = self.sources()
+        elsewhere = Path(tempfile.mkdtemp()) / "held"
+        elsewhere.mkdir()
+        (elsewhere / "D-98.md").write_text("x", encoding="utf-8")
+        (linked / "extra").symlink_to(elsewhere, target_is_directory=True)
+        self.assertEqual(["extra (symlink)"], G.stray_files(linked))
+        with self.assertRaises(ValueError):
+            G.read_sources(linked)
+
+    def test_editor_and_os_debris_is_NOT_refused(self):
+        """The predicate must not stop a developer running the gate.
+
+        `.D-01.md.swp` exists while a vim buffer is open. Failing on it trains
+        people around the gate rather than through it (Fable, PR #64).
+        """
+        directory = self.sources()
+        for name in (".DS_Store", ".D-01.md.swp", "D-01.md~", ".gitkeep",
+                     "notes.txt"):
+            (directory / name).write_text("x", encoding="utf-8")
+        self.assertEqual([], G.stray_files(directory))
+        G.read_sources(directory)          # must not raise
+
+    def test_an_unexpected_meta_key_is_refused(self):
+        """Front matter refuses one; this refused nothing, so an edit could
+        silently take no effect (Fable, PR #64)."""
+        directory = self.sources()
+        (directory / G.META_FILE).write_text(
+            json.dumps({"registry_comment": [], "doc_title": "never appears"}) + "\n",
+            encoding="utf-8")
+        with self.assertRaises(ValueError) as caught:
+            G.read_sources(directory)
+        self.assertIn("doc_title", str(caught.exception))
+
+
 class TestCheckReportsStaleWithoutWriting(unittest.TestCase):
     """`--check` must return 1 on drift and write nothing.
 

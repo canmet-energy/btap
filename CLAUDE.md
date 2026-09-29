@@ -217,7 +217,11 @@ asserts the filter stays absent.
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
 moves. Documentation-only pushes are path-ignored by **`test.yml`**, so run local
 doc checks before merging documentation changes — but the decisions gate still
-runs, so a forgotten `generate_decisions.py` cannot merge green.
+runs, so a forgotten `generate_decisions.py` shows up as a RED run rather than
+no run at all. It does not block the merge: `main` has no branch protection and
+no rulesets, and `main-red` is a job inside `test.yml`, so a docs-only push to
+`main` with stale outputs turns `decisions` red while `test.yml` never runs and
+no incident is opened. The gate makes that failure visible, not impossible.
 
 ## Traps
 

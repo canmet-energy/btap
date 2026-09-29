@@ -276,6 +276,12 @@ canonical source of the runtime registry while `test.yml` path-ignores
 `test.yml` would not run, and `main` has no branch protection to require it.
 `python/tests/test_decisions_gate_is_unskippable.py` keeps the filter absent.
 
+What the gate does NOT do: block a merge. `main` carries no branch protection
+and no rulesets, and `main-red` is a job inside `test.yml` gated on that
+workflow's own jobs — so a docs-only push to `main` with stale outputs turns
+`decisions` red while `test.yml` never runs and no incident issue is opened. The
+gate moves that failure from invisible to visible; someone still has to look.
+
 
 `parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
 declared. Run them whenever the oracle pin changes.

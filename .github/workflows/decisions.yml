@@ -28,6 +28,9 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  # Not enabled today (no rulesets), but if a merge queue is ever turned on the
+  # gate must run on the queued commit rather than only on the PR head.
+  merge_group:
   workflow_dispatch:
 
 permissions:
