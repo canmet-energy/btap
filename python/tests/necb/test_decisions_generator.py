@@ -169,15 +169,56 @@ class TestSourceValidation(unittest.TestCase):
         self.rejects("heading declares",
                      body="## D-02 {} Another decision\n\nBody.\n".format(EM))
 
-    def test_a_body_may_not_declare_its_own_short_anchor(self):
-        """Generation owns ``d-NN``; a hand-authored one is a second owner."""
-        for anchor in ('<a id="d-01"></a>', "<A ID='d-01'></a>",
-                       'text <a id="d-01"></a> inline'):
-            with self.subTest(anchor=anchor):
-                self.rejects("owns the", body=GOOD_BODY + "\n" + anchor + "\n")
+    def test_a_body_may_not_declare_its_own_short_id_in_ANY_spelling(self):
+        """Every construct that owns ``d-NN``, not just the generated one.
 
-    def test_a_second_bare_heading_would_claim_the_short_id_again(self):
-        self.rejects("bare", body=GOOD_BODY + "\n### D-01\n")
+        The first four below passed the parser while the uniqueness test
+        reported exactly one owner, because the parser recognised only
+        ``<a id=>`` and an ATX heading and the test counted only ``<a id=>``
+        (Sol, PR #64). GitHub's sanitiser rewrites BOTH ``id`` and ``name``,
+        on any element, to ``user-content-d-NN``.
+        """
+        claims = {
+            '<a name="d-01"></a>': "the name attribute, which also owns the target",
+            '<span id="d-01"></span>': "a non-anchor element",
+            "<h3 id='d-01'>Other</h3>": "single quotes on a heading element",
+            "D-01\n-----": "a bare Setext heading",
+            '<a id="d-01"></a>': "the generated spelling, authored by hand",
+            "<A ID = \"D-01\" ></A>": "uppercase, spaced",
+            "<a id=d-01></a>": "unquoted",
+            'text <a id="d-01"></a> inline': "inline rather than standalone",
+            "### D-01": "a bare ATX heading",
+            "### D-01 ###": "a closed ATX heading",
+        }
+        for claim, why in claims.items():
+            with self.subTest(claim=why):
+                self.rejects("element-id surface", body=GOOD_BODY + "\n" + claim + "\n")
+
+    def test_a_titled_heading_and_an_unrelated_tag_are_not_claims(self):
+        """The rule must not fire on the body's own heading or on ordinary text.
+
+        A TOML ``id = "D-01"`` assignment is the case that forced the tag
+        context: without it the front matter of every source is a false claim.
+        """
+        for benign in ('a paragraph mentioning D-01 and id = "D-01" in prose',
+                       "## D-01 " + EM + " a titled heading later in the body",
+                       '<a href="#d-01">a link, not a declaration</a>',
+                       "<a id=\"d-99-note\"></a>"):
+            with self.subTest(benign=benign[:40]):
+                meta, body = self.parse(body=GOOD_BODY + "\n" + benign + "\n")
+                self.assertIn(benign, body)
+
+    def test_the_owner_scan_finds_each_spelling(self):
+        """The shared scanner itself, so both callers rest on tested behaviour."""
+        found = G.short_id_owners(
+            '<a id="d-01"></a>\n<a name="d-02"></a>\n<span id="d-03"></span>\n'
+            "### D-04\nD-05\n=====\n")
+        self.assertEqual(
+            [(1, "html id attribute", "d-01"),
+             (2, "html name attribute", "d-02"),
+             (3, "html id attribute", "d-03"),
+             (4, "bare ATX heading", "d-04"),
+             (5, "bare Setext heading", "d-05")], found)
 
     def test_trailing_newline_discipline(self):
         self.rejects("exactly one newline", body=GOOD_BODY.rstrip("\n"))

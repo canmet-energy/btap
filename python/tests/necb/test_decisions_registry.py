@@ -1,10 +1,15 @@
-"""The Python half of the two-sided runtime-citation invariant (R3, D-81).
+"""The runtime-citation invariant (R3, D-81): every ``kind: runtime``
+decision is cited by a ``ruling`` literal in product Python.
 
-While both implementations exist (until R6), every ``kind: runtime``
-decision must be cited by a ``ruling`` literal in BOTH of them — the Ruby
-gem's ``test_decisions_registry.rb`` enforces its side over gem ``lib/``;
-THIS file enforces the Python side over ``python/btap``, reading the
-CANONICAL registry (``python/btap/codes/data/decisions.json``).
+This was once two-sided, enforced here over ``python/btap`` and in the Ruby
+gem's ``test_decisions_registry.rb`` over gem ``lib/``. D-84 retired the gems
+at R6, so the Python side is the whole invariant now.
+
+The registry it reads, ``python/btap/codes/data/decisions.json``, is
+GENERATED from the canonical per-decision sources in ``docs/decisions/``
+(D-81, amended 2026-09-29). This file is therefore checking citations against
+a projection; ``test_decisions_registry_sync.py`` is what holds that
+projection to its sources.
 
 Discovery is AST-BASED, deliberately: a line-regex scan counted the
 ``ruling='D-14'`` EXAMPLE in a module docstring as a citation, so a future
@@ -141,9 +146,7 @@ class TestRuntimeCitations(unittest.TestCase):
         self.assertEqual(
             [], uncited,
             f"kind:runtime but no ruling literal cites them in python/btap: "
-            f"{uncited} (tag the call site, or re-classify the entry) — a "
-            "runtime decision must be cited in BOTH implementations while "
-            "both exist (until R6)")
+            f"{uncited} (tag the call site, or re-classify the entry)")
 
     def test_non_runtime_entries_are_not_cited(self):
         cited = _cited_ids(self.sites)

@@ -63,11 +63,55 @@ HEADING_RE = re.compile("^## (D-\\d{2}) " + EM_DASH + " (.+)$")
 #: heading title at all. Only ``--split`` accepts it.
 SPLIT_HEADING_RE = re.compile("^## (D-\\d{2})(?: " + EM_DASH + " (.+))?$")
 ANCHOR_RE = re.compile(r'^<a id="d-\d{2}"></a>$')
-#: Generation owns the short ``d-NN`` anchor surface. A body may not declare a
-#: competing owner, whether as an explicit anchor or as a bare heading whose
-#: natural slug is the same short id.
-BODY_ANCHOR_RE = re.compile(r'<a\s+id\s*=\s*["\']?d-\d{2}', re.IGNORECASE)
-BARE_HEADING_RE = re.compile(r"^#{1,6}[ \t]+D-\d{2}[ \t]*$")
+
+#: Generation owns the short ``d-NN`` element-id surface, and these are the
+#: constructs that can claim it. An earlier version recognised only
+#: ``<a id=...>`` and an ATX bare heading, which let three other real spellings
+#: through the parser while the uniqueness test -- which counted only the
+#: generated spelling -- stayed green (Sol, PR #64).
+#:
+#: The attribute form is matched INSIDE an HTML tag, for any element, either
+#: attribute name, any quoting and any case: GitHub's sanitiser rewrites both
+#: ``id`` and ``name`` to ``user-content-d-NN``, so ``<a name="d-01">`` and
+#: ``<span id="d-01">`` own the target exactly as ``<a id="d-01">`` does.
+#: Requiring the tag context is what keeps it from matching a TOML ``id =``
+#: assignment. ``re.S`` because a tag may wrap across lines.
+HTML_SHORT_ID_RE = re.compile(
+    r"""<[a-zA-Z][^>]*?\b(?P<attr>id|name)\s*=\s*(?P<q>["']|)\s*(?P<id>d-\d{2,})\s*(?P=q)""",
+    re.IGNORECASE | re.DOTALL)
+#: A bare ``D-NN`` heading slugs to the short id on its own. Both spellings
+#: count: ATX (``## D-01``, optionally closed with trailing hashes) and Setext
+#: (``D-01`` underlined by ``=`` or ``-``).
+BARE_ATX_RE = re.compile(r"^#{1,6}[ \t]+(D-\d{2,})[ \t]*#*[ \t]*$")
+BARE_TEXT_RE = re.compile(r"^(D-\d{2,})[ \t]*$")
+SETEXT_UNDERLINE_RE = re.compile(r"^(?:=+|-+)[ \t]*$")
+
+
+def short_id_owners(text):
+    """Every construct in ``text`` that claims a ``d-NN`` element id.
+
+    Returns ``(line, kind, id)`` tuples. ONE implementation, shared: the
+    validator refuses any owner inside an authored body, and the generated
+    document's uniqueness test asserts exactly one owner per decision over the
+    same set of spellings. The previous split -- a narrow rule in the parser
+    and a narrower count in the test -- is why four authored forms could create
+    a second owner with the suite green.
+    """
+    owners = []
+    lines = text.split("\n")
+    for match in HTML_SHORT_ID_RE.finditer(text):
+        line = text.count("\n", 0, match.start()) + 1
+        owners.append((line, "html {} attribute".format(match.group("attr").lower()),
+                       match.group("id").lower()))
+    for number, line in enumerate(lines, start=1):
+        bare = BARE_ATX_RE.match(line)
+        if bare:
+            owners.append((number, "bare ATX heading", bare.group(1).lower()))
+        text_line = BARE_TEXT_RE.match(line)
+        if (text_line and number < len(lines)
+                and SETEXT_UNDERLINE_RE.match(lines[number])):
+            owners.append((number, "bare Setext heading", text_line.group(1).lower()))
+    return sorted(owners)
 
 
 def numeric_order(ids) -> list:
@@ -190,15 +234,15 @@ def validate(name: str, meta: dict, body: str) -> None:
     if heading.group(1) != meta["id"]:
         raise ValueError("{}: heading declares {}, front matter {}".format(
             name, heading.group(1), meta["id"]))
-    for number, line in enumerate(lines, start=1):
-        if BODY_ANCHOR_RE.search(line):
-            raise ValueError(
-                "{}: line {} declares a short anchor; generation owns the "
-                "d-NN anchor surface".format(name, number))
-        if number > 1 and BARE_HEADING_RE.match(line):
-            raise ValueError(
-                "{}: line {} is a bare '{}' heading, which would claim the "
-                "short id a second time".format(name, number, line.strip()))
+    # The body's own first line is an ATX heading, but a TITLED one, so it
+    # never claims the short id; every other owner is refused.
+    owners = [owner for owner in short_id_owners(body) if owner[0] != 1]
+    if owners:
+        line, kind, short = owners[0]
+        raise ValueError(
+            "{}: line {} is a {} claiming '{}'; generation owns the d-NN "
+            "element-id surface, so a body may not declare one".format(
+                name, line, kind, short))
     if not body.endswith("\n") or body.endswith("\n\n"):
         raise ValueError("{}: body must end with exactly one newline".format(name))
 
@@ -231,7 +275,11 @@ def render_toc(entries: dict) -> str:
 def render_doc(preamble: str, entries: dict) -> str:
     sections = ['<a id="{}"></a>\n\n{}'.format(i.lower(), entries[i][1])
                 for i in numeric_order(entries)]
-    return preamble + render_toc(entries) + "\n\n" + "\n".join(sections)
+    # The blank line between the preamble and the index is the generator's, so
+    # the source file ends at one terminal newline rather than carrying
+    # trailing whitespace that `git diff --check` flags (Sol, PR #64).
+    return (preamble.rstrip("\n") + "\n\n" + render_toc(entries)
+            + "\n\n" + "\n".join(sections))
 
 
 def render_registry(entries: dict, meta: dict) -> str:

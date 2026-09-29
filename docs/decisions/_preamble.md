@@ -1,10 +1,13 @@
-# NECB gem family — decision record
+# canmet-btap NECB — decision record
 
 > **This file is GENERATED. Do not edit it.** The canonical source of every
 > decision is `docs/decisions/D-NN.md`. See **Maintenance** below.
 
-Adjudicated interpretations and product decisions for the `openstudio-*` NECB
-gem family. Machine-checkable coverage lives elsewhere — article dispositions in
+Adjudicated interpretations and product decisions for the `canmet-btap` NECB
+implementation (`btap.codes.necb`). The five `btap-*` Ruby gems this record
+began under retired at R6 (D-84), and the package was renamed at D-86; entries
+written before those points keep their period wording. Machine-checkable
+coverage lives elsewhere — article dispositions in
 `python/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
 `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
@@ -39,4 +42,3 @@ verbatim reproduction to the generated coverage docs).
 audit are drained and archived — see `docs/README.md`.
 
 ---
-

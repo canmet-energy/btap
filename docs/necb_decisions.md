@@ -1,10 +1,13 @@
-# NECB gem family — decision record
+# canmet-btap NECB — decision record
 
 > **This file is GENERATED. Do not edit it.** The canonical source of every
 > decision is `docs/decisions/D-NN.md`. See **Maintenance** below.
 
-Adjudicated interpretations and product decisions for the `openstudio-*` NECB
-gem family. Machine-checkable coverage lives elsewhere — article dispositions in
+Adjudicated interpretations and product decisions for the `canmet-btap` NECB
+implementation (`btap.codes.necb`). The five `btap-*` Ruby gems this record
+began under retired at R6 (D-84), and the package was renamed at D-86; entries
+written before those points keep their period wording. Machine-checkable
+coverage lives elsewhere — article dispositions in
 `python/btap/codes/data/coverage/necb_8_4_disposition.json`, per-domain
 `article_coverage` manifests, the
 generated `NECB_8_4_COVERAGE.html`, and the evidence rules in
@@ -4792,13 +4795,21 @@ drift gate in CI. There is one writer, where R3's arrangement had the JSON
 hand-maintained and the document's prose hand-authored against it, and R6's
 had a second generator emitting the index alone.
 
-**What did not change:** the registry's content, the two-sided
-runtime-citation invariant (a `kind: "runtime"` entry is still cited by a
-Python `ruling:` tag), and the paraphrase rule for summaries. The migration
-that installed this moved no decision's text: 83 of the 97 bodies were carried
-byte-for-byte, and the other 14 — D-76 through D-89, which had been authored
-without a heading title — had only their first line replaced, taking the
-registry title each already carried in the index.
+**What did not change:** the Python runtime-citation invariant — a
+`kind: "runtime"` entry is still cited by a `ruling:` tag in product Python.
+The two-sided form named in the paragraphs above ended at D-84, which retired
+the Ruby gem, so only the Python side is active. The paraphrase rule for
+summaries is unchanged.
+
+**What the migration moved.** No decision's text was rewritten, but the
+partition is not uniform and an earlier wording of this paragraph stated one
+that does not add up. Of the 97 bodies, 83 were carried byte-for-byte. Of the
+remaining 14 — D-76 through D-89, authored without a heading title — 13
+changed in their first line alone, each taking the registry title it already
+carried in the index, and D-81 changed in its first line **and** by gaining
+this amendment. In the registry, 96 entries are unchanged and D-81's summary
+carries this amendment's substance: the registry's content moved exactly once,
+here.
 
 **Ordering.** Both generated artifacts are emitted in numeric id order. The
 document previously claimed its entries were chronological and they were not:
