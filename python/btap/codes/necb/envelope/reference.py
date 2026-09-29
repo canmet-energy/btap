@@ -246,7 +246,7 @@ def _apply_lightweight_construction(model, ruleset, hdd, prefix, audit):
         thermal = 0.9 if outer is None else outer.thermalAbsorptance()
         visible = 0.7 if outer is None else outer.visibleAbsorptance()
 
-        # Note A-8.4.4.4.(1) [READ, MCP 2026-07-28]: "lightweight" is NOT
+        # The thermal-mass Note [READ, MCP 2026-07-28]: "lightweight" is NOT
         # zero-mass — the note's example assemblies are light FRAME
         # constructions (wood-frame example: 40.8 kg/m2 areal mass, heat
         # capacity 45.5 kJ/(m2.K); steel-frame 33.9 / 35.3), with the layer

@@ -205,8 +205,8 @@ def _assign_interzone_envelope(model, surface, surface_class, ruleset, hdd,
     are building envelope per 1.4.1.2 and must meet the Table 3.2.2.2 row for
     their inclination (the edition's inclination sentence — surfaceType
     already encodes it). The
-    unconditioned enclosure is credited at U 6.25 per 3.1.1.7.(4); both faces
-    see interior air films. The paired surface gets the same construction so
+    unconditioned enclosure is credited at U 6.25 per the edition's
+    enclosed-unconditioned sentence; both faces see interior air films. The paired surface gets the same construction so
     the pair stays consistent. (Legacy OSut instead applies the exposed-FLOOR
     row to attic ceilings — floor 0.175 vs roof 0.156 at HDD 3890 — a more
     lenient reading with no inclination-rule basis; divergence logged.)"""
