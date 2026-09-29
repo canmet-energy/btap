@@ -301,12 +301,22 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         invisible: the live document has no inline anchor and no `### D-NN`, so
         accepting them changed nothing it could show (mutation matrix, PR #60).
 
-        Both forms must be ignored. An anchor mid-line is not a declaration
-        GitHub renders as its own element, and a level-3 heading's slug is not
-        this entry's short id.
+        Both forms are ignored because this gate recognises only the
+        repository's standalone-anchor convention — NOT because GitHub fails to
+        render them. It renders an inline anchor perfectly well:
+
+            text <a id="d-81"></a> more text
+            -> <p>text <a id="user-content-d-81"></a> more text</p>
+
+        so an inline anchor duplicating a declared id sits in the renderer blind
+        spot this reduced gate explicitly accepts, alongside the fence and
+        HTML-block routes named in the class docstring. An earlier version of
+        this comment claimed such an anchor does not render, which is the very
+        renderer-modelling mistake the reduction exists to stop making (Sol,
+        PR #60).
         """
         self.assertEqual({}, self.sources('text <a id="d-81"></a> more text\n'),
-                         "an anchor must be alone on its line to count")
+                         "only a standalone anchor is a declaration by this convention")
         self.assertEqual({}, self.sources("### D-81\n"),
                          "only a level-2 heading carries a decision")
         self.assertEqual({}, self.sources("## D-81 — a title\n"),
