@@ -184,8 +184,10 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
 
     What it deliberately does NOT do is enumerate every construct that could
     ALSO render a `d-NN` id — a heading inside a list, a Setext underline, an
-    entity. Those produce a duplicate id, which makes a fragment ambiguous
-    between two spellings of the same decision; they do not produce a dead link.
+    entity, an INLINE `<a id="d-NN"></a>`, or a `### D-NN` heading, both of
+    which render and own the short slug just as the conventional forms do.
+    Those produce a duplicate id, which makes a fragment ambiguous between two
+    spellings of the same decision; they do not produce a dead link.
 
     **And one class IS a dead link, which an earlier version of this docstring
     failed to say while presenting itself as the complete statement.** A
@@ -311,23 +313,31 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         accepting them changed nothing it could show (mutation matrix, PR #60).
 
         Both forms are ignored because this gate recognises only the
-        repository's standalone-anchor convention — NOT because GitHub fails to
-        render them. It renders an inline anchor perfectly well:
+        repository's source CONVENTIONS — a standalone anchor and a level-2
+        heading — **and not because GitHub fails to render them.** Both render,
+        and both own the short id:
 
             text <a id="d-81"></a> more text
             -> <p>text <a id="user-content-d-81"></a> more text</p>
 
-        so an inline anchor duplicating a declared id sits in the renderer blind
-        spot this reduced gate explicitly accepts, alongside the fence and
-        HTML-block routes named in the class docstring. An earlier version of
-        this comment claimed such an anchor does not render, which is the very
+            ### D-81
+            -> a level-3 heading, slugged from its text like any other, so it
+               owns `d-81` exactly as `## D-81` would
+
+        So each is an ACCEPTED RENDERER BLIND SPOT of this interim gate, listed
+        alongside the fence and HTML-block routes in the class docstring: either
+        could duplicate a declared id without this gate seeing it. Earlier
+        versions of this comment claimed an inline anchor does not render and
+        that a level-3 heading's slug differs — both false, and both the
         renderer-modelling mistake the reduction exists to stop making (Sol,
         PR #60).
         """
         self.assertEqual({}, self.sources('text <a id="d-81"></a> more text\n'),
                          "only a standalone anchor is a declaration by this convention")
         self.assertEqual({}, self.sources("### D-81\n"),
-                         "only a level-2 heading carries a decision")
+                         "only a level-2 heading declares a decision by this convention — a "
+                         "level-3 heading renders and owns the same short slug, and is an "
+                         "accepted blind spot")
         self.assertEqual({}, self.sources("## D-81 — a title\n"),
                          "a titled heading's own slug is its full title, not the short id")
         self.assertEqual({"D-81": ["bare heading slug"]}, self.sources("## D-81\n"))
