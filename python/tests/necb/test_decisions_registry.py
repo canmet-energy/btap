@@ -43,11 +43,6 @@ ID_TOKEN = re.compile(r"\bD-\d{2}\b")
 LITERAL_GRAMMAR = re.compile(r"\AD-\d{2}( D-\d{2})*\Z")
 AUDIT_METHODS = frozenset({"decision", "info", "warn"})
 
-#: A short decision fragment, ``d-95``. Deliberately NOT matching ``d-95-1``:
-#: GitHub's duplicate suffix makes that a different target, so a repeated
-#: heading is a registry-sync problem, not a duplicate element id.
-SHORT_ID = re.compile(r"d-\d+", re.I)
-
 #: A future forwarding call that legitimately passes a variable would be
 #: allowed HERE, by exact (file, method) pair — never by a general rule.
 NONLITERAL_EXCEPTIONS = frozenset()
@@ -170,8 +165,14 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     than GitHub — em-dash spacing, level-3 headings, duplicate-source folding,
     commented-out anchors, list-item headings, nested-list Setext, and finally
     HTML blocks, which hid the very false green the design was adopted to kill.
-    Every round was a defect in the CHECK, not in the document; the document's
-    13 dead links were fixed in the first round and have been correct since.
+    The document reached its present form at `3ad8602` — 81 explicit anchors
+    beside the 14 bare headings — and has not changed since. The SEVEN rounds
+    after that changed only the check. Rounds one to three were not: round one
+    rewrote the links to full heading slugs, and round two put an anchor on all
+    95 entries, which created 14 duplicate element ids on the bare headings.
+    That was a document defect, and earlier wording here and in a commit message
+    claimed the document had been correct from the first round. It had not
+    (Fable, PR #60).
 
     So this asks only what can be answered exactly from the source, with no
     model of Markdown at all:
@@ -184,12 +185,24 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     What it deliberately does NOT do is enumerate every construct that could
     ALSO render a `d-NN` id — a heading inside a list, a Setext underline, an
     entity. Those produce a duplicate id, which makes a fragment ambiguous
-    between two spellings of the same decision; they do not produce a dead
-    link. Chasing them exhaustively is what cost seven rounds, and the fix is
-    structural rather than a wider regex: generate the document from the
-    registry, so a drifting or duplicated anchor cannot be written at all. That
-    is proposed separately; this gate is the interim, and it is honest about
-    being one.
+    between two spellings of the same decision; they do not produce a dead link.
+
+    **And one class IS a dead link, which an earlier version of this docstring
+    failed to say while presenting itself as the complete statement.** A
+    declaration that does not RENDER — inside a code fence, a multi-line HTML
+    comment, or any other HTML block — is still counted here as live. Wrap an
+    entry's anchor and heading in `<!-- … -->` and every test in this file and in
+    `test_decisions_registry_sync` stays green while `#d-NN` resolves nowhere,
+    because both scan raw source. Nothing else in the repository catches it
+    (Fable, PR #60).
+
+    `test_no_declaration_is_hidden_in_a_comment` closes the realistic route —
+    commenting an entry out — with a literal whitelist of the two TOC markers,
+    which needs no Markdown model. The fence route stays open and is accepted:
+    the document has one four-line fence, and the structural fix is to generate
+    the document from the registry so a hidden or duplicated declaration cannot
+    be written at all. That is proposed separately; this gate is the interim and
+    is honest about being one.
     """
 
     DOC = PYTHON_ROOT.parent / "docs" / "necb_decisions.md"
@@ -205,6 +218,49 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     #: element ids (Sol, PR #60).
     ANCHOR = re.compile(r'^<a id="(d-\d+)"></a>$', re.M)
     BARE_HEADING = re.compile(r"^##[ ]+(D-\d+)[ ]*$", re.M)
+
+    @classmethod
+    def bad_fragments(cls, doc, declared):
+        """Fragments in `doc` that are not the short id of a declared entry.
+
+        Shared deliberately. The negative test below first carried its own copy
+        of this expression, so mutating the production one left it green — a
+        test agreeing with its own reimplementation rather than with the code
+        (found while re-running Fable's PR #60 mutation matrix against my own
+        fix for it).
+        """
+        # Membership alone is sufficient and the short-form check was dead:
+        # every declared id is `D-NN`, so a fragment whose uppercase is in
+        # `declared` necessarily matches `d-\d+`. A full heading slug fails
+        # membership, which is what rejects it. Keeping both clauses meant one
+        # of them could not be falsified by any input (mutation matrix, PR #60).
+        return sorted({f for f in cls.LINK.findall(doc) if f.upper() not in declared})
+
+    @classmethod
+    def comment_markers(cls, doc):
+        """Every line carrying an HTML comment delimiter."""
+        return [ln.strip() for ln in doc.splitlines() if "<!--" in ln or "-->" in ln]
+
+    @classmethod
+    def hidden_declaration_risk(cls, doc):
+        """Why `doc`'s HTML comments could hide a declaration from every scan
+        here, or [] if they cannot.
+
+        Shared by the live assertion and its synthetic negative, so mutating the
+        rule fails both. Asserting only against the live document left each
+        clause unfalsifiable.
+        """
+        markers = cls.comment_markers(doc)
+        problems = []
+        if len(markers) != 2:
+            problems.append(f"expected only the TOC's two comment markers, got {markers}")
+        else:
+            if "TOC BEGIN" not in markers[0] or "TOC END" not in markers[1]:
+                problems.append(f"the two comment markers are not the TOC's: {markers}")
+        problems.extend(f"a comment that does not close on its own line can span a "
+                        f"declaration: {m!r}"
+                        for m in markers if not (m.startswith("<!--") and m.endswith("-->")))
+        return problems
 
     @classmethod
     def sources(cls, doc):
@@ -240,6 +296,24 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
                          "a titled heading's own slug is its full title, so the anchor is the "
                          "only source of the short id and is required")
 
+    def test_only_a_line_start_declaration_counts(self):
+        """`sources()` had no synthetic case, so loosening either pattern was
+        invisible: the live document has no inline anchor and no `### D-NN`, so
+        accepting them changed nothing it could show (mutation matrix, PR #60).
+
+        Both forms must be ignored. An anchor mid-line is not a declaration
+        GitHub renders as its own element, and a level-3 heading's slug is not
+        this entry's short id.
+        """
+        self.assertEqual({}, self.sources('text <a id="d-81"></a> more text\n'),
+                         "an anchor must be alone on its line to count")
+        self.assertEqual({}, self.sources("### D-81\n"),
+                         "only a level-2 heading carries a decision")
+        self.assertEqual({}, self.sources("## D-81 — a title\n"),
+                         "a titled heading's own slug is its full title, not the short id")
+        self.assertEqual({"D-81": ["bare heading slug"]}, self.sources("## D-81\n"))
+        self.assertEqual({"D-81": ["explicit anchor"]}, self.sources('<a id="d-81"></a>\n'))
+
     def test_every_authored_fragment_is_a_real_short_id(self):
         """Links are constrained instead of targets being modelled.
 
@@ -248,13 +322,92 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
         which is the derivation that was wrong in six different ways.
         """
         doc = self.DOC.read_text(encoding="utf-8")
-        declared = set(self.sources(doc))
-        wrong = sorted({f for f in self.LINK.findall(doc)
-                        if not re.fullmatch(r"d-\d+", f) or f.upper() not in declared})
+        wrong = self.bad_fragments(doc, set(self.sources(doc)))
         self.assertEqual([], wrong,
                          "fragments in the decision log must be the short `#d-NN` form of a "
                          f"declared entry; a full heading slug breaks when the heading is "
                          f"reworded, which is why the short form exists: {wrong}")
+
+    def test_the_link_scan_can_fail(self):
+        """F1, Fable PR #60. The link side was UNFALSIFIABLE.
+
+        Making `LINK` never match left all ten tests green, as did dropping the
+        inbound-tree regex and the short-form `fullmatch`. Two of the three
+        remaining patterns therefore had no test that could fail, and the
+        reference-definition alternative credited to an earlier review was never
+        exercised at all. A scan satisfied by matching nothing is not a scan.
+        """
+        doc = ('[a](#d-93) and [b]: #d-01\n'
+               '<a href="#d-02">c</a>\n'
+               '[bad](#not-a-decision)\n'
+               '[long](#d-93--a-full-heading-slug)\n')
+        self.assertEqual(["d-93", "d-01", "d-02", "not-a-decision",
+                          "d-93--a-full-heading-slug"], self.LINK.findall(doc),
+                         "all three link spellings must be seen: `](#x)`, `[x]: #x`, `href=\"#x\"`")
+        wrong = self.bad_fragments(doc, {"D-93", "D-01", "D-02"})
+        self.assertEqual(["d-93--a-full-heading-slug", "not-a-decision"], wrong,
+                         "a non-decision fragment AND a full heading slug must both be "
+                         "rejected — the full slug is the form that breaks on a reword")
+
+    def test_the_scans_are_not_vacuous(self):
+        """Floors, so a broken scanner cannot go green-silent — the same
+        protection `TestRuntimeCitations.test_scan_is_not_vacuous` already gives
+        the citation walker in this file (Fable, PR #60)."""
+        doc = self.DOC.read_text(encoding="utf-8")
+        self.assertGreaterEqual(
+            len(self.LINK.findall(doc)), 10,
+            "the decision log carries 14 fragment links today; finding almost none means "
+            "the LINK pattern is broken, not that the cross-references went away")
+        tracked = [name for name in subprocess.run(
+            ["git", "-C", str(self.TREE), "ls-files", "-z"],
+            capture_output=True, text=True, check=True).stdout.split("\0") if name]
+        inbound = 0
+        for name in tracked:
+            try:
+                text = (self.TREE / name).read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+            inbound += len(re.findall(r'necb_decisions\.md#([^)\s"\']+)', text))
+        self.assertGreaterEqual(
+            inbound, 1,
+            "main-red's incident body links into the decision log; finding zero inbound "
+            "links means the tree scan is broken")
+
+    def test_no_declaration_is_hidden_in_a_comment(self):
+        """F2's realistic route, closed by a literal whitelist.
+
+        A declaration inside a multi-line HTML comment is counted as live by
+        every raw-source scan here and by the sync test, so commenting out an
+        entry leaves `#d-NN` dead with all tests green. Rather than model HTML
+        blocks — the modelling that cost seven rounds — this asserts the only
+        comment markers in the document are the TOC's two (Fable, PR #60).
+        """
+        # Matched by SHAPE, not by the marker's prose: the generator owns that
+        # string and may reword it (it still says `.rb`, from before the port).
+        self.assertEqual([], self.hidden_declaration_risk(
+            self.DOC.read_text(encoding="utf-8")))
+
+    def test_a_third_comment_marker_is_caught(self):
+        """The marker guard's own negative. Read against the live document only,
+        its clauses could not fail — mutating the count to a tautology left every
+        test green, because the other clauses still held."""
+        hidden = ('<!-- TOC BEGIN -->\n<!-- TOC END -->\n\n'
+                  '<!--\n<a id="d-81"></a>\n\n## D-81\n-->\n')
+        self.assertNotEqual([], self.hidden_declaration_risk(hidden),
+                            "a comment hiding a declaration adds markers, and that is what "
+                            "the live-document guard refuses")
+        self.assertEqual([], self.hidden_declaration_risk(
+            "<!-- TOC BEGIN (x) -->\n<!-- TOC END -->\n"),
+            "and the TOC's own two markers stay legal, or the document is unwritable")
+        # Isolates the COUNT clause. The multi-line case above is also caught by
+        # the well-formedness clause, so on its own it could not falsify the
+        # count; three tidy single-line comments can only fail on the count.
+        self.assertNotEqual([], self.hidden_declaration_risk(
+            "<!-- TOC BEGIN -->\n<!-- TOC END -->\n<!-- a stray note -->\n"),
+            "a third well-formed comment is still a place a declaration could be hidden")
+        self.assertEqual(["D-81"], sorted(self.sources(hidden)),
+                         "and the raw scan still counts the hidden declaration as live, which "
+                         "is exactly the dead link the guard exists to prevent")
 
     def test_every_inbound_link_from_the_tree_resolves(self):
         """Links from ANYWHERE tracked, not just the workflow.
