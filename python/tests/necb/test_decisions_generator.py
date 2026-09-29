@@ -211,6 +211,18 @@ class TestSourceValidation(unittest.TestCase):
             "### [D-01](https://example.com)": "a link whose text is the id",
             "### `D-01`": "code span inside a heading",
             "### <em>D-01</em>": "an inline HTML element inside a heading",
+            # These three defeated the regex reducer by leaving syntax BEHIND,
+            # making the candidate longer than the render rather than shorter
+            # -- which is why "approximation can only refuse" was false
+            # (Sol, PR #64).
+            "### D&#45;01": "a character reference spelling the hyphen",
+            "### [D-01](https://example.com/a_(b))":
+                "balanced parentheses inside a link destination",
+            '### <span title="1 > 0">D-01</span>':
+                "a greater-than inside a quoted attribute",
+            # Unresolvable syntax fails closed rather than being read as prose.
+            "### [D-01](unterminated": "an unterminated link destination",
+            "### [D-01": "an unterminated link label",
         }
         for claim, why in claims.items():
             with self.subTest(claim=why):
@@ -273,20 +285,45 @@ class TestSourceValidation(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertEqual(expected, G.unprefixed(line))
 
-    def test_visible_text_strips_inline_markup_but_keeps_the_words(self):
-        """What a line RENDERS as, approximately -- the judgement surface.
-
-        Over-eager by design: calling a line's visible text shorter than a
-        renderer would can only refuse a source, never admit a second owner.
-        """
+    def test_visible_text_resolves_the_supported_grammar_exactly(self):
+        """The three constructs the restricted grammar resolves, and only those."""
         for raw, expected in (("**D-01**", "D-01"), ("`D-01`", "D-01"),
                               ("[D-01](https://example.com)", "D-01"),
                               ("[D-01][ref]", "D-01"), ("<em>D-01</em>", "D-01"),
                               ("_D-01_", "D-01"), ("~~D-01~~", "D-01"),
+                              ("D&#45;01", "D-01"), ("D&#x2D;01", "D-01"),
+                              ("[D-01](https://example.com/a_(b))", "D-01"),
+                              ('<span title="1 > 0">D-01</span>', "D-01"),
                               ("D-01 and more words", "D-01 and more words"),
                               ("see [D-01](#d-01) here", "see D-01 here")):
             with self.subTest(raw=raw):
-                self.assertEqual(expected, G.visible_text(raw))
+                text, proven = G.visible_text(raw)
+                self.assertEqual(expected, text)
+                self.assertTrue(proven, "this construct is in the supported grammar")
+
+    def test_unresolvable_syntax_is_reported_as_unproven(self):
+        """The fail-closed half: unresolved is NOT the same as resolved-to-prose.
+
+        Treating the remainder as prose is exactly what admitted the three
+        counterexamples above, because leftover syntax made the candidate
+        longer than the rendered heading (Sol, PR #64).
+        """
+        for raw in ("[D-01](unterminated", "[D-01", "[D-01](a(b)"):
+            with self.subTest(raw=raw):
+                self.assertFalse(G.visible_text(raw)[1],
+                                 "an unresolvable construct must not be called proven")
+
+    def test_links_balance_their_destination_parentheses(self):
+        text, proven = G.consume_links("[D-01](https://example.com/a_(b)) tail")
+        self.assertEqual("D-01 tail", text)
+        self.assertTrue(proven)
+        self.assertFalse(G.consume_links("[D-01](a(b)")[1])
+
+    def test_html_is_tokenised_not_pattern_matched(self):
+        text, parsed = G.strip_html('<span title="1 > 0">D-01</span>')
+        self.assertEqual("D-01", text)
+        self.assertTrue(parsed)
+        self.assertEqual("D-01", G.strip_html("D&#45;01")[0])
 
     def test_trailing_newline_discipline(self):
         self.rejects("exactly one newline", body=GOOD_BODY.rstrip("\n"))

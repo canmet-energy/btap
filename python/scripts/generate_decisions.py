@@ -29,6 +29,7 @@ import json
 import re
 import sys
 import tomllib
+from html.parser import HTMLParser
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -89,15 +90,119 @@ BLOCK_PREFIX_RE = re.compile(r"^(?:>[ \t]?|[-*+][ \t]+|\d{1,9}[.)][ \t]+)")
 #: An ATX heading, capturing its text so the text can be judged rather than
 #: the syntax around it.
 ATX_HEADING_RE = re.compile(r"^#{1,6}[ \t]+(.*?)[ \t]*#*$")
-#: Inline constructs that leave the id as the visible text: a link keeps its
-#: label, an HTML tag contributes nothing, and emphasis/code/strikethrough
-#: markers vanish.
-INLINE_LINK_RE = re.compile(r"\[([^\]]*)\]\([^)]*\)")
-INLINE_REFLINK_RE = re.compile(r"\[([^\]]*)\]\[[^\]]*\]")
-INLINE_TAG_RE = re.compile(r"<[^>]*>")
-INLINE_MARKUP_RE = re.compile(r"[*_`~\\\[\]]")
+#: Emphasis, strong, strikethrough and code-span delimiters. These only
+#: delimit; the text between them renders, so removing them is exact.
+INLINE_DELIMITERS_RE = re.compile(r"[*_~`]")
 #: The exact short id, and nothing else.
 SHORT_ID_ONLY_RE = re.compile(r"^(D-\d{2,})$")
+SHORT_ID_TOKEN_RE = re.compile(r"\bD-\d{2,}\b")
+
+
+class _HeadingText(HTMLParser):
+    """Character data of an inline HTML fragment, entities resolved.
+
+    ``convert_charrefs`` resolves ``&#45;`` and friends, and a real tokenizer
+    is what makes ``<span title="1 > 0">`` end at the right ``>``. Both were
+    counterexamples against the regex substitution this replaced.
+    """
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts = []
+        self.ok = True
+
+    def handle_data(self, data):
+        self.parts.append(data)
+
+    def unknown_decl(self, data):
+        self.ok = False
+
+    def handle_pi(self, data):
+        self.ok = False
+
+
+def strip_html(text):
+    """``(character data, parsed)``. ``parsed`` is False if the tokenizer failed."""
+    parser = _HeadingText()
+    try:
+        parser.feed(text)
+        parser.close()
+    except Exception:                                    # noqa: BLE001
+        return text, False
+    return "".join(parser.parts), parser.ok
+
+
+def consume_links(text):
+    """``(label text, resolved)`` for inline and reference links.
+
+    A link renders as its label, so the label is what can own a slug. The
+    destination's parentheses are matched by BALANCE rather than by a regex:
+    ``[D-01](https://example.com/a_(b))`` left a trailing ``)`` behind when a
+    non-greedy regex stopped at the first one, which made the candidate longer
+    than the render and let it through (Sol, PR #64). An unbalanced or
+    unterminated construct returns ``resolved=False``.
+    """
+    out, index = [], 0
+    while index < len(text):
+        if text[index] != "[":
+            out.append(text[index])
+            index += 1
+            continue
+        close = text.find("]", index)
+        if close < 0:
+            return "".join(out) + text[index:], False
+        label, after = text[index + 1:close], close + 1
+        if after < len(text) and text[after] == "(":
+            depth, scan = 0, after
+            while scan < len(text):
+                if text[scan] == "(":
+                    depth += 1
+                elif text[scan] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                scan += 1
+            if depth != 0:
+                return "".join(out) + text[index:], False
+            out.append(label)
+            index = scan + 1
+            continue
+        if after < len(text) and text[after] == "[":
+            second = text.find("]", after)
+            if second < 0:
+                return "".join(out) + text[index:], False
+            out.append(label)
+            index = second + 1
+            continue
+        out.append(label)
+        index = close + 1
+    return "".join(out), True
+
+
+def visible_text(text):
+    """``(rendered text, proven)`` under a deliberately RESTRICTED grammar.
+
+    This is not a Markdown implementation and does not claim to be one. It
+    resolves exactly three things, each exactly rather than approximately:
+
+    * character references and inline HTML tags, through ``html.parser``;
+    * inline and reference links, reduced to their label, with the
+      destination's parentheses balanced;
+    * emphasis, strong, strikethrough and code-span delimiters, which delimit
+      without hiding the text between them.
+
+    Anything it cannot resolve -- a tokenizer failure, an unterminated link,
+    unbalanced parentheses -- sets ``proven`` to False, and the caller REFUSES
+    rather than treating the unresolved remainder as prose. An earlier version
+    reduced on a best-effort basis and called the result safe because it could
+    only make text shorter. That was false: leaving syntax behind makes the
+    candidate LONGER than the render, so a heading that renders as a bare
+    ``D-01`` slipped past a rule looking for exactly that (Sol, PR #64).
+    """
+    text, parsed = strip_html(text)
+    text, resolved = consume_links(text)
+    text = INLINE_DELIMITERS_RE.sub("", text)
+    return " ".join(text.split()), (parsed and resolved)
 
 
 def unprefixed(line: str) -> str:
@@ -114,26 +219,6 @@ def unprefixed(line: str) -> str:
         if match is None:
             return stripped.strip()
         line = stripped[match.end():]
-
-
-def visible_text(text: str) -> str:
-    """An approximation of what ``text`` RENDERS as, with inline markup gone.
-
-    Deliberately an approximation, and deliberately over-eager. ``### **D-01**``
-    renders as a heading whose visible text is exactly ``D-01``, so it owns the
-    same slug as ``### D-01`` -- but a rule that reads raw syntax sees two
-    different lines and accepted the first (Sol, PR #64). The alternative was a
-    real CommonMark/GFM implementation, which these stdlib-only tests cannot
-    carry and which is the modelling that has repeatedly been narrower than
-    GitHub. So this strips rather than parses: it may call a line's visible
-    text shorter than a renderer would, which can only cause a REFUSAL of a
-    source that had other ways to say the same thing.
-    """
-    text = INLINE_LINK_RE.sub(r"\1", text)
-    text = INLINE_REFLINK_RE.sub(r"\1", text)
-    text = INLINE_TAG_RE.sub("", text)
-    text = INLINE_MARKUP_RE.sub("", text)
-    return " ".join(text.split())
 
 
 def short_id_owners(text):
@@ -164,10 +249,15 @@ def short_id_owners(text):
         normalised = unprefixed(line)
         heading = ATX_HEADING_RE.match(normalised)
         kind = "bare ATX heading" if heading else "standalone short id"
-        only = SHORT_ID_ONLY_RE.match(
-            visible_text(heading.group(1) if heading else normalised))
+        rendered, proven = visible_text(heading.group(1) if heading else normalised)
+        only = SHORT_ID_ONLY_RE.match(rendered)
         if only:
             owners.append((number, kind, only.group(1).lower()))
+        elif not proven and SHORT_ID_TOKEN_RE.search(rendered):
+            # Fail closed: the grammar could not resolve this line, and it
+            # mentions a short id, so it cannot be shown NOT to render as one.
+            owners.append((number, kind + " (unresolved syntax)",
+                           SHORT_ID_TOKEN_RE.search(rendered).group(0).lower()))
     return sorted(owners)
 
 
