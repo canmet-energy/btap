@@ -212,13 +212,18 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
 
     #: ``](#x)``, ``[x]: #x`` and ``href="#x"`` all render as links; matching
     #: only the first let a reference-style definition through (Fable, PR #60).
-    #: Every spelling GitHub renders as a link. Verified against POST
-    #: /markdown: `[x](<#d>)`, `[x]( #d)`, `[x]: <#d>` and a
-    #: single-quoted href all become real links, and the previous
-    #: pattern saw none of them — so a dead fragment in any of those
-    #: spellings passed silently (Fable, PR #60).
+    #: The link spellings this gate recognises — ENUMERATED, not complete.
+    #: Each was verified against POST /markdown to render a real link:
+    #: `](#d)`, `](<#d>)`, `]( #d)`, `]: <#d>`, and an `href` quoted with
+    #: either quote, unquoted, or spaced. HTML attribute names are
+    #: case-INSENSITIVE, so `<a HREF="#d">` renders too and the previous
+    #: case-sensitive arm missed it (Sol, PR #60).
+    #:
+    #: The earlier comment claimed "every spelling GitHub renders as a link".
+    #: A finite regex cannot model every rendering route, and asserting it did
+    #: is the same false-green class the widening exists to close.
     LINK = re.compile(
-        r'(?:\]\([ \t]*<?|\]:[ \t]*<?|href\s*=\s*[\x22\x27]?)'
+        r'(?:\]\([ \t]*<?|\]:[ \t]*<?|(?i:href)\s*=\s*[\x22\x27]?)'
         r'#([^)>\s\x22\x27]+)')
 
     #: The explicit anchor, and the bare heading whose natural GitHub slug is
@@ -394,6 +399,11 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
             "href=\x22#d-05\x22": "double-quoted href",
             "href='#d-06'": "single-quoted href",
             "href = #d-07": "spaced, unquoted href",
+            # HTML attribute names are case-insensitive; GitHub renders
+            # `<a HREF="#d">` as a real link and the case-sensitive arm missed
+            # it (Sol, PR #60).
+            'HREF="#d-08"': "uppercase HREF",
+            'HrEf="#d-09"': "mixed-case href",
         }
         for spelling, label in cases.items():
             with self.subTest(spelling=label):
@@ -481,10 +491,15 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
     def unresolved_inbound(cls, text, declared):
         """Inbound decision-log fragments that name no declared id.
 
-        A classmethod so the negative below exercises the SAME predicate the
-        tree scan uses. Dropping the membership test survived 15/15 before this
+        The tree scan calls this, so the negative below pins production
+        behaviour. Dropping the membership test survived 15/15 before this
         existed: the vacuity floor proved the regex finds a link, not that a bad
         one is rejected (Fable, PR #60).
+
+        Case policy, stated because a duplicate copy of this predicate had
+        already drifted from it: a case variant such as `#D-95` is ACCEPTED,
+        because GitHub's client lowercases the fragment before looking up
+        `user-content-<id>` (Sol, PR #60).
         """
         found = re.findall(r"necb_decisions\.md#([^)\s\x22\x27]+)", text)
         return sorted({f for f in found if f.upper() not in declared})
@@ -520,9 +535,12 @@ class TestDecisionShortIdsResolve(unittest.TestCase):
                 text = (self.TREE / name).read_text(encoding="utf-8")
             except (UnicodeDecodeError, OSError):
                 continue
-            for fragment in re.findall(r'necb_decisions\.md#([^)\s"\']+)', text):
-                if not re.fullmatch(r"d-\d+", fragment) or fragment.upper() not in declared:
-                    offenders.append(f"{name}: #{fragment}")
+            # Through the SHARED helper. This loop previously carried its own
+            # copy of both the regex and the predicate, and they had already
+            # drifted: the copy's `re.fullmatch` rejected `#D-95` while the
+            # helper accepts it. So the synthetic negative pinned behaviour the
+            # live scan did not have (Sol, PR #60).
+            offenders.extend(f"{name}: #{f}" for f in self.unresolved_inbound(text, declared))
         self.assertEqual([], sorted(offenders),
                          "links into the decision log that do not name a declared short id:\n  "
                          + "\n  ".join(sorted(offenders)))
