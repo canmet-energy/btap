@@ -8,6 +8,8 @@ that happen to comply.
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import sys
 import tempfile
@@ -250,6 +252,89 @@ class TestRendering(unittest.TestCase):
                                              encoding="utf-8")
         with self.assertRaises(ValueError):
             G.generate(directory)
+
+
+class TestCheckReportsStaleWithoutWriting(unittest.TestCase):
+    """`--check` must return 1 on drift and write nothing.
+
+    The base had exactly this test against the retired TOC generator
+    (`test_check_reports_stale_without_writing`), and it was deleted with that
+    module while its two siblings were genuinely superseded. This one was not:
+    mutating `main()` so that `stale` is always empty survived all 49 tests
+    (Fable, PR #64).
+
+    It matters because `--check` is documented in CLAUDE.md, DEVELOPERS.md and
+    the multi-edition plan as a standalone local gate, run as a one-liner
+    WITHOUT the pytest modules that redundantly cover the same invariant.
+    """
+
+    def scratch(self):
+        """A source directory plus a SEPARATE output directory.
+
+        The outputs deliberately do not live beside the sources: the stray-file
+        guard refuses anything in the canonical directory that the `D-*.md`
+        glob does not reach, and it caught this test's first draft writing
+        `doc.md` and `registry.json` in there. Production keeps them apart too.
+        """
+        root = Path(tempfile.mkdtemp())
+        directory, outputs = root / "sources", root / "outputs"
+        directory.mkdir()
+        outputs.mkdir()
+        write(directory)
+        (directory / G.PREAMBLE_FILE).write_text("# Log\n\nIntro.\n\n---\n",
+                                                 encoding="utf-8")
+        (directory / G.META_FILE).write_text(
+            json.dumps({"registry_comment": ["generated"]}) + "\n",
+            encoding="utf-8")
+        doc, registry = outputs / "doc.md", outputs / "registry.json"
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(0, G.main(["--source-dir", str(directory),
+                                        "--doc", str(doc),
+                                        "--registry", str(registry)]))
+        return directory, doc, registry
+
+    def check(self, directory, doc, registry):
+        """``--check``'s exit code, with its reporting captured."""
+        with contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()):
+            return G.main(self.args(directory, doc, registry))
+
+    def args(self, directory, doc, registry):
+        return ["--check", "--source-dir", str(directory),
+                "--doc", str(doc), "--registry", str(registry)]
+
+    def test_check_passes_when_in_step(self):
+        directory, doc, registry = self.scratch()
+        self.assertEqual(0, self.check(directory, doc, registry))
+
+    def test_a_hand_edited_document_reports_stale_and_is_not_rewritten(self):
+        directory, doc, registry = self.scratch()
+        tampered = doc.read_text(encoding="utf-8") + "a hand edit\n"
+        doc.write_text(tampered, encoding="utf-8")
+        before = doc.read_bytes()
+
+        self.assertEqual(1, self.check(directory, doc, registry),
+                         "--check must return 1 on drift")
+        self.assertEqual(before, doc.read_bytes(),
+                         "--check must not rewrite the file it is checking")
+
+    def test_a_hand_edited_registry_reports_stale_and_is_not_rewritten(self):
+        directory, doc, registry = self.scratch()
+        data = json.loads(registry.read_text(encoding="utf-8"))
+        data["decisions"][0]["title"] = "tampered"
+        registry.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        before = registry.read_bytes()
+
+        self.assertEqual(1, self.check(directory, doc, registry))
+        self.assertEqual(before, registry.read_bytes())
+
+    def test_a_missing_output_fails_closed(self):
+        """It raises rather than reporting stale. Documented, not relied upon:
+        the exit is non-zero either way, but a reader should know which."""
+        directory, doc, registry = self.scratch()
+        doc.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.check(directory, doc, registry)
 
 
 class TestSplitIsNotAWriter(unittest.TestCase):

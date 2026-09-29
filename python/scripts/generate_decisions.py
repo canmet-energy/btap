@@ -192,13 +192,27 @@ def read_sources(source_dir: Path = SOURCE_DIR):
     meta = json.loads((source_dir / META_FILE).read_text(encoding="utf-8"))
     preamble = (source_dir / PREAMBLE_FILE).read_text(encoding="utf-8")
     entries = {}
-    for path in sorted(source_dir.glob("D-*.md")):
+    sources = sorted(source_dir.glob("D-*.md"))
+    for path in sources:
         fields, body = parse_source(path)
-        if fields["id"] in entries:
-            raise ValueError("duplicate source for {}".format(fields["id"]))
         entries[fields["id"]] = (fields, body)
     if not entries:
         raise ValueError("{}: no decision sources found".format(source_dir))
+    # Everything in the canonical directory is accounted for, or refused. The
+    # glob alone silently skips `d-98.md`, `D-98.MD`, `D98.md` and anything in a
+    # subdirectory: such a file reaches NEITHER output while --check reports
+    # up to date, so a whole decision can go missing with a green gate
+    # (Fable, PR #64). Checking the glob's own count against itself could not
+    # catch that; enumerating the directory can.
+    known = {PREAMBLE_FILE, META_FILE} | {p.name for p in sources}
+    stray = sorted(p.relative_to(source_dir).as_posix()
+                   for p in source_dir.rglob("*")
+                   if p.is_file() and p.relative_to(source_dir).as_posix() not in known)
+    if stray:
+        raise ValueError(
+            "{}: {} file(s) the D-*.md glob does not reach, so they would be "
+            "silently omitted from both generated outputs: {}".format(
+                source_dir, len(stray), stray))
     return preamble, entries, meta
 
 

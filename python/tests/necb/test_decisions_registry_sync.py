@@ -45,10 +45,20 @@ class TestDecisionSources(unittest.TestCase):
         for decision_id in self.entries:
             self.assertRegex(decision_id, ID_PATTERN,
                              f"malformed decision id: {decision_id!r}")
-        paths = sorted(SOURCE_DIR.glob("D-*.md"))
+        # This compared the glob's count with itself and so could never fail
+        # (Fable, PR #64) -- the same "always reports 0" shape as a field a
+        # previous round shipped. Repointed at the real hole: a file in the
+        # canonical directory that the glob does not reach.
+        known = {G.PREAMBLE_FILE, G.META_FILE} | {
+            p.name for p in SOURCE_DIR.glob("D-*.md")}
+        stray = sorted(p.relative_to(SOURCE_DIR).as_posix()
+                       for p in SOURCE_DIR.rglob("*")
+                       if p.is_file()
+                       and p.relative_to(SOURCE_DIR).as_posix() not in known)
         self.assertEqual(
-            len(paths), len(self.entries),
-            "a source file was dropped by id collision; one file is one decision")
+            [], stray,
+            "file(s) in the canonical directory that the D-*.md glob does not "
+            f"reach, so they reach neither generated output: {stray}")
 
     def test_a_source_file_rewrites_to_itself(self):
         """The writer is the inverse of the parser, for every real source.
