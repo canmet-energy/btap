@@ -133,6 +133,8 @@ audit are drained and archived — see `docs/README.md`.
 
 <!-- TOC END -->
 
+<a id="d-01"></a>
+
 ## D-01 — NECB text reproduction (Crown copyright)
 
 - **Decision:** NECB article text may be reproduced in full in generated
@@ -141,6 +143,8 @@ audit are drained and archived — see `docs/README.md`.
 - **Why:** NRCan is the Crown; NECB copyright is the Government of Canada's.
 - **Evidence:** `NECB_8_4_COVERAGE.html` renders full clause text; cache in
   `python/btap/necb/data/coverage/necb_8_4_articles_2025.json`. Commit `09c011740`.
+
+<a id="d-02"></a>
 
 ## D-02 — Unresolvable space types are a hard error (BREAKING)
 
@@ -154,6 +158,8 @@ audit are drained and archived — see `docs/README.md`.
   verification plan).
 - **Evidence:** hostile tests in `openstudio-*/test/test_necb_hostile_reference.rb`;
   commit `b03f77e33`.
+
+<a id="d-03"></a>
 
 ## D-03 — Chiller EIR_FT: verify against the proposed erratum, not the printed code
 
@@ -170,6 +176,8 @@ audit are drained and archived — see `docs/README.md`.
 - **Evidence:** `openstudio-necb/scripts/necb_8_4_6_curve_probe.rb`
   (`CHILLER_EIR_FT_EC_F_ERRATUM`); commit `00da55675`.
 
+<a id="d-04"></a>
+
 ## D-04 — EUI path (2025 8.4.4): two-run design with check-then-normalize
 
 - **Decision:** the EUI path and performance path simulate **different**
@@ -181,6 +189,8 @@ audit are drained and archived — see `docs/README.md`.
   design), 2026-07-22.
 - **Evidence:** `OpenStudioNECB::Archetypes`, round-trip test pinning
   check↔transform; commit `7f7a87047`.
+
+<a id="d-05"></a>
 
 ## D-05 — Two 8.4.4.2 interpretations adopted
 
@@ -194,6 +204,8 @@ audit are drained and archived — see `docs/README.md`.
   apples-to-apples; leaving proposed lighting schedules or proposed OA rates in
   place would leak proposed-design behaviour into the normalized run.
 - **Evidence:** commit `f42f19533`.
+
+<a id="d-06"></a>
 
 ## D-06 — ERV trigger: NECB 2020 Tables 5.2.10.1.-A/-B, post-sizing
 
@@ -211,6 +223,8 @@ audit are drained and archived — see `docs/README.md`.
   many to non-continuous. Flagged in the hvac manifest gaps, undecided.
 - **Evidence:** hostile tests incl. the 85%-OA divergence case; commit
   `f045739f1`.
+
+<a id="d-07"></a>
 
 ## D-07 — 8.4.6.6 cooling tower: engine disposition with numeric cross-check
 
@@ -233,6 +247,8 @@ audit are drained and archived — see `docs/README.md`.
   `rake necb:verify`); `python/btap/necb/data/coverage/necb_8_4_disposition.json`
   8.4.6.6.
 
+<a id="d-08"></a>
+
 ## D-08 — Batch sign-off of the remaining 19 article dispositions
 
 - **Decision:** all 19 remaining draft dispositions in
@@ -252,6 +268,8 @@ audit are drained and archived — see `docs/README.md`.
   implementing any of those articles later is separate, evidence-backed work.
 - **Evidence:** `python/btap/necb/data/coverage/necb_8_4_disposition.json` (no `draft` entries
   remain); rendered without DRAFT pills in `NECB_8_4_COVERAGE.html`.
+
+<a id="d-09"></a>
 
 ## D-09 — Umbrella manifest emits at runtime; warnings split from modeller scope notes
 
@@ -275,6 +293,8 @@ audit are drained and archived — see `docs/README.md`.
   `test_compliance.rb` (none-mode assertions) and `test_report_units.rb`
   (`test_coverage_status_modeller_scope_note`).
 
+<a id="d-10"></a>
+
 ## D-10 — Remaining adjudications delegated to Claude, with mandatory logging
 
 - **Decision:** phylroy delegated the remaining queue decisions: "make the rest
@@ -284,6 +304,8 @@ audit are drained and archived — see `docs/README.md`.
   made per the best evidence-backed recommendation and logged here as a D-XX
   entry, self-contained enough to reverse on review.
 - **Who/when:** phylroy, 2026-07-23.
+
+<a id="d-11"></a>
 
 ## D-11 — 8.4.4.14 Hydronic Pumps implemented (intensity transfer + Table curves)
 
@@ -337,6 +359,8 @@ audit are drained and archived — see `docs/README.md`.
   passes `proposed:` post-sizing; `test_necb_pump_rules.rb` (6 runs, incl.
   combined-intensity arithmetic, warn-never-silent, 2025 renumbering).
 
+<a id="d-12"></a>
+
 ## D-12 — 8.4.4.16 Space Temperature Control re-manifested modeller-scope
 
 - **Decision:** status `not_implemented` was factually wrong. Re-manifested
@@ -351,6 +375,8 @@ audit are drained and archived — see `docs/README.md`.
 - **Who/when:** phylroy chose "Re-manifest" (2026-07-23).
 - **Evidence:** manifest entries in both vintage rules JSONs; pin updated in
   `test_necb_energy_recovery.rb` (asserts info + gap_owner, not warning).
+
+<a id="d-13"></a>
 
 ## D-13 — Screw/Centrifugal chiller curves probed; imperfect printed normalization accepted
 
@@ -374,6 +400,8 @@ audit are drained and archived — see `docs/README.md`.
 fan schedules vs Always On — substantial, affects ERV continuous classification
 and reference energy; deferred to its own work session).*
 
+<a id="d-14"></a>
+
 ## D-14 — Reference air systems inherit the proposed operating schedule (resolves D-06)
 
 - **Decision:** `reference_hvac` captures each zone's proposed air-system
@@ -389,6 +417,8 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** `Reference.apply_operating_schedules`; `TestNecbOperatingSchedules`
   (inheritance + non-continuous classification + no-air-system note); ERV suite
   and rake necb:verify green.
+
+<a id="d-15"></a>
 
 ## D-15 — ERV effectiveness and frost provenance verified against 5.2.10.1 text
 
@@ -411,6 +441,8 @@ and reference energy; deferred to its own work session).*
   extended high-OA test (all 8 fields + (4)/(6) citations); audit decision now
   cites 5.2.10.1.(4)/(6).
 
+<a id="d-16"></a>
+
 ## D-16 — Archetype breadth sweep; orphaned proposed EMS purged from the reference
 
 - **Decision:** `openstudio-necb/scripts/necb_archetype_sweep.rb` cross-validates the pipeline
@@ -427,6 +459,8 @@ and reference energy; deferred to its own work session).*
 - **Who/when:** Claude under D-10 delegation, 2026-07-23.
 - **Evidence:** sweep verdict tables (before/after); ERV+pump suites and
   rake necb:verify green post-fix.
+
+<a id="d-17"></a>
 
 ## D-17 — Legacy ERV diagnosis filed upstream (issue #2123)
 
@@ -445,6 +479,8 @@ and reference energy; deferred to its own work session).*
 - **Who/when:** filed by phylroy (drafted under D-10 delegation), 2026-07-24.
 - **Evidence:** https://github.com/NatLabRockies/openstudio-standards/issues/2123
   (the former NREL repo — renamed/transferred; GitHub redirects the NREL URL).
+
+<a id="d-18"></a>
 
 ## D-18 — Sys-6 zone grouping rewritten to Note (3) of Table 8.4.4.7.-B
 
@@ -466,6 +502,8 @@ and reference energy; deferred to its own work session).*
 - **Evidence:** vav_reheat.rb zone_groups; NECB 2020 8.4.4.7 text (Note (3))
   retrieved via codes MCP; MURB re-sweep topology (corridors collapse 10 -> 1
   system, reference converges toward the legacy 2-loop layout).
+
+<a id="d-19"></a>
 
 ## D-19 — Infiltration lineage reconciliation (OPEN: arithmetic differs, both claim the same code default)
 
@@ -528,6 +566,8 @@ is the permissive direction). VERIFIED: reference delivered infiltration
 0.247 -> 0.135 ACH (proposed 0.142); reference energy 24128 -> 23069 kWh wk
 (78% -> 81% of target); envelope suite green incl. new inheritance +
 deviation-warning tests.
+
+<a id="d-20"></a>
 
 ## D-20 — MURB residual heating gap (OPEN)
 
@@ -598,6 +638,8 @@ buildings. The two marginal fails (102%/104%) and the Restaurant's 69% are
 within the documented residual ledger (legacy over-equipped ERVs per
 upstream #2123, DX COP bins, infiltration normalization remainder). All
 gates green: full hvac suite, necb:verify, 5/5 sweep PASS.
+
+<a id="d-21"></a>
 
 ## D-21 — Residual infiltration asymmetry on low-rise buildings (OPEN, two new findings)
 
@@ -682,6 +724,8 @@ reference defaults will drop at the next sweep (Restaurant basis 1356 ->
 ~320-scale per its geometry); the legacy side's roof-inclusive S remains
 upstream-issue material.
 
+<a id="d-22"></a>
+
 ## D-22 — Audit T-list implemented (T1-T13); fleet converges to 90-105%
 
 All thirteen ours-side findings from the 2026-07-25 reference-systems audit
@@ -706,6 +750,8 @@ counter-direction T6/T10 (wheel power, zone-fan spec) — the fleet now sits
 (A1-A5) remain with phylroy.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+<a id="d-23"></a>
 
 ## D-23 — Film convention: table U is OVERALL transmittance (default flipped)
 
@@ -748,6 +794,8 @@ umbrella test converts measured→overall via `Constructions.film_r` and
 stays data-driven). Lesson recorded: a convention flip's gate list must
 include every OTHER package's tests that pin the convention.
 
+<a id="d-24"></a>
+
 ## D-24 — Envelope scope: unconditioned spaces out, interzone assemblies in
 
 Second object-diff finding: the Restaurant reference carried an attic DECK
@@ -786,6 +834,8 @@ slightly, % of target DOWN) — full-fleet re-sweep queued behind the
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
 
+<a id="d-25"></a>
+
 ## D-25 — Runner design-day attach: replace + filter to annual extremes
 
 LargeOffice (the only archetype whose PROPOSED carries a cooling tower)
@@ -806,6 +856,8 @@ UNVERIFIED until the post-D-23/D-24 re-sweep (which uses the corrected
 attach throughout) lands.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+<a id="d-26"></a>
 
 ## D-26 — Tower fan sums the condenser loop; sized tower hydraulics hardened
 
@@ -834,6 +886,8 @@ tower fleet member):
    fan POWER, not UA, so this is faithful.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+<a id="d-27"></a>
 
 ## D-27 — SWH circulators are outside 8.4.4.14; transfer head reconciled
 
@@ -887,6 +941,8 @@ Pinned by test_capacity_iteration_converges_undersized_building (which fataled
 before the fix). Any future pass that hard-sets a sized quantity on a model
 that may be re-sized belongs in `prepare_for_resizing` too — reference boiler
 and chiller capacities are the standing candidates.
+
+<a id="d-28"></a>
 
 ## D-28 — Multizone selection groups merge into whole-building systems
 
@@ -943,6 +999,8 @@ building effect (~2.2x reference fan energy on LargeOffice).
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
 
+<a id="d-29"></a>
+
 ## D-29 — Upstream issues carry explicit Claude authorship (phylroy's direction)
 
 "file the L-9/L-10 fan issue upstream as you not me" + "state in
@@ -955,6 +1013,8 @@ Supersedes the earlier no-Claude-attribution convention from the #2123
 filing.
 
 - Who/when: phylroy directed, Claude executed, 2026-07-25.
+
+<a id="d-30"></a>
 
 ## D-30 — Ledger cleared: L-11..L-17 and L-19 filed upstream as #2128/#2129/#2130
 
@@ -976,6 +1036,8 @@ COP convention, L-7 NECB2015 ERV vintage question). Coverage docs
 regenerated post-D-23..D-28 (57/57, no conflicts, no fallbacks).
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+<a id="d-31"></a>
 
 ## D-31 — L-6 and L-7 root-caused: both close with NO legacy defect
 
@@ -1006,6 +1068,8 @@ stated in the ledger row.
 Ledger status after D-31: no UNFILED and no UNRESOLVED rows remain.
 
 - Who/when: Claude under D-10 delegation, 2026-07-25.
+
+<a id="d-32"></a>
 
 ## D-32 — Warehouse residual root-caused: ground-floor Table 3.2.3.1 extent was misread (our defect, fixed)
 
@@ -1055,6 +1119,8 @@ premise again breaks from the legacy side, as with the D-28 offices.
   surfaces; [READ, MCP] NECB 2020/2025 3.2.3.1/3.2.3.3/8.4.4.1; [RAN]
   envelope test battery + parity gate green; [RAN] 4-variant re-runs.
 
+<a id="d-33"></a>
+
 ## D-33 — Variant mockup set: the never-fleet-exercised reference routes now run the full pipeline
 
 Coverage audit of the reference-system routes (sweep audits x 22 runs +
@@ -1098,6 +1164,8 @@ mockups exercise CURRENT behavior and will pin whatever phylroy decides.
 - Evidence: [RAN] sweep-audit scan (22 runs -> sys 1/3/4/6 only); [RAN]
   gem-test grep; [RAN] generator + 8/8 test battery with sizing runs.
 
+<a id="d-34"></a>
+
 ## D-34 — A1 adjudicated (phylroy): residential heat-pump blocks follow legacy — ASHP redirect
 
 phylroy's ruling (2026-07-27): "A1 follow legacy." A residential/
@@ -1126,6 +1194,8 @@ copy rule keeps its own end-to-end pin. All green (selector 18, reference
 - Who/when: ruling phylroy 2026-07-27; implementation Claude under D-10.
 - Evidence: [READ] legacy autozone.rb necb_reference_hp branches (e.g.
   :1082), fuel_type_set plumbing necb_2011.rb:409/708; [RAN] test batteries.
+
+<a id="d-35"></a>
 
 ## D-35 — Appendix A ingested (hbix#67 fixed): four notes fetched; lightweight rebuild corrected to light-frame mass
 
@@ -1162,6 +1232,8 @@ load-bearing notes were retrieved [READ, MCP 2026-07-28] and dispositioned:
   (reference/hostile/skylight/data-integrity/prescriptive); [RAN] Warehouse
   annual e2e with the light-frame reference (Kiva-legality + energy effect).
 
+<a id="d-36"></a>
+
 ## D-36 — Campus 3D renderer ported into openstudio-geometry
 
 phylroy's request (2026-07-27): bring the campus repo's OSM 3D renderer
@@ -1180,6 +1252,8 @@ test_bar.rb (0.265 overall -> 0.2759 construction-only naming).
   D-10, 2026-07-28.
 - Evidence: [RAN] test_render.rb 5/5, wizards/bar green; [RAN] Warehouse
   reference archetype rendered end-to-end (146 KB self-contained page).
+
+<a id="d-37"></a>
 
 ## D-37 — A2 adjudicated (phylroy): the printed 8.4.4.13 split, boundary per Note A-8.4.4.13
 
@@ -1215,6 +1289,8 @@ redirect, no-evidence redirect, and residential-WLHP copy.
   conditioning run, efficiency/ERV/2025/pump/CBECS suites), umbrella
   mockups 9/9.
 
+<a id="d-38"></a>
+
 ## D-38 — A3 adjudicated (phylroy): 5.2.6.3 pump-power caps applied min-wins over the 8.4.4.14 transfer
 
 phylroy's ruling (2026-07-28): "do it and record the decision" on the
@@ -1249,6 +1325,8 @@ Note: legacy applies ONLY the 5.2.6.3 caps and lacks 8.4.4.14 (L-17,
 - Evidence: [READ, MCP] 5.2.6.3 + Table (2020/2025); [RAN] pump-rules
   12/12 (clamp + min-wins pins), efficiency suite, necb:verify orphan-key
   lint OK, gas Warehouse annual sweep with the cap live.
+
+<a id="d-39"></a>
 
 ## D-39 — A4 adjudicated (phylroy): System 5 heating "None" honoured conditionally per 8.4.4.1.(5)
 
@@ -1286,6 +1364,8 @@ reference 10 all green.
 - Who/when: ruling phylroy 2026-07-28; implementation Claude under D-10.
 - Evidence: [READ, MCP] Table 8.4.4.7.-B System 5 row; [RAN] batteries.
 
+<a id="d-40"></a>
+
 ## D-40 — A5 adjudicated (phylroy): reheat-coil autosizing trusted; legacy hard-size workaround rejected
 
 phylroy's ruling (2026-07-28, after reviewing the measurement): no-change
@@ -1318,6 +1398,8 @@ residual ever traces to reheat sizing, reopen with data via the ledger.
   join on the sized LargeOffice reference (table in the conversation
   record); no code change.
 
+<a id="d-41"></a>
+
 ## D-41 — 8.4.4.20.(3)-(4) machine-verified (appendix-era ingestion); SWH reference gap refined
 
 The SHW manifest's oldest caveat — "sentence text falls in a PDF-extraction
@@ -1337,6 +1419,8 @@ refinements queued behind the staged-heating work in the completion list.
 - Who/when: Claude under D-10 delegation, 2026-07-28.
 - Evidence: [READ, MCP] 8.4.4.20 + A-8.4.4.20.(4)(a); [READ] shw
   reference.rb (no pump/part-load handling — confirming the refined gaps).
+
+<a id="d-42"></a>
 
 ## D-42 — First FULL-ANNUAL fleet sweep (8760 h): reference generation validated; verdicts expose a proposed-side archetype character
 
@@ -1393,6 +1477,8 @@ Findings:
   + sizing runs, all PASS); report.json capacity_iterations/unmet blocks;
   week-run baselines from the cached fleet.
 
+<a id="d-43"></a>
+
 ## D-43 — 8.4.1.2.(5) capacity iteration made per-thermal-block, secant-targeted from run history
 
 - Decision: the sentence-(5) capacity auto-iteration no longer bumps only the
@@ -1437,6 +1523,8 @@ Findings:
   8.4.1.2 how-text, umbrella CLAUDE.md.
 - Who/when: Claude under D-10 delegation, 2026-07-28 (implementation requested
   by phylroy: "implement it — per-zone targeting plus the secant step").
+
+<a id="d-44"></a>
 
 ## D-44 — Decisions surfaced at RUNTIME: `ruling:` audit tags, a registry, and a report appendix
 
@@ -1498,6 +1586,8 @@ Findings:
   `test_compliance.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-28.
 
+<a id="d-45"></a>
+
 ## D-45 — Museum exhibition galleries take the Assembly row; museum ARCHIVES and restoration rooms take the Collections row
 
 - **The question (was A6 on the 2026-07-25 audit list, moved here by D-44):**
@@ -1541,6 +1631,8 @@ Findings:
 - **Who/when:** raised Claude under D-10 (2026-07-27, D-33); ruled 2026-07-29
   on phylroy's instruction after the printed rows and the reachable space-type
   domain were laid out.
+
+<a id="d-46"></a>
 
 ## D-46 — Staged heating and cooling built as unitary multispeed coils; stage COUNT set post-sizing, capacities left autosized
 
@@ -1703,6 +1795,8 @@ test_stage_flow_ratios_are_floored_at_the_outdoor_air_fraction.
 Net effect on the fleet: the floor binds only on high-OA units, so most PSZ
 numbers stand; the 2026-07-29 full-annual results are re-run below.
 
+<a id="d-47"></a>
+
 ## D-47 — Stage count CLAMPED at the EnergyPlus four-stage ceiling, with a shouted warning on every clamp
 
 **What.** `Coil:Cooling:DX:MultiSpeed`, `Coil:Heating:DX:MultiSpeed` and
@@ -1726,6 +1820,8 @@ the report checklist.
   cooling and the gas coil while the object keeps four stages.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
 
+<a id="d-48"></a>
+
 ## D-48 — Staging scope is AIR-LOOP unitary equipment; zone terminals and make-up-air tempering coils stay single-speed
 
 **What.** 8.4.4.9.(7)/8.4.4.10.(8) staging is applied to air-loop unitary
@@ -1746,6 +1842,8 @@ entries would swamp the report's audit appendix without adding information.
   (`audit_staging_skips`).
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
 
+<a id="d-49"></a>
+
 ## D-49 — Electric resistance heating is not a furnace: 8.4.4.9.(7) staging is not applied to it
 
 **What.** The staging sentence governs furnaces. An electric-resistance heating
@@ -1762,6 +1860,8 @@ does change how EnergyPlus sizes it — see the D-46 measurement).
 
 - **Files:** `openstudio-hvac/lib/openstudio_hvac/systems/psz.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+<a id="d-50"></a>
 
 ## D-50 — Terminal/secondary capacity split realized as Sizing:Zone dedicated-outdoor-air accounting
 
@@ -1868,6 +1968,8 @@ hydronic — LargeOffice is bit-identical end-use for end-use across the whole
 staging change, which is the cleanest available control that staging touches
 only what it should.
 
+<a id="d-51"></a>
+
 ## D-51 — Reference daylighting is ON by default: the reference carries the photocontrols 4.2.2 mandates
 
 **What.** `performance_compliance(reference_daylighting:)` now defaults to
@@ -1955,6 +2057,8 @@ implemented by `align_heat_pump_heating_capacity` since D-22.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`.
 - **Who/when:** phylroy ruled 2026-07-29, implemented by Claude under D-10.
 
+<a id="d-52"></a>
+
 ## D-52 — 8.4.4.13.(2)(b)/(g)/(h): HP cooling sized without oversizing (measured), and the auxiliary-heating fuel is ELECTED from the proposed annual run
 
 **What.** The last item of the reference-generation backlog (Phase 5), ruled by
@@ -2041,6 +2145,8 @@ orphan-keys all green.
 - **Who/when:** phylroy ruled the election 2026-07-29; implemented by Fable
   under D-10, 2026-08-02.
 
+<a id="d-60"></a>
+
 ## D-60 — The same verification pass, run for the NECB 2025 edition
 
 **What.** phylroy asked (2026-08-02): "run the same verification pass for the
@@ -2069,6 +2175,8 @@ with the corrected letter map and today's verification.
 
 - **Files:** `efficiencies_2025.json` (provenance), the test.
 - **Who/when:** Fable under D-10, 2026-08-02.
+
+<a id="d-59"></a>
 
 ## D-59 — Equipment-efficiency minimums verified against the printed NECB 2020 tables
 
@@ -2117,6 +2225,8 @@ so data drift fails with the printed number in the message.
 - **Files:** `efficiencies_2020.json` (chiller notes + provenance block),
   the new test.
 - **Who/when:** Fable under D-10, 2026-08-02.
+
+<a id="d-58"></a>
 
 ## D-58 — The proposed→reference matrix (97 catalog systems): residential compatible-cooling and HP detection go fact-based
 
@@ -2196,6 +2306,8 @@ stand.
 - **Files:** `openstudio-hvac/lib/openstudio_hvac/classify.rb`,
   `.../necb/reference.rb`; test + golden as above.
 - **Who/when:** Fable under D-10, 2026-08-02.
+
+<a id="d-53"></a>
 
 ## D-53 — The SHW part-load curve is the PLF-domain IMAGE of 8.4.5.9's FHeatPLC, not a rival curve; the raw quadratic must never enter the EnergyPlus part-load-factor field
 
@@ -2286,6 +2398,8 @@ manifest now says precisely that instead of calling it unimplemented.
   `openstudio-shw/test/test_shw.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
 
+<a id="d-54"></a>
+
 ## D-54 — 8.4.4.15.(2): the proposed's demand-control ventilation strategy is carried across the reference teardown; the peak-rate outdoor-air method is not
 
 **What.** `Classify.characterize` now records, per air loop,
@@ -2360,6 +2474,8 @@ fresh: the proposed is VRP, the reference comes out `ZoneSum` with DCV on.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
   `openstudio-hvac/test/test_necb_dcv.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+<a id="d-55"></a>
 
 ## D-55 — Table 8.4.4.7.-B note (1): reference humidification is REBUILT on the proposed's energy source, with a control taken from the proposed — or not built at all
 
@@ -2444,6 +2560,8 @@ above, run in-suite). It was previously unpinned by ANY test.
   `openstudio-hvac/lib/openstudio_hvac/data/necb/reference_rules_{2020,2025}.json`;
   `openstudio-hvac/test/test_necb_humidification.rb`.
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+<a id="d-56"></a>
 
 ## D-56 — 5.2.2.9 water-side economizer built for reference systems 2/5; sentence (1) binds, and the tower setpoint reset is what makes it real
 
@@ -2598,6 +2716,8 @@ cooled fluid to economize with and are warned rather than silently skipped.
   `openstudio-hvac/test/test_helper.rb` (`run_energyplus!` gained an optional
   `run_period:` — shoulder weather is where this control acts).
 - **Who/when:** Claude under D-10 delegation, 2026-07-29.
+
+<a id="d-57"></a>
 
 ## D-57 — Reference daylighting follows NECB 2020/2025 4.2.2.1.(10)-(15), not the 2011 port
 
@@ -3206,6 +3326,8 @@ five from here on.
 
 - Who/when: Fable under D-10 delegation, 2026-08-02.
 
+<a id="d-61"></a>
+
 ## D-61 — Staleness audit after the hbix extraction fixes: zero stale-data defects
 
 **What.** phylroy asked (2026-08-02): with hbix#88 fixed, "should you check for
@@ -3475,6 +3597,8 @@ pipeline.
 
 - Who/when: Fable under D-10, 2026-08-03.
 
+<a id="d-62"></a>
+
 ## D-62 — 5.2.2.8.(4)-(5): the economizer staging floor (Phase 3a of the close-out plan)
 
 **What.** The printed sentences [RAN get_section 5.2.2.8, both editions]:
@@ -3525,6 +3649,8 @@ move without an audited mechanism as suspect: RERUN SOLO before attributing.
   `test_necb_energy_recovery.rb`.
 - **Who/when:** Fable under D-10, 2026-08-03.
 
+<a id="d-63"></a>
+
 ## D-63 — Table 6.2.2.1 pool-heater + solar-thermal minimums, apply-when-present (Phase 3b)
 
 **What.** The solar/pool sections of Table 6.2.2.1 were LOST from the
@@ -3552,6 +3678,8 @@ archetype carries either class — the pass exists for foreign proposeds.
   the new test.
 - **Who/when:** Fable under D-10, 2026-08-03.
 
+<a id="d-64"></a>
+
 ## D-64 — SmallHotel reference heating gate: morning setback-recovery lag in four micro-zones (Phase 4b)
 
 **Root cause [RAN, from the standing full-annual SQL + final iteration
@@ -3574,6 +3702,8 @@ standing in the baseline table; revisit only if a determination on a real
 project turns on it.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+<a id="d-65"></a>
 
 ## D-65 — Hospital reference runtime root-caused: the OA floor × the flow-per-watt band, plus 30 required ERVs (Phase 4a)
 
@@ -3599,6 +3729,8 @@ when that subsystem is next touched.
 sweeps get a ~12 h window.
 
 - **Who/when:** Fable under D-10, 2026-08-03.
+
+<a id="d-66"></a>
 
 ## D-66 — CBECS evap-cooler values aligned to legacy (two unsourced deviations closed)
 
@@ -3628,6 +3760,8 @@ asserted).
 
 - **Who/when:** Fable under D-10, 2026-08-09 (executed by an opus subagent,
   reviewed by Fable).
+
+<a id="d-67"></a>
 
 ## D-67 — Clarity restructure: aliased public renames + the openstudio-audit gem
 
@@ -3671,6 +3805,8 @@ their own files (verbatim, constant paths unchanged).
 
 - **Who/when:** Fable under D-10 per phylroy's three rulings, 2026-08-09;
   executed by tiered subagents (sonnet/opus), every diff Fable-reviewed.
+
+<a id="d-68"></a>
 
 ## D-68 — The nrcan merge absorbed: SHW flip, daylighting-port tracking, SHA-keyed caches
 
@@ -3752,6 +3888,8 @@ kept pre-merge run dirs:
 green on a fresh SHA-keyed cache (3/17). The FULL-ANNUAL 17×2 table above
 remains STALE-PENDING-REFRESH.
 
+<a id="d-69"></a>
+
 ## D-69 — The legacy-parity oracle is PINNED to a revision (legacy_pin/)
 
 The parity gates now compare against a bundler-pinned checkout of the
@@ -3799,6 +3937,8 @@ in-flight sweep's cache is not orphaned mid-run.
 - **Who/when:** Fable under D-10 per phylroy's "plan and do it",
   2026-08-10.
 
+<a id="d-70"></a>
+
 ## D-70 — Hospital and Outpatient removed from routine sweeps (phylroy)
 
 **Ruling (phylroy, 2026-08-10): "lets remove hospital and outpatient from
@@ -3828,6 +3968,8 @@ deletion:
   last valid full-annual numbers remain in the pre-merge table as history.
 
 - **Who/when:** phylroy's ruling, implemented by Fable, 2026-08-10.
+
+<a id="d-71"></a>
 
 ## D-71 — Measured-footprint massing lands in openstudio-geometry (Claude, delegated)
 
@@ -3943,6 +4085,8 @@ note the MCP's `nrcan-buildings` dataset currently reports `record_count: 200`
 
 - **Who/when:** Claude under the D-delegation, 2026-08-10.
 
+<a id="d-72"></a>
+
 ## D-72 — The building-stock adapter is a SCRIPT, not a gem file (Claude, delegated)
 
 **Question:** where does the NRCan fetch live, given D-71 froze
@@ -3998,6 +4142,8 @@ orientation is the obvious next step and is deliberately not attempted here.
 
 - **Who/when:** Claude under the D-delegation, 2026-08-10.
 
+<a id="d-73"></a>
+
 ## D-73 — Perimeter zones merge by ORIENTATION, via zone membership not polygons (Claude, delegated)
 
 **Question (phylroy, 2026-08-10): "merge perimeter zones by orientation into
@@ -4036,6 +4182,8 @@ cold with the merged zones intact. The adapter manifest now reports
 `thermal_zones` and `zones_per_storey` alongside `spaces`.
 
 - **Who/when:** phylroy's request, implemented by Claude, 2026-08-10.
+
+<a id="d-74"></a>
 
 ## D-74 — WWR is a caller input; NECB FDWR stays in openstudio-envelope (phylroy)
 
@@ -4092,6 +4240,8 @@ the 200 that `get_dataset_info` reports — that count is stale on that code
 path. D-71/D-72's "200-record test sample" caveat is withdrawn.
 
 - **Who/when:** phylroy's ruling, implemented by Claude, 2026-08-10.
+
+<a id="d-75"></a>
 
 ## D-75 — CORRECTION to D-74: thermostats gate the envelope pass, not construction seeding
 
@@ -5401,6 +5551,8 @@ data miss rather than a DF-4 validation. (6) The live scenario counts read 41, t
 them Python-only from their first freeze. R-O re-frozen on the clean tree;
 attribution in the plan log.
 
+<a id="d-90"></a>
+
 ## D-90 — The reference plant's capacity follows the reference's own sizing
 
 **Decided:** 2026-09-15 (DF-1, planned with the user; implemented together
@@ -5542,6 +5694,8 @@ with attribution in the plan log.
   `tests/necb/test_plant_capacity_ownership.py`.
 - **Who/when:** Claude with the user, reviewed by Fable and Sol, 2026-09-15.
 
+<a id="d-91"></a>
+
 ## D-91 — Reference zone dispatch for one-unit-per-block Systems 3 and 4: the rooftop air terminal runs first
 
 **Decided:** 2026-09-15 by Sol, after two Fable reviews and four rounds of
@@ -5657,6 +5811,8 @@ in the plan log.
 - **Who/when:** Claude with the user; Fable reviews; decided by Sol,
   2026-09-15.
 
+<a id="d-92"></a>
+
 ## D-92 — The reference pump is stated as head, efficiency and motor efficiency; EnergyPlus derives its power
 
 - **Decision:** the efficiency pass writes each reference hydronic pump's rated
@@ -5764,6 +5920,8 @@ in the plan log.
 - **Who/when:** Claude under [D-10](#d-10) delegation, with the user; Fable
   reviews; Sol's D-58 scope ruling, 2026-09-16.
 
+<a id="d-93"></a>
+
 ## D-93 — The reference pump's value source: correspondence, then the sentence that governs it
 
 - **Decision:** 8.4.4.14 (2025: 8.4.5.14) is applied per CORRESPONDENCE, not
@@ -5870,6 +6028,8 @@ in the plan log.
   reviews; scoped by Sol to 1:1 so it need not wait on the consolidation
   adjudication.
 
+<a id="d-94"></a>
+
 ## D-94 — Development and sign-off: implement, Sol, Fable, then stop
 
 - **Decision:** phylroy set the working loop (2026-09-20): research and develop
@@ -5914,6 +6074,8 @@ in the plan log.
   that runs terminal commands can iterate without being prompted.
 - **Who/when:** phylroy, 2026-09-20. Extends [D-10](#d-10), which delegated the
   adjudications themselves; this governs how the resulting work is signed off.
+
+<a id="d-95"></a>
 
 ## D-95 — Freeze-carrying PRs merge with a merge commit, not a squash or rebase
 
