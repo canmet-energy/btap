@@ -119,7 +119,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is exactly the tables and articles this file's own provenance block names. Values were additionally cross-checked cell-by-cell against the legacy openstudio-standards NECB2020/data/surface_thermal_transmittance.json (exact match) and re-verified 2026-08-02 against the post-hbix-fix extraction (D-61). The MCP server exposes no build id, so source_revision is null; the archived payloads are the retained artifact.",
-      "result_sha256": "60687cd8ae819364dfd92cacc73833307465f329ad9148933c07935cf69f238a"
+      "result_sha256": "4ecf480b7bedf0489db6000065c23e3c4986757a8e1f50140dc2697b843ecfe9"
     },
     "reference_rules.json": {
       "source": "mcp:necb:2020",
