@@ -254,7 +254,7 @@ attribution together. Never hand-edit a golden. Full instructions are in
 
 ## CI
 
-The workflow has six jobs:
+`.github/workflows/test.yml` has six jobs:
 
 | Job | Role |
 |---|---|
@@ -264,6 +264,18 @@ The workflow has six jobs:
 | `parity` | live pinned oracle, SmallOffice gate, optional golden export |
 | `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
 | `main-red` | on a failed push run on `main`, opens/updates an assigned issue (D-94) |
+
+Beside it, `.github/workflows/decisions.yml` is a **separate always-run gate**,
+not a seventh job. It carries no `paths`/`paths-ignore` deliberately, and runs
+`generate_decisions.py --check` plus
+`tests.necb.test_decisions_registry{,_sync}` and
+`tests.necb.test_decisions_generator` through stdlib `unittest` — no venv, no
+dependency install, no SDK. It exists because `docs/decisions/D-NN.md` is the
+canonical source of the runtime registry while `test.yml` path-ignores
+`docs/**`: editing a source without regenerating touches only ignored paths, so
+`test.yml` would not run, and `main` has no branch protection to require it.
+`python/tests/test_decisions_gate_is_unskippable.py` keeps the filter absent.
+
 
 `parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
 declared. Run them whenever the oracle pin changes.

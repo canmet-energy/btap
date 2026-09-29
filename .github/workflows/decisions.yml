@@ -42,7 +42,7 @@ jobs:
     name: "Decisions: generated outputs match their canonical sources"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # The one gate that must never be skippable: both generated artifacts
       # regenerate byte-identically from docs/decisions/.
