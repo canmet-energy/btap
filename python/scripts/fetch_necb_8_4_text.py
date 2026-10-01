@@ -10,9 +10,11 @@ for the coverage-document generator (which must run in CI without MCP access).
   python3 scripts/fetch_necb_8_4_text.py
   EDITION=2020 python3 scripts/fetch_necb_8_4_text.py
 
-Auth: X-API-Key from ``HBIX_API_KEY``, else read at runtime from ``.mcp.json``
-(which is never committed with a live key). The key is never printed and
-never written into the cache.
+Auth: X-API-Key from ``HBIX_API_KEY``, endpoint from ``HBIX_API_URL``
+(``HBIX_MCP_BASE_URL`` still honoured as a compat alias) — see
+``python/btap/_mcp.py``, vendored from hbix (``canmet-energy/btap#66``).
+Nothing is hardcoded or read from a config file; the key is never printed
+and never written into the cache.
 
 Parsing is deliberately conservative: an article whose text fails ANY sanity
 check is cached with ``parse_ok: false`` and its raw text — the generator then

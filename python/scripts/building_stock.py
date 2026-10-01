@@ -11,11 +11,13 @@ offline. The fetch adapter lives outside the modeling package, so
 ``btap.modeling.geometry.footprint`` never learns where a ring came from.
 
 AUTH follows scripts/fetch_necb_8_4_text.py: endpoint and X-API-Key come from
-the environment, else from .mcp.json (gitignored, never committed with a live
-key). Nothing is hardcoded, and the key is never printed, never written to the
-cache, and never stored in a model. btap.simulation's Remote backend declines
-to hardcode agent-facing MCP endpoints for exactly this reason; reading them at
-runtime is the same rule honoured, not an exception to it.
+``HBIX_API_KEY``/``HBIX_API_URL`` (``HBIX_MCP_BASE_URL`` still honoured as a
+compat alias) environment variables — see ``python/btap/_mcp.py``, vendored
+from hbix (``canmet-energy/btap#66``). Nothing is hardcoded, and the key is
+never printed, never written to the cache, and never stored in a model.
+btap.simulation's Remote backend declines to hardcode agent-facing MCP
+endpoints for exactly this reason; reading them at runtime is the same rule
+honoured, not an exception to it.
 
 CACHE: ``--cache`` writes the raw records, ``--from-cache`` rebuilds from them
 with no network at all — so a fetch is reproducible and CI never needs the MCP,
