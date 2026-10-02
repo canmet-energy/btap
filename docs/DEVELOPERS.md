@@ -126,7 +126,7 @@ python3 python/scripts/necb_orphan_keys.py
 python3 python/scripts/necb_8_4_6_curve_probe.py
 python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py --check
 cd python && python3 scripts/wheel_smoke.py
 ```
 
@@ -152,11 +152,15 @@ assert btap.__file__.startswith(EXPORT)   # never skip this check
 
 ## Decisions and generated docs
 
-The canonical registry is `python/btap/codes/data/decisions.json`; the authored
-record is [necb_decisions.md](necb_decisions.md). The registry tests enforce
-unique ordered ids, document/registry agreement, generated TOC agreement, and
-runtime citations. Regenerate the TOC with
-`python3 python/scripts/generate_decisions_toc.py`; use `--check` in gates.
+One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
+(`id`, `title`, `kind`, `articles`, `summary`) followed by the authored Markdown
+body, whose first line is its own `## D-NN —` heading. Those files are
+canonical. Both [necb_decisions.md](necb_decisions.md) and
+`python/btap/codes/data/decisions.json` are generated from them, in numeric id
+order, by `python3 python/scripts/generate_decisions.py`; use `--check` in
+gates. To add or change a decision, edit the one source file and regenerate --
+never the two outputs. The registry tests enforce the source schema, both
+generated outputs, short-link resolution and runtime citations.
 
 The two generated coverage documents are
 [NECB_COVERAGE.md](NECB_COVERAGE.md) and
@@ -250,7 +254,7 @@ attribution together. Never hand-edit a golden. Full instructions are in
 
 ## CI
 
-The workflow has six jobs:
+`.github/workflows/test.yml` has six jobs:
 
 | Job | Role |
 |---|---|
@@ -260,6 +264,25 @@ The workflow has six jobs:
 | `parity` | live pinned oracle, SmallOffice gate, optional golden export |
 | `parity-scenarios` | annual frozen scenarios, in parallel with `parity` |
 | `main-red` | on a failed push run on `main`, opens/updates an assigned issue (D-94) |
+
+Beside it, `.github/workflows/decisions.yml` is a **separate path-unfiltered
+gate**, not a seventh job. The property it enforces is exactly: path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch. It carries no `paths`/`paths-ignore` deliberately, and runs
+`generate_decisions.py --check` plus
+`tests.necb.test_decisions_registry{,_sync}` and
+`tests.necb.test_decisions_generator` through stdlib `unittest` — no venv, no
+dependency install, no SDK. It exists because `docs/decisions/D-NN.md` is the
+canonical source of the runtime registry while `test.yml` path-ignores
+`docs/**`: editing a source without regenerating touches only ignored paths, so
+`test.yml` would not run, and `main` has no branch protection to require it.
+`python/tests/test_decisions_gate_is_path_unfiltered.py` keeps the filter
+absent and the check runnable as a failing command.
+
+What the gate does NOT do: block a merge. `main` carries no branch protection
+and no rulesets, and `main-red` is a job inside `test.yml` gated on that
+workflow's own jobs — so a docs-only push to `main` with stale outputs turns
+`decisions` red while `test.yml` never runs and no incident issue is opened. The
+gate moves that failure from invisible to visible; someone still has to look.
+`[skip ci]` in a head commit message skips it as it would any workflow.
 
 `parity` and `parity-scenarios` are `workflow_dispatch` only; no schedule is
 declared. Run them whenever the oracle pin changes.

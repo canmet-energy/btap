@@ -1,5 +1,5 @@
 """The adjudicated-decision registry (port of btap-necb's decisions.rb): the
-machine-readable mirror of docs/necb_decisions.md.
+runtime projection of the per-decision sources in docs/decisions/.
 
 Runtime code cites decisions through the AuditLog ``ruling`` kwarg
 (``ruling='D-14'``, or ``'D-19 D-21'`` for several). This module resolves
@@ -7,16 +7,18 @@ those ids to a title and a SELF-CONTAINED summary, so the AHJ report can
 explain WHY a ruled code path did what it did without sending the reader
 anywhere — the report carries no external references by contract.
 
-Entry: {'id', 'title', 'kind', 'summary', 'articles'}
+Entry: {'id', 'title', 'kind', 'articles', 'summary'}
   kind: 'runtime'         — has at least one ruling-tagged audit call
         'runtime_unwired' — runtime behaviour, no ruling-tagged call
         'data'            — manifest / vendored-data / verification only
         'process'         — how the project works, not what the code does
 
-This package's data/decisions.json is the CANONICAL registry since R3
-(D-81); the Ruby gem's copy is generated from it. tests/necb/test_decisions_registry.py
-enforces the citation invariants on this side; the Ruby gem's
-test_decisions_registry.rb keeps enforcing them there until R6.
+This package's data/decisions.json is GENERATED and must not be edited.
+The canonical source is one file per decision, docs/decisions/D-NN.md, from
+which python/scripts/generate_decisions.py emits both this registry and
+docs/necb_decisions.md in numeric id order (D-81, amended 2026-09-29).
+tests/necb/test_decisions_registry.py enforces the citation invariants,
+test_decisions_registry_sync.py the drift gate on both outputs.
 """
 
 from __future__ import annotations
@@ -36,7 +38,13 @@ _by_id: dict[str, dict] | None = None
 
 
 def all_decisions() -> list[dict]:
-    """Every registered decision, document order (Ruby ``Decisions.all``)."""
+    """Every registered decision, numeric decision-id order.
+
+    The order is the generator's (D-81, amended 2026-09-29). This previously
+    documented itself as "document order", which was not true of either file:
+    document order, registry order and numeric order were three different
+    sequences before the migration.
+    """
     global _all
     if _all is None:
         with open(DATA_DIR / "decisions.json", encoding="utf-8") as handle:

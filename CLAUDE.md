@@ -74,7 +74,7 @@ python3 python/scripts/generate_necb_coverage.py
 python3 python/scripts/generate_necb_8_4_coverage.py
 python3 python/scripts/generate_necb_edition_delta.py --check
 python3 python/scripts/generate_necb_vintage_match.py --check
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py --check
 python3 python/scripts/legacy_whatsnew.py
 ```
 
@@ -84,16 +84,24 @@ runs in the `verify` CI job. Live oracle checks run only in `parity`.
 
 ## Decisions and coverage
 
-`python/btap/codes/data/decisions.json` is canonical. The authored document is
-`docs/necb_decisions.md`; its TOC is generated. Adding a `## D-XX` heading means
-adding the registry entry, and vice versa. A `kind: runtime` entry must be cited
-by product Python source.
+One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
+(`id`, `title`, `kind`, `articles`, `summary`) plus the authored Markdown body,
+whose first line is its own `## D-NN —` heading. That file is CANONICAL.
+Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
+GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
+are never hand-edited. Anchors and the index are inserted by the generator; by
+convention a body does not declare its own `d-NN` anchor. The front-matter
+`title` is the
+compact index title and the body's heading is authored prose, which differ on
+purpose. A `kind: runtime` entry must be cited by product Python source.
 
 ```bash
-python3 python/scripts/generate_decisions_toc.py --check
+python3 python/scripts/generate_decisions.py        # regenerate both outputs
+python3 python/scripts/generate_decisions.py --check
 cd python && python3 -m unittest \
   tests.necb.test_decisions_registry_sync \
-  tests.necb.test_decisions_registry
+  tests.necb.test_decisions_registry \
+  tests.necb.test_decisions_generator
 ```
 
 Coverage is declared at the depth the evidence supports. Match article ids by
@@ -167,7 +175,8 @@ boundary; post-R6 freezes do not recreate cross-language evidence.
 
 ## CI
 
-`.github/workflows/test.yml` has six jobs:
+`.github/workflows/test.yml` has six jobs, and
+`.github/workflows/decisions.yml` is a separate PATH-UNFILTERED gate beside it:
 
 - **`lint`**: stdlib-oriented Python checks, coverage pointers/doc drift, and
   the decisions registry.
@@ -195,9 +204,27 @@ current Dockerfile. With the repository variable `CI_RUNNER=necb-ci`, every job
 but `lint` runs on a 36-vCPU CodeBuild runner (`infra/aws-ci/README.md`);
 deleting the variable falls back to `ubuntu-latest`.
 
+`.github/workflows/decisions.yml` is a SEPARATE workflow, not a seventh job,
+and carries **no `paths` or `paths-ignore`** deliberately. The property it
+enforces is exactly: **path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch**. It is not
+"unskippable" — `[skip ci]` or `[ci skip]` in a head commit message skips it,
+like any push- or PR-triggered workflow — and it is not merge-blocking. It runs
+`generate_decisions.py --check` plus the three decision test modules on every
+push and pull request, stdlib-only with no dependency install. It exists because
+`docs/decisions/D-NN.md` is the canonical source of the RUNTIME registry while
+`test.yml` path-ignores `docs/**`: a source edit WITHOUT a regenerate touches
+only ignored paths, so `test.yml` would not run at all, and `main` has no branch
+protection to require it. `python/tests/test_decisions_gate_is_path_unfiltered.py`
+asserts the filter stays absent.
+
 There is no scheduled parity trigger. Dispatch parity whenever `legacy_pin/REF`
-moves. Documentation-only pushes are path-ignored by the workflow, so run local
-doc checks before merging documentation changes.
+moves. Documentation-only pushes are path-ignored by **`test.yml`**, so run local
+doc checks before merging documentation changes — but the decisions gate still
+runs, so a forgotten `generate_decisions.py` shows up as a RED run rather than
+no run at all. It does not block the merge: `main` has no branch protection and
+no rulesets, and `main-red` is a job inside `test.yml`, so a docs-only push to
+`main` with stale outputs turns `decisions` red while `test.yml` never runs and
+no incident is opened. The gate makes that failure visible, not impossible.
 
 ## Traps
 

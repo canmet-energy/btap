@@ -1,0 +1,30 @@
+{
+  "registry_comment": [
+    "GENERATED FILE - do not edit. Source: docs/decisions/D-NN.md, one file per",
+    "decision, carrying TOML front matter plus the authored Markdown body. Regenerate with",
+    "  python3 python/scripts/generate_decisions.py",
+    "and gate drift with its --check. The same sources generate docs/necb_decisions.md,",
+    "the authored record. This file is the runtime projection of their front matter,",
+    "in numeric decision-id order.",
+    "",
+    "The adjudicated interpretations and product decisions governing the NECB Part 8",
+    "pipeline. Runtime code cites these ids through the AuditLog `ruling:` kwarg, and the",
+    "AHJ report's rulings appendix renders the ones that actually fired in a run, so a",
+    "reader sees WHY a value was chosen without needing access to this repository's",
+    "documentation.",
+    "",
+    "kind: runtime          — governs a code path that carries a `ruling:` audit tag",
+    "      runtime_unwired  — governs runtime behaviour with no ruling-tagged audit call",
+    "      data             — manifest / vendored-data or verification-only decision",
+    "      process          — how the project works (authorship, delegation, sign-off, sweeps)",
+    "",
+    "MAINTENANCE: add or edit the one source file, then regenerate. Every kind:runtime entry",
+    "must be cited by at least one `ruling:` literal in Python code.",
+    "python/tests/necb/test_decisions_registry.py, test_decisions_registry_sync.py and",
+    "test_decisions_generator.py enforce the source schema, both generated outputs,",
+    "the runtime-citation invariant and short-link resolution. The path-unfiltered and reachable on pushes to main/develop, pull requests, merge groups and manual dispatch drift",
+    "gate is .github/workflows/decisions.yml, which carries no path filter.",
+    "Summaries are PARAPHRASE — never reproduce NECB text verbatim here (D-01 governs where",
+    "code text may be reproduced, and this file is not one of those places)."
+  ]
+}

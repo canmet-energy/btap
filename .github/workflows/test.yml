@@ -64,7 +64,7 @@ jobs:
             || { echo "::error::Coverage docs are stale. Run: rake necb:coverage_doc"; exit 1; }
       # docs/NECB_EDITION_DELTAS.md is GENERATED from the same per-edition
       # manifests (multi-edition plan, Stage 4) — same drift contract, its own
-      # --check flag (the generate_decisions_toc.py --check contract).
+      # --check flag (the generate_decisions.py --check contract).
       - name: NECB edition delta doc matches the manifests
         run: python3 python/scripts/generate_necb_edition_delta.py --check
       # docs/NECB_VINTAGE_MATCH.md compares each snapshot's INHERITED content
@@ -74,16 +74,16 @@ jobs:
       # MCP operation (--fetch) and never runs in CI.
       - name: NECB vintage-match doc matches the archived payloads
         run: python3 python/scripts/generate_necb_vintage_match.py --check
-      # The Python registry is canonical after R6. Run its document, TOC, id,
-      # and runtime-citation gates explicitly; the retired Ruby-copy sync test
-      # is intentionally not part of this lane.
-      - name: "Decisions registry: document + TOC + runtime citations"
+      # docs/decisions/D-NN.md is canonical; docs/necb_decisions.md and
+      # python/btap/codes/data/decisions.json are both generated from it by the
+      # one writer. --check is the drift gate for both outputs at once, so a
+      # hand-edit of either is caught here (D-81, amended 2026-09-29).
+      - name: "Decisions: generated outputs + sources + runtime citations"
         run: |
-          python3 python/scripts/generate_decisions_toc.py --check
+          python3 python/scripts/generate_decisions.py --check
           cd python && python3 -m unittest \
-            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_decision_ids_are_unique_and_well_formed \
-            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_doc_headings_mirror_the_canonical_registry \
-            tests.necb.test_decisions_registry_sync.TestDecisionsRegistrySync.test_doc_toc_matches_the_canonical_registry \
+            tests.necb.test_decisions_registry_sync \
+            tests.necb.test_decisions_generator \
             tests.necb.test_decisions_registry
 
   # The Python product suite on a bare runner, including import contracts,
