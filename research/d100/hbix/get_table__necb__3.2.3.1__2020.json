@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "3.2.3.1",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-10-02T15:00:24.353400+00:00",
+    "returned_number": "3.2.3.1",
+    "server_known_issue": null,
+    "sha256": "79122a0ac55454d6ab0cb6a44c9e20afacb2bf54a17efebfa321c8ed5f4dd88d",
+    "state": "present",
+    "state_note": "",
+    "title": "Overall Thermal Transmittance of Building Assemblies in Contact with the Ground"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2020",
+    "headers": [
+      "Assembly in Contact with the Ground",
+      "Zone 4: < 3000",
+      "Zone 5: 3000 to 3999",
+      "Zone 6: 4000 to 4999",
+      "Zone 7A: 5000 to 5999",
+      "Zone 7B: 6000 to 6999",
+      "Zone 8: ≥ 7000"
+    ],
+    "page_number": 75,
+    "row_count": 3,
+    "rows": [
+      {
+        "Assembly in Contact with the Ground": "Walls",
+        "Zone 4: < 3000": "0.568",
+        "Zone 5: 3000 to 3999": "0.379",
+        "Zone 6: 4000 to 4999": "0.284",
+        "Zone 7A: 5000 to 5999": "0.284",
+        "Zone 7B: 6000 to 6999": "0.284",
+        "Zone 8: ≥ 7000": "0.210"
+      },
+      {
+        "Assembly in Contact with the Ground": "Roofs",
+        "Zone 4: < 3000": "0.568",
+        "Zone 5: 3000 to 3999": "0.379",
+        "Zone 6: 4000 to 4999": "0.284",
+        "Zone 7A: 5000 to 5999": "0.284",
+        "Zone 7B: 6000 to 6999": "0.284",
+        "Zone 8: ≥ 7000": "0.210"
+      },
+      {
+        "Assembly in Contact with the Ground": "Floors",
+        "Zone 4: < 3000": "0.757 for 1.2 m",
+        "Zone 5: 3000 to 3999": "0.757 for 1.2 m",
+        "Zone 6: 4000 to 4999": "0.757 for 1.2 m",
+        "Zone 7A: 5000 to 5999": "0.757 for 1.2 m",
+        "Zone 7B: 6000 to 6999": "0.757 for 1.2 m",
+        "Zone 8: ≥ 7000": "0.379 for full area"
+      }
+    ],
+    "table_number": "3.2.3.1",
+    "title": "Overall Thermal Transmittance of Building Assemblies in Contact with the Ground"
+  }
+}

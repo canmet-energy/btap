@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2020",
+      "table_number": "8.4.4.1",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-10-02T15:00:24.353400+00:00",
+    "returned_number": "8.4.4.12",
+    "server_known_issue": null,
+    "sha256": "b9fd99016a41e9582511879550f1af90d4099dbde9b0179998020bd498538ebd",
+    "state": "returned_mismatch",
+    "state_note": "requested '8.4.4.1' but the payload identifies itself as '8.4.4.12'",
+    "title": "Applicable Requirements for Cooling with Outside Air According to Type of HVAC System"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2020",
+    "headers": [
+      "Type of System",
+      "Applicable Article for Cooling with Outside Air"
+    ],
+    "page_number": 218,
+    "row_count": 3,
+    "rows": [
+      {
+        "Applicable Article for Cooling with Outside Air": "5.2.2.8.",
+        "Type of System": "HVAC systems 1, 3, 4 and 6(1)"
+      },
+      {
+        "Applicable Article for Cooling with Outside Air": "5.2.2.9.",
+        "Type of System": "HVAC systems 2 and 5(1)"
+      },
+      {
+        "Applicable Article for Cooling with Outside Air": "5.2.2.8.",
+        "Type of System": "All types of heat pump systems(2)"
+      }
+    ],
+    "table_number": "8.4.4.12",
+    "title": "Applicable Requirements for Cooling with Outside Air According to Type of HVAC System"
+  }
+}

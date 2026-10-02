@@ -54,21 +54,44 @@ def classify(citation: str):
     return "unclassified", text, ""
 
 
-def requests_for(kind: str, base: str, edition: str):
+def table_number_of(base: str) -> str:
+    """The number `get_table` accepts: no terminal citation punctuation.
+
+    Citations are authored with a trailing period (`Table 3.2.2.2.`), and
+    passing that straight through produced `table_number "3.2.2.2."`, which the
+    server answers empty. All six table requests were `mcp_empty` for that
+    reason alone (Sol, `065` item 1).
+    """
+    return base.rstrip(".")
+
+
+def parent_article_of(base: str) -> str:
+    """The article that ENCLOSES a table, which is where its Notes live.
+
+    `get_section 8.4.4.7.-B` is not the request that retrieves Table -B's
+    Notes; `get_section 8.4.4.7` is. Fourteen designator section requests were
+    empty because of that (Sol, `065` item 1).
+    """
+    return re.sub(r"\.?-[A-Z]$", "", table_number_of(base)).rstrip(".")
+
+
+def requests_for(kind: str, base: str, fragment: str, edition: str):
     """The exact request(s) that answer this citation in ``edition``.
 
-    A table Note needs BOTH the structured table and the enclosing section's
-    note text, so it yields two requests rather than one (Sol, `061` item 4).
+    A table citation needs its exact `get_table`. A Table NOTE additionally
+    needs the PARENT ARTICLE's section, because that is where the Note text
+    lives. Nothing requests a section under a table designator.
     """
     year = edition.replace("necb", "")
     if kind.startswith("table"):
-        yield {"tool": "get_table", "code": "necb", "table_number": base,
-               "edition": year}
-        yield {"tool": "get_section", "code": "necb", "section_number": base,
-               "edition": year}
+        yield {"tool": "get_table", "code": "necb",
+               "table_number": table_number_of(base), "edition": year}
+        if fragment.startswith("Note"):
+            yield {"tool": "get_section", "code": "necb",
+                   "section_number": parent_article_of(base), "edition": year}
     else:
-        yield {"tool": "get_section", "code": "necb", "section_number": base,
-               "edition": year}
+        yield {"tool": "get_section", "code": "necb",
+               "section_number": base, "edition": year}
 
 
 def main(argv=None):
@@ -86,7 +109,8 @@ def main(argv=None):
             if decision_id not in entry["cited_by"]:
                 entry["cited_by"].append(decision_id)
             for edition in EDITIONS:
-                entry["requests"][edition] = list(requests_for(kind, base, edition))
+                entry["requests"][edition] = list(
+                    requests_for(kind, base, fragment, edition))
 
     # one flat, de-duplicated request list — every count downstream is derived
     # from this, so no stage can report a number the corpus does not contain

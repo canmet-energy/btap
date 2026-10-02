@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "8.4.4.1",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-10-02T15:00:24.353400+00:00",
+    "returned_number": "8.4.4.1",
+    "server_known_issue": null,
+    "sha256": "89f7aa7b672fe18c0bf44e51905db1e8ca006b0f4189ca4a7fb25227be788ca2",
+    "state": "present",
+    "state_note": "",
+    "title": "Energy Use Intensities for Building Archetypes"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2025",
+    "headers": [
+      "Building Archetype(1)",
+      "Energy Use Intensity, (2)(3) kWh/m² per year"
+    ],
+    "page_number": 216,
+    "row_count": 4,
+    "rows": [
+      {
+        "Building Archetype(1)": "School (K-12)",
+        "Energy Use Intensity, (2)(3) kWh/m² per year": "125"
+      },
+      {
+        "Building Archetype(1)": "Multi-unit residential building, not more than 6 storeys in building height",
+        "Energy Use Intensity, (2)(3) kWh/m² per year": "225"
+      },
+      {
+        "Building Archetype(1)": "Multi-unit residential building, more than 6 storeys in building height",
+        "Energy Use Intensity, (2)(3) kWh/m² per year": "175"
+      },
+      {
+        "Building Archetype(1)": "Office",
+        "Energy Use Intensity, (2)(3) kWh/m² per year": "175"
+      }
+    ],
+    "table_number": "8.4.4.1",
+    "title": "Energy Use Intensities for Building Archetypes"
+  }
+}

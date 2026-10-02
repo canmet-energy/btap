@@ -165,27 +165,33 @@ def main(argv=None):
         found = chains(calls, graph, site["module"], site["function"])
         entry = [c for c in found
                  if any(marker in step for step in c for marker in ENTRY_MARKERS)]
-        site["candidate_chains"] = [" <- ".join(c) for c in entry][:4]
-        site["manifest_bound_entry"] = bool(entry)
-        # Directory placement is NOT evidence, so nothing here assigns code ids.
-        site["per_code_chain"] = None
-        site["requires_human_resolution"] = not entry
+        # UNVERIFIED candidates, named as such. A name-only call index produced
+        # a provably invalid chain -- `path.py` calls `reference._apply`, which
+        # then calls `Prescriptive._apply`, and both modules define `_apply` --
+        # and a qualified-symbol check still validated only the top of an edge.
+        # Sol ruled against building a general resolver: these are candidates,
+        # the global corroborated count is UNRESOLVED, and an accepted packet
+        # must carry a human-verified per-code chain from the manifest binding
+        # through the lifecycle hook and guards (Sol, `065` item 4, `068`).
+        site["unverified_candidate_chains"] = [" <- ".join(c) for c in entry][:4]
+        site["chain_corroborated"] = None          # unresolved, not False
+        site["per_code_chain"] = None              # human work, never inferred
+        site["requires_human_resolution"] = True   # every site, without exception
         by_id[site["id"]].append(site)
 
     write_json(out / "traces.json", dict(sorted(by_id.items())))
-    unresolved = [f"{s['module']}:{s['line']}" for s in sites
-                  if s["requires_human_resolution"]]
+    with_candidate = sum(1 for s in sites if s["unverified_candidate_chains"])
     print(f"ruling sites: {len(sites)} across {len(by_id)} decisions")
-    print(f"  with a corroborated chain to a manifest-bound entry : "
-          f"{len(sites) - len(unresolved)}")
-    print(f"  UNRESOLVED, marked for human tracing                : "
-          f"{len(unresolved)}")
-    for site in unresolved[:8]:
-        print(f"    {site}")
-    print(f"  sites carrying at least one guard                   : "
+    print(f"  with at least one UNVERIFIED candidate chain : {with_candidate}")
+    print(f"  with no candidate chain at all               : "
+          f"{len(sites) - with_candidate}")
+    print(f"  carrying at least one guard                  : "
           f"{sum(1 for s in sites if s['guards'])}")
-    print("  per_code_chain is null for every site: the manifest-binding-to-site "
-          "chain per code id is human work, not inferred here.")
+    print("  corroborated chains                          : UNRESOLVED")
+    print("  Every site requires human resolution. A candidate chain is a "
+          "starting point for reading, not evidence of reachability: a shared "
+          "module or a same-named function is not proof, and no count here is "
+          "a corroborated count (Sol, 068).")
     print(f"written: {out / 'traces.json'}")
 
 

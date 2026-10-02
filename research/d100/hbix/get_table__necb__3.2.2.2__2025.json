@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "request": {
+      "code": "necb",
+      "edition": "2025",
+      "table_number": "3.2.2.2",
+      "tool": "get_table"
+    },
+    "retrieved_utc": "2026-10-02T15:00:24.353400+00:00",
+    "returned_number": "3.2.2.2",
+    "server_known_issue": null,
+    "sha256": "94156b33256c4c980aefe934cd3be29e8078f3bd4595122f3a1aa75c719cbf69",
+    "state": "present",
+    "state_note": "",
+    "title": "Overall Thermal Transmittance of Above-ground Opaque Building Assemblies"
+  },
+  "payload": {
+    "division": "B",
+    "edition": "2025",
+    "headers": [
+      "Above-ground Opaque Building Assembly",
+      "Zone 4: < 3000",
+      "Zone 5: 3000 to 3999",
+      "Zone 6: 4000 to 4999",
+      "Zone 7A: 5000 to 5999",
+      "Zone 7B: 6000 to 6999",
+      "Zone 8: ≥ 7000"
+    ],
+    "page_number": 73,
+    "row_count": 3,
+    "rows": [
+      {
+        "Above-ground Opaque Building Assembly": "Walls",
+        "Zone 4: < 3000": "0.290",
+        "Zone 5: 3000 to 3999": "0.265",
+        "Zone 6: 4000 to 4999": "0.240",
+        "Zone 7A: 5000 to 5999": "0.215",
+        "Zone 7B: 6000 to 6999": "0.190",
+        "Zone 8: ≥ 7000": "0.165"
+      },
+      {
+        "Above-ground Opaque Building Assembly": "Roofs",
+        "Zone 4: < 3000": "0.164",
+        "Zone 5: 3000 to 3999": "0.156",
+        "Zone 6: 4000 to 4999": "0.138",
+        "Zone 7A: 5000 to 5999": "0.121",
+        "Zone 7B: 6000 to 6999": "0.117",
+        "Zone 8: ≥ 7000": "0.110"
+      },
+      {
+        "Above-ground Opaque Building Assembly": "Floors",
+        "Zone 4: < 3000": "0.193",
+        "Zone 5: 3000 to 3999": "0.175",
+        "Zone 6: 4000 to 4999": "0.156",
+        "Zone 7A: 5000 to 5999": "0.138",
+        "Zone 7B: 6000 to 6999": "0.121",
+        "Zone 8: ≥ 7000": "0.117"
+      }
+    ],
+    "table_number": "3.2.2.2",
+    "title": "Overall Thermal Transmittance of Above-ground Opaque Building Assemblies"
+  }
+}

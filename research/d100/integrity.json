@@ -1,0 +1,14 @@
+{
+  "findings": [],
+  "summary": {
+    "indexed": 160,
+    "payload_files": 160,
+    "requests": 160,
+    "server_known_issue_count": 2,
+    "states": {
+      "mcp_empty": 35,
+      "present": 124,
+      "returned_mismatch": 1
+    }
+  }
+}

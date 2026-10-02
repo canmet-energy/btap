@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 
 from common import (ARTIFACT_ROOT, ERROR, MCP_EMPTY, PRESENT, PYTHON_ROOT,
+                    RETURNED_MISMATCH,
                     ResearchError, out_dir, read_json, request_key, sha256,
                     write_json)
 
@@ -51,6 +52,21 @@ def answer(client, request: dict):
             f"{request['tool']} {arguments} failed: {text}") from error
     if not result:
         return None, MCP_EMPTY, "tool returned an empty result"
+
+    # A non-empty payload is not success unless it identifies itself as what was
+    # requested. HBIX answers the 2020 request for 8.4.4.1 with Table 8.4.4.12.
+    asked_number = str(request.get("section_number") or request.get("table_number"))
+    returned = str(result.get("table_number") or result.get("article_number")
+                   or result.get("section_number") or "")
+    asked_edition, returned_edition = str(request["edition"]), str(result.get("edition") or "")
+    if returned.rstrip(".") != asked_number.rstrip("."):
+        return result, RETURNED_MISMATCH, (
+            f"requested {asked_number!r} but the payload identifies itself as "
+            f"{returned!r}")
+    if returned_edition and returned_edition != asked_edition:
+        return result, RETURNED_MISMATCH, (
+            f"requested edition {asked_edition} but the payload says "
+            f"{returned_edition}")
     return result, PRESENT, ""
 
 
@@ -107,8 +123,20 @@ def main(argv=None):
           "findings are recorded separately in README.md and never folded into "
           "it.)")
     print(f"written: {out / 'hbix_index.json'}")
+    mismatched = [k for k, m in index.items() if m["state"] == RETURNED_MISMATCH]
+    if mismatched:
+        print(f"\n  RETURNED-NUMBER MISMATCHES ({len(mismatched)}) — the server "
+              "answered with something other than what was asked:")
+        for key in mismatched:
+            print(f"    {key}: {index[key]['state_note']}")
     if states.get(ERROR):
         raise ResearchError("errors recorded; corpus is incomplete")
+    if mismatched:
+        # The archive is written and inspectable; the RUN is not clean.
+        raise ResearchError(
+            f"{len(mismatched)} request(s) answered with a different number or "
+            "edition than requested; record each as a local HBIX finding before "
+            "relying on the corpus")
 
 
 if __name__ == "__main__":

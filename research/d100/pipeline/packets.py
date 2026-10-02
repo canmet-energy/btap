@@ -111,9 +111,12 @@ def main(argv=None):
             "superseding_layers": layers(body),
             "ruling_sites": [{"module": s["module"], "line": s["line"],
                               "function": s["function"], "guards": s["guards"],
-                              "manifest_bound_entry": s["manifest_bound_entry"],
-                              "candidate_chains": s["candidate_chains"],
-                              "per_code_chain": s["per_code_chain"]}
+                              "unverified_candidate_chains":
+                                  s["unverified_candidate_chains"],
+                              "chain_corroborated": s["chain_corroborated"],
+                              "per_code_chain": s["per_code_chain"],
+                              "requires_human_resolution":
+                                  s["requires_human_resolution"]}
                              for s in sites],
             "path_based_candidates": path_candidates(sites),
             "scope": None,

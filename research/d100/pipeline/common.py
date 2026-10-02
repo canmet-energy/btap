@@ -34,8 +34,15 @@ DECISION_ID_FULL_RE = re.compile(r"\A" + DECISION_ID + r"\Z")
 PRESENT = "present"
 MCP_EMPTY = "mcp_empty"
 HIERARCHY_ABSENT = "hierarchy_absent"
+#: The server answered, but with a DIFFERENT number or edition than requested.
+#: HBIX answers the 2020 request for `8.4.4.1` with Table `8.4.4.12`, so a
+#: non-empty payload is not success unless it identifies itself as the thing
+#: asked for (Sol, `065` item 1). Not folded into `present`, and not folded into
+#: `error` either: the corpus stays complete and inspectable, and the RUN exits
+#: non-zero so it cannot be mistaken for a clean one.
+RETURNED_MISMATCH = "returned_mismatch"
 ERROR = "error"
-STATES = (PRESENT, MCP_EMPTY, HIERARCHY_ABSENT, ERROR)
+STATES = (PRESENT, MCP_EMPTY, HIERARCHY_ABSENT, RETURNED_MISMATCH, ERROR)
 
 
 class ResearchError(RuntimeError):
