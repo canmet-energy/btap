@@ -28,6 +28,18 @@ Whitespace is also collapsed. That is stated here rather than described as
 
 Differences are reported as spans, never scored: a `similarity 1.000` once hid
 four real changes behind a rounded float.
+
+A one-sided citation is reported as `one-sided at this address` and nothing more.
+An earlier version grouped the complementary one-sided citations of one decision
+into a "candidate renumbered pair"; Sol ruled it out and the rule is gone (`070`).
+It proposed sixteen pairs, at least one demonstrably false: D-61's `8.4.4.14.` is
+a pump curve and its `11.4.1.1.` is a GHG performance provision, and that decision
+is a broad staleness audit of independent tables, not a renumbering. The pairing
+was invented by the grouping, not found in the record. D-03's two chiller EIR
+tables ARE a real pair — but the decision's own body establishes that, not the
+heuristic. A cross-edition comparison therefore requires positive cited evidence
+of the pair plus the correct edition's archived payloads; if the corpus ever needs
+explicit pairs they are an authored, validated input, never inferred here.
 """
 
 from __future__ import annotations
@@ -219,45 +231,12 @@ def compare_one(entry, sides):
     return record
 
 
-def candidate_pairings(citations, results):
-    """One-sided citations of one decision that are present in complementary
-    editions — a CANDIDATE renumbered pair, never an asserted one.
-
-    D-03 cites `8.4.5.5.-C` and `8.4.6.5.-C`; the first is present in 2020 only
-    and the second in 2025 only. That is positive per-edition evidence, which is
-    what Sol asked for in place of a mapping rule — but which of them pairs with
-    which is a record fact, so it is reported for confirmation, not resolved.
-    """
-    by_decision = {}
-    for citation, record in results.items():
-        if record["verdict"] != "one-sided at this address":
-            continue
-        only = ("2020" if record["state_2020"] == PRESENT else
-                "2025" if record["state_2025"] == PRESENT else None)
-        if not only:
-            continue
-        for decision in record["cited_by"]:
-            by_decision.setdefault(decision, []).append((citation, only))
-    out = {}
-    for decision, items in sorted(by_decision.items()):
-        in_2020 = [c for c, y in items if y == "2020"]
-        in_2025 = [c for c, y in items if y == "2025"]
-        if in_2020 and in_2025:
-            out[decision] = {"present_in_2020_only": sorted(in_2020),
-                             "present_in_2025_only": sorted(in_2025),
-                             "status": "CANDIDATE pair — confirm against the "
-                                       "decision's own body; not asserted here"}
-    return out
-
-
 def main(argv=None):
     out = out_dir(argv, __doc__)
     citations = read_json(out / "citations.json")["citations"]
     results = {citation: compare_one(entry, sides_for(out, entry))
                for citation, entry in citations.items()}
-    pairings = candidate_pairings(citations, results)
-    write_json(out / "comparisons.json",
-               {"comparisons": results, "candidate_pairings": pairings})
+    write_json(out / "comparisons.json", {"comparisons": results})
 
     counts, grains = {}, {}
     for record in results.values():
@@ -270,11 +249,6 @@ def main(argv=None):
     print("  by granularity:")
     for grain in sorted(grains):
         print(f"    {grain:40} {grains[grain]}")
-    if pairings:
-        print(f"\n  candidate renumbered pairs ({len(pairings)}), for confirmation:")
-        for decision, pair in pairings.items():
-            print(f"    {decision}: {pair['present_in_2020_only']} (2020) <-> "
-                  f"{pair['present_in_2025_only']} (2025)")
     differs = sorted(c for c, r in results.items() if r["verdict"] == "differs")
     if differs:
         print(f"\n  differing ({len(differs)}), for reading:")

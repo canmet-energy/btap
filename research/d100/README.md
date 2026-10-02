@@ -64,7 +64,6 @@ comparisons               120
     cited sentences 4-5                  1
     structured headers and rows          5
     whole article                        27
-candidate renumbered pairs 16
 ```
 
 <!-- COUNTS END -->
@@ -123,12 +122,21 @@ Sentence ranges are INCLUSIVE. `5.2.2.8.(4)-(5)` compares both sentences and
 records that granularity; reading only the first number returned Sentence (4)
 alone and still called the result a cited-fragment comparison.
 
-A citation present in one edition only is reported `one-sided at this address`,
-never compared against its own absent twin. Where one decision cites
-complementary one-sided provisions, they are offered as a CANDIDATE renumbered
-pair for confirmation against the decision's own body — positive per-edition
-evidence, not a mapping rule. That grouping over-pairs when a decision has
-several unrelated one-sided citations, which is why it is a candidate.
+A citation present in one edition only is reported `one-sided at this address`
+and nothing more. It is never compared against its own absent twin, and an empty
+answer is not proven Code absence.
+
+An earlier version grouped the complementary one-sided citations of a single
+decision into a "candidate renumbered pair". **Sol ruled that out and it is
+gone** (`070`). It proposed sixteen pairs, at least one demonstrably false: for
+D-61 it paired `8.4.4.14.` with `11.4.1.1.`, which are a pump curve and a GHG
+performance provision, in a decision that is a broad staleness audit of
+independent tables rather than a renumbering. The relation was invented by the
+grouping, not found in the record. D-03's two chiller EIR tables *are* a genuine
+pair, but the decision's own body establishes that — the heuristic did not. A
+cross-edition comparison therefore requires positive cited evidence of the pair
+plus the correct edition's archived payloads, and explicit pairs, if the corpus
+ever needs them, are an authored and validated input rather than an inference.
 
 Normalises exactly two things, plus whitespace:
 

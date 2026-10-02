@@ -90,7 +90,6 @@ def counts_block(out: Path) -> str:
     lines.append("  by granularity:")
     for grain in sorted(grains):
         lines.append(f"    {grain:36} {grains[grain]}")
-    lines.append(f"candidate renumbered pairs {len(comparisons['candidate_pairings'])}")
     lines += ["```", "", COUNTS_END]
     return "\n".join(lines)
 
