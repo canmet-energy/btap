@@ -230,7 +230,14 @@ def stray_files(source_dir: Path = SOURCE_DIR):
         # what G4 decided against for vim's `.swp` (Fable, PR #64). Safe at this
         # position: a `.#`-prefixed name can never be a canonical source, since
         # sources are `D-NN.md`, so the link is skipped and never followed.
-        if path.name.startswith(".#"):
+        # ...and ONLY when the remainder names a source the glob already
+        # reached. A bare `.#` prefix was too broad both ways Fable predicted: a
+        # complete decision in `.#D-98.md` was silently lost, and `.#extra ->`
+        # a directory of sources escaped the symlink arm entirely, because this
+        # test precedes it. Emacs names its lock `.#<the file being edited>`, so
+        # the remainder is always a real source and this costs the real case
+        # nothing (Fable, PR #64).
+        if path.name.startswith(".#") and path.name[2:] in keep:
             continue
         # is_symlink() is tested BEFORE the keep-set exemption. Checking keep
         # first accepted a symlink NAMED `D-98.md`, and symlinked `_preamble.md`

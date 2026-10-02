@@ -122,11 +122,32 @@ def carries_path_filter(text: str):
 def escape_key_pattern(key: str) -> str:
     """Match ``key`` as a YAML mapping key in any of its spellings.
 
-    Plain, double-quoted, single-quoted, and with space before the colon — all
-    valid YAML, all parsing to the same key, all honoured by GitHub. This still
-    models no YAML semantics: it is one key name, matched as a key.
+    Plain, double-quoted, single-quoted, space before the colon, and YAML's
+    EXPLICIT KEY form `? if` / `: false` — all valid YAML, all parsing to the
+    same key, all honoured by GitHub. The explicit form evaded every assertion in
+    this module, and `[-?]` is the whole fix (Fable, PR #64). This still models
+    no YAML semantics: it is one key name, matched as a key.
+
+    Two spellings are deliberately NOT covered. A tagged key (`!!str if:`) is
+    exotic and whether GitHub's parser honours it is unverified. Anchors and
+    aliases are not supported in GitHub workflows at all, so they are not a
+    route. Flow mappings (`- {name: x, if: false}`) are caught instead by the
+    `run:`-form constraint and the check-runs assertion — the form constraint
+    earning its keep rather than a gap.
     """
-    return r"(?m)^\s*(?:-\s+)?[\"']?" + re.escape(key) + r"[\"']?\s*:"
+    return r"(?m)^\s*(?:[-?]\s+)?[\"']?" + re.escape(key) + r"[\"']?\s*:"
+
+
+def shell_commands(line: str):
+    """One executed line split into the commands it actually runs.
+
+    `regen && check` had `--check` somewhere in the line, so a whole-line
+    membership test read it as compliant. That was inconsistent with this
+    module's own treatment of the check itself, where `--check; true` and
+    `--check || true` are already refused: chaining was refused on one line and
+    permitted on the other (Fable, PR #64).
+    """
+    return [part.strip() for part in re.split(r"&&|\|\||;|\|", line) if part.strip()]
 
 
 def regenerating_steps(text: str):
@@ -144,8 +165,9 @@ def regenerating_steps(text: str):
     is the fifth instance in this repository of a check agreeing with its own
     reimplementation, and the fix is always this one.
     """
-    return [line for line in executed_lines(text)
-            if "generate_decisions.py" in line and "--check" not in line]
+    return [command for line in executed_lines(text)
+            for command in shell_commands(line)
+            if "generate_decisions.py" in command and "--check" not in command]
 
 
 def carries_escape_key(text: str):
@@ -247,7 +269,10 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
         for key in ESCAPE_KEYS:
             for spelling in (f"{key}: false", f'"{key}": false',
                              f"'{key}': false", f"{key} : false",
-                             f"{key}  :   false"):
+                             f"{key}  :   false",
+                             # YAML's EXPLICIT KEY form, which evaded every
+                             # assertion in this module (Fable, PR #64)
+                             f"? {key}\n        : false"):
                 with self.subTest(spelling=spelling):
                     text = ("jobs:\n  d:\n    steps:\n      - name: x\n        "
                             + spelling + "\n        run: " + EXACT_CHECK + "\n")
@@ -276,7 +301,14 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
         it reads as a harmless "regenerate first" and was the cheapest bypass
         found in four rounds (Fable, PR #64).
         """
-        offenders = regenerating_steps(GATE.read_text(encoding="utf-8"))
+        live = GATE.read_text(encoding="utf-8")
+        # The same precondition the path-filter assertion carries, and for the
+        # same reason: without it `regenerating_steps("")` satisfies this test
+        # vacuously. The asymmetry was real (Fable, PR #64).
+        self.assertIn(EXACT_CHECK, executed_lines(live),
+                      f"precondition: {GATE.name} must actually run the check, "
+                      "or finding no regenerate step proves nothing")
+        offenders = regenerating_steps(live)
         self.assertEqual(
             [], offenders,
             f"{GATE.name} must never invoke generate_decisions.py without "
@@ -290,6 +322,15 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
                   "      - name: check\n        run: " + EXACT_CHECK + "\n")
         self.assertEqual(1, len(regenerating_steps(bypass)),
                          "the bypass must be detected")
+        # chained onto ONE line is the same bypass, and was evading
+        for joiner in ("&&", ";", "||", "|"):
+            chained = ("jobs:\n  d:\n    steps:\n      - run: python3 "
+                       "python/scripts/generate_decisions.py " + joiner + " "
+                       + EXACT_CHECK + "\n")
+            with self.subTest(joiner=joiner):
+                self.assertEqual(1, len(regenerating_steps(chained)),
+                                 f"a regenerate chained with {joiner} is still a "
+                                 "regenerate before the check")
         clean = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
         self.assertEqual([], regenerating_steps(clean))
         # and the live gate must actually contain the command, so neutering the

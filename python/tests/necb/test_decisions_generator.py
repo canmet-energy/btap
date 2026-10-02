@@ -321,11 +321,34 @@ class TestStrayFilesAreRefused(unittest.TestCase):
                      # emacs's lock file, as a PLAIN file
                      ".#D-01.md"):
             (directory / name).write_text("x", encoding="utf-8")
-        # and emacs's lock file in the shape it actually takes: a symlink whose
-        # target does not exist. It must be skipped BEFORE the symlink arm.
-        (directory / ".#D-02.md").symlink_to("user@host.1234:1700000000")
         self.assertEqual([], G.stray_files(directory))
         G.read_sources(directory)          # must not raise
+        # and in the shape it actually takes: a symlink to a target that does
+        # not exist, which must be skipped BEFORE the symlink arm. The lock is
+        # named after the file being edited, so `D-01.md` is a real source here —
+        # `.#D-02.md` would correctly be refused, there being no `D-02.md`.
+        (directory / ".#D-01.md").unlink()
+        (directory / ".#D-01.md").symlink_to("user@host.1234:1700000000")
+        self.assertEqual([], G.stray_files(directory))
+        G.read_sources(directory)          # must not raise
+
+    def test_an_emacs_lock_exemption_is_bounded_to_real_sources(self):
+        """`.#X` is debris only when `X` is a source the glob already reached.
+
+        A bare `.#` prefix was too broad in both directions: a complete decision
+        in `.#D-98.md` was silently lost, and `.#extra` pointing at a directory
+        escaped the symlink arm entirely, because the exemption precedes it
+        (Fable, PR #64). Emacs names its lock after the file being edited, so
+        bounding it this way costs the real case nothing.
+        """
+        directory = self.sources()
+        # a decision hidden behind the prefix is NOT debris
+        (directory / ".#D-98.md").write_text("x", encoding="utf-8")
+        self.assertEqual([".#D-98.md"], G.stray_files(directory))
+        (directory / ".#D-98.md").unlink()
+        # nor is a symlink that merely wears the prefix
+        (directory / ".#extra").symlink_to("/etc")
+        self.assertEqual([".#extra (symlink)"], G.stray_files(directory))
 
     def test_a_dotted_decision_source_still_fires(self):
         """The `.#` exemption must not become a blanket dotfile skip again.

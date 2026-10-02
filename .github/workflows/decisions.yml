@@ -57,7 +57,7 @@ jobs:
       # requires-python >=3.11. `ubuntu-latest` happens to ship 3.12 today, so
       # this works unpinned -- but the gate that must stay reachable should not
       # depend on a runner default (Fable, PR #64). It fails closed either way.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
