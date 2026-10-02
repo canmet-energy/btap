@@ -223,6 +223,15 @@ def stray_files(source_dir: Path = SOURCE_DIR):
     found = []
     for path in sorted(source_dir.rglob("*")):
         relative = path.relative_to(source_dir).as_posix()
+        # Emacs's lock file is tested FIRST, before the symlink arm, because it
+        # IS a symlink: `.#D-01.md -> user@host.1234:1700000000`, present only
+        # while a buffer has unsaved changes. Checking it after the symlink arm
+        # left the gate hard-failing for anyone mid-edit in emacs -- exactly
+        # what G4 decided against for vim's `.swp` (Fable, PR #64). Safe at this
+        # position: a `.#`-prefixed name can never be a canonical source, since
+        # sources are `D-NN.md`, so the link is skipped and never followed.
+        if path.name.startswith(".#"):
+            continue
         # is_symlink() is tested BEFORE the keep-set exemption. Checking keep
         # first accepted a symlink NAMED `D-98.md`, and symlinked `_preamble.md`
         # and `_meta.json` with it: the name was exempted and the link followed

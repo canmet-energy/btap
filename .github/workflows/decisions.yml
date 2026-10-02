@@ -53,6 +53,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # `generate_decisions.py` imports `tomllib`, and `pyproject.toml` declares
+      # requires-python >=3.11. `ubuntu-latest` happens to ship 3.12 today, so
+      # this works unpinned -- but the gate that must stay reachable should not
+      # depend on a runner default (Fable, PR #64). It fails closed either way.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       # Path-unfiltered, so this is reachable from a docs-only change. It is
       # NOT unskippable: `[skip ci]` skips it, and nothing requires it —
       # `main` has no branch protection. It makes the failure visible.

@@ -50,7 +50,11 @@ MAIN = WORKFLOWS / "test.yml"
 #: The whole command, as its own executed line.
 EXACT_CHECK = "python3 python/scripts/generate_decisions.py --check"
 #: Keys that let a step or job run without being able to fail the workflow.
-ESCAPE_KEYS = ("if:", "continue-on-error:")
+#: NAMES, without the colon: a YAML key has more than one spelling, and matching
+#: `re.escape("if:")` caught exactly one of four. `"if": false`, `'if': false`
+#: and `if : false` are all valid YAML parsing to the key `if`, all honoured by
+#: GitHub, and all evaded the first version of this check (Fable, PR #64).
+ESCAPE_KEYS = ("if", "continue-on-error")
 PATH_FILTER_KEYS = ("paths:", "paths-ignore:")
 
 COMMENT_RE = re.compile(r"(?m)^\s*#.*$|(?<=\s)#.*$")
@@ -115,6 +119,35 @@ def carries_path_filter(text: str):
     return [key for key in PATH_FILTER_KEYS if key in block]
 
 
+def escape_key_pattern(key: str) -> str:
+    """Match ``key`` as a YAML mapping key in any of its spellings.
+
+    Plain, double-quoted, single-quoted, and with space before the colon — all
+    valid YAML, all parsing to the same key, all honoured by GitHub. This still
+    models no YAML semantics: it is one key name, matched as a key.
+    """
+    return r"(?m)^\s*(?:-\s+)?[\"']?" + re.escape(key) + r"[\"']?\s*:"
+
+
+def regenerating_steps(text: str):
+    """Executed lines that invoke the generator WITHOUT ``--check``.
+
+    A `--check` compares the tree against what the sources generate, so a
+    preceding step that regenerates makes it compare identical bytes: green
+    forever, committed outputs permanently stale, invisible on an ephemeral
+    checkout. No escape key, no path filter, plain `run:` form — it reads as a
+    harmless "regenerate first" (Fable, PR #64).
+
+    A helper rather than an inline expression in the test, because the first
+    version computed it inline and the falsifying test recomputed the same
+    expression: neutering the live assertion to `[]` left the suite green. That
+    is the fifth instance in this repository of a check agreeing with its own
+    reimplementation, and the fix is always this one.
+    """
+    return [line for line in executed_lines(text)
+            if "generate_decisions.py" in line and "--check" not in line]
+
+
 def carries_escape_key(text: str):
     """Which step/job escape keys ``text`` declares anywhere.
 
@@ -125,7 +158,7 @@ def carries_escape_key(text: str):
     """
     body = uncommented(text)
     return [key for key in ESCAPE_KEYS
-            if re.search(r"(?m)^\s*(?:-\s+)?" + re.escape(key), body)]
+            if re.search(escape_key_pattern(key), body)]
 
 
 class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
@@ -206,14 +239,62 @@ class TestDecisionsGateIsPathUnfiltered(unittest.TestCase):
             "lets the check run without being able to fail the workflow. A real "
             "need for one must change this contract deliberately")
 
-    def test_an_escape_key_would_be_detected(self):
+    def test_an_escape_key_would_be_detected_in_every_yaml_spelling(self):
+        """Each spelling is valid YAML for the same key, so each must be caught.
+
+        The first version matched `re.escape("if:")` and caught one of four.
+        """
         for key in ESCAPE_KEYS:
-            with self.subTest(key=key):
-                text = ("jobs:\n  d:\n    steps:\n      - name: x\n        "
-                        + key + " false\n        run: " + EXACT_CHECK + "\n")
-                self.assertEqual([key], carries_escape_key(text))
+            for spelling in (f"{key}: false", f'"{key}": false',
+                             f"'{key}': false", f"{key} : false",
+                             f"{key}  :   false"):
+                with self.subTest(spelling=spelling):
+                    text = ("jobs:\n  d:\n    steps:\n      - name: x\n        "
+                            + spelling + "\n        run: " + EXACT_CHECK + "\n")
+                    self.assertEqual(
+                        [key], carries_escape_key(text),
+                        f"{spelling!r} is valid YAML for the key {key!r} and "
+                        "GitHub honours it")
         clean = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
         self.assertEqual([], carries_escape_key(clean))
+
+    def test_a_key_name_inside_another_word_is_not_an_escape_key(self):
+        """The arm must refuse keys, not substrings: `notify:` is not `if:`."""
+        for innocent in ("notify: true", "verify: all", "if-no-files-found: error",
+                         "continue-on-error-policy: strict"):
+            with self.subTest(innocent=innocent):
+                text = ("jobs:\n  d:\n    steps:\n      - name: x\n        "
+                        + innocent + "\n        run: " + EXACT_CHECK + "\n")
+                self.assertEqual([], carries_escape_key(text))
+
+    def test_no_step_regenerates_before_checking(self):
+        """A `--check` compares the tree with what the sources generate.
+
+        So a preceding step that REGENERATES makes it compare identical bytes:
+        permanently green, committed outputs permanently stale, and invisible on
+        an ephemeral checkout. No escape key, no path filter, plain `run:` form —
+        it reads as a harmless "regenerate first" and was the cheapest bypass
+        found in four rounds (Fable, PR #64).
+        """
+        offenders = regenerating_steps(GATE.read_text(encoding="utf-8"))
+        self.assertEqual(
+            [], offenders,
+            f"{GATE.name} must never invoke generate_decisions.py without "
+            "--check: regenerating first makes the check compare identical "
+            f"bytes and pass forever. Offending step(s): {offenders}")
+
+    def test_regenerating_before_the_check_would_be_detected(self):
+        bypass = ("jobs:\n  d:\n    steps:\n"
+                  "      - name: regenerate first\n"
+                  "        run: python3 python/scripts/generate_decisions.py\n"
+                  "      - name: check\n        run: " + EXACT_CHECK + "\n")
+        self.assertEqual(1, len(regenerating_steps(bypass)),
+                         "the bypass must be detected")
+        clean = "jobs:\n  d:\n    steps:\n      - run: " + EXACT_CHECK + "\n"
+        self.assertEqual([], regenerating_steps(clean))
+        # and the live gate must actually contain the command, so neutering the
+        # detector cannot pass by finding nothing to inspect
+        self.assertIn(EXACT_CHECK, executed_lines(GATE.read_text(encoding="utf-8")))
 
     def test_the_gate_uses_only_the_plain_run_form(self):
         """A style constraint on a file we own, in place of a YAML parser.

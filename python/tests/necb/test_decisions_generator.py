@@ -317,10 +317,29 @@ class TestStrayFilesAreRefused(unittest.TestCase):
         """
         directory = self.sources()
         for name in (".DS_Store", ".D-01.md.swp", "D-01.md~", ".gitkeep",
-                     "notes.txt", "LICENSE", "README.txt"):
+                     "notes.txt", "LICENSE", "README.txt",
+                     # emacs's lock file, as a PLAIN file
+                     ".#D-01.md"):
             (directory / name).write_text("x", encoding="utf-8")
+        # and emacs's lock file in the shape it actually takes: a symlink whose
+        # target does not exist. It must be skipped BEFORE the symlink arm.
+        (directory / ".#D-02.md").symlink_to("user@host.1234:1700000000")
         self.assertEqual([], G.stray_files(directory))
         G.read_sources(directory)          # must not raise
+
+    def test_a_dotted_decision_source_still_fires(self):
+        """The `.#` exemption must not become a blanket dotfile skip again.
+
+        `.D-98.md` is a decision-shaped Markdown source, invisible to the
+        `D-*.md` glob — the case the blanket skip hid (Sol, PR #64).
+        """
+        directory = self.sources()
+        (directory / ".D-98.md").write_text("x", encoding="utf-8")
+        self.assertEqual([".D-98.md"], G.stray_files(directory))
+        (directory / ".D-98.md").unlink()
+        # and a symlink NAMED like a decision is still refused as a symlink
+        (directory / "D-98.md").symlink_to("../../elsewhere.md")
+        self.assertEqual(["D-98.md (symlink)"], G.stray_files(directory))
 
     def test_an_unexpected_meta_key_is_refused(self):
         """Front matter refuses one; this refused nothing, so an edit could
