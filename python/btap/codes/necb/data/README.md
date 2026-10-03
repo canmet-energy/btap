@@ -274,8 +274,8 @@ Machine-readable transcription of the NECB envelope requirements:
 - **SRR** (`srr_max`): 3.2.1.4.(2), 2% of gross roof area (2017+ value; NECB
   2011 was 5% — relevant only to a future edition backfill).
 - **Reference envelope** (`reference_envelope`): the 8.4.4.3/8.4.4.4 (2025:
-  8.4.5.3/.4) parameters — lightweight layers pinned from Note A-8.4.4.4.(1),
-  air leakage from 8.4.3.3.(3).
+  8.4.5.3/.4) parameters — lightweight layers pinned from the thermal-mass Note
+  (2020 `A-8.4.4.4.(1)`, 2025 `A-8.4.5.4.(1)`), air leakage from 8.4.3.3.(3).
 - **article_coverage**: the completeness manifest — every governed article with
   status; emitted into every run's audit.
 

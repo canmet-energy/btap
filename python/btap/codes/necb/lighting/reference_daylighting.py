@@ -4,8 +4,8 @@ renumbered performance path). Where Subsection 4.2.2 requires photocontrols
 
   (10)(b) reflectances: floor 0.15 / walls 0.50 / ceiling 0.80 — SET on the
           reference model's interior surfaces (visible absorptance =
-          1 - reflectance); works naturally with the envelope gem's
-          lightweight massless constructions.
+          1 - reflectance); works naturally with the envelope reference
+          transform's lightweight light-frame constructions.
   (10)(d) fenestration VT: the envelope reference transform preserves the
           proposed optics by construction — satisfied.
   (11)    photocontrol set-point: the proposed building's, else

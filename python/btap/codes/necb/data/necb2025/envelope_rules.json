@@ -140,7 +140,7 @@
  "reference_envelope": {
   "article": "8.4.5.1.(2), 8.4.5.3., 8.4.5.4.",
   "roof_absorptance_if_actual_used": 0.7,
-  "note": "populated fully in P4 (lightweight layers from Note A-8.4.4.4.(1), air leakage from 8.4.3.3.(3))"
+  "note": "populated fully in P4 (lightweight layers from Note A-8.4.5.4.(1), air leakage from 8.4.3.3.(3))"
  },
  "article_coverage": {
   "note": "Envelope-slice coverage; statuses flip as phases land.",
@@ -282,7 +282,7 @@
     "title": "Lightweight construction + space thermal characteristics",
     "status": "implemented",
     "gaps": "VERIFIED against Note A-8.4.5.4.(1) (retrieved via MCP 2026-07-28, D-35): lightweight = light FRAME, not zero-mass - the rebuild is calibrated to the note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at the prescriptive resistance; the note's follow-the-proposed-layer-structure guidance is approximated by the single calibrated layer",
-    "how": "opaque assemblies rebuilt as massless (zero thermal mass) layers at unchanged Ut; space thermal characteristics satisfied by clone",
+    "how": "opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
     "code": [
      "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
     ]
