@@ -6,7 +6,10 @@ STATE. The state is an enum, never a boolean (Sol, `061` item 1):
 
     present           the tool returned content
     mcp_empty         the tool returned nothing -- NOT proven Code absence
-    hierarchy_absent  absence established from the edition hierarchy
+    hierarchy_absent  advertised, but REFUSED by the integrity gate: no
+                      validated structure exists for hierarchy evidence
+    returned_mismatch a payload identifying itself as something OTHER than what
+                      was requested -- neither present nor a transport error
     error             transport/auth/protocol failure -- FAILS THE RUN
 
 A transport failure must not produce a successful-looking corpus with a hole in
@@ -34,7 +37,7 @@ from common import (ARTIFACT_ROOT, ERROR, MCP_EMPTY, PRESENT, PYTHON_ROOT,
                     write_json)
 
 sys.path.insert(0, str(PYTHON_ROOT))
-from btap._mcp import MCPClient  # noqa: E402
+from btap._mcp import MCPClient, MCPError  # noqa: E402
 
 #: The ONE message `btap._mcp` raises when the server answered with an empty
 #: content array — matched EXACTLY, per tool, never as a substring. Substring
@@ -46,14 +49,21 @@ EMPTY_RESULT_SUFFIX = ": empty result content"
 
 
 def is_empty_result(error, tool: str) -> bool:
-    """True only for the exact empty-content condition, for THIS tool.
+    """True only for the MCP client's exact empty-content error, for THIS tool.
 
-    An exact match is what makes this a typed condition rather than a guess:
-    every transport message `btap._mcp` can raise (`HTTP {code}`,
-    `network error: {e}`) has a different full text, so none of them can be
-    mistaken for an absence however their inner text reads.
+    TYPED, not merely exact-text. The first fix matched the full message, which
+    still let `TimeoutError("get_table: empty result content")` be read as an
+    absence, because `answer()` catches `Exception` and a transport exception
+    cannot establish Code absence however its text reads (Sol, `076`). The error
+    must BE an `MCPError` and say exactly the one thing the client says when the
+    server returned an empty content array.
+
+    The type check matters beyond this corpus: #67 vendors a new client
+    implementation, and a condition keyed on an arbitrary exception's string
+    would silently start classifying its errors.
     """
-    return str(error) == f"{tool}{EMPTY_RESULT_SUFFIX}"
+    return isinstance(error, MCPError) and \
+        str(error) == f"{tool}{EMPTY_RESULT_SUFFIX}"
 
 
 def answer(client, request: dict):

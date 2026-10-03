@@ -166,6 +166,20 @@ def main(argv=None):
     target.mkdir(parents=True, exist_ok=True)
     try:
         if args.refetch:
+            # `fetch.py` skips any request whose per-request file already exists,
+            # so pointing `--refetch` at a populated `--into` directory made ZERO
+            # calls and still printed the clean byte-identical message: a success
+            # claim about a re-answer that never happened (Sol, `076`). The
+            # default fresh temp directory was never affected, which is exactly
+            # why it went unnoticed.
+            existing = sorted((target / "hbix").glob("*.json"))
+            if existing:
+                raise SystemExit(
+                    f"--refetch target {target} already holds {len(existing)} "
+                    "archived payload(s), and fetch.py skips a request whose file "
+                    "exists — so nothing would be re-answered and any 'identical' "
+                    "result would be meaningless. Point --into at an empty "
+                    "directory, or omit --into to use a fresh one.")
             run("citations.py", target)
             # `fetch.py` exits non-zero when ANY request is `returned_mismatch`,
             # and the committed corpus has one — so the documented

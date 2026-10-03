@@ -30,7 +30,7 @@ Checks:
 * no extra and no missing payloads.
 
 Exit code is non-zero on any failure, so this is usable as a gate.
-`tests/test_integrity.py` pins the mutations, not just the clean archive.
+`pipeline/test_method_gates.py` pins the mutations, not just the clean archive.
 """
 
 from __future__ import annotations
@@ -38,8 +38,9 @@ from __future__ import annotations
 import json
 import sys
 
-from common import (ERROR, MCP_EMPTY, PRESENT, RETURNED_MISMATCH, STATES,
-                    out_dir, read_json, request_key, sha256, write_json)
+from common import (ERROR, HIERARCHY_ABSENT, MCP_EMPTY, PRESENT,
+                    RETURNED_MISMATCH, STATES, out_dir, read_json, request_key,
+                    sha256, write_json)
 
 #: Metadata fields the archive declares. Compared in full between the stored
 #: payload and the index, because comparing only `request` let a payload's own
@@ -108,6 +109,20 @@ def check(out):
         if state not in STATES:
             findings.append(f"{key}: undeclared state {state!r}")
 
+        # `hierarchy_absent` is advertised by the state enum but has no
+        # validated evidence structure, so it is refused outright rather than
+        # trusted. Sol forged an absence in it two ways (`076`): a null payload
+        # was rejected for the wrong reason, and an arbitrary POSITIVE payload
+        # with a synchronised hash passed clean. Neither carried hierarchy
+        # proof. No committed request uses this state; it fails closed until
+        # that proof has a structure worth checking.
+        if state == HIERARCHY_ABSENT:
+            findings.append(
+                f"{key}: state hierarchy_absent is not accepted — no validated "
+                "structure exists for hierarchy evidence, so an absence in this "
+                "state cannot be told apart from a forged one")
+            continue
+
         # 4. a state dictates whether evidence exists, never whether it is checked
         if state in EMPTY_STATES:
             if payload is not None:
@@ -137,11 +152,20 @@ def check(out):
                 findings.append(
                     f"{key}: present, but edition {got_edition} not {asked_edition}")
         elif state == RETURNED_MISMATCH:
-            # the state has to earn its name
-            if got_number == asked_number and got_edition == asked_edition:
+            # The state must be established AFFIRMATIVELY. Comparing for an exact
+            # pair of equal strings let a payload that states the requested
+            # number and says NOTHING about its edition pass: `_identity()` turns
+            # a missing edition into "", which is unequal to "2020" and so looked
+            # like a mismatch (Sol, `076`). Silence is not a mismatch.
+            differs_number = bool(got_number) and got_number != asked_number
+            differs_edition = bool(got_edition) and got_edition != asked_edition
+            if not (differs_number or differs_edition):
                 findings.append(
-                    f"{key}: state returned_mismatch, but the payload identifies "
-                    f"itself as exactly what was requested ({asked_number!r})")
+                    f"{key}: state returned_mismatch, but the payload establishes "
+                    f"no mismatch — it says number {got_number!r} and edition "
+                    f"{got_edition!r} against a request for {asked_number!r} / "
+                    f"{asked_edition!r}. A mismatch needs a NONEMPTY differing "
+                    "number or edition.")
             if meta.get("returned_number") and \
                     str(meta["returned_number"]).rstrip(".") != got_number:
                 findings.append(

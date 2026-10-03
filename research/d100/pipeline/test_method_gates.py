@@ -25,9 +25,11 @@ import unittest
 from pathlib import Path
 
 import compare
+import fetch
 import integrity
 import rebuild
-from common import ARTIFACT_ROOT
+from btap._mcp import MCPError
+from common import ARTIFACT_ROOT, ResearchError
 
 MISMATCH = "get_table__necb__8.4.4.1__2020"
 PRESENT_TABLE = "get_table__necb__3.2.2.2__2020"
@@ -38,8 +40,13 @@ def _sha(payload) -> str:
         json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
 
-class ArchiveProbe(unittest.TestCase):
-    """Each test gets its own copy of the committed archive."""
+class ArchiveHelpers:
+    """Copy-the-archive helpers, shared WITHOUT re-running another class's tests.
+
+    `StateEvidenceProbe` first inherited `ArchiveProbe`, which silently ran every
+    one of its tests a second time — 44 reported where 35 exist. A mixin keeps
+    the helpers shared and the test counts honest.
+    """
 
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
@@ -79,6 +86,10 @@ class ArchiveProbe(unittest.TestCase):
         if needle:
             self.assertTrue(any(needle in f for f in found),
                             f"no finding mentioned {needle!r}: {found}")
+
+
+class ArchiveProbe(ArchiveHelpers, unittest.TestCase):
+    """Each test gets its own copy of the committed archive."""
 
     # -- the clean case, first and least interesting ----------------------
     def test_the_committed_archive_is_sound(self):
@@ -127,7 +138,7 @@ class ArchiveProbe(unittest.TestCase):
         self.edit_index(lambda d: d["index"][MISMATCH].update(
             sha256=_sha(json.loads(
                 self.payload_path(MISMATCH).read_text())["payload"])))
-        self.assertCaught("identifies itself as exactly what was requested")
+        self.assertCaught("establishes no mismatch")
 
     def test_a_deleted_payload_file(self):
         self.payload_path(PRESENT_TABLE).unlink()
@@ -265,6 +276,132 @@ class RefetchProbe(unittest.TestCase):
         findings, _ = rebuild.compare_evidence(
             {"a": self.side("present", [])}, {"b": self.side("present", [])}, set())
         self.assertTrue(any("request set changed" in f for f in findings))
+
+
+class StateEvidenceProbe(ArchiveHelpers, unittest.TestCase):
+    """A state must be ESTABLISHED, not merely asserted (Sol, `076`)."""
+
+    def test_a_mismatch_that_states_the_requested_number_and_no_edition(self):
+        """His case: the payload says what was asked and nothing about edition.
+
+        `_identity()` turns a missing edition into "", which is unequal to
+        "2020" and so looked like a mismatch. Silence is not a mismatch.
+        """
+        def mutate(stored):
+            stored["payload"]["table_number"] = \
+                stored["meta"]["request"]["table_number"]
+            stored["payload"].pop("edition", None)
+            stored["meta"]["returned_number"] = \
+                stored["meta"]["request"]["table_number"]
+        self.edit_payload(MISMATCH, mutate, rehash=True)
+        fresh = json.loads(self.payload_path(MISMATCH).read_text())
+        # synchronise BOTH metadata copies, so this tests identity rather than
+        # the hash or a metadata disagreement
+        self.edit_index(lambda d: d["index"][MISMATCH].update(fresh["meta"]))
+        self.assertCaught("establishes no mismatch")
+
+    def test_hierarchy_absent_with_a_null_payload_is_refused(self):
+        key = "get_table__necb__8.4.4.1__2020"
+        def mutate(stored):
+            stored["meta"]["state"] = "hierarchy_absent"
+            stored["payload"] = None
+            stored["meta"]["sha256"] = None
+        self.edit_payload(key, mutate)
+        fresh = json.loads(self.payload_path(key).read_text())
+        self.edit_index(lambda d: d["index"][key].update(fresh["meta"]))
+        self.assertCaught("hierarchy_absent is not accepted")
+
+    def test_hierarchy_absent_with_a_FORGED_positive_payload_is_refused(self):
+        """The worse half: an arbitrary payload with a synchronised hash passed
+        clean, i.e. a forged absence was accepted as evidence."""
+        key = "get_table__necb__8.4.4.1__2020"
+        def mutate(stored):
+            stored["meta"]["state"] = "hierarchy_absent"
+            stored["payload"] = {"article_number": "7.7.7.7", "edition": "2020"}
+        self.edit_payload(key, mutate, rehash=True)
+        fresh = json.loads(self.payload_path(key).read_text())
+        self.edit_index(lambda d: d["index"][key].update(fresh["meta"]))
+        self.assertCaught("hierarchy_absent is not accepted")
+
+
+class EmptyResultProbe(unittest.TestCase):
+    """`fetch.answer()` and `is_empty_result()` had NO probe at all (Sol, `076`).
+
+    An absence may only be concluded from the MCP client's own empty-content
+    error. Everything else is a transport or protocol failure and fails the run.
+    """
+
+    TOOL = "get_table"
+
+    def _is_empty(self, error):
+        return fetch.is_empty_result(error, self.TOOL)
+
+    def test_the_real_empty_response_is_an_absence(self):
+        self.assertTrue(self._is_empty(MCPError(f"{self.TOOL}: empty result content")))
+
+    def test_an_http_error_mentioning_empty_content_is_NOT(self):
+        self.assertFalse(self._is_empty(
+            MCPError(f"{self.TOOL}: HTTP 503: empty result content")))
+
+    def test_a_network_error_mentioning_no_content_is_NOT(self):
+        self.assertFalse(self._is_empty(
+            MCPError(f"{self.TOOL}: network error: no content")))
+
+    def test_the_right_text_from_the_WRONG_tool_is_NOT(self):
+        self.assertFalse(self._is_empty(MCPError("get_section: empty result content")))
+
+    def test_an_unrelated_exception_with_the_EXACT_text_is_NOT(self):
+        """The typed half. Exact-text alone let this through, because
+        `answer()` catches `Exception` (Sol, `076`)."""
+        self.assertFalse(self._is_empty(
+            TimeoutError(f"{self.TOOL}: empty result content")))
+        self.assertFalse(self._is_empty(
+            RuntimeError(f"{self.TOOL}: empty result content")))
+
+    def test_answer_records_an_absence_for_the_real_empty_error(self):
+        class Client:
+            def call(self, tool, arguments):
+                raise MCPError(f"{tool}: empty result content")
+        payload, state, _ = fetch.answer(
+            Client(), {"tool": self.TOOL, "code": "necb",
+                       "table_number": "9.9.9.9", "edition": "2020"})
+        self.assertIsNone(payload)
+        self.assertEqual("mcp_empty", state)
+
+    def test_answer_RAISES_on_a_transport_error_wearing_the_same_text(self):
+        class Client:
+            def call(self, tool, arguments):
+                raise TimeoutError(f"{tool}: empty result content")
+        with self.assertRaises(ResearchError):
+            fetch.answer(Client(), {"tool": self.TOOL, "code": "necb",
+                                    "table_number": "9.9.9.9", "edition": "2020"})
+
+
+class RefetchTargetProbe(unittest.TestCase):
+    """`--refetch` into a POPULATED directory re-answered nothing and still
+    printed the clean message (Sol, `076`)."""
+
+    def test_a_populated_refetch_target_is_refused(self):
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "hbix").mkdir()
+        shutil.copy2(ARTIFACT_ROOT / "hbix" / f"{PRESENT_TABLE}.json",
+                     directory / "hbix")
+        with self.assertRaises(SystemExit) as caught:
+            rebuild.main(["--refetch", "--into", str(directory)])
+        self.assertIn("already holds", str(caught.exception))
+
+    def test_an_empty_refetch_target_is_not_refused_for_that_reason(self):
+        """The guard must not become a blanket refusal of --into."""
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "hbix").mkdir()
+        try:
+            rebuild.main(["--refetch", "--into", str(directory)])
+        except SystemExit as exc:
+            self.assertNotIn("already holds", str(exc))
+        except Exception:
+            pass          # a real fetch needs a key; only the refusal is pinned
 
 
 if __name__ == "__main__":
