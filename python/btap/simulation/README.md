@@ -76,15 +76,25 @@ that already contains `in.osm` + `in.osw`, run EnergyPlus so that
 `dir/run/eplusout.sql` **and** `dir/run/eplusout.err` exist, and raise on
 failure.
 
-One precondition, and only for runs that need it: **if the translated model has
-any autosized field, the model's three sizing-calculation flags must be on.**
-A backend refuses such a dir up front rather than letting EnergyPlus fail 0.3s
-in with a message naming the first autosized component instead of the cause.
-`run_energyplus` sets the flags, so a dir it prepared always satisfies this; a
-caller invoking a backend directly must set them itself. A model with nothing to
-size needs no sizing run and is accepted with the flags off — the check counts
-`Autosize` fields in the translated IDF rather than assuming (D-100 review,
-Sol `075`).
+One narrow precondition: **if the translated model has an autosized numeric
+field and NO sizing calculation is enabled at all, a backend refuses the dir**
+rather than letting EnergyPlus fail 0.3s in with a message naming the first
+autosized component instead of the cause. `run_energyplus` enables all three, so
+a dir it prepared always satisfies this.
+
+Deliberately narrow, because two wider rules each refused runs that work (Sol
+`075`, `077`):
+
+- a model with nothing to size needs no sizing run — the bare fixture runs clean
+  with all three flags off;
+- needing to size something does **not** require all three calculations: a zone
+  baseboard sizes fine with `zone=True, system=False, plant=False`.
+
+So this gate UNDER-refuses by design. It will not catch a model whose autosized
+chiller needs plant sizing while only zone sizing is on; EnergyPlus reports that
+itself. Autosized fields are identified by asking the IDD for each field's type,
+because a text search for the `Autosize` token also matches an object merely
+NAMED "Autosize".
 
 - **`Local`** (default) — translates the model in process with
   `ForwardTranslator`, writes `in.idf`, and runs the provisioned

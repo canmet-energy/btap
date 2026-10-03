@@ -236,12 +236,11 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         with self.assertRaises(RuntimeError) as caught:
             Local(energyplus="/nonexistent/energyplus").execute(directory)
         message = str(caught.exception)
-        for expected in ("Do Zone Sizing Calculation",
-                         "Do System Sizing Calculation",
-                         "Do Plant Sizing Calculation",
-                         "run_energyplus"):
+        for expected in ("NO sizing calculation enabled", "run_energyplus"):
             self.assertIn(expected, message,
-                          "the message must name the missing flags and the fix")
+                          "the message must say what is wrong and name the fix")
+        self.assertIn("Heating Design Capacity", message,
+                      "and name an actual field, so the reader can see WHY")
 
     @needs_sdk
     def test_remote_refuses_before_uploading_anything(self):
@@ -252,7 +251,7 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                         transport=ExplodingTransport(), poll_seconds=0)
         with self.assertRaises(RuntimeError) as caught:
             remote.execute(directory)
-        self.assertIn("Do Zone Sizing Calculation", str(caught.exception))
+        self.assertIn("NO sizing calculation enabled", str(caught.exception))
 
     @needs_sdk
     def test_remote_refuses_the_openstudio_workflow_too(self):
@@ -264,7 +263,7 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                         workflow_type="openstudio")
         with self.assertRaises(RuntimeError) as caught:
             remote.execute(directory)
-        self.assertIn("Do Zone Sizing Calculation", str(caught.exception),
+        self.assertIn("NO sizing calculation enabled", str(caught.exception),
                       "moving the guard after the workflow branch leaves this "
                       "path unguarded — the OSM is uploaded unchanged")
 
@@ -285,7 +284,7 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         model = opt(openstudio.model.Model.load(
             openstudio.path(str(directory / "in.osm"))))
         workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
-        self.assertEqual(0, autosized_fields(workspace),
+        self.assertEqual([], autosized_fields(workspace),
                          "the bare fixture must have nothing to size")
         _require_sizing_calculations(model, workspace, directory / "in.osm")
 
@@ -301,7 +300,10 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         model = opt(openstudio.model.Model.load(
             openstudio.path(str(directory / "in.osm"))))
         workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
-        self.assertGreater(autosized_fields(workspace), 0)
+        fields = autosized_fields(workspace)
+        self.assertTrue(fields, "the probe must detect a real autosized field")
+        self.assertTrue(any("Heating Design Capacity" in f for f in fields),
+                        f"and name it: {fields}")
 
     @needs_sdk
     def test_a_prepared_model_passes_the_guard(self):
@@ -319,22 +321,55 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         _require_sizing_calculations(model, workspace, directory / "in.osm")
 
     @needs_sdk
-    def test_each_flag_alone_is_enough_to_trip_it(self):
-        """One disabled flag must fail, not only all three."""
-        from btap.simulation.backends import _require_sizing_calculations
+    def test_one_enabled_flag_is_enough_for_a_zone_only_model(self):
+        """Sol's `077` case 1, pinned — and the test this REPLACES asserted the
+        opposite using exactly this model.
 
-        setters = ("setDoZoneSizingCalculation", "setDoSystemSizingCalculation",
-                   "setDoPlantSizingCalculation")
-        for omitted in setters:
-            with self.subTest(omitted=omitted):
-                model = load_fixture()
-                sim = model.getSimulationControl()
-                for setter in setters:
-                    getattr(sim, setter)(setter != omitted)
-                import openstudio
-                baseboard = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
-                baseboard.autosizeNominalCapacity()
-                baseboard.addToThermalZone(model.getThermalZones()[0])
-                ws = openstudio.energyplus.ForwardTranslator().translateModel(model)
-                with self.assertRaises(RuntimeError):
-                    _require_sizing_calculations(model, ws, Path("in.osm"))
+        A zone baseboard sizes fine with zone=True, system=False, plant=False;
+        he verified it by running it. The old rule required all three, so it
+        refused a working run, and `test_each_flag_alone_is_enough_to_trip_it`
+        encoded that false requirement as if it were a contract.
+        """
+        import openstudio
+
+        from btap._compat import opt
+        from btap.simulation.backends import _require_sizing_calculations, autosized_fields
+
+        directory = self._run_dir(sizing=False, autosized=True)
+        model = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)        # the only one this needs
+        sim.setDoSystemSizingCalculation(False)
+        sim.setDoPlantSizingCalculation(False)
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        self.assertTrue(autosized_fields(workspace),
+                        "precondition: there IS something to size")
+        _require_sizing_calculations(model, workspace, directory / "in.osm")
+
+    @needs_sdk
+    def test_an_object_merely_NAMED_autosize_is_not_a_field_to_size(self):
+        """Sol's `077` case 2, pinned.
+
+        A `Building` named "Autosize" renders `Autosize,  !- Name`, which the
+        whole-text token count read as a field to size — so the guard refused a
+        model with nothing to size. The IDD knows that field is alpha.
+        """
+        import openstudio
+
+        from btap._compat import opt
+        from btap.simulation.backends import _require_sizing_calculations, autosized_fields
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        model = load_fixture()
+        model.getBuilding().setName("Autosize")
+        model.save(openstudio.path(str(directory / "in.osm")), True)
+        saved = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(saved)
+        self.assertIn("Autosize", str(workspace),
+                      "precondition: the TOKEN is present in the IDF text")
+        self.assertEqual([], autosized_fields(workspace),
+                         "but no NUMERIC field needs sizing")
+        _require_sizing_calculations(saved, workspace, directory / "in.osm")

@@ -23,7 +23,6 @@ parse surface, no CLI anywhere.
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import time
 import urllib.request
@@ -100,24 +99,37 @@ class Local(Backend):
         )
 
 
-#: EnergyPlus's own literal token for a field it must size, as a whole field
-#: value in an IDF. Counting these is what makes the guard CONDITIONAL: the IDF
-#: is the file EnergyPlus reads, so this is an observation rather than an
-#: inference about SDK types.
-AUTOSIZE_FIELD_RE = re.compile(r"(?mi)^\s*autosize\s*[,;]")
+def autosized_fields(workspace):
+    """The NUMERIC fields EnergyPlus would have to size, named.
 
+    Asks the IDD for each field's declared type, because a whole-text search for
+    the `Autosize` token cannot tell an autosizable numeric field from an alpha
+    one: a `Building` merely NAMED "Autosize" renders `Autosize,  !- Name` and
+    was counted, so the guard refused a model with nothing to size at all (Sol,
+    `077` case 2). The IDD is authoritative about field types, and it is data the
+    SDK already ships rather than a list this module would have to maintain.
 
-def autosized_fields(workspace) -> int:
-    """How many fields EnergyPlus would have to size in this workspace.
-
-    Deliberately reads the translated IDF rather than interrogating the model:
-    `getModelObjects()` yields base instances, so the SDK's typed
-    `isXxxAutosized()` predicates are unreachable, and enumerating the concrete
-    component types would be an open-ended list — an unbounded surface to model,
-    which is the mistake this repository keeps paying for. Measured: 0 on the
-    bare test fixture, 27 on `01-baseboard-gas`, 134 on `04-fancoil-chiller`.
+    Interrogating the MODEL instead does not work: `getModelObjects()` yields
+    base instances, so the SDK's typed `isXxxAutosized()` predicates are
+    unreachable — they report 0 even for `01-baseboard-gas` — and enumerating
+    concrete component types would be an open-ended surface to model.
     """
-    return len(AUTOSIZE_FIELD_RE.findall(str(workspace)))
+    found = []
+    for obj in workspace.objects():
+        idd = obj.iddObject()
+        for index in range(obj.numFields()):
+            value = obj.getString(index)
+            if not value.is_initialized() or \
+                    value.get().strip().lower() != "autosize":
+                continue
+            field = idd.getField(index)
+            if not field.is_initialized():
+                continue
+            if any(kind in str(field.get().properties().type)
+                   for kind in ("Real", "Integer")):
+                found.append(f"{idd.name()} field {index} "
+                             f"({field.get().name()})")
+    return found
 
 
 def _require_sizing_calculations(model, workspace, osm) -> None:
@@ -131,13 +143,24 @@ def _require_sizing_calculations(model, workspace, osm) -> None:
     done`, which names the first autosized component rather than the cause. That
     cost three separate detours in one session.
 
-    CONDITIONAL, because the unconditional version was wrong. Sol built a valid
-    run from the bare fixture — no autosized HVAC, a one-week weather run, no
-    sizing period, all three flags false — and it completes in EnergyPlus and
-    passes `is_clean_run`. The first version refused it, so the error text
-    predicted a failure that does not occur and a previously valid direct-backend
-    use was removed (`075`). A model with nothing to size does not need a sizing
-    run, and this now says so by checking.
+    NARROW, in two directions, because two wider versions each refused valid
+    work (Sol, `075` and `077`):
+
+    * a model with NOTHING to size does not need a sizing run — the bare fixture
+      runs clean with all three flags false;
+    * needing to size something does not require all THREE calculations. A zone
+      baseboard sizes fine with `zone=True, system=False, plant=False`, and the
+      earlier "any autosized field requires all three" rule refused exactly that.
+
+    So the refusal is limited to the one case that certainly fails: something must
+    be sized and NO sizing calculation will run at all. That is deliberately
+    weaker than a per-dependency check. Mapping each autosizable component to the
+    calculation that sizes it would mean enumerating hundreds of component types —
+    the unbounded surface this module already refuses to model once — so this
+    gate UNDER-refuses by design. It will not catch a model whose autosized
+    chiller needs plant sizing while only zone sizing is enabled; EnergyPlus
+    reports that case itself. Under-refusing costs a clearer error message;
+    over-refusing breaks runs that work.
 
     It CHECKS rather than repairs, deliberately:
 
@@ -149,23 +172,24 @@ def _require_sizing_calculations(model, workspace, osm) -> None:
       and `run_energyplus` deliberately varies the two `runSimulationfor*`
       flags — a backend is not the place to decide what the run is.
     """
-    count = autosized_fields(workspace)
-    if not count:
+    autosized = autosized_fields(workspace)
+    if not autosized:
         return                      # nothing to size; the flags are irrelevant
     sim = model.getSimulationControl()
-    missing = [name for name, enabled in (
-        ("Do Zone Sizing Calculation", sim.doZoneSizingCalculation()),
-        ("Do System Sizing Calculation", sim.doSystemSizingCalculation()),
-        ("Do Plant Sizing Calculation", sim.doPlantSizingCalculation()),
-    ) if not enabled]
-    if missing:
-        raise RuntimeError(
-            f"{osm} has {count} autosized field(s) but sizing calculations "
-            f"disabled ({', '.join(missing)}), so EnergyPlus will fail on the "
-            "first autosized component. Prepare the run through "
-            "btap.simulation.runner.run_energyplus, which sets these, or set "
-            "them on the model before calling a backend directly."
-        )
+    enabled = {
+        "Do Zone Sizing Calculation": sim.doZoneSizingCalculation(),
+        "Do System Sizing Calculation": sim.doSystemSizingCalculation(),
+        "Do Plant Sizing Calculation": sim.doPlantSizingCalculation(),
+    }
+    if any(enabled.values()):
+        return                      # a sizing run exists; which one is E+'s call
+    raise RuntimeError(
+        f"{osm} has {len(autosized)} autosized field(s) but NO sizing "
+        f"calculation enabled, so EnergyPlus cannot size any of them — it will "
+        f"fail on the first. Example: {autosized[0]}. Prepare the run through "
+        "btap.simulation.runner.run_energyplus, which enables all three, or "
+        "enable the one(s) this model needs before calling a backend directly."
+    )
 
 
 def _ensure_output_requests(workspace) -> None:
