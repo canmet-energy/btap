@@ -36,7 +36,24 @@ from common import (ARTIFACT_ROOT, ERROR, MCP_EMPTY, PRESENT, PYTHON_ROOT,
 sys.path.insert(0, str(PYTHON_ROOT))
 from btap._mcp import MCPClient  # noqa: E402
 
-EMPTY_MARKERS = ("empty result content", "no content")
+#: The ONE message `btap._mcp` raises when the server answered with an empty
+#: content array — matched EXACTLY, per tool, never as a substring. Substring
+#: matching classified transport failures as absence: a
+#: `MCPError("get_table: HTTP 503: empty result content")` and a
+#: `"network error: no content"` both became `mcp_empty`, contradicting this
+#: module's own "transport failures fail the run" contract (Sol, `074`).
+EMPTY_RESULT_SUFFIX = ": empty result content"
+
+
+def is_empty_result(error, tool: str) -> bool:
+    """True only for the exact empty-content condition, for THIS tool.
+
+    An exact match is what makes this a typed condition rather than a guess:
+    every transport message `btap._mcp` can raise (`HTTP {code}`,
+    `network error: {e}`) has a different full text, so none of them can be
+    mistaken for an absence however their inner text reads.
+    """
+    return str(error) == f"{tool}{EMPTY_RESULT_SUFFIX}"
 
 
 def answer(client, request: dict):
@@ -46,8 +63,10 @@ def answer(client, request: dict):
         result = client.call(request["tool"], arguments)
     except Exception as error:                                # noqa: BLE001
         text = str(error)
-        if any(marker in text for marker in EMPTY_MARKERS):
+        if is_empty_result(error, request["tool"]):
             return None, MCP_EMPTY, text
+        # Everything else is a transport or protocol failure and fails the run,
+        # including a message whose text happens to mention empty content.
         raise ResearchError(
             f"{request['tool']} {arguments} failed: {text}") from error
     if not result:

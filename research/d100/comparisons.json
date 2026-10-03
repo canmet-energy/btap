@@ -368,19 +368,18 @@
       "cited_by": [
         "D-21"
       ],
+      "clause": "c",
       "compared_with": "get_section",
       "diff_spans": [],
       "fragment": "(1)(c)",
-      "granularity": "cited sentence",
+      "granularity": "cited clause (1)(c)",
       "kind": "article",
       "sentences": [
         1
       ],
       "state_2020": "present",
       "state_2025": "present",
-      "superscripts_present": [
-        "²"
-      ],
+      "superscripts_present": [],
       "verdict": "substantively identical"
     },
     "4.2.1.6.": {
@@ -1637,11 +1636,17 @@
         ]
       ],
       "fragment": "(1)(a)",
-      "granularity": "cited sentence",
+      "fragment_not_isolated": {
+        "clause": "a",
+        "isolated_2020": false,
+        "isolated_2025": true,
+        "note": "the cited clause could not be isolated, so the comparison is of the enclosing article and is NOT evidence about the cited address",
+        "sentences": [
+          1
+        ]
+      },
+      "granularity": "whole article",
       "kind": "article",
-      "sentences": [
-        1
-      ],
       "state_2020": "present",
       "state_2025": "present",
       "superscripts_present": [],
@@ -4608,12 +4613,18 @@
         ]
       ],
       "fragment": "(9)-(12)",
-      "fragment_not_isolated": [
-        9,
-        10,
-        11,
-        12
-      ],
+      "fragment_not_isolated": {
+        "clause": null,
+        "isolated_2020": false,
+        "isolated_2025": true,
+        "note": "the cited sentence(s) could not be isolated, so the comparison is of the enclosing article",
+        "sentences": [
+          9,
+          10,
+          11,
+          12
+        ]
+      },
       "granularity": "whole article",
       "kind": "article",
       "state_2020": "present",
@@ -5165,9 +5176,15 @@
         ]
       ],
       "fragment": "(3)",
-      "fragment_not_isolated": [
-        3
-      ],
+      "fragment_not_isolated": {
+        "clause": null,
+        "isolated_2020": false,
+        "isolated_2025": true,
+        "note": "the cited sentence(s) could not be isolated, so the comparison is of the enclosing article",
+        "sentences": [
+          3
+        ]
+      },
       "granularity": "whole article",
       "kind": "article",
       "state_2020": "present",
@@ -5413,9 +5430,15 @@
         ]
       ],
       "fragment": "(6)",
-      "fragment_not_isolated": [
-        6
-      ],
+      "fragment_not_isolated": {
+        "clause": null,
+        "isolated_2020": false,
+        "isolated_2025": true,
+        "note": "the cited sentence(s) could not be isolated, so the comparison is of the enclosing article",
+        "sentences": [
+          6
+        ]
+      },
       "granularity": "whole article",
       "kind": "article",
       "state_2020": "present",
@@ -5664,9 +5687,15 @@
         ]
       ],
       "fragment": "(7)",
-      "fragment_not_isolated": [
-        7
-      ],
+      "fragment_not_isolated": {
+        "clause": null,
+        "isolated_2020": false,
+        "isolated_2025": true,
+        "note": "the cited sentence(s) could not be isolated, so the comparison is of the enclosing article",
+        "sentences": [
+          7
+        ]
+      },
       "granularity": "whole article",
       "kind": "article",
       "state_2020": "present",

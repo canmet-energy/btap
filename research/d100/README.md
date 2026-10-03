@@ -60,20 +60,23 @@ comparisons               120
   substantively identical 24
   by granularity:
     -                                    60
-    cited sentence                       27
+    cited clause (1)(c)                  1
+    cited sentence                       25
     cited sentences 4-5                  1
     structured headers and rows          5
-    whole article                        27
+    whole article                        28
 ```
 
 <!-- COUNTS END -->
 
-## Four states, never collapsed onto a boolean
+## Five states, never collapsed onto a boolean
 
 ```text
 present           the tool returned content
 mcp_empty         the tool returned nothing — NOT proven Code absence
 hierarchy_absent  absence established from the edition hierarchy
+returned_mismatch a payload that identifies itself as something OTHER than
+                  what was requested — neither present nor a transport error
 error             transport/auth/protocol failure — FAILS THE RUN
 ```
 

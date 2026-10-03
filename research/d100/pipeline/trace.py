@@ -6,11 +6,15 @@ NOT decide reachability, and it does not infer it from a file's directory: a
 shared module can branch on ruleset data, so directory placement is not
 evidence (Sol, `058`, `061` item 5).
 
-Sites with no corroborated chain are marked `unresolved`, never assigned every
-code id by default. `manifest_bound_entry` records whether a chain reaches a
-function the manifests actually bind; anything beyond that -- the per-code
-chain from each manifest binding, with edition guards -- is human work and the
-packet says so.
+EVERY site is marked `requires_human_resolution`, never assigned a code id by
+default. `068` retired the earlier `manifest_bound_entry` field, which claimed a
+chain reached a function the manifests bind: a name-only call index produced a
+provably invalid chain, and Sol ruled against building a general resolver
+because both manifests bind the same code path, so a perfect resolver walks one
+graph twice. What remains are `unverified_candidate_chains` -- a starting point
+for reading, not evidence -- with `chain_corroborated` null rather than False and
+no global corroborated count. The per-code chain from each manifest binding,
+with edition guards, is human work and the packet says so.
 """
 
 from __future__ import annotations

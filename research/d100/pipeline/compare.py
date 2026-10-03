@@ -61,10 +61,14 @@ CITE_RE = re.compile(r"(A-)?8\.4\.(4|5|6)\.")
 SUBSECTIONS = {"2020": {"4": "REF", "5": "PRE"},
                "2025": {"5": "REF", "6": "PRE"}}
 SENTENCE_RE = re.compile(r"(?m)^(\d+)\)\s")
+#: A lettered clause inside a sentence: `a)` at the start of a line.
+CLAUSE_RE = re.compile(r"(?m)^([a-z])\)\s")
 #: `(2)`, `(2)(a)`, and an INCLUSIVE range `(4)-(5)`. Reading only the first
 #: number returned Sentence (4) alone for D-62's `5.2.2.8.(4)-(5)` and still
-#: labelled the result a cited-fragment comparison (Sol, `065` item 3).
-FRAGMENT_RE = re.compile(r"^\((\d+)\)(?:-\((\d+)\))?")
+#: labelled the result a cited-fragment comparison (Sol, `065` item 3); it then
+#: did the same thing one level down, reporting `8.4.3.6.(1)(a)` at "cited
+#: sentence" depth when 2020's section has no `a)` clause at all (Sol, `074`).
+FRAGMENT_RE = re.compile(r"^\((\d+)\)(?:-\((\d+)\))?(?:\(([a-z])\))?")
 
 
 def rewrite_citations(text: str, edition: str) -> str:
@@ -84,16 +88,44 @@ def normalise(text: str, edition: str) -> str:
     return " ".join(text.split())
 
 
-def wanted_sentences(fragment: str):
-    """The sentence numbers a fragment cites, inclusive, or [] for none."""
+def wanted_fragment(fragment: str):
+    """``(sentence numbers, clause letter or None)`` for a cited fragment.
+
+    The letter matters: a cited SUBCLAUSE is a different address from the
+    sentence containing it, and reporting the parent sentence as though it were
+    the clause is the false-precision bug twice over (Sol, `065`, `074`).
+    """
     match = FRAGMENT_RE.match(fragment or "")
     if not match:
-        return []
+        return [], None
     first = int(match.group(1))
     last = int(match.group(2)) if match.group(2) else first
     if last < first:
-        return []
-    return list(range(first, last + 1))
+        return [], None
+    return list(range(first, last + 1)), match.group(3)
+
+
+def wanted_sentences(fragment: str):
+    """The sentence numbers a fragment cites, inclusive, or [] for none."""
+    return wanted_fragment(fragment)[0]
+
+
+def clause_of(full_text: str, numbers, letter):
+    """``(text, complete)`` for one lettered clause inside the cited sentence.
+
+    ``complete`` is False when the clause is not present, so an absent clause can
+    never be presented as a comparison at the cited address.
+    """
+    sentence, ok = sentences_of(full_text, numbers)
+    if not ok or not sentence or not letter:
+        return None, False
+    marks = [(m.group(1), m.start()) for m in CLAUSE_RE.finditer(sentence)]
+    index = {name: position for name, position in marks}
+    if letter not in index:
+        return None, False
+    start = index[letter]
+    later = [p for _, p in marks if p > start]
+    return sentence[start:(min(later) if later else len(sentence))], True
 
 
 def sentences_of(full_text: str, numbers):
@@ -209,20 +241,39 @@ def compare_one(entry, sides):
             record["row_counts"] = [len(left.get("rows") or []),
                                     len(right.get("rows") or [])]
     else:
-        numbers = wanted_sentences(fragment)
-        left_text, left_ok = sentences_of(left.get("full_text", ""), numbers)
-        right_text, right_ok = sentences_of(right.get("full_text", ""), numbers)
+        numbers, letter = wanted_fragment(fragment)
+        if letter:
+            left_text, left_ok = clause_of(left.get("full_text", ""), numbers, letter)
+            right_text, right_ok = clause_of(right.get("full_text", ""), numbers, letter)
+        else:
+            left_text, left_ok = sentences_of(left.get("full_text", ""), numbers)
+            right_text, right_ok = sentences_of(right.get("full_text", ""), numbers)
         if numbers and left_ok and right_ok:
             a, b = normalise(left_text, "2020"), normalise(right_text, "2025")
-            record["granularity"] = ("cited sentence" if len(numbers) == 1
-                                     else f"cited sentences {numbers[0]}-{numbers[-1]}")
+            if letter:
+                record["granularity"] = f"cited clause ({numbers[0]})({letter})"
+                record["clause"] = letter
+            else:
+                record["granularity"] = ("cited sentence" if len(numbers) == 1
+                                         else f"cited sentences {numbers[0]}-{numbers[-1]}")
             record["sentences"] = numbers
         else:
+            # Fall back to the WHOLE ARTICLE and say so, naming which side could
+            # not be isolated. The cited address is not what was compared, so
+            # this must never read as a comparison at that address.
             a = normalise(left.get("full_text", ""), "2020")
             b = normalise(right.get("full_text", ""), "2025")
             record["granularity"] = "whole article"
             if numbers:
-                record["fragment_not_isolated"] = numbers
+                record["fragment_not_isolated"] = {
+                    "sentences": numbers, "clause": letter,
+                    "isolated_2020": bool(left_ok), "isolated_2025": bool(right_ok),
+                    "note": ("the cited clause could not be isolated, so the "
+                             "comparison is of the enclosing article and is NOT "
+                             "evidence about the cited address")
+                    if letter else
+                    ("the cited sentence(s) could not be isolated, so the "
+                     "comparison is of the enclosing article")}
 
     spans = spans_between(a, b)
     record["verdict"] = "substantively identical" if not spans else "differs"

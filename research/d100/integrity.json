@@ -1,8 +1,10 @@
 {
   "findings": [],
   "summary": {
+    "declared_request_count": 160,
     "indexed": 160,
     "payload_files": 160,
+    "payloads_hashed": 125,
     "requests": 160,
     "server_known_issue_count": 2,
     "states": {

@@ -1,31 +1,65 @@
 #!/usr/bin/env python3
 """Stage 0 — check the archive is internally consistent. Offline.
 
-`rebuild.py` previously checked four derived JSON files and nothing else, while
-printing "byte-for-byte" and actually calling a semantic comparison. Neither
-`hbix/` nor `hbix_index.json` was validated at all, so a changed table row or a
-new `known_issue` could pass the gate — especially since the comparator did not
-read table rows (Sol, `065` item 5).
+The first version checked only `present` payloads, and Sol falsified its central
+claim (`074`): a table ROW inside the one `returned_mismatch` payload could be
+changed with its hash untouched, and both `integrity.py` and the offline
+`rebuild.py` reported the archive sound. That payload is server-erratum evidence,
+so it is among the LEAST safe things to leave unhashed. Three adjacent holes went
+with it — a stored `state` could disagree with the index, the index's declared
+`request_count` was never read, and a `present` payload could have its `edition`
+erased because the check was written `if edition and ...`, treating absent
+identity as valid.
 
-Every invariant here was independently checked by Sol by hand; this is those
-checks, mechanised, so they hold on every run instead of once:
+The rule now is uniform: **every stored non-null payload is hashed, and every
+declared metadata field must agree between the payload and the index.** State is
+not a licence to skip verification; it only changes what the payload must SAY.
 
-* the request-key set, the index-key set and the payload-file set are EQUAL;
-* each payload's stored `request` matches the index's, exactly;
+Checks:
+
+* the request-key set, the index-key set and the payload-file set are EQUAL, and
+  the index's own `request_count` matches;
+* every declared metadata field agrees between the stored payload and the index —
+  not merely the `request` sub-object;
 * every state is one of the declared enum values;
-* every `present` payload's SHA-256 recomputes;
-* every `present` payload identifies itself as the number and edition requested;
+* every non-null payload's SHA-256 recomputes, whatever its state;
+* a `present` payload identifies itself as the number AND the edition requested,
+  with a missing value treated as a failure rather than a pass;
+* a `returned_mismatch` payload really does identify itself as something OTHER
+  than what was requested — the state has to earn its name;
 * no extra and no missing payloads.
 
 Exit code is non-zero on any failure, so this is usable as a gate.
+`tests/test_integrity.py` pins the mutations, not just the clean archive.
 """
 
 from __future__ import annotations
 
+import json
 import sys
 
-from common import (ERROR, PRESENT, RETURNED_MISMATCH, STATES, out_dir,
-                    read_json, request_key, sha256, write_json)
+from common import (ERROR, MCP_EMPTY, PRESENT, RETURNED_MISMATCH, STATES,
+                    out_dir, read_json, request_key, sha256, write_json)
+
+#: Metadata fields the archive declares. Compared in full between the stored
+#: payload and the index, because comparing only `request` let a payload's own
+#: `state` disagree with the index's (Sol, `074`).
+META_FIELDS = ("request", "state", "sha256", "returned_number", "state_note",
+               "title", "server_known_issue", "retrieved_utc")
+#: States whose payload must be null. Anything else must carry evidence.
+EMPTY_STATES = (MCP_EMPTY, ERROR)
+
+
+def _identity(payload) -> tuple[str, str]:
+    """What a payload says it IS: (number, edition), '' when absent."""
+    number = (payload.get("table_number") or payload.get("article_number")
+              or payload.get("section_number") or "")
+    return str(number).rstrip("."), str(payload.get("edition") or "")
+
+
+def _asked(request) -> tuple[str, str]:
+    number = request.get("section_number") or request.get("table_number") or ""
+    return str(number).rstrip("."), str(request.get("edition") or "")
 
 
 def check(out):
@@ -36,10 +70,9 @@ def check(out):
     index = index_doc["index"]
 
     expected = {request_key(request): request for request in citations["requests"]}
-    archive = out / "hbix"
-    on_disk = {path.stem: path for path in sorted(archive.glob("*.json"))}
+    on_disk = {path.stem: path for path in sorted((out / "hbix").glob("*.json"))}
 
-    # 1. three sets, equal
+    # 1. three sets, equal — and the index's own declared count
     for label, missing in (
             ("requested but not indexed", sorted(set(expected) - set(index))),
             ("indexed but not requested", sorted(set(index) - set(expected))),
@@ -47,6 +80,10 @@ def check(out):
             ("payload file but not indexed", sorted(set(on_disk) - set(index)))):
         if missing:
             findings.append(f"{label}: {len(missing)} {missing[:5]}")
+    declared = index_doc.get("request_count")
+    if declared != len(index):
+        findings.append(
+            f"index declares request_count={declared} but holds {len(index)} entries")
 
     states = {}
     for key, meta in sorted(index.items()):
@@ -56,10 +93,12 @@ def check(out):
         stored = read_json(path)
         payload, stored_meta = stored.get("payload"), stored.get("meta", {})
 
-        # 2. the payload's own record of the request matches the index's
-        if stored_meta.get("request") != meta.get("request"):
-            findings.append(f"{key}: payload request disagrees with the index")
-        # and both match what was actually asked for
+        # 2. EVERY declared metadata field agrees, not just `request`
+        for field in META_FIELDS:
+            if stored_meta.get(field) != meta.get(field):
+                findings.append(
+                    f"{key}: stored meta.{field} disagrees with the index "
+                    f"({stored_meta.get(field)!r} vs {meta.get(field)!r})")
         if key in expected and meta.get("request") != expected[key]:
             findings.append(f"{key}: indexed request disagrees with citations.json")
 
@@ -69,31 +108,45 @@ def check(out):
         if state not in STATES:
             findings.append(f"{key}: undeclared state {state!r}")
 
-        if state != PRESENT:
-            if payload is not None and state != RETURNED_MISMATCH:
+        # 4. a state dictates whether evidence exists, never whether it is checked
+        if state in EMPTY_STATES:
+            if payload is not None:
                 findings.append(f"{key}: state {state} but a payload is stored")
             continue
-
         if payload is None:
-            findings.append(f"{key}: state present but no payload")
+            findings.append(f"{key}: state {state} but no payload is stored")
             continue
-        # 4. the hash recomputes
-        import json as _json
-        recomputed = sha256(_json.dumps(payload, ensure_ascii=False, sort_keys=True))
+
+        recomputed = sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True))
         if recomputed != meta.get("sha256"):
-            findings.append(f"{key}: sha256 does not recompute")
-        # 5. the payload identifies itself as what was requested
-        request = meta.get("request", {})
-        asked = str(request.get("section_number") or request.get("table_number") or "")
-        returned = str(payload.get("table_number") or payload.get("article_number")
-                       or payload.get("section_number") or "")
-        if returned.rstrip(".") != asked.rstrip("."):
-            findings.append(
-                f"{key}: present, but identifies itself as {returned!r} not {asked!r}")
-        edition = str(payload.get("edition") or "")
-        if edition and edition != str(request.get("edition")):
-            findings.append(
-                f"{key}: present, but edition {edition} not {request.get('edition')}")
+            findings.append(f"{key}: sha256 does not recompute (state {state})")
+
+        # 5. what the payload must SAY, per state
+        asked_number, asked_edition = _asked(meta.get("request", {}))
+        got_number, got_edition = _identity(payload)
+        if state == PRESENT:
+            if got_number != asked_number:
+                findings.append(
+                    f"{key}: present, but identifies itself as {got_number!r} "
+                    f"not {asked_number!r}")
+            # absent identity is a FAILURE, not a pass: `if edition and ...`
+            # treated an erased edition as valid (Sol, `074`)
+            if not got_edition:
+                findings.append(f"{key}: present, but declares no edition")
+            elif got_edition != asked_edition:
+                findings.append(
+                    f"{key}: present, but edition {got_edition} not {asked_edition}")
+        elif state == RETURNED_MISMATCH:
+            # the state has to earn its name
+            if got_number == asked_number and got_edition == asked_edition:
+                findings.append(
+                    f"{key}: state returned_mismatch, but the payload identifies "
+                    f"itself as exactly what was requested ({asked_number!r})")
+            if meta.get("returned_number") and \
+                    str(meta["returned_number"]).rstrip(".") != got_number:
+                findings.append(
+                    f"{key}: meta.returned_number {meta['returned_number']!r} is not "
+                    f"what the payload says it is ({got_number!r})")
 
     if states.get(ERROR):
         findings.append(f"{states[ERROR]} request(s) in state 'error'")
@@ -101,6 +154,9 @@ def check(out):
     summary = {
         "requests": len(expected), "indexed": len(index),
         "payload_files": len(on_disk), "states": states,
+        "declared_request_count": declared,
+        "payloads_hashed": sum(1 for k, m in index.items()
+                               if m.get("state") not in EMPTY_STATES),
         "server_known_issue_count": sum(
             1 for m in index.values() if m.get("server_known_issue")),
     }
@@ -115,8 +171,11 @@ def main(argv=None):
     print("archive integrity")
     print(f"  requests / indexed / payload files : {summary['requests']} / "
           f"{summary['indexed']} / {summary['payload_files']}")
+    print(f"  index declares                     : "
+          f"{summary['declared_request_count']}")
     for state in sorted(summary["states"]):
         print(f"  {state:20} {summary['states'][state]}")
+    print(f"  payloads hashed (every non-null)   : {summary['payloads_hashed']}")
     print(f"  server_known_issue_count           : "
           f"{summary['server_known_issue_count']}")
     if findings:
