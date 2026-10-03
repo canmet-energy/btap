@@ -70,6 +70,13 @@ class TestLocalRun(unittest.TestCase):
     def _model_with_sql(self, target):
         import openstudio
         model = load_fixture()
+        # What `run_energyplus` sets before handing a dir to a backend. Without
+        # these the backend's own guard refuses the dir, and this helper is named
+        # for a PREPARED dir — so it must prepare one faithfully.
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)
+        sim.setDoSystemSizingCalculation(True)
+        sim.setDoPlantSizingCalculation(True)
         model.setSqlFile(openstudio.SqlFile(
             openstudio.path(str(Path(target) / "run" / "eplusout.sql"))))
         return model
@@ -79,6 +86,13 @@ class TestLocalRun(unittest.TestCase):
         # means a path with spaces (the Windows norm) cannot split.
         target = str(Path(self.tmp.name) / "a directory with spaces" / "run")
         model = load_fixture()
+        # What `run_energyplus` sets before handing a dir to a backend. Without
+        # these the backend's own guard refuses the dir, and this helper is named
+        # for a PREPARED dir — so it must prepare one faithfully.
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)
+        sim.setDoSystemSizingCalculation(True)
+        sim.setDoPlantSizingCalculation(True)
         runner.attach_weather(model, epw=str(EPW), ddy=str(DDY))
         out_dir = runner.run_energyplus(model, target, sizing_only=True)
 

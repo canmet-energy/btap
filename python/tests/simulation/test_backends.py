@@ -124,3 +124,129 @@ class TestBackends(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ExplodingTransport:
+    """Any use at all is a test failure.
+
+    The guard tests used `mock.Mock()`, which answers every call with another
+    Mock — so when a mutation removed the guard, `Remote.execute` sailed past the
+    upload and sat in `_poll` forever against a Mock that never returns a
+    terminal status. Three of five mutations HUNG instead of failing, including
+    the two that matter most. A mutation that hangs is not a mutation that was
+    caught, so the seam's four methods now refuse rather than improvise.
+    """
+
+    def _boom(self, name):
+        raise AssertionError(
+            f"transport.{name} was called: the guard must refuse before "
+            "anything touches the wire")
+
+    def post_json(self, *a, **k):
+        self._boom("post_json")
+
+    def put_bytes(self, *a, **k):
+        self._boom("put_bytes")
+
+    def get_json(self, *a, **k):
+        self._boom("get_json")
+
+    def get_bytes(self, *a, **k):
+        self._boom("get_bytes")
+
+
+class TestSizingCalculationsGuard(unittest.TestCase):
+    """A backend reached without `run_energyplus` must say so, not hand
+    EnergyPlus a model that fatals 0.3s in on the first autosized component.
+
+    All three flags default to False on a model, and `run_energyplus` is the
+    only thing that enables them, so every bypass hit the same cryptic error:
+    an API upload, a local sweep and an `openstudio run` OSW, in one session.
+    """
+
+    @needs_sdk
+    def _run_dir(self, *, sizing):
+        import openstudio
+
+        directory = Path(tempfile.mkdtemp())
+        model = load_fixture()
+        if sizing:
+            sim = model.getSimulationControl()
+            sim.setDoZoneSizingCalculation(True)
+            sim.setDoSystemSizingCalculation(True)
+            sim.setDoPlantSizingCalculation(True)
+        model.save(openstudio.path(str(directory / "in.osm")), True)
+        return directory
+
+    @needs_sdk
+    def test_local_refuses_a_model_with_sizing_disabled(self):
+        directory = self._run_dir(sizing=False)
+        # An explicit nonexistent binary, so that if the guard is ever removed
+        # this test fails FAST instead of falling through to
+        # engine.ensure_energyplus(), which provisions EnergyPlus. Without it,
+        # the mutation "remove the Local call site" hung for 36 minutes instead
+        # of failing -- a test whose failure mode was a hang, not a red.
+        with self.assertRaises(RuntimeError) as caught:
+            Local(energyplus="/nonexistent/energyplus").execute(directory)
+        message = str(caught.exception)
+        for expected in ("Do Zone Sizing Calculation",
+                         "Do System Sizing Calculation",
+                         "Do Plant Sizing Calculation",
+                         "run_energyplus"):
+            self.assertIn(expected, message,
+                          "the message must name the missing flags and the fix")
+
+    @needs_sdk
+    def test_remote_refuses_before_uploading_anything(self):
+        """The check must precede the upload: 20 queue-minutes is a worse place
+        to learn this, and a rejected run still costs a transfer."""
+        directory = self._run_dir(sizing=False)
+        remote = Remote(endpoint="https://example.invalid", api_key="x",
+                        transport=ExplodingTransport(), poll_seconds=0)
+        with self.assertRaises(RuntimeError) as caught:
+            remote.execute(directory)
+        self.assertIn("Do Zone Sizing Calculation", str(caught.exception))
+
+    @needs_sdk
+    def test_remote_refuses_the_openstudio_workflow_too(self):
+        """`workflow_type='openstudio'` uploads in.osm unchanged, so the
+        workspace-level trick `_ensure_output_requests` uses cannot cover it."""
+        directory = self._run_dir(sizing=False)
+        remote = Remote(endpoint="https://example.invalid", api_key="x",
+                        transport=ExplodingTransport(), poll_seconds=0,
+                        workflow_type="openstudio")
+        with self.assertRaises(RuntimeError) as caught:
+            remote.execute(directory)
+        self.assertIn("Do Zone Sizing Calculation", str(caught.exception),
+                      "moving the guard after the workflow branch leaves this "
+                      "path unguarded — the OSM is uploaded unchanged")
+
+    @needs_sdk
+    def test_a_prepared_model_passes_the_guard(self):
+        """The guard must not fire on what `run_energyplus` produces —
+        otherwise it would be unfalsifiable by construction."""
+        from btap.simulation.backends import _require_sizing_calculations
+
+        directory = self._run_dir(sizing=True)
+        import openstudio
+
+        from btap._compat import opt
+        model = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        _require_sizing_calculations(model, directory / "in.osm")   # must not raise
+
+    @needs_sdk
+    def test_each_flag_alone_is_enough_to_trip_it(self):
+        """One disabled flag must fail, not only all three."""
+        from btap.simulation.backends import _require_sizing_calculations
+
+        setters = ("setDoZoneSizingCalculation", "setDoSystemSizingCalculation",
+                   "setDoPlantSizingCalculation")
+        for omitted in setters:
+            with self.subTest(omitted=omitted):
+                model = load_fixture()
+                sim = model.getSimulationControl()
+                for setter in setters:
+                    getattr(sim, setter)(setter != omitted)
+                with self.assertRaises(RuntimeError):
+                    _require_sizing_calculations(model, Path("in.osm"))
