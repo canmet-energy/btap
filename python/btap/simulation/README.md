@@ -76,6 +76,16 @@ that already contains `in.osm` + `in.osw`, run EnergyPlus so that
 `dir/run/eplusout.sql` **and** `dir/run/eplusout.err` exist, and raise on
 failure.
 
+One precondition, and only for runs that need it: **if the translated model has
+any autosized field, the model's three sizing-calculation flags must be on.**
+A backend refuses such a dir up front rather than letting EnergyPlus fail 0.3s
+in with a message naming the first autosized component instead of the cause.
+`run_energyplus` sets the flags, so a dir it prepared always satisfies this; a
+caller invoking a backend directly must set them itself. A model with nothing to
+size needs no sizing run and is accepted with the flags off — the check counts
+`Autosize` fields in the translated IDF rather than assuming (D-100 review,
+Sol `075`).
+
 - **`Local`** (default) — translates the model in process with
   `ForwardTranslator`, writes `in.idf`, and runs the provisioned
   `energyplus` binary. (The Ruby gem shelled out to `openstudio run`

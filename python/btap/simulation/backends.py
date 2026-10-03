@@ -23,6 +23,7 @@ parse surface, no CLI anywhere.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 import urllib.request
@@ -61,9 +62,8 @@ class Local(Backend):
         model = opt(openstudio.model.Model.load(openstudio.path(str(osm))))
         if model is None:
             raise RuntimeError(f"local backend: cannot load {osm}")
-        _require_sizing_calculations(model, osm)
-
         workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        _require_sizing_calculations(model, workspace, osm)
         _ensure_output_requests(workspace)
         idf = run_dir / "in.idf"
         workspace.save(openstudio.path(str(idf)), True)
@@ -100,19 +100,46 @@ class Local(Backend):
         )
 
 
-def _require_sizing_calculations(model, osm) -> None:
-    """Refuse a model whose sizing calculations are off.
+#: EnergyPlus's own literal token for a field it must size, as a whole field
+#: value in an IDF. Counting these is what makes the guard CONDITIONAL: the IDF
+#: is the file EnergyPlus reads, so this is an observation rather than an
+#: inference about SDK types.
+AUTOSIZE_FIELD_RE = re.compile(r"(?mi)^\s*autosize\s*[,;]")
 
-    All three default to FALSE on a model, and `run_energyplus` is the only
-    thing in the product that turns them on. So anything that reaches a backend
+
+def autosized_fields(workspace) -> int:
+    """How many fields EnergyPlus would have to size in this workspace.
+
+    Deliberately reads the translated IDF rather than interrogating the model:
+    `getModelObjects()` yields base instances, so the SDK's typed
+    `isXxxAutosized()` predicates are unreachable, and enumerating the concrete
+    component types would be an open-ended list — an unbounded surface to model,
+    which is the mistake this repository keeps paying for. Measured: 0 on the
+    bare test fixture, 27 on `01-baseboard-gas`, 134 on `04-fancoil-chiller`.
+    """
+    return len(AUTOSIZE_FIELD_RE.findall(str(workspace)))
+
+
+def _require_sizing_calculations(model, workspace, osm) -> None:
+    """Refuse a model that has fields to size but no sizing run to size them.
+
+    The three flags default to FALSE on a model and `run_energyplus` is the only
+    thing in the product that turns them on, so anything reaching a backend
     without going through it — a direct `Local().execute(...)`, an upload to the
     simulation API, a hand-built `openstudio run` OSW — dies 0.3s into
     EnergyPlus with `For autosizing of <component>, a zone sizing run must be
     done`, which names the first autosized component rather than the cause. That
-    cost three separate debugging detours in one session: a cancelled 16-job API
-    batch, a local sweep, and an `openstudio run` comparison.
+    cost three separate detours in one session.
 
-    This CHECKS rather than repairs, deliberately:
+    CONDITIONAL, because the unconditional version was wrong. Sol built a valid
+    run from the bare fixture — no autosized HVAC, a one-week weather run, no
+    sizing period, all three flags false — and it completes in EnergyPlus and
+    passes `is_clean_run`. The first version refused it, so the error text
+    predicted a failure that does not occur and a previously valid direct-backend
+    use was removed (`075`). A model with nothing to size does not need a sizing
+    run, and this now says so by checking.
+
+    It CHECKS rather than repairs, deliberately:
 
     * `Remote` with `workflow_type='openstudio'` uploads `in.osm` itself, so the
       workspace-level trick `_ensure_output_requests` uses cannot reach it; only
@@ -121,10 +148,10 @@ def _require_sizing_calculations(model, osm) -> None:
     * a backend that silently enabled sizing would hide the caller's omission,
       and `run_energyplus` deliberately varies the two `runSimulationfor*`
       flags — a backend is not the place to decide what the run is.
-
-    The sibling of the `in.osm is missing` check: both say the run directory was
-    not prepared, and name what to do about it.
     """
+    count = autosized_fields(workspace)
+    if not count:
+        return                      # nothing to size; the flags are irrelevant
     sim = model.getSimulationControl()
     missing = [name for name, enabled in (
         ("Do Zone Sizing Calculation", sim.doZoneSizingCalculation()),
@@ -133,10 +160,11 @@ def _require_sizing_calculations(model, osm) -> None:
     ) if not enabled]
     if missing:
         raise RuntimeError(
-            f"{osm} has sizing calculations disabled ({', '.join(missing)}), so "
-            "EnergyPlus will fail on the first autosized component. Prepare the "
-            "run through btap.simulation.runner.run_energyplus, which sets "
-            "these, or set them on the model before calling a backend directly."
+            f"{osm} has {count} autosized field(s) but sizing calculations "
+            f"disabled ({', '.join(missing)}), so EnergyPlus will fail on the "
+            "first autosized component. Prepare the run through "
+            "btap.simulation.runner.run_energyplus, which sets these, or set "
+            "them on the model before calling a backend directly."
         )
 
 
@@ -245,12 +273,16 @@ class Remote(Backend):
         model = opt(openstudio.model.Model.load(openstudio.path(str(osm))))
         if model is None:
             raise RuntimeError(f"remote backend: cannot load {osm}")
-        _require_sizing_calculations(model, osm)
+        # Translated once, BEFORE the workflow branch, and reused below. The
+        # `openstudio` workflow uploads `in.osm` unchanged and the remote does
+        # its own translation, so this one is spent purely on the guard — a
+        # second of local work against a transfer plus a queue wait (Sol, `075`:
+        # keep the ordering).
+        idf = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        _require_sizing_calculations(model, idf, osm)
 
         if self._workflow_type() == "openstudio":
             return osm.read_bytes(), "in.osm"
-
-        idf = openstudio.energyplus.ForwardTranslator().translateModel(model)
         path = run_dir / "in.idf"
         idf.save(openstudio.path(str(path)), True)
         return path.read_bytes(), "in.idf"

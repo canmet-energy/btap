@@ -4,6 +4,7 @@ delegates to an injected backend. (The Ruby CLI-path tests have no Python
 analogue: the Local backend runs the provisioned engine, not the CLI; their
 replacement lives in test_engine.py.)"""
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -126,6 +127,40 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class TestRunnerOwnsTheSizingContract(unittest.TestCase):
+    """`run_energyplus` must set the flags itself, starting from the defaults.
+
+    Sol's `075`: pre-setting them in a test fixture MASKS a future failure of
+    exactly that runner preparation, so the fixture keeps its false defaults and
+    the runner is required to prove its own contract on the SAVED `in.osm`.
+    """
+
+    @needs_sdk
+    def test_run_energyplus_enables_sizing_on_the_saved_in_osm(self):
+        import openstudio
+
+        from btap._compat import opt
+
+        model = load_fixture()
+        sim = model.getSimulationControl()
+        self.assertFalse(sim.doZoneSizingCalculation(), "precondition: defaults")
+        self.assertFalse(sim.doSystemSizingCalculation())
+        self.assertFalse(sim.doPlantSizingCalculation())
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        runner.run_energyplus(model, directory, backend=FakeBackend(self))
+
+        saved = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        self.assertIsNotNone(saved, "the runner must save in.osm")
+        control = saved.getSimulationControl()
+        self.assertTrue(control.doZoneSizingCalculation(),
+                        "the runner must enable zone sizing on the saved model")
+        self.assertTrue(control.doSystemSizingCalculation())
+        self.assertTrue(control.doPlantSizingCalculation())
+
+
 class ExplodingTransport:
     """Any use at all is a test failure.
 
@@ -164,12 +199,24 @@ class TestSizingCalculationsGuard(unittest.TestCase):
     an API upload, a local sweep and an `openstudio run` OSW, in one session.
     """
 
-    @needs_sdk
-    def _run_dir(self, *, sizing):
+    def _run_dir(self, *, sizing, autosized=True):
+        """A run dir as the runner would leave one.
+
+        `autosized` adds a baseboard with an autosized capacity. Without it the
+        bare fixture has NOTHING to size, and a model with nothing to size does
+        not need a sizing run — the case Sol's `075` showed the first version of
+        this guard wrongly refused.
+        """
         import openstudio
 
         directory = Path(tempfile.mkdtemp())
         model = load_fixture()
+        if autosized:
+            baseboard = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+            baseboard.autosizeNominalCapacity()
+            zones = model.getThermalZones()
+            self.assertTrue(zones, "the fixture must have a zone to attach to")
+            baseboard.addToThermalZone(zones[0])
         if sizing:
             sim = model.getSimulationControl()
             sim.setDoZoneSizingCalculation(True)
@@ -222,6 +269,41 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                       "path unguarded — the OSM is uploaded unchanged")
 
     @needs_sdk
+    def test_a_model_with_nothing_to_size_is_NOT_refused(self):
+        """Sol's `075` finding, pinned.
+
+        A bare model with no autosized field runs fine in EnergyPlus with all
+        three flags false. The first version of this guard refused it, so its
+        error text predicted a failure that does not occur and it removed a
+        valid direct-backend use. The guard must stay silent here.
+        """
+        import openstudio
+
+        from btap._compat import opt
+        from btap.simulation.backends import _require_sizing_calculations, autosized_fields
+        directory = self._run_dir(sizing=False, autosized=False)
+        model = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        self.assertEqual(0, autosized_fields(workspace),
+                         "the bare fixture must have nothing to size")
+        _require_sizing_calculations(model, workspace, directory / "in.osm")
+
+    @needs_sdk
+    def test_an_autosized_model_has_fields_to_size(self):
+        """The other half: the probe must actually detect autosizing, or the
+        conditional guard is unfalsifiable by construction."""
+        import openstudio
+
+        from btap._compat import opt
+        from btap.simulation.backends import autosized_fields
+        directory = self._run_dir(sizing=False, autosized=True)
+        model = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        self.assertGreater(autosized_fields(workspace), 0)
+
+    @needs_sdk
     def test_a_prepared_model_passes_the_guard(self):
         """The guard must not fire on what `run_energyplus` produces —
         otherwise it would be unfalsifiable by construction."""
@@ -233,7 +315,8 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         from btap._compat import opt
         model = opt(openstudio.model.Model.load(
             openstudio.path(str(directory / "in.osm"))))
-        _require_sizing_calculations(model, directory / "in.osm")   # must not raise
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        _require_sizing_calculations(model, workspace, directory / "in.osm")
 
     @needs_sdk
     def test_each_flag_alone_is_enough_to_trip_it(self):
@@ -248,5 +331,10 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                 sim = model.getSimulationControl()
                 for setter in setters:
                     getattr(sim, setter)(setter != omitted)
+                import openstudio
+                baseboard = openstudio.model.ZoneHVACBaseboardConvectiveElectric(model)
+                baseboard.autosizeNominalCapacity()
+                baseboard.addToThermalZone(model.getThermalZones()[0])
+                ws = openstudio.energyplus.ForwardTranslator().translateModel(model)
                 with self.assertRaises(RuntimeError):
-                    _require_sizing_calculations(model, Path("in.osm"))
+                    _require_sizing_calculations(model, ws, Path("in.osm"))
