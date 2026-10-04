@@ -314,3 +314,151 @@ class TestUnreadableEntriesAreNamed(unittest.TestCase):
         message = self._download([])
         self.assertIn("produced no eplusout.sql", message)
         self.assertNotIn("does not understand", message)
+
+
+class TestWeatherIdentity(unittest.TestCase):
+    """The station the service needs, derived from the model's own EPW.
+
+    `cli.py` builds a bare `Remote()`, so nothing supplied `weather_station_id`
+    and `_submit` dropped it — the service then rejected the job as
+    "EnergyPlus requires a weather file (WEATHER_S3_KEY)". No harness scenario
+    could run remotely at all (Sol, PR #79).
+
+    Deriving it from the EPW the model already carries binds the station to THE
+    SAME committed weather the scenario pins. Note it binds the LABEL, not the
+    bytes — see hbix#105.
+    """
+
+    def test_the_committed_naming_conventions(self):
+        from btap.simulation.backends import weather_identity
+
+        CASES = (
+            ("CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
+             ("716240", "CWEC2020")),
+            ("CAN_NB_Fredericton.717000_CWEC2020.epw",
+             ("717000", "CWEC2020")),
+            ("/abs/path/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
+             ("716240", "CWEC2020")),
+            ("CAN_ON_Toronto.Intl.AP.716240_TMYx.2009-2023.epw",
+             ("716240", "TMYx.2009-2023")),
+            ("no-station-here.epw", None),
+            ("", None),
+            (None, None),
+        )
+        for path, expected in CASES:
+            with self.subTest(path=path):
+                self.assertEqual(expected, weather_identity(path))
+
+    def test_an_explicit_option_still_wins(self):
+        from btap.simulation.backends import Remote
+
+        remote = Remote(endpoint="https://svc.test", api_key="k",
+                        weather_station_id="999999", weather_format="TMYx")
+        remote._derived = ("716240", "CWEC2020")
+        self.assertEqual("999999", remote._station_id())
+        self.assertEqual("TMYx", remote._weather_format())
+
+    def test_the_derived_identity_is_used_when_no_option_is_given(self):
+        from btap.simulation.backends import Remote
+
+        remote = Remote(endpoint="https://svc.test", api_key="k")
+        remote._derived = ("716240", "CWEC2020")
+        self.assertEqual("716240", remote._station_id())
+        self.assertEqual("CWEC2020", remote._weather_format())
+
+    def test_submit_REFUSES_when_no_station_can_be_found(self):
+        """Better than the service's own cryptic rejection."""
+        from btap.simulation.backends import Remote
+
+        class Transport:
+            def post_json(self, url, body):
+                raise AssertionError("must refuse BEFORE submitting")
+
+        remote = Remote(endpoint="https://svc.test", api_key="k",
+                        transport=Transport())
+        with self.assertRaises(RuntimeError) as caught:
+            remote._submit("m-1")
+        message = str(caught.exception)
+        self.assertIn("needs a weather station", message)
+        self.assertIn("WEATHER_S3_KEY", message,
+                      "name the service's own error so it is searchable")
+
+    def test_the_osm_text_scan_finds_the_weather_path(self):
+        import tempfile
+        from pathlib import Path
+
+        from btap.simulation.backends import _osm_weather_path
+
+        body = ("OS:WeatherFile,\n  {h}, !- Handle\n  Toronto Intl AP,\n"
+                "  /x/y/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw, !- Url\n;\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            osm = Path(tmp) / "in.osm"
+            osm.write_text(body, encoding="utf-8")
+            self.assertEqual(
+                "/x/y/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw",
+                _osm_weather_path(osm))
+            missing = Path(tmp) / "absent.osm"
+            self.assertIsNone(_osm_weather_path(missing))
+
+
+class TestDerivationHappensAtTheCallSite(unittest.TestCase):
+    """`_prepare_payload` must actually DERIVE, not just be able to.
+
+    THIRD time this gap has bitten in this PR family: tests that set
+    `remote._derived` by hand pass even when the derivation is deleted, just
+    as `_result_files` tests passed when `_download` was reverted (#78) and
+    `_select_backend` tests passed when `build_env` did not pass the variable
+    (#79). Mutation evidence is what exposed it: removing the two derivation
+    lines from `_prepare_payload` left 63 tests green.
+
+    So this reaches `_prepare_payload` with a real OSM on disk, and asserts the
+    station it will SUBMIT.
+    """
+
+    def _prepared(self, osm_body, **opts):
+        import tempfile
+        from pathlib import Path
+
+        from btap.simulation.backends import Remote
+
+        remote = Remote(endpoint="https://svc.test", api_key="k", **opts)
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = Path(tmp)
+            (run_dir / "in.osm").write_text(osm_body, encoding="utf-8")
+            # the 2-phase branch returns before any SDK work, which is enough
+            # to exercise the derivation
+            remote._opts["workflow_type"] = "openstudio"
+            remote._prepare_payload(run_dir)
+        return remote
+
+    OSM = ("OS:WeatherFile,\n  {h}, !- Handle\n  Toronto Intl AP,\n"
+           "  /w/CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw, !- Url\n;\n")
+
+    def test_preparing_the_payload_derives_the_station(self):
+        remote = self._prepared(self.OSM)
+        self.assertEqual(("716240", "CWEC2020"), remote._derived)
+        self.assertEqual("716240", remote._station_id())
+
+    def test_the_FORMAT_comes_from_the_epw_not_a_constant(self):
+        """A non-CWEC2020 EPW must not be submitted as CWEC2020."""
+        osm = self.OSM.replace("716240_CWEC2020.epw",
+                               "716240_TMYx.2009-2023.epw")
+        remote = self._prepared(osm)
+        self.assertEqual("TMYx.2009-2023", remote._weather_format(),
+                         "a constant fallback would mis-describe the weather")
+
+    def test_an_osm_without_a_derivable_epw_leaves_it_unset(self):
+        remote = self._prepared("OS:Version,\n  {h}, !- Handle\n  3.11.0;\n")
+        self.assertIsNone(remote._station_id())
+
+    def test_a_number_that_is_not_a_six_digit_station_is_not_one(self):
+        """`_(\\d{6})_` is deliberate: a bare number is not a WMO station."""
+        from btap.simulation.backends import weather_identity
+
+        for name in ("CAN_ON_somewhere.12_CWEC2020.epw",
+                     "CAN_ON_somewhere.1234567_CWEC2020.epw",
+                     "CAN_ON_run.2024_CWEC2020.epw"):
+            with self.subTest(name=name):
+                got = weather_identity(name)
+                self.assertIsNone(
+                    got, f"{name!r} has no six-digit station, got {got!r}")

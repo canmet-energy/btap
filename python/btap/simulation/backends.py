@@ -23,6 +23,7 @@ parse surface, no CLI anywhere.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 import urllib.request
@@ -166,6 +167,9 @@ class Remote(Backend):
                          or os.environ.get("OS_SIM_REMOTE_API_KEY") or None)
         self._opts = opts
         self._transport = transport or Http(self._api_key)
+        #: `(station, format)` derived from the model's own weather file in
+        #: `_prepare_payload`. Never overrides an explicit option.
+        self._derived = None
 
     def is_configured(self) -> bool:
         return bool(self._endpoint) and bool(self._api_key)
@@ -193,6 +197,13 @@ class Remote(Backend):
         osm = run_dir / "in.osm"
         if not osm.is_file():
             raise RuntimeError(f"remote backend: {osm} is missing — the runner did not prepare this dir")
+        # The model's own weather file names the station the service must
+        # resolve. Read from the OSM TEXT rather than via the SDK, so both
+        # workflows derive it the same way and neither pays a second model
+        # load. Never overrides an explicit option.
+        if self._derived is None:
+            self._derived = weather_identity(_osm_weather_path(osm))
+
         if self._workflow_type() == "openstudio":
             return osm.read_bytes(), "in.osm"
 
@@ -257,9 +268,20 @@ class Remote(Backend):
         return reg.get("model_id")
 
     def _submit(self, model_id: str) -> str:
+        station = self._station_id()
+        if not station:
+            raise RuntimeError(
+                "remote submit needs a weather station: none was passed as "
+                "weather_station_id and none could be derived from the model's "
+                "weather file. The service resolves weather from its own "
+                "library by station id and rejects a job without one (as "
+                "\"EnergyPlus requires a weather file (WEATHER_S3_KEY)\", "
+                "which names an internal key rather than the missing field). "
+                "Pass weather_station_id=, or attach an EPW named "
+                "..._<station>_<format>.epw.")
         body = {"model_id": model_id,
-                "weather_station_id": self._station_id(),
-                "weather_format": self._opts.get("weather_format", "CWEC2020"),
+                "weather_station_id": station,
+                "weather_format": self._weather_format(),
                 "workflow_type": self._workflow_type(),
                 "engine_version": self._engine_version(),
                 "queue": self._opts.get("queue", "auto")}
@@ -389,8 +411,13 @@ class Remote(Backend):
     # The service resolves weather from its own library by station id;
     # arbitrary local EPWs are not uploadable on this path (documented).
     def _station_id(self):
-        return self._opts.get("weather_station_id") or (
+        explicit = self._opts.get("weather_station_id") or (
             self._opts.get("station_map") or {}).get("default")
+        return explicit or (self._derived or (None, None))[0]
+
+    def _weather_format(self):
+        explicit = self._opts.get("weather_format")
+        return explicit or (self._derived or (None, None))[1] or "CWEC2020"
 
     # Never put the api key in a message — errors name the host only.
     def _host(self) -> str:
@@ -398,6 +425,55 @@ class Remote(Backend):
             return urlsplit(str(self._endpoint)).hostname or str(self._endpoint)
         except Exception:
             return "the configured endpoint"
+
+
+#: `..._<station>_<format>.epw` — the committed naming convention, e.g.
+#: `CAN_ON_Toronto.Intl.AP.716240_CWEC2020.epw` and
+#: `CAN_NB_Fredericton.717000_CWEC2020.epw`. The station is preceded by a DOT
+#: in both, so the separator class is `[._]`.
+_EPW_IDENTITY_RE = re.compile(r"[._](\d{6})_([^_/\\]+)\.epw$", re.IGNORECASE)
+
+
+def _osm_weather_path(osm_path):
+    """The EPW path recorded in an OSM, by text scan.
+
+    `OS:WeatherFile`'s url field holds it. A regex over the file avoids an SDK
+    model load purely to read one string, and works identically for the
+    1-phase and 2-phase payload paths.
+    """
+    try:
+        text = osm_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    match = re.search(r"([^\s,;]+\.epw)", text, re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def weather_identity(path):
+    """`(station_id, format)` from an EPW path, or None if underivable.
+
+    The service resolves weather from its own library by STATION ID and
+    rejects a job without one — as `EnergyPlus requires a weather file
+    (WEATHER_S3_KEY)`, naming an internal key rather than the field the caller
+    omitted. `cli.py` builds a bare `Remote()`, so nothing supplied a station
+    and no harness scenario could run remotely at all (Sol, PR #79).
+
+    Deriving it from the EPW the model already carries means the station is
+    THE SAME committed weather the scenario pins, rather than a separately
+    configured value free to disagree with it.
+
+    WHAT THIS DOES AND DOES NOT BIND: the station LABEL, not the bytes. The
+    service's library for one station can change under the same format label —
+    it has (hbix#105: `CWEC2020` for 716240 moved from ASHRAE 2021 to 2025
+    design conditions). For a SIZING run that does not matter, because D-25
+    attaches the design days INTO the model and they travel in the uploaded
+    IDF. For an ANNUAL run the service's hourly data is what gets used, so the
+    label is not sufficient provenance there.
+    """
+    if not path:
+        return None
+    match = _EPW_IDENTITY_RE.search(str(path))
+    return (match.group(1), match.group(2)) if match else None
 
 
 def _result_files(res):

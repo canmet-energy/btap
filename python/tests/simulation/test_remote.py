@@ -104,6 +104,11 @@ class TestRemote(unittest.TestCase):
 
     def remote(self, transport, **opts):
         opts.setdefault("poll_seconds", 0)
+        # A station is a PRECONDITION of submitting, so these tests — which are
+        # about polling, retry, payload shape and download — supply one rather
+        # than tripping the weather refusal before reaching their subject. The
+        # refusal itself is tested in test_backends.py, where it belongs.
+        opts.setdefault("weather_station_id", "716240")
         return Remote(endpoint="https://svc.test", api_key="k", transport=transport, **opts)
 
     def uploaded_filename(self, transport):
