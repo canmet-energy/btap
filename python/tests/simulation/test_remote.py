@@ -24,7 +24,13 @@ class FakeTransport:
     def post_json(self, url, body):
         self.calls.append(("post", url, body))
         path, _, query = url.partition("?")
-        if "/models" in path:
+        # Matched on the path's TAIL, not as a substring. `"/models" in path`
+        # would fire for an endpoint that itself contains `/models` — e.g.
+        # `https://svc.test/api/models` makes `{endpoint}/simulations` contain
+        # `/models`, enter this branch, fail the endswith below, and raise a
+        # spurious 404 on a route that works. Same substring class as the
+        # `run_lines` parser in #64 (Fable, PR #75).
+        if path.endswith(("/models", "/models/upload-url")):
             # The fake now ENFORCES the live service's contract instead of
             # restating whatever the backend happened to send. It previously
             # matched `endswith("/models")`, so it validated a route the service
@@ -88,8 +94,10 @@ class TestRemote(unittest.TestCase):
         return parse_qs(urlsplit(call[1]).query).get("filename", [None])[0]
 
     def find_call(self, transport, kind, suffix):
+        # endswith, not `in`: see FakeTransport.post_json on why a substring
+        # match on a URL path is a trap.
         return next(c for c in transport.calls
-                    if c[0] == kind and suffix in c[1].partition("?")[0])
+                    if c[0] == kind and c[1].partition("?")[0].endswith(suffix))
 
     def test_happy_path_lands_both_artifacts_locally(self):
         run_dir = self.prepared_dir()

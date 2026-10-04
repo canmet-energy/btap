@@ -241,7 +241,10 @@ class Remote(Backend):
         # the transport is injected and every test runs offline against a fake —
         # correct for unit tests, and exactly why a contract change went unseen.
         # The other three routes (`/simulations`, `/simulations/{id}`,
-        # `/simulations/{id}/results`) still match the service's OpenAPI spec.
+        # `/simulations/{id}/results`) matched the service's OpenAPI spec when
+        # read on 2026-10-03 — DATED deliberately, because a spec read once has
+        # the same shelf life as the fake this replaced, and claiming they
+        # "still match" would read as a standing guarantee (Fable, PR #75).
         #
         # The response keys this reads are unchanged, so nothing downstream moves.
         query = urlencode({"filename": filename})
