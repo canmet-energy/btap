@@ -168,3 +168,61 @@ class TestPhaseErrorsAreReadable(unittest.TestCase):
         for status in ({"phases": []}, {}, None):
             with self.subTest(status=status):
                 self.assertEqual("", self._remote()._phase_errors(status))
+
+
+class TestResultFilesShape(unittest.TestCase):
+    """`res["files"]` is a LIST on the live service, and `_download` indexed it.
+
+    The failed-job payload is, verbatim from the service:
+
+        {"job_id": …, "status": "failed", "engine": "energyplus",
+         "files": [], "summary": {}}
+
+    so `files.get(name)` raised `'list' object has no attribute 'get'` from
+    inside the DOWNLOAD step — burying the run's real error, which was an
+    EnergyPlus severe about a missing zone sizing run.
+
+    The populated shape is UNVERIFIED (no remote run of ours has succeeded
+    yet), so this pins tolerance and a diagnostic rather than a guess.
+
+    Offline: pure function, no transport.
+    """
+
+    def test_the_live_failure_shape_yields_no_files(self):
+        from btap.simulation.backends import _result_files
+
+        live = {"job_id": "x", "status": "failed", "engine": "energyplus",
+                "files": [], "summary": {}}
+        self.assertEqual({}, _result_files(live))
+
+    def test_a_mapping_is_used_as_is(self):
+        """The shape the code originally assumed still works."""
+        from btap.simulation.backends import _result_files
+
+        self.assertEqual({"eplusout.sql": "https://a"},
+                         _result_files({"files": {"eplusout.sql": "https://a"}}))
+
+    def test_a_list_of_objects_is_read_through_name_and_url(self):
+        from btap.simulation.backends import _result_files
+
+        got = _result_files({"files": [
+            {"name": "eplusout.sql", "url": "https://a"},
+            {"filename": "run/eplusout.err", "download_url": "https://b"},
+        ]})
+        self.assertEqual({"eplusout.sql": "https://a",
+                          "eplusout.err": "https://b"}, got)
+
+    def test_a_missing_or_null_files_key_is_empty(self):
+        from btap.simulation.backends import _result_files
+
+        for res in ({}, {"files": None}, None):
+            with self.subTest(res=res):
+                self.assertEqual({}, _result_files(res))
+
+    def test_an_unknown_shape_names_what_arrived(self):
+        """A fourth wrong assumption should be a readable error, not a crash."""
+        from btap.simulation.backends import _result_files
+
+        with self.assertRaises(RuntimeError) as caught:
+            _result_files({"files": "https://a"})
+        self.assertIn("is a str", str(caught.exception))

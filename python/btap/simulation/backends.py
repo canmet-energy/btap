@@ -297,7 +297,7 @@ class Remote(Backend):
     def _download(self, job_id: str, run_dir: Path):
         res = self._with_retry("results", lambda: self._transport.get_json(
             f"{self._endpoint}/simulations/{job_id}/results"))
-        files = res.get("files") or {}
+        files = _result_files(res)
         out_dir = run_dir / "run"
         out_dir.mkdir(parents=True, exist_ok=True)
         for name in ("eplusout.sql", "eplusout.err"):
@@ -384,6 +384,47 @@ class Remote(Backend):
             return urlsplit(str(self._endpoint)).hostname or str(self._endpoint)
         except Exception:
             return "the configured endpoint"
+
+
+def _result_files(res):
+    """`{name: url}` from the results payload, whatever shape it arrives in.
+
+    `res["files"]` is a LIST on the live service — a failed job returns
+    `{"job_id":…, "status":"failed", "engine":"energyplus", "files": [],
+      "summary": {}}` — and the old code called `.get` on it, so a remote
+    failure raised `'list' object has no attribute 'get'` from inside the
+    DOWNLOAD step instead of reporting the run's actual error.
+
+    DELIBERATELY NOT GUESSING: no remote run of ours has yet SUCCEEDED, so the
+    populated list's element shape is unverified. Rather than invent a fourth
+    assumption about this API — three have already been wrong against the live
+    service (`_upload`'s route, `_phase_errors`' entries, and this) — a mapping
+    is used as-is, a list of objects is read through the obvious name/url
+    aliases, and anything else raises a message naming what actually arrived.
+    An empty list yields no files, which lets the caller's own "produced no
+    eplusout.sql" error be the one that surfaces.
+    """
+    files = (res or {}).get("files")
+    if files is None:
+        return {}
+    if isinstance(files, dict):
+        return files
+    if isinstance(files, list):
+        out = {}
+        for item in files:
+            if not isinstance(item, dict):
+                continue
+            name = (item.get("name") or item.get("filename")
+                    or item.get("file") or item.get("key"))
+            url = (item.get("url") or item.get("download_url")
+                   or item.get("presigned_url") or item.get("href"))
+            if name and url:
+                out[str(name).rsplit("/", 1)[-1]] = url
+        return out
+    raise RuntimeError(
+        f"remote results: 'files' is a {type(files).__name__}, which this "
+        "backend does not understand — expected a mapping of name to URL, or "
+        "a list of objects carrying a name and a URL")
 
 
 class Http:

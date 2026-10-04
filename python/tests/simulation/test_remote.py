@@ -51,10 +51,25 @@ class FakeTransport:
     def get_json(self, url):
         self.calls.append(("get", url))
         if url.endswith("/results"):
-            return {"files": self.files if self.files is not None
-                    else {"eplusout.sql": "https://s3.test/sql",
-                          "eplusout.err": "https://s3.test/err"}}
-        return {"status": self.status, "phases": [{"errors": ["boom"]}]}
+            # LIVE SHAPES, measured against the service on 2026-10-04. `files`
+            # is a LIST of objects, not a mapping — the fake previously
+            # returned a mapping, which is exactly why `_download` calling
+            # `.get` on a list survived every offline test and only failed on
+            # a real run. Same class of drift as the `/models/upload-url`
+            # route above: a fake that restates the backend's assumption
+            # cannot falsify it.
+            return {"job_id": "j-1", "status": self.status,
+                    "engine": "energyplus",
+                    "files": self.files if self.files is not None
+                    else [{"name": "eplusout.sql", "url": "https://s3.test/sql"},
+                          {"name": "eplusout.err", "url": "https://s3.test/err"}],
+                    "summary": {}}
+        # Phase errors are STRUCTURED on the live service, verbatim:
+        #   {"error_code": "ENERGYPLUS_SEVERE", "message": "** Severe **…",
+        #    "recoverable": false, "suggestion": null}
+        return {"status": self.status, "phases": [{"errors": [
+            {"error_code": "ENERGYPLUS_SEVERE", "message": "boom",
+             "recoverable": False, "suggestion": None}]}]}
 
     def put_bytes(self, url, payload):
         self.calls.append(("put", url, len(payload)))
@@ -170,7 +185,8 @@ class TestRemote(unittest.TestCase):
 
     def test_missing_sql_in_the_result_bundle_raises(self):
         run_dir = self.prepared_dir()
-        t = FakeTransport(files={"eplusout.err": "https://s3.test/err"})
+        t = FakeTransport(files=[{"name": "eplusout.err",
+                                  "url": "https://s3.test/err"}])
         with self.assertRaises(RuntimeError) as ctx:
             self.remote(t).execute(run_dir)
         self.assertIn("no eplusout.sql", str(ctx.exception))
