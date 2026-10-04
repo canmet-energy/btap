@@ -57,8 +57,29 @@ def python_exe():
     venv = PYTHON_ROOT / ".venv" / "bin" / "python"
     return str(venv) if venv.exists() else sys.executable
 
+#: Which backend scenario subprocesses execute on. "local" is the default and
+#: the only value a FREEZE accepts — `freeze.py` refuses anything else, so
+#: committed baselines keep attesting to a local, offline run. "remote" is for
+#: VERIFYING against existing baselines without consuming local memory, which is
+#: the constraint that actually governs this repository: SDK workers plus
+#: EnergyPlus runs took the 32 GB VM down on 2026-09-08, so a re-freeze collides
+#: with anyone else's test run.
+#:
+#: Measured 2026-10-04 on the service: 112 annual runs in 270 s wall at peak
+#: concurrency 112, per-job latency flat from 1 job to 112, and 14/16 sample
+#: models agreeing with local output to 0.000% on Total Site Energy.
+def scenario_backend() -> str:
+    return os.environ.get("BTAP_SCENARIO_BACKEND", "local").strip() or "local"
+
+
 #: Infrastructure vars a scenario subprocess may inherit — everything else
-#: comes from the scenario's authored env. HBIX_* is deliberately absent.
+#: comes from the scenario's authored env.
+#:
+#: HBIX_* is deliberately absent from the DEFAULT set: a frozen scenario must be
+#: reproducible offline, which is the same reason the geometry gem stays
+#: SDK-only (D-71, D-72). `remote_env_allowlist()` adds the two variables the
+#: remote backend needs ONLY when a run explicitly asks for it, so the offline
+#: default is preserved by construction rather than by remembering.
 ENV_ALLOWLIST = ("PATH", "HOME", "TMPDIR", "BTAP_ENERGYPLUS",
                  "BTAP_ENERGYPLUS_ARCHIVE", "SYSTEMROOT",
                  # relocatable interpreters (actions/setup-python's
@@ -132,8 +153,17 @@ def lone_epw(scratch):
 
 # ---------------------------------------------------------- environment
 
+#: What `Remote` needs to configure itself. Added to the inherited set only
+#: under BTAP_SCENARIO_BACKEND=remote. The KEY IS NEVER PRINTED here or
+#: anywhere else in this module.
+REMOTE_ENV_ALLOWLIST = ("HBIX_API_KEY", "HBIX_SIM_ENDPOINT")
+
+
 def _base_env():
-    env = {k: os.environ[k] for k in ENV_ALLOWLIST if k in os.environ}
+    allowed = ENV_ALLOWLIST
+    if scenario_backend() == "remote":
+        allowed = allowed + REMOTE_ENV_ALLOWLIST
+    env = {k: os.environ[k] for k in allowed if k in os.environ}
     env["LANG"] = env["LC_ALL"] = "C.UTF-8"
     # The openstudio bindings print FutureWarnings to stderr with the
     # importing environment's ABSOLUTE site path (venv locally, the image
@@ -235,6 +265,11 @@ def _execute_cli(scenario, run_dir, ctx, argv0=None):
     argv = [resolve(a, ctx) for a in scenario["argv"]]
     env = build_env(scenario,
                     {k: resolve(v, ctx) for k, v in scenario["env"].items()})
+    # The product already owns backend selection (`cli.py --backend`), so this
+    # threads the choice rather than inventing a mechanism. Appended only when
+    # asked for, and only when the scenario has not set it itself.
+    if scenario_backend() == "remote" and "--backend" not in argv:
+        argv = [*argv, "--backend", "remote"]
     cmd = argv0 or [python_exe(), "-m", "btap.codes.cli"]
     proc = subprocess.run(
         [*cmd, *argv], capture_output=True, text=True, env=env,

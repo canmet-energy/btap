@@ -68,6 +68,33 @@ def run(call, run_dir):
     }
 
 
+def _select_backend():
+    """Honour BTAP_SCENARIO_BACKEND in the API path too.
+
+    A CLI scenario gets `--backend` threaded onto its argv; this path calls
+    `performance_compliance` directly, so the choice has to be made through the
+    product's own process-wide default — the mechanism `--backend remote`
+    already uses to reach the ~8 pipeline sites without threading a parameter
+    through every phase. Default local, so an unset variable behaves exactly as
+    before.
+    """
+    import os
+
+    if os.environ.get("BTAP_SCENARIO_BACKEND", "local").strip() != "remote":
+        return
+    from btap.simulation import Remote
+    from btap.simulation.runner import set_default_backend
+
+    backend = Remote()
+    if not backend.is_configured():
+        raise SystemExit(
+            "BTAP_SCENARIO_BACKEND=remote but the remote backend is not "
+            "configured: HBIX_SIM_ENDPOINT and HBIX_API_KEY must reach this "
+            "subprocess (runner.REMOTE_ENV_ALLOWLIST carries them only when "
+            "the backend is remote)")
+    set_default_backend(backend)
+
+
 def main(argv):
     call_path, run_dir = Path(argv[1]), Path(argv[2])
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -75,6 +102,7 @@ def main(argv):
         sys.path.insert(0, str(PYTHON_ROOT))
     try:
         call = json.loads(call_path.read_text(encoding="utf-8"))
+        _select_backend()          # after sys.path, before any pipeline work
         observations = run(call, run_dir)
     except BaseException as error:  # noqa: BLE001 — a crash must be readable
         _write(run_dir, {"error": repr(error),

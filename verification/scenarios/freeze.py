@@ -304,6 +304,21 @@ def main():
                     help="dev override, recorded in provenance")
     args = ap.parse_args()
 
+    # A FREEZE MAY ONLY RUN LOCALLY. Verifying against existing baselines on the
+    # remote backend changes nothing about what they attest; PRODUCING them there
+    # would change it from "this tree, this commit, this OpenStudio build" to
+    # "...whatever the service ran", and that is a freeze-contract question for
+    # Sol rather than a convenience. Refused here so the capability cannot be
+    # used for a freeze by accident — the offline guarantee holds by
+    # construction rather than by remembering.
+    backend = runner.scenario_backend()
+    if backend != "local":
+        die(f"BTAP_SCENARIO_BACKEND={backend!r}: a freeze may only run on the "
+            "local backend. Baselines record the OpenStudio build that produced "
+            "them, and a remote-produced freeze would attest to the service's "
+            "stack instead. Unset it to freeze; `remote` is for verifying "
+            "against baselines that already exist.")
+
     dirty = bool(git("status", "--porcelain"))
     if dirty and not args.allow_dirty:
         die("dirty source tree — baselines must be reproducible from a "
