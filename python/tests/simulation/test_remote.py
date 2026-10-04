@@ -23,7 +23,19 @@ class FakeTransport:
 
     def post_json(self, url, body):
         self.calls.append(("post", url, body))
-        if url.endswith("/models"):
+        path, _, query = url.partition("?")
+        if "/models" in path:
+            # The fake now ENFORCES the live service's contract instead of
+            # restating whatever the backend happened to send. It previously
+            # matched `endswith("/models")`, so it validated a route the service
+            # answers with 404 — which is how the drift went unseen while every
+            # offline test passed. Measured against the live API on 2026-10-03.
+            if not path.endswith("/models/upload-url"):
+                raise RuntimeError(f"404 Not Found: {path}")
+            if "filename=" not in query:
+                raise RuntimeError(
+                    "422 missing query parameter 'filename' "
+                    "(the service wants it in the query, not the body)")
             self.fail_times -= 1
             if self.fail_times >= 0:
                 raise RuntimeError("503 Service Unavailable")
@@ -64,8 +76,20 @@ class TestRemote(unittest.TestCase):
         opts.setdefault("poll_seconds", 0)
         return Remote(endpoint="https://svc.test", api_key="k", transport=transport, **opts)
 
+    def uploaded_filename(self, transport):
+        """The `filename` as the service receives it: a QUERY parameter.
+
+        Reading it from the JSON body is what the old assertions did, and the
+        service answers that shape with 422.
+        """
+        from urllib.parse import parse_qs, urlsplit
+
+        call = self.find_call(transport, "post", "/models/upload-url")
+        return parse_qs(urlsplit(call[1]).query).get("filename", [None])[0]
+
     def find_call(self, transport, kind, suffix):
-        return next(c for c in transport.calls if c[0] == kind and c[1].endswith(suffix))
+        return next(c for c in transport.calls
+                    if c[0] == kind and suffix in c[1].partition("?")[0])
 
     def test_happy_path_lands_both_artifacts_locally(self):
         run_dir = self.prepared_dir()
@@ -83,8 +107,12 @@ class TestRemote(unittest.TestCase):
         t = FakeTransport()
         self.remote(t).execute(run_dir)
 
-        register = self.find_call(t, "post", "/models")
-        self.assertEqual("in.idf", register[2]["filename"])
+        register = self.find_call(t, "post", "/models/upload-url")
+        self.assertEqual("in.idf", self.uploaded_filename(t),
+                         "the service wants filename in the query, not the body")
+        self.assertEqual({}, register[2],
+                         "and the body carries nothing — a body with filename "
+                         "returns 422")
         self.assertTrue((run_dir / "in.idf").is_file(), "the IDF should be left beside in.osm")
 
         submit = self.find_call(t, "post", "/simulations")
@@ -94,7 +122,7 @@ class TestRemote(unittest.TestCase):
         run_dir = self.prepared_dir()
         t = FakeTransport()
         self.remote(t, workflow_type="openstudio").execute(run_dir)
-        self.assertEqual("in.osm", self.find_call(t, "post", "/models")[2]["filename"])
+        self.assertEqual("in.osm", self.uploaded_filename(t))
 
     def test_engine_version_is_always_sent_and_defaults_to_the_local_energyplus(self):
         run_dir = self.prepared_dir()
@@ -121,7 +149,7 @@ class TestRemote(unittest.TestCase):
         t = FakeTransport(fail_times=2)
         with mock.patch("time.sleep"):
             self.remote(t).execute(run_dir)
-        registers = [c for c in t.calls if c[0] == "post" and c[1].endswith("/models")]
+        registers = [c for c in t.calls if c[0] == "post" and "/models/upload-url" in c[1]]
         self.assertGreaterEqual(len(registers), 3)
 
     def test_failed_status_raises_with_the_phase_errors(self):

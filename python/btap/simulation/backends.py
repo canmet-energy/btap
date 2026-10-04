@@ -27,7 +27,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 from btap.simulation import engine
 
@@ -226,8 +226,27 @@ class Remote(Backend):
             )
 
     def _upload(self, payload: bytes, filename: str) -> str:
+        # `/models/upload-url`, with `filename` as a QUERY parameter.
+        #
+        # This backend was validated against the live service once and the API
+        # has moved since. Measured against it on 2026-10-03:
+        #
+        #   POST {endpoint}/models                        -> 404 Not Found
+        #   POST {endpoint}/models/upload-url  (JSON body) -> 422
+        #        {"detail":[{"type":"missing","loc":["query","filename"], ...}]}
+        #   POST {endpoint}/models/upload-url?filename=X   -> 200
+        #        {"model_id", "s3_key", "upload_url"}
+        #
+        # So `Remote` could not upload anything, and no test caught it because
+        # the transport is injected and every test runs offline against a fake —
+        # correct for unit tests, and exactly why a contract change went unseen.
+        # The other three routes (`/simulations`, `/simulations/{id}`,
+        # `/simulations/{id}/results`) still match the service's OpenAPI spec.
+        #
+        # The response keys this reads are unchanged, so nothing downstream moves.
+        query = urlencode({"filename": filename})
         reg = self._with_retry("upload", lambda: self._transport.post_json(
-            f"{self._endpoint}/models", {"filename": filename}))
+            f"{self._endpoint}/models/upload-url?{query}", {}))
         url = reg.get("upload_url")
         if url is None:
             raise RuntimeError(f"remote upload registration returned no upload_url (host {self._host()})")
