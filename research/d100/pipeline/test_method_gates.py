@@ -22,6 +22,7 @@ import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import compare
@@ -391,17 +392,52 @@ class RefetchTargetProbe(unittest.TestCase):
             rebuild.main(["--refetch", "--into", str(directory)])
         self.assertIn("already holds", str(caught.exception))
 
-    def test_an_empty_refetch_target_is_not_refused_for_that_reason(self):
-        """The guard must not become a blanket refusal of --into."""
+    def test_a_populated_target_is_refused_BEFORE_any_stage_runs(self):
+        """The refusal must precede the work, not follow it."""
         directory = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
         (directory / "hbix").mkdir()
-        try:
-            rebuild.main(["--refetch", "--into", str(directory)])
-        except SystemExit as exc:
-            self.assertNotIn("already holds", str(exc))
-        except Exception:
-            pass          # a real fetch needs a key; only the refusal is pinned
+        shutil.copy2(ARTIFACT_ROOT / "hbix" / f"{PRESENT_TABLE}.json",
+                     directory / "hbix")
+        calls = []
+        with mock.patch.object(rebuild, "run",
+                               lambda *a, **k: calls.append(a[0])):
+            with self.assertRaises(SystemExit):
+                rebuild.main(["--refetch", "--into", str(directory)])
+        self.assertEqual([], calls, "no stage may run before the refusal")
+
+    def test_an_empty_refetch_target_PROCEEDS_to_the_fetch(self):
+        """Deterministic, offline, and it asserts the path actually reached.
+
+        The version this replaces called `rebuild.main` with no stub and
+        swallowed every exception. With a key exported it launched a live
+        160-request MCP refetch; without one it printed "HBIX_API_KEY not
+        exported" and passed. Sol patched `rebuild.run` to raise for EVERY stage
+        and the test still passed, so it proved neither that an empty target
+        proceeds nor that the fetch works, while contacting the live service in
+        the success case (`077`).
+
+        Now: `run` is injected, nothing reaches the network, the first stage is
+        asserted by name, and only a sentinel is caught.
+        """
+        class Reached(Exception):
+            """Raised BY THE FAKE, so catching it cannot mask a real failure."""
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "hbix").mkdir()
+        calls = []
+
+        def fake_run(script, out, extra=(), allow_fail=False):
+            calls.append(script)
+            raise Reached(script)
+
+        with mock.patch.object(rebuild, "run", fake_run):
+            with self.assertRaises(Reached):
+                rebuild.main(["--refetch", "--into", str(directory)])
+        self.assertEqual(["citations.py"], calls,
+                         "an empty target must get PAST the refusal and reach "
+                         "the first stage")
 
 
 if __name__ == "__main__":
