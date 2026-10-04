@@ -70,7 +70,8 @@ def attach_weather(model, *, epw, ddy, audit=None):
     all_days = list(workspace.getDesignDays())
     extremes = [dd for dd in all_days
                 if any(re.search(p, dd.nameString()) for p in keep)]
-    if not extremes:  # odd DDY: keep everything rather than none
+    fell_back = not extremes
+    if fell_back:  # odd DDY: keep everything rather than none
         extremes = all_days
     for dd in extremes:
         model.addObject(dd.clone())
@@ -84,16 +85,30 @@ def attach_weather(model, *, epw, ddy, audit=None):
     # report's "Decisions and assumptions applied" that cannot be evidenced
     # from its own inputs is a narrative rather than a record.
     if audit is not None:
+        # The action MUST branch on the fallback, because the fallback keeps the
+        # whole DDY. An unconditional "filtered to the annual extremes" was
+        # false exactly when `kept_all_as_fallback` is true — the entry carried
+        # evidence that refuted its own claim, which is worse than saying
+        # nothing, because it is an AHJ-facing modelling assumption (Sol, `084`:
+        # reproduced with a DDY whose three extreme days were renamed, giving
+        # 78 kept and the text still asserting 99.6%/0.4% only).
+        if fell_back:
+            action = ("no annual-extreme design day matched this DDY, so the "
+                      "FULL file was retained for sizing — the building is "
+                      "sized on every design day in the file, not on the 99.6% "
+                      "heating and 0.4% cooling days alone")
+        else:
+            action = ("design days replaced, not appended, and filtered to the "
+                      "annual extremes — the building is sized on the 99.6% "
+                      "heating and 0.4% cooling days only")
         audit.decision(
             "climate",
-            "design days replaced, not appended, and filtered to the annual "
-            "extremes — the building is sized on the 99.6% heating and 0.4% "
-            "cooling days only",
+            action,
             target=Path(ddy).name,
             inputs={"design_days_discarded": discarded,
                     "design_days_in_file": len(all_days),
                     "design_days_kept": len(extremes),
-                    "kept_all_as_fallback": extremes is all_days},
+                    "kept_all_as_fallback": fell_back},
             value=", ".join(sorted(dd.nameString() for dd in extremes)),
             ruling="D-25")
     return model

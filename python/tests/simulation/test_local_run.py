@@ -9,12 +9,14 @@ systems — EnergyPlus free-floats the zones and the parse surface is
 identical); the cross-language class below carries a REAL HVAC system built
 by each language's own btap-modeling port (added when M3 landed it)."""
 
+import pathlib
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from btap.simulation import run, runner
-from tests.support import DDY, EPW, load_fixture, needs_engine
+from tests.support import DDY, EPW, load_fixture, needs_engine, needs_sdk
 
 
 def week():
@@ -88,3 +90,71 @@ class TestLocalRun(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestDesignDayAuditTellsTheTruth(unittest.TestCase):
+    """D-25's audit entry must not claim a filter that did not happen.
+
+    `attach_weather` keeps only the annual-extreme design days — unless NONE of
+    them match, in which case it deliberately keeps the whole DDY rather than
+    none. The first version of the entry asserted "filtered to the annual
+    extremes ... sized on the 99.6% heating and 0.4% cooling days only"
+    unconditionally, so on that supported fallback it stated a false modelling
+    assumption in a document an AHJ reads — while its own `inputs` recorded
+    `kept_all_as_fallback: true` and a kept-count equal to the whole file.
+    Sol reproduced it by renaming the three matching days in the shipped Toronto
+    DDY (`084`).
+    """
+
+    KEEP_PATTERNS = (r"Htg 99.6. Condns DB", r"Clg .4% Condns DB=>MWB",
+                     r"Clg 0.4% Condns DB=>MCWB", r"Clg .4. Condns WB=>MDB")
+
+    def _ddy_with_no_extremes(self):
+        """The shipped DDY with every annual-extreme NAME made non-matching."""
+        import re
+
+        text = pathlib.Path(DDY).read_text(encoding="latin-1")
+        out = []
+        for line in text.splitlines(keepends=True):
+            if any(re.search(p, line) for p in self.KEEP_PATTERNS):
+                line = line.replace("Htg 99.6%", "Htg Ordinary") \
+                           .replace("Clg .4%", "Clg Ordinary") \
+                           .replace("Clg 0.4%", "Clg Ordinary")
+            out.append(line)
+        directory = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        path = directory / "no-extremes.ddy"
+        path.write_text("".join(out), encoding="latin-1")
+        return path
+
+    @needs_sdk
+    def test_the_normal_path_says_it_filtered(self):
+        from btap.audit import AuditLog
+
+        audit = AuditLog()
+        model = load_fixture()
+        runner.attach_weather(model, epw=str(EPW), ddy=str(DDY), audit=audit)
+        entry = next(e for e in audit.entries if e.get("ruling") == "D-25")
+        self.assertFalse(entry["inputs"]["kept_all_as_fallback"])
+        self.assertIn("filtered to the annual extremes", entry["action"])
+        self.assertLess(entry["inputs"]["design_days_kept"],
+                        entry["inputs"]["design_days_in_file"],
+                        "the normal path must keep FEWER than the file holds")
+
+    @needs_sdk
+    def test_the_FALLBACK_path_does_not_claim_a_filter(self):
+        from btap.audit import AuditLog
+
+        ddy = self._ddy_with_no_extremes()
+        audit = AuditLog()
+        model = load_fixture()
+        runner.attach_weather(model, epw=str(EPW), ddy=str(ddy), audit=audit)
+        entry = next(e for e in audit.entries if e.get("ruling") == "D-25")
+        inputs = entry["inputs"]
+        self.assertTrue(inputs["kept_all_as_fallback"],
+                        "precondition: this DDY must trigger the fallback")
+        self.assertEqual(inputs["design_days_kept"], inputs["design_days_in_file"],
+                         "the fallback keeps the WHOLE file")
+        # the claim must match the evidence
+        self.assertIn("FULL file was retained", entry["action"])
+        self.assertNotIn("0.4% cooling days only", entry["action"])
+        self.assertNotIn("filtered to the annual extremes", entry["action"])
