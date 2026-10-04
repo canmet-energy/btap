@@ -199,6 +199,41 @@ class TestSizingCalculationsGuard(unittest.TestCase):
     an API upload, a local sweep and an `openstudio run` OSW, in one session.
     """
 
+    def _plant_run_dir(self):
+        """A run dir whose model PROVOKES a real SDK plant-sizing advisory.
+
+        Zone sizing on, plant sizing off, and an autosized boiler on a pumped
+        hot-water loop with a scheduled setpoint — the partial-flag case Sol
+        validated end to end. The point is that the translator emits a NONEMPTY
+        advisory list, which `_run_dir(sizing=True)` does not.
+        """
+        import openstudio
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        model = load_fixture()
+        loop = openstudio.model.PlantLoop(model)
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.autosizeNominalCapacity()
+        loop.addSupplyBranchForComponent(boiler)
+        openstudio.model.PumpVariableSpeed(model).addToNode(loop.supplyInletNode())
+        schedule = openstudio.model.ScheduleConstant(model)
+        schedule.setValue(82.0)
+        openstudio.model.SetpointManagerScheduled(model, schedule).addToNode(
+            loop.supplyOutletNode())
+        coil = openstudio.model.CoilHeatingWaterBaseboard(model)
+        baseboard = openstudio.model.ZoneHVACBaseboardConvectiveWater(
+            model, model.alwaysOnDiscreteSchedule(), coil)
+        baseboard.addToThermalZone(model.getThermalZones()[0])
+        loop.addDemandBranchForComponent(coil)
+        control = model.getSimulationControl()
+        control.setDoZoneSizingCalculation(True)       # partial: plant is OFF
+        control.setDoSystemSizingCalculation(False)
+        control.setDoPlantSizingCalculation(False)
+        model.save(openstudio.path(str(directory / "in.osm")), True)
+        (directory / "in.osw").write_text("{}", encoding="utf-8")
+        return directory
+
     def _run_dir(self, *, sizing, autosized=True):
         """A run dir as the runner would leave one.
 
@@ -399,17 +434,39 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                                 f"{method} needs a sizing run")
 
     @needs_sdk
-    def test_BOTH_backends_pass_the_advisories_to_the_guard(self):
-        """The wiring, not the helper.
+    def test_BOTH_backends_SURFACE_a_real_advisory_as_a_warning(self):
+        """The wiring carrying real content, through each backend entry path.
 
-        The mutation "Local stops passing advisories" was MISSED, because the
-        advisory test called `_require_sizing_calculations` directly — proving
-        the helper works but not that either backend hands it anything. Same
-        shape as the reimplementation gap this repository keeps finding: a check
-        that cannot see the seam it is about.
+        Two earlier versions of this were vacuous. The first called
+        `_require_sizing_calculations` directly, proving the helper and not the
+        wiring. The second went through the backends but used a fixture with
+        zone sizing ENABLED, so the translator produced ZERO advisories and the
+        assertion — argument 4 is a list — accepted `[]`. Sol falsified it by
+        discarding the advisory list only when called from `Local.execute` or
+        `Remote._prepare_payload`: both tests still passed while the real boiler
+        case would have gone silent (`079`).
+
+        So this asserts a NONEMPTY `DoPlantSizingCalculation` advisory reaches a
+        Python warning through each real backend path. The engine and transport
+        fail AFTER the warning, which is why the failure is allowed — but only
+        after the warning has been captured, never as proof of it.
         """
+        import warnings
 
-        directory = self._run_dir(sizing=True, autosized=True)
+        from btap.simulation.backends import translate_capturing_advisories
+
+        directory = self._plant_run_dir()
+
+        # precondition: the fixture must actually provoke the advisory, or this
+        # test is the vacuous one again
+        import openstudio
+
+        from btap._compat import opt
+        model = opt(openstudio.model.Model.load(
+            openstudio.path(str(directory / "in.osm"))))
+        _, advisories = translate_capturing_advisories(model)
+        self.assertTrue(any("DoPlantSizingCalculation" in a for a in advisories),
+                        f"fixture must provoke a plant advisory, got {advisories}")
 
         for name, invoke in (
                 ("Local", lambda: Local(energyplus="/nonexistent").execute(directory)),
@@ -418,20 +475,18 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                                           transport=ExplodingTransport(),
                                           poll_seconds=0).execute(directory))):
             with self.subTest(backend=name):
-                with mock.patch("btap.simulation.backends."
-                                "_require_sizing_calculations") as guard:
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter("always")
                     try:
                         invoke()
                     except Exception:
-                        pass            # we only care how the guard was called
-                self.assertTrue(guard.called, f"{name} must call the guard")
-                args = guard.call_args.args
-                self.assertEqual(4, len(args),
-                                 f"{name} must pass advisories as the 4th "
-                                 f"argument, got {len(args)}: {args!r}")
-                self.assertIsInstance(args[3], (list, tuple),
-                                      f"{name}'s 4th argument must be the "
-                                      "captured advisories")
+                        pass        # the engine/transport fails AFTER the warning
+                    surfaced = [str(w.message) for w in caught
+                                if "DoPlantSizingCalculation" in str(w.message)]
+                self.assertTrue(
+                    surfaced,
+                    f"{name} must surface the SDK's plant-sizing advisory as a "
+                    f"warning; captured {[str(w.message) for w in caught]}")
 
     @needs_sdk
     def test_a_partial_flag_run_surfaces_the_SDK_advisory(self):
