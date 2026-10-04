@@ -72,7 +72,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-22** — Reference-systems audit findings implemented as one batch _(runtime)_
 - **D-23** — Table transmittance values treated as overall, air films included _(runtime)_
 - **D-24** — Envelope scope: unconditioned spaces out, interzone assemblies in _(runtime)_
-- **D-25** — Design-day attach replaces rather than appends, filtered to annual extremes _(runtime_unwired)_
+- **D-25** — Design-day attach replaces rather than appends, filtered to annual extremes _(runtime)_
 - **D-26** — Heat-rejection fan power sums the condenser loop; sized tower hydraulics hardened _(runtime)_
 - **D-27** — Service-water circulators are outside the hydronic pump article; transfer head reconciled _(runtime)_
 - **D-28** — Multizone selection groups merge into whole-building systems _(runtime)_
@@ -307,6 +307,7 @@ audit are drained and archived — see `docs/README.md`.
   all six emitters, `coverage_status` in `report/sections.rb`; tests in
   `test_compliance.rb` (none-mode assertions) and `test_report_units.rb`
   (`test_coverage_status_modeller_scope_note`).
+- **Deliberately not ruling-tagged.** The decision's own behaviour already reaches the report: the coverage emitter runs on every successful pipeline and the `gap_owner: "modeller"` scope note renders as an info entry — 110 coverage lines in a single generated audit, including "Modeller inputs — partial, modeller scope". A `ruling` tag would add a row to "Decisions and assumptions applied" restating what the coverage section already shows. `runtime_unwired` here records a fact about the code, not a gap.
 
 <a id="d-10"></a>
 
@@ -1267,6 +1268,7 @@ test_bar.rb (0.265 overall -> 0.2759 construction-only naming).
   D-10, 2026-07-28.
 - Evidence: [RAN] test_render.rb 5/5, wizards/bar green; [RAN] Warehouse
   reference archetype rendered end-to-end (146 KB self-contained page).
+- **Deliberately not ruling-tagged.** A campus 3D renderer is presentation, not an assumption that changes a reference model. A row in "Decisions and assumptions applied" would tell a code authority nothing about the building being assessed.
 
 <a id="d-37"></a>
 
@@ -3775,6 +3777,7 @@ asserted).
 
 - **Who/when:** Fable under D-10, 2026-08-09 (executed by an opus subagent,
   reviewed by Fable).
+- **Deliberately not ruling-tagged.** This aligns two CBECS `evap_cooler` data values to legacy (`modeling/hvac/systems/evap_cooler.py`). It is parity fidelity rather than an interpretation of the Code, and no frozen scenario builds an evaporative cooler, so a tagged entry would be unobservable — it would add an untested surface with no output to verify. (Scoped once as a cheap win on a grep that matched "evaporatively" in an unrelated heat-rejection line; recorded here so that is not repeated.)
 
 <a id="d-67"></a>
 
@@ -4197,6 +4200,7 @@ cold with the merged zones intact. The adapter manifest now reports
 `thermal_zones` and `zones_per_storey` alongside `spaces`.
 
 - **Who/when:** phylroy's request, implemented by Claude, 2026-08-10.
+- **Deliberately not ruling-tagged.** Zone merging by orientation is a modelling mechanic whose visible consequence — the reference system count — is explained by D-18 instead. There is also no frozen coverage: no baseline carries a `geometry` step at all, so a tagged entry would be unobservable. (Scoped once against `modeling/geometry/footprint.py` by matching words from this decision's title; `grep -rn "D-73"` across product source returns only the registry entry, so that attribution was never evidenced.)
 
 <a id="d-74"></a>
 

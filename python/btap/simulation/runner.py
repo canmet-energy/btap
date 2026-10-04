@@ -37,7 +37,7 @@ def set_default_backend(backend):
     _default_backend = backend
 
 
-def attach_weather(model, *, epw, ddy):
+def attach_weather(model, *, epw, ddy, audit=None):
     """Attach an EPW + its design days (required before any sizing run).
 
     Design days are REPLACED, not appended (a model already carrying design
@@ -58,8 +58,10 @@ def attach_weather(model, *, epw, ddy):
     if workspace is None:
         raise ValueError(f"could not parse design days from {ddy}")
 
+    discarded = 0
     for dd in model.getDesignDays():
         dd.remove()
+        discarded += 1
     # the legacy default list — NOT a bare /.4%/, which would also pull the
     # MONTHLY .4% days (a January cooling day's ~2C wet-bulb breaks the
     # tower UA solve). Ruby's =~ is a SEARCH: re.search, never match.
@@ -74,6 +76,26 @@ def attach_weather(model, *, epw, ddy):
         model.addObject(dd.clone())
     if len(model.getDesignDays()) == 0:
         raise ValueError(f"no design days found in {ddy}")
+    # D-25 is a modelling ASSUMPTION a reader of the report cannot otherwise
+    # see: a modeller who supplied their own design days would reasonably
+    # expect them to survive, and they do not. The entry states the inputs it
+    # is evidenced by (how many were discarded, found and kept) and the
+    # consequence (which conditions size the building), because a row in the
+    # report's "Decisions and assumptions applied" that cannot be evidenced
+    # from its own inputs is a narrative rather than a record.
+    if audit is not None:
+        audit.decision(
+            "climate",
+            "design days replaced, not appended, and filtered to the annual "
+            "extremes — the building is sized on the 99.6% heating and 0.4% "
+            "cooling days only",
+            target=Path(ddy).name,
+            inputs={"design_days_discarded": discarded,
+                    "design_days_in_file": len(all_days),
+                    "design_days_kept": len(extremes),
+                    "kept_all_as_fallback": extremes is all_days},
+            value=", ".join(sorted(dd.nameString() for dd in extremes)),
+            ruling="D-25")
     return model
 
 
