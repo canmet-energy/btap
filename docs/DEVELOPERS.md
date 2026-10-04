@@ -188,6 +188,35 @@ When a deliberate behaviour change affects output, run
 `verification/scenarios/freeze.py` from a clean tree and commit the resulting
 baselines and provenance with the change.
 
+**"Clean" includes untracked files, so freeze in a `git worktree`.** `freeze.py`
+refuses on `git status --porcelain`, which lists untracked paths — and this
+repository normally has other people's work-in-progress sitting in the tree, so
+your own tracked changes being committed is not enough. A worktree at the
+intended commit has no untracked files, so it is clean by construction rather
+than by tidying:
+
+```bash
+git worktree add --detach /tmp/freeze-xyz <commit>
+cd /tmp/freeze-xyz/python
+# assert btap resolves HERE, not to the main checkout — this repo has a trap
+<venv>/bin/python -c "import btap, pathlib; print(pathlib.Path(btap.__file__))"
+<venv>/bin/python ../verification/scenarios/freeze.py
+# copy baselines/ and manifest.json back, then the DECISIVE check:
+# re-run the frozen comparison FROM THE MAIN CHECKOUT and require zero drift.
+git worktree remove --force /tmp/freeze-xyz
+```
+
+That last step is what proves the freeze ran against the right source: if it
+hadn't, the main checkout would disagree with the baselines it was just handed.
+Verify the artifact, not the environment.
+
+Do **not** move or stash a colleague's untracked files, and do **not** use
+`--allow-dirty` for a re-freeze you intend to commit — it records `dirty: true`
+in the provenance, and nothing reads that field, so its only value is that a
+human believes it. Sol ruled the strict predicate stays (2026-10-04): an
+untracked `conftest.py`, `sitecustomize.py`, `.pth` or globbed data file can all
+affect a run, so tracked-only cleanliness would weaken the provenance claim.
+
 **Merge a freeze-carrying PR with GitHub's "Create a merge commit" (D-95).** A
 PR that changes frozen baselines or the manifest provenance counts as
 freeze-carrying — look for `manifest.json` or `baselines/` in the diff.
