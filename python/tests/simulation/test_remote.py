@@ -2,6 +2,7 @@
 exercised OFFLINE through an injected transport. Nothing here touches the
 network."""
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -90,16 +91,48 @@ class FakeTransport:
 
 @needs_sdk
 class TestRemote(unittest.TestCase):
+    """The whole Remote backend, offline through an injected transport.
+
+    THE FIXTURE IS LOADED ONCE FOR THE CLASS, not once per test. `prepared_dir`
+    used to call `load_fixture()` and `model.save()` every time, and ten tests
+    here call it — which is why these offline, network-free tests each cost a
+    uniform ~3.1 s and the module dominated `tests/simulation/`. Measured:
+
+        load_fixture()  5.00 s     model.save()  0.16 s     file copy  1.9 ms
+
+    so ten loads were ~41 s of the suite's 60 s. Each test still gets its own
+    temporary directory and its own byte-identical copy of `in.osm`, because
+    the only thing any of them needs is that file being present — none mutates
+    the model. The saving compounds in a mutation matrix, which pays the suite
+    cost once per mutant.
+    """
+
+    #: Set in setUpClass: a saved `in.osm` every test copies.
+    _template = None
+    _class_tmp = None
+
+    @classmethod
+    def setUpClass(cls):
+        import openstudio
+
+        cls._class_tmp = tempfile.TemporaryDirectory()
+        cls._template = Path(cls._class_tmp.name) / "template.osm"
+        load_fixture().save(openstudio.path(str(cls._template)), True)
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls._class_tmp is not None:
+            cls._class_tmp.cleanup()
+            cls._class_tmp = None
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
 
     def prepared_dir(self):
-        import openstudio
         run_dir = Path(self.tmp.name) / "run"
         run_dir.mkdir(parents=True, exist_ok=True)
-        model = load_fixture()
-        model.save(openstudio.path(str(run_dir / "in.osm")), True)
+        shutil.copyfile(self._template, run_dir / "in.osm")
         return run_dir
 
     def remote(self, transport, **opts):

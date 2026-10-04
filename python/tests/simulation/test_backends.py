@@ -37,6 +37,25 @@ class FakeBackend(Backend):
 
 @needs_sdk
 class TestBackends(unittest.TestCase):
+    #: The fixture, parsed ONCE for the class. Each test gets an independent
+    #: `clone()` rather than re-parsing the OSM, because `run_energyplus`
+    #: MUTATES the model it is given (sizing flags, then the SQL file) and a
+    #: shared instance would leak that between tests. Measured:
+    #:
+    #:     load_fixture()  4.78 s        model.clone().to_Model()  0.02 s
+    #:
+    #: so three loads were 14.4 s of this module; one load plus three clones is
+    #: 4.8 s. Independence is asserted below rather than assumed.
+    _base = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls._base = load_fixture()
+
+    def fresh_model(self):
+        """An independent copy of the fixture — safe to mutate."""
+        return self._base.clone().to_Model()
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -44,8 +63,21 @@ class TestBackends(unittest.TestCase):
     def run_dir(self, name):
         return str(Path(self.tmp.name) / name)
 
+    def test_a_clone_is_independent_of_the_shared_base(self):
+        """The precondition for sharing the parse. If this fails, every other
+        test in this class is suspect, so it is asserted, not assumed."""
+        a, b = self.fresh_model(), self.fresh_model()
+        a.getSimulationControl().setDoZoneSizingCalculation(True)
+        self.assertTrue(a.getSimulationControl().doZoneSizingCalculation())
+        self.assertFalse(b.getSimulationControl().doZoneSizingCalculation(),
+                         "a sibling clone must not see the mutation")
+        self.assertFalse(self._base.getSimulationControl()
+                         .doZoneSizingCalculation(),
+                         "the shared base must not see the mutation")
+        self.assertEqual(len(self._base.objects()), len(a.objects()))
+
     def test_custom_backend_is_invoked_with_prepared_dir(self):
-        model = load_fixture()
+        model = self.fresh_model()
         target = self.run_dir("custom")
         fake = FakeBackend(self)
 
@@ -58,7 +90,7 @@ class TestBackends(unittest.TestCase):
         self.assertTrue(runner.is_clean_run(result), "is_clean_run should read the canned err")
 
     def test_facade_uses_injected_backend(self):
-        model = load_fixture()
+        model = self.fresh_model()
         target = self.run_dir("facade")
         fake = FakeBackend(self)
 
@@ -71,7 +103,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNone(result.unmet_hours, "sizing_only run has no unmet hours")
 
     def test_local_is_the_default_backend(self):
-        model = load_fixture()
+        model = self.fresh_model()
         target = self.run_dir("default")
         called = []
 
