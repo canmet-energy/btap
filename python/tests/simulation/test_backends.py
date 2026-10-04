@@ -193,31 +193,54 @@ class TestResultFilesShape(unittest.TestCase):
 
         live = {"job_id": "x", "status": "failed", "engine": "energyplus",
                 "files": [], "summary": {}}
-        self.assertEqual({}, _result_files(live))
+        self.assertEqual(({}, []), _result_files(live))
 
     def test_a_mapping_is_used_as_is(self):
         """The shape the code originally assumed still works."""
         from btap.simulation.backends import _result_files
 
-        self.assertEqual({"eplusout.sql": "https://a"},
+        self.assertEqual(({"eplusout.sql": "https://a"}, []),
                          _result_files({"files": {"eplusout.sql": "https://a"}}))
 
     def test_a_list_of_objects_is_read_through_name_and_url(self):
         from btap.simulation.backends import _result_files
 
-        got = _result_files({"files": [
+        got, unreadable = _result_files({"files": [
             {"name": "eplusout.sql", "url": "https://a"},
             {"filename": "run/eplusout.err", "download_url": "https://b"},
         ]})
         self.assertEqual({"eplusout.sql": "https://a",
                           "eplusout.err": "https://b"}, got)
+        self.assertEqual([], unreadable)
+
+    def test_the_OBSERVED_successful_element_shape(self):
+        """The real thing, from a completed job on 2026-10-04.
+
+        17 files, element keys exactly
+        `download_url, name, phase_id, s3_key, size_bytes`. Recorded because
+        the previous version of this test used GUESSED aliases and called them
+        live (Sol, PR #78).
+        """
+        from btap.simulation.backends import _result_files
+
+        got, unreadable = _result_files({"files": [
+            {"name": "eplusout.sql", "size_bytes": 778240,
+             "phase_id": "fe0e240e", "s3_key": "jobs/…/eplusout.sql",
+             "download_url": "https://…presigned"},
+            {"name": "eplusout.err", "size_bytes": 10649,
+             "phase_id": "fe0e240e", "s3_key": "jobs/…/eplusout.err",
+             "download_url": "https://…presigned"},
+        ]})
+        self.assertEqual({"eplusout.sql": "https://…presigned",
+                          "eplusout.err": "https://…presigned"}, got)
+        self.assertEqual([], unreadable)
 
     def test_a_missing_or_null_files_key_is_empty(self):
         from btap.simulation.backends import _result_files
 
         for res in ({}, {"files": None}, None):
             with self.subTest(res=res):
-                self.assertEqual({}, _result_files(res))
+                self.assertEqual(({}, []), _result_files(res))
 
     def test_an_unknown_shape_names_what_arrived(self):
         """A fourth wrong assumption should be a readable error, not a crash."""
@@ -226,3 +249,68 @@ class TestResultFilesShape(unittest.TestCase):
         with self.assertRaises(RuntimeError) as caught:
             _result_files({"files": "https://a"})
         self.assertIn("is a str", str(caught.exception))
+
+
+class TestUnreadableEntriesAreNamed(unittest.TestCase):
+    """A NONEMPTY unsupported entry must name its shape, not vanish.
+
+    `_result_files` used to `continue` past an element it could not read, so
+    `_download` reported only "produced no eplusout.sql" — replacing one
+    masked remote diagnosis with another. The caller would chase a missing
+    file when the real problem is an element shape we do not handle.
+
+    Reaches `_download` through the transport seam, because a helper-level
+    test cannot show the message the caller actually receives (Sol, PR #78).
+    """
+
+    class Transport:
+        def __init__(self, files):
+            self._files = files
+
+        def get_json(self, url):
+            if url.endswith("/results"):
+                return {"job_id": "j-1", "status": "completed",
+                        "engine": "energyplus", "files": self._files,
+                        "summary": {}}
+            return {"status": "completed", "phases": []}
+
+        def get_bytes(self, url):
+            return b""
+
+    def _download(self, files):
+        import tempfile
+        from pathlib import Path
+
+        from btap.simulation.backends import Remote
+
+        remote = Remote(endpoint="https://svc.test", api_key="k",
+                        transport=self.Transport(files))
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(RuntimeError) as caught:
+                remote._download("j-1", Path(tmp))
+        return str(caught.exception)
+
+    def test_an_unsupported_entry_shape_is_named(self):
+        message = self._download([{"path": "eplusout.sql",
+                                   "downloadUrl": "https://example.invalid/s"}])
+        self.assertIn("does not understand", message)
+        self.assertIn("downloadUrl", message, "the KEY NAMES must appear")
+        self.assertIn("path", message)
+
+    def test_the_presigned_url_is_NEVER_in_the_message(self):
+        """Key names are not secret; a presigned URL carries an STS token."""
+        secret = "https://example.invalid/SECRET-TOKEN-abc123"
+        message = self._download([{"path": "eplusout.sql",
+                                   "downloadUrl": secret}])
+        self.assertNotIn(secret, message)
+        self.assertNotIn("SECRET-TOKEN", message)
+
+    def test_a_non_dict_entry_is_named_by_its_type(self):
+        message = self._download(["https://example.invalid/sql"])
+        self.assertIn("str", message)
+
+    def test_an_EMPTY_list_keeps_the_original_message(self):
+        """No unreadable entries means the plain contract error, unchanged."""
+        message = self._download([])
+        self.assertIn("produced no eplusout.sql", message)
+        self.assertNotIn("does not understand", message)

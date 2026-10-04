@@ -297,7 +297,7 @@ class Remote(Backend):
     def _download(self, job_id: str, run_dir: Path):
         res = self._with_retry("results", lambda: self._transport.get_json(
             f"{self._endpoint}/simulations/{job_id}/results"))
-        files = _result_files(res)
+        files, unreadable = _result_files(res)
         out_dir = run_dir / "run"
         out_dir.mkdir(parents=True, exist_ok=True)
         for name in ("eplusout.sql", "eplusout.err"):
@@ -307,6 +307,20 @@ class Remote(Backend):
             (out_dir / name).write_bytes(self._transport.get_bytes(url))
         sql = out_dir / "eplusout.sql"
         if not (sql.is_file() and sql.stat().st_size > 0):
+            # If entries arrived that this backend could not read, SAY SO and
+            # name their shape. Reporting only "produced no eplusout.sql"
+            # would replace one masked remote diagnosis with another: the
+            # caller would chase a missing file when the real problem is an
+            # element shape we do not handle (Sol, PR #78).
+            if unreadable:
+                raise RuntimeError(
+                    f"remote run {job_id} produced no readable eplusout.sql, and "
+                    f"{len(unreadable)} result entr"
+                    f"{'y was' if len(unreadable) == 1 else 'ies were'} in a shape "
+                    f"this backend does not understand: "
+                    f"{', '.join(unreadable[:5])} — expected a name "
+                    "(name/filename/file/key) and a URL "
+                    "(url/download_url/presigned_url/href)")
             raise RuntimeError(
                 f"remote run {job_id} produced no eplusout.sql — the contract needs it for results parsing"
             )
@@ -389,11 +403,16 @@ class Remote(Backend):
 def _result_files(res):
     """`{name: url}` from the results payload, whatever shape it arrives in.
 
-    `res["files"]` is a LIST on the live service — a failed job returns
-    `{"job_id":…, "status":"failed", "engine":"energyplus", "files": [],
-      "summary": {}}` — and the old code called `.get` on it, so a remote
-    failure raised `'list' object has no attribute 'get'` from inside the
-    DOWNLOAD step instead of reporting the run's actual error.
+    `res["files"]` is a LIST on the live service, and the old code called
+    `.get` on it, so `'list' object has no attribute 'get'` came out of the
+    DOWNLOAD step.
+
+    PRECISELY WHICH PATH: the SUCCESSFUL one. `execute()` polls before it
+    downloads and `_poll` raises on `status == "failed"`, so a failed job
+    never reaches here — an earlier version of this note cited the failed
+    job's `{"files": []}` payload, which cannot trigger it (Sol, PR #78). A
+    COMPLETED job returns 17 entries whose keys are `download_url`, `name`,
+    `phase_id`, `s3_key`, `size_bytes`; that list is what broke the call.
 
     DELIBERATELY NOT GUESSING: no remote run of ours has yet SUCCEEDED, so the
     populated list's element shape is unverified. Rather than invent a fourth
@@ -406,13 +425,14 @@ def _result_files(res):
     """
     files = (res or {}).get("files")
     if files is None:
-        return {}
+        return {}, []
     if isinstance(files, dict):
-        return files
+        return files, []
     if isinstance(files, list):
-        out = {}
+        out, unreadable = {}, []
         for item in files:
             if not isinstance(item, dict):
+                unreadable.append(type(item).__name__)
                 continue
             name = (item.get("name") or item.get("filename")
                     or item.get("file") or item.get("key"))
@@ -420,7 +440,12 @@ def _result_files(res):
                    or item.get("presigned_url") or item.get("href"))
             if name and url:
                 out[str(name).rsplit("/", 1)[-1]] = url
-        return out
+            else:
+                # NEVER the values — a `download_url` is presigned and carries
+                # an STS token. The KEY NAMES are what a maintainer needs to
+                # see, and they are not secret.
+                unreadable.append("{" + ", ".join(sorted(item)) + "}")
+        return out, unreadable
     raise RuntimeError(
         f"remote results: 'files' is a {type(files).__name__}, which this "
         "backend does not understand — expected a mapping of name to URL, or "

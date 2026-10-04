@@ -51,18 +51,27 @@ class FakeTransport:
     def get_json(self, url):
         self.calls.append(("get", url))
         if url.endswith("/results"):
-            # LIVE SHAPES, measured against the service on 2026-10-04. `files`
-            # is a LIST of objects, not a mapping — the fake previously
-            # returned a mapping, which is exactly why `_download` calling
-            # `.get` on a list survived every offline test and only failed on
-            # a real run. Same class of drift as the `/models/upload-url`
-            # route above: a fake that restates the backend's assumption
-            # cannot falsify it.
+            # THE OBSERVED SHAPE, from a COMPLETED job on 2026-10-04 — 17
+            # files whose element keys are exactly
+            # `download_url, name, phase_id, s3_key, size_bytes`. `files` is a
+            # LIST, not a mapping; the fake used to return a mapping, which is
+            # why `_download` calling `.get` on a list survived every offline
+            # test and failed only on a real run. Same class of drift as the
+            # `/models/upload-url` route above: a fake that restates the
+            # backend's assumption cannot falsify it.
+            #
+            # These are the service's real key names rather than aliases the
+            # backend happens to accept, so this fixture would catch the
+            # service renaming one (Sol, PR #78).
             return {"job_id": "j-1", "status": self.status,
                     "engine": "energyplus",
                     "files": self.files if self.files is not None
-                    else [{"name": "eplusout.sql", "url": "https://s3.test/sql"},
-                          {"name": "eplusout.err", "url": "https://s3.test/err"}],
+                    else [{"name": "eplusout.sql", "size_bytes": 778240,
+                           "phase_id": "p-1", "s3_key": "jobs/j-1/eplusout.sql",
+                           "download_url": "https://s3.test/sql"},
+                          {"name": "eplusout.err", "size_bytes": 10649,
+                           "phase_id": "p-1", "s3_key": "jobs/j-1/eplusout.err",
+                           "download_url": "https://s3.test/err"}],
                     "summary": {}}
         # Phase errors are STRUCTURED on the live service, verbatim:
         #   {"error_code": "ENERGYPLUS_SEVERE", "message": "** Severe **…",
@@ -185,8 +194,10 @@ class TestRemote(unittest.TestCase):
 
     def test_missing_sql_in_the_result_bundle_raises(self):
         run_dir = self.prepared_dir()
-        t = FakeTransport(files=[{"name": "eplusout.err",
-                                  "url": "https://s3.test/err"}])
+        t = FakeTransport(files=[{"name": "eplusout.err", "size_bytes": 10649,
+                                  "phase_id": "p-1",
+                                  "s3_key": "jobs/j-1/eplusout.err",
+                                  "download_url": "https://s3.test/err"}])
         with self.assertRaises(RuntimeError) as ctx:
             self.remote(t).execute(run_dir)
         self.assertIn("no eplusout.sql", str(ctx.exception))
