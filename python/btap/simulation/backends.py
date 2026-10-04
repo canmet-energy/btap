@@ -61,8 +61,8 @@ class Local(Backend):
         model = opt(openstudio.model.Model.load(openstudio.path(str(osm))))
         if model is None:
             raise RuntimeError(f"local backend: cannot load {osm}")
-        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
-        _require_sizing_calculations(model, workspace, osm)
+        workspace, advisories = translate_capturing_advisories(model)
+        _require_sizing_calculations(model, workspace, osm, advisories)
         _ensure_output_requests(workspace)
         idf = run_dir / "in.idf"
         workspace.save(openstudio.path(str(idf)), True)
@@ -99,6 +99,24 @@ class Local(Backend):
         )
 
 
+def translate_capturing_advisories(model):
+    """``(workspace, advisories)`` — ForwardTranslate, keeping the SDK's own
+    sizing advice.
+
+    OpenStudio emits e.g. "You have PlantLoop(s) and design days, it's possible
+    you should enable SimulationControl::DoPlantSizingCalculation" at translate
+    time, to the SDK log. That log is not `eplusout.err`, so nothing surfaced it
+    and the partial-flag case ran silently (Fable, PR #70).
+    """
+    import openstudio
+
+    sink = openstudio.StringStreamLogSink()
+    sink.setLogLevel(openstudio.Warn)
+    workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+    messages = [" ".join(str(m.logMessage()).split()) for m in sink.logMessages()]
+    return workspace, [m for m in messages if "SizingCalculation" in m]
+
+
 def autosized_fields(workspace):
     """The NUMERIC fields EnergyPlus would have to size, named.
 
@@ -125,14 +143,56 @@ def autosized_fields(workspace):
             field = idd.getField(index)
             if not field.is_initialized():
                 continue
-            if any(kind in str(field.get().properties().type)
-                   for kind in ("Real", "Integer")):
-                found.append(f"{idd.name()} field {index} "
-                             f"({field.get().name()})")
+            if not any(kind in str(field.get().properties().type)
+                       for kind in ("Real", "Integer")):
+                continue
+            if not _method_selects(obj, idd, field.get().name()):
+                continue
+            found.append(f"{idd.name()} field {index} "
+                         f"({field.get().name()})")
     return found
 
 
-def _require_sizing_calculations(model, workspace, osm) -> None:
+def _method_selects(obj, idd, field_name: str) -> bool:
+    """Would EnergyPlus actually READ this autosized field?
+
+    An autosized field is often governed by a sibling `*Method` field that
+    selects which of several inputs applies. With
+    `Heating Design Capacity Method = CapacityPerFloorArea`, EnergyPlus reads
+    `Heating Design Capacity Per Floor Area` and never evaluates
+    `Heating Design Capacity`, which OpenStudio leaves `Autosize` by default —
+    so the field is autosized, inert, and needs no sizing run. The guard refused
+    such a model while EnergyPlus completed it with rc=0 (Fable, PR #70).
+
+    This reads ONE sibling field whose own value names the input it selects. It
+    is not the component taxonomy this module refuses to model: no list of types,
+    no per-component knowledge, just the method field the IDD already declares
+    next to the value it governs.
+
+    `FractionOfAutosizedHeatingCapacity` still NEEDS sizing — the fraction is
+    taken OF the autosized result — so any method naming "autosiz" counts as
+    selecting it.
+    """
+    wanted = field_name.replace(" ", "").lower()
+    for index in range(obj.numFields()):
+        field = idd.getField(index)
+        if not field.is_initialized():
+            continue
+        name = field.get().name()
+        if not name.endswith("Method"):
+            continue
+        base = name[: -len("Method")].strip().replace(" ", "").lower()
+        if not wanted.startswith(base):
+            continue                    # a method, but it governs another field
+        value = obj.getString(index)
+        if not value.is_initialized() or not value.get().strip():
+            return True                 # unset: the field stands as given
+        chosen = value.get().strip().replace(" ", "").lower()
+        return chosen == wanted or "autosiz" in chosen
+    return True                         # no governing method field
+
+
+def _require_sizing_calculations(model, workspace, osm, advisories=()) -> None:
     """Refuse a model that has fields to size but no sizing run to size them.
 
     The three flags default to FALSE on a model and `run_energyplus` is the only
@@ -150,17 +210,24 @@ def _require_sizing_calculations(model, workspace, osm) -> None:
       runs clean with all three flags false;
     * needing to size something does not require all THREE calculations. A zone
       baseboard sizes fine with `zone=True, system=False, plant=False`, and the
-      earlier "any autosized field requires all three" rule refused exactly that.
+      earlier "any autosized field requires all three" rule refused exactly that;
+    * an autosized field a sibling `*Method` field steers EnergyPlus away from is
+      never evaluated at all — see `_method_selects`.
 
     So the refusal is limited to the one case that certainly fails: something must
     be sized and NO sizing calculation will run at all. That is deliberately
-    weaker than a per-dependency check. Mapping each autosizable component to the
-    calculation that sizes it would mean enumerating hundreds of component types —
-    the unbounded surface this module already refuses to model once — so this
-    gate UNDER-refuses by design. It will not catch a model whose autosized
-    chiller needs plant sizing while only zone sizing is enabled; EnergyPlus
-    reports that case itself. Under-refusing costs a clearer error message;
-    over-refusing breaks runs that work.
+    weaker than a per-dependency check, because mapping each autosizable
+    component to the calculation that sizes it would mean enumerating hundreds of
+    component types — the unbounded surface this module already refuses to model.
+
+    WHAT THE DEFERRED CASE COSTS, corrected. An earlier version of this docstring
+    said EnergyPlus "reports that case itself". **It does not.** Fable ran an
+    autosized boiler on a plant loop with zone sizing on and plant sizing off:
+    EnergyPlus completed with rc=0, no Severe and no Fatal, and silently derived
+    a nominal capacity. The only signal anywhere was an OpenStudio translate-time
+    advisory, which goes to the SDK log rather than `eplusout.err`. So this gate
+    surfaces that advisory through `warnings.warn` instead of claiming a report
+    that never comes.
 
     It CHECKS rather than repairs, deliberately:
 
@@ -182,7 +249,13 @@ def _require_sizing_calculations(model, workspace, osm) -> None:
         "Do Plant Sizing Calculation": sim.doPlantSizingCalculation(),
     }
     if any(enabled.values()):
-        return                      # a sizing run exists; which one is E+'s call
+        # A sizing run exists, but not necessarily the one this model needs, and
+        # EnergyPlus will not say so. Surface the SDK's own advice rather than
+        # letting a partial-flag run derive a capacity in silence.
+        import warnings
+        for advisory in advisories:
+            warnings.warn(f"{osm}: {advisory}", stacklevel=2)
+        return
     raise RuntimeError(
         f"{osm} has {len(autosized)} autosized field(s) but NO sizing "
         f"calculation enabled, so EnergyPlus cannot size any of them — it will "
@@ -302,8 +375,8 @@ class Remote(Backend):
         # its own translation, so this one is spent purely on the guard — a
         # second of local work against a transfer plus a queue wait (Sol, `075`:
         # keep the ordering).
-        idf = openstudio.energyplus.ForwardTranslator().translateModel(model)
-        _require_sizing_calculations(model, idf, osm)
+        idf, advisories = translate_capturing_advisories(model)
+        _require_sizing_calculations(model, idf, osm, advisories)
 
         if self._workflow_type() == "openstudio":
             return osm.read_bytes(), "in.osm"

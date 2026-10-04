@@ -348,6 +348,131 @@ class TestSizingCalculationsGuard(unittest.TestCase):
         _require_sizing_calculations(model, workspace, directory / "in.osm")
 
     @needs_sdk
+    def test_a_field_a_sibling_METHOD_steers_away_from_is_not_to_be_sized(self):
+        """Fable's L1, pinned. The guard refused a run EnergyPlus completes.
+
+        With `Heating Design Capacity Method = CapacityPerFloorArea`, EnergyPlus
+        reads `Heating Design Capacity Per Floor Area` and never evaluates
+        `Heating Design Capacity`, which OpenStudio leaves `Autosize`. The field
+        is autosized, inert, and needs no sizing run. Reachable through seven
+        documented SDK classes, and `isHeatingDesignCapacityAutosized()` returns
+        True — so the SDK's own predicate would have made the same mistake.
+        """
+        import openstudio
+
+        from btap.simulation.backends import autosized_fields
+
+        model = load_fixture()
+        baseboard = openstudio.model.ZoneHVACBaseboardRadiantConvectiveElectric(model)
+        baseboard.setHeatingDesignCapacityMethod("CapacityPerFloorArea")
+        baseboard.setHeatingDesignCapacityPerFloorArea(50.0)
+        baseboard.addToThermalZone(model.getThermalZones()[0])
+        self.assertTrue(baseboard.isHeatingDesignCapacityAutosized(),
+                        "precondition: the SDK still calls the field autosized")
+        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        self.assertEqual([], autosized_fields(workspace),
+                         "a field the method steers away from is not to be sized")
+
+    @needs_sdk
+    def test_the_METHOD_cases_that_DO_need_sizing_still_count(self):
+        """The inverse, so the skip cannot become a blanket exemption.
+
+        `HeatingDesignCapacity` selects the autosized field, and
+        `FractionOfAutosizedHeatingCapacity` takes a fraction OF the autosized
+        result — both need a sizing run.
+        """
+        import openstudio
+
+        from btap.simulation.backends import autosized_fields
+
+        for method in ("HeatingDesignCapacity",
+                       "FractionOfAutosizedHeatingCapacity"):
+            with self.subTest(method=method):
+                model = load_fixture()
+                baseboard = openstudio.model.ZoneHVACBaseboardRadiantConvectiveElectric(
+                    model)
+                baseboard.setHeatingDesignCapacityMethod(method)
+                baseboard.addToThermalZone(model.getThermalZones()[0])
+                workspace = openstudio.energyplus.ForwardTranslator().translateModel(
+                    model)
+                self.assertTrue(autosized_fields(workspace),
+                                f"{method} needs a sizing run")
+
+    @needs_sdk
+    def test_BOTH_backends_pass_the_advisories_to_the_guard(self):
+        """The wiring, not the helper.
+
+        The mutation "Local stops passing advisories" was MISSED, because the
+        advisory test called `_require_sizing_calculations` directly — proving
+        the helper works but not that either backend hands it anything. Same
+        shape as the reimplementation gap this repository keeps finding: a check
+        that cannot see the seam it is about.
+        """
+
+        directory = self._run_dir(sizing=True, autosized=True)
+
+        for name, invoke in (
+                ("Local", lambda: Local(energyplus="/nonexistent").execute(directory)),
+                ("Remote", lambda: Remote(endpoint="https://example.invalid",
+                                          api_key="x",
+                                          transport=ExplodingTransport(),
+                                          poll_seconds=0).execute(directory))):
+            with self.subTest(backend=name):
+                with mock.patch("btap.simulation.backends."
+                                "_require_sizing_calculations") as guard:
+                    try:
+                        invoke()
+                    except Exception:
+                        pass            # we only care how the guard was called
+                self.assertTrue(guard.called, f"{name} must call the guard")
+                args = guard.call_args.args
+                self.assertEqual(4, len(args),
+                                 f"{name} must pass advisories as the 4th "
+                                 f"argument, got {len(args)}: {args!r}")
+                self.assertIsInstance(args[3], (list, tuple),
+                                      f"{name}'s 4th argument must be the "
+                                      "captured advisories")
+
+    @needs_sdk
+    def test_a_partial_flag_run_surfaces_the_SDK_advisory(self):
+        """Fable's L2, pinned.
+
+        An autosized boiler with plant sizing OFF completes in EnergyPlus with
+        rc=0, no Severe and no Fatal, silently deriving a capacity. The docstring
+        used to claim EnergyPlus reports this; it does not. The only signal is an
+        OpenStudio translate-time advisory, so the guard surfaces it.
+        """
+        import warnings
+
+        import openstudio
+
+        from btap.simulation.backends import (
+            _require_sizing_calculations,
+            translate_capturing_advisories,
+        )
+
+        model = load_fixture()
+        loop = openstudio.model.PlantLoop(model)
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.autosizeNominalCapacity()
+        loop.addSupplyBranchForComponent(boiler)
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)        # partial: plant is OFF
+        sim.setDoSystemSizingCalculation(False)
+        sim.setDoPlantSizingCalculation(False)
+
+        workspace, advisories = translate_capturing_advisories(model)
+        self.assertTrue(any("DoPlantSizingCalculation" in a for a in advisories),
+                        f"the SDK must advise about plant sizing: {advisories}")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            _require_sizing_calculations(model, workspace, Path("in.osm"),
+                                         advisories)
+        self.assertTrue(any("DoPlantSizingCalculation" in str(w.message)
+                            for w in caught),
+                        "the deferred case must not be silent")
+
+    @needs_sdk
     def test_an_object_merely_NAMED_autosize_is_not_a_field_to_size(self):
         """Sol's `077` case 2, pinned.
 
