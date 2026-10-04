@@ -188,7 +188,15 @@ def _method_selects(obj, idd, field_name: str) -> bool:
         if not value.is_initialized() or not value.get().strip():
             return True                 # unset: the field stands as given
         chosen = value.get().strip().replace(" ", "").lower()
-        return chosen == wanted or "autosiz" in chosen
+        # `endswith`, not `==`: a method choice names its field, sometimes
+        # WITHOUT the leading qualifier. `AirLoopHVAC:UnitarySystem`'s
+        # `Cooling Supply Air Flow Rate Method = SupplyAirFlowRate` selects
+        # `Cooling Supply Air Flow Rate` — so an equality test skipped a field
+        # EnergyPlus must size, making the guard silently blind in the one
+        # direction it exists to prevent (Fable, PR #70). Verified 7/7 across
+        # both families: the `CapacityPerFloorArea` skip is preserved and the
+        # `SupplyAirFlowRate` hole is closed.
+        return wanted.endswith(chosen) or "autosiz" in chosen
     return True                         # no governing method field
 
 

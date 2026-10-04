@@ -489,6 +489,82 @@ class TestSizingCalculationsGuard(unittest.TestCase):
                     f"warning; captured {[str(w.message) for w in caught]}")
 
     @needs_sdk
+    def test_a_method_naming_its_field_WITHOUT_the_qualifier_still_counts(self):
+        """Fable's `#70` fourth hole, in the opposite direction to the first three.
+
+        A method choice names its field, sometimes without the leading
+        qualifier: `Cooling Supply Air Flow Rate Method = SupplyAirFlowRate`
+        selects `Cooling Supply Air Flow Rate`. An equality test skipped it, so
+        the guard went silently blind on a field EnergyPlus must size — the
+        failure it exists to prevent. Checked at the predicate, because no btap
+        builder produces `AirLoopHVAC:UnitarySystem` today.
+        """
+        from btap.simulation.backends import _method_selects
+
+        class FakeField:
+            def __init__(self, name):
+                self._name = name
+
+            def name(self):
+                return self._name
+
+        class FakeOpt:
+            def __init__(self, v):
+                self._v = v
+
+            def is_initialized(self):
+                return self._v is not None
+
+            def get(self):
+                return self._v
+
+        class FakeIdd:
+            def __init__(self, pairs):
+                self._pairs = pairs
+
+            def numFields(self):
+                return len(self._pairs)
+
+            def getField(self, i):
+                return FakeOpt(FakeField(self._pairs[i][0]))
+
+        class FakeObj:
+            def __init__(self, pairs):
+                self._pairs = pairs
+
+            def numFields(self):
+                return len(self._pairs)
+
+            def getString(self, i):
+                return FakeOpt(self._pairs[i][1])
+
+        CASES = (
+            # (field, method value, must the field be counted?)
+            ("Heating Design Capacity", "CapacityPerFloorArea", False),
+            ("Heating Design Capacity", "HeatingDesignCapacity", True),
+            ("Heating Design Capacity", "FractionOfAutosizedHeatingCapacity", True),
+            ("Cooling Supply Air Flow Rate", "SupplyAirFlowRate", True),
+            ("Cooling Supply Air Flow Rate", "FlowPerFloorArea", False),
+            ("Cooling Supply Air Flow Rate", "FlowPerCoolingCapacity", False),
+            ("No Load Supply Air Flow Rate", "SupplyAirFlowRate", True),
+            # The case that distinguishes `endswith` from a SUBSTRING test, and
+            # the reason the predicate is not `chosen in wanted`: the method
+            # token sits inside this field's name without ending it, and it
+            # selects the plain capacity field rather than the per-area one. A
+            # substring test would count a field the method steers away from —
+            # over-refusing, which is how the first three versions of this
+            # guard broke valid runs.
+            ("Heating Design Capacity Per Floor Area",
+             "HeatingDesignCapacity", False),
+        )
+        for field, method, expected in CASES:
+            with self.subTest(field=field, method=method):
+                pairs = [(f"{field} Method", method), (field, "Autosize")]
+                got = _method_selects(FakeObj(pairs), FakeIdd(pairs), field)
+                self.assertEqual(expected, got,
+                                 f"{method!r} selecting {field!r}")
+
+    @needs_sdk
     def test_a_partial_flag_run_surfaces_the_SDK_advisory(self):
         """Fable's L2, pinned.
 
