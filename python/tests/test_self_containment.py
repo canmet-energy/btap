@@ -110,6 +110,14 @@ ALLOWLIST = {
         "retires": "R1-adjudicated",
         "why": "oracle_goldens_dir() resolves the committed Leg-C goldens",
     },
+    "python/tests/test_scenario_backend_hook.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("tests the scenario harness's backend selection, which lives "
+                "in verification/scenarios — the shared harness, not a gem "
+                "tree; the test imports runner.py the way the harness's own "
+                "scripts do, so the path cannot be abstracted away"),
+    },
     "python/tests/necb/test_legacy_archetype_e2e.py": {
         "refs": ["legacy_pin", "verification/"],
         "retires": "R6-oracle-boundary",

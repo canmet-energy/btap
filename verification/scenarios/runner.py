@@ -68,8 +68,24 @@ def python_exe():
 #: Measured 2026-10-04 on the service: 112 annual runs in 270 s wall at peak
 #: concurrency 112, per-job latency flat from 1 job to 112, and 14/16 sample
 #: models agreeing with local output to 0.000% on Total Site Energy.
+#: The only values accepted. An unrecognised one is REFUSED rather than
+#: treated as local: `BTAP_SCENARIO_BACKEND=remtoe` would otherwise run the
+#: whole corpus locally, match every baseline, and report success — the typo
+#: silently producing the opposite of what was asked (Sol, PR #79).
+SCENARIO_BACKENDS = ("local", "remote")
+
+
 def scenario_backend() -> str:
-    return os.environ.get("BTAP_SCENARIO_BACKEND", "local").strip() or "local"
+    value = os.environ.get("BTAP_SCENARIO_BACKEND", "local").strip()
+    if not value:
+        return "local"
+    if value not in SCENARIO_BACKENDS:
+        raise SystemExit(
+            f"BTAP_SCENARIO_BACKEND={value!r} is not a backend. Use one of "
+            f"{', '.join(SCENARIO_BACKENDS)}, or unset it for local. Refusing "
+            "rather than defaulting, because a typo here would run locally and "
+            "match every baseline while claiming remote verification.")
+    return value
 
 
 #: Infrastructure vars a scenario subprocess may inherit — everything else
@@ -153,10 +169,18 @@ def lone_epw(scratch):
 
 # ---------------------------------------------------------- environment
 
-#: What `Remote` needs to configure itself. Added to the inherited set only
-#: under BTAP_SCENARIO_BACKEND=remote. The KEY IS NEVER PRINTED here or
-#: anywhere else in this module.
-REMOTE_ENV_ALLOWLIST = ("HBIX_API_KEY", "HBIX_SIM_ENDPOINT")
+#: What a remote subprocess needs. Added to the inherited set only under
+#: BTAP_SCENARIO_BACKEND=remote. The KEY IS NEVER PRINTED here or anywhere
+#: else in this module.
+#:
+#: `BTAP_SCENARIO_BACKEND` ITSELF IS IN THIS LIST, and leaving it out was a
+#: real defect: the API path reads the variable inside `api_worker.py`, so
+#: without it `_select_backend()` saw its own default "local" and never called
+#: `set_default_backend(Remote())`. The two annual parity API scenarios ran
+#: LOCALLY while the run claimed remote verification — the CLI path happened to
+#: work only because its selection travels on argv instead (Sol, PR #79).
+REMOTE_ENV_ALLOWLIST = ("HBIX_API_KEY", "HBIX_SIM_ENDPOINT",
+                        "BTAP_SCENARIO_BACKEND")
 
 
 def _base_env():

@@ -91,12 +91,101 @@ class TestEnvIsolation(unittest.TestCase):
         self.assertEqual("https://x", env.get("HBIX_SIM_ENDPOINT"))
 
     def test_nothing_else_was_added_to_the_allowlist(self):
-        """The exception is exactly two variables, not a widening."""
-        self.assertEqual(("HBIX_API_KEY", "HBIX_SIM_ENDPOINT"),
+        """The exception is exactly three variables, not a widening.
+
+        `BTAP_SCENARIO_BACKEND` joined the two credentials because the API
+        path reads it INSIDE the worker — see the seam test below, which is
+        what should have caught its absence.
+        """
+        self.assertEqual(("HBIX_API_KEY", "HBIX_SIM_ENDPOINT",
+                          "BTAP_SCENARIO_BACKEND"),
                          self.runner.REMOTE_ENV_ALLOWLIST)
         for name in self.runner.REMOTE_ENV_ALLOWLIST:
             self.assertNotIn(name, self.runner.ENV_ALLOWLIST,
                              "the default set must stay offline")
+
+
+class TestUnknownValueIsRefused(unittest.TestCase):
+    """A typo must not silently run locally and match every baseline.
+
+    `BTAP_SCENARIO_BACKEND=remtoe` would otherwise verify the whole corpus
+    locally and report success — the typo producing the exact opposite of what
+    was asked (Sol, PR #79).
+    """
+
+    def setUp(self):
+        self.runner = _harness()
+
+    def test_a_misspelling_raises_rather_than_defaulting(self):
+        for value in ("remtoe", "REMOTE", "localhost", "both"):
+            with self.subTest(value=value):
+                with mock.patch.dict(os.environ,
+                                     {"BTAP_SCENARIO_BACKEND": value}):
+                    with self.assertRaises(SystemExit) as caught:
+                        self.runner.scenario_backend()
+                    self.assertIn(value, str(caught.exception))
+
+    def test_the_supported_set_is_declared(self):
+        self.assertEqual(("local", "remote"), self.runner.SCENARIO_BACKENDS)
+
+    def test_the_two_supported_values_still_work(self):
+        for value in self.runner.SCENARIO_BACKENDS:
+            with self.subTest(value=value):
+                with mock.patch.dict(os.environ,
+                                     {"BTAP_SCENARIO_BACKEND": value}):
+                    self.assertEqual(value, self.runner.scenario_backend())
+
+
+class TestTheApiSeam(unittest.TestCase):
+    """build_env -> api_worker selection, as ONE path rather than two halves.
+
+    This is the test that was missing. I had `_base_env` and
+    `_select_backend` each passing in isolation while the seam between them
+    was broken: `build_env` did not pass `BTAP_SCENARIO_BACKEND`, so the
+    worker read its own default "local" and never called
+    `set_default_backend(Remote())`. The two annual parity API scenarios ran
+    LOCALLY while the run claimed remote verification (Sol, PR #79).
+    """
+
+    def setUp(self):
+        self.runner = _harness()
+
+    def _worker_sees(self, parent_env):
+        """What `api_worker._select_backend` would decide, given the env the
+        harness actually hands a worker subprocess."""
+        with mock.patch.dict(os.environ, parent_env, clear=False):
+            for key in ("BTAP_SCENARIO_BACKEND",):
+                if key not in parent_env:
+                    os.environ.pop(key, None)
+            env = self.runner.build_env({"kind": "api"}, {})
+        return env.get("BTAP_SCENARIO_BACKEND", "local")
+
+    def test_the_worker_LEARNS_it_is_remote(self):
+        seen = self._worker_sees({"BTAP_SCENARIO_BACKEND": "remote",
+                                  "HBIX_API_KEY": "k",
+                                  "HBIX_SIM_ENDPOINT": "https://x"})
+        self.assertEqual("remote", seen,
+                         "without this the API path runs locally while the "
+                         "run claims remote verification")
+
+    def test_the_worker_also_gets_what_Remote_needs(self):
+        with mock.patch.dict(os.environ,
+                             {"BTAP_SCENARIO_BACKEND": "remote",
+                              "HBIX_API_KEY": "k",
+                              "HBIX_SIM_ENDPOINT": "https://x"}):
+            env = self.runner.build_env({"kind": "api"}, {})
+        self.assertEqual("k", env.get("HBIX_API_KEY"))
+        self.assertEqual("https://x", env.get("HBIX_SIM_ENDPOINT"))
+
+    def test_the_default_tells_the_worker_nothing(self):
+        seen = self._worker_sees({"HBIX_API_KEY": "k"})
+        self.assertEqual("local", seen)
+        with mock.patch.dict(os.environ, {"HBIX_API_KEY": "k"}):
+            os.environ.pop("BTAP_SCENARIO_BACKEND", None)
+            env = self.runner.build_env({"kind": "api"}, {})
+        self.assertNotIn("BTAP_SCENARIO_BACKEND", env)
+        self.assertNotIn("HBIX_API_KEY", env,
+                         "an offline scenario must not inherit the key")
 
 
 class TestCliThreading(unittest.TestCase):
