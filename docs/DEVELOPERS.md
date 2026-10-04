@@ -196,19 +196,46 @@ intended commit has no untracked files, so it is clean by construction rather
 than by tidying:
 
 ```bash
-git worktree add --detach /tmp/freeze-xyz <commit>
-cd /tmp/freeze-xyz/python
-# assert btap resolves HERE, not to the main checkout — this repo has a trap
-<venv>/bin/python -c "import btap, pathlib; print(pathlib.Path(btap.__file__))"
-<venv>/bin/python ../verification/scenarios/freeze.py
-# copy baselines/ and manifest.json back, then the DECISIVE check:
-# re-run the frozen comparison FROM THE MAIN CHECKOUT and require zero drift.
-git worktree remove --force /tmp/freeze-xyz
+REPO=$(pwd)                       # the main checkout
+WT=/tmp/freeze-$(git rev-parse --short HEAD)
+PY=$REPO/python/.venv/bin/python  # one interpreter for BOTH steps below
+
+git worktree add --detach "$WT" HEAD
+cd "$WT/python"
+
+# ASSERT btap resolves to the worktree — this repo has a trap where it does
+# not, and a freeze against the wrong source is a provenance lie. This exits
+# non-zero rather than printing and carrying on.
+"$PY" -c "import btap,pathlib,sys; p=pathlib.Path(btap.__file__).resolve()
+sys.exit(0 if str(p).startswith('$WT') else f'WRONG SOURCE: {p}')"
+
+"$PY" ../verification/scenarios/freeze.py
+
+# TRANSFER the output before removing anything — freeze.py writes tracked
+# baselines and the manifest, and they exist only here until copied.
+cp -r "$WT/verification/scenarios/baselines/." "$REPO/verification/scenarios/baselines/"
+cp "$WT/verification/scenarios/manifest.json"  "$REPO/verification/scenarios/manifest.json"
+
+# THE DECISIVE CHECK, from the MAIN checkout: zero drift.
+cd "$REPO/python"
+"$PY" -m pytest -q tests/necb/test_frozen_scenarios.py || \
+  echo "DRIFT — do NOT remove $WT; inspect it"
+
+# Only once that passed, and only from outside it:
+cd "$REPO" && git worktree remove "$WT"
 ```
 
-That last step is what proves the freeze ran against the right source: if it
-hadn't, the main checkout would disagree with the baselines it was just handed.
-Verify the artifact, not the environment.
+The zero-drift step is what proves the freeze ran against the right source: if
+it hadn't, the main checkout would disagree with the baselines it was just
+handed. Verify the artifact, not the environment.
+
+Note the ordering, which matters more than it looks. `freeze.py`'s output lives
+only in the worktree until you copy it, so removing the worktree first — or with
+`--force` while still inside it — discards the only copy of a re-freeze you may
+have waited an hour for. Leave it in place if the drift check fails: it is the
+evidence you need to work out why. And the local comparison runs the default
+`python` lane, which may not contain the baselines your change touched; check the
+full dispatch for the `verify` and `parity` lanes.
 
 Do **not** move or stash a colleague's untracked files, and do **not** use
 `--allow-dirty` for a re-freeze you intend to commit — it records `dirty: true`
