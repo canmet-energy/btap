@@ -124,3 +124,47 @@ class TestBackends(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPhaseErrorsAreReadable(unittest.TestCase):
+    """The service returns STRUCTURED errors, and `_phase_errors` joined them.
+
+    `"; ".join(errors)` raised `sequence item 0: expected str instance, dict
+    found`. The damage is out of proportion to the typo, because this function
+    runs only while BUILDING A FAILURE MESSAGE: a diagnosable remote failure
+    became an opaque TypeError naming neither the phase nor the cause. It cost
+    one real diagnosis — a remote sizing run whose actual error was
+    "EnergyPlus requires a weather file (WEATHER_S3_KEY)" surfaced as a
+    TypeError about dicts.
+
+    Offline: no transport, no network.
+    """
+
+    def _remote(self):
+        from btap.simulation.backends import Remote
+
+        return Remote(endpoint="https://example.invalid", api_key="unused")
+
+    def test_a_dict_error_is_rendered_not_raised(self):
+        status = {"phases": [{"errors": [{"message": "E+ failed", "code": 7}]}]}
+        self.assertEqual("E+ failed", self._remote()._phase_errors(status))
+
+    def test_a_dict_without_a_message_keeps_its_detail(self):
+        """Falling back to the mapping beats dropping the only diagnosis."""
+        status = {"phases": [{"errors": [{"code": 7, "where": "translate"}]}]}
+        got = self._remote()._phase_errors(status)
+        self.assertIn("code", got)
+        self.assertIn("translate", got)
+
+    def test_mixed_strings_dicts_nones_and_scalars(self):
+        status = {"phases": [{"errors": ["a", {"detail": "b"}, None, 12]}]}
+        self.assertEqual("a; b; 12", self._remote()._phase_errors(status))
+
+    def test_strings_still_behave_exactly_as_before(self):
+        status = {"phases": [{"errors": ["boom", "again"]}]}
+        self.assertEqual("boom; again", self._remote()._phase_errors(status))
+
+    def test_no_phases_is_empty_not_an_error(self):
+        for status in ({"phases": []}, {}, None):
+            with self.subTest(status=status):
+                self.assertEqual("", self._remote()._phase_errors(status))

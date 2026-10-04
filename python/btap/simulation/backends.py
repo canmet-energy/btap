@@ -326,9 +326,42 @@ class Remote(Backend):
                 delay *= 2
 
     def _phase_errors(self, status) -> str:
+        """The service's phase errors, as one line.
+
+        An entry is NOT always a string. The live service returns structured
+        errors — `{"message": …}` and friends — and a bare
+        `"; ".join(errors)` then raises
+        `sequence item 0: expected str instance, dict found`. The damage is out
+        of proportion to the typo: this runs only while BUILDING A FAILURE
+        MESSAGE, so a diagnosable remote failure became an opaque TypeError
+        that named neither the phase nor the cause. Found on the first real
+        sizing run through the remote backend.
+        """
         phases = (status or {}).get("phases") or []
-        errors = [err for p in phases for err in (p.get("errors") or []) if err is not None]
-        return "; ".join(errors[:5])
+        out = []
+        for phase in phases:
+            for err in (phase.get("errors") or []):
+                if err is None:
+                    continue
+                if isinstance(err, str):
+                    out.append(err)
+                    continue
+                if isinstance(err, dict):
+                    # Prefer a human message, then the usual aliases, and fall
+                    # back to the whole mapping rather than dropping detail on
+                    # the floor — this text is the only diagnosis the caller
+                    # gets.
+                    for key in ("message", "msg", "error", "detail", "reason"):
+                        value = err.get(key)
+                        if isinstance(value, str) and value.strip():
+                            out.append(value.strip())
+                            break
+                    else:
+                        out.append(json.dumps(err, sort_keys=True,
+                                              default=str))
+                    continue
+                out.append(str(err))
+        return "; ".join(out[:5])
 
     def _workflow_type(self) -> str:
         return self._opts.get("workflow_type", "energyplus")
