@@ -196,38 +196,89 @@ intended commit has no untracked files, so it is clean by construction rather
 than by tidying:
 
 ```bash
+set -euo pipefail                 # a failing step must STOP, not continue
 REPO=$(pwd)                       # the main checkout
 WT=/tmp/freeze-$(git rev-parse --short HEAD)
-PY=$REPO/python/.venv/bin/python  # one interpreter for BOTH steps below
+PY=$REPO/python/.venv/bin/python  # one interpreter for every step below
 
 git worktree add --detach "$WT" HEAD
+
+# PYTHONPATH IS MANDATORY, not belt-and-braces. One interpreter does not mean
+# one source. Measured both ways from "$WT/python" on 2026-10-04:
+#
+#   $PY -c "import btap"     ->  $WT/python/btap     (cwd leads sys.path)
+#   $PY some/script.py       ->  $REPO/python/btap   <- THE TRAP
+#
+# In script mode sys.path[0] is the SCRIPT's directory, not the cwd, so `btap`
+# resolves through the venv's editable install — which points at the main
+# checkout. freeze.py is a script, and its check_required_python_engines()
+# imports btap (line 117) BEFORE check_required_energyplus() calls
+# runner._sys_path_python() (line 151), so the main-checkout module also lands
+# in sys.modules first and persists. Exporting PYTHONPATH settles it for the
+# guard and the freezer alike (Sol, PR #76).
+export PYTHONPATH="$WT/python"
+
+# ASSERT the source the way the freezer will actually load it, and with
+# `is_relative_to` rather than a string prefix so a sibling directory sharing
+# the prefix cannot pass. Written as a FILE because -c was the thing that
+# could not see the trap.
+printf '%s\n' \
+  'import pathlib, sys' \
+  'import btap' \
+  'p = pathlib.Path(btap.__file__).resolve()' \
+  'want = pathlib.Path(sys.argv[1]).resolve() / "python"' \
+  'sys.exit(0 if p.is_relative_to(want) else f"WRONG SOURCE: {p} not under {want}")' \
+  > "$WT/_assert_source.py"
+"$PY" "$WT/_assert_source.py" "$WT"
+
 cd "$WT/python"
-
-# ASSERT btap resolves to the worktree — this repo has a trap where it does
-# not, and a freeze against the wrong source is a provenance lie. This exits
-# non-zero rather than printing and carrying on.
-"$PY" -c "import btap,pathlib,sys; p=pathlib.Path(btap.__file__).resolve()
-sys.exit(0 if str(p).startswith('$WT') else f'WRONG SOURCE: {p}')"
-
 "$PY" ../verification/scenarios/freeze.py
 
 # TRANSFER the output before removing anything — freeze.py writes tracked
 # baselines and the manifest, and they exist only here until copied.
-cp -r "$WT/verification/scenarios/baselines/." "$REPO/verification/scenarios/baselines/"
-cp "$WT/verification/scenarios/manifest.json"  "$REPO/verification/scenarios/manifest.json"
+# `rsync --delete`, not `cp -r`: an overlay copy leaves a REMOVED baseline
+# behind in the main checkout if the scenario set shrank.
+rsync -a --delete "$WT/verification/scenarios/baselines/" \
+                  "$REPO/verification/scenarios/baselines/"
+cp "$WT/verification/scenarios/manifest.json" \
+   "$REPO/verification/scenarios/manifest.json"
 
-# THE DECISIVE CHECK, from the MAIN checkout: zero drift.
+# THE DRIFT CHECK, from the MAIN checkout, over THE LANES YOU ACTUALLY MOVED.
+# `test_frozen_scenarios.py` defaults to BTAP_SCENARIO_LANES=python, the
+# engine-free lane — it holds NONE of the sizing or annual baselines, so the
+# default command can pass without comparing one changed file.
+# `git -C "$REPO" status --porcelain verification/scenarios/baselines` tells
+# you which lanes moved.
 cd "$REPO/python"
-"$PY" -m pytest -q tests/necb/test_frozen_scenarios.py || \
-  echo "DRIFT — do NOT remove $WT; inspect it"
-
-# Only once that passed, and only from outside it:
-cd "$REPO" && git worktree remove "$WT"
+if PYTHONPATH="$REPO/python" BTAP_SCENARIO_LANES=python,verify \
+   "$PY" -m pytest -q tests/necb/test_frozen_scenarios.py; then
+  echo "zero drift on the compared lanes"
+  cd "$REPO" && git worktree remove --force "$WT"   # dirty by construction
+else
+  echo "DRIFT — the worktree is KEPT at $WT; inspect it before removing"
+  exit 1
+fi
 ```
 
-The zero-drift step is what proves the freeze ran against the right source: if
-it hadn't, the main checkout would disagree with the baselines it was just
-handed. Verify the artifact, not the environment.
+Three things about that gate, each of which was wrong in an earlier version of
+this note:
+
+* **It is an `if`/`else`, not `cmd || echo`.** `pytest … || echo "DRIFT"` turns
+  a failed comparison into an exit-0 `echo`, and then the cleanup underneath it
+  runs unconditionally — the opposite of what the message says.
+* **Cleanup is on the success branch only**, and uses `--force` deliberately. A
+  real re-freeze leaves the worktree dirty, so plain `git worktree remove`
+  refuses it; relying on that refusal as the safety net means the recipe is
+  safe only in the one case where nothing changed.
+* **A local pass over `python,verify` is still not the whole corpus.** The
+  `parity` lanes are dispatch-only. Treat the local run as partial and get a
+  green exact-head full dispatch before calling a freeze verified.
+
+The drift step is what proves the freeze ran against the right source: if it
+hadn't, the main checkout would disagree with the baselines it was just handed.
+Verify the artifact, not the environment — but verify it over the lanes that
+MOVED, because a lane holding none of the changed baselines agrees with
+anything.
 
 Note the ordering, which matters more than it looks. `freeze.py`'s output lives
 only in the worktree until you copy it, so removing the worktree first — or with
