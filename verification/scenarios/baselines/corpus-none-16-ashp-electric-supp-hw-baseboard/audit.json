@@ -138,17 +138,18 @@
  },
  {
   "step": "selection",
-  "target": "Thermal Zone 1,Thermal Zone 2,Thermal Zone 3,Thermal Zone 4,Thermal Zone 5",
-  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "target": "Hot Water Loop",
+  "action": "UNRESOLVED: the proposed heating system uses MORE THAN ONE ENERGY TYPE on one plant, and the reference has NOT reconciled the capacity-ratio requirement of 8.4.4.9.(5) with the single-boiler requirement of 8.4.4.9.(6)(b) \u2014 neither article is claimed as satisfied for this plant, and a passing annual result is not evidence that they are",
   "inputs": {
+   "serving_plant": "Hot Water Loop",
    "proposed_energy_types": [
     "Electricity",
     "NaturalGas"
    ],
-   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
-   "reference_modelled_on": "single energy type"
+   "proposed_capacity_shares": "unavailable without sizing",
+   "reconciled": false
   },
-  "article": "8.4.4.9.(5)",
+  "article": "8.4.4.9.(5); 8.4.4.9.(6)(b)",
   "building": "reference building",
   "level": "warning"
  },
