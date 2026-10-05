@@ -6163,6 +6163,40 @@ in the plan log.
   failed, the repair comes before the next item. Sol raised this, on a
   diagnosis Claude produced and Sol verified; see [D-95](#d-95) for the merge
   rule that removes the cause.
+- **Review depth is tiered by what the change can break (added 2026-10-05).**
+  phylroy asked whether nine review rounds across two PRs were worth it. The
+  honest answer was that the first rounds paid and the later ones found
+  variants of one class, and that the rounds were being spent on the wrong
+  things — more scrutiny went into the tool that checks our checks than into
+  anything a building engineer sees. So the loop above applies in full to
+  changes that can reach a compliance outcome, and is deliberately shallower
+  elsewhere:
+
+  | tier | what it covers | review |
+  |---|---|---|
+  | **compliance** | product code that can change an audit entry, a verdict, a sized capacity, a citation, or a frozen baseline's content | the full loop — Sol, then Fable, every round until all three agree |
+  | **verification** | the harness, provenance, freeze machinery, CI wiring — anything whose defects are visible and recoverable without a wrong answer reaching a reader | ONE adversarial round, then merge on clearance; further variants of a found class are filed, not chased |
+  | **tooling** | developer scripts nothing imports (`python/scripts/mutate.py` and the like) | self-review under the red-test rule below; no adversarial round |
+
+  The tiering is about DEPTH, never about rigour: a tooling change still needs
+  its mutation evidence and its tests, and a verification change still needs
+  its re-freeze. What changes is how many adversarial rounds a found class
+  earns.
+
+- **A negative test must be SHOWN to go red (added 2026-10-05).** The rule
+  that would have prevented most of the rounds that prompted the tiering. Six
+  times in one session Claude wrote a check that MODELLED a property instead
+  of exercising it — a grep for a regex anchor that passed while the anchor
+  was dropped from one entry, a mutation row that reported a failure a later
+  fix had made impossible, two greps standing in for "the producer is not a
+  gate", a grep that failed because the forbidden string sat in its own
+  docstring, and a negative test that injected its impossible value AFTER the
+  load it was meant to guard. Each passed; none could fail for the reason it
+  claimed. So: before a negative test is offered as evidence, install the
+  defect it exists to catch and watch it go red. Not reasoned about — run.
+  Reporting a check as evidence without that step is the same error as
+  reporting a frozen lane that holds none of the changed baselines.
+
 - **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
   directly, so neither GitHub nor phylroy carries messages. Claude watches
   `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
