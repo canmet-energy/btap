@@ -327,3 +327,93 @@ class TestDesignDayAuditTellsTheTruth(unittest.TestCase):
                      and e["level"] == "decision")
         self.assertNotIn("JUL", entry["value"],
                          "the audit value must not list a monthly day either")
+
+    @needs_sdk
+    def test_a_PARTIAL_match_the_OTHER_WAY_names_heating(self):
+        """Fable's M1: the ternary's other arm was never exercised.
+
+        All three partial tests used `_ddy_with_only("heating")` — the
+        MISSING-COOLING sub-state — so `missing = "cooling" if not kept_cooling
+        else "heating"` was pinned on one arm, and hardcoding it to `"cooling"`
+        SURVIVED mutation. If that arm broke, a DDY with a cooling extreme and
+        no heating one would announce "NO COOLING design day matched" and warn
+        that COOLING equipment autosizes without a design condition, while the
+        actual gap is heating: a false AHJ-facing claim naming the WRONG KIND.
+
+        No baseline can ever catch this — the partial branch is unreachable in
+        the corpus by construction — so these assertions are the only thing
+        holding the text true.
+        """
+        from btap.audit import AuditLog
+
+        ddy = self._ddy_with_only("cooling")
+        audit = AuditLog()
+        model = load_fixture()
+        runner.attach_weather(model, epw=str(EPW), ddy=str(ddy), audit=audit)
+
+        entry = next(e for e in audit.entries if e.get("ruling") == "D-25"
+                     and e["level"] == "decision")
+        inputs = entry["inputs"]
+        self.assertFalse(inputs["kept_all_as_fallback"],
+                         "precondition: not the total-miss fallback")
+        self.assertEqual(0, inputs["design_days_kept_heating"],
+                         "precondition: no heating extreme may have matched")
+        self.assertGreater(inputs["design_days_kept_cooling"], 0,
+                           "precondition: a cooling extreme must have matched")
+
+        self.assertIn("NO HEATING", entry["action"],
+                      "the missing kind is HEATING here, not cooling")
+        self.assertNotIn("NO COOLING", entry["action"])
+
+        warnings = [e for e in audit.entries if e["level"] == "warning"
+                    and e.get("ruling") == "D-25"]
+        self.assertEqual(1, len(warnings))
+        self.assertIn("heating", warnings[0]["action"],
+                      "the warning must name the kind that is actually absent")
+        self.assertNotIn("cooling equipment", warnings[0]["action"])
+
+    @needs_sdk
+    def test_the_FALLBACK_per_kind_counts_describe_what_was_attached(self):
+        """Fable's M2: nothing asserted the per-kind counts on the fallback.
+
+        The counts are computed AFTER the fallback substitutes the whole file,
+        so on a fallback they must describe the whole file. Moving them back
+        above the substitution no longer crashes — the `partial` guard makes
+        `missing` unreachable there — but it WOULD report
+        `heating=0, cooling=0` while 78 days are attached: a false evidence
+        pair in the one state whose entire point is that everything was kept.
+
+        This is also what makes the matrix row claiming to catch that mutation
+        meaningful again; without this assertion the row reported a difference
+        it could no longer detect.
+        """
+        from btap.audit import AuditLog
+
+        ddy = self._ddy_with_no_extremes()
+        audit = AuditLog()
+        model = load_fixture()
+        runner.attach_weather(model, epw=str(EPW), ddy=str(ddy), audit=audit)
+        entry = next(e for e in audit.entries if e.get("ruling") == "D-25"
+                     and e["level"] == "decision")
+        inputs = entry["inputs"]
+        self.assertTrue(inputs["kept_all_as_fallback"],
+                        "precondition: this DDY must trigger the fallback")
+
+        heating = inputs["design_days_kept_heating"]
+        cooling = inputs["design_days_kept_cooling"]
+        self.assertGreater(heating + cooling, 0,
+                           "the fallback attached the WHOLE file, so the "
+                           "per-kind counts cannot both be zero — reporting "
+                           "0/0 beside a kept count of 78 is a false evidence "
+                           "pair")
+        # They do NOT sum to the total, and an earlier version of this test
+        # wrongly asserted that they do. The shipped Toronto DDY's 78 days are
+        # 4 `Htg`, 12 `Clg`, 2 `Hum_n` (humidity) and 60 MONTH-NAMED days
+        # (`January .4% Condns DB=>MCWB`), so most attached days are neither
+        # heating nor cooling by name. The counts are a floor on each kind,
+        # not a partition of the file.
+        self.assertLessEqual(
+            heating + cooling, inputs["design_days_kept"],
+            "a per-kind count cannot exceed what was attached")
+        self.assertGreater(heating, 0, "the file carries Htg design days")
+        self.assertGreater(cooling, 0, "the file carries Clg design days")
