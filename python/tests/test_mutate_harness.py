@@ -74,7 +74,36 @@ class _Harness(unittest.TestCase):
         # point the harness at this tree instead of the repository's
         self.mutate.PYTHON_ROOT = self.root
 
-    def run_matrix(self, mutations, tests=("tests/test_probe.py",), jobs=2):
+    #: Every verdict the tool can print for one row. Used to assert that
+    #: EXACTLY ONE appears — `assertIn` cannot see a second verdict emitted
+    #: alongside the first, and with this many states that is the natural
+    #: defect (Fable, PR #81).
+    VERDICTS = ("*** SURVIVED ***", "*** CAUGHT BY SOMETHING ELSE ***",
+                "*** UNVIABLE (no test failed) ***",
+                "*** MIXED (failure + error) ***", "*** ERROR ***",
+                "caught (as declared)", "caught", "BROKEN")
+
+    def assert_exactly_one_verdict(self, out, label, expected):
+        """The row for `label` carries `expected` and no other verdict."""
+        rows = [ln for ln in out.splitlines()
+                if ln.strip().startswith(label)]
+        self.assertEqual(1, len(rows),
+                         f"expected one row for {label!r}, got {rows}")
+        row = rows[0]
+        present = [v for v in self.VERDICTS if v in row]
+        # "caught" is a substring of "caught (as declared)", so compare on the
+        # longest match rather than counting overlaps.
+        longest = max(present, key=len) if present else None
+        self.assertEqual(
+            expected, longest,
+            f"row for {label!r} should read {expected!r}: {row!r}")
+        others = [v for v in present
+                  if v != expected and v not in expected and expected not in v]
+        self.assertEqual([], others,
+                         f"a second verdict leaked onto the row: {others}")
+
+    def run_matrix(self, mutations, tests=("tests/test_probe.py",), jobs=2,
+                   timeout=None):
         spec = {"target": "btap/simulation/probe.py",
                 "tests": list(tests), "mutations": mutations}
         path = self.root / "matrix.json"
@@ -82,9 +111,12 @@ class _Harness(unittest.TestCase):
         import contextlib
         import io
 
+        argv = [str(path), "-j", str(jobs)]
+        if timeout is not None:
+            argv += ["--timeout", str(timeout)]
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            code = self.mutate.main([str(path), "-j", str(jobs)])
+            code = self.mutate.main(argv)
         return code, buffer.getvalue()
 
 
@@ -152,15 +184,89 @@ class TestFalseGreens(_Harness):
         self.assertEqual(1, code)
 
     def test_an_honest_row_is_caught_as_declared_and_exits_zero(self):
-        """The control. Without this the tests above could pass vacuously."""
+        """THE CONTROL — the only proof the tool can say "yes".
+
+        Fable corrected my reasoning about this test. I worried that if it
+        passed for the wrong reason the others would be vacuous; they would
+        not, since each asserts exit 1 or 2 and its own verdict
+        independently. Its unique job is narrower and real: without it, a
+        harness that ALWAYS reported a problem would satisfy every other case
+        here.
+
+        It asserts EXACTLY ONE verdict, not merely that the right one is
+        present — a spurious second verdict printed on every row went
+        undetected by `assertIn`.
+        """
         code, out = self.run_matrix([{
             "label": "honest",
             "old": "MARKER = 'ORIGINAL'",
             "new": "MARKER = 'CHANGED'",
             "expect_failures": ["test_marker_is_original"],
         }])
-        self.assertIn("caught (as declared)", out, out)
+        self.assert_exactly_one_verdict(out, "honest", "caught (as declared)")
         self.assertEqual(0, code, out)
+
+    def test_an_UNDECLARED_row_that_fails_is_plain_caught(self):
+        """The other arm of the ternary whose declared arm is covered."""
+        code, out = self.run_matrix([{
+            "label": "undeclared",
+            "old": "MARKER = 'ORIGINAL'",
+            "new": "MARKER = 'CHANGED'",
+        }])
+        self.assert_exactly_one_verdict(out, "undeclared", "caught")
+        self.assertIn("no row declared `expect_failures`", out,
+                      "the footer must say the wrong-reason case is "
+                      "undetectable without declarations")
+        self.assertEqual(0, code, out)
+
+    def test_a_hanging_mutant_is_ERROR_and_exits_nonzero(self):
+        """The `rc is None` path — a false green once already, since it was
+        labelled ERROR and then left out of the exit condition."""
+        code, out = self.run_matrix([{
+            "label": "hangs",
+            "old": "MARKER = 'ORIGINAL'",
+            "new": "MARKER = 'ORIGINAL'\nimport time as _t; _t.sleep(90)",
+            "expect_failures": ["test_marker_is_original"],
+        }], timeout=10)
+        self.assert_exactly_one_verdict(out, "hangs", "*** ERROR ***")
+        self.assertEqual(1, code, out)
+
+
+class TestItCanReportItsOwnReasonForExisting(_Harness):
+    """SURVIVED had no test, and that is the worst gap this tool could have.
+
+    Fable replaced the `rc == 0` branch's verdict with `caught (as declared)`
+    and dropped the `survived.append(label)` — and all eleven other cases
+    still passed. So if that branch ever broke, `mutate.py` would report EVERY
+    mutation as caught, exit 0, and hand the next user a clean bill of health
+    on a suite that pins nothing.
+
+    In its words: the harness built to catch checks that cannot fail had no
+    check that it can report a failure to catch. `SURVIVED` appeared in this
+    file only inside the NAME of a test asserting its ABSENCE.
+    """
+
+    def test_a_mutation_no_test_observes_is_reported_SURVIVED(self):
+        """`ALT` is in the probe module and no test reads it."""
+        code, out = self.run_matrix([{
+            "label": "unobserved",
+            "old": "ALT = 'ORIGINAL'",
+            "new": "ALT = 'CHANGED'",
+        }])
+        self.assert_exactly_one_verdict(out, "unobserved", "*** SURVIVED ***")
+        self.assertIn("the tests do not pin", out, out)
+        self.assertEqual(1, code, "a survivor is a finding and must exit 1")
+
+    def test_a_surviving_row_is_named_in_the_footer(self):
+        """The label has to reach the summary, not only the row."""
+        _, out = self.run_matrix([{
+            "label": "unobserved-footer",
+            "old": "ALT = 'ORIGINAL'",
+            "new": "ALT = 'CHANGED'",
+        }])
+        tail = out[out.index("wall for"):]
+        self.assertIn("unobserved-footer", tail,
+                      "a survivor must be named where a reader looks last")
 
 
 class TestContainment(_Harness):
