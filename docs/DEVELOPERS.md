@@ -199,7 +199,8 @@ than by tidying:
 set -euo pipefail                 # a failing step must STOP, not continue
 REPO=$(pwd)                       # the main checkout
 WT=/tmp/freeze-$(git rev-parse --short HEAD)
-GUARD=/tmp/freeze-guard-$$.py     # OUTSIDE $WT — see below
+GUARD=$(mktemp -t freeze-guard-XXXXXX.py)   # OUTSIDE $WT — see below
+trap 'rm -f "$GUARD"' EXIT                  # removed on failure too
 PY=$REPO/python/.venv/bin/python  # one interpreter for every step
 
 git worktree add --detach "$WT" HEAD
@@ -221,6 +222,11 @@ export PYTHONPATH="$WT/python"
 # --porcelain` report `?? _assert_source.py`, and freeze.py checks exactly
 # that — so the freeze refuses immediately after the guard passes, and no
 # clean-tree freeze can follow. Sol hit this by running the recipe.
+#
+# `mktemp`, not `/tmp/freeze-guard-$$.py`: a predictable path on a shared
+# host is a symlink-following write waiting to happen, since `cat >` follows
+# an existing symlink. The `trap` removes it on failure as well as success,
+# so a refused freeze leaves no stale guard behind (Sol, PR #76).
 cat > "$GUARD" <<'GUARD_EOF'
 import pathlib, sys
 import btap
@@ -229,7 +235,6 @@ want = pathlib.Path(sys.argv[1]).resolve() / "python"
 sys.exit(0 if p.is_relative_to(want) else f"WRONG SOURCE: {p} not under {want}")
 GUARD_EOF
 "$PY" "$GUARD" "$WT"               # script mode, like the freezer
-rm -f "$GUARD"
 
 # ...and the worktree must still be clean at the moment of freezing.
 test -z "$(git -C "$WT" status --porcelain)" || {
@@ -251,12 +256,27 @@ cp "$WT/verification/scenarios/manifest.json" \
    "$REPO/verification/scenarios/manifest.json"
 
 # A shrunken scenario set leaves obsolete TRACKED baselines behind, because
-# the copy above is an overlay. List them; remove them only if the freeze
-# intended to.
-git -C "$WT" ls-files verification/scenarios/baselines > /tmp/freeze-kept-$$
-git -C "$REPO" ls-files verification/scenarios/baselines \
-  | comm -13 /tmp/freeze-kept-$$ - || true   # tracked here, absent there
-rm -f /tmp/freeze-kept-$$
+# the copy above is an overlay. `git ls-files --deleted` IN THE WORKTREE is
+# the only query that sees them.
+#
+# An earlier version compared the two checkouts' plain `git ls-files` output.
+# That reads the INDEX, not the working tree, and both checkouts start at the
+# same commit — so a baseline `freeze.py` removed is STILL LISTED in $WT's
+# index, and the comparison printed nothing precisely when a scenario had been
+# removed. Reproduced in a scratch repo: after deleting a tracked baseline,
+# `git status --short` shows ` D`, plain `ls-files` still lists it, and only
+# `--deleted` reports it (Sol, PR #76).
+#
+# And this STOPS rather than warning. A removed baseline must be reviewed and
+# `git rm`-ed deliberately, and the `|| true` on the old inventory meant a
+# broken query looked identical to a clean one.
+DELETED=$(git -C "$WT" ls-files --deleted -- verification/scenarios/baselines)
+if [ -n "$DELETED" ]; then
+  echo "the freeze REMOVED tracked baselines — review them, git rm them in"
+  echo "$REPO deliberately, then re-run the drift check:"
+  printf '%s\n' "$DELETED"
+  exit 1
+fi
 
 # THE DRIFT CHECK, from the MAIN checkout, over THE LANES YOU ACTUALLY MOVED.
 # `test_frozen_scenarios.py` defaults to BTAP_SCENARIO_LANES=python, the
@@ -299,7 +319,9 @@ of this note:
   underneath runs unconditionally, the opposite of what the message says.
 * **No destructive mirror into the shared tree.** `rsync --delete` would
   remove a colleague's untracked files from `baselines/`. Tracked deletions
-  are listed for a deliberate `git rm` instead.
+  are reported by `git ls-files --deleted` **in the worktree** — comparing the
+  two checkouts' indices printed nothing exactly when a scenario had been
+  removed — and the recipe **stops** so they are removed deliberately.
 * **The worktree outlives a partial check.** Local lanes are not the whole
   corpus, so the freeze output is kept until a full dispatch has verified the
   lanes that only run there.
