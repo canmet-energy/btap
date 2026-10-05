@@ -145,6 +145,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-95** — Freeze-carrying PRs merge with a merge commit, not a squash or rebase _(process)_
 - **D-96** — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later _(process)_
 - **D-97** — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones _(runtime)_
+- **D-98** — A baseline records its producer; freezing stays local until an image digest is obtainable _(process)_
 
 <!-- TOC END -->
 
@@ -6443,3 +6444,105 @@ in the plan log.
 - **Who/when:** Sol ruled, 2026-09-28. Numbered D-97 rather than the D-96 the
   ruling named, because D-96 was taken by the relicence while this question was
   in flight.
+
+<a id="d-98"></a>
+
+## D-98 — a baseline records its producer; freezing stays local until an image digest is obtainable
+
+- **Decision:** the frozen manifest records a `producer` block naming the
+  engine stack that produced it. Freezing remains **local-only**;
+  service-only freezing is rejected, and freezing in the pinned CI image is
+  the intended follow-on rather than this change.
+- **Who/when:** phylroy, 2026-10-05, on Sol's ruling. phylroy raised the gap;
+  Sol adjudicated the freeze contract; Claude measured.
+
+### What was and was not already pinned
+
+The manifest pinned the **source** of a baseline and never its **producer**:
+
+| fact | pinned before this | by what |
+|---|---|---|
+| source code | yes | `commit` + `runner_sha256`, `freezer_sha256`, `api_worker_sha256` |
+| weather bytes | yes | the same commit — `python/tests/fixtures/weather/*.epw`/`.ddy` are **tracked** |
+| engine stack | **no** | `openstudio_cli`, a version string only |
+
+That the weather is committed matters more than it first appears: it means a
+*local* freeze's weather provenance was already complete, and the whole
+weather-revision problem belongs to remote execution rather than to the freeze
+contract.
+
+`openstudio_cli` is a value a machine *reports*. Two hosts can both report
+`3.11.0+241b8abb4d` while running different EnergyPlus builds, and CI never
+freezes, so the producer has always been whichever developer machine ran
+`freeze.py`. Sol's words: this "is not a claim that a developer's laptop is a
+controlled baseline producer."
+
+### A record, not a gate
+
+```
+openstudio         3.11.0+241b8abb4d
+energyplus         25.2.0-cf7368216c     <- the BUILD HASH, which a bare version hides
+python             3.12.3
+platform           Linux-...-WSL2-x86_64-with-glibc2.39
+container_digest   null                  <- only CI can fill this
+```
+
+No test compares these against the running machine, deliberately. A baseline
+frozen on one host must remain verifiable on another — that is what the frozen
+corpus is for. What they buy is **attribution**: when a baseline moves, the
+diff says whether the engine underneath it moved too.
+
+Every probe fails **soft**. An identity that cannot be read is recorded as
+absent, because an exception would stop the freeze while "unknown" is honest.
+
+### Why not the service
+
+Rejected, on Sol's ruling. The simulation request carries a station id and
+format — **not** a requestable weather revision, nor a hash of the bytes the
+job used — so mirroring today's service file and diffing it does not bind
+tomorrow's job to those bytes.
+
+The drift is real. Station 716240, same `CWEC2020` label:
+
+| | fixture | service, 2026-10-04 |
+|---|---|---|
+| design conditions | ASHRAE 2021 | ASHRAE **2025** |
+| heating 99.6% | −18.5 °C | **−17.8 °C** |
+| design days | 81 | 117 |
+| 8 760 hourly rows | — | **byte-identical** |
+
+Adopting it moves **40 of 286** audit entries and sized capacity **52.0 →
+51.1 kW**. NECB efficiency tiers are capacity-banded, so a ~2% shift near a
+band edge can change which requirement applies. That weather is **not
+adopted**; a rebaseline onto it is its own adjudication, in the class of the
+`canmet-tbd` pin rather than dependency maintenance. `hbix#105` asks upstream
+for a content hash and a requestable revision, and is the prerequisite for
+reconsidering.
+
+Remote **verification** against committed baselines stays permitted, and
+`freeze.py` keeps refusing any non-local backend. One sizing scenario verified
+byte-identical local versus remote — `audit.json`, `audit.txt` and
+`report.json` — through the product CLI. That holds for a structural reason:
+D-25 attaches the design days **into** the model, so they travel in the
+uploaded IDF and the service's weather library cannot affect a sizing result.
+An annual run uses the service's hourly data, so the equality is **not**
+established there.
+
+### The follow-on, and why it is not this change
+
+Freezing in the pinned CI image is the stronger end state. It is **not
+known to be faster**: the 6-minute figure is a full verification *dispatch*,
+which never runs `freeze.py` and splits lanes across parallel jobs, while the
+freezer runs all 45 scenarios sequentially. A CI freeze has not been
+measured. And it is not available yet:
+
+- the image tag is `<openstudio version>-<sha256(Dockerfile)[:12]>`, which
+  pins the **recipe**, not the built bytes; the same Dockerfile rebuilds
+  differently as its base image and packages move;
+- no digest is recorded anywhere in the workflows;
+- a true `sha256:` digest is obtainable only where the image runs.
+
+So the follow-on is: `ci-image.yml` emitting the pushed digest, a freeze
+workflow running in that image and returning its output, and `freeze.py`
+filling `container_digest`. The fields recorded here are exactly what that end
+state records **plus** the digest, so nothing done now is wasted.

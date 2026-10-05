@@ -105,6 +105,13 @@ ALLOWLIST = {
                 "verification/oracle — the shared harness, not a gem tree"),
     },
     # --- cross-language (Leg B) and oracle (Leg C) tests --------------------
+    "python/tests/test_freeze_producer.py": {
+        "refs": ["verification/"],
+        "retires": "R1-adjudicated",
+        "why": ("tests the frozen manifest's producer provenance, which lives "
+                "in verification/scenarios — the shared harness, not a gem "
+                "tree"),
+    },
     "python/tests/support.py": {
         "refs": ["verification/"],
         "retires": "R1-adjudicated",

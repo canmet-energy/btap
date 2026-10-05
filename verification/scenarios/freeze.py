@@ -298,6 +298,129 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
             (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
 
 
+def producer_identity():
+    """What actually produced this freeze, as far as it can be established.
+
+    WHY THIS EXISTS. The manifest already pins the SOURCE — a commit, three
+    harness hashes, the sample manifest — and because the scenarios' weather
+    is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that commit
+    pins the weather bytes too. What it did not pin is the PRODUCER.
+    `openstudio_cli` is a version STRING a machine reports; two laptops can
+    report `3.11.0+241b8abb4d` while running different EnergyPlus builds, and
+    CI never freezes, so the producer has always been whichever developer
+    machine ran this script.
+
+    EVERYTHING IS PROBED IN THE WORKER INTERPRETER, not this one. Scenario
+    subprocesses run under `runner.python_exe()`, where `BTAP_PYTHON` takes
+    precedence, and the worker's `Local.execute` calls its OWN
+    `engine.ensure_energyplus()`. Probing `openstudio` and the engine here
+    recorded the DRIVER's stack: under a controlled override the record said
+    `python_worker=3.99.0` at `/other/python` while still reporting the
+    driver's OpenStudio and EnergyPlus — false provenance whenever the two
+    environments carry different builds (Sol, PR #80). The driver's own values
+    are kept beside them, labelled, so a divergence is visible rather than
+    hidden behind one ambiguous field.
+
+    A BARE VERSION IS REFUSED. The build suffix is the entire reason this
+    field exists — `25.2.0` is exactly what hides two engines — so a
+    successful probe returning `EnergyPlus, Version 25.2.0` records NULL
+    rather than a value that cannot distinguish anything.
+
+    These fields are a RECORD, NOT A GATE. Nothing compares them against the
+    running machine: a baseline frozen on one host must remain verifiable on
+    another, which is the point of the frozen corpus. What they buy is
+    attribution — when a baseline moves, the diff says whether the engine
+    underneath it moved too.
+
+    `container_digest` is the field this cannot fill. The CI image's tag is
+    `<openstudio version>-<sha256(Dockerfile)[:12]>`, which pins the RECIPE,
+    not the built bytes; a true `sha256:` digest is obtainable only where the
+    image runs, so it stays null until freezing happens there.
+
+    Every probe fails SOFT. A freeze must not break because an identity could
+    not be read; an absent field says "unknown", which is honest, where a
+    raised exception would just stop the work.
+    """
+    import platform
+    import re
+
+    #: A version WITH a build suffix. The suffix is mandatory: see the
+    #: docstring.
+    ENGINE_RE = re.compile(r"^\d+\.\d+\.\d+-[0-9A-Za-z]+$")
+
+    identity = {
+        "openstudio": None,
+        "energyplus": None,
+        "python_driver": platform.python_version(),
+        "python_worker": None,
+        "platform": platform.platform(),
+        "container_digest": None,
+    }
+
+    # One probe, in the interpreter that will actually run the scenarios.
+    probe = (
+        "import platform, sys\n"
+        "print('python', platform.python_version())\n"
+        "print('exe', sys.executable)\n"
+        "try:\n"
+        "    import openstudio\n"
+        "    print('openstudio', openstudio.openStudioLongVersion())\n"
+        "except Exception: pass\n"
+        "try:\n"
+        "    import subprocess\n"
+        "    from btap.simulation import engine\n"
+        "    out = subprocess.run([str(engine.ensure_energyplus()), "
+        "'--version'], capture_output=True, text=True, timeout=120)\n"
+        "    if out.returncode == 0:\n"
+        "        text = (out.stdout or out.stderr).strip()\n"
+        "        print('energyplus', text.split()[-1] if text else '')\n"
+        "except Exception: pass\n")
+    try:
+        runner._sys_path_python()
+        worker = runner.python_exe()
+        env = dict(os.environ)
+        env["PYTHONPATH"] = (str(runner.PYTHON_ROOT) + os.pathsep
+                             + env.get("PYTHONPATH", "")).rstrip(os.pathsep)
+        out = subprocess.run([str(worker), "-c", probe], capture_output=True,
+                             text=True, check=False, timeout=600, env=env)
+        if out.returncode == 0:
+            for line in out.stdout.strip().splitlines():
+                key, _, value = line.partition(" ")
+                value = value.strip()
+                if key == "python" and re.fullmatch(r"\d+\.\d+\.\d+", value):
+                    identity["python_worker"] = value
+                elif key == "exe" and value:
+                    identity["python_worker_executable"] = value
+                elif key == "openstudio" and value:
+                    identity["openstudio"] = value
+                elif key == "energyplus" and ENGINE_RE.match(value):
+                    identity["energyplus"] = value
+    except Exception:  # noqa: BLE001 — an unknown identity is not a failure
+        pass
+
+    # The DRIVER's own stack, beside the worker's, so a divergence is visible.
+    try:
+        import openstudio
+
+        identity["openstudio_driver"] = openstudio.openStudioLongVersion()
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from btap.simulation import engine
+
+        out = subprocess.run([str(engine.ensure_energyplus()), "--version"],
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
+        if out.returncode == 0:
+            text = (out.stdout or out.stderr).strip()
+            candidate = text.split()[-1] if text else ""
+            if ENGINE_RE.match(candidate):
+                identity["energyplus_driver"] = candidate
+    except Exception:  # noqa: BLE001
+        pass
+    return identity
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
@@ -431,6 +554,10 @@ def main():
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
+                # WHO produced this freeze. A record, never a gate — no
+            # test compares these against the running machine, because a
+            # baseline frozen on one host must stay verifiable on another.
+            "producer": producer_identity(),
             "active_seals": active_seals,
             "retired_seals": retired_seals,
             "final_cross_language_attestation": final_attestation,
