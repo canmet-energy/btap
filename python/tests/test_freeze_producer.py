@@ -187,26 +187,39 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
                     "python_worker", "platform", "container_digest"):
             self.assertIn(key, provenance["producer"])
 
-    def test_integrity_still_passes_with_an_IMPOSSIBLE_producer(self):
-        """The load-bearing test. Wherever a comparison is added, this fails.
+    def _integrity_with(self, producer, guard=None):
+        """Run the REAL `test_manifest_integrity` against a manifest whose
+        producer block is `producer`, optionally with `guard` wrapping
+        `load_manifest`.
 
-        IT TOUCHES NO SHARED FILE. The first version overwrote the tracked
-        `verification/scenarios/manifest.json` while a subprocess ran and
-        copied it back afterwards. CI runs the suite under `pytest -n auto`,
-        so another worker could read the impossible block — or a half-written
-        JSON file — and an interrupted process would leave the tracked
-        manifest altered. Sol demonstrated it: he ran the field-shape test
-        inside that window and it failed on `container_digest`. Writing to the
-        shared checkout to test a property of the shared checkout was the
-        wrong shape (Sol, PR #80).
+        THE INJECTION HAPPENS BEFORE `load_manifest`, which is Sol's
+        correction. My first version called `setUpClass()` — which calls the
+        real `runner.load_manifest()` on the UNMODIFIED manifest — and only
+        then swapped the class attribute. So a host-equality check inside
+        `load_manifest` never saw the impossible value: he installed exactly
+        such a check in memory and the test STILL PASSED, with instrumentation
+        showing the guard saw only the real `25.2.0-cf7368216c`. The claim
+        that this test detects a comparison "wherever someone puts it" was
+        false — and it missed the same path as the two greps before it.
 
-        Instead the REAL `test_manifest_integrity` runs in-process against an
-        INJECTED manifest: `TestFrozenScenarios` loads it once in
-        `setUpClass`, so replacing that attribute exercises the genuine
-        assertions — hashes, ancestry, counts — with a producer block no
-        machine can match.
+        The runner's `MANIFEST` is a module global read by `load_manifest`, so
+        pointing it at a temporary, otherwise-identical file puts the
+        impossible producer on the real load path. The tracked file is never
+        written, which is asserted at the end.
         """
         import importlib.util
+        import shutil
+        import tempfile
+
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        manifest["provenance"]["producer"] = dict(producer)
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        injected = directory / "manifest.json"
+        injected.write_text(json.dumps(manifest, indent=1) + "\n",
+                            encoding="utf-8")
+        before = MANIFEST.read_bytes()
 
         spec_path = (REPO_ROOT / "python" / "tests" / "necb"
                      / "test_frozen_scenarios.py")
@@ -216,52 +229,65 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
         sys.modules[spec.name] = module
         try:
             spec.loader.exec_module(module)
+            original_load = module._load
+
+            def patched_load(name, path):
+                loaded = original_load(name, path)
+                if name == "scenario_runner":
+                    loaded.MANIFEST = injected
+                    if guard is not None:
+                        inner = loaded.load_manifest
+                        loaded.load_manifest = lambda: guard(inner())
+                return loaded
+
+            module._load = patched_load
             case = module.TestFrozenScenarios
             try:
                 case.setUpClass()
             except unittest.SkipTest as skip:
                 self.skipTest(f"frozen-scenario prerequisites absent: {skip}")
             try:
-                # the injection: only the producer block, nothing else
-                case.manifest = json.loads(json.dumps(case.manifest))
-                case.manifest["provenance"]["producer"] = dict(self.IMPOSSIBLE)
-                instance = case("test_manifest_integrity")
-                instance.test_manifest_integrity()
+                case("test_manifest_integrity").test_manifest_integrity()
             finally:
                 case.tearDownClass()
         finally:
             sys.modules.pop(spec.name, None)
 
-        # If that raised, the producer has become load-bearing somewhere.
-        self.assertEqual(
-            dict(self.IMPOSSIBLE), case.manifest["provenance"]["producer"],
-            "sanity: the impossible block must have been the one in play")
-
-    def test_the_live_manifest_is_never_modified_by_these_tests(self):
-        """Pins the fix above, not just the behaviour it replaced.
-
-        A future edit reaching for the simpler write-and-restore approach
-        would reintroduce a test that can corrupt a parallel run.
-        """
-        before = MANIFEST.read_bytes()
-        mtime = MANIFEST.stat().st_mtime_ns
-        self.test_integrity_still_passes_with_an_IMPOSSIBLE_producer()
         self.assertEqual(before, MANIFEST.read_bytes(),
-                         "the tracked manifest must be byte-identical after "
-                         "the negative test runs")
-        self.assertEqual(mtime, MANIFEST.stat().st_mtime_ns,
-                         "the tracked manifest must not even be REWRITTEN "
-                         "with identical bytes — a parallel worker reading it "
-                         "mid-write sees a truncated file")
+                         "the tracked manifest must never be written")
 
-        # NO SOURCE GREP HERE, and the reason is worth recording. The first
-        # version of this test asserted `"MANIFEST.write_text" not in` its own
-        # source — and FAILED, because that string appears in the docstring
-        # above describing what not to do. A check that greps for a
-        # prohibition is a check modelling itself: it can fail for the wrong
-        # reason, as that did, and pass while the prohibited thing happens by
-        # another spelling. The byte-and-mtime comparison above is the
-        # property; it needs no help.
+    def test_integrity_still_passes_with_an_IMPOSSIBLE_producer(self):
+        """The property: a baseline frozen on one host verifies on another."""
+        self._integrity_with(self.IMPOSSIBLE)
+
+    def test_the_negative_test_DETECTS_a_host_gate_in_load_manifest(self):
+        """PROOF that the test above can fail — Sol's requirement.
+
+        A negative test nobody has seen fail is a claim, not a check. This
+        installs the future mistake it exists to prevent — a host comparison
+        inside `load_manifest` — and requires the path to go RED. Without it,
+        the test above passes on the freezer's own host whatever the loader
+        does, which is precisely how the previous two attempts were hollow.
+        """
+        import platform
+
+        def host_gate(manifest):
+            producer = manifest["provenance"]["producer"]
+            if producer.get("python_driver") != platform.python_version():
+                raise AssertionError(
+                    "this manifest was frozen on a different host")
+            return manifest
+
+        with self.assertRaises(AssertionError) as caught:
+            self._integrity_with(self.IMPOSSIBLE, guard=host_gate)
+        self.assertIn("different host", str(caught.exception),
+                      "the injected gate must be what failed, not something "
+                      "incidental")
+
+    def test_the_guard_harness_does_not_fail_on_its_own(self):
+        """The control for the control: a PASS-THROUGH guard must not break
+        the path, or the test above could be red for an unrelated reason."""
+        self._integrity_with(self.IMPOSSIBLE, guard=lambda manifest: manifest)
 
     def test_the_field_shapes_are_checked_separately(self):
         """The POSITIVE check, kept apart from the negative one above.
