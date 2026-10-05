@@ -75,6 +75,13 @@ class TestRemote(unittest.TestCase):
         run_dir = Path(self.tmp.name) / "run"
         run_dir.mkdir(parents=True, exist_ok=True)
         model = load_fixture()
+        # What `run_energyplus` sets before handing a dir to a backend. Without
+        # these the backend's own guard refuses the dir, and this helper is named
+        # for a PREPARED dir — so it must prepare one faithfully.
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)
+        sim.setDoSystemSizingCalculation(True)
+        sim.setDoPlantSizingCalculation(True)
         model.save(openstudio.path(str(run_dir / "in.osm")), True)
         return run_dir
 

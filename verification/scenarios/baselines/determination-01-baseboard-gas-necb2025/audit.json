@@ -38,6 +38,23 @@
  },
  {
   "step": "climate",
+  "target": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
+  "action": "design days replaced, not appended, and filtered to the annual extremes \u2014 the building is sized on the 99.6% heating and 0.4% cooling days only",
+  "inputs": {
+   "design_days_discarded": 7,
+   "design_days_in_file": 78,
+   "design_days_kept": 3,
+   "design_days_kept_heating": 1,
+   "design_days_kept_cooling": 2,
+   "kept_all_as_fallback": false
+  },
+  "value": "Toronto Intl AP Ann Clg .4% Condns DB=>MWB, Toronto Intl AP Ann Clg .4% Condns WB=>MDB, Toronto Intl AP Ann Htg 99.6% Condns DB",
+  "ruling": "D-25",
+  "building": "proposed building",
+  "level": "decision"
+ },
+ {
+  "step": "climate",
   "action": "HDD from nearest NECB Table C-1 city",
   "inputs": {
    "city": "Mississauga (Lester B. Pearson Int'l Airport), ON",
@@ -1499,7 +1516,7 @@
   "action": "Hydronic Pumps \u2014 implemented: Table 8.4.5.14. riding-curve coefficients + below-D minimum-flow clamp on every reference PumpVariableSpeed ((4)-(5)), applied POST-SIZING by the efficiency pass; proposed combined peak W/(L/s) per plant-loop type transferred to reference pump rated power ((1)-(3), needs the sized proposed via apply_efficiencies proposed:) \u2014 unknown proposed pumps or unsized flows warn loudly. D-38: the transferred power is then clamped min-wins at the Table 5.2.6.3 combined-pump maximum (W per kW of loop peak thermal demand; 8.4.5.1.(2) makes Part 5 a ceiling for the reference).",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 2,
+   "decisions_citing": 1,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#_apply_pump_rules"
    ]
@@ -2158,7 +2175,7 @@
   "action": "Lightweight construction + space thermal characteristics \u2014 implemented: opaque assemblies rebuilt as a single light-frame layer calibrated to the thermal-mass Note's wood-frame example (40.8 kg/m2, 45.5 kJ/(m2.K)) at unchanged Ut; space thermal characteristics satisfied by clone",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 3,
+   "decisions_citing": 2,
    "code": [
     "python/btap/codes/necb/envelope/reference.py#_apply_lightweight_construction"
    ]
