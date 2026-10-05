@@ -244,13 +244,24 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
         would reintroduce a test that can corrupt a parallel run.
         """
         before = MANIFEST.read_bytes()
+        mtime = MANIFEST.stat().st_mtime_ns
         self.test_integrity_still_passes_with_an_IMPOSSIBLE_producer()
         self.assertEqual(before, MANIFEST.read_bytes(),
                          "the tracked manifest must be byte-identical after "
                          "the negative test runs")
-        source = Path(__file__).read_text(encoding="utf-8")
-        self.assertNotIn("MANIFEST.write_text", source,
-                         "this module must not write the tracked manifest")
+        self.assertEqual(mtime, MANIFEST.stat().st_mtime_ns,
+                         "the tracked manifest must not even be REWRITTEN "
+                         "with identical bytes — a parallel worker reading it "
+                         "mid-write sees a truncated file")
+
+        # NO SOURCE GREP HERE, and the reason is worth recording. The first
+        # version of this test asserted `"MANIFEST.write_text" not in` its own
+        # source — and FAILED, because that string appears in the docstring
+        # above describing what not to do. A check that greps for a
+        # prohibition is a check modelling itself: it can fail for the wrong
+        # reason, as that did, and pass while the prohibited thing happens by
+        # another spelling. The byte-and-mtime comparison above is the
+        # property; it needs no help.
 
     def test_the_field_shapes_are_checked_separately(self):
         """The POSITIVE check, kept apart from the negative one above.

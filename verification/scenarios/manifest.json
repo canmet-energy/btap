@@ -2,9 +2,9 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "723ca7169d374137ff1d6d23ef8c88801d8614f1",
+  "commit": "0546115d79479fd9f9a6f02ebd8171899fac185b",
   "dirty": false,
-  "freezer_sha256": "1ded6d45e97bf03b9f5a5a74982e4a9e863729d736ecb06e924f89abfe8e4300",
+  "freezer_sha256": "4d8c2ff76da26c5c75e95001c1e3405b78b33a4f163edcf5ff2032cde341804d",
   "defs_sha256": "2bfd5c1a9f7e5dbca537987c4352b892328811baaf37939b9f8902cf5a961a67",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
@@ -19,7 +19,9 @@
    "python_worker": "3.12.3",
    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
    "container_digest": null,
-   "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python"
+   "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python",
+   "openstudio_driver": "3.11.0+241b8abb4d",
+   "energyplus_driver": "25.2.0-cf7368216c"
   },
   "active_seals": {
    "python-only:post-handoff": 31,
