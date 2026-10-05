@@ -1921,6 +1921,36 @@ def _energy_type_variant(fuel):
     return None
 
 
+def _heating_allocation(group, facts):
+    """``(shares, watts_by_fuel)`` for a multi-energy heating group, or None.
+
+    8.4.4.9.(5) ratios the proposed building's heating equipment CAPACITY
+    allocation per energy type. `classify` records that allocation on the
+    plant it belongs to; this finds the plant serving THIS group by fuel-set
+    intersection and returns the shares when every capacity is known.
+
+    Returns None when the allocation cannot be established — an autosized
+    plant, no sizing run, or more than one candidate plant. That is the common
+    case rather than the edge: every multi-fuel plant in the sample corpus is
+    autosized, and a `--simulate none` run never sizes at all. The caller must
+    say UNKNOWN rather than guess a fraction (Sol, `110`).
+    """
+    wanted = {str(f) for f in group.get('heating_energy_types') or ()}
+    candidates = [pl for pl in (facts.get('plants') or ())
+                  if pl.get('type') == 'hot_water'
+                  and wanted & set(pl.get('fuels') or ())]
+    if len(candidates) != 1:
+        return None
+    watts = candidates[0].get('fuel_capacities_w') or {}
+    known = {f: w for f, w in watts.items() if w}
+    if len(known) < 2 or len(known) != len(watts):
+        return None
+    total = sum(known.values())
+    if total <= 0:
+        return None
+    return {f: w / total for f, w in known.items()}, known
+
+
 def _reference_energy_type(group, selection, facts, audit):
     """8.4.4.9.(4)/8.4.4.10.(3): reference energy type follows the proposed system;
     8.4.4.6.(1): purchased heating is represented by a gas-fired boiler.
@@ -1940,6 +1970,74 @@ def _reference_energy_type(group, selection, facts, audit):
                        inputs={'part_load_curve_class': part_load_curve_class},
                        article=purchased_heating['article'], ruling='D-89')
         return 'gas', part_load_curve_class
+    # MULTI-ENERGY: 8.4.4.9.(5) / 8.4.4.10.(4) require the reference's
+    # capacities to match the proposed allocation per energy type. We do NOT
+    # do that, and the reason is a Code conflict rather than an omission:
+    # 8.4.4.9.(6) configures a hydronic reference plant as ONE single-stage
+    # boiler at or below 176 kW, TWO BOILERS OF EQUAL CAPACITY (or a
+    # two-staged boiler) between 176 and 352 kW, and "a boiler" modulating to
+    # 25% above that. Every band is singular or equal-split, so a proposed
+    # 60/40 allocation cannot be represented without breaking (6) — a
+    # requirement we currently satisfy. Splitting the plant would trade a met
+    # requirement for a contested reading of another.
+    #
+    # So the collapse stays, and STOPS BEING SILENT. Previously a dual-fuel
+    # proposed plant became a gas reference with nothing in the audit saying
+    # a Code requirement had been set aside; a reader could not tell. The
+    # tiebreak is also no longer positional: the fuel with the largest
+    # proposed capacity wins where the allocation is known, which is more
+    # defensible under 8.4.4.9.(4) than "gas appears first in the cascade".
+    #
+    # NOT claimed as compliance with (5): coverage stays `partial`.
+    # No `!= 'Purchased'` filter: the purchased branch above has already
+    # RETURNED for any group carrying it, so excluding it here is dead code —
+    # the mutation matrix proved that by surviving its removal. 8.4.4.6. owns
+    # purchased energy with its own capacity-share rule against the building
+    # total, and it never reaches this point (Sol's `110`).
+    distinct = {str(f) for f in fuels}
+    if len(distinct) > 1:
+        allocation = _heating_allocation(group, facts)
+        if allocation is None:
+            audit.warn(
+                'selection',
+                'proposed heating uses MORE THAN ONE ENERGY TYPE and the '
+                'capacity allocation is UNKNOWN (unsized plant) — the '
+                'reference is modelled on a single energy type, so '
+                '8.4.4.9.(5) is NOT satisfied for this group',
+                target=','.join(group['zones']),
+                inputs={'proposed_energy_types': sorted(distinct),
+                        'capacity_allocation': 'unknown — plant autosized or '
+                                               'no sizing run',
+                        'reference_modelled_on': 'single energy type'},
+                article='8.4.4.9.(5)')
+        else:
+            shares, watts = allocation
+            dominant = max(shares, key=shares.get)
+            audit.warn(
+                'selection',
+                'proposed heating uses MORE THAN ONE ENERGY TYPE — the '
+                'reference is modelled on the LARGEST-capacity type alone, '
+                'because 8.4.4.9.(6) permits no unequal split of the '
+                'reference plant; 8.4.4.9.(5) is NOT satisfied for this group',
+                target=','.join(group['zones']),
+                inputs={'proposed_energy_types': sorted(distinct),
+                        'capacity_shares': {f: round(s, 4)
+                                            for f, s in sorted(shares.items())},
+                        'capacity_w': {f: round(w, 1)
+                                       for f, w in sorted(watts.items())},
+                        'reference_modelled_on': dominant},
+                article='8.4.4.9.(5)')
+            # ONLY the electric case needs to return here. A fossil-dominant
+            # allocation falls through to the cascade below, which already
+            # prefers gas — so an explicit gas branch would be observationally
+            # equivalent and untestable, which the mutation matrix proved by
+            # surviving its removal. The capacity tiebreak therefore changes
+            # behaviour in exactly one direction: where ELECTRICITY holds the
+            # larger proposed capacity, the reference follows it instead of
+            # defaulting to gas by cascade position.
+            if 'Electric' in dominant:
+                return 'electric', None
+
     if any(re.search(r'gas|oil|propane', str(f), re.IGNORECASE) for f in fuels):
         return 'gas', None
     if 'Electricity' in fuels:

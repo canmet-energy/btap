@@ -21,7 +21,9 @@ cooling capacity) and by costing of foreign models.
           'design_cooling_kw': 42.0|None,
           'dcv': False, 'system_outdoor_air_method': 'ZoneSum'|None } ],
       'plants': [ { 'name':, 'type': 'hot_water'|'chilled_water'|'condenser'|'service_water'|'other',
-                    'fuels': ['NaturalGas'], 'purchased': False, 'heat_pump': False } ],
+                    'fuels': ['NaturalGas'],
+                    'fuel_capacities_w': {'NaturalGas': 176000.0, 'Electricity': None},
+                    'purchased': False, 'heat_pump': False } ],
       'purchased_energy': { 'heating': False, 'cooling': False }
     }
 """
@@ -134,10 +136,23 @@ def _plant_facts(loop, audit):
     heat_pump = False
     has_boiler = has_chiller = has_rejection = False
 
+    #: (fuel, watts|None) per heating device on this plant — see below.
+    allocation = []
     for comp in loop.supplyComponents():
         if comp.to_BoilerHotWater().is_initialized():
             has_boiler = True
-            fuels.append(comp.to_BoilerHotWater().get().fuelType())
+            boiler = comp.to_BoilerHotWater().get()
+            fuels.append(boiler.fuelType())
+            # 8.4.4.9.(5) ratios the proposed CAPACITY ALLOCATION per energy
+            # type, so the allocation is recorded here beside the fuels rather
+            # than re-derived later. Autosized capacity reads as None and the
+            # consumer must say "unknown" rather than guess a fraction —
+            # every multi-fuel plant in the sample corpus is autosized, so the
+            # unknown case is the common one, not the edge (Sol, `110`).
+            watts = (opt(boiler.nominalCapacity())
+                     or opt(boiler.autosizedNominalCapacity()))
+            allocation.append((boiler.fuelType(),
+                               float(watts) if watts is not None else None))
         elif comp.to_ChillerElectricEIR().is_initialized():
             has_chiller = True
             fuels.append('Electricity')
@@ -175,8 +190,20 @@ def _plant_facts(loop, audit):
     else:
         type_ = 'other'
 
+    # Per-energy-type capacity, summed across devices of the same fuel. A
+    # fuel whose devices are all autosized maps to None: the allocation is
+    # UNKNOWN until a sizing run, not zero.
+    by_fuel = {}
+    for fuel, watts in allocation:
+        if fuel not in by_fuel:
+            by_fuel[fuel] = watts
+        elif by_fuel[fuel] is not None and watts is not None:
+            by_fuel[fuel] += watts
+        else:
+            by_fuel[fuel] = None
     facts = {'name': loop.nameString(), 'type': type_,
              'fuels': list(dict.fromkeys(fuels)),
+             'fuel_capacities_w': by_fuel,
              'purchased': purchased, 'heat_pump': heat_pump}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
