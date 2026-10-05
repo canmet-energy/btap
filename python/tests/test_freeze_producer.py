@@ -220,6 +220,7 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
         injected.write_text(json.dumps(manifest, indent=1) + "\n",
                             encoding="utf-8")
         before = MANIFEST.read_bytes()
+        before_mtime = MANIFEST.stat().st_mtime_ns
 
         spec_path = (REPO_ROOT / "python" / "tests" / "necb"
                      / "test_frozen_scenarios.py")
@@ -255,6 +256,15 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
 
         self.assertEqual(before, MANIFEST.read_bytes(),
                          "the tracked manifest must never be written")
+        # MTIME AS WELL AS BYTES. A write-and-restore with IDENTICAL bytes
+        # evades a byte-only check, and Sol verified exactly that. It is not a
+        # hypothetical refactor hazard: I had this assertion, then deleted it
+        # by replacing this block by line range, and did not notice until he
+        # filed it. A parallel worker reading the file mid-write sees a
+        # truncated document whether or not the bytes end up the same.
+        self.assertEqual(before_mtime, MANIFEST.stat().st_mtime_ns,
+                         "the tracked manifest must not even be REWRITTEN "
+                         "with identical bytes")
 
     def test_integrity_still_passes_with_an_IMPOSSIBLE_producer(self):
         """The property: a baseline frozen on one host verifies on another."""
