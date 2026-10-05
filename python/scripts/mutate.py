@@ -84,6 +84,12 @@ PYTHON_ROOT = Path(__file__).resolve().parents[1]
 #: check. Deliberately generous.
 PER_RUN_MB = 600
 
+#: The ONLY pytest exit status that can mean "the suite ran and a test
+#: failed". 0 is all-passed, 2 interrupted, 3 internal error, 4 usage error,
+#: 5 nothing collected — an abnormal exit is a broken run even when a `FAILED`
+#: id is present, because the rest of the suite never finished (Sol, PR #81).
+PYTEST_TESTS_FAILED = (1,)
+
 
 def available_mb() -> int | None:
     """Free memory, or None where it cannot be read (then skip the check)."""
@@ -265,6 +271,7 @@ def main(argv=None):
     expected = {m["label"]: m.get("expect_failures") or []
                 for m in mutations if "label" in m}
     survived, mislabelled, errors, unviable, mixed = [], [], [], [], []
+    abnormal = []
     by_failures = {}
     for label, rc, summary, failed, errored in sorted(results):
         want = expected.get(label) or []
@@ -286,6 +293,22 @@ def main(argv=None):
             # are broken runs.
             verdict = "*** UNVIABLE (no test failed) ***"
             unviable.append((label, sorted(errored)[:2] or f"exit {rc}"))
+        elif rc not in PYTEST_TESTS_FAILED:
+            # ONLY pytest's ordinary "tests failed" status is eligible for a
+            # catch. Exit 2 means INTERRUPTED, 3 internal error, 4 usage
+            # error, 5 nothing collected — none means "the suite completed and
+            # discriminated this mutation". Sol's probe: a mutation that
+            # failed its declared test and then raised KeyboardInterrupt
+            # returned rc=2 WITH a `FAILED` id and no errors, so neither the
+            # `not failed` nor the `errored` branch saw it and it read as
+            # `caught (as declared)`, exit 0.
+            #
+            # PLACED AFTER `not failed`, deliberately: a collection error
+            # exits 2 as well, and UNVIABLE ("nothing tested the mutant") is
+            # the more informative verdict for it. Getting this order wrong is
+            # the second time in this function — see the note on `errored`.
+            verdict = f"*** ABNORMAL EXIT {rc} ***"
+            abnormal.append((label, rc, sorted(failed)[:2]))
         elif errored:
             # A MIXED RUN IS NOT A CLEAN CATCH, even when a declared failure
             # also occurs. `main` used to grant the catch on `failed` alone, so
@@ -338,6 +361,11 @@ def main(argv=None):
               "test failed, so nothing tested the mutant:")
         for label, why in unviable:
             print(f"      {label}: {why}")
+    if abnormal:
+        print(f"  {len(abnormal)} ABNORMAL EXIT — pytest did not simply "
+              "report failing tests, so the suite did not complete:")
+        for label, rc, got in abnormal:
+            print(f"      {label}: exit {rc}, failed={got}")
     if mixed:
         print(f"  {len(mixed)} MIXED — a declared failure occurred but other "
               "tests ERRORED, so part of the suite never ran:")
@@ -356,7 +384,7 @@ def main(argv=None):
     print("  NOTE: a mutation reaches only tests that IMPORT the target; a "
           "test reading product source BY PATH reads the real tree")
     return 1 if (survived or broken or mislabelled
-                 or errors or unviable or mixed) else 0
+                 or errors or unviable or mixed or abnormal) else 0
 
 
 if __name__ == "__main__":

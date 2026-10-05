@@ -79,14 +79,19 @@ class _Harness(unittest.TestCase):
     #: alongside the first, and with this many states that is the natural
     #: defect (Fable, PR #81).
     VERDICTS = ("*** SURVIVED ***", "*** CAUGHT BY SOMETHING ELSE ***",
+                "*** ABNORMAL EXIT 2 ***", "*** ABNORMAL EXIT 3 ***",
                 "*** UNVIABLE (no test failed) ***",
                 "*** MIXED (failure + error) ***", "*** ERROR ***",
                 "caught (as declared)", "caught", "BROKEN")
 
     def assert_exactly_one_verdict(self, out, label, expected):
         """The row for `label` carries `expected` and no other verdict."""
+        # A VERDICT ROW, not a footer detail line — the footer repeats the
+        # label (`  label: exit 2, failed=[...]`) and matching on the label
+        # alone found two "rows" for one mutation.
         rows = [ln for ln in out.splitlines()
-                if ln.strip().startswith(label)]
+                if ln.strip().startswith(label)
+                and any(v in ln for v in self.VERDICTS)]
         self.assertEqual(1, len(rows),
                          f"expected one row for {label!r}, got {rows}")
         row = rows[0]
@@ -162,6 +167,39 @@ class TestFalseGreens(_Harness):
             tests=("tests/test_probe.py", "tests/test_errors.py"))
         self.assertIn("MIXED", out, out)
         self.assertEqual(1, code, "a mixed failure+error must not exit 0")
+
+    def test_an_INTERRUPTED_suite_is_not_a_catch(self):
+        """Sol's probe: a declared failure followed by an interrupt.
+
+        pytest exit 2 means INTERRUPTED, not "the suite completed and
+        discriminated this mutation". The short summary still carries a
+        `FAILED` id and there are no errors, so neither the `not failed` nor
+        the `errored` branch saw it — it read as `caught (as declared)` and
+        exited 0. Only exit 1 is eligible for a catch.
+        """
+        tests = self.root / "tests"
+        (tests / "test_interrupt.py").write_text(
+            "from btap.simulation import probe\n"
+            "\n"
+            "def test_declared():\n"
+            "    assert probe.MARKER == 'ORIGINAL'\n"
+            "\n"
+            "def test_then_interrupts():\n"
+            "    if getattr(probe, 'INJECTED', False):\n"
+            "        raise KeyboardInterrupt('stop everything')\n",
+            encoding="utf-8")
+        code, out = self.run_matrix(
+            [{
+                "label": "interrupted",
+                "old": "MARKER = 'ORIGINAL'",
+                "new": "MARKER = 'CHANGED'\nINJECTED = True",
+                "expect_failures": ["test_declared"],
+            }],
+            tests=("tests/test_interrupt.py",))
+        self.assert_exactly_one_verdict(out, "interrupted",
+                                        "*** ABNORMAL EXIT 2 ***")
+        self.assertIn("the suite did not complete", out, out)
+        self.assertEqual(1, code, "an interrupted run must not exit 0")
 
     def test_an_inert_mutation_is_BROKEN(self):
         code, out = self.run_matrix([{
