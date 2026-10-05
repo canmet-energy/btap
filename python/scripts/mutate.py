@@ -107,6 +107,21 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     root.mkdir(parents=True)
     shutil.copytree(PYTHON_ROOT / "btap", root / "btap",
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    # THE TARGET MUST STAY INSIDE THE COPIED PACKAGE. `target` was trusted,
+    # and `tests/` in the shadow is a SYMLINK to the real checkout — so
+    # `target="tests/.../x"` or an absolute path wrote to the REAL tree.
+    # Reproduced: a file outside the shadow went from ORIGINAL to CHANGED. A
+    # matrix typo must not overwrite a collaborator's source (Sol, PR #81).
+    # Checked AFTER the copytree and BEFORE any read, with `resolve()` so a
+    # symlink or `..` cannot smuggle a path past `is_relative_to`.
+    if Path(target).is_absolute():
+        raise ValueError(f"target must be relative to python/, got {target!r}")
+    resolved = (root / target).resolve()
+    package = (root / "btap").resolve()
+    if not resolved.is_relative_to(package):
+        raise ValueError(
+            f"target {target!r} resolves to {resolved}, outside the mutant's "
+            f"own btap/ — refusing to touch anything but the copied package")
     # The mutant runs with cwd=root, because `python -m pytest` puts CWD at the
     # FRONT of sys.path — ahead of PYTHONPATH. Setting PYTHONPATH alone left
     # the real `btap` winning from the repository's own python/ directory, and
@@ -120,7 +135,7 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
         if source.exists():
             (root / name).symlink_to(source)
     # `target` is relative to python/, e.g. btap/simulation/backends.py
-    path = root / target
+    path = resolved
     text = path.read_text(encoding="utf-8")
     if new == old:
         # An inert mutation is a broken mutation, not evidence about the
@@ -167,16 +182,22 @@ def run_suite(root: Path | None, tests: list[str], timeout: int):
     # tables are nearly all subTests, so that was most of them. The id is
     # taken as the first token containing `::` rather than by position, which
     # survives the parenthetical and any future prefix.
-    failed = set()
+    failed, errored = set(), set()
     for line in lines:
-        if not line.startswith(("FAILED", "ERROR", "SUBFAIL")):
+        bucket = (failed if line.startswith(("FAILED", "SUBFAIL"))
+                  else errored if line.startswith("ERROR") else None)
+        if bucket is None:
             continue
         for token in line.split():
             if "::" in token:
-                failed.add(token)
+                bucket.add(token)
+                break
+            # a collection error names a FILE, not a node id
+            if token.endswith(".py"):
+                bucket.add(token)
                 break
     return (proc.returncode, (summary[-1] if summary else "(no summary)"),
-            failed)
+            failed, errored)
 
 
 def main(argv=None):
@@ -205,7 +226,7 @@ def main(argv=None):
 
     t0 = time.time()
     print(f"  baseline (unmutated, {len(tests)} path(s))...", flush=True)
-    rc, summary, _ = run_suite(None, tests, opts.timeout)
+    rc, summary, _, _ = run_suite(None, tests, opts.timeout)
     print(f"    {'PASS' if rc == 0 else 'FAIL'}  {summary}")
     if rc != 0:
         print("  baseline FAILED — fix that before mutating; every mutation "
@@ -232,25 +253,39 @@ def main(argv=None):
             for future in concurrent.futures.as_completed(futures):
                 label = futures[future]
                 try:
-                    rc, summary, failed = future.result()
+                    rc, summary, failed, errored = future.result()
                 except Exception as error:  # noqa: BLE001
                     results.append((label, None,
-                                    f"{type(error).__name__}: {error}", set()))
+                                    f"{type(error).__name__}: {error}",
+                                    set(), set()))
                     continue
-                results.append((label, rc, summary, failed))
+                results.append((label, rc, summary, failed, errored))
 
     width = max((len(r[0]) for r in results), default=10)
     expected = {m["label"]: m.get("expect_failures") or []
                 for m in mutations if "label" in m}
-    survived, mislabelled = [], []
+    survived, mislabelled, errors, unviable = [], [], [], []
     by_failures = {}
-    for label, rc, summary, failed in sorted(results):
+    for label, rc, summary, failed, errored in sorted(results):
         want = expected.get(label) or []
         if rc is None:
-            verdict = "ERROR"
+            # A timeout or an exception running the mutant. This used to print
+            # ERROR and then be omitted from the exit condition, so a hanging
+            # mutant exited 0 (Sol, PR #81).
+            verdict = "*** ERROR ***"
+            errors.append(label)
         elif rc == 0:
             verdict = "*** SURVIVED ***"
             survived.append(label)
+        elif not failed:
+            # NONZERO EXIT IS NOT A CATCH. A mutant that fails to IMPORT gives
+            # "1 error during collection" — nonzero, but no assertion ever saw
+            # the mutant, so the gate discriminated nothing. This was reported
+            # as `caught` and exited 0 (Sol, PR #81). A catch REQUIRES a failed
+            # test; a usage error, a collection error and "no tests collected"
+            # are broken runs.
+            verdict = "*** UNVIABLE (no test failed) ***"
+            unviable.append((label, sorted(errored)[:2] or f"exit {rc}"))
         elif want and not any(
                 any(w in f for f in failed) for w in want):
             # The suite failed, but NOT where the row says it should. The row
@@ -260,7 +295,7 @@ def main(argv=None):
             mislabelled.append((label, want, sorted(failed)[:3]))
         else:
             verdict = "caught (as declared)" if want else "caught"
-        print(f"  {label:{width}}  {verdict:30} {summary}")
+        print(f"  {label:{width}}  {verdict:34} {summary}")
         if rc not in (None, 0) and failed:
             by_failures.setdefault(frozenset(failed), []).append(label)
     for label, why in broken:
@@ -284,6 +319,14 @@ def main(argv=None):
         print(f"  {len(mislabelled)} CAUGHT BY SOMETHING ELSE — the row's "
               "declared test did not fail, so it credits a rule it did not "
               "test")
+    if unviable:
+        print(f"  {len(unviable)} UNVIABLE — the suite exited nonzero but no "
+              "test failed, so nothing tested the mutant:")
+        for label, why in unviable:
+            print(f"      {label}: {why}")
+    if errors:
+        print(f"  {len(errors)} ERROR — the mutant could not be run: "
+              f"{', '.join(errors)}")
     if broken:
         print(f"  {len(broken)} broken mutation(s) — neither caught nor "
               "survived")
@@ -293,7 +336,8 @@ def main(argv=None):
               "works")
     print("  NOTE: a mutation reaches only tests that IMPORT the target; a "
           "test reading product source BY PATH reads the real tree")
-    return 1 if (survived or broken or mislabelled) else 0
+    return 1 if (survived or broken or mislabelled
+                 or errors or unviable) else 0
 
 
 if __name__ == "__main__":
