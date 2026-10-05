@@ -494,3 +494,129 @@ class TestDerivationHappensAtTheCallSite(unittest.TestCase):
                 got = weather_identity(name)
                 self.assertIsNone(
                     got, f"{name!r} has no six-digit station, got {got!r}")
+
+
+class TestStationComesFromThisRunsModel(unittest.TestCase):
+    """Sol's #78 findings: the station could come from the wrong model.
+
+    Both were reproduced before fixing, and both silently change the station
+    sent to the service — so annual results move while the baseline claims the
+    committed EPW. That is why #78 is compliance tier and not verification
+    tier, which I had it wrong.
+
+    Offline: no transport, no network, no SDK load (the 2-phase payload path
+    returns the OSM bytes directly).
+    """
+
+    def _remote(self, **opts):
+        from btap.simulation.backends import Remote
+
+        opts.setdefault("workflow_type", "openstudio")
+        return Remote(endpoint="https://svc.test", api_key="k", **opts)
+
+    def _run_dir(self, station):
+        import tempfile
+        from pathlib import Path
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(__import__("shutil").rmtree, directory,
+                        ignore_errors=True)
+        (directory / "in.osm").write_text(
+            "OS:WeatherFile,\n  {h}, !- Handle\n  Somewhere,\n"
+            f"  /w/CAN_XX_Somewhere.{station}_CWEC2020.epw, !- Url\n;\n",
+            encoding="utf-8")
+        return directory
+
+    def test_a_REUSED_backend_recomputes_for_each_model(self):
+        """`Remote` is reused — `set_default_backend` installs one
+        process-wide — and `if self._derived is None` cached the FIRST
+        model's station. A second run naming 717000 still submitted 716240,
+        so every model after the first in a sweep went to the wrong station.
+        """
+        remote = self._remote()
+        seen = []
+        for station in ("716240", "717000", "718770"):
+            remote._prepare_payload(self._run_dir(station))
+            seen.append(remote._station_id())
+        self.assertEqual(["716240", "717000", "718770"], seen,
+                         "each preparation must derive from ITS OWN model")
+
+    def test_an_unrelated_epw_before_the_weather_object_is_ignored(self):
+        """`_osm_weather_path` took the first `.epw` token ANYWHERE, including
+        a comment, despite its docstring naming the `OS:WeatherFile` URL."""
+        import shutil
+        import tempfile
+        from pathlib import Path
+
+        from btap.simulation.backends import _osm_weather_path
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        osm = directory / "in.osm"
+        osm.write_text(
+            "! stale note about /old/CAN_XX.716240_CWEC2020.epw\n"
+            "OS:Version,\n  {v}, !- Handle\n  3.11.0;\n"
+            "OS:WeatherFile,\n  {h}, !- Handle\n  Somewhere,\n"
+            "  /w/CAN_XX.717000_CWEC2020.epw, !- Url\n;\n",
+            encoding="utf-8")
+        self.assertEqual("/w/CAN_XX.717000_CWEC2020.epw",
+                         _osm_weather_path(osm),
+                         "a comment must not decide the service weather")
+
+    def test_the_station_reaches_the_SUBMITTED_request(self):
+        """The helper is not the deliverable — the request body is."""
+        captured = {}
+
+        class Transport:
+            def post_json(self, url, body):
+                captured.setdefault("bodies", []).append(body)
+                if url.endswith("/models/upload-url"):
+                    return {"model_id": "m-1",
+                            "upload_url": "https://s3.test/put", "s3_key": "k"}
+                return {"job_id": "j-1"}
+
+            def put_bytes(self, url, payload):
+                return None
+
+        remote = self._remote(transport=Transport())
+        remote._prepare_payload(self._run_dir("717000"))
+        remote._submit("m-1")
+        submitted = [b for b in captured["bodies"] if "weather_station_id" in b]
+        self.assertEqual(1, len(submitted))
+        self.assertEqual("717000", submitted[0]["weather_station_id"])
+        self.assertEqual("CWEC2020", submitted[0]["weather_format"])
+
+    def test_an_explicit_option_still_wins_over_the_model(self):
+        remote = self._remote(weather_station_id="999999")
+        remote._prepare_payload(self._run_dir("716240"))
+        self.assertEqual("999999", remote._station_id())
+
+    def test_a_model_with_no_station_is_refused_BEFORE_any_upload(self):
+        """The check lived in `_submit`, so the model was transferred first."""
+        import shutil
+        import tempfile
+        from pathlib import Path
+
+        class Transport:
+            def __init__(self):
+                self.calls = []
+
+            def post_json(self, url, body):
+                self.calls.append(url)
+                raise AssertionError(f"network touched: {url}")
+
+            def put_bytes(self, url, payload):
+                self.calls.append(url)
+                raise AssertionError(f"network touched: {url}")
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "in.osm").write_text("OS:Version,\n  {h},\n  3.11.0;\n",
+                                          encoding="utf-8")
+        transport = Transport()
+        remote = self._remote(transport=transport)
+        with self.assertRaises(RuntimeError) as caught:
+            remote.execute(directory)
+        self.assertIn("needs a weather station", str(caught.exception))
+        self.assertEqual([], transport.calls,
+                         "nothing may be uploaded before the refusal")

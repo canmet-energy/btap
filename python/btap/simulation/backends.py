@@ -183,6 +183,10 @@ class Remote(Backend):
         run_dir = Path(run_dir)
         payload, filename = self._prepare_payload(run_dir)
         self._guard_engine_version()
+        # Refuse BEFORE the network transfer. The station check lived in
+        # `_submit`, so a model with no derivable station was uploaded first
+        # and only then rejected locally (Sol, PR #78).
+        self._require_station()
         model_id = self._upload(payload, filename)
         job_id = self._submit(model_id)
         self._poll(job_id)
@@ -201,8 +205,15 @@ class Remote(Backend):
         # resolve. Read from the OSM TEXT rather than via the SDK, so both
         # workflows derive it the same way and neither pays a second model
         # load. Never overrides an explicit option.
-        if self._derived is None:
-            self._derived = weather_identity(_osm_weather_path(osm))
+        #
+        # RECOMPUTED EVERY PREPARATION. Guarding this with
+        # `if self._derived is None` cached the FIRST model's station on a
+        # reused backend: a second run naming 717000 still submitted 716240.
+        # `Remote` is reusable and IS reused — `set_default_backend` installs
+        # one process-wide — so a sweep would have sent every model after the
+        # first to the wrong station, silently moving annual results
+        # (Sol, PR #78).
+        self._derived = weather_identity(_osm_weather_path(osm))
 
         if self._workflow_type() == "openstudio":
             return osm.read_bytes(), "in.osm"
@@ -268,17 +279,8 @@ class Remote(Backend):
         return reg.get("model_id")
 
     def _submit(self, model_id: str) -> str:
+        self._require_station()
         station = self._station_id()
-        if not station:
-            raise RuntimeError(
-                "remote submit needs a weather station: none was passed as "
-                "weather_station_id and none could be derived from the model's "
-                "weather file. The service resolves weather from its own "
-                "library by station id and rejects a job without one (as "
-                "\"EnergyPlus requires a weather file (WEATHER_S3_KEY)\", "
-                "which names an internal key rather than the missing field). "
-                "Pass weather_station_id=, or attach an EPW named "
-                "..._<station>_<format>.epw.")
         body = {"model_id": model_id,
                 "weather_station_id": station,
                 "weather_format": self._weather_format(),
@@ -410,6 +412,25 @@ class Remote(Backend):
 
     # The service resolves weather from its own library by station id;
     # arbitrary local EPWs are not uploadable on this path (documented).
+    def _require_station(self):
+        """Refuse a run with no resolvable weather station.
+
+        One message, called from `execute` BEFORE the upload and again in
+        `_submit`, so the refusal cannot be bypassed by a different entry
+        point.
+        """
+        if self._station_id():
+            return
+        raise RuntimeError(
+            "remote run needs a weather station: none was passed as "
+            "weather_station_id and none could be derived from the model's "
+            "weather file. The service resolves weather from its own library "
+            "by station id and rejects a job without one (as \"EnergyPlus "
+            "requires a weather file (WEATHER_S3_KEY)\", which names an "
+            "internal key rather than the missing field). Pass "
+            "weather_station_id=, or attach an EPW named "
+            "..._<station>_<format>.epw.")
+
     def _station_id(self):
         explicit = self._opts.get("weather_station_id") or (
             self._opts.get("station_map") or {}).get("default")
@@ -445,8 +466,21 @@ def _osm_weather_path(osm_path):
         text = osm_path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
-    match = re.search(r"([^\s,;]+\.epw)", text, re.IGNORECASE)
-    return match.group(1) if match else None
+    # SCOPED TO THE `OS:WeatherFile` OBJECT. An unrestricted search for the
+    # first `.epw` token took whatever appeared earliest in the file —
+    # including a COMMENT — so a stale reference above the weather object
+    # changed the station sent to the service. Reproduced: a comment naming
+    # 716240 above an `OS:WeatherFile` URL of 717000 yielded 716240
+    # (Sol, PR #78). That silently moves annual results while the baseline
+    # claims the committed EPW.
+    for block in re.split(r"(?=^OS:WeatherFile,)", text, flags=re.M):
+        if not block.startswith("OS:WeatherFile,"):
+            continue
+        body = block.split(";", 1)[0]
+        match = re.search(r"([^\s,;!]+\.epw)", body, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    return None
 
 
 def weather_identity(path):
@@ -490,9 +524,10 @@ def _result_files(res):
     COMPLETED job returns 17 entries whose keys are `download_url`, `name`,
     `phase_id`, `s3_key`, `size_bytes`; that list is what broke the call.
 
-    DELIBERATELY NOT GUESSING: no remote run of ours has yet SUCCEEDED, so the
-    populated list's element shape is unverified. Rather than invent a fourth
-    assumption about this API — three have already been wrong against the live
+    THE POPULATED SHAPE IS NOW OBSERVED, not guessed — see below for the 17
+    entries a completed job returns. The tolerant handling predates that
+    observation and is retained deliberately rather than narrowed to it: three
+    assumptions about this API — three have already been wrong against the live
     service (`_upload`'s route, `_phase_errors`' entries, and this) — a mapping
     is used as-is, a list of objects is read through the obvious name/url
     aliases, and anything else raises a message naming what actually arrived.
