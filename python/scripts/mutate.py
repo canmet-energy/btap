@@ -307,7 +307,21 @@ def main(argv=None):
             # exits 2 as well, and UNVIABLE ("nothing tested the mutant") is
             # the more informative verdict for it. Getting this order wrong is
             # the second time in this function — see the note on `errored`.
-            verdict = f"*** ABNORMAL EXIT {rc} ***"
+            # NAMED FOR THE CONSEQUENCE, not the mechanism. `UNVIABLE (no
+            # test failed)` and this branch are both reachable from pytest's
+            # exit 2, so naming one after the exit code made the pair look
+            # like the tool was confused about its own states. They carry
+            # different next actions: UNVIABLE means nothing tested the mutant
+            # (fix the mutation), INCOMPLETE means a test DID fail but the
+            # suite did not finish, so the row might be a genuine catch and
+            # cannot be relied on (re-run). The code stays as detail
+            # (Fable, PR #81).
+            #
+            # In practice this is reachable for exit 2 (interrupted) and 3
+            # (internal error) only: 4 (usage) and 5 (nothing collected) have
+            # no failures, so they reach `not failed` first and read UNVIABLE,
+            # which is correct.
+            verdict = f"*** INCOMPLETE (exit {rc}, suite unfinished) ***"
             abnormal.append((label, rc, sorted(failed)[:2]))
         elif errored:
             # A MIXED RUN IS NOT A CLEAN CATCH, even when a declared failure
@@ -362,8 +376,8 @@ def main(argv=None):
         for label, why in unviable:
             print(f"      {label}: {why}")
     if abnormal:
-        print(f"  {len(abnormal)} ABNORMAL EXIT — pytest did not simply "
-              "report failing tests, so the suite did not complete:")
+        print(f"  {len(abnormal)} INCOMPLETE — a test failed but the suite "
+              "did not finish, so the row cannot be relied on:")
         for label, rc, got in abnormal:
             print(f"      {label}: exit {rc}, failed={got}")
     if mixed:

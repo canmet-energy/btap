@@ -79,7 +79,8 @@ class _Harness(unittest.TestCase):
     #: alongside the first, and with this many states that is the natural
     #: defect (Fable, PR #81).
     VERDICTS = ("*** SURVIVED ***", "*** CAUGHT BY SOMETHING ELSE ***",
-                "*** ABNORMAL EXIT 2 ***", "*** ABNORMAL EXIT 3 ***",
+                "*** INCOMPLETE (exit 2, suite unfinished) ***",
+                "*** INCOMPLETE (exit 3, suite unfinished) ***",
                 "*** UNVIABLE (no test failed) ***",
                 "*** MIXED (failure + error) ***", "*** ERROR ***",
                 "caught (as declared)", "caught", "BROKEN")
@@ -196,9 +197,9 @@ class TestFalseGreens(_Harness):
                 "expect_failures": ["test_declared"],
             }],
             tests=("tests/test_interrupt.py",))
-        self.assert_exactly_one_verdict(out, "interrupted",
-                                        "*** ABNORMAL EXIT 2 ***")
-        self.assertIn("the suite did not complete", out, out)
+        self.assert_exactly_one_verdict(
+            out, "interrupted", "*** INCOMPLETE (exit 2, suite unfinished) ***")
+        self.assertIn("did not finish", out, out)
         self.assertEqual(1, code, "an interrupted run must not exit 0")
 
     def test_an_inert_mutation_is_BROKEN(self):
