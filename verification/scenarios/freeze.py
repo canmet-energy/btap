@@ -328,15 +328,38 @@ def producer_identity():
     raised exception would just stop the work.
     """
     import platform
+    import re
 
     identity = {
         "openstudio": None,
         "energyplus": None,
-        "python": platform.python_version(),
+        # TWO interpreters, labelled, because they can differ. This field was
+        # `platform.python_version()` alone — the DRIVER running this script —
+        # while scenario subprocesses run under `runner.python_exe()`, where
+        # `BTAP_PYTHON` takes precedence. Exercised: the selector returned
+        # `/opt/another-python` while the record claimed 3.12.3, so the field
+        # named an interpreter that produced none of the outputs (Sol, PR #80).
+        "python_driver": platform.python_version(),
+        "python_worker": None,
         "platform": platform.platform(),
         # Only CI can fill this; see the docstring.
         "container_digest": None,
     }
+    try:
+        worker = runner.python_exe()
+        out = subprocess.run(
+            [str(worker), "-c",
+             "import platform, sys; "
+             "print(platform.python_version()); print(sys.executable)"],
+            capture_output=True, text=True, check=False, timeout=120)
+        if out.returncode == 0:
+            lines = out.stdout.strip().splitlines()
+            if lines and re.fullmatch(r"\d+\.\d+\.\d+", lines[0].strip()):
+                identity["python_worker"] = lines[0].strip()
+                if len(lines) > 1:
+                    identity["python_worker_executable"] = lines[1].strip()
+    except Exception:  # noqa: BLE001
+        pass
     try:
         runner._sys_path_python()
         import openstudio
@@ -350,11 +373,20 @@ def producer_identity():
         binary = engine.ensure_energyplus()
         out = subprocess.run([str(binary), "--version"], capture_output=True,
                              text=True, check=False, timeout=120)
-        text = (out.stdout or out.stderr).strip()
-        # "EnergyPlus, Version 25.2.0-cf7368216c" -> "25.2.0-cf7368216c".
-        # The BUILD HASH is the point: a bare "25.2.0" is what hides two
-        # different engines behind one version string.
-        identity["energyplus"] = text.split()[-1] if text else None
+        # THE EXIT STATUS IS CHECKED AND THE SHAPE IS VALIDATED. This took the
+        # last word of ANY output, so a failed probe printing
+        # "EnergyPlus version probe FAILED" with returncode 7 recorded
+        # `"energyplus": "FAILED"` — success-shaped garbage in provenance,
+        # indistinguishable from a real build string (Sol, PR #80). A failed
+        # probe stays NONFATAL, but it records absence rather than nonsense.
+        if out.returncode == 0:
+            text = (out.stdout or out.stderr).strip()
+            # "EnergyPlus, Version 25.2.0-cf7368216c" -> "25.2.0-cf7368216c".
+            # The BUILD HASH is the point: a bare "25.2.0" is what hides two
+            # different engines behind one version string.
+            candidate = text.split()[-1] if text else ""
+            if re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z]+)?", candidate):
+                identity["energyplus"] = candidate
     except Exception:  # noqa: BLE001
         pass
     return identity
