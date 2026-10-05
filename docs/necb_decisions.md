@@ -6526,9 +6526,11 @@ established there.
 
 ### The follow-on, and why it is not this change
 
-Freezing in the pinned CI image is the stronger end state and is also
-**faster** — a full dispatch is 6 minutes against 10–13 for a local freeze.
-It is not available yet:
+Freezing in the pinned CI image is the stronger end state. It is **not
+known to be faster**: the 6-minute figure is a full verification *dispatch*,
+which never runs `freeze.py` and splits lanes across parallel jobs, while the
+freezer runs all 45 scenarios sequentially. A CI freeze has not been
+measured. And it is not available yet:
 
 - the image tag is `<openstudio version>-<sha256(Dockerfile)[:12]>`, which
   pins the **recipe**, not the built bytes; the same Dockerfile rebuilds
