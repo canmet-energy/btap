@@ -264,7 +264,7 @@ def main(argv=None):
     width = max((len(r[0]) for r in results), default=10)
     expected = {m["label"]: m.get("expect_failures") or []
                 for m in mutations if "label" in m}
-    survived, mislabelled, errors, unviable = [], [], [], []
+    survived, mislabelled, errors, unviable, mixed = [], [], [], [], []
     by_failures = {}
     for label, rc, summary, failed, errored in sorted(results):
         want = expected.get(label) or []
@@ -286,6 +286,20 @@ def main(argv=None):
             # are broken runs.
             verdict = "*** UNVIABLE (no test failed) ***"
             unviable.append((label, sorted(errored)[:2] or f"exit {rc}"))
+        elif errored:
+            # A MIXED RUN IS NOT A CLEAN CATCH, even when a declared failure
+            # also occurs. `main` used to grant the catch on `failed` alone, so
+            # a mutation that genuinely fails one test AND breaks another's
+            # setup was reported `caught (as declared)` and exited 0. The error
+            # means part of the suite did not run, so the row's evidence is
+            # incomplete whatever else happened (Sol, PR #81).
+            #
+            # ORDER MATTERS AND I GOT IT WRONG FIRST: this must come AFTER the
+            # `not failed` case, or an unimportable mutant — errors, no
+            # failures — is reported MIXED instead of UNVIABLE. Caught by the
+            # regression below.
+            verdict = "*** MIXED (failure + error) ***"
+            mixed.append((label, sorted(errored)[:2]))
         elif want and not any(
                 any(w in f for f in failed) for w in want):
             # The suite failed, but NOT where the row says it should. The row
@@ -324,6 +338,11 @@ def main(argv=None):
               "test failed, so nothing tested the mutant:")
         for label, why in unviable:
             print(f"      {label}: {why}")
+    if mixed:
+        print(f"  {len(mixed)} MIXED — a declared failure occurred but other "
+              "tests ERRORED, so part of the suite never ran:")
+        for label, why in mixed:
+            print(f"      {label}: {why}")
     if errors:
         print(f"  {len(errors)} ERROR — the mutant could not be run: "
               f"{', '.join(errors)}")
@@ -337,7 +356,7 @@ def main(argv=None):
     print("  NOTE: a mutation reaches only tests that IMPORT the target; a "
           "test reading product source BY PATH reads the real tree")
     return 1 if (survived or broken or mislabelled
-                 or errors or unviable) else 0
+                 or errors or unviable or mixed) else 0
 
 
 if __name__ == "__main__":
