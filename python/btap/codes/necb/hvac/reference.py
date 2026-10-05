@@ -1921,6 +1921,15 @@ def _energy_type_variant(fuel):
     return None
 
 
+def _heating_plant_name(group, facts):
+    """The hot-water plant serving this group, by fuel-set intersection."""
+    wanted = {str(f) for f in group.get('heating_energy_types') or ()}
+    candidates = [pl for pl in (facts.get('plants') or ())
+                  if pl.get('type') == 'hot_water'
+                  and wanted & set(pl.get('fuels') or ())]
+    return candidates[0].get('name') if len(candidates) == 1 else None
+
+
 def _heating_allocation(group, facts):
     """``(shares, watts_by_fuel)`` for a multi-energy heating group, or None.
 
@@ -1970,71 +1979,71 @@ def _reference_energy_type(group, selection, facts, audit):
                        inputs={'part_load_curve_class': part_load_curve_class},
                        article=purchased_heating['article'], ruling='D-89')
         return 'gas', part_load_curve_class
-    # MULTI-ENERGY: 8.4.4.9.(5) / 8.4.4.10.(4) require the reference's
-    # capacities to match the proposed allocation per energy type. We do NOT
-    # do that, and the reason is a Code conflict rather than an omission:
-    # 8.4.4.9.(6) configures a hydronic reference plant as ONE single-stage
-    # boiler at or below 176 kW, TWO BOILERS OF EQUAL CAPACITY (or a
-    # two-staged boiler) between 176 and 352 kW, and "a boiler" modulating to
-    # 25% above that. Every band is singular or equal-split, so a proposed
-    # 60/40 allocation cannot be represented without breaking (6) — a
-    # requirement we currently satisfy. Splitting the plant would trade a met
-    # requirement for a contested reading of another.
+    # MULTI-ENERGY: 8.4.4.9.(5) requires the reference's heating capacities
+    # to match the proposed allocation per energy type. We do not reconcile
+    # that with 8.4.4.9.(6), and Sol MEASURED why rather than inferring it
+    # (`111`): for both dual-fuel fixtures the reference retains BOTH
+    # autosized boilers —
     #
-    # So the collapse stays, and STOPS BEING SILENT. Previously a dual-fuel
-    # proposed plant became a gas reference with nothing in the audit saying
-    # a Code requirement had been set aside; a reader could not tell. The
-    # tiebreak is also no longer positional: the fuel with the largest
-    # proposed capacity wins where the allocation is known, which is more
-    # defensible under 8.4.4.9.(4) than "gas appears first in the cascade".
+    #   proposed    gas 52.186 kW  electric 52.186 kW
+    #   reference   gas 52.263 kW  electric 52.263 kW   (104.5 kW total)
     #
-    # NOT claimed as compliance with (5): coverage stays `partial`.
-    # No `!= 'Purchased'` filter: the purchased branch above has already
-    # RETURNED for any group carrying it, so excluding it here is dead code —
-    # the mutation matrix proved that by surviving its removal. 8.4.4.6. owns
-    # purchased energy with its own capacity-share rule against the building
-    # total, and it never reaches this point (Sol's `110`).
+    # — and the secondary's "0kBtu/hr" NAME does not zero its sized capacity.
+    # At 104.5 kW the plant is under 176 kW, where (6)(b) prescribes ONE
+    # single-stage boiler. So the reference currently violates (6)(b) while
+    # arguably satisfying (5)(a) by accident, both fuels landing 50/50. That
+    # is the opposite way round from what this comment first claimed.
+    #
+    # Sol's `112` also REJECTED the hydronic carve-out I proposed: (5) is
+    # conditioned on the PROPOSED system's energy types with no hydronic
+    # exclusion, (6) constrains a reference plant without replacing (5), and
+    # (4) shows the Code writes "Except as provided in Sentence (5)" when it
+    # intends an exception. Table -B's System 2 is inherently hydronic and
+    # dual-fuel-capable, so a carve-out would silently exempt it.
+    #
+    # Pending phylroy's ruling on the cardinality-versus-fuel overlap, this
+    # emits ONE unresolved warning per serving plant. It does not claim the
+    # ratio is implemented, does not guess an allocation, and does not imply
+    # a green annual result is compliance with either article.
     distinct = {str(f) for f in fuels}
     if len(distinct) > 1:
         allocation = _heating_allocation(group, facts)
-        if allocation is None:
+        plant_name = _heating_plant_name(group, facts) or 'the shared heating plant'
+        seen = facts.setdefault('_multi_energy_warned', set())
+        if plant_name not in seen:
+            # DEDUPLICATED across the blocks one plant serves — five identical
+            # warnings for one plant is noise, not five findings (Sol, `111`).
+            seen.add(plant_name)
+            inputs = {'serving_plant': plant_name,
+                      'proposed_energy_types': sorted(distinct)}
+            if allocation is None:
+                inputs['proposed_capacity_shares'] = \
+                    'unavailable without sizing'
+            else:
+                shares, watts = allocation
+                inputs['proposed_capacity_shares'] = {
+                    f: round(s, 4) for f, s in sorted(shares.items())}
+                inputs['proposed_capacity_w'] = {
+                    f: round(w, 1) for f, w in sorted(watts.items())}
+            inputs['reconciled'] = False
             audit.warn(
                 'selection',
-                'proposed heating uses MORE THAN ONE ENERGY TYPE and the '
-                'capacity allocation is UNKNOWN (unsized plant) — the '
-                'reference is modelled on a single energy type, so '
-                '8.4.4.9.(5) is NOT satisfied for this group',
-                target=','.join(group['zones']),
-                inputs={'proposed_energy_types': sorted(distinct),
-                        'capacity_allocation': 'unknown — plant autosized or '
-                                               'no sizing run',
-                        'reference_modelled_on': 'single energy type'},
-                article='8.4.4.9.(5)')
-        else:
-            shares, watts = allocation
+                'UNRESOLVED: the proposed heating system uses MORE THAN ONE '
+                'ENERGY TYPE on one plant, and the reference has NOT '
+                'reconciled the capacity-ratio requirement of 8.4.4.9.(5) '
+                'with the single-boiler requirement of 8.4.4.9.(6)(b) — '
+                'neither article is claimed as satisfied for this plant, and '
+                'a passing annual result is not evidence that they are',
+                target=plant_name,
+                inputs=inputs,
+                article='8.4.4.9.(5); 8.4.4.9.(6)(b)')
+        if allocation is not None:
+            shares, _ = allocation
             dominant = max(shares, key=shares.get)
-            audit.warn(
-                'selection',
-                'proposed heating uses MORE THAN ONE ENERGY TYPE — the '
-                'reference is modelled on the LARGEST-capacity type alone, '
-                'because 8.4.4.9.(6) permits no unequal split of the '
-                'reference plant; 8.4.4.9.(5) is NOT satisfied for this group',
-                target=','.join(group['zones']),
-                inputs={'proposed_energy_types': sorted(distinct),
-                        'capacity_shares': {f: round(s, 4)
-                                            for f, s in sorted(shares.items())},
-                        'capacity_w': {f: round(w, 1)
-                                       for f, w in sorted(watts.items())},
-                        'reference_modelled_on': dominant},
-                article='8.4.4.9.(5)')
-            # ONLY the electric case needs to return here. A fossil-dominant
-            # allocation falls through to the cascade below, which already
-            # prefers gas — so an explicit gas branch would be observationally
-            # equivalent and untestable, which the mutation matrix proved by
-            # surviving its removal. The capacity tiebreak therefore changes
-            # behaviour in exactly one direction: where ELECTRICITY holds the
-            # larger proposed capacity, the reference follows it instead of
-            # defaulting to gas by cascade position.
+            # Only the electric case returns: a fossil-dominant allocation
+            # falls through to the cascade below, which already prefers gas,
+            # so an explicit branch would be observationally equivalent — the
+            # mutation matrix proved that by surviving its removal.
             if 'Electric' in dominant:
                 return 'electric', None
 

@@ -38,6 +38,9 @@ class _Fixture(unittest.TestCase):
         return {"zones": list(zones), "heating_energy_types": list(fuels)}
 
     def _facts(self, plants=()):
+        # a FRESH dict each call: the per-plant dedupe state lives in `facts`,
+        # so sharing one would hide the second warning rather than the
+        # duplicate
         return {"plants": list(plants), "purchased_energy": {}}
 
     def _selection(self):
@@ -52,7 +55,7 @@ class _Fixture(unittest.TestCase):
             group, self._selection(), facts, audit)
         warnings = [e for e in audit.entries
                     if e["level"] == "warning"
-                    and "MORE THAN ONE ENERGY TYPE" in str(e.get("action"))]
+                    and "UNRESOLVED" in str(e.get("action"))]
         return result, warnings, audit
 
 
@@ -74,10 +77,14 @@ class TestTheCollapseIsDisclosed(_Fixture):
             self._group(["NaturalGas", "Electricity"]), self._facts([plant]))
         self.assertEqual(1, len(warnings), "the collapse must be disclosed")
         entry = warnings[0]
-        self.assertEqual("8.4.4.9.(5)", entry["article"])
-        self.assertIn("UNKNOWN", entry["action"])
-        self.assertIn("NOT satisfied", entry["action"],
-                      "it must not read as if the requirement were met")
+        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)(b)", entry["article"],
+                         "both articles — the point is that they are not "
+                         "reconciled with each other (Sol, `111`)")
+        self.assertIn("NOT", entry["action"],
+                      "it must not read as if either were satisfied")
+        self.assertFalse(entry["inputs"]["reconciled"])
+        self.assertEqual("unavailable without sizing",
+                         entry["inputs"]["proposed_capacity_shares"])
         self.assertEqual(["Electricity", "NaturalGas"],
                          entry["inputs"]["proposed_energy_types"])
         self.assertEqual("gas", energy, "behaviour is unchanged — only the "
@@ -92,8 +99,7 @@ class TestTheCollapseIsDisclosed(_Fixture):
         self.assertEqual(1, len(warnings))
         inputs = warnings[0]["inputs"]
         self.assertEqual({"Electricity": 0.4, "NaturalGas": 0.6},
-                         inputs["capacity_shares"])
-        self.assertEqual("NaturalGas", inputs["reference_modelled_on"])
+                         inputs["proposed_capacity_shares"])
         self.assertEqual("gas", energy)
 
     def test_the_tiebreak_follows_CAPACITY_not_the_cascade_order(self):
@@ -112,8 +118,8 @@ class TestTheCollapseIsDisclosed(_Fixture):
         self.assertEqual("electric", energy,
                          "electricity holds the larger capacity, so it is the "
                          "reference energy type")
-        self.assertEqual("Electricity",
-                         warnings[0]["inputs"]["reference_modelled_on"])
+        self.assertEqual({"Electricity": 0.7, "NaturalGas": 0.3},
+                         warnings[0]["inputs"]["proposed_capacity_shares"])
 
     def test_oil_and_propane_stay_DISTINCT_from_natural_gas(self):
         """Sol's `110`: Division A 1.4.1.2 defines no 'fossil' equivalence
@@ -159,10 +165,10 @@ class TestTheCollapseIsDisclosed(_Fixture):
             self._group(["NaturalGas", "Electricity", "FuelOilNo2"]),
             self._facts([plant]))
         self.assertEqual(1, len(warnings))
-        self.assertIn("UNKNOWN", warnings[0]["action"],
-                      "a half-known allocation must not be reported as a "
-                      "ratio — the missing half is not zero")
-        self.assertNotIn("capacity_shares", warnings[0]["inputs"])
+        self.assertEqual("unavailable without sizing",
+                         warnings[0]["inputs"]["proposed_capacity_shares"],
+                         "a half-known allocation must not be reported as a "
+                         "ratio — the missing half is not zero")
 
     def test_PURCHASED_returns_before_the_multi_energy_branch(self):
         """Purchased energy never reaches the disclosure, by construction.
@@ -189,7 +195,69 @@ class TestTheCollapseIsDisclosed(_Fixture):
         (_, _), warnings, _ = self._call(
             self._group(["NaturalGas", "Electricity"]), self._facts(plants))
         self.assertEqual(1, len(warnings))
-        self.assertIn("UNKNOWN", warnings[0]["action"])
+        self.assertEqual("unavailable without sizing",
+                         warnings[0]["inputs"]["proposed_capacity_shares"])
+
+
+class TestTheWarningIsDeduplicated(_Fixture):
+    """ONE warning per serving plant, not one per block it serves.
+
+    The first version emitted five identical warnings on
+    11-staged-boilers-gas-lead — one per thermal-block group. Five copies of
+    one finding is noise, and Sol asked for the plant to be named and the
+    warning deduplicated across the blocks it serves (`111`).
+    """
+
+    def test_one_plant_serving_five_blocks_warns_once(self):
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        plant = {"name": "Hot Water Loop", "type": "hot_water",
+                 "fuels": ["NaturalGas", "Electricity"],
+                 "fuel_capacities_w": {"NaturalGas": None,
+                                       "Electricity": None}}
+        facts = self._facts([plant])
+        audit = AuditLog()
+        for block in range(5):
+            reference._reference_energy_type(
+                self._group(["NaturalGas", "Electricity"],
+                            zones=(f"Zone {block}",)),
+                self._selection(), facts, audit)
+        warnings = [e for e in audit.entries
+                    if e["level"] == "warning"
+                    and "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(1, len(warnings),
+                         f"one plant, one warning — got {len(warnings)}")
+        self.assertEqual("Hot Water Loop", warnings[0]["target"],
+                         "the warning must name the plant, not a zone list")
+
+    def test_TWO_plants_warn_twice(self):
+        """The control: dedupe must not swallow a genuinely second finding."""
+        from btap.audit import AuditLog
+        from btap.codes.necb.hvac import reference
+
+        facts = self._facts([
+            {"name": "Hot Water Loop A", "type": "hot_water",
+             "fuels": ["NaturalGas", "Electricity"],
+             "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}},
+        ])
+        audit = AuditLog()
+        reference._reference_energy_type(
+            self._group(["NaturalGas", "Electricity"]), self._selection(),
+            facts, audit)
+        facts["plants"] = [
+            {"name": "Hot Water Loop B", "type": "hot_water",
+             "fuels": ["FuelOilNo2", "Electricity"],
+             "fuel_capacities_w": {"FuelOilNo2": None, "Electricity": None}}]
+        reference._reference_energy_type(
+            self._group(["FuelOilNo2", "Electricity"]), self._selection(),
+            facts, audit)
+        warnings = [e for e in audit.entries
+                    if e["level"] == "warning"
+                    and "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(2, len(warnings))
+        self.assertEqual({"Hot Water Loop A", "Hot Water Loop B"},
+                         {w["target"] for w in warnings})
 
 
 class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
