@@ -301,27 +301,41 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
 def producer_identity():
     """What actually produced this freeze, as far as it can be established.
 
-    WHY THIS EXISTS. The manifest already pins the SOURCE — a commit,
-    three harness hashes, the sample manifest — and because the scenarios'
-    weather is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that
-    commit pins the weather bytes too. What it did not pin is the PRODUCER.
+    WHY THIS EXISTS. The manifest already pins the SOURCE — a commit, three
+    harness hashes, the sample manifest — and because the scenarios' weather
+    is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that commit
+    pins the weather bytes too. What it did not pin is the PRODUCER.
     `openstudio_cli` is a version STRING a machine reports; two laptops can
     report `3.11.0+241b8abb4d` while running different EnergyPlus builds, and
     CI never freezes, so the producer has always been whichever developer
     machine ran this script.
 
-    These fields are a RECORD, NOT A GATE. They are deliberately not compared
-    against the running machine by any test: a baseline frozen on one host must
-    remain verifiable on another, which is the whole point of the frozen
-    corpus. What they buy is attribution — when a baseline moves, the diff says
-    whether the engine underneath it moved too.
+    EVERYTHING IS PROBED IN THE WORKER INTERPRETER, not this one. Scenario
+    subprocesses run under `runner.python_exe()`, where `BTAP_PYTHON` takes
+    precedence, and the worker's `Local.execute` calls its OWN
+    `engine.ensure_energyplus()`. Probing `openstudio` and the engine here
+    recorded the DRIVER's stack: under a controlled override the record said
+    `python_worker=3.99.0` at `/other/python` while still reporting the
+    driver's OpenStudio and EnergyPlus — false provenance whenever the two
+    environments carry different builds (Sol, PR #80). The driver's own values
+    are kept beside them, labelled, so a divergence is visible rather than
+    hidden behind one ambiguous field.
+
+    A BARE VERSION IS REFUSED. The build suffix is the entire reason this
+    field exists — `25.2.0` is exactly what hides two engines — so a
+    successful probe returning `EnergyPlus, Version 25.2.0` records NULL
+    rather than a value that cannot distinguish anything.
+
+    These fields are a RECORD, NOT A GATE. Nothing compares them against the
+    running machine: a baseline frozen on one host must remain verifiable on
+    another, which is the point of the frozen corpus. What they buy is
+    attribution — when a baseline moves, the diff says whether the engine
+    underneath it moved too.
 
     `container_digest` is the field this cannot fill. The CI image's tag is
     `<openstudio version>-<sha256(Dockerfile)[:12]>`, which pins the RECIPE,
-    not the built bytes; the same Dockerfile rebuilds differently as its base
-    image and packages move. A true `sha256:` digest is only obtainable where
-    the image runs, so it stays null until freezing happens there — the
-    follow-on describes.
+    not the built bytes; a true `sha256:` digest is obtainable only where the
+    image runs, so it stays null until freezing happens there.
 
     Every probe fails SOFT. A freeze must not break because an identity could
     not be read; an absent field says "unknown", which is honest, where a
@@ -330,67 +344,81 @@ def producer_identity():
     import platform
     import re
 
+    #: A version WITH a build suffix. The suffix is mandatory: see the
+    #: docstring.
+    ENGINE_RE = re.compile(r"^\d+\.\d+\.\d+-[0-9A-Za-z]+$")
+
     identity = {
         "openstudio": None,
         "energyplus": None,
-        # TWO interpreters, labelled, because they can differ. This field was
-        # `platform.python_version()` alone — the DRIVER running this script —
-        # while scenario subprocesses run under `runner.python_exe()`, where
-        # `BTAP_PYTHON` takes precedence. Exercised: the selector returned
-        # `/opt/another-python` while the record claimed 3.12.3, so the field
-        # named an interpreter that produced none of the outputs (Sol, PR #80).
         "python_driver": platform.python_version(),
         "python_worker": None,
         "platform": platform.platform(),
-        # Only CI can fill this; see the docstring.
         "container_digest": None,
     }
-    try:
-        worker = runner.python_exe()
-        out = subprocess.run(
-            [str(worker), "-c",
-             "import platform, sys; "
-             "print(platform.python_version()); print(sys.executable)"],
-            capture_output=True, text=True, check=False, timeout=120)
-        if out.returncode == 0:
-            lines = out.stdout.strip().splitlines()
-            if lines and re.fullmatch(r"\d+\.\d+\.\d+", lines[0].strip()):
-                identity["python_worker"] = lines[0].strip()
-                if len(lines) > 1:
-                    identity["python_worker_executable"] = lines[1].strip()
-    except Exception:  # noqa: BLE001
-        pass
+
+    # One probe, in the interpreter that will actually run the scenarios.
+    probe = (
+        "import platform, sys\n"
+        "print('python', platform.python_version())\n"
+        "print('exe', sys.executable)\n"
+        "try:\n"
+        "    import openstudio\n"
+        "    print('openstudio', openstudio.openStudioLongVersion())\n"
+        "except Exception: pass\n"
+        "try:\n"
+        "    import subprocess\n"
+        "    from btap.simulation import engine\n"
+        "    out = subprocess.run([str(engine.ensure_energyplus()), "
+        "'--version'], capture_output=True, text=True, timeout=120)\n"
+        "    if out.returncode == 0:\n"
+        "        text = (out.stdout or out.stderr).strip()\n"
+        "        print('energyplus', text.split()[-1] if text else '')\n"
+        "except Exception: pass\n")
     try:
         runner._sys_path_python()
+        worker = runner.python_exe()
+        env = dict(os.environ)
+        env["PYTHONPATH"] = (str(runner.PYTHON_ROOT) + os.pathsep
+                             + env.get("PYTHONPATH", "")).rstrip(os.pathsep)
+        out = subprocess.run([str(worker), "-c", probe], capture_output=True,
+                             text=True, check=False, timeout=600, env=env)
+        if out.returncode == 0:
+            for line in out.stdout.strip().splitlines():
+                key, _, value = line.partition(" ")
+                value = value.strip()
+                if key == "python" and re.fullmatch(r"\d+\.\d+\.\d+", value):
+                    identity["python_worker"] = value
+                elif key == "exe" and value:
+                    identity["python_worker_executable"] = value
+                elif key == "openstudio" and value:
+                    identity["openstudio"] = value
+                elif key == "energyplus" and ENGINE_RE.match(value):
+                    identity["energyplus"] = value
+    except Exception:  # noqa: BLE001 — an unknown identity is not a failure
+        pass
+
+    # The DRIVER's own stack, beside the worker's, so a divergence is visible.
+    try:
         import openstudio
 
-        identity["openstudio"] = openstudio.openStudioLongVersion()
-    except Exception:  # noqa: BLE001 — an unknown identity is not a failure
+        identity["openstudio_driver"] = openstudio.openStudioLongVersion()
+    except Exception:  # noqa: BLE001
         pass
     try:
         from btap.simulation import engine
 
-        binary = engine.ensure_energyplus()
-        out = subprocess.run([str(binary), "--version"], capture_output=True,
-                             text=True, check=False, timeout=120)
-        # THE EXIT STATUS IS CHECKED AND THE SHAPE IS VALIDATED. This took the
-        # last word of ANY output, so a failed probe printing
-        # "EnergyPlus version probe FAILED" with returncode 7 recorded
-        # `"energyplus": "FAILED"` — success-shaped garbage in provenance,
-        # indistinguishable from a real build string (Sol, PR #80). A failed
-        # probe stays NONFATAL, but it records absence rather than nonsense.
+        out = subprocess.run([str(engine.ensure_energyplus()), "--version"],
+                             capture_output=True, text=True, check=False,
+                             timeout=120)
         if out.returncode == 0:
             text = (out.stdout or out.stderr).strip()
-            # "EnergyPlus, Version 25.2.0-cf7368216c" -> "25.2.0-cf7368216c".
-            # The BUILD HASH is the point: a bare "25.2.0" is what hides two
-            # different engines behind one version string.
             candidate = text.split()[-1] if text else ""
-            if re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z]+)?", candidate):
-                identity["energyplus"] = candidate
+            if ENGINE_RE.match(candidate):
+                identity["energyplus_driver"] = candidate
     except Exception:  # noqa: BLE001
         pass
     return identity
-
 
 
 def main():

@@ -118,19 +118,36 @@ class TestProducerIdentity(unittest.TestCase):
     def test_an_unreadable_identity_is_absent_rather_than_fatal(self):
         """A freeze must not break because a probe failed.
 
-        Simulated by making the EnergyPlus probe raise: the field goes to
-        None and the other fields still report.
+        The probes now run in a SUBPROCESS (the worker interpreter), so the
+        soft-failure property is exercised by making that subprocess raise
+        rather than by patching an in-process call — which an earlier version
+        of this test did, and which the new design made vacuous.
         """
         from unittest import mock
 
-        import btap.simulation.engine as engine
-
-        with mock.patch.object(engine, "ensure_energyplus",
-                               side_effect=RuntimeError("no engine")):
+        with mock.patch.object(self.freeze.subprocess, "run",
+                               side_effect=OSError("no interpreter")):
             identity = self.freeze.producer_identity()
         self.assertIsNone(identity["energyplus"])
+        self.assertIsNone(identity["python_worker"])
         self.assertIsNotNone(identity["python_driver"],
                              "one failed probe must not blank the others")
+        self.assertIsNotNone(identity["platform"])
+
+    def test_a_FAILED_worker_probe_records_absence(self):
+        """A nonzero probe records nothing, not the last word of its error."""
+        from unittest import mock
+
+        class Failed:
+            returncode = 7
+            stdout = "energyplus FAILED\n"
+            stderr = ""
+
+        with mock.patch.object(self.freeze.subprocess, "run",
+                               return_value=Failed()):
+            identity = self.freeze.producer_identity()
+        self.assertIsNone(identity["energyplus"])
+        self.assertIsNone(identity["python_worker"])
 
 
 class TestItIsARecordAndNotAGate(unittest.TestCase):
@@ -173,38 +190,67 @@ class TestItIsARecordAndNotAGate(unittest.TestCase):
     def test_integrity_still_passes_with_an_IMPOSSIBLE_producer(self):
         """The load-bearing test. Wherever a comparison is added, this fails.
 
-        Rewrites only the producer block, runs the REAL
-        `test_manifest_integrity` against the altered manifest, and requires
-        it to pass — because nothing about the baselines has changed.
+        IT TOUCHES NO SHARED FILE. The first version overwrote the tracked
+        `verification/scenarios/manifest.json` while a subprocess ran and
+        copied it back afterwards. CI runs the suite under `pytest -n auto`,
+        so another worker could read the impossible block — or a half-written
+        JSON file — and an interrupted process would leave the tracked
+        manifest altered. Sol demonstrated it: he ran the field-shape test
+        inside that window and it failed on `container_digest`. Writing to the
+        shared checkout to test a property of the shared checkout was the
+        wrong shape (Sol, PR #80).
+
+        Instead the REAL `test_manifest_integrity` runs in-process against an
+        INJECTED manifest: `TestFrozenScenarios` loads it once in
+        `setUpClass`, so replacing that attribute exercises the genuine
+        assertions — hashes, ancestry, counts — with a producer block no
+        machine can match.
         """
-        import shutil
-        import subprocess
-        import tempfile
+        import importlib.util
 
-        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        manifest["provenance"]["producer"] = dict(self.IMPOSSIBLE)
-
-        with tempfile.TemporaryDirectory() as tmp:
-            backup = Path(tmp) / "manifest.json"
-            shutil.copyfile(MANIFEST, backup)
+        spec_path = (REPO_ROOT / "python" / "tests" / "necb"
+                     / "test_frozen_scenarios.py")
+        spec = importlib.util.spec_from_file_location(
+            "frozen_scenarios_under_test", spec_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        try:
+            spec.loader.exec_module(module)
+            case = module.TestFrozenScenarios
             try:
-                MANIFEST.write_text(json.dumps(manifest, indent=1) + "\n",
-                                    encoding="utf-8")
-                proc = subprocess.run(
-                    [sys.executable, "-m", "pytest", "-q", "--color=no",
-                     "-p", "no:cacheprovider",
-                     "tests/necb/test_frozen_scenarios.py"
-                     "::TestFrozenScenarios::test_manifest_integrity"],
-                    capture_output=True, text=True,
-                    cwd=str(REPO_ROOT / "python"), timeout=600)
+                case.setUpClass()
+            except unittest.SkipTest as skip:
+                self.skipTest(f"frozen-scenario prerequisites absent: {skip}")
+            try:
+                # the injection: only the producer block, nothing else
+                case.manifest = json.loads(json.dumps(case.manifest))
+                case.manifest["provenance"]["producer"] = dict(self.IMPOSSIBLE)
+                instance = case("test_manifest_integrity")
+                instance.test_manifest_integrity()
             finally:
-                shutil.copyfile(backup, MANIFEST)
+                case.tearDownClass()
+        finally:
+            sys.modules.pop(spec.name, None)
 
+        # If that raised, the producer has become load-bearing somewhere.
         self.assertEqual(
-            0, proc.returncode,
-            "manifest integrity must NOT depend on the producer matching this "
-            "host — a baseline frozen on one machine has to stay verifiable "
-            "on another. Output:\n" + (proc.stdout or proc.stderr)[-1200:])
+            dict(self.IMPOSSIBLE), case.manifest["provenance"]["producer"],
+            "sanity: the impossible block must have been the one in play")
+
+    def test_the_live_manifest_is_never_modified_by_these_tests(self):
+        """Pins the fix above, not just the behaviour it replaced.
+
+        A future edit reaching for the simpler write-and-restore approach
+        would reintroduce a test that can corrupt a parallel run.
+        """
+        before = MANIFEST.read_bytes()
+        self.test_integrity_still_passes_with_an_IMPOSSIBLE_producer()
+        self.assertEqual(before, MANIFEST.read_bytes(),
+                         "the tracked manifest must be byte-identical after "
+                         "the negative test runs")
+        source = Path(__file__).read_text(encoding="utf-8")
+        self.assertNotIn("MANIFEST.write_text", source,
+                         "this module must not write the tracked manifest")
 
     def test_the_field_shapes_are_checked_separately(self):
         """The POSITIVE check, kept apart from the negative one above.
