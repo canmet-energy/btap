@@ -27,7 +27,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 from btap.simulation import engine
 
@@ -61,8 +61,8 @@ class Local(Backend):
         model = opt(openstudio.model.Model.load(openstudio.path(str(osm))))
         if model is None:
             raise RuntimeError(f"local backend: cannot load {osm}")
-
-        workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        workspace, advisories = translate_capturing_advisories(model)
+        _require_sizing_calculations(model, workspace, osm, advisories)
         _ensure_output_requests(workspace)
         idf = run_dir / "in.idf"
         workspace.save(openstudio.path(str(idf)), True)
@@ -97,6 +97,180 @@ class Local(Backend):
         raise RuntimeError(
             f"EnergyPlus run failed in {run_dir}:\n{_failure_detail(err_path)}\n(full log: {err_path})"
         )
+
+
+def translate_capturing_advisories(model):
+    """``(workspace, advisories)`` — ForwardTranslate, keeping the SDK's own
+    sizing advice.
+
+    OpenStudio emits e.g. "You have PlantLoop(s) and design days, it's possible
+    you should enable SimulationControl::DoPlantSizingCalculation" at translate
+    time, to the SDK log. That log is not `eplusout.err`, so nothing surfaced it
+    and the partial-flag case ran silently (Fable, PR #70).
+    """
+    import openstudio
+
+    sink = openstudio.StringStreamLogSink()
+    sink.setLogLevel(openstudio.Warn)
+    workspace = openstudio.energyplus.ForwardTranslator().translateModel(model)
+    messages = [" ".join(str(m.logMessage()).split()) for m in sink.logMessages()]
+    return workspace, [m for m in messages if "SizingCalculation" in m]
+
+
+def autosized_fields(workspace):
+    """The NUMERIC fields EnergyPlus would have to size, named.
+
+    Asks the IDD for each field's declared type, because a whole-text search for
+    the `Autosize` token cannot tell an autosizable numeric field from an alpha
+    one: a `Building` merely NAMED "Autosize" renders `Autosize,  !- Name` and
+    was counted, so the guard refused a model with nothing to size at all (Sol,
+    `077` case 2). The IDD is authoritative about field types, and it is data the
+    SDK already ships rather than a list this module would have to maintain.
+
+    Interrogating the MODEL instead does not work: `getModelObjects()` yields
+    base instances, so the SDK's typed `isXxxAutosized()` predicates are
+    unreachable — they report 0 even for `01-baseboard-gas` — and enumerating
+    concrete component types would be an open-ended surface to model.
+    """
+    found = []
+    for obj in workspace.objects():
+        idd = obj.iddObject()
+        for index in range(obj.numFields()):
+            value = obj.getString(index)
+            if not value.is_initialized() or \
+                    value.get().strip().lower() != "autosize":
+                continue
+            field = idd.getField(index)
+            if not field.is_initialized():
+                continue
+            if not any(kind in str(field.get().properties().type)
+                       for kind in ("Real", "Integer")):
+                continue
+            if not _method_selects(obj, idd, field.get().name()):
+                continue
+            found.append(f"{idd.name()} field {index} "
+                         f"({field.get().name()})")
+    return found
+
+
+def _method_selects(obj, idd, field_name: str) -> bool:
+    """Would EnergyPlus actually READ this autosized field?
+
+    An autosized field is often governed by a sibling `*Method` field that
+    selects which of several inputs applies. With
+    `Heating Design Capacity Method = CapacityPerFloorArea`, EnergyPlus reads
+    `Heating Design Capacity Per Floor Area` and never evaluates
+    `Heating Design Capacity`, which OpenStudio leaves `Autosize` by default —
+    so the field is autosized, inert, and needs no sizing run. The guard refused
+    such a model while EnergyPlus completed it with rc=0 (Fable, PR #70).
+
+    This reads ONE sibling field whose own value names the input it selects. It
+    is not the component taxonomy this module refuses to model: no list of types,
+    no per-component knowledge, just the method field the IDD already declares
+    next to the value it governs.
+
+    `FractionOfAutosizedHeatingCapacity` still NEEDS sizing — the fraction is
+    taken OF the autosized result — so any method naming "autosiz" counts as
+    selecting it.
+    """
+    wanted = field_name.replace(" ", "").lower()
+    for index in range(obj.numFields()):
+        field = idd.getField(index)
+        if not field.is_initialized():
+            continue
+        name = field.get().name()
+        if not name.endswith("Method"):
+            continue
+        base = name[: -len("Method")].strip().replace(" ", "").lower()
+        if not wanted.startswith(base):
+            continue                    # a method, but it governs another field
+        value = obj.getString(index)
+        if not value.is_initialized() or not value.get().strip():
+            return True                 # unset: the field stands as given
+        chosen = value.get().strip().replace(" ", "").lower()
+        # `endswith`, not `==`: a method choice names its field, sometimes
+        # WITHOUT the leading qualifier. `AirLoopHVAC:UnitarySystem`'s
+        # `Cooling Supply Air Flow Rate Method = SupplyAirFlowRate` selects
+        # `Cooling Supply Air Flow Rate` — so an equality test skipped a field
+        # EnergyPlus must size, making the guard silently blind in the one
+        # direction it exists to prevent (Fable, PR #70). Verified 7/7 across
+        # both families: the `CapacityPerFloorArea` skip is preserved and the
+        # `SupplyAirFlowRate` hole is closed.
+        return wanted.endswith(chosen) or "autosiz" in chosen
+    return True                         # no governing method field
+
+
+def _require_sizing_calculations(model, workspace, osm, advisories=()) -> None:
+    """Refuse a model that has fields to size but no sizing run to size them.
+
+    The three flags default to FALSE on a model and `run_energyplus` is the only
+    thing in the product that turns them on, so anything reaching a backend
+    without going through it — a direct `Local().execute(...)`, an upload to the
+    simulation API, a hand-built `openstudio run` OSW — dies 0.3s into
+    EnergyPlus with `For autosizing of <component>, a zone sizing run must be
+    done`, which names the first autosized component rather than the cause. That
+    cost three separate detours in one session.
+
+    NARROW, in two directions, because two wider versions each refused valid
+    work (Sol, `075` and `077`):
+
+    * a model with NOTHING to size does not need a sizing run — the bare fixture
+      runs clean with all three flags false;
+    * needing to size something does not require all THREE calculations. A zone
+      baseboard sizes fine with `zone=True, system=False, plant=False`, and the
+      earlier "any autosized field requires all three" rule refused exactly that;
+    * an autosized field a sibling `*Method` field steers EnergyPlus away from is
+      never evaluated at all — see `_method_selects`.
+
+    So the refusal is limited to the one case that certainly fails: something must
+    be sized and NO sizing calculation will run at all. That is deliberately
+    weaker than a per-dependency check, because mapping each autosizable
+    component to the calculation that sizes it would mean enumerating hundreds of
+    component types — the unbounded surface this module already refuses to model.
+
+    WHAT THE DEFERRED CASE COSTS, corrected. An earlier version of this docstring
+    said EnergyPlus "reports that case itself". **It does not.** Fable ran an
+    autosized boiler on a plant loop with zone sizing on and plant sizing off:
+    EnergyPlus completed with rc=0, no Severe and no Fatal, and silently derived
+    a nominal capacity. The only signal anywhere was an OpenStudio translate-time
+    advisory, which goes to the SDK log rather than `eplusout.err`. So this gate
+    surfaces that advisory through `warnings.warn` instead of claiming a report
+    that never comes.
+
+    It CHECKS rather than repairs, deliberately:
+
+    * `Remote` with `workflow_type='openstudio'` uploads `in.osm` itself, so the
+      workspace-level trick `_ensure_output_requests` uses cannot reach it; only
+      the model could be mutated, and `in.osm` must stay byte-comparable with
+      what the Ruby runner saves;
+    * a backend that silently enabled sizing would hide the caller's omission,
+      and `run_energyplus` deliberately varies the two `runSimulationfor*`
+      flags — a backend is not the place to decide what the run is.
+    """
+    autosized = autosized_fields(workspace)
+    if not autosized:
+        return                      # nothing to size; the flags are irrelevant
+    sim = model.getSimulationControl()
+    enabled = {
+        "Do Zone Sizing Calculation": sim.doZoneSizingCalculation(),
+        "Do System Sizing Calculation": sim.doSystemSizingCalculation(),
+        "Do Plant Sizing Calculation": sim.doPlantSizingCalculation(),
+    }
+    if any(enabled.values()):
+        # A sizing run exists, but not necessarily the one this model needs, and
+        # EnergyPlus will not say so. Surface the SDK's own advice rather than
+        # letting a partial-flag run derive a capacity in silence.
+        import warnings
+        for advisory in advisories:
+            warnings.warn(f"{osm}: {advisory}", stacklevel=2)
+        return
+    raise RuntimeError(
+        f"{osm} has {len(autosized)} autosized field(s) but NO sizing "
+        f"calculation enabled, so EnergyPlus cannot size any of them — it will "
+        f"fail on the first. Example: {autosized[0]}. Prepare the run through "
+        "btap.simulation.runner.run_energyplus, which enables all three, or "
+        "enable the one(s) this model needs before calling a backend directly."
+    )
 
 
 def _ensure_output_requests(workspace) -> None:
@@ -193,17 +367,27 @@ class Remote(Backend):
         osm = run_dir / "in.osm"
         if not osm.is_file():
             raise RuntimeError(f"remote backend: {osm} is missing — the runner did not prepare this dir")
-        if self._workflow_type() == "openstudio":
-            return osm.read_bytes(), "in.osm"
-
         import openstudio
 
         from btap._compat import opt
 
+        # Loaded and checked BEFORE the workflow branch: the `openstudio`
+        # workflow uploads this OSM unchanged, so it needs the same guard as the
+        # translated path — and 20 queue-minutes is a worse place to learn this
+        # than here.
         model = opt(openstudio.model.Model.load(openstudio.path(str(osm))))
         if model is None:
             raise RuntimeError(f"remote backend: cannot load {osm}")
-        idf = openstudio.energyplus.ForwardTranslator().translateModel(model)
+        # Translated once, BEFORE the workflow branch, and reused below. The
+        # `openstudio` workflow uploads `in.osm` unchanged and the remote does
+        # its own translation, so this one is spent purely on the guard — a
+        # second of local work against a transfer plus a queue wait (Sol, `075`:
+        # keep the ordering).
+        idf, advisories = translate_capturing_advisories(model)
+        _require_sizing_calculations(model, idf, osm, advisories)
+
+        if self._workflow_type() == "openstudio":
+            return osm.read_bytes(), "in.osm"
         path = run_dir / "in.idf"
         idf.save(openstudio.path(str(path)), True)
         return path.read_bytes(), "in.idf"
@@ -226,8 +410,30 @@ class Remote(Backend):
             )
 
     def _upload(self, payload: bytes, filename: str) -> str:
+        # `/models/upload-url`, with `filename` as a QUERY parameter.
+        #
+        # This backend was validated against the live service once and the API
+        # has moved since. Measured against it on 2026-10-03:
+        #
+        #   POST {endpoint}/models                        -> 404 Not Found
+        #   POST {endpoint}/models/upload-url  (JSON body) -> 422
+        #        {"detail":[{"type":"missing","loc":["query","filename"], ...}]}
+        #   POST {endpoint}/models/upload-url?filename=X   -> 200
+        #        {"model_id", "s3_key", "upload_url"}
+        #
+        # So `Remote` could not upload anything, and no test caught it because
+        # the transport is injected and every test runs offline against a fake —
+        # correct for unit tests, and exactly why a contract change went unseen.
+        # The other three routes (`/simulations`, `/simulations/{id}`,
+        # `/simulations/{id}/results`) matched the service's OpenAPI spec when
+        # read on 2026-10-03 — DATED deliberately, because a spec read once has
+        # the same shelf life as the fake this replaced, and claiming they
+        # "still match" would read as a standing guarantee (Fable, PR #75).
+        #
+        # The response keys this reads are unchanged, so nothing downstream moves.
+        query = urlencode({"filename": filename})
         reg = self._with_retry("upload", lambda: self._transport.post_json(
-            f"{self._endpoint}/models", {"filename": filename}))
+            f"{self._endpoint}/models/upload-url?{query}", {}))
         url = reg.get("upload_url")
         if url is None:
             raise RuntimeError(f"remote upload registration returned no upload_url (host {self._host()})")

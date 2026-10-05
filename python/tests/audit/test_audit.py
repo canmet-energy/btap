@@ -129,6 +129,55 @@ class TestCoverageEmit(unittest.TestCase):
                          "partial/not_implemented warn; implemented/satisfied_by_clone/"
                          "host_scope inform; gap_owner modeller is an info scope note (D-09)")
 
+    def test_an_article_cited_WITH_its_own_Note_counts_once(self):
+        """Sol's specified negative test (`076`), and the #65 defect.
+
+        `_ARTICLE_RE` strips a leading `A-`, so `A-8.4.4.7.(1)` collapses onto
+        `8.4.4.7.`. One decision citing an article alongside its OWN Note
+        therefore incremented that article twice, and `decisions_citing` reported
+        2 for one decision. It reaches the AHJ report, so the inflation
+        over-stated how many adjudicated decisions bear on the article.
+        """
+        self.audit.decision("build", "thermal mass",
+                            article="8.4.4.7.(1) (Note A-8.4.4.7.(1): lightweight)")
+        entries = [e for e in (emit_coverage(self.COVERAGE, self.audit)
+                               or self.audit.entries)
+                   if e["step"] == "coverage"]
+        counts = {e["article"]: e["inputs"]["decisions_citing"] for e in entries}
+        self.assertEqual(1, counts["8.4.4.7."],
+                         "one decision citing an article and its own Note is "
+                         "ONE citation, not two")
+
+    def test_two_DISTINCT_articles_in_one_entry_each_count(self):
+        """Sol's specified positive test: the dedup must not merge real ones."""
+        self.audit.decision("build", "two provisions",
+                            article="8.4.4.7.(1); 8.4.4.9.(2)")
+        entries = [e for e in (emit_coverage(self.COVERAGE, self.audit)
+                               or self.audit.entries)
+                   if e["step"] == "coverage"]
+        counts = {e["article"]: e["inputs"]["decisions_citing"] for e in entries}
+        self.assertEqual(1, counts["8.4.4.7."])
+        self.assertEqual(1, counts["8.4.4.9."],
+                         "deduplicating per entry must not merge distinct articles")
+
+    def test_a_Note_cited_ALONE_still_credits_its_article(self):
+        """Why the fix is per-entry dedup rather than excluding `A-` ids.
+
+        A lookbehind that refused a leading `A-` would fix the double-count and
+        ALSO stop a Note from crediting its article at all — an article whose
+        only evidence is its Note would drop to zero, under-stating coverage
+        instead of over-stating it. This pins the behaviour that rules that
+        approach out.
+        """
+        self.audit.decision("build", "note only",
+                            article="Note A-8.4.4.7.(1)")
+        entries = [e for e in (emit_coverage(self.COVERAGE, self.audit)
+                               or self.audit.entries)
+                   if e["step"] == "coverage"]
+        counts = {e["article"]: e["inputs"]["decisions_citing"] for e in entries}
+        self.assertEqual(1, counts["8.4.4.7."],
+                         "a Note citation is still evidence about its article")
+
     def test_citation_counts_are_prefix_matched(self):
         entries = self.emit()
         counts = {e["article"]: e["inputs"]["decisions_citing"] for e in entries}

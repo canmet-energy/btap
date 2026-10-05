@@ -23,7 +23,25 @@ class FakeTransport:
 
     def post_json(self, url, body):
         self.calls.append(("post", url, body))
-        if url.endswith("/models"):
+        path, _, query = url.partition("?")
+        # Matched on the path's TAIL, not as a substring. `"/models" in path`
+        # would fire for an endpoint that itself contains `/models` — e.g.
+        # `https://svc.test/api/models` makes `{endpoint}/simulations` contain
+        # `/models`, enter this branch, fail the endswith below, and raise a
+        # spurious 404 on a route that works. Same substring class as the
+        # `run_lines` parser in #64 (Fable, PR #75).
+        if path.endswith(("/models", "/models/upload-url")):
+            # The fake now ENFORCES the live service's contract instead of
+            # restating whatever the backend happened to send. It previously
+            # matched `endswith("/models")`, so it validated a route the service
+            # answers with 404 — which is how the drift went unseen while every
+            # offline test passed. Measured against the live API on 2026-10-03.
+            if not path.endswith("/models/upload-url"):
+                raise RuntimeError(f"404 Not Found: {path}")
+            if "filename=" not in query:
+                raise RuntimeError(
+                    "422 missing query parameter 'filename' "
+                    "(the service wants it in the query, not the body)")
             self.fail_times -= 1
             if self.fail_times >= 0:
                 raise RuntimeError("503 Service Unavailable")
@@ -57,6 +75,13 @@ class TestRemote(unittest.TestCase):
         run_dir = Path(self.tmp.name) / "run"
         run_dir.mkdir(parents=True, exist_ok=True)
         model = load_fixture()
+        # What `run_energyplus` sets before handing a dir to a backend. Without
+        # these the backend's own guard refuses the dir, and this helper is named
+        # for a PREPARED dir — so it must prepare one faithfully.
+        sim = model.getSimulationControl()
+        sim.setDoZoneSizingCalculation(True)
+        sim.setDoSystemSizingCalculation(True)
+        sim.setDoPlantSizingCalculation(True)
         model.save(openstudio.path(str(run_dir / "in.osm")), True)
         return run_dir
 
@@ -64,8 +89,22 @@ class TestRemote(unittest.TestCase):
         opts.setdefault("poll_seconds", 0)
         return Remote(endpoint="https://svc.test", api_key="k", transport=transport, **opts)
 
+    def uploaded_filename(self, transport):
+        """The `filename` as the service receives it: a QUERY parameter.
+
+        Reading it from the JSON body is what the old assertions did, and the
+        service answers that shape with 422.
+        """
+        from urllib.parse import parse_qs, urlsplit
+
+        call = self.find_call(transport, "post", "/models/upload-url")
+        return parse_qs(urlsplit(call[1]).query).get("filename", [None])[0]
+
     def find_call(self, transport, kind, suffix):
-        return next(c for c in transport.calls if c[0] == kind and c[1].endswith(suffix))
+        # endswith, not `in`: see FakeTransport.post_json on why a substring
+        # match on a URL path is a trap.
+        return next(c for c in transport.calls
+                    if c[0] == kind and c[1].partition("?")[0].endswith(suffix))
 
     def test_happy_path_lands_both_artifacts_locally(self):
         run_dir = self.prepared_dir()
@@ -83,8 +122,12 @@ class TestRemote(unittest.TestCase):
         t = FakeTransport()
         self.remote(t).execute(run_dir)
 
-        register = self.find_call(t, "post", "/models")
-        self.assertEqual("in.idf", register[2]["filename"])
+        register = self.find_call(t, "post", "/models/upload-url")
+        self.assertEqual("in.idf", self.uploaded_filename(t),
+                         "the service wants filename in the query, not the body")
+        self.assertEqual({}, register[2],
+                         "and the body carries nothing — a body with filename "
+                         "returns 422")
         self.assertTrue((run_dir / "in.idf").is_file(), "the IDF should be left beside in.osm")
 
         submit = self.find_call(t, "post", "/simulations")
@@ -94,7 +137,7 @@ class TestRemote(unittest.TestCase):
         run_dir = self.prepared_dir()
         t = FakeTransport()
         self.remote(t, workflow_type="openstudio").execute(run_dir)
-        self.assertEqual("in.osm", self.find_call(t, "post", "/models")[2]["filename"])
+        self.assertEqual("in.osm", self.uploaded_filename(t))
 
     def test_engine_version_is_always_sent_and_defaults_to_the_local_energyplus(self):
         run_dir = self.prepared_dir()
@@ -121,7 +164,7 @@ class TestRemote(unittest.TestCase):
         t = FakeTransport(fail_times=2)
         with mock.patch("time.sleep"):
             self.remote(t).execute(run_dir)
-        registers = [c for c in t.calls if c[0] == "post" and c[1].endswith("/models")]
+        registers = [c for c in t.calls if c[0] == "post" and "/models/upload-url" in c[1]]
         self.assertGreaterEqual(len(registers), 3)
 
     def test_failed_status_raises_with_the_phase_errors(self):

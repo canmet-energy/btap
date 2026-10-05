@@ -40,7 +40,37 @@ def emit_coverage(coverage, audit):
 
     cited = Counter()
     for e in audit.entries:
-        cited.update(_ARTICLE_RE.findall(str(e.get("article") or "")))
+        # ONE entry counts ONCE per article, hence the set. `_ARTICLE_RE` strips
+        # a leading `A-`, so an Appendix Note id collapses onto the article it
+        # refers to: an entry citing `8.4.5.4.(1) (Note A-8.4.5.4.(1): ...)`
+        # yielded that article TWICE and `decisions_citing` reported 2 for one
+        # decision. The count reaches the AHJ report, so the inflation is a
+        # disclosure defect (Fable + Sol, PR #65).
+        #
+        # Deduplicating PER ENTRY rather than tightening the pattern is
+        # deliberate, for two reasons.
+        #
+        # A lookbehind that excluded `A-` would also stop a Note from crediting
+        # its own article at all — an article whose only evidence is its Note
+        # would drop to zero, under-stating coverage instead of over-stating it.
+        #
+        # And it would not have fixed the defect everywhere. The same
+        # double-count has a second SPELLING: `eui_archetypes.py` cites
+        # `"8.4.4.1.(2); Table 8.4.4.1."` — an article beside its own TABLE, not
+        # its Note — which an `A-` lookbehind leaves counting twice while
+        # appearing to succeed. Per-entry dedup is spelling-agnostic, and that
+        # is what makes it the right shape rather than merely the safe one
+        # (Fable, PR #74).
+        #
+        # WHY A NOTE COUNTS AT ALL, since this is the judgement the dedup
+        # preserves: the metric counts MENTIONS, not applications — the report's
+        # own caption says a citation "is not, by itself, evidence the rule is
+        # applied". A line citing `Note A-8.4.5.4.(1)` does mention `8.4.5.4.`,
+        # so crediting it is correct under that definition. It would NOT be
+        # correct if the count claimed normative coverage, because Appendix A is
+        # explanatory rather than normative; the weakness of the metric is
+        # exactly what makes counting a Note defensible.
+        cited.update(set(_ARTICLE_RE.findall(str(e.get("article") or ""))))
     for art in coverage["articles"]:
         prefix = _SLICE_SUFFIX_RE.sub("", str(art["article"]))
         applied = sum(n for a, n in cited.items() if a.startswith(prefix))
