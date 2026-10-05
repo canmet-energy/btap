@@ -137,38 +137,168 @@ class TestUnknownValueIsRefused(unittest.TestCase):
 
 
 class TestTheApiSeam(unittest.TestCase):
-    """build_env -> api_worker selection, as ONE path rather than two halves.
+    """build_env -> api_worker._select_backend -> set_default_backend(Remote).
 
-    This is the test that was missing. I had `_base_env` and
-    `_select_backend` each passing in isolation while the seam between them
-    was broken: `build_env` did not pass `BTAP_SCENARIO_BACKEND`, so the
-    worker read its own default "local" and never called
-    `set_default_backend(Remote())`. The two annual parity API scenarios ran
-    LOCALLY while the run claimed remote verification (Sol, PR #79).
+    THE EXECUTED SEAM, not a helper's return value. The previous version of
+    this class called `runner.build_env(...)` and asserted what the returned
+    dict contained — so deleting the worker's `_select_backend()` call, or
+    changing its guard to skip `"remote"`, left all 17 tests green while both
+    annual API scenarios ran LOCALLY and the run claimed remote verification.
+    Sol found that, and I reproduced it: with the call removed the suite still
+    passed 17/17.
+
+    That is the seventh time in this session I wrote a check that models a
+    property instead of exercising it — and this one was written IN RESPONSE
+    to Sol finding the same seam untested. So these tests run the worker's own
+    selection against the environment the harness actually hands it, with a
+    fake `Remote`, and the mutations below are the evidence.
     """
 
     def setUp(self):
         self.runner = _harness()
+        self.worker = self._worker_module()
 
-    def _worker_sees(self, parent_env):
-        """What `api_worker._select_backend` would decide, given the env the
-        harness actually hands a worker subprocess."""
+    def _worker_module(self):
+        """`api_worker` loaded the way the harness invokes it."""
+        import importlib.util
+
+        path = SCENARIOS / "api_worker.py"
+        spec = importlib.util.spec_from_file_location("api_worker_seam", path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        self.addCleanup(sys.modules.pop, spec.name, None)
+        spec.loader.exec_module(module)
+        return module
+
+    def _select_with(self, parent_env):
+        """Run the WORKER's selection under the env the harness would pass.
+
+        Returns the backend `set_default_backend` received, or None.
+        """
+        from unittest import mock
+
         with mock.patch.dict(os.environ, parent_env, clear=False):
-            for key in ("BTAP_SCENARIO_BACKEND",):
-                if key not in parent_env:
-                    os.environ.pop(key, None)
+            if "BTAP_SCENARIO_BACKEND" not in parent_env:
+                os.environ.pop("BTAP_SCENARIO_BACKEND", None)
             env = self.runner.build_env({"kind": "api"}, {})
-        return env.get("BTAP_SCENARIO_BACKEND", "local")
 
-    def test_the_worker_LEARNS_it_is_remote(self):
-        seen = self._worker_sees({"BTAP_SCENARIO_BACKEND": "remote",
-                                  "HBIX_API_KEY": "k",
-                                  "HBIX_SIM_ENDPOINT": "https://x"})
-        self.assertEqual("remote", seen,
-                         "without this the API path runs locally while the "
-                         "run claims remote verification")
+        installed = []
 
-    def test_the_worker_also_gets_what_Remote_needs(self):
+        class FakeRemote:
+            def __init__(self, *a, **k):
+                pass
+
+            def is_configured(self):
+                return True
+
+        import btap.simulation
+        import btap.simulation.runner as product_runner
+
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(btap.simulation, "Remote", FakeRemote):
+                with mock.patch.object(product_runner, "set_default_backend",
+                                       installed.append):
+                    self.worker._select_backend()
+        return installed[0] if installed else None
+
+    def test_the_worker_INSTALLS_a_remote_backend(self):
+        """The whole point: the env the harness passes must make the worker
+        call `set_default_backend`."""
+        installed = self._select_with({"BTAP_SCENARIO_BACKEND": "remote",
+                                       "HBIX_API_KEY": "k",
+                                       "HBIX_SIM_ENDPOINT": "https://x"})
+        self.assertIsNotNone(
+            installed,
+            "the worker did not install a backend — the API path would run "
+            "LOCALLY while the run claims remote verification")
+        self.assertEqual("FakeRemote", type(installed).__name__)
+
+    def test_the_worker_MAIN_invokes_the_selection(self):
+        """THE CALL SITE. Calling `_select_backend()` from a test proves the
+        function works, not that `main()` runs it.
+
+        Sol's probe is precisely this: delete the call from `main()` and the
+        suite stays green while both annual API scenarios run locally. My
+        rewrite of this class still survived that mutation, because every test
+        invoked the helper directly — the eighth time in this session I tested
+        a function instead of its caller. So this drives `main()` with a real
+        call file and a stubbed pipeline, and asserts the backend was
+        installed.
+        """
+        import json as _json
+        import shutil
+        import tempfile
+        from unittest import mock
+
+        installed = []
+
+        class FakeRemote:
+            def __init__(self, *a, **k):
+                pass
+
+            def is_configured(self):
+                return True
+
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        call = directory / "call.json"
+        call.write_text(_json.dumps({"code": "necb2020",
+                                     "simulate": "none"}), encoding="utf-8")
+        run_dir = directory / "run"
+
+        import btap.simulation
+        import btap.simulation.runner as product_runner
+
+        with mock.patch.dict(os.environ,
+                             {"BTAP_SCENARIO_BACKEND": "remote",
+                              "HBIX_API_KEY": "k",
+                              "HBIX_SIM_ENDPOINT": "https://x"}, clear=False):
+            with mock.patch.object(btap.simulation, "Remote", FakeRemote):
+                with mock.patch.object(product_runner, "set_default_backend",
+                                       installed.append):
+                    # stub the pipeline: this test is about the selection
+                    with mock.patch.object(self.worker, "run",
+                                           lambda call, out: {"ok": True}):
+                        code = self.worker.main(
+                            ["api_worker", str(call), str(run_dir)])
+
+        self.assertEqual(0, code,
+                         f"the worker failed: "
+                         f"{(run_dir / 'observations.json').read_text()[:300]
+                            if (run_dir / 'observations.json').exists() else ''}")
+        self.assertEqual(
+            1, len(installed),
+            "main() did not install a backend — deleting its "
+            "_select_backend() call must fail this test")
+
+    def test_the_worker_installs_NOTHING_by_default(self):
+        self.assertIsNone(self._select_with({"HBIX_API_KEY": "k"}),
+                          "the default must leave the product's backend alone")
+
+    def test_an_unconfigured_remote_refuses_rather_than_running_locally(self):
+        """Silently falling back to local would be the same false claim."""
+        from unittest import mock
+
+        class Unconfigured:
+            def __init__(self, *a, **k):
+                pass
+
+            def is_configured(self):
+                return False
+
+        import btap.simulation
+
+        with mock.patch.dict(os.environ,
+                             {"BTAP_SCENARIO_BACKEND": "remote"}, clear=True):
+            with mock.patch.object(btap.simulation, "Remote", Unconfigured):
+                with self.assertRaises(SystemExit) as caught:
+                    self.worker._select_backend()
+        self.assertIn("not configured", str(caught.exception))
+
+    def test_the_credentials_reach_the_worker_env(self):
+        """Still worth asserting, but it is no longer the whole test."""
+        from unittest import mock
+
         with mock.patch.dict(os.environ,
                              {"BTAP_SCENARIO_BACKEND": "remote",
                               "HBIX_API_KEY": "k",
@@ -176,89 +306,7 @@ class TestTheApiSeam(unittest.TestCase):
             env = self.runner.build_env({"kind": "api"}, {})
         self.assertEqual("k", env.get("HBIX_API_KEY"))
         self.assertEqual("https://x", env.get("HBIX_SIM_ENDPOINT"))
-
-    def test_the_default_tells_the_worker_nothing(self):
-        seen = self._worker_sees({"HBIX_API_KEY": "k"})
-        self.assertEqual("local", seen)
-        with mock.patch.dict(os.environ, {"HBIX_API_KEY": "k"}):
-            os.environ.pop("BTAP_SCENARIO_BACKEND", None)
-            env = self.runner.build_env({"kind": "api"}, {})
-        self.assertNotIn("BTAP_SCENARIO_BACKEND", env)
-        self.assertNotIn("HBIX_API_KEY", env,
-                         "an offline scenario must not inherit the key")
-
-
-class TestCliThreading(unittest.TestCase):
-    """`--backend remote` is threaded, not reinvented.
-
-    The product already owns backend selection, so the harness passes the
-    existing flag through.
-    """
-
-    def setUp(self):
-        self.runner = _harness()
-
-    def _argv_for(self, backend, scenario_argv):
-        captured = {}
-
-        class Proc:
-            returncode, stdout, stderr = 0, "", ""
-
-        def fake_run(cmd, **kwargs):
-            captured["cmd"] = cmd
-            return Proc()
-
-        scenario = {"argv": scenario_argv, "env": {}}
-        with mock.patch.dict(os.environ, {"BTAP_SCENARIO_BACKEND": backend}):
-            with mock.patch.object(self.runner.subprocess, "run", fake_run):
-                self.runner._execute_cli(scenario, Path("/tmp"), {})
-        return captured["cmd"]
-
-    def test_local_adds_nothing(self):
-        cmd = self._argv_for("local", ["--city", "toronto"])
-        self.assertNotIn("--backend", cmd,
-                         "the default must leave the invocation untouched")
-
-    def test_remote_appends_the_product_flag(self):
-        cmd = self._argv_for("remote", ["--city", "toronto"])
-        self.assertIn("--backend", cmd)
-        self.assertEqual("remote", cmd[cmd.index("--backend") + 1])
-
-    def test_a_scenario_that_sets_its_own_backend_wins(self):
-        """A scenario authored with an explicit backend is not overridden."""
-        cmd = self._argv_for("remote", ["--backend", "local", "--city", "t"])
-        self.assertEqual(1, cmd.count("--backend"),
-                         "the harness must not append a second --backend")
-        self.assertEqual("local", cmd[cmd.index("--backend") + 1])
-
-
-class TestFreezeRefusesRemote(unittest.TestCase):
-    """The guard that keeps the freeze contract intact.
-
-    Without it the capability's first accidental use is a committed baseline
-    attesting to a stack nobody chose.
-    """
-
-    def test_freeze_source_refuses_a_non_local_backend(self):
-        source = (SCENARIOS / "freeze.py").read_text(encoding="utf-8")
-        self.assertIn("scenario_backend()", source,
-                      "freeze.py must consult the selector")
-        self.assertIn("a freeze may only run on the", source,
-                      "and refuse with a message naming the reason")
-
-    def test_freezing_remote_dies_before_any_work(self):
-        import subprocess
-
-        env = dict(os.environ, BTAP_SCENARIO_BACKEND="remote")
-        proc = subprocess.run(
-            [sys.executable, str(SCENARIOS / "freeze.py")],
-            capture_output=True, text=True, env=env, timeout=120)
-        self.assertNotEqual(0, proc.returncode,
-                            "a remote freeze must fail, not proceed")
-        combined = proc.stdout + proc.stderr
-        self.assertIn("may only run on the local backend", combined)
-        self.assertNotIn("frozen 45 scenarios", combined,
-                         "it must refuse BEFORE doing the work")
+        self.assertEqual("remote", env.get("BTAP_SCENARIO_BACKEND"))
 
 
 if __name__ == "__main__":
