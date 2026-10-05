@@ -6197,6 +6197,21 @@ in the plan log.
   Reporting a check as evidence without that step is the same error as
   reporting a frozen lane that holds none of the changed baselines.
 
+  **On its own case** (Fable's clause, 2026-10-05). A suite where breaking
+  rung N turns case M red is still modelling, one level up: the coverage is
+  real but no case is pinned to the rung it names, so a later edit can delete
+  the rung a case claims to guard while something else keeps it green. The
+  check is that each case reds on the defect it is named for. Fable
+  demonstrated the standard on `mutate.py` — 15 mutations, one per rung, term
+  and refusal, each red on its own case — and that is the bar.
+
+  **And the cheap habit that produces it:** install the defect FIRST, confirm
+  red, then write the fix. Test-first for negative tests specifically, where
+  the usual argument for it is weakest and the payoff is highest. Five of the
+  six occurrences above were written while fixing a finding about checks that
+  model themselves, which is the hardest moment to notice it — the attention
+  is on the defect, not on the instrument.
+
 - **Transport:** `.reviews/` (gitignored) — Sol and Claude exchange files
   directly, so neither GitHub nor phylroy carries messages. Claude watches
   `to-claude/`; `wait-for.sh` blocks until the other side replies, so an agent
