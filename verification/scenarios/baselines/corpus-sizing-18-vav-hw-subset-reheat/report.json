@@ -8,6 +8,7 @@
  "reference": {},
  "compliant": null,
  "warnings": [
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",
   "CoilHeatingGasMultiStage_gas: staged capacity unavailable (model not sized?) \u2014 8.4.4.9.(7) stage count NOT set; run sizing first",
   "staged DX cooling capacity unavailable (model not sized?) \u2014 not set",

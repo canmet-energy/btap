@@ -9,6 +9,11 @@
  "compliant": null,
  "warnings": [
   "proposed is UNSIZED (simulate: :none) \u2014 data-centre kW thresholds and capacity-binned efficiencies fall back with warnings; the 5.2.10.1 energy-recovery determination needs sized flows and is SKIPPED",
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
   "boiler capacity unavailable (model not sized?) \u2014 not set",
   "boiler capacity unavailable (model not sized?) \u2014 not set",
   "CoilCoolingDXMultiSpeed_dx: staged capacity unavailable (model not sized?) \u2014 8.4.4.10.(8) stage count NOT set; run sizing first",

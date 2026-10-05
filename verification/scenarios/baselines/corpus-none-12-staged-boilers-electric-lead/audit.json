@@ -160,6 +160,22 @@
  {
   "step": "selection",
   "target": "Thermal Zone 1",
+  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "inputs": {
+   "proposed_energy_types": [
+    "Electricity",
+    "NaturalGas"
+   ],
+   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
+   "reference_modelled_on": "single energy type"
+  },
+  "article": "8.4.4.9.(5)",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 1",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
@@ -172,6 +188,22 @@
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 2",
+  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "inputs": {
+   "proposed_energy_types": [
+    "Electricity",
+    "NaturalGas"
+   ],
+   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
+   "reference_modelled_on": "single energy type"
+  },
+  "article": "8.4.4.9.(5)",
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "selection",
@@ -192,6 +224,22 @@
  {
   "step": "selection",
   "target": "Thermal Zone 3",
+  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "inputs": {
+   "proposed_energy_types": [
+    "Electricity",
+    "NaturalGas"
+   ],
+   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
+   "reference_modelled_on": "single energy type"
+  },
+  "article": "8.4.4.9.(5)",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 3",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
@@ -208,6 +256,22 @@
  {
   "step": "selection",
   "target": "Thermal Zone 4",
+  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "inputs": {
+   "proposed_energy_types": [
+    "Electricity",
+    "NaturalGas"
+   ],
+   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
+   "reference_modelled_on": "single energy type"
+  },
+  "article": "8.4.4.9.(5)",
+  "building": "reference building",
+  "level": "warning"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 4",
   "action": "reference system selected",
   "inputs": {
    "category": "General Area",
@@ -220,6 +284,22 @@
   "article": "8.4.4.7.(1)",
   "building": "reference building",
   "level": "decision"
+ },
+ {
+  "step": "selection",
+  "target": "Thermal Zone 5",
+  "action": "proposed heating uses MORE THAN ONE ENERGY TYPE and the capacity allocation is UNKNOWN (unsized plant) \u2014 the reference is modelled on a single energy type, so 8.4.4.9.(5) is NOT satisfied for this group",
+  "inputs": {
+   "proposed_energy_types": [
+    "Electricity",
+    "NaturalGas"
+   ],
+   "capacity_allocation": "unknown \u2014 plant autosized or no sizing run",
+   "reference_modelled_on": "single energy type"
+  },
+  "article": "8.4.4.9.(5)",
+  "building": "reference building",
+  "level": "warning"
  },
  {
   "step": "selection",
@@ -1053,7 +1133,7 @@
   "action": "Heating System \u2014 implemented: reference heating system selected per Table 8.4.4.7.-A and this Article",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_assign"
    ]
@@ -1067,7 +1147,7 @@
   "action": "Heating System \u2014 implemented: purchased energy routes to Article 8.4.4.6.",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1081,7 +1161,7 @@
   "action": "Heating System \u2014 partial. Applied: terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50). Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual \u2014 audited as an approximation, not claimed",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_audit_terminal_secondary_split",
     "python/btap/codes/necb/hvac/reference.py#_apply_zone_fan_rules"
@@ -1096,7 +1176,7 @@
   "action": "Heating System \u2014 implemented: reference heating energy type modeled identical to the proposed (structural election; see also 8.4.4.13.(2)(g))",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
    ]
@@ -1110,7 +1190,7 @@
   "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled: a proposed plant drawing on more than one energy type passes into the reference unchanged rather than being apportioned",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 15
+   "decisions_citing": 20
   },
   "article": "8.4.4.9.(5)",
   "building": "reference building",
@@ -1121,7 +1201,7 @@
   "action": "Heating System \u2014 implemented: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
     "python/btap/codes/necb/hvac/efficiency.py#_apply_boiler"
@@ -1136,7 +1216,7 @@
   "action": "Heating System \u2014 partial. Applied: furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized. Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning \u2014 EnergyPlus multispeed objects cannot hold a fifth (D-47)",
   "inputs": {
    "status": "partial",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/codes/necb/hvac/efficiency.py#apply_staging",
     "python/btap/codes/necb/hvac/efficiency.py#_stage_multispeed_coil"
@@ -1151,7 +1231,7 @@
   "action": "Heating System \u2014 implemented: heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89",
   "inputs": {
    "status": "implemented",
-   "decisions_citing": 15,
+   "decisions_citing": 20,
    "code": [
     "python/btap/modeling/hvac/components/curves.py#build",
     "python/btap/codes/necb/hvac/efficiency.py#apply"
