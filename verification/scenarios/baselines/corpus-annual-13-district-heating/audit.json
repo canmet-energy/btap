@@ -44,6 +44,8 @@
    "design_days_discarded": 7,
    "design_days_in_file": 78,
    "design_days_kept": 3,
+   "design_days_kept_heating": 1,
+   "design_days_kept_cooling": 2,
    "kept_all_as_fallback": false
   },
   "value": "Toronto Intl AP Ann Clg .4% Condns DB=>MWB, Toronto Intl AP Ann Clg .4% Condns WB=>MDB, Toronto Intl AP Ann Htg 99.6% Condns DB",
