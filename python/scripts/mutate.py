@@ -9,11 +9,18 @@ forty minutes that way.
 
 HOW IT PARALLELISES WITHOUT COPYING A VENV. Each mutant needs its own source
 tree, because each one edits the same file differently. It does NOT need its
-own virtualenv: `PYTHONPATH` takes precedence over the venv's editable
-install, so a 15 MB copy of `btap/` placed on `PYTHONPATH` shadows the
-installed package completely. That is the same resolution order that made the
-freeze-recipe trap possible — `$PY script.py` resolves `btap` through the
-editable finder unless `PYTHONPATH` says otherwise — used deliberately here.
+own virtualenv: a 15 MB copy of `btap/` becomes the subprocess's CWD, and
+`python -m pytest` puts the CWD at the FRONT of `sys.path` — ahead of the
+venv's editable install and ahead of `PYTHONPATH`.
+
+THE MECHANISM IS THE CWD, NOT `PYTHONPATH`, and this docstring previously
+said the opposite. Measured:
+
+    cwd=/tmp/ppA  PYTHONPATH=/tmp/ppB  ->  btap.WHO == 'A'
+
+`PYTHONPATH` is set as well, but it is belt-and-braces; removing `cwd=root`
+on the authority of the old wording would restore the silent inertness
+described below, where no mutant was ever imported (Fable, PR #81 N4).
 
 THE RAM CEILING, which is the reason this is capped rather than `-n auto`.
 One run peaks at 438 MB RSS. The devcontainer sees every host core, and the
@@ -31,8 +38,32 @@ where matrix.json is:
      "tests":  ["tests/simulation/"],
      "mutations": [{"label": "...", "old": "...", "new": "..."}]}
 
-Exit status is 0 only if every mutation was CAUGHT (the suite failed for it)
-and the unmutated baseline PASSED. A mutation that survives is the finding.
+WHAT A MUTATION CAN AND CANNOT REACH. A mutant is visible only to tests that
+IMPORT the target. A test that reads product source BY PATH reads the REAL
+tree, because `tests/` is a symlink and `Path(__file__).resolve()` walks out
+of the mutant directory — so such a test scans unmutated files and the row
+reports SURVIVED. That is a harness limitation wearing the costume of a
+coverage finding, which is the same conflation this tool is careful to avoid
+for broken anchors. In this repository it affects at least
+`test_no_legacy_namespace.py`, `test_decisions_gate_is_path_unfiltered.py`,
+`test_coverage_code_refs.py`, `test_citation_no_loss.py` and the decisions
+sync/generator modules. Copying `tests/` instead of symlinking does not help
+— `parents[2]` then lands outside a git tree and the test fails for a third
+reason — so the footer SAYS SO instead (Fable, PR #81 N1).
+
+VERDICTS ARE THREE, NOT TWO, which is the heart of this tool's honesty.
+"SURVIVED" only means nothing failed; it cannot see a row that fails for the
+WRONG REASON. A real example: a #77 row labelled "counts computed before the
+substitution" kept reporting a failure after a later fix made the bug it
+named impossible — it had been validated against the pre-fix code and was
+crediting a rule it no longer tested. So a mutation may DECLARE the test ids
+that must fail, and a row whose declared test does not fail is reported as
+CAUGHT BY SOMETHING ELSE rather than counted as a success. That also catches
+an inert mutation, which cannot produce its declared failure.
+
+Exit status is 0 only if every mutation was CAUGHT — by its declared test
+where one is declared — and the unmutated baseline PASSED. A survivor, a
+broken anchor, and a row caught by something else are all findings.
 """
 
 from __future__ import annotations
@@ -91,6 +122,15 @@ def build_mutant(work: Path, index: int, target: str, old: str, new: str):
     # `target` is relative to python/, e.g. btap/simulation/backends.py
     path = root / target
     text = path.read_text(encoding="utf-8")
+    if new == old:
+        # An inert mutation is a broken mutation, not evidence about the
+        # tests. It changes nothing, so the suite passes, so it reports
+        # SURVIVED and looks exactly like a coverage gap — the mistake that
+        # cost a round on #77 (Fable, PR #81 N2). The SEMANTIC version of
+        # this (`x if True else y`) is caught by `expect_failures` instead,
+        # since an inert change cannot produce a declared failure.
+        raise ValueError("`new` is identical to `old` — an inert mutation "
+                         "proves nothing and would report SURVIVED")
     hits = text.count(old)
     if hits != 1:
         raise ValueError(f"anchor matches {hits} times, needs exactly 1")
@@ -113,9 +153,30 @@ def run_suite(root: Path | None, tests: list[str], timeout: int):
          "--color=no", "-p", "no:cacheprovider", *tests],
         capture_output=True, text=True, cwd=str(cwd),
         env=env, timeout=timeout)
-    summary = [ln for ln in proc.stdout.strip().split("\n")
+    lines = proc.stdout.strip().split("\n")
+    summary = [ln for ln in lines
                if "passed" in ln or "failed" in ln or "error" in ln.lower()]
-    return proc.returncode, (summary[-1] if summary else "(no summary)")
+    # pytest -q already prints the short summary, so the ids are a PARSE
+    # rather than a second invocation.
+    #
+    # `SUBFAILED` MATTERS AS MUCH AS `FAILED`. With `pytest-subtests` a
+    # failing subTest prints `SUBFAILED(state='x') path::test` — a different
+    # prefix AND a parenthetical before the id. Matching only `FAILED ` made
+    # every subtest-driven row report an empty failure set, so an honest row
+    # was misreported as CAUGHT BY SOMETHING ELSE. This repository's predicate
+    # tables are nearly all subTests, so that was most of them. The id is
+    # taken as the first token containing `::` rather than by position, which
+    # survives the parenthetical and any future prefix.
+    failed = set()
+    for line in lines:
+        if not line.startswith(("FAILED", "ERROR", "SUBFAIL")):
+            continue
+        for token in line.split():
+            if "::" in token:
+                failed.add(token)
+                break
+    return (proc.returncode, (summary[-1] if summary else "(no summary)"),
+            failed)
 
 
 def main(argv=None):
@@ -144,7 +205,7 @@ def main(argv=None):
 
     t0 = time.time()
     print(f"  baseline (unmutated, {len(tests)} path(s))...", flush=True)
-    rc, summary = run_suite(None, tests, opts.timeout)
+    rc, summary, _ = run_suite(None, tests, opts.timeout)
     print(f"    {'PASS' if rc == 0 else 'FAIL'}  {summary}")
     if rc != 0:
         print("  baseline FAILED — fix that before mutating; every mutation "
@@ -171,25 +232,47 @@ def main(argv=None):
             for future in concurrent.futures.as_completed(futures):
                 label = futures[future]
                 try:
-                    rc, summary = future.result()
+                    rc, summary, failed = future.result()
                 except Exception as error:  # noqa: BLE001
-                    results.append((label, None, f"{type(error).__name__}: {error}"))
+                    results.append((label, None,
+                                    f"{type(error).__name__}: {error}", set()))
                     continue
-                results.append((label, rc, summary))
+                results.append((label, rc, summary, failed))
 
     width = max((len(r[0]) for r in results), default=10)
-    survived = []
-    for label, rc, summary in sorted(results):
+    expected = {m["label"]: m.get("expect_failures") or []
+                for m in mutations if "label" in m}
+    survived, mislabelled = [], []
+    by_failures = {}
+    for label, rc, summary, failed in sorted(results):
+        want = expected.get(label) or []
         if rc is None:
             verdict = "ERROR"
         elif rc == 0:
             verdict = "*** SURVIVED ***"
             survived.append(label)
+        elif want and not any(
+                any(w in f for f in failed) for w in want):
+            # The suite failed, but NOT where the row says it should. The row
+            # is crediting a rule it did not test — the stale-row signal that
+            # "SURVIVED vs caught" cannot see (Fable, PR #81 N3).
+            verdict = "*** CAUGHT BY SOMETHING ELSE ***"
+            mislabelled.append((label, want, sorted(failed)[:3]))
         else:
-            verdict = "caught"
-        print(f"  {label:{width}}  {verdict:16} {summary}")
+            verdict = "caught (as declared)" if want else "caught"
+        print(f"  {label:{width}}  {verdict:30} {summary}")
+        if rc not in (None, 0) and failed:
+            by_failures.setdefault(frozenset(failed), []).append(label)
     for label, why in broken:
-        print(f"  {label:{width}}  BROKEN ANCHOR    {why}")
+        print(f"  {label:{width}}  {'BROKEN':30} {why}")
+
+    for labels in by_failures.values():
+        if len(labels) > 1:
+            print(f"  NOTE: identical failing-test sets — {', '.join(labels)}"
+                  "\n        at least one is probably not discriminating what "
+                  "its label claims")
+    for label, want, got in mislabelled:
+        print(f"  {label}: declared {want}, got {got}")
 
     serial = (len(built) + 1) * 61
     print(f"\n  {time.time() - t0:.0f}s wall for {len(built)} mutation(s) "
@@ -197,9 +280,20 @@ def main(argv=None):
     if survived:
         print(f"  {len(survived)} SURVIVED — the tests do not pin: "
               f"{', '.join(survived)}")
+    if mislabelled:
+        print(f"  {len(mislabelled)} CAUGHT BY SOMETHING ELSE — the row's "
+              "declared test did not fail, so it credits a rule it did not "
+              "test")
     if broken:
-        print(f"  {len(broken)} broken anchor(s) — neither caught nor survived")
-    return 1 if (survived or broken) else 0
+        print(f"  {len(broken)} broken mutation(s) — neither caught nor "
+              "survived")
+    if not any(expected.values()):
+        print("  NOTE: no row declared `expect_failures`, so a row that fails "
+              "for the WRONG reason cannot be distinguished from one that "
+              "works")
+    print("  NOTE: a mutation reaches only tests that IMPORT the target; a "
+          "test reading product source BY PATH reads the real tree")
+    return 1 if (survived or broken or mislabelled) else 0
 
 
 if __name__ == "__main__":
