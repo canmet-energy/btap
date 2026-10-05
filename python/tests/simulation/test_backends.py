@@ -569,6 +569,16 @@ class TestSizingCalculationsGuard(unittest.TestCase):
             # would be the shape this repository keeps catching: a check whose
             # reported difference cannot occur.
             #
+            # IT IS NOT PERMANENTLY INERT, WHICH IS THE POINT OF RECORDING IT
+            # NOW. The IDD is a pinned artifact, not a law — the CI image pins
+            # OpenStudio 3.11.0 — and both facts that make this row moot are
+            # properties of THAT IDD: this field being `autosizable=False`,
+            # and no object spelling a method token strictly inside a field
+            # name. On an SDK bump either can change, and the row becomes
+            # load-bearing the first time it does. Recorded now rather than at
+            # the bump, when nobody will want to re-derive which predicate was
+            # meant under time pressure (Fable, PR #82).
+            #
             # For the record of what each candidate actually differs on
             # (Fable's enumeration over the 67 tuples):
             #
