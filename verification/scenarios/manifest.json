@@ -2,9 +2,9 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "117c21063afe763a82feab519e2e92689a148e6e",
+  "commit": "ce8d6ed148b924956cd5eaf0bb837082a415fb5a",
   "dirty": false,
-  "freezer_sha256": "ec2e87647b2de6eab1cd2a449c791c9da23ce65e67f09611366cb8e0b0f66227",
+  "freezer_sha256": "6d15918311d8e4848c4479e4af22194dff5cd5ddf9f115f01f5d4c0c406f1eea",
   "defs_sha256": "2bfd5c1a9f7e5dbca537987c4352b892328811baaf37939b9f8902cf5a961a67",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
@@ -12,6 +12,13 @@
   "audit_scenario_sha256": "eec293247a2ce2f8fcdcfb657a4e346a452ec44aafb4be4174f7cb75e588010b",
   "gate_sha256": "ddb991eabf51d6f1176064bfb400a8659597859fa3f2f61ae5ac7d2d31d67325",
   "openstudio_cli": "3.11.0+241b8abb4d",
+  "producer": {
+   "openstudio": "3.11.0+241b8abb4d",
+   "energyplus": "25.2.0-cf7368216c",
+   "python": "3.12.3",
+   "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+   "container_digest": null
+  },
   "active_seals": {
    "python-only:post-handoff": 31,
    "python-only": 14
