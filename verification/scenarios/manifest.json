@@ -2,9 +2,9 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "ce8d6ed148b924956cd5eaf0bb837082a415fb5a",
+  "commit": "723ca7169d374137ff1d6d23ef8c88801d8614f1",
   "dirty": false,
-  "freezer_sha256": "6d15918311d8e4848c4479e4af22194dff5cd5ddf9f115f01f5d4c0c406f1eea",
+  "freezer_sha256": "1ded6d45e97bf03b9f5a5a74982e4a9e863729d736ecb06e924f89abfe8e4300",
   "defs_sha256": "2bfd5c1a9f7e5dbca537987c4352b892328811baaf37939b9f8902cf5a961a67",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
@@ -15,9 +15,11 @@
   "producer": {
    "openstudio": "3.11.0+241b8abb4d",
    "energyplus": "25.2.0-cf7368216c",
-   "python": "3.12.3",
+   "python_driver": "3.12.3",
+   "python_worker": "3.12.3",
    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
-   "container_digest": null
+   "container_digest": null,
+   "python_worker_executable": "/workspaces/openstudio-necb-gems/python/.venv/bin/python"
   },
   "active_seals": {
    "python-only:post-handoff": 31,
