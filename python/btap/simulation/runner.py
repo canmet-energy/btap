@@ -62,17 +62,39 @@ def attach_weather(model, *, epw, ddy, audit=None):
     for dd in model.getDesignDays():
         dd.remove()
         discarded += 1
-    # the legacy default list — NOT a bare /.4%/, which would also pull the
-    # MONTHLY .4% days (a January cooling day's ~2C wet-bulb breaks the
-    # tower UA solve). Ruby's =~ is a SEARCH: re.search, never match.
-    keep = [r"Htg 99.6. Condns DB", r"Clg .4% Condns DB=>MWB",
-            r"Clg 0.4% Condns DB=>MCWB", r"Clg .4. Condns WB=>MDB"]
+    # The legacy default list, ANCHORED ON `Ann`. Without the anchor these
+    # patterns match on the condition substring alone and never constrain the
+    # Ann/JUN/JUL token, so a DDY that spells its monthly days the same way
+    # after the period marker retained all of them — the precise hazard the
+    # comment below was written to prevent. Measured over every `.ddy` on
+    # disk: 16 CZ2010 files (vendored gem weather) kept 8 of 9 days, SIX of
+    # them monthly; CWEC escaped only by a coincidence of spelling, since it
+    # writes `.4%`+`DB=>MWB` while the `0.4%` and `MCWB` patterns each miss it
+    # by one character. So the exclusion was an artefact of two naming
+    # mismatches rather than an enforced property (Fable, PR #77).
+    #
+    # NOT a bare /.4%/, for the same reason: a January cooling day's ~2C
+    # wet-bulb breaks the tower UA solve. Ruby's =~ is a SEARCH: re.search,
+    # never match.
+    keep = [r"\bAnn\b.*Htg 99.6. Condns DB",
+            r"\bAnn\b.*Clg .4% Condns DB=>MWB",
+            r"\bAnn\b.*Clg 0.4% Condns DB=>MCWB",
+            r"\bAnn\b.*Clg .4. Condns WB=>MDB"]
     all_days = list(workspace.getDesignDays())
     extremes = [dd for dd in all_days
                 if any(re.search(p, dd.nameString()) for p in keep)]
     fell_back = not extremes
     if fell_back:  # odd DDY: keep everything rather than none
         extremes = all_days
+    # Classified AFTER the fallback substitution, so the counts describe what
+    # was actually ATTACHED rather than what matched — on the fallback the
+    # whole file is attached and may well carry both kinds. Computing them
+    # before the substitution made every fallback look like a partial match,
+    # which the existing fallback test caught.
+    kept_heating = sum(1 for dd in extremes
+                       if re.search(r"Htg", dd.nameString()))
+    kept_cooling = sum(1 for dd in extremes
+                       if re.search(r"Clg", dd.nameString()))
     for dd in extremes:
         model.addObject(dd.clone())
     if len(model.getDesignDays()) == 0:
@@ -92,25 +114,59 @@ def attach_weather(model, *, epw, ddy, audit=None):
         # nothing, because it is an AHJ-facing modelling assumption (Sol, `084`:
         # reproduced with a DDY whose three extreme days were renamed, giving
         # 78 kept and the text still asserting 99.6%/0.4% only).
+        # THREE states, not two. "replaced, not appended" leads every one of
+        # them: it holds in all three and it is the single fact a modeller who
+        # supplied their own design days is most likely to have wrong — in the
+        # fallback especially, where "the FULL file was retained" otherwise
+        # invites the reading that their days survived (Fable, PR #77 L3).
+        # The THIRD state is a partial match of the FILTER — never the
+        # fallback, which is its own state and keeps everything.
+        partial = not fell_back and not (kept_heating and kept_cooling)
         if fell_back:
-            action = ("no annual-extreme design day matched this DDY, so the "
-                      "FULL file was retained for sizing — the building is "
-                      "sized on every design day in the file, not on the 99.6% "
-                      "heating and 0.4% cooling days alone")
+            action = ("design days replaced, not appended; no annual-extreme "
+                      "design day matched this DDY, so the FULL file was "
+                      "retained for sizing — the building is sized on every "
+                      "design day in the file, not on the 99.6% heating and "
+                      "0.4% cooling days alone")
+        elif partial:
+            missing = "cooling" if not kept_cooling else "heating"
+            action = ("design days replaced, not appended, and filtered to the "
+                      f"annual extremes, but NO {missing.upper()} design day "
+                      "matched this DDY — the building is sized without an "
+                      f"annual {missing} design condition, so {missing} "
+                      "equipment autosizes against no design day of its kind")
         else:
             action = ("design days replaced, not appended, and filtered to the "
                       "annual extremes — the building is sized on the 99.6% "
                       "heating and 0.4% cooling days only")
+        inputs = {"design_days_discarded": discarded,
+                  "design_days_in_file": len(all_days),
+                  "design_days_kept": len(extremes),
+                  # Per-kind counts, so all three states are EVIDENCED rather
+                  # than asserted: `design_days_kept` alone does not say of
+                  # which kind, which is what let the partial state claim a
+                  # cooling day it did not have.
+                  "design_days_kept_heating": kept_heating,
+                  "design_days_kept_cooling": kept_cooling,
+                  "kept_all_as_fallback": fell_back}
         audit.decision(
-            "climate",
-            action,
-            target=Path(ddy).name,
-            inputs={"design_days_discarded": discarded,
-                    "design_days_in_file": len(all_days),
-                    "design_days_kept": len(extremes),
-                    "kept_all_as_fallback": fell_back},
+            "climate", action, target=Path(ddy).name, inputs=inputs,
             value=", ".join(sorted(dd.nameString() for dd in extremes)),
             ruling="D-25")
+        # A missing design condition of either kind is a WARNING, not merely a
+        # recorded decision: the package contract says warnings are never
+        # silent, and this one has a sizing consequence rather than only a
+        # disclosure one.
+        if partial:
+            audit.warn(
+                "climate",
+                f"no annual {missing} design day matched {Path(ddy).name} — "
+                f"{missing} equipment will autosize with no annual {missing} "
+                "design condition",
+                target=Path(ddy).name,
+                inputs={"design_days_kept_heating": kept_heating,
+                        "design_days_kept_cooling": kept_cooling},
+                ruling="D-25")
     return model
 
 
