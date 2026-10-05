@@ -149,8 +149,15 @@ def _plant_facts(loop, audit):
             # consumer must say "unknown" rather than guess a fraction —
             # every multi-fuel plant in the sample corpus is autosized, so the
             # unknown case is the common one, not the edge (Sol, `110`).
-            watts = (opt(boiler.nominalCapacity())
-                     or opt(boiler.autosizedNominalCapacity()))
+            # ONLY ask for the autosized value when a sizing run exists.
+            # `autosizedNominalCapacity()` on an unsized model emits
+            # "This model has no sql file, cannot retrieve the autosized
+            # value" to the console for EVERY boiler — noise on every run of
+            # every model, single-fuel ones included, which the frozen stdout
+            # baselines caught when six unrelated scenarios changed.
+            watts = opt(boiler.nominalCapacity())
+            if watts is None and loop.model().sqlFile().is_initialized():
+                watts = opt(boiler.autosizedNominalCapacity())
             allocation.append((boiler.fuelType(),
                                float(watts) if watts is not None else None))
         elif comp.to_ChillerElectricEIR().is_initialized():
