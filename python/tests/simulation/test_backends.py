@@ -547,13 +547,45 @@ class TestSizingCalculationsGuard(unittest.TestCase):
             ("Cooling Supply Air Flow Rate", "FlowPerFloorArea", False),
             ("Cooling Supply Air Flow Rate", "FlowPerCoolingCapacity", False),
             ("No Load Supply Air Flow Rate", "SupplyAirFlowRate", True),
-            # The case that distinguishes `endswith` from a SUBSTRING test, and
-            # the reason the predicate is not `chosen in wanted`: the method
-            # token sits inside this field's name without ending it, and it
-            # selects the plain capacity field rather than the per-area one. A
-            # substring test would count a field the method steers away from —
-            # over-refusing, which is how the first three versions of this
-            # guard broke valid runs.
+            # THIS ROW PINS THE PREDICATE'S CONTRACT, NOT A REACHABLE DEFECT,
+            # and the distinction cost a wrong claim in PR #70's body.
+            #
+            # I added it because a mutation widening `endswith` to a substring
+            # test (`chosen in wanted`) passed the other seven rows, and
+            # described that as closing a hole. It is not one. Fable derived
+            # the ground truth from the shipped IDD — all 67 real
+            # (autosizable field x governing method choice) tuples — and the
+            # substring form differs from `endswith` on ZERO of them, so on
+            # this IDD it is an observationally equivalent implementation.
+            # `Heating Design Capacity Per Floor Area` is itself
+            # `autosizable=False`, so `autosized_fields` never calls
+            # `_method_selects` for it: OpenStudio will not emit `autosize`
+            # there.
+            #
+            # It still earns its place — a predicate's contract is
+            # legitimately broader than its current call sites, and this row
+            # says which predicate was intended where several agree on today's
+            # inputs. But it is intent-pinning, and calling it a defect fix
+            # would be the shape this repository keeps catching: a check whose
+            # reported difference cannot occur.
+            #
+            # IT IS NOT PERMANENTLY INERT, WHICH IS THE POINT OF RECORDING IT
+            # NOW. The IDD is a pinned artifact, not a law — the CI image pins
+            # OpenStudio 3.11.0 — and both facts that make this row moot are
+            # properties of THAT IDD: this field being `autosizable=False`,
+            # and no object spelling a method token strictly inside a field
+            # name. On an SDK bump either can change, and the row becomes
+            # load-bearing the first time it does. Recorded now rather than at
+            # the bump, when nobody will want to re-derive which predicate was
+            # meant under time pressure (Fable, PR #82).
+            #
+            # For the record of what each candidate actually differs on
+            # (Fable's enumeration over the 67 tuples):
+            #
+            #   ==, startswith, reversed endswith   6 real tuples
+            #   no autosiz clause                  18
+            #   always True                        33
+            #   substring (`chosen in wanted`)      0
             ("Heating Design Capacity Per Floor Area",
              "HeatingDesignCapacity", False),
         )
