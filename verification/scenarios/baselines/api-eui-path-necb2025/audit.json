@@ -28,6 +28,23 @@
  },
  {
   "step": "climate",
+  "target": "CAN_ON_Toronto.Intl.AP.716240_CWEC2020.ddy",
+  "action": "design days replaced, not appended, and filtered to the annual extremes \u2014 the building is sized on the 99.6% heating and 0.4% cooling days only",
+  "inputs": {
+   "design_days_discarded": 7,
+   "design_days_in_file": 78,
+   "design_days_kept": 3,
+   "design_days_kept_heating": 1,
+   "design_days_kept_cooling": 2,
+   "kept_all_as_fallback": false
+  },
+  "value": "Toronto Intl AP Ann Clg .4% Condns DB=>MWB, Toronto Intl AP Ann Clg .4% Condns WB=>MDB, Toronto Intl AP Ann Htg 99.6% Condns DB",
+  "ruling": "D-25",
+  "building": "proposed building",
+  "level": "decision"
+ },
+ {
+  "step": "climate",
   "action": "HDD from nearest NECB Table C-1 city",
   "inputs": {
    "city": "Mississauga (Lester B. Pearson Int'l Airport), ON",

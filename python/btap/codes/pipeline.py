@@ -219,7 +219,7 @@ def _attach_weather_and_hdd(run):
                     f"weather['{key}'] is required when simulate: "
                     f"{opts['simulate']}")
         runner.attach_weather(run.proposed, epw=weather["epw"],
-                              ddy=weather["ddy"])
+                              ddy=weather["ddy"], audit=audit)
 
     # An explicit hdd= always wins; otherwise the CODE says where the
     # heating degree-days come from (NECB: Table C-1 from the EPW site, then

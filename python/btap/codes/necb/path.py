@@ -475,7 +475,7 @@ def _eui_compliance(model, *, ruleset, weather, hdd, run_dir, simulate,
                 if not weather.get(k):
                     raise ValueError(f"weather['{k}'] required")
             runner.attach_weather(proposed, epw=weather["epw"],
-                                  ddy=weather["ddy"])
+                                  ddy=weather["ddy"], audit=audit)
         if hdd is None:
             hdd = envelope.hdd18(proposed, edition=ruleset.edition, audit=audit)
 
