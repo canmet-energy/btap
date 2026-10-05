@@ -298,6 +298,69 @@ def promote(staged_baselines, staged_manifest, dest_baselines,
             (shutil.rmtree if backup.is_dir() else os.remove)(str(backup))
 
 
+def producer_identity():
+    """What actually produced this freeze, as far as it can be established.
+
+    WHY THIS EXISTS. The manifest already pins the SOURCE — a commit,
+    three harness hashes, the sample manifest — and because the scenarios'
+    weather is COMMITTED (`python/tests/fixtures/weather/*.epw`/`.ddy`), that
+    commit pins the weather bytes too. What it did not pin is the PRODUCER.
+    `openstudio_cli` is a version STRING a machine reports; two laptops can
+    report `3.11.0+241b8abb4d` while running different EnergyPlus builds, and
+    CI never freezes, so the producer has always been whichever developer
+    machine ran this script.
+
+    These fields are a RECORD, NOT A GATE. They are deliberately not compared
+    against the running machine by any test: a baseline frozen on one host must
+    remain verifiable on another, which is the whole point of the frozen
+    corpus. What they buy is attribution — when a baseline moves, the diff says
+    whether the engine underneath it moved too.
+
+    `container_digest` is the field this cannot fill. The CI image's tag is
+    `<openstudio version>-<sha256(Dockerfile)[:12]>`, which pins the RECIPE,
+    not the built bytes; the same Dockerfile rebuilds differently as its base
+    image and packages move. A true `sha256:` digest is only obtainable where
+    the image runs, so it stays null until freezing happens there — the
+    follow-on describes.
+
+    Every probe fails SOFT. A freeze must not break because an identity could
+    not be read; an absent field says "unknown", which is honest, where a
+    raised exception would just stop the work.
+    """
+    import platform
+
+    identity = {
+        "openstudio": None,
+        "energyplus": None,
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        # Only CI can fill this; see the docstring.
+        "container_digest": None,
+    }
+    try:
+        runner._sys_path_python()
+        import openstudio
+
+        identity["openstudio"] = openstudio.openStudioLongVersion()
+    except Exception:  # noqa: BLE001 — an unknown identity is not a failure
+        pass
+    try:
+        from btap.simulation import engine
+
+        binary = engine.ensure_energyplus()
+        out = subprocess.run([str(binary), "--version"], capture_output=True,
+                             text=True, check=False, timeout=120)
+        text = (out.stdout or out.stderr).strip()
+        # "EnergyPlus, Version 25.2.0-cf7368216c" -> "25.2.0-cf7368216c".
+        # The BUILD HASH is the point: a bare "25.2.0" is what hides two
+        # different engines behind one version string.
+        identity["energyplus"] = text.split()[-1] if text else None
+    except Exception:  # noqa: BLE001
+        pass
+    return identity
+
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--allow-dirty", action="store_true",
@@ -431,6 +494,10 @@ def main():
             "openstudio_cli": subprocess.run(
                 ["openstudio", "openstudio_version"], capture_output=True,
                 text=True, check=False).stdout.strip(),
+                # WHO produced this freeze. A record, never a gate — no
+            # test compares these against the running machine, because a
+            # baseline frozen on one host must stay verifiable on another.
+            "producer": producer_identity(),
             "active_seals": active_seals,
             "retired_seals": retired_seals,
             "final_cross_language_attestation": final_attestation,
