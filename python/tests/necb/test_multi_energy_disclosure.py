@@ -344,10 +344,21 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
     """Sol's `114`.2: an ANNUAL heat-pump election bypassed the diagnostic.
 
     `_finalize` calls `_reference_energy_type` only when
-    `heat_pump_aux_energy_type` returns None. With annual delivered-heat data
-    for a mixed ASHP group, 8.4.4.13.(2)(g)(i) elects the auxiliary type and
-    that branch is never taken — so the group got the election and NO
-    multi-energy disclosure at all. The disclosure now runs on both paths.
+    `heat_pump_aux_energy_type` returns None, so a mixed ASHP group with
+    annual data got the 8.4.4.13.(2)(g) election and NO (5) disclosure.
+
+    MY FIRST VERSION OF THIS TEST DID NOT REACH THAT BRANCH (Sol, `115`). It
+    passed `{"groups": {zone: {"hp_j":, "terminal_j":}}}`, but
+    `heat_pump_aux_energy_type` reads `annual["loops"][air_loop]` with
+    `hp_j` and `aux: [{"fuel":, "j":}]`, plus `annual["zones"][zone]`. With
+    the wrong shape the election fell through to the structural proxy and
+    emitted "no terminal or auxiliary heating energy" — so the test would
+    have PASSED with the disclosure moved back inside the election branch,
+    which is exactly the bug it claims to pin.
+
+    The discriminator is the (2)(g) DECISION count, not just the warning
+    count: the annual case must show the election firing AND the disclosure
+    surviving it.
     """
 
     def _run(self, proposed_annual):
@@ -355,24 +366,41 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
 
         facts = copy.deepcopy(_ASHP_MIXED_FACTS)
         audit = AuditLog()
-        reference.select_reference_systems(
+        out = reference.select_reference_systems(
             facts=facts, building={"storeys": 1}, code="necb2020",
             audit=audit, proposed_annual=proposed_annual)
-        return [e for e in audit.entries
-                if "UNRESOLVED" in str(e.get("action"))
-                and "ENERGY TYPE" in str(e.get("action"))]
+        elections = [e for e in audit.entries
+                     if "(2)(g)" in str(e.get("article", ""))
+                     and e["level"] == "decision"]
+        warnings = [e for e in audit.entries
+                    if "UNRESOLVED" in str(e.get("action"))
+                    and "ENERGY TYPE" in str(e.get("action"))]
+        return sorted({a.energy_type for a in out}), elections, warnings
 
-    def test_the_ANNUAL_heat_pump_election_still_discloses(self):
-        zones = _ASHP_MIXED_FACTS["zone_groups"][0]["zones"]
-        annual = {"groups": {z: {"hp_j": 80e9,
-                                 "terminal_j": {"Electricity": 20e9}}
-                             for z in zones}}
-        self.assertEqual(
-            1, len(self._run(annual)),
-            "the auxiliary election must not swallow the (5) disclosure")
+    def test_the_ANNUAL_heat_pump_election_fires_AND_still_discloses(self):
+        loop = _ASHP_MIXED_FACTS["zone_groups"][0]["air_loop"]
+        annual = {"loops": {loop: {"hp_j": 80e9,
+                                   "aux": [{"fuel": "Electricity",
+                                            "j": 20e9}]}},
+                  "zones": {}}
+        variants, elections, warnings = self._run(annual)
+        # 80/(80+20) = 80% of the blocks' annual heating, over the 33%
+        # proviso, so sentence (g) elects the largest auxiliary fuel.
+        self.assertEqual(1, len(elections),
+                         "the 8.4.4.13.(2)(g) election must actually FIRE — "
+                         "otherwise this case is the structural path in "
+                         "disguise and pins nothing")
+        self.assertEqual("electric", elections[0].get("value"))
+        self.assertEqual(["electric"], variants,
+                         "the elected auxiliary fuel picks the variant")
+        self.assertEqual(1, len(warnings),
+                         "and the (5) disclosure must survive that election")
 
-    def test_the_structural_path_discloses_too(self):
-        self.assertEqual(1, len(self._run(None)))
+    def test_the_structural_path_is_the_separate_control(self):
+        variants, elections, warnings = self._run(None)
+        self.assertEqual(0, len(elections), "no annual data, no election")
+        self.assertEqual(["gas"], variants, "the 8.4.4.9.(4) proxy decides")
+        self.assertEqual(1, len(warnings))
 
 
 class TestTheDisclosureDoesNotOVERSTATE(_Fixture):
