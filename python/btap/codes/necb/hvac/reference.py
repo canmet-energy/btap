@@ -2025,15 +2025,26 @@ def _reference_energy_type(group, selection, facts, audit):
                     f: round(s, 4) for f, s in sorted(shares.items())}
                 inputs['proposed_capacity_w'] = {
                     f: round(w, 1) for f, w in sorted(watts.items())}
+            inputs['operating_allocation'] = (
+                'lead device carries the full load (SequentialLoad) — '
+                'priority of use per 8.4.4.9.(5)(b) NOT transferred')
+            inputs['six_b_departure'] = (
+                'one heating device per energy type retained where (6)(b) '
+                'prescribes one boiler; measured energy-neutral')
             inputs['reconciled'] = False
             audit.warn(
                 'selection',
                 'UNRESOLVED: the proposed heating system uses MORE THAN ONE '
-                'ENERGY TYPE on one plant, and the reference has NOT '
-                'reconciled the capacity-ratio requirement of 8.4.4.9.(5) '
-                'with the single-boiler requirement of 8.4.4.9.(6)(b) — '
-                'neither article is claimed as satisfied for this plant, and '
-                'a passing annual result is not evidence that they are',
+                'ENERGY TYPE on one plant. The reference retains one heating '
+                'device per energy type, which DEPARTS from 8.4.4.9.(6)(b)\'s '
+                'single boiler; measured as energy-neutral, since each device '
+                'autosizes to the full plant load and only the lead one '
+                'fires. 8.4.4.9.(5)(a)\'s installed-capacity ratio is '
+                'therefore matched only when the proposed split is EQUAL, and '
+                '(5)(b)\'s operating priority is NOT transferred at all — the '
+                'lead device carries the whole load whatever the installed '
+                'ratio. Neither sentence is claimed as satisfied, and a '
+                'passing annual result is not evidence that they are',
                 target=plant_name,
                 inputs=inputs,
                 article='8.4.4.9.(5); 8.4.4.9.(6)(b)')

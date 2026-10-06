@@ -10,8 +10,23 @@ modulating to 25% above that. Every band is singular or equal-split, so a
 proposed 60/40 allocation cannot be represented without breaking (6) — which
 we currently satisfy.
 
-So the collapse stays and stops being silent. What these tests pin is the
-DISCLOSURE: previously a dual-fuel plant became a gas reference with nothing
+WHAT THE MEASUREMENT SHOWED, and it overturned two of my own estimates.
+Each reference boiler autosizes to the FULL plant load (64,396 W each), not
+half of it, and `SequentialLoad` means only the lead one fires. So:
+
+  * the (6)(b) boiler-count departure is ENERGY-NEUTRAL — an annual run of
+    the two-boiler reference and of a single-boiler reference both give
+    158,219.4 kWh, identical to 0.1 kWh;
+  * my earlier 10-32% "staging advantage" was wrong, because it assumed the
+    pair SHARES load;
+  * my earlier 5.3% "fuel-mix" figure was wrong too, because the electric
+    boiler delivers no energy at all;
+  * (5)(a)'s installed-capacity ratio therefore lands 50/50 and holds
+    COINCIDENTALLY for an equal proposed split, failing for any other;
+  * (5)(b)'s operating priority is the clause genuinely not addressed.
+
+So the model is left alone and the CLAIMS are corrected. What these tests
+pin is the DISCLOSURE: previously a dual-fuel plant became a gas reference with nothing
 in the audit saying a Code requirement had been set aside, and a reader could
 not tell. Coverage for (5) stays `partial`; nothing here claims compliance.
 
@@ -82,7 +97,15 @@ class TestTheCollapseIsDisclosed(_Fixture):
                          "reconciled with each other (Sol, `111`)")
         self.assertIn("NOT", entry["action"],
                       "it must not read as if either were satisfied")
+        self.assertIn("energy-neutral", entry["action"],
+                      "the (6)(b) departure was MEASURED as energy-neutral — "
+                      "annual results identical at 158,219.4 kWh — and the "
+                      "entry must say so rather than imply a penalty")
+        self.assertIn("(5)(b)", entry["action"],
+                      "clause (b) is the one genuinely not addressed")
         self.assertFalse(entry["inputs"]["reconciled"])
+        self.assertIn("SequentialLoad", entry["inputs"]["operating_allocation"])
+        self.assertIn("energy-neutral", entry["inputs"]["six_b_departure"])
         self.assertEqual("unavailable without sizing",
                          entry["inputs"]["proposed_capacity_shares"])
         self.assertEqual(["Electricity", "NaturalGas"],
