@@ -593,10 +593,13 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled: a proposed plant drawing on more than one energy type passes into the reference unchanged rather than being apportioned",
+  "action": "Heating System \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled. MEASURED on the two dual-fuel fixtures: both reference boilers autosize to the FULL plant load (64,396 W each), so installed capacities land 50/50 and clause (a) holds COINCIDENTALLY for an equal proposed split \u2014 it would fail for any other ratio, so it is not implemented. Clause (b) (operating schedule, priority of use) is not addressed at all: with SequentialLoad the lead heating device carries the whole load, so the operating allocation is 100/0 whatever the installed ratio. A warning naming the plant and both articles is emitted per serving plant.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 2
+   "decisions_citing": 2,
+   "code": [
+    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+   ]
   },
   "article": "8.4.4.9.(5)",
   "building": "reference building",
@@ -604,9 +607,9 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass",
+  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: DEPARTURE recorded for a reused dual-fuel plant: sentence (6)(b) prescribes ONE single-stage boiler at or below 176 kW, and the reference retains TWO (one per proposed energy type) on the dual-fuel fixtures, 64,396 W each. Measured as ENERGY-NEUTRAL: each boiler autosizes to the full plant load and SequentialLoad means only the lead fires, so an annual run of the two-boiler reference and of a single-boiler reference give 158,219.4 kWh identically. The second boiler is redundant capacity that never operates. Retained rather than collapsed because removing it would also discard the installed-capacity split clause 8.4.4.9.(5)(a) asks for; the cardinality-versus-fuel overlap awaits an adjudicated ruling.",
   "inputs": {
-   "status": "implemented",
+   "status": "partial",
    "decisions_citing": 2,
    "code": [
     "python/btap/modeling/hvac/systems/plant_loops.py#hot_water",
@@ -615,7 +618,7 @@
   },
   "article": "8.4.4.9.(6)",
   "building": "reference building",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",
@@ -691,10 +694,13 @@
  },
  {
   "step": "coverage",
-  "action": "Cooling Systems \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled \u2014 the same gap as the heating article, sentence (5)",
+  "action": "Cooling Systems \u2014 not implemented. Gaps: multi-energy capacity ratios are not modelled. MEASURED on the two dual-fuel fixtures: both reference boilers autosize to the FULL plant load (64,396 W each), so installed capacities land 50/50 and clause (a) holds COINCIDENTALLY for an equal proposed split \u2014 it would fail for any other ratio, so it is not implemented. Clause (b) (operating schedule, priority of use) is not addressed at all: with SequentialLoad the lead cooling device carries the whole load, so the operating allocation is 100/0 whatever the installed ratio. A warning naming the plant and both articles is emitted per serving plant.",
   "inputs": {
    "status": "not_implemented",
-   "decisions_citing": 2
+   "decisions_citing": 2,
+   "code": [
+    "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
+   ]
   },
   "article": "8.4.4.10.(4)",
   "building": "reference building",
