@@ -40,6 +40,8 @@ from __future__ import annotations
 
 import unittest
 
+from btap.audit import AuditLog
+from btap.codes.necb.hvac import reference
 from tests.support import needs_sdk
 
 
@@ -59,8 +61,10 @@ class _Fixture(unittest.TestCase):
         return {"plants": list(plants), "purchased_energy": {}}
 
     def _selection(self):
-        return {"special_rules": {"purchased_heating": {
-            "article": "8.4.4.6.(1)", "part_load_curve_class": "modulating"}}}
+        return {"special_rules": {
+            "purchased_heating": {"article": "8.4.4.6.(1)",
+                                  "part_load_curve_class": "modulating"},
+            "heat_pump": {"article": "8.4.4.13.(1)-(2) + Table 8.4.4.13"}}}
 
     def _call(self, group, facts):
         from btap.codes.necb.hvac import reference
@@ -95,17 +99,20 @@ class TestTheCollapseIsDisclosed(_Fixture):
         self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)(b)", entry["article"],
                          "both articles — the point is that they are not "
                          "reconciled with each other (Sol, `111`)")
-        self.assertIn("NOT", entry["action"],
+        self.assertIn("NEITHER", entry["action"],
                       "it must not read as if either were satisfied")
-        self.assertIn("energy-neutral", entry["action"],
-                      "the (6)(b) departure was MEASURED as energy-neutral — "
-                      "annual results identical at 158,219.4 kWh — and the "
-                      "entry must say so rather than imply a penalty")
-        self.assertIn("(5)(b)", entry["action"],
-                      "clause (b) is the one genuinely not addressed")
+        self.assertIn("ONE BOILER PLANT", entry["action"],
+                      "this plant really does carry both fuels")
+        self.assertNotIn(
+            "energy-neutral", entry["action"],
+            "the measurement belongs in `inputs` as provenance for samples "
+            "11/12, NOT asserted in prose about an arbitrary model (Sol, "
+            "`113`)")
+        self.assertIn("NOT a property of this model",
+                      entry["inputs"]["fixture_measurement"])
         self.assertFalse(entry["inputs"]["reconciled"])
-        self.assertIn("SequentialLoad", entry["inputs"]["operating_allocation"])
-        self.assertIn("energy-neutral", entry["inputs"]["six_b_departure"])
+        self.assertEqual(["Electricity", "NaturalGas"],
+                         entry["inputs"]["plant_energy_types"])
         self.assertEqual("unavailable without sizing",
                          entry["inputs"]["proposed_capacity_shares"])
         self.assertEqual(["Electricity", "NaturalGas"],
@@ -125,24 +132,28 @@ class TestTheCollapseIsDisclosed(_Fixture):
                          inputs["proposed_capacity_shares"])
         self.assertEqual("gas", energy)
 
-    def test_the_tiebreak_follows_CAPACITY_not_the_cascade_order(self):
-        """The old cascade put gas first regardless. With a known allocation
-        the LARGER proposed capacity decides, which is more defensible under
-        8.4.4.9.(4) than a positional accident.
+    def test_a_known_allocation_does_NOT_change_the_elected_energy_type(self):
+        """The capacity-dominant election is NOT part of this change.
 
-        Pre-emptive: unreachable with the current corpus, since no sample
-        plant carries hard capacities.
+        It flips the reference's whole system type for a sized
+        electric-dominant plant — sample 12's reference becomes electric
+        baseboards with no boiler plant — and no frozen scenario exercises
+        it. Sol's `113` asked for it to be separated from disclosure-only
+        work rather than verified in passing, so it lives on its own branch
+        with its own fixture and freeze. Here the cascade still decides.
         """
         plant = {"type": "hot_water", "fuels": ["NaturalGas", "Electricity"],
                  "fuel_capacities_w": {"NaturalGas": 30_000.0,
                                        "Electricity": 70_000.0}}
         (energy, _), warnings, _ = self._call(
             self._group(["NaturalGas", "Electricity"]), self._facts([plant]))
-        self.assertEqual("electric", energy,
-                         "electricity holds the larger capacity, so it is the "
-                         "reference energy type")
+        self.assertEqual("gas", energy,
+                         "disclosure does not change the election — the "
+                         "cascade's gas preference still stands")
         self.assertEqual({"Electricity": 0.7, "NaturalGas": 0.3},
-                         warnings[0]["inputs"]["proposed_capacity_shares"])
+                         warnings[0]["inputs"]["proposed_capacity_shares"],
+                         "the shares are still REPORTED, which is the whole "
+                         "point of the disclosure")
 
     def test_oil_and_propane_stay_DISTINCT_from_natural_gas(self):
         """Sol's `110`: Division A 1.4.1.2 defines no 'fossil' equivalence
@@ -218,8 +229,12 @@ class TestTheCollapseIsDisclosed(_Fixture):
         (_, _), warnings, _ = self._call(
             self._group(["NaturalGas", "Electricity"]), self._facts(plants))
         self.assertEqual(1, len(warnings))
-        self.assertEqual("unavailable without sizing",
-                         warnings[0]["inputs"]["proposed_capacity_shares"])
+        # Two candidates means no identified serving plant, so nothing may be
+        # claimed about boilers per energy type — the generic entry, which
+        # carries no shares key at all rather than a guessed one.
+        self.assertNotIn("ONE BOILER PLANT", warnings[0]["action"])
+        self.assertNotIn("proposed_capacity_shares", warnings[0]["inputs"])
+        self.assertEqual("8.4.4.9.(5)", warnings[0]["article"])
 
 
 class TestTheWarningIsDeduplicated(_Fixture):
@@ -283,25 +298,95 @@ class TestTheWarningIsDeduplicated(_Fixture):
                          {w["target"] for w in warnings})
 
 
+def _plant(model, fuels, capacity_w=None, name="Hot Water Loop"):
+    """A hot-water plant with one boiler per named fuel, BUILT not loaded.
+
+    The previous fixture read an OSM out of an absolute scratchpad path and
+    `skipTest`-ed when it was absent, so it never ran on CI — a check that
+    cannot fail (Sol, `113`).
+    """
+    import openstudio
+
+    loop = openstudio.model.PlantLoop(model)
+    loop.setName(name)
+    loop.sizingPlant().setLoopType("Heating")
+    loop.setLoadDistributionScheme("SequentialLoad")
+    boilers = []
+    for i, fuel in enumerate(fuels):
+        boiler = openstudio.model.BoilerHotWater(model)
+        boiler.setName(f"{name} Boiler {i + 1}")
+        boiler.setFuelType(fuel)
+        if capacity_w is not None and capacity_w[i] is not None:
+            boiler.setNominalCapacity(capacity_w[i])
+        loop.addSupplyBranchForComponent(boiler)
+        boilers.append(boiler)
+    return loop, boilers
+
+
+class TestTheGenericEntryDedupesByServingGROUP(_Fixture):
+    """Sol's `113`: "Deduplicate by the actual serving system rather than by
+    any plant sharing one fuel."
+
+    Two distinct mixed serving groups can both intersect ONE gas-only plant.
+    Each is its own serving system and each is its own unresolved finding, so
+    keying the dedupe on that shared plant would report one and silently drop
+    the other. A survived mutation is what showed this was unpinned.
+    """
+
+    def _selection(self):
+        sel = super()._selection()
+        sel["special_rules"]["heat_pump"] = {"article": "8.4.4.13.(1)-(2)"}
+        return sel
+
+    def test_two_mixed_groups_sharing_one_GAS_ONLY_plant_warn_twice(self):
+        from btap.codes.necb.hvac import reference
+
+        gas_only = {"type": "hot_water", "name": "Shared Gas Loop",
+                    "fuels": ["NaturalGas"],
+                    "fuel_capacities_w": {"NaturalGas": 50_000.0}}
+        facts = self._facts(plants=[gas_only])      # ONE facts dict: shared state
+        audit = self._audit()
+        for zones in (("North 1", "North 2"), ("South 1", "South 2")):
+            reference._reference_energy_type(
+                self._group(("NaturalGas", "Electricity"), zones=zones),
+                self._selection(), facts, audit)
+        warnings = [e for e in audit.entries
+                    if "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(
+            2, len(warnings),
+            "each serving GROUP is its own finding; keying on the shared "
+            "single-fuel plant drops the second")
+        self.assertEqual({"North 1,North 2", "South 1,South 2"},
+                         {e["target"] for e in warnings})
+
+    def test_two_groups_with_NO_identified_plant_still_warn_twice(self):
+        """The ambiguous/no-plant path puts `None` in the plant name, so a
+        plant-keyed dedupe collapses every such group into one entry."""
+        from btap.codes.necb.hvac import reference
+
+        facts = self._facts(plants=[])              # nothing to match at all
+        audit = self._audit()
+        for zones in (("A",), ("B",)):
+            reference._reference_energy_type(
+                self._group(("NaturalGas", "Electricity"), zones=zones),
+                self._selection(), facts, audit)
+        warnings = [e for e in audit.entries
+                    if "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(2, len(warnings))
+        self.assertEqual({"A", "B"}, {e["target"] for e in warnings})
+
+
 class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
     @needs_sdk
     def test_a_dual_fuel_plant_carries_both_fuels_and_both_capacities(self):
         """`classify` is where the allocation comes from, so the survey must
         carry it — not just the fuel names it carried before."""
-        import pathlib
-
         import openstudio
 
         from btap.modeling.hvac import classify
 
-        corpus = pathlib.Path(
-            "/tmp/claude-1000/-workspaces-openstudio-necb-gems/"
-            "a100f076-cc34-4c32-b8b8-6d3f4c82e03f/scratchpad/lvr-corpus")
-        osm = corpus / "11-staged-boilers-gas-lead.osm"
-        if not osm.is_file():
-            self.skipTest("sample corpus not generated in this environment")
-        model = openstudio.osversion.VersionTranslator().loadModel(
-            openstudio.toPath(str(osm))).get()
+        model = openstudio.model.Model()
+        _plant(model, ("NaturalGas", "Electricity"))
         facts = classify.characterize(model)
         hot = [p for p in facts["plants"] if p["type"] == "hot_water"]
         self.assertEqual(1, len(hot))
@@ -313,6 +398,112 @@ class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
             all(v is None for v in hot[0]["fuel_capacities_w"].values()),
             "both boilers are autosized, so the allocation is UNKNOWN — the "
             "survey must say None rather than 0")
+
+    @needs_sdk
+    def test_a_SIZED_60_40_plant_reports_those_shares_not_a_guess(self):
+        """Sol's `113` asked for an explicit UNEQUAL split, because a 50/50
+        one cannot distinguish a real allocation from the autosizing default
+        that gives every parallel boiler the whole load."""
+        import openstudio
+
+        from btap.modeling.hvac import classify
+
+        model = openstudio.model.Model()
+        _plant(model, ("NaturalGas", "Electricity"),
+               capacity_w=(60_000.0, 40_000.0))
+        facts = classify.characterize(model)
+        hot = [p for p in facts["plants"] if p["type"] == "hot_water"][0]
+        self.assertEqual({"NaturalGas": 60_000.0, "Electricity": 40_000.0},
+                         hot["fuel_capacities_w"])
+
+        group = {"zones": ["Zone 1"],
+                 "heating_energy_types": ["NaturalGas", "Electricity"]}
+        audit = AuditLog()
+        reference._reference_energy_type(
+            group,
+            {"special_rules": {"purchased_heating": {
+                "article": "8.4.4.6.(1)", "part_load_curve_class": "modulating"},
+                "heat_pump": {"article": "8.4.4.13.(1)-(2)"}}},
+            {"plants": facts["plants"], "purchased_energy": {}}, audit)
+        warned = [e for e in audit.entries
+                  if "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(1, len(warned))
+        self.assertEqual({"NaturalGas": 0.6, "Electricity": 0.4},
+                         warned[0]["inputs"]["proposed_capacity_shares"])
+
+
+class TestTheWarningDoesNotOVERCLAIM(_Fixture):
+    """Sol's `113` blocker 1: the specific boiler statements were being made
+    about groups that have NO dual-fuel plant. Samples 16/17/18 have a
+    GAS-ONLY hot-water plant plus electric heating elsewhere in the group,
+    and the committed audits claimed two boilers, SequentialLoad, a 50/50
+    match and a measured energy result for all three.
+    """
+
+    def _selection(self):
+        sel = super()._selection()
+        sel["special_rules"]["heat_pump"] = {"article": "8.4.4.13.(1)-(2)"}
+        return sel
+
+    def test_a_GAS_ONLY_plant_in_a_mixed_group_makes_no_boiler_claim(self):
+        group = self._group(("NaturalGas", "Electricity"))
+        facts = self._facts(plants=[{"type": "hot_water",
+                                     "name": "Gas Only Loop",
+                                     "fuels": ["NaturalGas"],
+                                     "fuel_capacities_w": {"NaturalGas": 50_000.0}}])
+        _result, warnings, _audit = self._call(group, facts)
+        self.assertEqual(1, len(warnings), "the group is still unresolved")
+        action = warnings[0]["action"]
+        for forbidden in ("BOILER PLANT", "boiler per proposed energy type",
+                          "SequentialLoad", "energy-neutral", "158,219.4"):
+            self.assertNotIn(
+                forbidden, action,
+                f"a gas-only plant cannot support the claim {forbidden!r}")
+        self.assertIn("ONE of them", action)
+        self.assertEqual(["NaturalGas"],
+                         warnings[0]["inputs"]["plant_energy_types"])
+        self.assertEqual("8.4.4.9.(5)", warnings[0]["article"],
+                         "(6)(b) is a BOILER-COUNT article and must not be "
+                         "cited where no boiler count is at issue")
+
+    def test_a_TRUE_dual_fuel_plant_still_gets_the_specific_entry(self):
+        group = self._group(("NaturalGas", "Electricity"))
+        facts = self._facts(plants=[{"type": "hot_water",
+                                     "name": "Mixed Loop",
+                                     "fuels": ["NaturalGas", "Electricity"],
+                                     "fuel_capacities_w": {"NaturalGas": None,
+                                                           "Electricity": None}}])
+        _result, warnings, _audit = self._call(group, facts)
+        self.assertEqual(1, len(warnings))
+        self.assertIn("ONE BOILER PLANT", warnings[0]["action"])
+        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)(b)", warnings[0]["article"])
+        self.assertIn(
+            "NOT a property of this model",
+            warnings[0]["inputs"]["fixture_measurement"],
+            "the measurement is provenance for samples 11/12, never a claim "
+            "about the model in hand")
+
+    def test_the_2025_edition_cites_2025_articles(self):
+        group = self._group(("NaturalGas", "Electricity"))
+        facts = self._facts(plants=[{"type": "hot_water",
+                                     "name": "Mixed Loop",
+                                     "fuels": ["NaturalGas", "Electricity"],
+                                     "fuel_capacities_w": {"NaturalGas": None,
+                                                           "Electricity": None}}])
+        audit = AuditLog()
+        reference._reference_energy_type(
+            group,
+            {"special_rules": {
+                "purchased_heating": {"article": "8.4.5.6.(1)",
+                                      "part_load_curve_class": "modulating"},
+                "heat_pump": {"article": "8.4.5.13.(1)-(2) + Table 8.4.5.13"}}},
+            facts, audit)
+        warned = [e for e in audit.entries
+                  if "UNRESOLVED" in str(e.get("action"))]
+        self.assertEqual(1, len(warned))
+        self.assertEqual("8.4.5.9.(5); 8.4.5.9.(6)(b)", warned[0]["article"])
+        self.assertNotIn("8.4.4.", warned[0]["action"],
+                         "a 2025 run must not cite a 2020 article to the AHJ")
 
 
 if __name__ == "__main__":
