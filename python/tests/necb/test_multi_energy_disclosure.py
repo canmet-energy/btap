@@ -70,8 +70,11 @@ class _Fixture(unittest.TestCase):
         from btap.codes.necb.hvac import reference
 
         audit = self._audit()
-        result = reference._reference_energy_type(
-            group, self._selection(), facts, audit)
+        selection = self._selection()
+        result = reference._reference_energy_type(group, selection, facts, audit)
+        # `_finalize` calls these two in sequence, and the disclosure now runs
+        # on EVERY election path rather than only this one (Sol, `114`.2).
+        reference._disclose_multi_energy(group, selection, facts, audit)
         warnings = [e for e in audit.entries
                     if e["level"] == "warning"
                     and "UNRESOLVED" in str(e.get("action"))]
@@ -96,9 +99,11 @@ class TestTheCollapseIsDisclosed(_Fixture):
             self._group(["NaturalGas", "Electricity"]), self._facts([plant]))
         self.assertEqual(1, len(warnings), "the collapse must be disclosed")
         entry = warnings[0]
-        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)(b)", entry["article"],
-                         "both articles — the point is that they are not "
-                         "reconciled with each other (Sol, `111`)")
+        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)", entry["article"],
+                         "both sentences — but (6) WITHOUT a subclause, "
+                         "because which of (6)(b)/(c)/(d) applies depends on "
+                         "a reference plant capacity that does not exist at "
+                         "selection time (Sol, `114`.4)")
         self.assertIn("NEITHER", entry["action"],
                       "it must not read as if either were satisfied")
         self.assertIn("ONE BOILER PLANT", entry["action"],
@@ -257,7 +262,7 @@ class TestTheWarningIsDeduplicated(_Fixture):
         facts = self._facts([plant])
         audit = AuditLog()
         for block in range(5):
-            reference._reference_energy_type(
+            reference._disclose_multi_energy(
                 self._group(["NaturalGas", "Electricity"],
                             zones=(f"Zone {block}",)),
                 self._selection(), facts, audit)
@@ -280,14 +285,14 @@ class TestTheWarningIsDeduplicated(_Fixture):
              "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}},
         ])
         audit = AuditLog()
-        reference._reference_energy_type(
+        reference._disclose_multi_energy(
             self._group(["NaturalGas", "Electricity"]), self._selection(),
             facts, audit)
         facts["plants"] = [
             {"name": "Hot Water Loop B", "type": "hot_water",
              "fuels": ["FuelOilNo2", "Electricity"],
              "fuel_capacities_w": {"FuelOilNo2": None, "Electricity": None}}]
-        reference._reference_energy_type(
+        reference._disclose_multi_energy(
             self._group(["FuelOilNo2", "Electricity"]), self._selection(),
             facts, audit)
         warnings = [e for e in audit.entries
@@ -296,6 +301,188 @@ class TestTheWarningIsDeduplicated(_Fixture):
         self.assertEqual(2, len(warnings))
         self.assertEqual({"Hot Water Loop A", "Hot Water Loop B"},
                          {w["target"] for w in warnings})
+
+
+#: Sample 16's real shape, from `classify.characterize` on the generated
+#: fixture: ONE zone group of five zones using Electricity + NaturalGas, an
+#: air-source heat pump, and a GAS-ONLY hot-water plant. Written as a literal
+#: so the case runs without the generated corpus.
+_ASHP_MIXED_FACTS = {
+    "zone_groups": [{
+        "zones": [f"Thermal Zone {i}" for i in range(1, 6)],
+        "air_loop": "PSZ RTU ASHP with Electric and ASHP with Electric "
+                    "Supp. Heat Coils and Hot Water Baseboard | Thermal Zone 1",
+        "family": "psz",
+        "catalog_name": "PSZ RTU ASHP with Electric and ASHP with Electric "
+                        "Supp. Heat Coils and Hot Water Baseboard",
+        "family_guess": "central_doas_or_cv",
+        "heated": True,
+        "cooled": True,
+        "heating_energy_types": ["Electricity", "NaturalGas"],
+        "cooling_energy_types": ["Electricity"],
+        "heat_pump": True,
+        "heat_pump_sources": ["air"],
+        "heat_pump_source_loops": [],
+        "terminal_type": "cv",
+        "zonal_units": ["baseboard"],
+        "loop_dx_cooling": True,
+        "design_cooling_kw": None,
+        "dcv": False,
+        "system_outdoor_air_method": "ZoneSum",
+        "evidence": [],
+    }],
+    "plants": [{"name": "Hot Water Loop", "type": "hot_water",
+                "fuels": ["NaturalGas"],
+                "fuel_capacities_w": {"NaturalGas": None},
+                "purchased": False, "heat_pump": False}],
+    "purchased_energy": {},
+    "built_by_gem": False,
+}
+
+
+class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
+    """Sol's `114`.2: an ANNUAL heat-pump election bypassed the diagnostic.
+
+    `_finalize` calls `_reference_energy_type` only when
+    `heat_pump_aux_energy_type` returns None. With annual delivered-heat data
+    for a mixed ASHP group, 8.4.4.13.(2)(g)(i) elects the auxiliary type and
+    that branch is never taken — so the group got the election and NO
+    multi-energy disclosure at all. The disclosure now runs on both paths.
+    """
+
+    def _run(self, proposed_annual):
+        import copy
+
+        facts = copy.deepcopy(_ASHP_MIXED_FACTS)
+        audit = AuditLog()
+        reference.select_reference_systems(
+            facts=facts, building={"storeys": 1}, code="necb2020",
+            audit=audit, proposed_annual=proposed_annual)
+        return [e for e in audit.entries
+                if "UNRESOLVED" in str(e.get("action"))
+                and "ENERGY TYPE" in str(e.get("action"))]
+
+    def test_the_ANNUAL_heat_pump_election_still_discloses(self):
+        zones = _ASHP_MIXED_FACTS["zone_groups"][0]["zones"]
+        annual = {"groups": {z: {"hp_j": 80e9,
+                                 "terminal_j": {"Electricity": 20e9}}
+                             for z in zones}}
+        self.assertEqual(
+            1, len(self._run(annual)),
+            "the auxiliary election must not swallow the (5) disclosure")
+
+    def test_the_structural_path_discloses_too(self):
+        self.assertEqual(1, len(self._run(None)))
+
+
+class TestTheDisclosureDoesNotOVERSTATE(_Fixture):
+    """Sol's `114`.1/.3/.4 — three distinct overstatements, one entry."""
+
+    def _selection(self):
+        sel = super()._selection()
+        sel["special_rules"]["heat_pump"] = {"article": "8.4.4.13.(1)-(2)"}
+        return sel
+
+    def test_a_plant_covering_PART_of_the_group_keeps_shares_unresolved(self):
+        """A gas+oil plant under an {Electricity, gas, oil} group was taking
+        the specific branch and reporting shares of {gas: .6, oil: .4} —
+        electricity dropped out of the DENOMINATOR entirely."""
+        group = self._group(("Electricity", "NaturalGas", "FuelOilNo2"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Gas+Oil Loop",
+            "fuels": ["NaturalGas", "FuelOilNo2"],
+            "fuel_capacities_w": {"NaturalGas": 60_000.0,
+                                  "FuelOilNo2": 40_000.0}}])
+        _r, warnings, _a = self._call(group, facts)
+        self.assertEqual(1, len(warnings))
+        entry = warnings[0]
+        self.assertNotIn("ONE BOILER PLANT", entry["action"],
+                         "the plant does not account for the whole group")
+        self.assertNotIn("proposed_capacity_shares", entry["inputs"],
+                         "a plant-only split is NOT the group's allocation")
+        self.assertIn("UNRESOLVED", entry["inputs"]["group_shares"])
+        self.assertEqual(["FuelOilNo2", "NaturalGas"],
+                         entry["inputs"]["plant_energy_types"])
+
+    def test_the_entry_says_NOT_VERIFIED_rather_than_NOT_MET(self):
+        """Sample 16's reference DOES carry electric ASHP heating stages, so
+        "the other types carry no reference capacity" and "the ratio is NOT
+        met" were both false. The tool does not compute the allocation, so
+        the honest statement is that it is not verified either way."""
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Gas Only Loop",
+            "fuels": ["NaturalGas"],
+            "fuel_capacities_w": {"NaturalGas": 50_000.0}}])
+        _r, warnings, _a = self._call(group, facts)
+        action = warnings[0]["action"]
+        self.assertIn("NOT VERIFIED", action)
+        for false_claim in ("is NOT met", "no reference capacity",
+                            "carry no reference"):
+            self.assertNotIn(false_claim, action)
+
+    def test_no_6_SUBCLAUSE_is_cited_without_a_capacity_band(self):
+        """(6)(b) is the <=176 kW subclause. (6)(c) covers 176-352 and (6)(d)
+        above that. Which applies depends on the REFERENCE plant capacity,
+        which does not exist at selection time, so citing (6)(b) asserted a
+        band nothing had established."""
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Mixed Loop",
+            "fuels": ["NaturalGas", "Electricity"],
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        _r, warnings, _a = self._call(group, facts)
+        entry = warnings[0]
+        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)", entry["article"])
+        for subclause in ("(6)(b)", "(6)(c)", "(6)(d)"):
+            self.assertNotIn(subclause, entry["article"])
+            self.assertNotIn(subclause, entry["action"])
+        self.assertIn("NOT ESTABLISHED",
+                      entry["inputs"]["boiler_count_subclause"])
+
+    def test_the_measurement_does_NOT_travel_to_another_edition(self):
+        """Sol's `114`: "Do not attach the 2020 experiment to a 2025 runtime
+        audit as though it verifies that model." The repo's own
+        edition-independence test says the same thing about the snapshots.
+        """
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Mixed Loop",
+            "fuels": ["NaturalGas", "Electricity"],
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        audit = AuditLog()
+        reference._disclose_multi_energy(
+            group,
+            {"special_rules": {
+                "purchased_heating": {"article": "8.4.5.6.(1)",
+                                      "part_load_curve_class": "modulating"},
+                "heat_pump": {"article": "8.4.5.13.(1)-(2) + Table 8.4.5.13"}}},
+            facts, audit)
+        entry = [e for e in audit.entries
+                 if "UNRESOLVED" in str(e.get("action"))][0]
+        measured = entry["inputs"]["fixture_measurement"]
+        self.assertIn("NONE for this edition", measured)
+        for leaked in ("158,219.4", "157,602.8", "sample 11", "necb2020"):
+            self.assertNotIn(leaked, measured,
+                             f"{leaked!r} belongs to the other edition")
+
+    def test_the_measurement_names_its_sample_and_does_not_say_unchanged(self):
+        """`114`: I had written that the annual result was "unchanged at the
+        legacy gem's 0.5 sizing factor". It was not — it changed by
+        -616.6 kWh. What was unchanged is that the secondary never fired."""
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Mixed Loop",
+            "fuels": ["NaturalGas", "Electricity"],
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        _r, warnings, _a = self._call(group, facts)
+        measured = warnings[0]["inputs"]["fixture_measurement"]
+        self.assertIn("sample 11 only", measured)
+        self.assertIn("necb2020", measured)
+        self.assertIn("157,602.8", measured, "the 0.5 result must be stated")
+        self.assertIn("-616.6", measured, "and named as a CHANGE")
+        self.assertIn("never fired", measured)
+        self.assertNotIn("unchanged at", measured)
 
 
 def _plant(model, fuels, capacity_w=None, name="Hot Water Loop"):
@@ -347,7 +534,7 @@ class TestTheGenericEntryDedupesByServingGROUP(_Fixture):
         facts = self._facts(plants=[gas_only])      # ONE facts dict: shared state
         audit = self._audit()
         for zones in (("North 1", "North 2"), ("South 1", "South 2")):
-            reference._reference_energy_type(
+            reference._disclose_multi_energy(
                 self._group(("NaturalGas", "Electricity"), zones=zones),
                 self._selection(), facts, audit)
         warnings = [e for e in audit.entries
@@ -367,7 +554,7 @@ class TestTheGenericEntryDedupesByServingGROUP(_Fixture):
         facts = self._facts(plants=[])              # nothing to match at all
         audit = self._audit()
         for zones in (("A",), ("B",)):
-            reference._reference_energy_type(
+            reference._disclose_multi_energy(
                 self._group(("NaturalGas", "Electricity"), zones=zones),
                 self._selection(), facts, audit)
         warnings = [e for e in audit.entries
@@ -419,7 +606,7 @@ class TestTheAllocationIsRecordedByClassify(unittest.TestCase):
         group = {"zones": ["Zone 1"],
                  "heating_energy_types": ["NaturalGas", "Electricity"]}
         audit = AuditLog()
-        reference._reference_energy_type(
+        reference._disclose_multi_energy(
             group,
             {"special_rules": {"purchased_heating": {
                 "article": "8.4.4.6.(1)", "part_load_curve_class": "modulating"},
@@ -454,12 +641,12 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
         _result, warnings, _audit = self._call(group, facts)
         self.assertEqual(1, len(warnings), "the group is still unresolved")
         action = warnings[0]["action"]
-        for forbidden in ("BOILER PLANT", "boiler per proposed energy type",
+        for forbidden in ("BOILER PLANT", "boiler per energy type",
                           "SequentialLoad", "energy-neutral", "158,219.4"):
             self.assertNotIn(
                 forbidden, action,
                 f"a gas-only plant cannot support the claim {forbidden!r}")
-        self.assertIn("ONE of them", action)
+        self.assertIn("NOT VERIFIED", action)
         self.assertEqual(["NaturalGas"],
                          warnings[0]["inputs"]["plant_energy_types"])
         self.assertEqual("8.4.4.9.(5)", warnings[0]["article"],
@@ -476,7 +663,7 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
         _result, warnings, _audit = self._call(group, facts)
         self.assertEqual(1, len(warnings))
         self.assertIn("ONE BOILER PLANT", warnings[0]["action"])
-        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)(b)", warnings[0]["article"])
+        self.assertEqual("8.4.4.9.(5); 8.4.4.9.(6)", warnings[0]["article"])
         self.assertIn(
             "NOT a property of this model",
             warnings[0]["inputs"]["fixture_measurement"],
@@ -491,7 +678,7 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
                                      "fuel_capacities_w": {"NaturalGas": None,
                                                            "Electricity": None}}])
         audit = AuditLog()
-        reference._reference_energy_type(
+        reference._disclose_multi_energy(
             group,
             {"special_rules": {
                 "purchased_heating": {"article": "8.4.5.6.(1)",
@@ -501,7 +688,7 @@ class TestTheWarningDoesNotOVERCLAIM(_Fixture):
         warned = [e for e in audit.entries
                   if "UNRESOLVED" in str(e.get("action"))]
         self.assertEqual(1, len(warned))
-        self.assertEqual("8.4.5.9.(5); 8.4.5.9.(6)(b)", warned[0]["article"])
+        self.assertEqual("8.4.5.9.(5); 8.4.5.9.(6)", warned[0]["article"])
         self.assertNotIn("8.4.4.", warned[0]["action"],
                          "a 2025 run must not cite a 2020 article to the AHJ")
 

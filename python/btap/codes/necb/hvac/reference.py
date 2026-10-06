@@ -362,6 +362,14 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     if assignment.energy_type is None:
         assignment.energy_type, boiler_part_load_curve_class = \
             _reference_energy_type(group, selection, facts, audit)
+    # The 8.4.x.9.(5) disclosure runs on EVERY election path, not only the
+    # structural one. It used to live inside _reference_energy_type, which
+    # `_finalize` skips whenever heat_pump_aux_energy_type elects a type —
+    # so an ANNUAL run of a mixed ASHP group produced the 8.4.4.13.(2)(g)
+    # election and NO multi-energy disclosure at all (Sol, `114`). Whether
+    # 8.4.4.13 supersedes (5) for such a group is an adjudication; until it
+    # is made, disclosing is the conservative side.
+    _disclose_multi_energy(group, selection, facts, audit)
     definition = definitions[str(assignment.reference_system)]
     variant = definition[assignment.energy_type]
     assignment.catalog_name = variant['name']
@@ -1943,14 +1951,21 @@ def _heating_plant_name(group, facts):
     return None if plant is None else plant.get('name')
 
 
-def _plant_is_multi_fuel(plant):
-    """True when ONE plant's own equipment spans more than one energy type.
+def _plant_covers_group(plant, group):
+    """True when ONE plant carries EVERY energy type the serving group uses.
 
-    This is the only condition under which the reference holds one boiler per
-    proposed energy type on a single plant, so it gates every statement about
-    boiler count, staging and the (6)(b) departure.
+    `len(plant.fuels) > 1` is NOT enough, and Sol built the counter-example
+    (`114`): a group of {Electricity, NaturalGas, FuelOilNo2} served by a
+    gas+oil plant took the plant-specific branch and reported shares of
+    {NaturalGas: 0.6, FuelOilNo2: 0.4} — electricity dropped out of the
+    DENOMINATOR entirely. A plant-only allocation may be described as the
+    group's allocation only when the plant accounts for the whole group.
     """
-    return plant is not None and len({str(f) for f in (plant.get('fuels') or ())}) > 1
+    if plant is None:
+        return False
+    plant_fuels = {str(f) for f in (plant.get('fuels') or ())}
+    group_fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+    return len(plant_fuels) > 1 and group_fuels <= plant_fuels
 
 
 def multi_energy_articles(selection):
@@ -1994,6 +2009,137 @@ def _heating_allocation(group, facts):
     if total <= 0:
         return None
     return {f: w / total for f, w in known.items()}, known
+
+
+#: What was ACTUALLY measured, named precisely enough to be checked. My
+#: previous wording said the annual result was "unchanged at the legacy gem's
+#: 0.5 sizing factor", which is false: it changed by -616.6 kWh. What was
+#: unchanged across BOTH experiments is that the secondary boiler never
+#: fired. Sol caught the conflation (`114`), and the two statements are not
+#: the same claim.
+#:
+#: Both experiments ran on sample 11's necb2020 reference model (gas-primary)
+#: with CWEC2020 Toronto weather. Neither says anything about a 2025 runtime,
+#: a different sample, or a cooling plant.
+#: The subsection the measurement was taken under. The experiments ran on one
+#: edition, so the note travels only to that edition: attaching it elsewhere
+#: would present it as verifying a model it never touched (Sol, `114`).
+_MEASURED_SUBSECTION = '8.4.4'
+_FIXTURE_MEASUREMENT = (
+    'MEASURED on sample 11 only, necb2020 reference, gas-primary, annual: '
+    '(i) BOILER COUNT at sizingFactor 1.0 — two boilers 158,219.4 kWh vs one '
+    'boiler 158,219.4 kWh, identical to 0.1 kWh; (ii) SIZING FACTOR at two '
+    'boilers — 1.0 gives 158,219.4 kWh and 0.5 gives 157,602.8 kWh, a CHANGE '
+    'of -616.6 kWh (-0.39%) from part-load efficiency on the lead boiler. '
+    'What held in BOTH experiments is that the secondary boiler never fired, '
+    'which is NOT the same statement as the annual kWh being unchanged. '
+    'These are measurements on that one fixture and edition, NOT a property '
+    'of this model.')
+
+
+def _disclose_multi_energy(group, selection, facts, audit):
+    """8.4.x.9.(5): disclose a multi-energy proposed heating system.
+
+    Called from `_finalize` on EVERY election path. It states what is
+    UNRESOLVED and nothing else — four separate corrections from Sol's `113`
+    and `114` all came from this entry claiming more than the model supports:
+
+    * a gas-only plant was described as holding one boiler per energy type;
+    * a plant covering only part of the group had its fuels reported as the
+      group's whole allocation;
+    * the ratio was called NOT MET when it is not verified or enforced —
+      sample 16's reference does carry electric ASHP heating stages, so
+      "the other types carry no reference capacity" was simply false;
+    * (6)(b) was cited as a demonstrated departure without any capacity to
+      establish which of (6)(b)/(c)/(d) even applies.
+    """
+    fuels = group.get('heating_energy_types') or ()
+    if 'Purchased' in fuels or (facts.get('purchased_energy') or {}).get('heating'):
+        return                      # 8.4.x.6 is the separate purchased route
+    distinct = {str(f) for f in fuels}
+    if len(distinct) < 2:
+        return
+
+    ratio_article, boiler_article = multi_energy_articles(selection)
+    sentence_six = boiler_article.split('(')[0] + '(6)'
+    plant = _heating_plant(group, facts)
+    covers = _plant_covers_group(plant, group)
+    plant_name = (plant or {}).get('name')
+    key = (f'plant:{plant_name}' if covers
+           else 'group:' + ','.join(sorted(group['zones'])))
+    seen = facts.setdefault('_multi_energy_warned', set())
+    if key in seen:
+        return
+    seen.add(key)
+
+    target = plant_name if covers else ','.join(group['zones'])
+    inputs = {'proposed_energy_types': sorted(distinct),
+              'serving_system': target,
+              'reconciled': False}
+    if plant is not None:
+        # The fuels are recorded whenever a plant is IDENTIFIED. Gating this on
+        # the name meant an unnamed plant silently lost the one input a reader
+        # needs to check the claim.
+        inputs['plant_energy_types'] = sorted(
+            {str(f) for f in (plant.get('fuels') or ())})
+        if plant_name:
+            inputs['serving_plant'] = plant_name
+    if not covers:
+        # Nothing may be said about boilers per energy type, nor about the
+        # group's shares, because the plant does not account for the group.
+        inputs['group_shares'] = (
+            'UNRESOLVED: no single plant carries every energy type this '
+            'group uses, so a plant-only capacity split would omit the '
+            'others from the denominator')
+        audit.warn(
+            'selection',
+            'UNRESOLVED: the heating equipment serving this group uses MORE '
+            f'THAN ONE ENERGY TYPE. {ratio_article} requires the reference '
+            'heating capacities to follow the proposed energy-type '
+            'allocation, and this tool does NOT compute or enforce that '
+            'allocation — it elects ONE energy type for the group. Whether '
+            'the reference happens to match the proposed allocation is '
+            'therefore NOT VERIFIED here, in either direction, and a '
+            'passing annual result is not evidence that it does',
+            target=target, inputs=inputs, article=ratio_article)
+        return
+
+    allocation = _heating_allocation(group, facts)
+    if allocation is None:
+        inputs['proposed_capacity_shares'] = 'unavailable without sizing'
+    else:
+        shares, watts = allocation
+        inputs['proposed_capacity_shares'] = {
+            f: round(s, 4) for f, s in sorted(shares.items())}
+        inputs['proposed_capacity_w'] = {
+            f: round(w, 1) for f, w in sorted(watts.items())}
+    # Which of (6)(b)/(c)/(d) applies depends on the REFERENCE plant's
+    # heating capacity, which does not exist at selection time. Cite the
+    # sentence, never a subclause we cannot establish (Sol, `114`.4).
+    inputs['boiler_count_subclause'] = (
+        f'NOT ESTABLISHED: {sentence_six} bands the requirement by the '
+        f'reference plant capacity, which is not known at selection time, '
+        f'so no subclause is claimed')
+    if ratio_article.startswith(_MEASURED_SUBSECTION):
+        inputs['fixture_measurement'] = _FIXTURE_MEASUREMENT
+    else:
+        inputs['fixture_measurement'] = (
+            'NONE for this edition: the boiler-count and sizing-factor '
+            'experiments were run under '
+            f'{_MEASURED_SUBSECTION} and say nothing about this one')
+    audit.warn(
+        'selection',
+        'UNRESOLVED: the proposed heating system puts MORE THAN ONE ENERGY '
+        'TYPE on ONE BOILER PLANT that carries every energy type the group '
+        f'uses. The reference retains one boiler per energy type, which may '
+        f'conflict with {sentence_six}, whose applicable subclause depends '
+        f'on the reference plant capacity and is NOT established here. '
+        f"NEITHER {ratio_article}'s capacity-ratio clause (a) nor its "
+        'operating-priority clause (b) is computed or enforced, so the '
+        'allocation is NOT VERIFIED in either direction, and a passing '
+        'annual result is not evidence that it is satisfied',
+        target=target, inputs=inputs,
+        article=f'{ratio_article}; {sentence_six}')
 
 
 def _reference_energy_type(group, selection, facts, audit):
@@ -2041,83 +2187,6 @@ def _reference_energy_type(group, selection, facts, audit):
     # emits ONE unresolved warning per serving plant. It does not claim the
     # ratio is implemented, does not guess an allocation, and does not imply
     # a green annual result is compliance with either article.
-    distinct = {str(f) for f in fuels}
-    if len(distinct) > 1:
-        ratio_article, boiler_article = multi_energy_articles(selection)
-        plant = _heating_plant(group, facts)
-        dual_fuel_plant = _plant_is_multi_fuel(plant)
-        plant_name = (plant or {}).get('name')
-        # Dedupe by the ACTUAL serving system: the plant when one plant holds
-        # every proposed energy type, otherwise the serving group itself. Keyed
-        # on a plant that merely shares ONE fuel, 16/17/18 were each reported
-        # as a dual-fuel boiler plant they do not have (Sol, `113`).
-        key = (f'plant:{plant_name}' if dual_fuel_plant
-               else 'group:' + ','.join(sorted(group['zones'])))
-        seen = facts.setdefault('_multi_energy_warned', set())
-        if key not in seen:
-            seen.add(key)
-            target = plant_name if dual_fuel_plant else ','.join(group['zones'])
-            inputs = {'proposed_energy_types': sorted(distinct),
-                      'serving_system': target,
-                      'reconciled': False}
-            if dual_fuel_plant:
-                inputs['serving_plant'] = plant_name
-                inputs['plant_energy_types'] = sorted(
-                    {str(f) for f in (plant.get('fuels') or ())})
-                allocation = _heating_allocation(group, facts)
-                if allocation is None:
-                    inputs['proposed_capacity_shares'] = \
-                        'unavailable without sizing'
-                else:
-                    shares, watts = allocation
-                    inputs['proposed_capacity_shares'] = {
-                        f: round(s, 4) for f, s in sorted(shares.items())}
-                    inputs['proposed_capacity_w'] = {
-                        f: round(w, 1) for f, w in sorted(watts.items())}
-                # The measurement is PROVENANCE for the fixtures it was taken
-                # on, never a property asserted of the model in hand.
-                inputs['fixture_measurement'] = (
-                    'on samples 11 and 12 each reference boiler autosized to '
-                    'the FULL plant load and only the lead one fired, so the '
-                    'boiler count was energy-neutral THERE (158,219.4 kWh '
-                    'with one boiler and with two, and unchanged at the '
-                    "legacy gem's 0.5 sizing factor) — a measurement on those "
-                    'fixtures, NOT a property of this model')
-                audit.warn(
-                    'selection',
-                    'UNRESOLVED: the proposed heating system puts MORE THAN '
-                    'ONE ENERGY TYPE on ONE BOILER PLANT. The reference '
-                    f'retains one boiler per proposed energy type, which '
-                    f'DEPARTS from {boiler_article}, and NEITHER '
-                    f"{ratio_article}'s capacity-ratio clause (a) nor its "
-                    'operating-priority clause (b) is claimed as satisfied '
-                    'for this plant. A passing annual result is not evidence '
-                    'that they are',
-                    target=target, inputs=inputs,
-                    article=f'{ratio_article}; {boiler_article}')
-            else:
-                # A mixed serving GROUP whose hot-water plant (if any) carries
-                # ONE fuel: the other energy type lives on an air loop, a
-                # heating coil or an ASHP. Nothing here may speak of boilers
-                # per energy type, staging, or a measured energy result.
-                if plant_name:
-                    inputs['serving_plant'] = plant_name
-                    inputs['plant_energy_types'] = sorted(
-                        {str(f) for f in (plant.get('fuels') or ())})
-                audit.warn(
-                    'selection',
-                    'UNRESOLVED: the heating equipment serving this group '
-                    'uses MORE THAN ONE ENERGY TYPE, and the reference '
-                    f"elects ONE of them, so {ratio_article}'s requirement "
-                    'that reference heating capacities follow the proposed '
-                    'energy-type allocation is NOT met — the energy types '
-                    'that were not elected carry no reference capacity. '
-                    'Neither clause (a) nor the operating-priority clause '
-                    '(b) is claimed as satisfied, and a passing annual '
-                    'result is not evidence that they are',
-                    target=target, inputs=inputs,
-                    article=ratio_article)
-
     if any(re.search(r'gas|oil|propane', str(f), re.IGNORECASE) for f in fuels):
         return 'gas', None
     if 'Electricity' in fuels:
