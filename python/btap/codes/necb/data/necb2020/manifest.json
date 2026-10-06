@@ -209,7 +209,7 @@
       "method": "transcribed",
       "source_verification": "archived",
       "note": "The archived set is the three tables this file's provenance names plus the eight articles in its own `articles` list. The category keywords extending the Table 8.4.4.7.-A space lists with synonyms are a maintainer addition, not code text, and are marked as such in the file.",
-      "result_sha256": "42909acac4e65da838d0eccd45a15aa3be4b5e30f489ab7d2dcacbfc4029e510"
+      "result_sha256": "8d7b314622045ed19c75baf5405f2e6e027e5f06b76706f6a87048c4180bb896"
     },
     "efficiencies.json": {
       "source": "oracle:f01da13a6b89e45761d1ede481fedb1c1aeb6ea0",
