@@ -2089,7 +2089,7 @@ def multi_energy_serving_groups(facts):
     return out
 
 
-def multi_energy_serving_systems(facts):
+def multi_energy_serving_systems(facts, *, hydronic_only=False):
     """The DEDUPED serving-system identities behind `multi_energy_serving_groups`.
 
     The group list overcounts: sample 11 is five thermal blocks served by ONE
@@ -2105,6 +2105,14 @@ def multi_energy_serving_systems(facts):
         if _plant_covers_group(plant, group):
             key = f"plant:{plant.get('name')}"
             label = plant.get('name') or 'the shared heating plant'
+        elif hydronic_only:
+            # `hydronic_only` selects the systems a BOILER question can apply
+            # to. Sentence (6) governs "where a hydronic system is modeled",
+            # so a mixed group with no plant carrying its fuels cannot raise a
+            # boiler-cardinality conflict — asking it to was Sol's `122`
+            # blocker 3, where a bare dual-fuel thermal-block group with no
+            # hydronic plant was handed the boiler question anyway.
+            continue
         else:
             key = 'group:' + ','.join(sorted(group['zones']))
             label = ','.join(group['zones'])

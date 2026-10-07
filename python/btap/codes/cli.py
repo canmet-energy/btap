@@ -571,12 +571,14 @@ def verdict_block(result, rep):
         return "\n".join([
             "", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
             f"  {article} governs the {len(systems)} multi-energy serving "
-            "system(s) below and is",
-            "  NOT implemented: the reference elects ONE energy type, and no "
-            "single-fuel",
-            "  basis satisfies its capacity-ratio requirement. The comparison "
-            "above is",
-            "  INFORMATIONAL only and is not evidence of compliance.",
+            "system(s) below and its",
+            "  capacity-ratio requirement is neither computed nor enforced. "
+            "What the",
+            "  reference's final heating equipment carries is NOT established "
+            "by this tool,",
+            "  so the comparison above is INFORMATIONAL only and is not "
+            "evidence of",
+            "  compliance.",
             *[f"    - {s}" for s in systems],
             "",
             "  CONDITIONAL: the authority having jurisdiction must accept the "

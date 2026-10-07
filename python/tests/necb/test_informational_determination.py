@@ -21,6 +21,7 @@ import unittest
 
 from btap.codes import cli
 from btap.codes.necb.hvac import reference
+from tests.support import needs_sdk
 
 
 def _group(zones, fuels):
@@ -108,6 +109,17 @@ class TestTheLabel(unittest.TestCase):
         self.assertIn("INFORMATIONAL", got)
         self.assertIn("AUTHORITY HAVING JURISDICTION", got)
 
+    def test_the_BLOCK_prose_asserts_nothing_about_the_equipment_either(self):
+        """The reason dict and the rendered block are SEPARATE copies of this
+        prose. `122` blocker 1 was fixed in `path.py`'s `why` while
+        `cli.py`'s block kept printing "the reference elects ONE energy type"
+        — the seventh instance of one overclaim, surviving in another layer
+        because the test only looked at the first."""
+        block = cli.verdict_block(_Result(True), self.AFFECTED)
+        self.assertIn("NOT established by this tool", block)
+        for overclaim in ("elects ONE energy type", "no single-fuel"):
+            self.assertNotIn(overclaim, block)
+
     def test_the_block_opens_with_the_NOT_A_DETERMINATION_banner(self):
         """The same banner the --quick path uses, so the two read alike."""
         block = cli.verdict_block(_Result(True), self.AFFECTED)
@@ -189,6 +201,110 @@ class TestTheREPORTCarriesTheCondition(unittest.TestCase):
         self.assertNotIn("CONDITIONAL", html)
         self.assertNotIn("AHJ APPROVAL", html)
         self.assertIn("PERFORMANCE PATH: PASS", html)
+
+
+class TestTheREALHelperOnRealModels(unittest.TestCase):
+    """Sol's `122` blocker 5: nothing invoked the determination creator at all.
+    The presentation tests above build the reason dictionary BY HAND, so they
+    pin the rendering and say nothing about whether the helper produces it.
+
+    These drive `_mark_informational_if_multi_energy` on models built here,
+    and cover the distinction `122` blocker 3 was about: a hydronic plant
+    carrying both fuels raises the boiler-cardinality question, and a mixed
+    group with no such plant must NOT.
+    """
+
+    @staticmethod
+    def _model(plant_fuels, *, with_plant=True):
+        import openstudio
+
+        m = openstudio.model.Model()
+        zone = openstudio.model.ThermalZone(m)
+        zone.setName("Zone 1")
+        if not with_plant:
+            return m
+        loop = openstudio.model.PlantLoop(m)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        loop.setLoadDistributionScheme("SequentialLoad")
+        for i, fuel in enumerate(plant_fuels):
+            b = openstudio.model.BoilerHotWater(m)
+            b.setName(f"{'Primary' if i == 0 else 'Secondary'} Boiler")
+            b.setFuelType(fuel)
+            b.setNominalCapacity(52_000.0)
+            loop.addSupplyBranchForComponent(b)
+        coil = openstudio.model.CoilHeatingWaterBaseboard(m)
+        bb = openstudio.model.ZoneHVACBaseboardConvectiveWater(
+            m, m.alwaysOnDiscreteSchedule(), coil)
+        bb.addToThermalZone(zone)
+        loop.addDemandBranchForComponent(coil)
+        return m
+
+    def _run_helper(self, model):
+        from btap.audit import AuditLog
+        from btap.codes import resolve
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.proposed = model
+        run.report = {}
+        run.ruleset = resolve("necb2020")
+        audit = AuditLog()
+        necb_path._mark_informational_if_multi_energy(run, audit)
+        return run.report, audit
+
+    @needs_sdk
+    def test_a_HYDRONIC_dual_fuel_plant_raises_the_boiler_question(self):
+        report, audit = self._run_helper(
+            self._model(("NaturalGas", "Electricity")))
+        self.assertEqual("conditional", report["compliance_determination"])
+        reason = report["compliance_determination_reason"]
+        self.assertEqual(["Hot Water Loop"], reason["hydronic_serving_systems"])
+        self.assertEqual(["AHJ-1", "AHJ-3"], reason["ahj_ids"])
+        joined = " ".join(reason["ahj_must_approve"])
+        self.assertIn("ALTERNATIVE SOLUTION", joined)
+        self.assertIn("REPRESENTED", joined, "the cardinality question applies")
+        warned = [e for e in audit.entries
+                  if "INFORMATIONAL AND CONDITIONAL" in str(e.get("action"))]
+        self.assertEqual(1, len(warned))
+
+    @needs_sdk
+    def test_a_SINGLE_fuel_plant_is_not_conditional_at_all(self):
+        report, audit = self._run_helper(self._model(("NaturalGas",)))
+        self.assertEqual("code", report["compliance_determination"])
+        self.assertNotIn("compliance_determination_reason", report)
+        self.assertEqual([], [e for e in audit.entries
+                              if "CONDITIONAL" in str(e.get("action"))])
+
+    @needs_sdk
+    def test_the_prose_asserts_NOTHING_about_the_reference_equipment(self):
+        """`122` blocker 1: the reason used to say "the reference elects ONE
+        energy type", which is false for outcomes already reproduced."""
+        report, _audit = self._run_helper(
+            self._model(("NaturalGas", "Electricity")))
+        why = report["compliance_determination_reason"]["why"]
+        self.assertIn("not established by this tool", why)
+        for overclaim in ("elects ONE energy type", "no single-fuel basis"):
+            self.assertNotIn(overclaim, why)
+
+    def test_a_NON_hydronic_mixed_group_omits_the_boiler_question(self):
+        """`122` blocker 3: a bare dual-fuel group with no plant carrying its
+        fuels was handed the boiler-cardinality question anyway. Driven
+        through the selector rather than a built model, because the shape is
+        a group whose fuels no single plant covers."""
+        facts = {"zone_groups": [_group(["Z1"],
+                                        ["NaturalGas", "Electricity"])],
+                 "plants": [], "purchased_energy": {}}
+        self.assertEqual(
+            [], reference.multi_energy_serving_systems(facts,
+                                                       hydronic_only=True),
+            "no plant carries both fuels, so no boiler question arises")
+        self.assertEqual(
+            1, len(reference.multi_energy_serving_systems(facts)),
+            "but the ratio question still applies to the group")
 
 
 if __name__ == "__main__":

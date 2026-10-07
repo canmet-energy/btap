@@ -411,46 +411,66 @@ def _mark_informational_if_multi_energy(run, audit):
     article = f"{prefix}.9.(5)"
     names = list(groups)
     six = f"{prefix}.9.(6)"
+    # Only the systems a BOILER question can reach. Sentence (6) governs
+    # "where a hydronic system is modeled", so a mixed group with no plant
+    # carrying its fuels raises the ratio question but NOT the cardinality
+    # one (Sol, `122`.3).
+    hydronic = _hvac_reference.multi_energy_serving_systems(
+        facts, hydronic_only=True)
     run.report["compliance_determination"] = "conditional"
-    run.report["compliance_determination_reason"] = {
+    reason = {
         "article": article,
+        # NOTHING about the reference's final equipment is asserted here. The
+        # previous wording said "the reference elects ONE energy type", which
+        # is false for outcomes already reproduced: an equal role-labelled
+        # pair can survive 50/50, generic boilers can remain unstaged, and a
+        # selected variant can remove the plant entirely. That was the SIXTH
+        # instance of this overclaim, and I put it here while removing it from
+        # the disclosure (Sol, `122`.1).
         "why": (f"the proposed heating system uses MORE THAN ONE ENERGY TYPE "
                 f"on {len(groups)} serving system(s), and {article}'s "
                 f"capacity-ratio requirement is neither computed nor "
-                f"enforced: the reference elects ONE energy type, and no "
-                f"single-fuel basis satisfies clause (a). The comparison is "
-                f"INFORMATIONAL and is NOT a Code-compliance determination."),
+                f"enforced. What the reference's final heating equipment "
+                f"carries is not established by this tool, so the comparison "
+                f"is INFORMATIONAL and is NOT a Code-compliance "
+                f"determination."),
         "serving_systems": names,
-        # phylroy's decision: informational AND conditional. Where the
-        # acceptable-solution text does not resolve the representation, the
-        # authority having jurisdiction must accept the interpretation before
-        # this result can support compliance, and the report must SAY so
-        # rather than leave the reader to infer it.
+        "hydronic_serving_systems": hydronic,
+        # phylroy's decision: informational AND conditional. The report must
+        # SAY what an authority has to accept rather than leave it to be
+        # inferred.
         "condition": "approval by the authority having jurisdiction",
-        "ahj_must_approve": [
-            (f"how {article}'s multi-energy capacity allocation is to be "
-             f"REPRESENTED when {six} bands the reference plant's boiler "
-             f"count and each simulation boiler object carries ONE fixed "
-             f"fuel. The acceptable-solution text does not resolve this, so "
-             f"it is an interpretation an authority must accept, not a "
-             f"calculation this tool can make."),
-            (f"whether the single reference energy type this tool elected may "
-             f"stand in for the proposed allocation at all, given that "
-             f"{article} clause (a) requires the capacities to match the "
-             f"proposed ratio and clause (b) requires the proposed operating "
-             f"priority."),
-        ],
         "if_not_approved": (
             "the comparison does not establish compliance and no verdict "
             "from it may be submitted as a determination"),
-        # The register entry this condition belongs to. Cited so the runtime
-        # and the tracked register cannot drift apart:
-        # `test_ahj_register.py` fails if an id emitted here is missing from
-        # the file, which is what makes the register a record rather than a
-        # claim that one exists.
         "ahj_ids": ["AHJ-1"],
         "ahj_register": "docs/NECB_AHJ_QUESTIONS.md",
     }
+    # The capacity ratio itself is NOT an ambiguity: (5)(a) says the
+    # capacities "shall match the ratio". A single-fuel reference is a
+    # NON-CONFORMING substitution an authority could accept only as an
+    # explicitly identified alternative solution, never as an unresolved
+    # reading of the acceptable solution. Stating it as a question was Sol's
+    # `122`.2 blocker.
+    approve = [
+        (f"an ALTERNATIVE SOLUTION: {article} clause (a) requires the "
+         f"reference heating capacities to MATCH THE RATIO of the proposed "
+         f"capacity allocation, and clause (b) requires the proposed "
+         f"operating priority. This tool satisfies neither. Accepting this "
+         f"comparison means accepting a non-conforming modelling "
+         f"substitution, identified as such — not resolving an ambiguity."),
+    ]
+    if hydronic:
+        approve.append(
+            f"how {article}'s capacity allocation is to be REPRESENTED on a "
+            f"hydronic plant, where {six} bands the reference plant's boiler "
+            f"count and each simulation boiler object carries ONE fixed fuel. "
+            f"The acceptable-solution text does not resolve that, so it is an "
+            f"interpretation an authority must accept. Applies to: "
+            + ", ".join(hydronic))
+        reason["ahj_ids"] = ["AHJ-1", "AHJ-3"]
+    reason["ahj_must_approve"] = approve
+    run.report["compliance_determination_reason"] = reason
     audit.warn("compliance",
                "INFORMATIONAL AND CONDITIONAL: this comparison is NOT a "
                f"Code-compliance determination. {article} governs the "

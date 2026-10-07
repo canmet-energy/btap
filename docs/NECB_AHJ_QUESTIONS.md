@@ -1,34 +1,53 @@
 # NECB interpretations referred to an authority having jurisdiction
 
 **AUTHORED, not generated.** One entry per Code question this implementation
-cannot answer from the acceptable-solution text. Each entry says what is
-ambiguous, who established that, what the tool does in the meantime, and
-where a reader meets it at runtime.
+cannot answer from the acceptable-solution text, plus the closed and
+tool-side dispositions that were considered and rejected as referrals — kept
+so the register shows its own reasoning rather than only its conclusions.
 
 phylroy's standing direction (2026-10-07): where Claude, Sol and Fable cannot
 reach a solution *after real effort*, the tool emits a conditional result
 naming the AHJ approval required rather than stalling the work. Questions
 needing deeper thought by the NECB committees go to the AHJ by this route.
-This file is the register that direction assumed existed; it did not, and
-these entries were recovered from `.reviews/` correspondence, which is
+This file is the register that direction assumed existed; it did not, and the
+first entries were recovered from `.reviews/` correspondence, which is
 gitignored and therefore not a record.
 
-A runtime condition is NOT a substitute for implementing a requirement that
-*can* be implemented. An entry belongs here only when the acceptable-solution
-text does not decide the question.
+## What each status means
 
-| id | article | status | surfaced at runtime |
+A `referral` is ONLY for a question the acceptable-solution text does not
+decide. Three other statuses exist so that settled and fixable things cannot
+sit in the active set and make it look larger than it is — Sol's `122`
+blocker 4 found exactly that, with two of the first six entries violating the
+contract this file had just stated:
+
+| status | meaning | sets a run conditional? |
+| --- | --- | --- |
+| `referral` | the text does not decide it; an authority must | yes, where it is reachable |
+| `alternative-solution` | the text DOES decide it and we do not comply; an authority can accept it only as an explicitly identified non-conforming substitution | yes |
+| `ruled` | settled against normative text; no authority needed | no |
+| `tool-gap` | implementable; a defect to close, NOT an interpretation | no |
+
+Calling a tool gap a referral would launder a defect as an ambiguity. Sol
+listed twelve decisions in `122` that are tool or data gaps for exactly that
+reason, including D-92's variable-speed reference pumps, which are a plain
+nonconformity with 8.4.x.9.(6)(e).
+
+| id | article | status | sets a run conditional |
 | --- | --- | --- | --- |
-| AHJ-1 | 8.4.4.9.(5) / 8.4.5.9.(5) with (6) | open | `compliance_determination: conditional` |
-| AHJ-2 | 8.4.4.9.(5) vs 8.4.4.13 for a heat-pump group | narrowed, open | the (5) disclosure on an ASHP group |
-| AHJ-3 | 8.4.4.9.(6)(d) boiler cardinality | open | the (6) coverage gap |
-| AHJ-4 | 8.4.2.2.(5) backup-equipment exclusion | ruled, no referral needed | — |
-| AHJ-5 | water-loop heat-pump source boiler as an "energy type" | open, unreferred | nothing yet |
-| AHJ-6 | 8.4.4.9.(4) oil and propane to a gas reference | open | the (4) coverage gap |
+| AHJ-1 | 8.4.x.9.(5)(a)/(b) | alternative-solution | yes — `compliance_determination: conditional` |
+| AHJ-2 | 8.4.x.9.(5) vs 8.4.x.13 | referral | not yet (see the entry) |
+| AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | yes, where a hydronic plant carries both fuels |
+| AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | no |
+| AHJ-5 | WSHP source boiler as an "energy type" | referral | **no — and that is a hole, see the entry** |
+| AHJ-6 | 8.4.x.9.(4) oil/propane to a gas reference | tool-gap | no |
+| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | **no — see the entry; phylroy's call** |
+| AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | no |
+| AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | no |
 
 ---
 
-## AHJ-1 — how a multi-energy capacity allocation may be REPRESENTED
+## AHJ-1 — a single-fuel reference is a NON-CONFORMING substitution
 
 **Article.** 8.4.4.9.(5) with 8.4.4.9.(6); 8.4.5.9.(5) with 8.4.5.9.(6).
 
@@ -53,10 +72,22 @@ satisfies neither clause, and says so: an UNRESOLVED audit warning per
 serving system, `8.4.x.9.(5)` held at `not_implemented`, and the run's
 determination set to `conditional` naming this question.
 
-**Not a candidate for a tool-side fix.** Sol ruled that no single-fuel basis —
-fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant —
-satisfies (5)(a). A capacity-dominant election was built, measured and
-abandoned for that reason (`118`).
+**Status: `alternative-solution`, not `referral`.** Sol's `122` corrected my
+framing: (5)(a) says the capacities "shall match the ratio", so whether one
+elected fuel may stand in is NOT an open reading — the text decides it, and
+this tool does not comply. An authority can accept the comparison only as an
+explicitly identified non-conforming modelling substitution. The runtime
+condition says exactly that.
+
+What remains a genuine `referral` is the narrower question in AHJ-3: how a
+two-fuel ratio may be REPRESENTED on a hydronic plant given (6)'s cardinality
+bands. That one the text does not resolve.
+
+**Not a candidate for a tool-side fix of the election.** Sol ruled that no
+single-fuel basis — fossil-first cascade, capacity-dominant, lead-fuel or
+annual-dominant — satisfies (5)(a). A capacity-dominant election was built,
+measured and abandoned for that reason (`118`). Computing the ratio and
+verifying it IS tool-side work and is not excused by this entry.
 
 ## AHJ-2 — whether 8.4.4.13 displaces (5) for a heat-pump group
 
@@ -99,6 +130,8 @@ applicable subclause is not established at selection time and claims none.
 
 ## AHJ-4 — the 8.4.2.2.(5) backup-equipment exclusion
 
+**Status: `ruled`. Does not set a run conditional.**
+
 **Article.** 8.4.2.2.(5); 8.4.2.2.(5) in the 2025 edition.
 
 **RULED by Sol on fetched text. No referral needed.** Sol ruled on fetched text that the exclusion
@@ -125,11 +158,17 @@ text does not settle.
 **Established by.** Fable `117` O2.
 
 **What the tool does meanwhile.** NOTHING — no disclosure fires for that
-shape, because the group's own fuel list is single-valued. This entry is
-UNREFERRED: it has no runtime surface yet, and that is a gap in this register's
-coverage rather than a decision.
+shape, because the group's own fuel list is single-valued.
+
+**That is a HOLE, not a disposition.** Sol's `122`: under phylroy's standing
+direction this must either be resolved or surfaced at runtime, and listing it
+as open-but-silent contradicts the behaviour the README now documents. Until
+one or the other happens, the README's "if your building hits one, the run
+says so" is not true of this shape, and the README says so.
 
 ## AHJ-6 — oil and propane rendered as a natural-gas reference
+
+**Status: `tool-gap`, NOT a referral.** Sol's `122`: (4) says identical energy type and Division A requires the same energy sources, so this is a catalog defect to close. It is recorded here because it was raised as a referral and is not one.
 
 **Article.** 8.4.4.9.(4); 8.4.5.9.(4); with Division A's building-energy-target
 definition.
@@ -150,3 +189,179 @@ blocker 2.
 collapse is stated in its coverage gap. It does NOT currently set the run's
 determination to conditional, because the fix is implementation rather than
 interpretation.
+
+## AHJ-7 — three published chiller EIR_FT rows are arithmetically wrong
+
+**Article.** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
+
+**The ambiguity.** THE DEFECT IS IN THE PUBLISHED CODE, not in our extraction.
+Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point
+normalization, which requires EIR_FT = 1.0 at 44 °F chilled water with 85 °F
+condenser water or 95 °F condenser air:
+
+| row | coefficient | printed | evaluates to | suspected correct |
+| --- | --- | --- | --- | --- |
+| Water-cooled Scroll | d | -0.0128136 | 0.018 | -0.00128136 |
+| Water-cooled Reciprocating | b | -0.0882156 | -2.49 | -0.00882156 |
+| Air-cooled Screw | a | 0.013545636 | 0.88 | 0.13545636 (approx; fit 1.005) |
+
+All three look like a single misplaced decimal place. A rating point of 0.018
+means a chiller drawing under two per cent of its rated power, and -2.49 is
+not physically interpretable at all. The codes MCP flags this itself as a
+`known_issue`, says the rows are "transcribed faithfully from the printed
+NECB", states that "the defect is in the source publication, not this
+database", that it is identical in both editions, and advises: "Do not use the
+Water-cooled Scroll/Reciprocating or Air-cooled Screw EIR_FT rows without
+correction; verify each polynomial at its rating point before use."
+
+**Why an authority must weigh in.** Complying literally with the printed
+coefficient produces an absurd result; using the corrected coefficient departs
+from the text as published. Neither is a calculation a tool can be said to
+have got right, and the choice changes modelled chiller energy. A project
+relying on either needs its authority to accept which reading applies.
+
+**Established by.** The codes service's own errata
+(`services/codes/docs/errata-necb-chiller-eir-ft.md`), surfaced in the
+`known_issue` of the archived payload at
+`necb2020/provenance/vintage_match/8.4.5.5.-C.result.json`. Recovered into
+this register on 2026-10-07 after phylroy recalled that table errors had been
+found in an earlier session; they were recorded in provenance and in the
+vintage-match verification, but not as an AHJ-weighable question.
+
+**What the tool does meanwhile.** It ships the CORRECTED values for two of the
+three rows, and the manifest provenance records that it does so and why: "the
+water-cooled Scroll and Reciprocating rows agree only after the codes
+service's own published errata for those two rows ... so the misprint is the
+printed source's and the shipped curve already carries the corrected value".
+That is a documented deviation from the printed Code, which is the defensible
+choice and still a deviation.
+
+**VERIFIED 2026-10-07 by evaluating the shipped surfaces, not by reading the
+provenance.** Every water-cooled EIR_FT curve hits the AHRI rating point
+(44 °F leaving chilled water, 85 °F entering condenser water), in both
+editions:
+
+```
+  WaterCooled_Reciprocating_EIRFT   0.9999    printed coefficient gives -2.49
+  WaterCooled_Scroll_EIRFT          0.9983    printed coefficient gives  0.018
+  WaterCooled_Screw_EIRFT           0.9964
+  WaterCooled_Centrifugal_EIRFT     0.9953
+```
+
+So the corrections are genuinely in the product data, and the two rows the
+erratum names would be unusable without them.
+
+**The Air-cooled Screw row does not reach us, because NO air-cooled chiller
+curve is shipped at all** — which answers the erratum and exposes something
+else. `efficiencies.json` carries 19 `WaterCooled` chiller rows and ONE
+`AirCooled` row, and that row has `compressor_type: null` and `eirft: null`.
+Curves are applied from the row (`setElectricInputToCoolingOutputRatio
+FunctionOfTemperature`), so an air-cooled reference chiller keeps the
+**OpenStudio default** performance curve rather than a Table 8.4.5.5.-C one.
+Every curve reference that IS present resolves to a shipped curve — 0
+dangling of 60 checked — so this is an absence, not a broken link.
+
+That matters because 8.4.x.6.(2) represents purchased cooling with an
+air-cooled electric chiller, and 8.4.x.10.(6)(f) governs reference chiller
+type. Carrying the air-cooled rows is a `tool-gap` to close, and the Screw row
+among them is the one the erratum affects — so closing it requires adopting
+the correction deliberately.
+
+**STILL OPEN, and phylroy's call.** The deviation sets no run conditional, so a
+building with a water-cooled scroll or reciprocating chiller is modelled on
+corrected coefficients with nothing in its report saying so. Same shape of
+hole as AHJ-5.
+
+## AHJ-8 — Table 4.2.1.6's A and B control marks are not carried at all
+
+**Article.** Table 4.2.1.6 and its Note (1), both editions.
+
+**Status: `tool-gap`, NOT a referral.** The Code is clear; we do not carry what
+it requires. Recorded here because the codes service warned about exactly this
+consumer shape and nothing in this repository had picked the warning up.
+
+**What the Code requires.** Note (1) defines the nine control columns' marks:
+controls marked `X` must ALL be implemented, and **at least one `A` and at
+least one `B` must also be**. The service's `known_issue` on this table says so
+and names the consequence: "a consumer that keeps only 'X' silently drops the
+A/B group requirements (140 A and 163 B marks per edition)".
+
+**We are that consumer.** `tables/daylighting_controls_4_2_1_6.json` reduces
+the nine columns to two fields, `sidelighting` and `toplighting`, with only two
+states, and its own evidence strings name only the two cell kinds it read:
+
+```
+'required'      186   evidence: "Table 4.2.1.6 cell 'X'"
+'not_required'    12   evidence: "Table 4.2.1.6 cell '-'"
+```
+
+No `A` or `B` value appears anywhere in either edition's shipped table.
+Nothing in `btap/codes/necb/lighting/` implements an A/B group rule, and the
+data could not support it if it tried.
+
+**Established by.** The codes service's own `known_issue` on Table 4.2.1.6
+(`services/codes/docs/known-limits-necb-4.2.1.6.md`), archived at
+`necb2020/provenance/daylighting_controls_4_2_1_6.result.json`; the omission in
+our shipped data and the absence of any A/B rule in product code were verified
+here on 2026-10-07, after phylroy asked for the table errata to be surfaced.
+
+**Coverage says `implemented`.** Both editions claim `4.2.1.6.` as implemented,
+with `how` text describing only the lighting-power-density values. The article
+also carries the control columns, and the id is prefix-matched, so the claim
+reaches them. That is an overclaim of the same shape this register's first six
+entries were created for.
+
+**What the tool does meanwhile.** Nothing — and nothing warns. This is a gap to
+CLOSE, not a question for an authority: carry the A and B marks, implement
+Note (1)'s group requirement, and correct the coverage claim. Until then a
+building is not checked against a requirement the Code states plainly.
+
+**Also on this table, and lower severity.** The service flags one space-type
+label as OCR-damaged — `Class Il facility(8)` for the printed `Class II
+facility`, a capital-I followed by a lowercase-L — and two Space Category
+labels as normalised rather than verbatim. Both spellings are present in our
+shipped file. Its guidance is to match case-insensitively or normalise
+`Il` -> `II`, and to key on Space Type plus LPD when identity matters rather
+than on the synthesised category. Whether our lookups do that is unverified.
+
+## AHJ-9 — two table-structure errata with definitive guidance
+
+**Article.** Table A-8.4.3.2.(1)-G and the schedule tables behind
+`loads_rules`, both editions.
+
+**Status: `ruled`. No authority needed, and no run conditional.** Recorded so
+the register shows it considered these and why they are not referrals.
+
+**A-8.4.3.2.(1)-G's section labels are missing.** The printed schedule divides
+into blocks — Occupants, Lighting, Receptacle Equipment, Fans, Cooling System,
+Heating System, Service Water Heating — and the service's repair produced no
+column to hold the labels, so its 21 rows read as repeated Mon-Fri/Sat/Sun
+triples with nothing to distinguish one block from another. The guidance is
+definitive: rows 1-3 Occupants, 4-6 Lighting, 7-9 Receptacle Equipment, 10-12
+Fans, 13-15 Cooling System, 16-18 Heating System, 19-21 Service Water Heating,
+and every sibling table A..K carries the labels in a column. The hourly values
+are correct and in printed order.
+
+**The printed table heads both noon and midnight `12`.** Rows are served keyed
+by column label, which cannot hold a duplicate key, so the two are served as
+`12p` for noon and `12a` for midnight. Both are recovered from the raw
+extraction, not inferred.
+
+**What the tool does meanwhile.** It consumes the service's disambiguated form
+as given — `12p`/`12a` as served, and the 21 rows in printed order — and adds
+no reading instruction of its own. Nothing verifies either mapping, which is
+the risk recorded below.
+
+**Established by.** The codes service's `known_issue` on each table, archived
+at `necb2020/provenance/vintage_match/A-8.4.3.2.(1)-G.result.json` and
+`necb2020/provenance/loads_rules.result.json`. Surfaced into this register on
+2026-10-07.
+
+**Why these are not referrals.** Neither is an ambiguity in what the Code
+REQUIRES — the values and their order are known, and the service states them.
+They are reading instructions for a consumer of the data. They are recorded
+because getting either wrong would silently shift a whole schedule: mapping
+the 21 rows to the wrong blocks, or reading `12a` as noon, would move every
+hourly profile by twelve hours or attribute one block's values to another.
+**Whether our loaders honour both instructions is unverified** and is worth a
+test, which is a tool-side task rather than a question for an authority.

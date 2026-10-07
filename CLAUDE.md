@@ -156,11 +156,19 @@ which is gitignored and so was never a record of them. Entries are `AHJ-NN`,
 each stating the ambiguity, who established it, what the tool does meanwhile,
 and where a reader meets it at runtime.
 
-An entry belongs there ONLY when the text does not decide the question. A
-requirement that *can* be implemented is a gap to close, not a referral:
-AHJ-6 (oil and propane rendered as a gas reference) sits there marked as
-fixable tool-side, and AHJ-4 is recorded as ruled and explicitly NOT a
-referral, so the register never looks more complete than it is.
+Entries carry one of FOUR statuses, and only `referral` means the text does
+not decide the question. `alternative-solution` is for a requirement the text
+DOES decide and we do not meet — an authority can accept it only as an
+explicitly identified non-conforming substitution, which is what AHJ-1 is.
+`ruled` is settled and needs no authority. `tool-gap` is implementable and is
+a defect to close, not an interpretation. Calling a tool gap a referral would
+launder a defect as an ambiguity, and Sol's `122` lists twelve decisions that
+are tool or data gaps for that reason.
+
+Adding an entry means picking a status and saying whether it sets a run
+conditional. The register's own status table is the contract, and the first
+version of this section stated a one-status rule that two of its own six
+entries already broke.
 
 Where Claude, Sol and Fable cannot resolve a question after real effort,
 phylroy's direction (2026-10-07) is to emit a CONDITIONAL result naming the

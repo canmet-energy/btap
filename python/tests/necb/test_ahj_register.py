@@ -105,5 +105,50 @@ class TestEveryEntryStatesItsInterimBehaviour(unittest.TestCase):
                 f"{ident} does not say who established the ambiguity")
 
 
+class TestTheStatusTaxonomyIsHonoured(unittest.TestCase):
+    """Sol's `122` blocker 4: the register stated a one-status contract that
+    two of its own six entries broke — AHJ-4 is settled and AHJ-6 is
+    tool-fixable, neither a referral. Four statuses now exist, and these tests
+    keep each entry honest about which one it claims."""
+
+    STATUSES = {"referral", "alternative-solution", "ruled", "tool-gap"}
+
+    def _rows(self):
+        """The status table's rows, as (id, status)."""
+        out = {}
+        for line in _register_text().splitlines():
+            m = re.match(r"\|\s*(AHJ-\d+)\s*\|[^|]*\|\s*([a-z-]+)\s*\|", line)
+            if m:
+                out[m.group(1)] = m.group(2)
+        return out
+
+    def test_every_entry_has_a_row_with_a_known_status(self):
+        rows = self._rows()
+        self.assertEqual(_register_ids(), set(rows),
+                         "every entry needs a status-table row and vice versa")
+        unknown = {i: s for i, s in rows.items() if s not in self.STATUSES}
+        self.assertEqual({}, unknown, f"unknown status(es): {unknown}")
+
+    def test_the_taxonomy_itself_is_documented(self):
+        text = _register_text()
+        for status in self.STATUSES:
+            self.assertIn(f"`{status}`", text,
+                          f"{status} is used but never defined")
+
+    def test_a_tool_gap_or_ruled_entry_does_not_set_a_run_conditional(self):
+        """The whole point of the taxonomy: a defect must not be dressed as an
+        interpretation that blocks a verdict."""
+        rows = self._rows()
+        product = (PRODUCT / "codes" / "necb" / "path.py").read_text(
+            encoding="utf-8")
+        cited = set(ID_RE.findall(product))
+        for ident in cited:
+            self.assertIn(
+                rows.get(ident), {"referral", "alternative-solution"},
+                f"{ident} is cited by the conditional determination but its "
+                f"status is {rows.get(ident)!r}; only a referral or an "
+                f"alternative solution may set a run conditional")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

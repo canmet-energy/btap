@@ -252,9 +252,8 @@ Those questions are listed in
 ambiguous, who established that it is ambiguous, what this tool does in the
 meantime, and where you meet it in a run.
 
-**If your building hits one, the run says so.** The verdict is reported but
-marked as not a determination, and the report names what your authority must
-approve:
+**For most of them, the run says so.** The verdict is reported but marked as
+not a determination, and the report names what your authority must approve:
 
 ```
   *** NOT A CODE-COMPLIANT DETERMINATION ***
@@ -276,9 +275,14 @@ what follows if approval is not given.
 
 The commonest case today is a **proposed heating plant using two fuels**: the
 Code requires the reference building to carry both in the same capacity ratio,
-and how to do that when each simulated boiler has one fixed fuel is not
-resolved by the text. The exit code is unchanged for these runs — the
-qualification is in the verdict, not in the status code.
+and this tool elects one. Where the plant is hydronic there is a further
+question the text does not resolve — how a two-fuel ratio can be represented
+when each simulated boiler has one fixed fuel. The exit code is unchanged for
+these runs; the qualification is in the verdict, not the status code.
+
+**One entry does not yet surface at runtime.** The register's own status table
+says which, and marks it as a hole rather than a decision — read the register
+rather than assuming every listed question reaches you in a run.
 
 ---
 
