@@ -100,7 +100,15 @@ MULTI_ENERGY_SEAL = ("python-only:first frozen for the 8.4.x.9.(5) conditional "
 #: neither was true. The conditional verdict string and the report banner are
 #: covered by focused tests instead, which now assert the ABSENCE of the
 #: withdrawn claim and not merely the presence of the new text.
-MULTI_ENERGY_ANNUAL_SUBSET = ["11-staged-boilers-gas-lead"]
+#:
+#: Sample 09 joins it for AHJ-5. Sol's `126` ruled that a water-loop heat
+#: pump's source-loop boiler IS a second energy type, so sample 09's twelve
+#: serving groups now disclose (5) — 55 warnings became 60. Without an annual
+#: tier that disclosure never reaches the determination at all, which is the
+#: exact gap Sol's `122`.5 found for AHJ-1: the shape existed only in tiers
+#: that stop before the verdict, so the conditional had focused tests and zero
+#: frozen coverage.
+MULTI_ENERGY_ANNUAL_SUBSET = ["11-staged-boilers-gas-lead", "09-water-source-hp"]
 
 CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
