@@ -44,6 +44,13 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | **no — see the entry; phylroy's call** |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | no |
+| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | not yet |
+| AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | not yet |
+| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | not yet |
+| AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | referral | not yet |
+| AHJ-14 | boiler/furnace part-load class selection | referral | not yet |
+| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | not yet |
+| AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | not yet |
 
 ---
 
@@ -83,13 +90,19 @@ What remains a genuine `referral` is the narrower question in AHJ-3: how a
 two-fuel ratio may be REPRESENTED on a hydronic plant given (6)'s cardinality
 bands. That one the text does not resolve.
 
+**D-90 folds in here.** Sol's `122`: the primary/secondary role assignment
+that decides which fuel survives staging is part of this question, not a
+separate one. Computing the allocation, recognising roles and verifying the
+ratio remain tool-side work; only the irreconcilable equipment and cardinality
+shapes are referrals.
+
 **Not a candidate for a tool-side fix of the election.** Sol ruled that no
 single-fuel basis — fossil-first cascade, capacity-dominant, lead-fuel or
 annual-dominant — satisfies (5)(a). A capacity-dominant election was built,
 measured and abandoned for that reason (`118`). Computing the ratio and
 verifying it IS tool-side work and is not excused by this entry.
 
-## AHJ-2 — whether 8.4.4.13 displaces (5) for a heat-pump group
+## AHJ-2 — whether 8.4.4.13 displaces (5) for a heat-pump group, and what (2)(g) elects on
 
 **Article.** 8.4.4.13 and Table 8.4.4.13; 8.4.5.13 and its table; with
 8.4.x.9.(5).
@@ -107,10 +120,20 @@ authority where the two cannot both be satisfied.
 **Established by.** Sol `119`, `120`, narrowing his own earlier "expressly
 unresolved".
 
+**EXTENDED 2026-10-07 to cover D-52's own assumptions**, which Sol's `122`
+audit identified. Clause (2)(g) says "largest annual energy use" and does not
+define the energy BASIS; D-52 reads it as delivered heat. Nor does it supply a
+fallback: D-52 uses a structural fuel proxy when the heat-pump share is at or
+below the 33% proviso or when annual data are absent. Both are local choices
+the article does not make.
+
 **What the tool does meanwhile.** The (5) disclosure runs on the heat-pump
 path as well as the structural one, and says the allocation is NOT VERIFIED.
 It does not claim the auxiliary election eliminates electric reference
-heating, which was a false statement it used to make.
+heating, which was a false statement it used to make. The (2)(g) election
+itself proceeds on delivered heat, audited, and falls back to the structural
+proxy with its own audit entry — so the choice is visible per run even though
+it is not yet conditional.
 
 ## AHJ-3 — whether 8.4.4.9.(6)(d) permits more than one boiler
 
@@ -365,3 +388,123 @@ the 21 rows to the wrong blocks, or reading `12a` as noon, would move every
 hourly profile by twelve hours or attribute one block's values to another.
 **Whether our loaders honour both instructions is unverified** and is worth a
 test, which is a tool-side task rather than a question for an authority.
+
+---
+
+# Referrals from the decision-log audit
+
+Sol audited all 60 `runtime`, `data` and `runtime_unwired` decisions against
+normative text on 2026-10-07, after phylroy observed that decisions he had
+adjudicated might embed readings an authority should weigh in on. Nine needed
+referral; the other 51 are text-settled, modelling mechanics, historical
+record, or outside NECB interpretation. **Twelve were explicitly rejected as
+referrals and named as tool or data gaps** — D-05, D-14, D-22, D-35, D-41,
+D-47, D-48, D-49, D-50, D-57, D-92 and AHJ-6 — because calling a defect an
+ambiguity would launder it.
+
+**None of these sets a run conditional yet.** Each is disclosed in its own
+decision and audit entries, and wiring them into the conditional determination
+is follow-on work with its own freeze. Listing them as `not yet` is the honest
+state, the same treatment AHJ-5 gets.
+
+## AHJ-10 — how corner thermal blocks are grouped
+
+**Article.** Table 8.4.x.7.-B, Note (3).
+
+**The ambiguity.** The note says only that blocks are "grouped together based
+on facade orientation". D-18 assigns a corner block by largest exterior-wall
+area, with a north/east/south/west tie-break. Neither the metric nor the
+tie-break is in the text.
+
+**Established by.** Sol `122`, decision-log audit.
+
+**What the tool does meanwhile.** It applies D-18's rule and audits the
+assignment, so a reviewer can see which facade a corner block was given.
+
+## AHJ-11 — heating in a two-pipe System 5 reference
+
+**Article.** 8.4.x.1.(5) with Table 8.4.x.7.-B, System 5.
+
+**The ambiguity.** A genuine internal tension in the Code, not just in our
+reading: sentence (5) requires identical heating presence between proposed and
+reference, while the table's System 5 row says heating "None". D-39 retains
+heating when the proposed block is heated.
+
+**Established by.** Sol `122`, who called it a genuine internal tension.
+
+**What the tool does meanwhile.** It follows (5) and retains the heating,
+audited against both the sentence and the table row.
+
+## AHJ-12 — "where present" humidification
+
+**Article.** Table 8.4.x.7.-B, Note (1).
+
+**The ambiguity.** D-55 reads "where present" as requiring reference
+humidification wherever the PROPOSED has it. Sol reads the note as fixing the
+energy source only for humidification already present in the REFERENCE — a
+materially different scope.
+
+**Established by.** Sol `122`.
+
+**What the tool does meanwhile.** It applies D-55's reading, which adds
+reference humidification the other reading would not.
+
+## AHJ-13 — Path A or Path B for chiller efficiency
+
+**Article.** Table 5.2.12.1.-K.
+
+**The ambiguity.** The table supplies both Path A and Path B and elects
+neither for the reference model. D-59 elects Path B and treats full-load COP
+plus the reference curves as its IPLV realisation.
+
+**Established by.** Sol `122`.
+
+**What the tool does meanwhile.** It applies Path B, recorded in D-59.
+
+## AHJ-14 — which part-load class a reference boiler or furnace takes
+
+**Article.** 8.4.x.2/.3 and Tables 5.2.12.1.-N/-O.
+
+**The ambiguity.** The Code supplies multiple part-load classes and the
+efficiency tables do not select one for the reference. D-89 assumes ordinary
+boilers non-condensing and furnaces atmospheric, from LEGACY PRECEDENT rather
+than from the text — and the pinned gem has already been caught shipping the
+non-condensing curve on every boiler row, so the precedent is weak evidence.
+
+**Established by.** Sol `122`, who added one caution: keep the
+purchased-energy case separate, because 8.4.x.6 explicitly specifies a
+MODULATING boiler, so there the Code does elect.
+
+**What the tool does meanwhile.** It applies D-89's classes, and the purchased
+route separately applies the modulating class the article names (D-89's own
+scope note).
+
+## AHJ-15 — whether (3) governs dispatch priority at all
+
+**Article.** 8.4.x.9.(3) with 8.4.2.10.(2).
+
+**The ambiguity.** Sentence (3) specifies terminal and plant CAPACITY, not an
+annual dispatch sequence. D-91 selects air-terminal-first dispatch. Other
+viable sequences move reference energy by about **48 MWh per year**, which
+makes this the largest single unreferred assumption the audit found.
+
+**Established by.** Sol `122`. D-91 remains the interim project ruling.
+
+**What the tool does meanwhile.** It dispatches air-terminal-first per D-91
+and audits it. The magnitude is why this entry exists rather than sitting in
+the decision log alone.
+
+## AHJ-16 — N:1 system correspondence for hydronic pumps
+
+**Article.** 8.4.x.14 and its Appendix A note.
+
+**The ambiguity.** The note explains multiple pumps WITHIN one proposed
+system. It does not address several proposed hydronic systems corresponding to
+one grouped reference system, nor the case where no unique correspondence
+exists. D-93 and D-97 decline in those cases and retain a simulator default.
+
+**Established by.** Sol `122`, as one combined referral for both decisions.
+
+**What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
+unresolved warning per affected loop and leaving the simulator default in
+place — which is the conservative behaviour and still not a Code reading.
