@@ -51,7 +51,7 @@ Licensed **GPL-3.0-or-later** — see [LICENSE](LICENSE).
 | understand what it decided and why | [Reading the results](#reading-the-results) |
 | know which code articles are covered | [What is implemented](#what-is-implemented) |
 | know where it makes a judgement call | [Decisions and assumptions](#decisions-and-assumptions) |
-| know which readings **your authority** must approve | [Interpretations an authority must approve](#interpretations-an-authority-must-approve) |
+| know which readings **your authority** must approve | [Questions this tool does not decide](#questions-this-tool-does-not-decide) |
 | know what it does **not** do | [Known limits](#known-limits) |
 | work on the code itself | [docs/DEVELOPERS.md](docs/DEVELOPERS.md) |
 
@@ -241,16 +241,28 @@ affected this building, not all 98.
 
 ---
 
-## Interpretations an authority must approve
+## Questions this tool does not decide
 
-Some questions the Code does not answer. Where the acceptable-solution text does
-not settle how a requirement is to be modelled, no tool can decide it — an
-**authority having jurisdiction** has to accept the interpretation.
+Some questions the Code does not answer, and some it answers in a way this
+tool does not yet meet. Neither is ours to settle, so both are written down
+rather than resolved quietly.
 
-Those questions are listed in
-**[NECB_AHJ_QUESTIONS.md](docs/NECB_AHJ_QUESTIONS.md)**. Each entry says what is
-ambiguous, who established that it is ambiguous, what this tool does in the
-meantime, and where you meet it in a run.
+They are listed in
+**[NECB_AHJ_QUESTIONS.md](docs/NECB_AHJ_QUESTIONS.md)**, each entry naming
+what the question is, who established it, what this tool does in the meantime,
+and where you meet it in a run. Entries carry one of FOUR statuses, and only
+the first two need an **authority having jurisdiction**:
+
+| status | what it means |
+|---|---|
+| `referral` | the acceptable-solution text does not decide the question, so no tool can |
+| `alternative-solution` | the text DOES decide it and this tool does not comply; an authority can accept that only as an explicitly identified non-conforming substitution |
+| `ruled` | settled against the text; no authority needed |
+| `tool-gap` | implementable, so it is a defect to close — never an interpretation |
+
+That distinction is the point of the register. Calling a tool gap an
+ambiguity would launder a defect as a question for someone else, and twelve
+decisions Sol audited were rejected as referrals for exactly that reason.
 
 **Two of them change what a run reports: AHJ-1 and AHJ-3.** Where they apply,
 the verdict is still reported, marked as not a determination, and the report

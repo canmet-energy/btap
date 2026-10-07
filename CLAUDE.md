@@ -198,10 +198,12 @@ both in the decision and the provenance entry. When they disagree, the
 Code wins and the gem's version is recorded as a finding, not adopted;
 `docs/NECB_VINTAGE_MATCH.md` is the pattern.
 
-## Interpretations referred to an authority
+## Questions referred to an authority
 
-`docs/NECB_AHJ_QUESTIONS.md` is the AUTHORED register of Code questions the
-acceptable-solution text does not answer. It is tracked, unlike `.reviews/`,
+`docs/NECB_AHJ_QUESTIONS.md` is the AUTHORED register of questions this tool
+does not decide. NOT all of them are ambiguities, which is why the heading no
+longer says "interpretations": two of the four statuses need no authority at
+all. It is tracked, unlike `.reviews/`,
 which is gitignored and so was never a record of them. Entries are `AHJ-NN`,
 each stating the ambiguity, who established it, what the tool does meanwhile,
 and where a reader meets it at runtime.

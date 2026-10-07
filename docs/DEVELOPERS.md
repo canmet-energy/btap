@@ -177,18 +177,28 @@ Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 
-## AHJ referrals
+## The AHJ register
 
 `docs/NECB_AHJ_QUESTIONS.md` is AUTHORED, not generated — unlike
 `docs/necb_decisions.md` and `NECB_COVERAGE.md`, nothing regenerates it, so
 edit it directly and keep its entries in id order.
 
-It records the Code questions the acceptable-solution text does not answer.
-A runtime condition must cite its entry (`ahj_ids` in
-`path.py`'s determination reason), and `tests/necb/test_ahj_register.py` fails
-if the citation does not resolve, if the file stops being tracked, or if an
-entry omits its article, who established the ambiguity, or what the tool does
-in the meantime. Those properties are the difference between a register and a
+It records questions this tool does not decide, and NOT all of them are
+ambiguities. Entries carry one of four statuses — `referral`,
+`alternative-solution`, `ruled`, `tool-gap` — and only the first two may set a
+run conditional. The register's own status table is the contract; calling a
+tool gap a referral would launder a defect as somebody else's question, which
+is why twelve decisions Sol audited were explicitly rejected as referrals.
+
+A runtime condition must cite its entry (`ahj_ids` in `path.py`'s
+determination reason), and `tests/necb/test_ahj_register.py` fails if the
+citation does not resolve, if the file stops being tracked, if an entry omits
+its article, who established it, or what the tool does in the meantime, if an
+entry's own body declares a status its table row does not, or if the README's
+claim about which entries change a run disagrees with the table. That last
+pair exists because a status carried only in the table let one entry hold a
+referral and a tool gap at once, and because the README quoted a verdict block
+the CLI had stopped emitting. Those properties are the difference between a register and a
 pile of correspondence: the `.reviews/` trail held the same questions for
 weeks and was gitignored, so none of it was a record.
 
