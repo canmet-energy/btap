@@ -1092,9 +1092,9 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 implemented: reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g))",
+  "action": "Heating System \u2014 partial. Applied: reference heating energy type modeled identical to the proposed, for a SINGLE-energy heating system (structural election; see also 8.4.5.13.(2)(g)). Gaps: the sentence opens \\u201cExcept as provided in Sentence (5)\\u201d, so it does NOT govern a group whose proposed heating system uses more than one energy type \u2014 ruled on fetched normative text. For such a group the structural election is a SURROGATE for the unimplemented 8.4.5.9.(5), not an application of (4): no single-fuel basis \u2014 fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant \u2014 satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system and is not claimed as implemented here.",
   "inputs": {
-   "status": "implemented",
+   "status": "partial",
    "decisions_citing": 15,
    "code": [
     "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
@@ -1102,7 +1102,7 @@
   },
   "article": "8.4.5.9.(4)",
   "building": "reference building",
-  "level": "info"
+  "level": "warning"
  },
  {
   "step": "coverage",
@@ -1117,7 +1117,7 @@
  },
  {
   "step": "coverage",
-  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: the reference ADOPTS the proposed hot-water plant, so its device count and fuels are the proposed plant's \u2014 any number of boilers, not one per energy type. Sentence (6) bands the boiler count by the reference plant capacity, and no subclause is claimed at selection time because that capacity does not exist yet. What the implementation DOES do is set the plant's live capacity after sizing by primary/secondary ROLE \u2014 resolved from the builder feature, then the device name, then supply order \u2014 and BLIND to energy type: a secondary below the single-boiler threshold is driven to ~0 W. Three consequences are unverified against the Article. (i) The proposed installed allocation is NOT carried into the annual reference; it collapses onto whichever device holds the primary role, so 8.4.5.9.(5)(a) is not preserved by retaining the devices. (ii) Where the primary role falls on a device whose fuel is not the elected reference energy type, the surviving capacity is the rejected fuel. (iii) A plant with more than two heating devices has roles for only two, so the rest keep full capacity and more than one device can remain live below the single-boiler threshold. NO ANNUAL MEASUREMENT HAS BEEN TAKEN FOR THIS EDITION. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n.",
+  "action": "Heating System \u2014 partial. Applied: hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset \u2014 plant defaults + the efficiency pass. Gaps: sentence (6) bands the reference plant's boiler count and staging by its heating capacity, and the reference plant is NOT determined at selection time: it may be the adopted proposed plant, or may not exist at all where the selected variant needs no boiler. What the implementation does after sizing is set the plant's live capacity by primary/secondary ROLE \u2014 builder feature, then device name, then supply order \u2014 and BLIND to energy type. MEASURED outcomes, each on its own configuration and none generalised: two role-labelled 200 kW boilers in the two-boiler band become 100/100 kW, so an equal ratio IS preserved; a recognised secondary below the single-boiler threshold is driven to ~0 W, so there the allocation is not preserved and the surviving fuel need not be the elected one; and three generically-named 52 kW boilers keep 52/52/52, because the role resolver returns nothing unless there are exactly TWO boilers \u2014 such a plant has ZERO recognised roles, not two. Which outcome applies, and therefore whether 8.4.5.9.(5)(a) survives, is unverified against the Article. NO ANNUAL MEASUREMENT HAS BEEN TAKEN FOR THIS EDITION. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n.",
   "inputs": {
    "status": "partial",
    "decisions_citing": 15,
