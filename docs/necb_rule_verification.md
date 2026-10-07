@@ -98,12 +98,17 @@ hostile tests must not flag them:
   proposed (8.4.x.9.(4)) — but ONLY for a single-energy system whose energy
   source the catalog preserves. This exemption was written unqualified, which
   told a test author not to flag two things a hostile test SHOULD flag:
-  - a proposed oil or propane system becomes a GAS reference.
-    `_reference_energy_type` elects by a cascade that returns `'gas'` for ANY
-    fossil fuel it recognises — `re.search(r'gas|oil|propane', fuel)` — so the
-    catalog variant is the same for all three. (4) says "identical" energy
-    type and Division A requires the same energy sources for the same
-    functions, so that is a tool gap, AHJ-6, not an exemption.
+  - a proposed oil or propane system, whose reference may burn a DIFFERENT
+    fuel. `_reference_energy_type` elects by a cascade returning `'gas'` for
+    any fossil fuel it recognises — `re.search(r'gas|oil|propane', fuel)` — so
+    all three get the gas catalog variant. **That is a SELECTION fact, and the
+    final equipment is configuration-dependent.** Measured: an oil-fired
+    hot-water plant is ADOPTED and the reference keeps `FuelOilNo2`, while a
+    hot-water-baseboard variant tears it down and builds `NaturalGas` boilers
+    from the same election. So a final-fuel mismatch is real and reportable —
+    AHJ-6, a tool gap — and the exemption must not cover it. My first version
+    of this entry said every oil building "becomes a GAS reference", which was
+    the selector's answer presented as the reference's (Sol, `125`.1).
   - a MULTI-energy system is not governed by (4) at all. (4) opens "Except as
     provided in Sentence (5)", and (5) requires the reference capacities to
     match the RATIO of the proposed allocation. That is unimplemented and

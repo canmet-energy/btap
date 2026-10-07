@@ -382,5 +382,76 @@ class TestTheREADMEQuotesRealOutput(unittest.TestCase):
                     "re-render the block rather than editing it")
 
 
+class TestTheREADMECountsMatchTheRegistry(unittest.TestCase):
+    """The README states how many decisions exist and how many are runtime.
+    Both were stale the moment D-99 landed — 98/49 against a generated 99/50
+    (Sol, `125`.5).
+
+    A number in prose is a claim, and the only way to keep one true is to
+    check it against the thing it counts.
+    """
+
+    def setUp(self):
+        import json
+
+        self.readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        raw = json.loads(
+            (REPO_ROOT / "python" / "btap" / "codes" / "data"
+             / "decisions.json").read_text(encoding="utf-8"))
+        self.rows = (raw if isinstance(raw, list)
+                     else raw.get("decisions") or list(raw.values()))
+
+    def test_the_registry_parsed(self):
+        """Guards the parse so the comparisons cannot pass vacuously."""
+        self.assertGreater(len(self.rows), 50)
+
+    def test_the_total_matches(self):
+        total = len(self.rows)
+        self.assertIn(
+            "**{} decisions**".format(total), self.readme,
+            "the README's decision total disagrees with the generated "
+            "registry, which has {}".format(total))
+        self.assertIn("not all {}.".format(total), self.readme)
+
+    def test_the_runtime_count_matches(self):
+        runtime = sum(1 for r in self.rows if r.get("kind") == "runtime")
+        self.assertIn(
+            "{} of them".format(runtime), self.readme,
+            "the README's runtime count disagrees with the generated "
+            "registry, which has {}".format(runtime))
+
+
+class TestNonReferralEntriesAreNotCalledAmbiguities(unittest.TestCase):
+    """Only a `referral` entry describes an ambiguity.
+
+    AHJ-1 is an alternative solution — the text DECIDES the requirement and
+    this tool does not meet it — and AHJ-6, AHJ-8 and AHJ-17 are tool gaps.
+    All four introduced their text as "**The ambiguity.**", recreating the
+    classification error the surrounding documents were corrected to avoid
+    (Sol, `125`.5).
+    """
+
+    def setUp(self):
+        text = REGISTER.read_text(encoding="utf-8")
+        parts = re.split(r"^## (AHJ-\d+)", text, flags=re.M)
+        self.bodies = {parts[i]: parts[i + 1]
+                       for i in range(1, len(parts), 2)}
+
+    def test_entries_were_found(self):
+        self.assertGreater(len(self.bodies), 10)
+
+    def test_only_a_referral_may_call_its_subject_an_ambiguity(self):
+        for ident, body in sorted(self.bodies.items()):
+            found = re.search(r"\*\*Status[:*\s]*`?([a-z-]+)`?", body)
+            status = found.group(1) if found else "referral"
+            if status == "referral":
+                continue
+            with self.subTest(ident, status=status):
+                self.assertNotIn(
+                    "**The ambiguity.**", body,
+                    "{} is {!r}, so its subject is not an ambiguity".format(
+                        ident, status))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

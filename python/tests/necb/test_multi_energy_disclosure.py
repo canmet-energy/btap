@@ -610,6 +610,140 @@ class TestTheStagingOutcomeIsCONDITIONAL(unittest.TestCase):
                         f"no role recognised, so nothing is stubbed; got {got}")
 
 
+@needs_sdk
+class TestTheOutcomesAreReachableInABuiltModel(unittest.TestCase):
+    """The outcome list names four possibilities; two were pinned only as
+    PROSE.
+
+    `..._lists_the_TORN_DOWN_possibility` and `..._the_REPLACED_possibility`
+    assert the entry's TEXT contains certain words. Their docstrings state
+    measured facts, but the evidence was Sol's manual probe in `121` recorded
+    in a docstring — nothing in the suite built a model and looked. Same shape
+    as asserting the HTML contains the new wording without asserting the
+    withdrawn claim is gone.
+
+    All four are now reachable in a built model: ADOPTED and REPLACED here,
+    TORN DOWN here, and the role-staging pair in
+    `TestTheStagingOutcomeIsCONDITIONAL`.
+
+    Two discriminators do NOT work, and both were tried first:
+
+    - object NAMES. The reference's boilers are called `Primary Boiler` and
+      `Secondary Boiler`, and so are the proposed's, because the builder uses
+      conventional names. Name equality cannot tell adoption from a rebuild.
+    - object HANDLES. The reference is a separate `Model`, so EVERY object has
+      a new handle by construction, whether cloned or built.
+
+    What works is a marker the builder would never produce.
+    """
+
+    MARKER = "PROPOSED MARKER"
+
+    def _mixed_proposed(self, system="Baseboard gas boiler"):
+        """A proposed model whose hot-water plant is dual-fuel, with every
+        boiler marked so adoption is visible in the reference."""
+        from .support import proposed_with_hvac
+
+        proposed = proposed_with_hvac(system)
+        boilers = sorted(proposed.getBoilerHotWaters(),
+                         key=lambda b: b.nameString())
+        if len(boilers) > 1:
+            boilers[0].setFuelType("Electricity")
+        for index, boiler in enumerate(boilers):
+            boiler.setName("{} {}".format(self.MARKER, index))
+        return proposed
+
+    def _reference_of(self, proposed):
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        audit = AuditLog()
+        result = hvac.reference_hvac(proposed, code="necb2020",
+                                     building={"storeys": 1}, audit=audit)
+        return result.model, audit
+
+    def test_the_ADOPTED_outcome_is_reachable(self):
+        """Measured on the compliance fixture with `Baseboard gas boiler` and
+        one boiler switched to Electricity: both markers survive into the
+        reference, renamed with their efficiency suffix. So the proposed plant
+        IS adopted here, and an entry claiming the plant is always rebuilt or
+        always removed would be false."""
+        proposed = self._mixed_proposed()
+        reference, _audit = self._reference_of(proposed)
+        survived = [b.nameString() for b in reference.getBoilerHotWaters()
+                    if self.MARKER in b.nameString()]
+        self.assertEqual(
+            2, len(survived),
+            "both marked boilers should survive adoption; got {}".format(
+                [b.nameString() for b in reference.getBoilerHotWaters()]))
+
+    def test_the_adopted_reference_RETAINS_BOTH_FUELS(self):
+        """The direct refutation of the claim withdrawn over eight rounds.
+
+        The SELECTION elects one energy type. On this configuration the
+        reference plant that results carries `Electricity` AND `NaturalGas` —
+        so "the reference elects ONE energy type" was false as a statement
+        about final equipment, which is why the disclosure now separates
+        selection from outcome.
+        """
+        proposed = self._mixed_proposed()
+        reference, _audit = self._reference_of(proposed)
+        fuels = {b.fuelType() for b in reference.getBoilerHotWaters()}
+        self.assertEqual(
+            {"Electricity", "NaturalGas"}, fuels,
+            "the adopted reference plant carries both proposed fuels")
+
+    def test_the_REPLACED_outcome_is_reachable(self):
+        """Sol's `121` found this outcome by hand and "adopted or absent"
+        omitted it. Pinned here: the reference holds TWO boilers and NEITHER
+        carries the marker, so the proposed plant was torn down and a
+        different one built.
+
+        What decides adoption versus replacement is the terminal type, not the
+        fuels: `Baseboard gas boiler` is adopted, while
+        `... and Hot Water Baseboard` is replaced. Measured on three variants;
+        this uses one.
+        """
+        proposed = self._mixed_proposed(
+            "PSZ RTU Electric and DX Coils and Hot Water Baseboard")
+        reference, _audit = self._reference_of(proposed)
+        boilers = list(reference.getBoilerHotWaters())
+        self.assertTrue(
+            boilers, "this variant needs a boiler, so one must be built")
+        self.assertEqual(
+            [], [b.nameString() for b in boilers
+                 if self.MARKER in b.nameString()],
+            "no proposed boiler survives, so the plant was REPLACED; if a "
+            "marker appears this configuration became 'adopted' instead")
+
+    def test_the_TORN_DOWN_outcome_is_reachable(self):
+        """A variant declaring `needs_boiler: false` leaves the reference with
+        no boiler at all. 50 shipped variants declare it; this uses one."""
+        proposed = self._mixed_proposed(
+            "PSZ RTU Electric and DX Coils and Electric Baseboard")
+        reference, _audit = self._reference_of(proposed)
+        self.assertEqual(
+            [], [b.nameString() for b in reference.getBoilerHotWaters()],
+            "this variant needs no boiler, so the reference carries none")
+
+    def test_the_variant_used_above_really_declares_needs_boiler_false(self):
+        """The control. If the catalog entry changed, the test above would
+        pass for the wrong reason — a reference with no boiler because the
+        model never had one."""
+        import json
+        import pathlib
+
+        import btap.modeling as modeling
+
+        data = json.loads(
+            (pathlib.Path(modeling.__file__).parent / "hvac" / "data"
+             / "systems.json").read_text(encoding="utf-8"))
+        free = {s.get("name") for s in data["systems"]
+                if s.get("needs_boiler") is False}
+        self.assertIn(
+            "PSZ RTU Electric and DX Coils and Electric Baseboard", free)
+
+
 class TestPurchasedEnergyDoesNotSuppressUNRELATEDGroups(_Fixture):
     """Sol's `120` blocker 4: the building-wide `purchased_energy.heating`
     flag suppressed the (5) diagnostic everywhere, so district heat on one
@@ -645,13 +779,18 @@ class TestPurchasedEnergyDoesNotSuppressUNRELATEDGroups(_Fixture):
         self.assertEqual([], warnings)
 
 
-class TestTheSINGLEEnergyElectionIsNotAlwaysIdentical(_Fixture):
-    """Sol's `121` blocker 2: my new (4) coverage said the energy type is
-    identical "for a SINGLE-energy heating system". It is not. The cascade
-    maps FuelOilNo2 and PropaneGas to the GAS catalog variant, so an
-    oil-heated proposed building gets a natural-gas reference, which (4)'s
-    "identical" and Division A's same-energy-SOURCES definition both refuse.
-    `110` had already ruled the sources stay distinct.
+class TestTheSINGLEEnergyELECTIONIsNotAlwaysIdentical(_Fixture):
+    """Sol's `121` blocker 2: my (4) coverage said the energy type is identical
+    "for a SINGLE-energy heating system". It is not — the cascade maps
+    FuelOilNo2 and PropaneGas to the GAS catalog variant.
+
+    **This class tests the SELECTION only**, and its name and assertions say
+    so. It calls `_reference_energy_type` and proves `energy == "gas"`; it
+    never builds a reference. Its earlier wording said an oil-heated building
+    "gets a natural-gas reference", which is a claim about final equipment
+    that a selector test cannot support — and Sol's `125`.1 measured it false:
+    an adopted oil plant keeps `FuelOilNo2`. The final-equipment claim is
+    tested in `TestAnOILProposedBuildingsFinalREFERENCEFuel`.
     """
 
     def _elect(self, fuel):
@@ -662,9 +801,12 @@ class TestTheSINGLEEnergyElectionIsNotAlwaysIdentical(_Fixture):
             group, self._selection(), self._facts(), self._audit())
         return energy
 
-    def test_oil_and_propane_are_NOT_identical_in_the_reference(self):
+    def test_oil_and_propane_both_ELECT_the_gas_variant(self):
+        """SELECTION, not final equipment. The catalog has no oil or propane
+        variant, so both elect gas; what the resulting reference burns is a
+        separate measurement."""
         self.assertEqual("gas", self._elect("FuelOilNo2"),
-                         "the collapse is real; the coverage must disclose it")
+                         "no oil variant exists, so the election is gas")
         self.assertEqual("gas", self._elect("PropaneGas"))
 
     def test_the_sources_the_catalog_DOES_preserve(self):
@@ -708,6 +850,54 @@ class TestTheSINGLEEnergyElectionIsNotAlwaysIdentical(_Fixture):
                              f"and propane collapse to gas")
             self.assertIn("PropaneGas", entry["gaps"])
             self.assertIn("FuelOilNo2", entry["gaps"])
+
+
+@needs_sdk
+class TestAnOILProposedBuildingsFinalREFERENCEFuel(unittest.TestCase):
+    """The selection elects `gas` for oil. The FINAL reference fuel is
+    configuration-dependent, and Sol's `125`.1 established both outcomes.
+
+    Reproduced here so the claim is a measurement rather than an inference
+    from the selector. This is the twelfth overclaim on this branch: my fix
+    for the eleventh wrote "a proposed oil system becomes a GAS reference",
+    which is the selector's answer presented as the reference's.
+    """
+
+    MARKER = "PROPOSED MARKER"
+
+    def _oil_reference(self, system):
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        from .support import proposed_with_hvac
+
+        proposed = proposed_with_hvac(system)
+        boilers = list(proposed.getBoilerHotWaters())
+        self.assertTrue(boilers, "this fixture must have a proposed boiler")
+        for index, boiler in enumerate(boilers):
+            boiler.setFuelType("FuelOilNo2")
+            boiler.setName("{} {}".format(self.MARKER, index))
+        reference = hvac.reference_hvac(
+            proposed, code="necb2020", building={"storeys": 1},
+            audit=AuditLog()).model
+        built = list(reference.getBoilerHotWaters())
+        return ({b.fuelType() for b in built},
+                sum(1 for b in built if self.MARKER in b.nameString()))
+
+    def test_an_ADOPTED_oil_plant_keeps_FuelOilNo2(self):
+        """So the reference does NOT burn gas here, and a blanket claim that
+        oil becomes a gas reference is false."""
+        fuels, kept = self._oil_reference("Baseboard gas boiler")
+        self.assertEqual(2, kept, "the plant is adopted, so markers survive")
+        self.assertEqual({"FuelOilNo2"}, fuels)
+
+    def test_a_REPLACED_plant_carries_NaturalGas_from_the_same_election(self):
+        """The opposite outcome from the same `gas` election, which is why the
+        election cannot stand in for the final fuel."""
+        fuels, kept = self._oil_reference(
+            "PSZ RTU Electric and DX Coils and Hot Water Baseboard")
+        self.assertEqual(0, kept, "the plant is replaced, so no marker remains")
+        self.assertEqual({"NaturalGas"}, fuels)
 
 
 class TestTheEditionComesFromTheManifest(unittest.TestCase):

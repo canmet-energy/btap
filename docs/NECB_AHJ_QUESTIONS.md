@@ -1,4 +1,4 @@
-# NECB interpretations referred to an authority having jurisdiction
+# NECB questions referred to an authority, and gaps recorded beside them
 
 **AUTHORED, not generated.** One entry per Code question this implementation
 cannot answer from the acceptable-solution text, plus the closed and
@@ -83,7 +83,7 @@ nonconformity with 8.4.x.9.(6)(e).
 | AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | necb2020, necb2025 | yes, where a hydronic plant carries both fuels |
 | AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
 | AHJ-5 | WSHP source boiler as an "energy type" | referral | necb2020, necb2025 | **no — and that is a hole, see the entry** |
-| AHJ-6 | 8.4.x.9.(4) oil/propane to a gas reference | tool-gap | necb2020, necb2025 | no |
+| AHJ-6 | 8.4.x.9.(4) no oil or propane catalog variant | tool-gap | necb2020, necb2025 | no |
 | AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | necb2020, necb2025 | **no — see the entry; phylroy's call** |
 | AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
 | AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
@@ -102,7 +102,7 @@ nonconformity with 8.4.x.9.(6)(e).
 
 **Article.** 8.4.4.9.(5) with 8.4.4.9.(6); 8.4.5.9.(5) with 8.4.5.9.(6).
 
-**The ambiguity.** Sentence (5)(a) requires the reference heating capacities
+**The requirement, and why we do not meet it.** Sentence (5)(a) requires the reference heating capacities
 to match the ratio of the proposed building's capacity allocation per energy
 type, and (5)(b) requires the proposed operating schedule and priority of
 use. Sentence (6) independently bands the reference hydronic plant's boiler
@@ -243,21 +243,31 @@ as open-but-silent contradicts the behaviour the README now documents. Until
 one or the other happens, the README's "if your building hits one, the run
 says so" is not true of this shape, and the README says so.
 
-## AHJ-6 — oil and propane rendered as a natural-gas reference
+## AHJ-6 — the catalog offers no oil or propane variant
 
 **Status: `tool-gap`, NOT a referral.** Sol's `122`: (4) says identical energy type and Division A requires the same energy sources, so this is a catalog defect to close. It is recorded here because it was raised as a referral and is not one.
 
 **Article.** 8.4.4.9.(4); 8.4.5.9.(4); with Division A's building-energy-target
 definition.
 
-**The ambiguity.** (4) requires the reference energy type to be modeled as
-IDENTICAL to the proposed, and Division A requires the same energy SOURCES for
-the same functions. The implementation maps `FuelOilNo2` and `PropaneGas` to
-the gas catalog variant, so an oil- or propane-heated building is compared
-against a natural-gas reference. Sol ruled the sources stay distinct and that
-this is a catalog gap, not a Code reading — so unlike AHJ-1 this one IS
-fixable tool-side by adding the catalog variants, and belongs here only until
-that is done.
+**The gap.** (4) requires the reference energy type to be modeled as IDENTICAL
+to the proposed, and Division A requires the same energy SOURCES for the same
+functions. `_reference_energy_type` elects by a cascade returning `'gas'` for
+any recognised fossil fuel, so oil and propane both get the GAS catalog
+variant — there is no oil or propane variant to get.
+
+**That is a SELECTION fact, and the final equipment is configuration-dependent**
+(Sol, `125`.1). Measured on an oil-fired proposed building: where the hot-water
+plant is ADOPTED the reference keeps `FuelOilNo2`, and where a
+hot-water-baseboard variant tears it down the reference carries `NaturalGas`.
+So a final-fuel mismatch is real but not universal, and the earlier wording —
+"an oil- or propane-heated building is compared against a natural-gas
+reference" — stated the selector's answer as the reference's.
+
+Sol ruled the sources stay distinct and that this is a catalog gap, not a Code
+reading. Unlike AHJ-1 it IS fixable tool-side by adding the variants, and
+belongs here only until that is done. Propane's final outcome has not been
+measured; only oil's has.
 
 **Established by.** Sol `110`, confirmed against fetched text in `121`
 blocker 2.

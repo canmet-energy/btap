@@ -129,11 +129,23 @@ The requirement key and its `label` ARE the cross-edition equivalence
 assertion, so the generator checks structure instead of guessing meaning, and
 PER REQUIREMENT rather than across the file — a global coverage check let one
 requirement's missing edition hide behind another that listed it. Four rules:
-a non-empty label; every edition in `editions` present in EVERY requirement;
-each Section 8.4 id existing in the edition it is listed under; and the
-per-edition lists CORRESPONDING, same sentence suffixes in each edition's
-numbering. The `unverified` holding key may not be mixed with authored
-requirements.
+a non-empty requirement KEY and label; every edition in `editions` present in
+EVERY requirement; a citation that FULLMATCHES the grammar, so nothing rides
+along before or after it; and that citation validated against the edition's
+own snapshot to the depth the snapshot carries — the article, the sentence,
+the clause scoped to ITS sentence, and a table's suffix. The `unverified`
+holding key may not be mixed with authored requirements, `editions` may not
+repeat a code id, and one requirement may not mix Section 8.4 citations with
+uncheckable ones, within an edition or across them.
+
+**Correspondence is NOT checked by numbering, deliberately.** An equal-suffix
+rule was tried and refused a correct mapping: D-89's modulating-boiler
+part-load requirement is `8.4.5.2.(3)` in NECB 2020 and `8.4.6.2.(2)` in NECB
+2025, because the 2020 article has three sentences and the 2025 article has
+two. Whether two citations are the same requirement is an authored assertion
+carried by the key and label; a second correct citation and a wrong existing
+one are not structurally distinguishable, and Sol ruled that case out of
+scope rather than admitting another heuristic.
 
 **The id grammar is `^D-\d+$`, unbounded.** `^D-\d{2}$` allowed exactly 100
 ids and D-01 through D-99 all exist, so the registry had run out; a fixed three

@@ -201,23 +201,72 @@ def normalise_citation(value: str) -> str:
     return CITATION_PREFIX_RE.sub("", str(value)).strip()
 
 
-def _article_sentences(code: str, bare: str) -> set:
-    """The sentence numbers an edition's snapshot actually shows for an article.
-
-    Empty when the cache holds no sentence structure for it, which means the
-    caller must not treat absence as evidence.
-    """
-    entry = (_article_cache(code).get(bare)
-             or _article_cache(code).get(bare + "."))
-    if not isinstance(entry, dict):
-        return set()
-    return {int(m) for m in SENTENCE_RE.findall(str(entry.get("raw") or ""))}
-
-
-#: `8.4.4.9.(5)(a)` -> ('8.4.4.9', 5). The clause letter is not validated: the
-#: snapshot's text does not carry clause structure reliably.
+#: `8.4.4.9.(5)(a)` -> ('8.4.4.9', 5, 'a', None). FULLMATCH, not a prefix
+#: match: a prefix match ignored `8.4.4.9.(5) THIS IS TRAILING JUNK` and
+#: downgraded `junk before 8.4.4.9.(5)` to unchecked scope, so arbitrary text
+#: rode along beside a real citation (Sol, `125`.3).
 CITATION_PARTS_RE = re.compile(
-    r"^(?P<bare>\d+(?:\.\d+)*)\.?(?:\((?P<sentence>\d+)\))?")
+    r"(?P<bare>\d+(?:\.\d+)*)\.?"
+    r"(?:\((?P<sentence>\d+)\))?"
+    r"(?:\((?P<clause>[a-z]+)\))?"
+    r"(?:\((?P<subclause>[ivx]+)\))?")
+
+#: A table citation: `Table 8.4.4.7.-B` -> ('8.4.4.7', 'B').
+TABLE_PARTS_RE = re.compile(
+    r"(?P<bare>\d+(?:\.\d+)*)\.?-(?P<suffix>[A-Z])")
+
+def _article_record(code: str, bare: str) -> dict:
+    cache = _article_cache(code)
+    entry = cache.get(bare) or cache.get(bare + ".")
+    return entry if isinstance(entry, dict) else {}
+
+
+def _article_sentence_map(code: str, bare: str) -> dict:
+    """``{sentence number: {clause letters}}`` from the snapshot's STRUCTURED
+    `sentences` field, not a regex over `raw`.
+
+    Scoping matters: clause letters anywhere in 8.4.x.9's text run a..i,
+    because Sentence (6) has nine clauses. Taken unscoped, `(5)(f)` would pass
+    while the Code gives Sentence (5) only clauses (a) and (b).
+    """
+    found = {}
+    for sentence in (_article_record(code, bare).get("sentences") or ()):
+        if not isinstance(sentence, dict):
+            continue
+        try:
+            number = int(sentence.get("num"))
+        except (TypeError, ValueError):
+            continue
+        letters = set()
+        for clause in (sentence.get("clauses") or ()):
+            letter = (clause.get("id") or clause.get("letter")
+                      if isinstance(clause, dict) else clause)
+            if isinstance(letter, str) and letter.strip():
+                letters.add(letter.strip().lower())
+        found[number] = letters
+    return found
+
+
+def _article_tables(code: str, bare: str) -> set:
+    """Table suffixes the snapshot shows for an article, e.g. ``{'A', 'B'}``.
+
+    Empty when the snapshot names none, and the caller must then NOT treat the
+    absence as evidence.
+    """
+    record = _article_record(code, bare)
+    found = set()
+    for key in ("tables", "table_ids", "tables_referenced"):
+        for value in (record.get(key) or ()):
+            match = TABLE_PARTS_RE.search(str(value))
+            if match:
+                found.add(match.group("suffix"))
+    haystack = str(record.get("raw") or "") + " ".join(
+        str(s.get("text") or "") for s in (record.get("sentences") or ())
+        if isinstance(s, dict))
+    for match in TABLE_PARTS_RE.finditer(haystack):
+        if match.group("bare") == bare:
+            found.add(match.group("suffix"))
+    return found
 
 
 def check_articles(name: str, meta: dict) -> None:
@@ -287,6 +336,11 @@ def check_articles(name: str, meta: dict) -> None:
         return
 
     for key, block in sorted(articles.items()):
+        if not str(key).strip():
+            raise ValueError(
+                "{}: articles has a blank requirement key — the key and its "
+                "label ARE the cross-edition equivalence assertion, so an "
+                "empty one asserts nothing".format(name))
         if not isinstance(block, dict):
             raise ValueError(
                 "{}: articles[{!r}] must be a table with a label and one list "
@@ -350,38 +404,74 @@ def check_articles(name: str, meta: dict) -> None:
                 seen.add(citation)
 
                 # RULE 3/4. Normalise the prefix, then validate the WHOLE
-                # citation against the edition's own snapshot — the article
-                # AND, where the snapshot carries sentence structure, the
-                # sentence. Validating only the bare article admitted
-                # Sentence (999) of a real article.
-                m = CITATION_PARTS_RE.match(citation)
-                bare = m.group("bare") if m else None
-                if bare is None or not bare.startswith("8.4"):
+                # citation with a FULLMATCH. A prefix match let
+                # `8.4.4.9.(5) THIS IS TRAILING JUNK` through and downgraded
+                # `junk before 8.4.4.9.(5)` to unchecked scope (Sol, `125`.3).
+                table = TABLE_PARTS_RE.fullmatch(citation)
+                parts = CITATION_PARTS_RE.fullmatch(citation)
+                if table is None and parts is None:
+                    raise ValueError(
+                        "{}: articles[{!r}][{!r}] cites {!r}, which is not a "
+                        "citation — expected an article like 8.4.4.9.(5)(a) "
+                        "or a table like 8.4.4.7.-B, with nothing before or "
+                        "after it".format(name, key, code, value))
+                bare = (table or parts).group("bare")
+                if not bare.startswith("8.4"):
                     energy_section.add(False)
                     continue
                 energy_section.add(True)
-                titles = _article_titles(code)
-                if bare not in titles:
+                if bare not in _article_titles(code):
                     raise ValueError(
                         "{}: articles[{!r}][{!r}] cites {!r}, and Section 8.4 "
                         "article {} does not exist in that edition".format(
                             name, key, code, value, bare))
-                sentence = m.group("sentence")
+
+                if table is not None:
+                    suffixes = _article_tables(code, bare)
+                    if suffixes and table.group("suffix") not in suffixes:
+                        raise ValueError(
+                            "{}: articles[{!r}][{!r}] cites {!r}, and article "
+                            "{} has tables {} in that edition".format(
+                                name, key, code, value, bare,
+                                sorted(suffixes)))
+                    continue
+
+                sentence = parts.group("sentence")
                 if sentence is None:
                     continue
-                available = _article_sentences(code, bare)
-                if available and int(sentence) not in available:
+                sentences = _article_sentence_map(code, bare)
+                if sentences and int(sentence) not in sentences:
                     raise ValueError(
                         "{}: articles[{!r}][{!r}] cites {!r}, and article {} "
                         "has sentences {} in that edition".format(
                             name, key, code, value, bare,
-                            sorted(available)))
+                            sorted(sentences)))
+                clause = parts.group("clause")
+                if clause is None:
+                    continue
+                # Scoped to the SENTENCE. 8.4.x.9's clause letters run a..i
+                # across the article because (6) has nine, so an unscoped
+                # check would admit `(5)(f)` where the Code gives (5) only
+                # clauses (a) and (b).
+                letters = sentences.get(int(sentence)) or set()
+                if letters and clause.lower() not in letters:
+                    raise ValueError(
+                        "{}: articles[{!r}][{!r}] cites {!r}, and sentence "
+                        "({}) of article {} has clauses {} in that "
+                        "edition".format(name, key, code, value, sentence,
+                                         bare, sorted(letters)))
             scopes[code] = energy_section
 
-        # RULE 6. One requirement, one validation scope. Section 8.4 on one
-        # side and an unchecked citation on the other means half the claim was
-        # verified and half was not, with nothing saying which — more
-        # misleading than refusing it.
+        # RULE 6. One requirement, one validation scope — WITHIN each edition
+        # and across them. Comparing only across editions let every edition
+        # carry the same mixed set `{8.4, other}` and pass (Sol, `125`.3).
+        for code, scope in sorted(scopes.items()):
+            if len(scope) > 1:
+                raise ValueError(
+                    "{}: articles[{!r}][{!r}] mixes validated Section 8.4 "
+                    "citations with citations this generator cannot check — a "
+                    "requirement must be verifiable in every edition it "
+                    "claims or in none".format(name, key, code))
         if len({frozenset(v) for v in scopes.values()}) > 1:
             raise ValueError(
                 "{}: articles[{!r}] mixes validated Section 8.4 citations "
@@ -487,11 +577,17 @@ def validate(name: str, meta: dict, body: str) -> None:
         raise ValueError("{}: filename does not match id {!r}".format(name, meta["id"]))
     if meta["kind"] not in KINDS:
         raise ValueError("{}: unknown kind {!r}".format(name, meta["kind"]))
-    check_articles(name, meta)
     if not isinstance(meta["editions"], list) or not meta["editions"] or not all(
             isinstance(item, str) for item in meta["editions"]):
         raise ValueError(
             "{}: editions must be a non-empty list of strings".format(name))
+    # Checked BEFORE `check_articles`, which reduces editions to a set and so
+    # erased a duplicate silently (Sol, `125`.3).
+    duplicates = sorted({item for item in meta["editions"]
+                         if meta["editions"].count(item) > 1})
+    if duplicates:
+        raise ValueError(
+            "{}: editions lists {} more than once".format(name, duplicates))
     allowed = registered_codes() | {EDITIONS_UNVERIFIED}
     unknown = sorted(set(meta["editions"]) - allowed)
     if unknown:
@@ -503,6 +599,7 @@ def validate(name: str, meta: dict, body: str) -> None:
         raise ValueError(
             "{}: editions may not mix {!r} with a code id — either it has been "
             "checked or it has not".format(name, EDITIONS_UNVERIFIED))
+    check_articles(name, meta)
     for field in ("title", "summary"):
         if not isinstance(meta[field], str) or not meta[field].strip():
             raise ValueError("{}: {} must be a non-empty string".format(name, field))

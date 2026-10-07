@@ -272,6 +272,80 @@ class TestSourceValidation(unittest.TestCase):
                          "label": "Heating system",
                          "necb2020": ["Article 8.4.999.1.(5)"]}}))
 
+    def test_a_citation_must_FULLMATCH_the_grammar(self):
+        """A prefix match ignored anything after a valid citation and
+        downgraded anything before it to unchecked scope, so arbitrary text
+        rode along beside a real citation (Sol, `125`.3)."""
+        for bad in ("8.4.4.9.(5) THIS IS TRAILING JUNK",
+                    "junk before 8.4.4.9.(5)",
+                    "not a citation"):
+            with self.subTest(bad):
+                self.rejects("which is not a citation",
+                             meta=dict(GOOD_META, articles={"heating": {
+                                 "label": "Heating system",
+                                 "necb2020": [bad]}}))
+
+    def test_a_CLAUSE_is_validated_against_ITS_OWN_sentence(self):
+        """8.4.x.9's clause letters run a..i across the article, because
+        Sentence (6) has nine. An unscoped check would admit `(5)(f)` where
+        the Code gives Sentence (5) only clauses (a) and (b)."""
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system", "necb2020": ["8.4.4.9.(5)(a)"]}}))
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system", "necb2020": ["8.4.4.9.(6)(i)"]}}))
+        for bad in ("8.4.4.9.(5)(z)", "8.4.4.9.(5)(f)"):
+            with self.subTest(bad):
+                self.rejects("has clauses",
+                             meta=dict(GOOD_META, articles={"heating": {
+                                 "label": "Heating system",
+                                 "necb2020": [bad]}}))
+
+    def test_a_TABLE_suffix_is_validated_against_the_edition(self):
+        """Only Tables -A and -B exist for the system-selection article."""
+        self.accepts(meta=dict(GOOD_META, articles={"selection": {
+            "label": "Reference system selection",
+            "necb2020": ["Table 8.4.4.7.-B"]}}))
+        self.rejects("has tables",
+                     meta=dict(GOOD_META, articles={"selection": {
+                         "label": "Reference system selection",
+                         "necb2020": ["Table 8.4.4.7.-Z"]}}))
+
+    def test_a_requirement_key_may_not_be_BLANK(self):
+        """The key and its label are the equivalence assertion, so an empty
+        key asserts nothing while looking authored.
+
+        Written as a QUOTED TOML key, which is how it reaches the validator.
+        A bare whitespace key is a TOML syntax error, so the dict path used by
+        `rejects` cannot express this case — the first version of this test
+        asserted the wrong refusal and passed for the wrong reason.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "D-99.md"
+            real = (Path(G.__file__).resolve().parents[2] / "docs"
+                    / "decisions" / "D-99.md").read_text(encoding="utf-8")
+            path.write_text(
+                real.replace("[articles.multi_energy_heating]",
+                             '[articles.""]'),
+                encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                G.parse_source(path)
+            self.assertIn("blank requirement key", str(caught.exception))
+
+    def test_an_edition_may_not_be_listed_TWICE(self):
+        """`check_articles` reduces editions to a set, so a duplicate was
+        erased silently before reaching any check."""
+        self.rejects("more than once",
+                     meta=dict(GOOD_META,
+                               editions=["necb2020", "necb2020"]))
+
+    def test_validated_and_unvalidated_scope_may_not_mix_WITHIN_an_edition(self):
+        """Comparing scope only ACROSS editions let every edition carry the
+        same mixed set and pass."""
+        self.rejects("mixes validated Section 8.4",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["8.4.4.9.(5)", "5.2.12.1.(1)"]}}))
+
     def test_a_requirement_may_not_MIX_validated_and_unvalidated_scope(self):
         """Section 8.4 on one side and an unchecked citation on the other
         means half the claim was verified and half was not, with nothing

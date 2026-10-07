@@ -226,8 +226,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **98 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 49 of them
+buried in the source. **99 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 50 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -237,15 +237,16 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 98.
+affected this building, not all 99.
 
 ---
 
 ## Questions this tool does not decide
 
 Some questions the Code does not answer, and some it answers in a way this
-tool does not yet meet. Neither is ours to settle, so both are written down
-rather than resolved quietly.
+tool does not yet meet. Neither is ours to REINTERPRET, so both are written
+down rather than resolved quietly — but a tool gap is still ours to FIX, and
+the status table below says which is which.
 
 They are listed in
 **[NECB_AHJ_QUESTIONS.md](docs/NECB_AHJ_QUESTIONS.md)**, each entry naming
@@ -293,12 +294,16 @@ names what your authority must accept:
   (NECB 2020, Division B, Article 8.4.1.2; 8.4.4.9.(5) unimplemented)
 ```
 
-**The other fifteen do not change the verdict.** They are disclosed in the
-audit log and in the decision each came from, and the register's status column
-says which: `no` where the question does not bear on a run's outcome, `not yet`
-where wiring it in is follow-on work. One of them, AHJ-5, is recorded as a
-HOLE rather than a disposition — the shape it describes produces no disclosure
-at all.
+**The other fifteen do not change the verdict, and not all of them reach you
+at all.** The register's status column says which: `no` where the question does
+not bear on a run's outcome, `not yet` where its runtime treatment is still
+being established. Read it rather than assuming a listed question surfaces.
+
+Two cautions it states against itself. **AHJ-5 produces NO disclosure** for the
+shape it describes — a hole, not a disposition. And where an entry says the
+underlying decision is audited, that means the modelling action is recorded; it
+does NOT mean the audit tells you an authority's approval is wanted, because
+only AHJ-1 and AHJ-3 are cited in product output today.
 
 The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
 REQUIRED** badge beside the pass/fail badge, so it travels with the submission.
@@ -307,14 +312,12 @@ what follows if approval is not given.
 
 The commonest case today is a **proposed heating plant using two fuels**: the
 Code requires the reference building to carry both in the same capacity ratio,
-and this tool elects one. Where the plant is hydronic there is a further
+and this tool elects one energy type at SELECTION and computes no ratio. What
+the reference ends up carrying is not established by that election. Where the
+plant is hydronic there is a further
 question the text does not resolve — how a two-fuel ratio can be represented
 when each simulated boiler has one fixed fuel. The exit code is unchanged for
 these runs; the qualification is in the verdict, not the status code.
-
-**One entry does not yet surface at runtime.** The register's own status table
-says which, and marks it as a hole rather than a decision — read the register
-rather than assuming every listed question reaches you in a run.
 
 ---
 
@@ -328,8 +331,12 @@ Stated plainly, because a compliance tool that hides these is worse than useless
 - **`--quick` is never a determination.** Article 8.4.1.2 requires a simulated
   year.
 - **Multi-energy capacity ratios (8.4.4.9.(5) / 8.4.4.10.(4)) are not
-  modelled.** A plant drawing on more than one energy source passes into the
-  reference unchanged rather than being apportioned.
+  modelled.** A plant drawing on more than one energy source is elected into
+  ONE energy type at selection, and no capacity ratio is computed. What the
+  reference's final equipment carries is a separate question the tool does not
+  establish — an adopted plant has been measured keeping BOTH proposed fuels, a
+  replaced one carries only the elected fuel, and some variants need no boiler
+  at all.
 - **No article is wholly unimplemented.** Four individual *sentences* are —
   the multi-energy capacity ratios (8.4.4.9.(5) and 8.4.4.10.(4)) and two
   supply-air fan clauses (8.4.4.18.(5)-(6)) — and each is named as its own row
