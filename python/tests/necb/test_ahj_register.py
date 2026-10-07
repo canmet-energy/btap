@@ -230,5 +230,47 @@ class TestEveryEntrySaysWhichEditionsItAffects(unittest.TestCase):
                 f"{line.strip()[:90]}")
 
 
+class TestEveryEntryDeclaresItsOwnStatus(unittest.TestCase):
+    """An entry must state its status in its OWN body, not only in the table.
+
+    AHJ-7 carried a published-table referral and a missing-curve tool gap under
+    one `referral` row, and nothing caught it, because nine of seventeen
+    bodies named no status at all — a reader of the entry could not see which
+    of the four it claimed to be. The table is still the contract; this makes
+    each entry able to contradict it visibly.
+    """
+
+    def setUp(self):
+        self.text = REGISTER.read_text(encoding="utf-8")
+        self.rows = dict(re.findall(
+            r"^\| (AHJ-\d+) \|[^|]*\| ([a-z-]+) \|", self.text, re.M))
+        parts = re.split(r"^## (AHJ-\d+)", self.text, flags=re.M)
+        self.bodies = {parts[i]: parts[i + 1]
+                       for i in range(1, len(parts), 2)}
+
+    def test_the_table_and_the_entries_name_the_same_ids(self):
+        self.assertEqual(set(self.rows), set(self.bodies))
+        self.assertTrue(self.rows, "the status table did not parse at all")
+
+    def test_each_body_declares_the_status_its_row_declares(self):
+        for ident, status in sorted(self.rows.items()):
+            with self.subTest(ident):
+                found = re.search(r"\*\*Status[:*\s]*`?([a-z-]+)`?",
+                                  self.bodies[ident])
+                self.assertIsNotNone(
+                    found, "{} states no status in its own body".format(ident))
+                self.assertEqual(
+                    status, found.group(1),
+                    "{}: the table says {!r} and the entry says {!r}".format(
+                        ident, status, found.group(1)))
+
+    def test_a_status_the_taxonomy_does_not_define_is_refused(self):
+        """The four are not decorative: only `referral` and
+        `alternative-solution` may set a run conditional."""
+        for status in self.rows.values():
+            self.assertIn(status, {"referral", "alternative-solution",
+                                   "ruled", "tool-gap"})
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

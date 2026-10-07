@@ -155,6 +155,8 @@ verifying it IS tool-side work and is not excused by this entry.
 **Article.** 8.4.4.13 and Table 8.4.4.13; 8.4.5.13 and its table; with
 8.4.x.9.(5).
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** 8.4.x.7.(4) sends heat-pump thermal blocks to Article 13
 for the reference system type. Article 13 controls the ASHP topology, its
 capacity and operating limits, the terminal/auxiliary capacity, and the
@@ -187,6 +189,8 @@ it is not yet conditional.
 
 **Article.** 8.4.4.9.(6)(d); 8.4.5.9.(6)(d).
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** (6)(b) says "one single-stage boiler" and (6)(c) says "two
 boilers of equal capacity"; (6)(d) says only "a boiler that is fully
 modulating". Sol searched for a singular/plural interpretation rule and an
@@ -218,6 +222,8 @@ possible referral and is not one.
 
 **Article.** 8.4.x.9.(5)'s trigger, "where more than one energy type is used
 by the proposed building's heating system".
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
 
 **The ambiguity.** In sample 09 `classify` types the `Heat Pump Loop` as
 hot-water with NaturalGas, while every WSHP group's heating energy types read
@@ -264,6 +270,8 @@ interpretation.
 ## AHJ-7 — three published chiller EIR_FT rows are arithmetically wrong
 
 **Article.** Table 8.4.5.5.-C (NECB 2020); Table 8.4.6.5.-C (NECB 2025).
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
 
 **The ambiguity.** THE DEFECT IS IN THE PUBLISHED CODE, not in our extraction.
 Three electric-chiller EIR_FT rows fail the AHRI 550/590 rating-point
@@ -461,6 +469,8 @@ state, the same treatment AHJ-5 gets.
 
 **Article.** Table 8.4.x.7.-B, Note (3).
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** The note says only that blocks are "grouped together based
 on facade orientation". D-18 assigns a corner block by largest exterior-wall
 area, with a north/east/south/west tie-break. Neither the metric nor the
@@ -474,6 +484,8 @@ assignment, so a reviewer can see which facade a corner block was given.
 ## AHJ-11 — heating in a two-pipe System 5 reference
 
 **Article.** 8.4.x.1.(5) with Table 8.4.x.7.-B, System 5.
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
 
 **The ambiguity.** A genuine internal tension in the Code, not just in our
 reading: sentence (5) requires identical heating presence between proposed and
@@ -489,6 +501,8 @@ audited against both the sentence and the table row.
 
 **Article.** Table 8.4.x.7.-B, Note (1).
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** D-55 reads "where present" as requiring reference
 humidification wherever the PROPOSED has it. Sol reads the note as fixing the
 energy source only for humidification already present in the REFERENCE — a
@@ -503,6 +517,8 @@ reference humidification the other reading would not.
 
 **Article.** Table 5.2.12.1.-K.
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** The table supplies both Path A and Path B and elects
 neither for the reference model. D-59 elects Path B and treats full-load COP
 plus the reference curves as its IPLV realisation.
@@ -514,6 +530,8 @@ plus the reference curves as its IPLV realisation.
 ## AHJ-14 — which part-load class a reference boiler or furnace takes
 
 **Article.** 8.4.x.2/.3 and Tables 5.2.12.1.-N/-O.
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
 
 **The ambiguity.** The Code supplies multiple part-load classes and the
 efficiency tables do not select one for the reference. D-89 assumes ordinary
@@ -533,6 +551,8 @@ scope note).
 
 **Article.** 8.4.x.9.(3) with 8.4.2.10.(2).
 
+**Status: `referral`** — the acceptable-solution text does not decide this question.
+
 **The ambiguity.** Sentence (3) specifies terminal and plant CAPACITY, not an
 annual dispatch sequence. D-91 selects air-terminal-first dispatch. Other
 viable sequences move reference energy by about **48 MWh per year**, which
@@ -547,6 +567,8 @@ the decision log alone.
 ## AHJ-16 — N:1 system correspondence for hydronic pumps
 
 **Article.** 8.4.x.14 and its Appendix A note.
+
+**Status: `referral`** — the acceptable-solution text does not decide this question.
 
 **The ambiguity.** The note explains multiple pumps WITHIN one proposed
 system. It does not address several proposed hydronic systems corresponding to
