@@ -141,7 +141,7 @@ class TestGeneratedOutputsAreInStep(unittest.TestCase):
         class is closed structurally, because every anchor is emitted outside
         every authored body.
         """
-        anchors = re.findall(r'^<a id="(d-\d{2})"></a>$', self.doc, re.MULTILINE)
+        anchors = re.findall(r'^<a id="(d-\d+)"></a>$', self.doc, re.MULTILINE)
         self.assertEqual(len(anchors), len(set(anchors)), "duplicate generated anchor")
         self.assertEqual({i.lower() for i in self.entries}, set(anchors),
                          "every decision must carry its generated anchor")

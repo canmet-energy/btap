@@ -488,7 +488,7 @@ class TestComplianceWithEngine(unittest.TestCase):
             self.assertIsNotNone(Decisions.lookup(id),
                                  f"audited ruling {id} resolves")
         self.assertRegex(Path(dir, "audit.txt").read_text(encoding="utf-8"),
-                         r"\| ruling D-\d{2}",
+                         r"\| ruling D-\d+",
                          "audit.txt narrative carries the ruling segment")
 
     def test_hp_proposed_runs_the_2g_election_machinery(self):

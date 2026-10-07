@@ -6627,5 +6627,5 @@ and `tool-gap` may not, so a defect is never dressed as an interpretation.
 
 This decision does **not** excuse the gap. Computing the allocation and
 verifying it is tool-side work, as is carrying Table 4.2.1.6's A and B control
-marks (AHJ-8) and the air-cooled chiller curves (AHJ-7). A conditional result
+marks (AHJ-8) and the air-cooled chiller curves (AHJ-17). A conditional result
 is the honest interim state, not a destination.

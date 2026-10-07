@@ -152,10 +152,13 @@ learns *why* we read the article that way.
 
 - TOP-LEVEL keyword, never inside `inputs=`; a string LITERAL; several ids as
   one space-separated string (`ruling='D-19 D-21'`), scanned as
-  `\bD-\d{2}\b`.
+  `\bD-\d+\b`, unbounded.
 - **`data/decisions.json` is GENERATED — do not edit it.** The canonical
   source is one file per decision, `docs/decisions/D-NN.md`: TOML front matter
-  (`id`, `title`, `kind`, `articles`, `summary`) plus the authored body. Edit
+  (`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
+  body. `articles` groups citations by an AUTHORED requirement key carrying a
+  `label` and one list per code id, never a flat list: the same number names a
+  different requirement in each edition. Edit
   that file, then run `python3 python/scripts/generate_decisions.py`, which
   rewrites this registry and `docs/necb_decisions.md` together in numeric id
   order. `--check` is the drift gate.

@@ -492,7 +492,15 @@ def _mark_informational_if_multi_energy(run, audit):
                target=";".join(names),
                inputs={"serving_systems": names,
                        "determination": "conditional",
-                       "condition": "AHJ approval of the interpretation"},
+                       # NOT "of the interpretation". AHJ-1 is an
+                       # alternative-solution: the capacity-ratio clause
+                       # DECIDES the requirement and this tool does not meet
+                       # it. The visible action was corrected and this
+                       # structured input was not, so the wrong word stayed in
+                       # `audit.json` and in the frozen baseline (Sol,
+                       # `124`.2).
+                       "condition": "approval by the authority having "
+                                    "jurisdiction"},
                article=article, ruling="D-99")
 
 

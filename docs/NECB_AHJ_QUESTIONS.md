@@ -118,10 +118,14 @@ nor (5) that it overrides (6).
 fetched both editions through the codes MCP; Fable reproduced the
 implementation's behaviour with code.
 
-**What the tool does meanwhile.** It elects ONE reference energy type, which
-satisfies neither clause, and says so: an UNRESOLVED audit warning per
-serving system, `8.4.x.9.(5)` held at `not_implemented`, and the run's
-determination set to `conditional` naming this question.
+**What the tool does meanwhile.** It elects ONE energy type for the reference
+SELECTION and computes no capacity ratio, so it satisfies neither clause of
+(5). What the reference's FINAL equipment carries is a separate question this
+tool does not establish — the selected variant may adopt the proposed plant,
+replace it, tear it down, or stage it by role blind to fuel. It says so: an
+UNRESOLVED audit warning per serving system, `8.4.x.9.(5)` held at
+`not_implemented`, and the run's determination set to `conditional` naming
+this question.
 
 **Status: `alternative-solution`, not `referral`.** Sol's `122` corrected my
 framing: (5)(a) says the capacities "shall match the ratio", so whether one

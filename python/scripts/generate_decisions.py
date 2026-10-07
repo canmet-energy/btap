@@ -85,7 +85,11 @@ HEADING_RE = re.compile("^## (D-\\d+) " + EM_DASH + " (.+)$")
 #: The laxer form the pre-migration document used, where D-76..D-89 carried no
 #: heading title at all. Only ``--split`` accepts it.
 SPLIT_HEADING_RE = re.compile("^## (D-\\d+)(?: " + EM_DASH + " (.+))?$")
-ANCHOR_RE = re.compile(r'^<a id="d-\d{2}"></a>$')
+#: Unbounded, like `ID_RE`. Two digits here made the generator emit an
+#: anchor it could not then RECOGNISE on the round trip, so a real D-100
+#: turned the sync gate red while the generator itself reported success
+#: (Sol, `124`.6).
+ANCHOR_RE = re.compile(r'^<a id="d-\d+"></a>$')
 
 def numeric_order(ids) -> list:
     """Decision ids in numeric id order -- the one ordering invariant."""
@@ -163,16 +167,57 @@ def _article_titles(code: str) -> dict:
     per-edition check silently pass. A check that cannot fail is worse than no
     check, so a MISSING cache now raises.
     """
+    return {number: str(record.get("title") or "").strip().lower()
+            for number, record in _article_cache(code).items()
+            if record.get("title")}
+
+
+def _article_cache(code: str) -> dict:
+    """One edition's Section 8.4 article records, number -> record."""
     path = (pathlib.Path(__file__).resolve().parents[1] / "btap" / "codes"
             / "necb" / "data" / code / "coverage" / "articles_8_4.json")
     if not path.is_file():
         raise ValueError(
             "cannot validate articles for {!r}: {} is missing, so the "
             "per-edition check would silently pass".format(code, path))
-    articles = json.loads(path.read_text(encoding="utf-8"))["articles"]
-    return {number: str(record.get("title") or "").strip().lower()
-            for number, record in articles.items()
-            if record.get("title")}
+    records = json.loads(path.read_text(encoding="utf-8"))["articles"]
+    return {k: v for k, v in records.items() if isinstance(v, dict)}
+
+
+#: Citation prefixes the Code itself uses. `Article 8.4.4.9.(5)` and
+#: `8.4.4.9.(5)` are the same citation, and a validator that normalises one but
+#: not the other both ADMITS `Article 8.4.999.1.(5)`, whose prefix hid it from
+#: the existence check, and REFUSES a correct `Article 8.4.4.9.(5)` whose
+#: unnormalised string simply differed from its counterpart (Sol, `124`.4).
+CITATION_PREFIX_RE = re.compile(
+    r"^\s*(?:Articles?|Tables?|Notes?|Sentences?|Clauses?|Appendix|A-)\s*", re.I)
+
+#: A leading sentence marker inside an article's text: `1)`, `2)`, ...
+SENTENCE_RE = re.compile(r"^\s*(\d+)\)", re.M)
+
+
+def normalise_citation(value: str) -> str:
+    """Strip a supported prefix and collapse whitespace. Returns '' for blank."""
+    return CITATION_PREFIX_RE.sub("", str(value)).strip()
+
+
+def _article_sentences(code: str, bare: str) -> set:
+    """The sentence numbers an edition's snapshot actually shows for an article.
+
+    Empty when the cache holds no sentence structure for it, which means the
+    caller must not treat absence as evidence.
+    """
+    entry = (_article_cache(code).get(bare)
+             or _article_cache(code).get(bare + "."))
+    if not isinstance(entry, dict):
+        return set()
+    return {int(m) for m in SENTENCE_RE.findall(str(entry.get("raw") or ""))}
+
+
+#: `8.4.4.9.(5)(a)` -> ('8.4.4.9', 5). The clause letter is not validated: the
+#: snapshot's text does not carry clause structure reliably.
+CITATION_PARTS_RE = re.compile(
+    r"^(?P<bare>\d+(?:\.\d+)*)\.?(?:\((?P<sentence>\d+)\))?")
 
 
 def check_articles(name: str, meta: dict) -> None:
@@ -211,17 +256,37 @@ def check_articles(name: str, meta: dict) -> None:
 
     codes = registered_codes()
     claimed = set(meta["editions"])
-    seen_codes: set = set()
+
+    # RULE 1. The holding pen and established editions are mutually exclusive
+    # in BOTH directions. Checking only one let a decision claim necb2020 and
+    # necb2025 while carrying nothing but `unverified = []` (Sol, `124`.4).
+    holding = ARTICLES_UNVERIFIED in articles
+    unverified_editions = claimed == {EDITIONS_UNVERIFIED}
+    if holding and len(articles) > 1:
+        raise ValueError(
+            "{}: articles may not mix the {!r} holding key with authored "
+            "requirements".format(name, ARTICLES_UNVERIFIED))
+    if holding != unverified_editions:
+        raise ValueError(
+            "{}: articles[{!r}] and editions == [{!r}] go together or not at "
+            "all — articles holding={}, editions={}".format(
+                name, ARTICLES_UNVERIFIED, EDITIONS_UNVERIFIED,
+                holding, sorted(claimed)))
+    if holding:
+        block = articles[ARTICLES_UNVERIFIED]
+        if not isinstance(block, list) or not all(
+                isinstance(i, str) for i in block):
+            raise ValueError(
+                "{}: articles[{!r}] must be a list of strings".format(
+                    name, ARTICLES_UNVERIFIED))
+        for value in block:
+            if not normalise_citation(value):
+                raise ValueError(
+                    "{}: articles[{!r}] has a blank citation".format(
+                        name, ARTICLES_UNVERIFIED))
+        return
 
     for key, block in sorted(articles.items()):
-        if key == ARTICLES_UNVERIFIED:
-            # the holding pen for a decision whose editions are unestablished
-            if not isinstance(block, list) or not all(
-                    isinstance(i, str) for i in block):
-                raise ValueError(
-                    "{}: articles[{!r}] must be a list of strings".format(
-                        name, key))
-            continue
         if not isinstance(block, dict):
             raise ValueError(
                 "{}: articles[{!r}] must be a table with a label and one list "
@@ -232,13 +297,16 @@ def check_articles(name: str, meta: dict) -> None:
                 "requirement — the label IS the cross-edition equivalence "
                 "assertion".format(name, key))
         listed = {k: v for k, v in block.items() if k != "label"}
+        if ARTICLES_UNVERIFIED in listed:
+            raise ValueError(
+                "{}: articles[{!r}] may not carry the {!r} key inside an "
+                "authored requirement".format(
+                    name, key, ARTICLES_UNVERIFIED))
         if not listed:
             raise ValueError(
                 "{}: articles[{!r}] lists no editions".format(name, key))
-        # PER REQUIREMENT, not globally. Checking coverage across the whole
-        # file let one requirement's missing edition hide behind another
-        # requirement that did list it (Sol's mutation 3).
-        missing = claimed - set(listed) - {EDITIONS_UNVERIFIED}
+
+        missing = claimed - set(listed)
         if missing:
             raise ValueError(
                 "{}: articles[{!r}] lists no article for {}, which editions "
@@ -250,23 +318,8 @@ def check_articles(name: str, meta: dict) -> None:
             raise ValueError(
                 "{}: articles[{!r}] lists {} which editions does not "
                 "claim".format(name, key, sorted(extra)))
-        # One requirement, one shape. Its per-edition lists are the SAME
-        # requirement in different numbering, so they must correspond: equal
-        # length, and the same sentence/clause suffixes. That is structural,
-        # where the title-vocabulary rule was semantic and let "Heating
-        # System" become "Service Water Heating" (Sol's mutations 4 and 5).
-        shapes = {}
-        for code, values in sorted(listed.items()):
-            if not isinstance(values, list):
-                continue
-            shapes[code] = sorted(
-                str(v)[len(_bare_article(v) or ""):].strip(" .")
-                for v in values if isinstance(v, str))
-        if len({tuple(v) for v in shapes.values()}) > 1:
-            raise ValueError(
-                "{}: articles[{!r}] does not correspond across editions — the "
-                "same requirement must cite the same sentences in each "
-                "edition's numbering, got {}".format(name, key, shapes))
+
+        scopes = {}
         for code, values in sorted(listed.items()):
             if code not in codes:
                 raise ValueError(
@@ -278,29 +331,75 @@ def check_articles(name: str, meta: dict) -> None:
                 raise ValueError(
                     "{}: articles[{!r}][{!r}] must be a non-empty list of "
                     "strings".format(name, key, code))
-            seen_codes.add(code)
-            titles = _article_titles(code)
+
+            # RULE 2. Non-blank and unique WITHIN the edition list. A blank
+            # string and a repeated sentence both passed before: one cites
+            # nothing, the other counts one piece of evidence twice.
+            seen = set()
+            energy_section = set()
             for value in values:
-                bare = _bare_article(value)
+                citation = normalise_citation(value)
+                if not citation:
+                    raise ValueError(
+                        "{}: articles[{!r}][{!r}] has a blank citation "
+                        "{!r}".format(name, key, code, value))
+                if citation in seen:
+                    raise ValueError(
+                        "{}: articles[{!r}][{!r}] cites {!r} twice".format(
+                            name, key, code, citation))
+                seen.add(citation)
+
+                # RULE 3/4. Normalise the prefix, then validate the WHOLE
+                # citation against the edition's own snapshot — the article
+                # AND, where the snapshot carries sentence structure, the
+                # sentence. Validating only the bare article admitted
+                # Sentence (999) of a real article.
+                m = CITATION_PARTS_RE.match(citation)
+                bare = m.group("bare") if m else None
                 if bare is None or not bare.startswith("8.4"):
+                    energy_section.add(False)
                     continue
+                energy_section.add(True)
+                titles = _article_titles(code)
                 if bare not in titles:
                     raise ValueError(
                         "{}: articles[{!r}][{!r}] cites {!r}, and Section 8.4 "
                         "article {} does not exist in that edition".format(
                             name, key, code, value, bare))
+                sentence = m.group("sentence")
+                if sentence is None:
+                    continue
+                available = _article_sentences(code, bare)
+                if available and int(sentence) not in available:
+                    raise ValueError(
+                        "{}: articles[{!r}][{!r}] cites {!r}, and article {} "
+                        "has sentences {} in that edition".format(
+                            name, key, code, value, bare,
+                            sorted(available)))
+            scopes[code] = energy_section
 
-    if ARTICLES_UNVERIFIED in articles and len(articles) > 1:
-        raise ValueError(
-            "{}: articles may not mix the {!r} holding key with authored "
-            "requirements".format(name, ARTICLES_UNVERIFIED))
-
-    if ARTICLES_UNVERIFIED not in articles:
-        unspoken = claimed - seen_codes - {EDITIONS_UNVERIFIED}
-        if unspoken:
+        # RULE 6. One requirement, one validation scope. Section 8.4 on one
+        # side and an unchecked citation on the other means half the claim was
+        # verified and half was not, with nothing saying which — more
+        # misleading than refusing it.
+        if len({frozenset(v) for v in scopes.values()}) > 1:
             raise ValueError(
-                "{}: editions claims {} but no requirement lists any article "
-                "for it".format(name, sorted(unspoken)))
+                "{}: articles[{!r}] mixes validated Section 8.4 citations "
+                "with citations this generator cannot check, across "
+                "editions: {} — a requirement must be verifiable in every "
+                "edition it claims or in none".format(
+                    name, key,
+                    {c: ("8.4" if True in s else "other")
+                     for c, s in sorted(scopes.items())}))
+
+    # RULE 5 is a NON-rule, and deliberately so. Equal citation counts and
+    # equal sentence suffixes across editions are NOT required. The suffix
+    # rule I had was wrong in both directions (Sol, `124`.5): it admitted
+    # unrelated articles that happened to share suffixes, and it REFUSED a
+    # real migration — D-89's modulating-boiler part-load requirement is
+    # 8.4.5.2.(3) in NECB 2020 and 8.4.6.2.(2) in NECB 2025, because the 2020
+    # article has three sentences and the 2025 article has two. Correspondence
+    # is the authored key and label; numbering cannot carry it.
 
 
 def registered_codes() -> set:

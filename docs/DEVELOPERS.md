@@ -153,7 +153,8 @@ assert btap.__file__.startswith(EXPORT)   # never skip this check
 ## Decisions and generated docs
 
 One decision is one file, `docs/decisions/D-NN.md`: TOML front matter
-(`id`, `title`, `kind`, `articles`, `summary`) followed by the authored Markdown
+(`id`, `title`, `kind`, `articles`, `editions`, `summary`) followed by the
+authored Markdown
 body, whose first line is its own `## D-NN —` heading. Those files are
 canonical. Both [necb_decisions.md](necb_decisions.md) and
 `python/btap/codes/data/decisions.json` are generated from them, in numeric id

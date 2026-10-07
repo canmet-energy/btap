@@ -138,6 +138,12 @@ class TestSourceValidation(unittest.TestCase):
             self.parse(**kwargs)
         self.assertIn(message, str(caught.exception))
 
+    def accepts(self, **kwargs):
+        """The control. A validator is only as good as what it still admits,
+        and the rule this file replaced was caught by what it WRONGLY
+        refused, not by what it let through."""
+        self.parse(**kwargs)
+
     def test_a_missing_or_unexpected_field_is_refused(self):
         # A missing field cannot be written through source_text, which needs
         # all five, so this one is assembled by hand.
@@ -221,16 +227,73 @@ class TestSourceValidation(unittest.TestCase):
                                    "label": "Hydronic pump power",
                                    "necb2025": ["8.4.5.14."]}}))
 
-    def test_a_requirement_must_CORRESPOND_across_the_editions(self):
-        """Same requirement, same sentences, different numbering. Structural,
-        because the title-vocabulary rule let "Heating System" become
-        "Service Water Heating Systems" — both contain "heating"."""
-        self.rejects("does not correspond across editions",
+    def test_a_requirement_need_NOT_correspond_by_NUMBERING(self):
+        """The suffix-correspondence rule this replaces was wrong in BOTH
+        directions (Sol, `124`.5). It admitted unrelated articles that happened
+        to share suffixes, and it REFUSED a real migration: D-89's
+        modulating-boiler part-load requirement is 8.4.5.2.(3) in NECB 2020 and
+        8.4.6.2.(2) in NECB 2025, because the 2020 article has three sentences
+        and the 2025 article has two. Correspondence is the authored key and
+        its label; numbering cannot carry it."""
+        self.accepts(meta=dict(
+            GOOD_META, editions=["necb2020", "necb2025"],
+            articles={"boiler_part_load": {
+                "label": "Modulating boiler part-load efficiency curve",
+                "necb2020": ["8.4.5.2.(3)"],
+                "necb2025": ["8.4.6.2.(2)"]}}))
+
+    def test_a_citation_may_not_be_blank_or_repeated(self):
+        """A blank cites nothing; a repeat counts one piece of evidence
+        twice. Both were accepted before."""
+        for values in (["   "], [""], ["8.4.4.9.(5)", "8.4.4.9.(5)"]):
+            self.rejects("blank citation" if not values[0].strip()
+                         else "twice",
+                         meta=dict(GOOD_META, articles={"heating": {
+                             "label": "Heating system",
+                             "necb2020": values}}))
+
+    def test_a_nonexistent_SENTENCE_of_a_real_article_is_refused(self):
+        """Validating only the bare article admitted Sentence (999) of an
+        article that does exist."""
+        self.rejects("has sentences",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["8.4.4.9.(999)"]}}))
+
+    def test_a_citation_PREFIX_is_normalised_both_ways(self):
+        """`Article 8.4.4.9.(5)` and `8.4.4.9.(5)` are one citation. Not
+        normalising admitted `Article 8.4.999.1.(5)`, whose prefix hid it from
+        the existence check, and refused a correct prefixed citation."""
+        self.accepts(meta=dict(GOOD_META, articles={"heating": {
+            "label": "Heating system",
+            "necb2020": ["Article 8.4.4.9.(5)"]}}))
+        self.rejects("does not exist in that edition",
+                     meta=dict(GOOD_META, articles={"heating": {
+                         "label": "Heating system",
+                         "necb2020": ["Article 8.4.999.1.(5)"]}}))
+
+    def test_a_requirement_may_not_MIX_validated_and_unvalidated_scope(self):
+        """Section 8.4 on one side and an unchecked citation on the other
+        means half the claim was verified and half was not, with nothing
+        saying which."""
+        self.rejects("mixes validated Section 8.4",
                      meta=dict(GOOD_META, editions=["necb2020", "necb2025"],
                                articles={"heating": {
                                    "label": "Heating system",
-                                   "necb2020": ["8.4.4.9.(4)", "8.4.4.9.(5)"],
-                                   "necb2025": ["8.4.5.9.(4)"]}}))
+                                   "necb2020": ["8.4.4.9.(5)"],
+                                   "necb2025": ["5.2.12.1.(5)"]}}))
+
+    def test_the_holding_key_and_established_editions_are_exclusive_BOTH_ways(self):
+        """Checking one direction let a decision claim two code ids while
+        carrying nothing but the holding pen."""
+        self.rejects("go together or not at all",
+                     meta=dict(GOOD_META, editions=["necb2020"],
+                               articles={"unverified": []}))
+        self.rejects("go together or not at all",
+                     meta=dict(GOOD_META, editions=["unverified"],
+                               articles={"heating": {
+                                   "label": "Heating system",
+                                   "necb2020": ["8.4.4.9.(5)"]}}))
 
     def test_a_Section_8_4_article_absent_from_that_edition_is_refused(self):
         """`8.4.4.9` is the Heating System article in NECB 2020 and does not

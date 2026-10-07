@@ -56,7 +56,7 @@ not a regex, so:
 - a string **literal** — a name, an f-string or a `**{'ruling': ...}`
   expansion on an audit-surface call is refused, not ignored;
 - several ids = one space-separated string (`ruling='D-19 D-21'`), scanned
-  as `\bD-\d{2}\b`;
+  as `\bD-\d+\b`;
 - every id cited must exist in the registry, and every `kind: "runtime"`
   entry there must be cited by at least one tag — the test is hard in both
   directions;
