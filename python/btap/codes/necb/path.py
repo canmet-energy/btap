@@ -433,6 +433,13 @@ def _resolve_ahj_conditions(run, audit):
                 "entry_index": index,
             })
     if not fired:
+        # Sol's `127`: "no approval-required id -> compliance_determination:
+        # 'code'". The POSITIVE statement matters — a reader must be able to
+        # tell an unqualified determination from a run where the question was
+        # never asked, and a missing key cannot say that. Only an ANNUAL run
+        # has a determination to state.
+        if run.report.get("annual"):
+            run.report["compliance_determination"] = "code"
         return
 
     order = {record["id"]: position for position, record
@@ -450,7 +457,11 @@ def _resolve_ahj_conditions(run, audit):
     required = [ident for ident in unique
                 if _ahj.by_id()[ident]["status"] in approval]
     if not required:
-        # Citations still travel as provenance; nothing is conditional.
+        # Citations still travel as provenance, and the determination is
+        # UNQUALIFIED: a `ruled` or `tool-gap` citation does not qualify a
+        # verdict, so saying "code" here is the honest positive statement.
+        if run.report.get("annual"):
+            run.report["compliance_determination"] = "code"
         return
     if not run.report.get("annual"):
         # A `none`, `sizing` or shortened run has no determination to qualify.

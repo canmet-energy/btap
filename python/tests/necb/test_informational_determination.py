@@ -362,10 +362,11 @@ class TestTheREALHelperOnRealModels(unittest.TestCase):
     @needs_sdk
     def test_a_SINGLE_fuel_plant_is_not_conditional_at_all(self):
         report, audit = self._run_helper(self._model(("NaturalGas",)))
-        # Nothing cited, so nothing resolves and no determination is written.
-        # The old helper SET "code" here; the collector leaves the key absent
-        # because it owns only the conditional case — the unqualified verdict
-        # is the comparison's own result and is not this function's to assert.
+        # Nothing cited, so nothing requires approval and the determination is
+        # stated POSITIVELY as "code". A missing key could not distinguish an
+        # unqualified determination from a run where the question was never
+        # asked (Sol's `127`).
+        self.assertEqual("code", report["compliance_determination"])
         self.assertNotIn("compliance_determination_reason", report)
         self.assertNotIn("ahj_applied", report)
         self.assertEqual([], [e for e in audit.entries if e.get("ahj")],
@@ -506,11 +507,15 @@ class TestTheResolverPolicy(unittest.TestCase):
                          [e["id"] for e in report["ahj_applied"]],
                          "AHJ-11 sorts after AHJ-2, not between AHJ-1 and 2")
 
-    def test_a_RULED_or_TOOL_GAP_id_alone_sets_no_determination(self):
+    def test_a_RULED_or_TOOL_GAP_id_alone_sets_no_CONDITIONAL(self):
+        """It is still an unqualified determination — "code", not nothing, and
+        never "conditional". A tool gap stays a defect and a ruled question
+        stays settled."""
         for citation in ("AHJ-5", "AHJ-6", "AHJ-13", "AHJ-5 AHJ-6"):
             with self.subTest(citation):
                 report = self._report([citation])
-                self.assertNotIn("compliance_determination", report)
+                self.assertEqual("code", report["compliance_determination"])
+                self.assertNotIn("compliance_determination_reason", report)
                 self.assertTrue(report["ahj_applied"],
                                 "but it is still recorded as applied")
 
@@ -545,6 +550,76 @@ class TestTheResolverPolicy(unittest.TestCase):
         self.assertEqual(["AHJ-1"], [e["id"] for e in report["ahj_applied"]])
         self.assertNotIn("compliance_determination", report,
                          "a run with no determination has none to qualify")
+
+
+class TestTheDeterminationMATRIX(unittest.TestCase):
+    """Every combination of (what fired) x (is this an annual run).
+
+    Two of these were wrong in the first implementation and neither would have
+    shown up in the local lanes. `"code"` was not written at all, so an
+    unqualified annual determination became an ABSENT key — which the
+    dispatch-only parity baseline still carried as `"code"`, so it would have
+    gone red in CI rather than here. And a `--quick` run was setting
+    `conditional` while its own CLI printed `VERDICT: NO DETERMINATION`.
+    """
+
+    CASES = (
+        ("nothing cited", (), True, "code"),
+        ("a ruled id alone", ("AHJ-5",), True, "code"),
+        ("a tool-gap id alone", ("AHJ-6",), True, "code"),
+        ("ruled and tool-gap together", ("AHJ-5 AHJ-6",), True, "code"),
+        ("an alternative solution", ("AHJ-1",), True, "conditional"),
+        ("a referral", ("AHJ-11",), True, "conditional"),
+        ("approval-required beside ruled", ("AHJ-1 AHJ-5",), True,
+         "conditional"),
+        ("a shortened run, nothing cited", (), False, None),
+        ("a shortened run WITH an alternative solution", ("AHJ-1",), False,
+         None),
+        ("a shortened run with a referral", ("AHJ-11",), False, None),
+    )
+
+    def _determination(self, citations, annual):
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": annual, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        audit = AuditLog()
+        for citation in citations:
+            audit.warn("selection", "a choice was made", target="Z1",
+                       article="8.4.4.9.(5)", ahj=citation)
+        necb_path._resolve_ahj_conditions(run, audit)
+        return run.report.get("compliance_determination")
+
+    def test_the_matrix(self):
+        for label, citations, annual, expected in self.CASES:
+            with self.subTest(label, annual=annual):
+                self.assertEqual(
+                    expected, self._determination(citations, annual),
+                    "{} on an annual={} run".format(label, annual))
+
+    def test_a_shortened_run_still_records_the_CITATIONS(self):
+        """They are provenance even where there is no verdict to qualify —
+        losing them would hide that the question was reached at all."""
+        from btap.audit import AuditLog
+        from btap.codes.necb import path as necb_path
+
+        class _Run:
+            pass
+
+        run = _Run()
+        run.report = {"annual": False, "code": "necb2020"}
+        run.ruleset = type("_R", (), {"code": "necb2020"})()
+        audit = AuditLog()
+        audit.warn("selection", "a choice", target="Z1", ahj="AHJ-1 AHJ-5")
+        necb_path._resolve_ahj_conditions(run, audit)
+        self.assertEqual(["AHJ-1", "AHJ-5"],
+                         [e["id"] for e in run.report["ahj_applied"]])
+        self.assertNotIn("compliance_determination", run.report)
 
 
 if __name__ == "__main__":
