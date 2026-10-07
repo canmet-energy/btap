@@ -527,8 +527,15 @@ def determination(result, rep):
         return "NO DETERMINATION - run period shortened"
     if result.compliant is None:
         return "NO DETERMINATION - no annual simulation"
-
-    return "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    # 8.4.x.9.(5) is not implemented for a multi-energy serving system, so the
+    # comparison is reported but is NOT a certification. phylroy's decision is
+    # INFORMATIONAL: the verdict stays visible and the exit code is unchanged,
+    # so the qualification travels INSIDE the verdict string rather than beside
+    # it — a one-line summary is the thing most likely to be quoted alone.
+    if rep.get("compliance_determination") == "informational":
+        return f"{verdict} - INFORMATIONAL ONLY, NOT A COMPLIANCE DETERMINATION"
+    return verdict
 
 
 def verdict_block(result, rep):
@@ -545,6 +552,25 @@ def verdict_block(result, rep):
             "", f"  VERDICT: NO DETERMINATION (simulate: {rep.get('simulate')})",
             "  Run with --simulate annual for an 8.4.1.2 determination.", rule])
     verdict = "COMPLIANT" if result.compliant else "NOT COMPLIANT"
+    if rep.get("compliance_determination") == "informational":
+        reason = rep.get("compliance_determination_reason") or {}
+        article = reason.get("article", "8.4.4.9.(5)")
+        systems = reason.get("serving_systems") or []
+        return "\n".join([
+            "", "  *** NOT A CODE-COMPLIANT DETERMINATION ***",
+            f"  {article} governs the {len(systems)} multi-energy serving "
+            "system(s) below and is",
+            "  NOT implemented: the reference elects ONE energy type, and no "
+            "single-fuel",
+            "  basis satisfies its capacity-ratio requirement. The comparison "
+            "above is",
+            "  INFORMATIONAL only and is not evidence of compliance.",
+            *[f"    - {s}" for s in systems],
+            "",
+            f"  VERDICT: {verdict} - INFORMATIONAL ONLY, NOT A COMPLIANCE "
+            "DETERMINATION",
+            f"  ({rep.get('code_label')}, Division B, Article 8.4.1.2; "
+            f"{article} unimplemented)", rule])
     return "\n".join([
         "", f"  VERDICT: {verdict}   ({rep.get('code_label')}, Division B, "
             "Article 8.4.1.2)", rule])

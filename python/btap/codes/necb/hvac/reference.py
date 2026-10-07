@@ -2065,6 +2065,53 @@ _FIXTURE_MEASUREMENT = (
     'edition and model state, NOT a property of this model.')
 
 
+def multi_energy_serving_groups(facts):
+    """Serving groups whose PROPOSED heating system uses more than one energy
+    type, excluding the purchased-energy route.
+
+    These are exactly the groups 8.4.x.9.(5) governs and this tool does not
+    implement: it elects ONE reference energy type, and Sol ruled on fetched
+    normative text (`119`) that no single-fuel basis satisfies (5)(a)'s
+    capacity ratio. A run containing any of them therefore cannot carry an
+    unqualified Code-compliance determination.
+
+    A pure function of `facts`, deliberately: the caller needs this to label
+    the verdict, and deriving it by scanning audit prose would couple the
+    determination to wording. It is the same predicate
+    `_disclose_multi_energy` applies per group.
+    """
+    out = []
+    for group in facts.get('zone_groups') or ():
+        fuels = {str(f) for f in (group.get('heating_energy_types') or ())}
+        if 'Purchased' in fuels or len(fuels) < 2:
+            continue
+        out.append(group)
+    return out
+
+
+def multi_energy_serving_systems(facts):
+    """The DEDUPED serving-system identities behind `multi_energy_serving_groups`.
+
+    The group list overcounts: sample 11 is five thermal blocks served by ONE
+    plant, so the disclosure emits ONE finding while the group list has five
+    entries. A verdict label built from the group count would say "5
+    multi-energy serving systems" where there is one — the same overcounting
+    mistake in a new place. This applies the disclosure's own dedupe key, so
+    the label and the findings always agree.
+    """
+    seen: dict = {}
+    for group in multi_energy_serving_groups(facts):
+        plant = _heating_plant(group, facts)
+        if _plant_covers_group(plant, group):
+            key = f"plant:{plant.get('name')}"
+            label = plant.get('name') or 'the shared heating plant'
+        else:
+            key = 'group:' + ','.join(sorted(group['zones']))
+            label = ','.join(group['zones'])
+        seen.setdefault(key, label)
+    return [seen[k] for k in sorted(seen)]
+
+
 def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
                            disclosed=None):
     """8.4.x.9.(5): disclose a multi-energy proposed heating system.

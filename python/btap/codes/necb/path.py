@@ -372,10 +372,64 @@ def _compare_and_iterate(run):
                             step=opts["capacity_step"], audit=audit)
         run.compliant = compliance._evaluate(run.report, run.ruleset,
                                              opts["run_period"], audit)
+        _mark_informational_if_multi_energy(run, audit)
     elif opts["simulate"] == "sizing":
         audit.info("compliance",
                    "simulate: :sizing — both models generated and sized; no "
                    "energy comparison performed (compliance undetermined)")
+
+
+def _mark_informational_if_multi_energy(run, audit):
+    """8.4.x.9.(5): a reference that does not implement the multi-energy
+    capacity ratio cannot support an UNQUALIFIED Code-compliance
+    determination (Sol, `119`, on fetched normative text, citing 8.4.1.2, the
+    Division A building-energy-target definition, 8.4.2.10 and Division C
+    2.2.2.8).
+
+    phylroy's decision on the treatment is INFORMATIONAL: the comparison and
+    its verdict are still reported, and the exit code is unchanged, but the
+    determination is labelled as not a Code determination wherever it is
+    emitted. `run.compliant` keeps the raw comparison result; what changes is
+    that `report['compliance_determination']` says the comparison is not a
+    certification, and the CLI prints that above the verdict.
+
+    The predicate is computed from the PROPOSED model here rather than read
+    out of the audit, so the determination does not depend on warning wording.
+    """
+    from btap.codes.necb.hvac import reference as _hvac_reference
+    from btap.modeling.hvac import classify
+
+    facts = classify.characterize(run.proposed)
+    # DEDUPED serving systems, not the raw group list: five thermal blocks on
+    # one plant are one finding, and the label must agree with the findings.
+    groups = _hvac_reference.multi_energy_serving_systems(facts)
+    if not groups:
+        run.report["compliance_determination"] = "code"
+        return
+
+    prefix = run.ruleset.article("reference_subsection")
+    article = f"{prefix}.9.(5)"
+    names = list(groups)
+    run.report["compliance_determination"] = "informational"
+    run.report["compliance_determination_reason"] = {
+        "article": article,
+        "why": (f"the proposed heating system uses MORE THAN ONE ENERGY TYPE "
+                f"on {len(groups)} serving system(s), and {article}'s "
+                f"capacity-ratio requirement is neither computed nor "
+                f"enforced: the reference elects ONE energy type, and no "
+                f"single-fuel basis satisfies clause (a). The comparison is "
+                f"INFORMATIONAL and is NOT a Code-compliance determination."),
+        "serving_systems": names,
+    }
+    audit.warn("compliance",
+               "INFORMATIONAL ONLY: this comparison is NOT a Code-compliance "
+               f"determination. {article} governs the {len(groups)} "
+               "multi-energy serving system(s) listed and is not implemented, "
+               "so a passing result is not evidence of compliance",
+               target=";".join(names),
+               inputs={"serving_systems": names,
+                       "determination": "informational"},
+               article=article)
 
 
 # 8. Part 11 operational GHG performance level, for the editions that have
