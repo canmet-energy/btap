@@ -1,39 +1,33 @@
-"""A dual-fuel proposed heating plant must not collapse SILENTLY.
+"""The 8.4.x.9.(5) multi-energy heating disclosure.
 
-8.4.4.9.(5) and 8.4.4.10.(4) require the reference building's heating and
-cooling capacities to match the ratio of the proposed building's capacity
-allocation per energy type. We do not do that, and the reason is a Code
-conflict rather than an omission: 8.4.4.9.(6) configures a hydronic reference
-plant as ONE single-stage boiler at or below 176 kW, TWO BOILERS OF EQUAL
-CAPACITY (or a two-staged boiler) from 176 to 352 kW, and "a boiler"
-modulating to 25% above that. Every band is singular or equal-split, so a
-proposed 60/40 allocation cannot be represented without breaking (6) — which
-we currently satisfy.
+The tool ELECTS one reference heating energy type and never computes the
+proposed capacity-ratio allocation that 8.4.4.9.(5)/8.4.5.9.(5) requires.
+This module pins the DISCLOSURE of that gap, not a fix for it: coverage for
+(5) stays `not_implemented` and (6) is `partial`.
 
-WHAT THE MEASUREMENT SHOWED, and it overturned two of my own estimates.
-Each reference boiler autosizes to the FULL plant load (64,396 W each), not
-half of it, and `SequentialLoad` means only the lead one fires. So:
+Five review rounds shaped these tests, and every one of them blocked on the
+same thing — the audit entry asserting a mechanism the model had not
+established:
 
-  * the (6)(b) boiler-count departure is ENERGY-NEUTRAL — an annual run of
-    the two-boiler reference and of a single-boiler reference both give
-    158,219.4 kWh, identical to 0.1 kWh;
-  * my earlier 10-32% "staging advantage" was wrong, because it assumed the
-    pair SHARES load;
-  * my earlier 5.3% "fuel-mix" figure was wrong too, because the electric
-    boiler delivers no energy at all;
-  * (5)(a)'s installed-capacity ratio therefore lands 50/50 and holds
-    COINCIDENTALLY for an equal proposed split, failing for any other;
-  * (5)(b)'s operating priority is the clause genuinely not addressed.
+  * a gas-only plant described as holding one boiler per energy type;
+  * "the ratio is NOT met", when a reference may carry capacity for a
+    non-elected type through an air-loop coil or heat pump, so the honest
+    statement is NOT VERIFIED in either direction;
+  * a plant covering only PART of a serving group having its fuels reported
+    as the group's whole allocation, dropping the others from the
+    denominator;
+  * `(6)(b)` cited without any capacity to establish which of (6)(b)/(c)/(d)
+    applies;
+  * "the reference retains one boiler per energy type", when the reference
+    ADOPTS the proposed plant with its own device count and the post-sizing
+    staging pass then sets live capacity by primary/secondary ROLE, blind to
+    fuel — the committed baselines show the reference secondary at
+    `capacity_kw: 0.0` against a real design capacity.
 
-So the model is left alone and the CLAIMS are corrected. What these tests
-pin is the DISCLOSURE: previously a dual-fuel plant became a gas reference with nothing
-in the audit saying a Code requirement had been set aside, and a reader could
-not tell. Coverage for (5) stays `partial`; nothing here claims compliance.
-
-Sol's `110` ruling governs the shape: energy types stay distinct (no "fossil"
-class), ratios come from CAPACITY rather than annual energy or device count,
-and an unknown capacity is a visible unresolved case rather than a guessed
-fraction.
+So nothing here asserts an energy result or a (6) subclause as a general
+property. The one measurement that exists is provenance for a single sample,
+edition and model state, and it is gated so it cannot travel to another
+edition.
 """
 
 from __future__ import annotations
@@ -403,6 +397,170 @@ class TestTheDisclosureSurvivesTheHeatPumpPath(unittest.TestCase):
         self.assertEqual(1, len(warnings))
 
 
+class TestTheEntryDescribesTheADOPTEDPlant(_Fixture):
+    """Fable's `117` B1: the entry said "the reference retains one boiler per
+    energy type", and the reference does no such thing.
+
+    It ADOPTS the proposed hot-water plant whole — a three-boiler proposed
+    plant gives a three-boiler reference — and then the post-sizing staging
+    pass sets the plant's live capacity by primary/secondary ROLE, blind to
+    fuel, driving a secondary under the single-boiler threshold to ~0 W. So
+    the installed allocation is NOT carried into the annual reference, and
+    the surviving fuel need not be the elected one. Confirmed in the
+    repository's own committed baselines, where the reference building's
+    Secondary Boiler carries `capacity_kw: 0.0` against a
+    `design_capacity_kw` of 64.4 or 83.6.
+    """
+
+    def _selection(self):
+        sel = super()._selection()
+        sel["special_rules"]["heat_pump"] = {"article": "8.4.4.13.(1)-(2)"}
+        return sel
+
+    def test_a_THREE_boiler_plant_is_not_described_as_one_per_type(self):
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Three Boiler Loop",
+            "fuels": ["NaturalGas", "Electricity"],
+            "heating_device_count": 3,
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        _r, warnings, _a = self._call(group, facts)
+        entry = warnings[0]
+        self.assertNotIn("one boiler per energy type", entry["action"])
+        self.assertNotIn("retains one boiler", entry["action"])
+        self.assertEqual(3, entry["inputs"]["plant_heating_devices"],
+                         "the DEVICE COUNT is what distinguishes this from "
+                         "'one per type'; the fuel set cannot")
+
+    def _mixed(self):
+        group = self._group(("Electricity", "NaturalGas"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Mixed Loop",
+            "fuels": ["NaturalGas", "Electricity"],
+            "heating_device_count": 2,
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        _r, warnings, _a = self._call(group, facts)
+        return warnings[0]
+
+    def test_the_PROSE_states_the_fuel_blind_staging(self):
+        entry = self._mixed()
+        self.assertIn("ADOPTS", entry["action"])
+        self.assertIn("BLIND to energy type", entry["action"])
+        self.assertIn("need not be the one elected", entry["action"])
+        self.assertNotIn(
+            "retained rather than collapsed", entry["action"].lower(),
+            "the staging pass collapses it on every run — the opposite")
+
+    def test_the_INPUTS_record_the_role_basis_separately(self):
+        rule = self._mixed()["inputs"]["live_capacity_rule"]
+        self.assertIn("primary/secondary ROLE", rule)
+        self.assertIn("blind to energy type", rule)
+        self.assertNotIn("proposed allocation: a", rule)
+
+
+class TestTheStagingPassIsFuelBLIND(unittest.TestCase):
+    """The mechanism the entry now describes, exercised rather than asserted.
+
+    Fable's `117` found the entry claiming the reference "retains one boiler
+    per energy type". What actually happens is that the post-sizing staging
+    pass sets the plant's live capacity by primary/secondary ROLE — builder
+    feature, then device NAME, then supply order — and blind to fuel, driving
+    a secondary below the single-boiler threshold to ~0 W.
+
+    Reading the frozen baselines would show the same thing, but it would be
+    testing an artifact: a wrongly regenerated baseline would agree with a
+    wrongly behaving pass. This drives the pass itself.
+    """
+
+    @needs_sdk
+    def _staged(self, primary_fuel, secondary_fuel):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        loop.setLoadDistributionScheme("SequentialLoad")
+        made = {}
+        for role, fuel in (("Primary", primary_fuel),
+                           ("Secondary", secondary_fuel)):
+            b = openstudio.model.BoilerHotWater(model)
+            b.setName(f"{role} Boiler")
+            b.setFuelType(fuel)
+            b.setNominalCapacity(52_000.0)      # one plant, well under 176 kW
+            loop.addSupplyBranchForComponent(b)
+            made[role] = b
+        hvac.apply_efficiencies(model, code="necb2020", audit=AuditLog())
+        return {r: (b.fuelType(), b.nominalCapacity().get())
+                for r, b in made.items()}
+
+    @needs_sdk
+    def test_the_SECONDARY_is_zeroed_whichever_fuel_it_carries(self):
+        gas_lead = self._staged("NaturalGas", "Electricity")
+        elec_lead = self._staged("Electricity", "NaturalGas")
+        for label, got in (("gas-led", gas_lead), ("electric-led", elec_lead)):
+            primary_fuel, primary_w = got["Primary"]
+            secondary_fuel, secondary_w = got["Secondary"]
+            self.assertGreater(primary_w, 1.0,
+                               f"{label}: the primary keeps its capacity")
+            self.assertLess(
+                secondary_w, 1.0,
+                f"{label}: the secondary is driven to ~0 W, so the installed "
+                f"allocation is NOT carried through — got {secondary_w}")
+        # The discriminating part: the surviving fuel follows the ROLE, not
+        # the energy type, so flipping the fuels flips which fuel survives.
+        self.assertEqual("NaturalGas", gas_lead["Primary"][0])
+        self.assertEqual("Electricity", elec_lead["Primary"][0],
+                         "fuel-blind: an electric primary survives just as a "
+                         "gas primary does, which is why the surviving fuel "
+                         "need not be the elected reference energy type")
+
+
+class TestTheEditionComesFromTheManifest(unittest.TestCase):
+    """Fable's `117` O4: deriving the subsection from the heat-pump article
+    had a SILENT 2020 fallback, so a 2025 run with a missing or malformed
+    heat-pump rule value would cite 2020 to the AHJ without a word."""
+
+    def test_a_MALFORMED_heat_pump_article_does_not_silently_mean_2020(self):
+        from btap.codes import resolve
+
+        broken = {"special_rules": {"heat_pump": {"article": "Table"}}}
+        # with the ruleset in hand the manifest registry decides
+        for code, want in (("necb2020", "8.4.4"), ("necb2025", "8.4.5")):
+            ratio, _ = reference.multi_energy_articles(broken, resolve(code))
+            self.assertTrue(
+                ratio.startswith(want),
+                f"{code} must cite {want}.9.(5) from the manifest's "
+                f"reference_subsection, not a derived guess; got {ratio}")
+
+
+class TestTheDedupeStateIsCallSCOPED(unittest.TestCase):
+    """Fable's `117` O5: the seen-set was written into the caller's `facts`,
+    which `select_reference_systems` documents as pure input — so a second
+    call on the same dict emitted no disclosure at all."""
+
+    def test_two_calls_on_ONE_facts_dict_each_disclose(self):
+        import copy
+
+        facts = copy.deepcopy(_ASHP_MIXED_FACTS)
+        counts = []
+        for _ in range(2):
+            audit = AuditLog()
+            reference.select_reference_systems(
+                facts=facts, building={"storeys": 1}, code="necb2020",
+                audit=audit, proposed_annual=None)
+            counts.append(len([e for e in audit.entries
+                               if "UNRESOLVED" in str(e.get("action"))
+                               and "ENERGY TYPE" in str(e.get("action"))]))
+        self.assertEqual([1, 1], counts,
+                         "the dedupe must not persist across calls")
+        self.assertNotIn("_multi_energy_warned", facts,
+                         "and must not be written into the caller's dict")
+
+
 class TestTheDisclosureDoesNotOVERSTATE(_Fixture):
     """Sol's `114`.1/.3/.4 — three distinct overstatements, one entry."""
 
@@ -511,6 +669,11 @@ class TestTheDisclosureDoesNotOVERSTATE(_Fixture):
         self.assertIn("-616.6", measured, "and named as a CHANGE")
         self.assertIn("never fired", measured)
         self.assertNotIn("unchanged at", measured)
+        # Fable's `117` O1: the "two boilers" model was the SIZING-RUN INPUT
+        # with both boilers autosized, not the annual reference the pipeline
+        # builds, where the staging pass has already zeroed the secondary.
+        self.assertIn("FED TO THE SIZING RUN", measured)
+        self.assertIn("NOT the model the annual pipeline runs", measured)
 
 
 def _plant(model, fuels, capacity_w=None, name="Hot Water Loop"):

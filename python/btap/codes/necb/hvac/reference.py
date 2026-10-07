@@ -80,6 +80,11 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
     hp_rules = rules_data['heat_pump_reference']
 
     assignments = []
+    # The multi-energy disclosure dedupes per serving system. The set is
+    # scoped to THIS call rather than written into `facts`, which is the
+    # caller's dict and documented as pure input — two calls on one dict used
+    # to yield one disclosure (Fable, `117`).
+    disclosed: set = set()
     for group in facts['zone_groups']:
         if not (group['heated'] or group['cooled']):
             continue  # unconditioned: no reference system
@@ -87,7 +92,8 @@ def _select_reference_systems(*, facts, building, ruleset, audit=None,
         category = _category_for(group, building, selection, audit)
         assignment = _assign(group, category, building, selection, audit)
         result = _finalize(assignment, group, definitions, selection, facts, audit,
-                           hp_rules=hp_rules, proposed_annual=proposed_annual)
+                           hp_rules=hp_rules, proposed_annual=proposed_annual,
+                           ruleset=ruleset, disclosed=disclosed)
         if result is not None:
             assignments.append(result)
     return assignments
@@ -332,7 +338,8 @@ def _residential_compatible_cooling(group):
 # ---- finalize: heat-pump override, energy type, catalog name ----
 
 def _finalize(assignment, group, definitions, selection, facts, audit,
-              hp_rules=None, proposed_annual=None):
+              hp_rules=None, proposed_annual=None, ruleset=None,
+              disclosed=None):
     if assignment.action == 'copy_proposed':
         return assignment
 
@@ -369,7 +376,8 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     # election and NO multi-energy disclosure at all (Sol, `114`). Whether
     # 8.4.4.13 supersedes (5) for such a group is an adjudication; until it
     # is made, disclosing is the conservative side.
-    _disclose_multi_energy(group, selection, facts, audit)
+    _disclose_multi_energy(group, selection, facts, audit,
+                           ruleset=ruleset, disclosed=disclosed)
     definition = definitions[str(assignment.reference_system)]
     variant = definition[assignment.energy_type]
     assignment.catalog_name = variant['name']
@@ -1968,16 +1976,26 @@ def _plant_covers_group(plant, group):
     return len(plant_fuels) > 1 and group_fuels <= plant_fuels
 
 
-def multi_energy_articles(selection):
+def multi_energy_articles(selection, ruleset=None):
     """``(capacity_ratio, single_boiler)`` for the RESOLVED edition.
 
-    8.4.4.9.(5)/(6)(b) in 2020 and 8.4.5.9.(5)/(6)(b) in 2025. Derived from
-    the ruleset the way `heat_pump_article_base` derives its own, because a
-    hardcoded literal here cited 2020's numbers to the AHJ on every 2025 run
-    (Sol, `113` — the same defect that helper's docstring already records).
+    8.4.4.9.(5)/(6)(b) in 2020 and 8.4.5.9.(5)/(6)(b) in 2025. A hardcoded
+    literal here cited 2020's numbers to the AHJ on every 2025 run (Sol,
+    `113`).
+
+    The subsection comes from the manifest's own `reference_subsection`
+    registry when a ruleset is in hand, as `_audit_terminal_secondary_split`
+    already does. Deriving it from the heat-pump article instead had a SILENT
+    2020 fallback: `heat_pump_article_base` returns '8.4.4.13' when that rule
+    value is missing or malformed, so a 2025 selection would have cited 2020
+    without a word (Fable, `117`). The derivation is kept only as the
+    fallback for a caller with no ruleset, and it is the narrower risk of the
+    two.
     """
-    base = heat_pump_article_base(selection)          # 8.4.4.13 / 8.4.5.13
-    subsection = base.rsplit('.', 1)[0] if '.' in base else '8.4.4'
+    if ruleset is not None:
+        subsection = ruleset.article('reference_subsection')
+    else:
+        subsection = heat_pump_article_base(selection).rsplit('.', 1)[0]
     return f'{subsection}.9.(5)', f'{subsection}.9.(6)(b)'
 
 
@@ -2026,18 +2044,21 @@ def _heating_allocation(group, facts):
 #: would present it as verifying a model it never touched (Sol, `114`).
 _MEASURED_SUBSECTION = '8.4.4'
 _FIXTURE_MEASUREMENT = (
-    'MEASURED on sample 11 only, necb2020 reference, gas-primary, annual: '
+    'MEASURED on sample 11 only, necb2020, gas-primary, annual, on the model '
+    'FED TO THE SIZING RUN (both boilers autosized, 64,396 W each) — which is '
+    'NOT the model the annual pipeline runs, where the staging pass has '
+    'already driven the secondary to ~0 W: '
     '(i) BOILER COUNT at sizingFactor 1.0 — two boilers 158,219.4 kWh vs one '
     'boiler 158,219.4 kWh, identical to 0.1 kWh; (ii) SIZING FACTOR at two '
     'boilers — 1.0 gives 158,219.4 kWh and 0.5 gives 157,602.8 kWh, a CHANGE '
-    'of -616.6 kWh (-0.39%) from part-load efficiency on the lead boiler. '
-    'What held in BOTH experiments is that the secondary boiler never fired, '
-    'which is NOT the same statement as the annual kWh being unchanged. '
-    'These are measurements on that one fixture and edition, NOT a property '
-    'of this model.')
+    'of -616.6 kWh (-0.39%). What held in BOTH experiments is that the '
+    'secondary boiler never fired, which is NOT the same statement as the '
+    'annual kWh being unchanged. These are measurements on that one fixture, '
+    'edition and model state, NOT a property of this model.')
 
 
-def _disclose_multi_energy(group, selection, facts, audit):
+def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
+                           disclosed=None):
     """8.4.x.9.(5): disclose a multi-energy proposed heating system.
 
     Called from `_finalize` on EVERY election path. It states what is
@@ -2060,14 +2081,17 @@ def _disclose_multi_energy(group, selection, facts, audit):
     if len(distinct) < 2:
         return
 
-    ratio_article, boiler_article = multi_energy_articles(selection)
+    ratio_article, boiler_article = multi_energy_articles(selection, ruleset)
     sentence_six = boiler_article.split('(')[0] + '(6)'
     plant = _heating_plant(group, facts)
     covers = _plant_covers_group(plant, group)
     plant_name = (plant or {}).get('name')
     key = (f'plant:{plant_name}' if covers
            else 'group:' + ','.join(sorted(group['zones'])))
-    seen = facts.setdefault('_multi_energy_warned', set())
+    # `disclosed` is the caller's call-scoped set; the `facts` fallback keeps
+    # a direct unit-test call working without leaking into a pipeline run.
+    seen = facts.setdefault('_multi_energy_warned', set()) \
+        if disclosed is None else disclosed
     if key in seen:
         return
     seen.add(key)
@@ -2116,10 +2140,24 @@ def _disclose_multi_energy(group, selection, facts, audit):
     # Which of (6)(b)/(c)/(d) applies depends on the REFERENCE plant's
     # heating capacity, which does not exist at selection time. Cite the
     # sentence, never a subclause we cannot establish (Sol, `114`.4).
+    inputs['plant_heating_devices'] = plant.get('heating_device_count')
     inputs['boiler_count_subclause'] = (
         f'NOT ESTABLISHED: {sentence_six} bands the requirement by the '
         f'reference plant capacity, which is not known at selection time, '
         f'so no subclause is claimed')
+    # The reference ADOPTS this plant, so its device count is the proposed
+    # count — any number, not one per energy type. After sizing, the staging
+    # pass sets the plant's live capacity by primary/secondary ROLE, resolved
+    # from the builder feature then the name then supply order, and blind to
+    # fuel: a secondary under the single-boiler threshold is driven to ~0 W.
+    # So the installed allocation is NOT carried into the annual reference,
+    # and on a plant whose primary is the non-elected fuel the surviving
+    # capacity is the fuel the election rejected (Fable, `117`).
+    inputs['live_capacity_rule'] = (
+        'set after sizing by primary/secondary ROLE, blind to energy type: a '
+        'secondary below the single-boiler threshold is driven to ~0 W, so '
+        'the proposed installed allocation is NOT carried into the annual '
+        'reference and the surviving fuel need not be the elected one')
     if ratio_article.startswith(_MEASURED_SUBSECTION):
         inputs['fixture_measurement'] = _FIXTURE_MEASUREMENT
     else:
@@ -2131,13 +2169,17 @@ def _disclose_multi_energy(group, selection, facts, audit):
         'selection',
         'UNRESOLVED: the proposed heating system puts MORE THAN ONE ENERGY '
         'TYPE on ONE BOILER PLANT that carries every energy type the group '
-        f'uses. The reference retains one boiler per energy type, which may '
-        f'conflict with {sentence_six}, whose applicable subclause depends '
-        f'on the reference plant capacity and is NOT established here. '
-        f"NEITHER {ratio_article}'s capacity-ratio clause (a) nor its "
-        'operating-priority clause (b) is computed or enforced, so the '
-        'allocation is NOT VERIFIED in either direction, and a passing '
-        'annual result is not evidence that it is satisfied',
+        'uses, and the reference ADOPTS that plant with its own device count '
+        f'and fuels. After sizing, the staging pass sets the plant\'s live '
+        f'capacity by primary/secondary ROLE, BLIND to energy type, so the '
+        f'proposed installed allocation is NOT carried through and the '
+        f'surviving fuel need not be the one elected for the reference. '
+        f'Whether that conflicts with {sentence_six} is NOT established '
+        f'here, because its applicable subclause depends on the reference '
+        f'plant capacity. NEITHER {ratio_article}\'s capacity-ratio clause '
+        f'(a) nor its operating-priority clause (b) is computed or enforced, '
+        'so the allocation is NOT VERIFIED in either direction, and a '
+        'passing annual result is not evidence that it is satisfied',
         target=target, inputs=inputs,
         article=f'{ratio_article}; {sentence_six}')
 
@@ -2161,32 +2203,25 @@ def _reference_energy_type(group, selection, facts, audit):
                        inputs={'part_load_curve_class': part_load_curve_class},
                        article=purchased_heating['article'], ruling='D-89')
         return 'gas', part_load_curve_class
-    # MULTI-ENERGY: 8.4.4.9.(5) requires the reference's heating capacities
-    # to match the proposed allocation per energy type. We do not reconcile
-    # that with 8.4.4.9.(6), and Sol MEASURED why rather than inferring it
-    # (`111`): for both dual-fuel fixtures the reference retains BOTH
-    # autosized boilers —
+    # MULTI-ENERGY: this function ELECTS one energy type and says nothing
+    # about 8.4.x.9.(5). The disclosure moved out to
+    # `_disclose_multi_energy`, which `_finalize` calls after EVERY election
+    # path — including the heat-pump auxiliary election, which used to skip
+    # this function entirely and so emitted no disclosure at all (Sol, `114`).
     #
-    #   proposed    gas 52.186 kW  electric 52.186 kW
-    #   reference   gas 52.263 kW  electric 52.263 kW   (104.5 kW total)
+    # The cascade below prefers a fossil fuel whenever one is present. It does
+    # NOT weigh the proposed capacity allocation: a capacity-dominant election
+    # was written, measured to flip the reference's whole system type on a
+    # sized electric-dominant plant, and separated onto its own branch because
+    # no frozen scenario exercised it (Sol, `113`).
     #
-    # — and the secondary's "0kBtu/hr" NAME does not zero its sized capacity.
-    # At 104.5 kW the plant is under 176 kW, where (6)(b) prescribes ONE
-    # single-stage boiler. So the reference currently violates (6)(b) while
-    # arguably satisfying (5)(a) by accident, both fuels landing 50/50. That
-    # is the opposite way round from what this comment first claimed.
-    #
-    # Sol's `112` also REJECTED the hydronic carve-out I proposed: (5) is
-    # conditioned on the PROPOSED system's energy types with no hydronic
+    # Sol's `112` REJECTED the hydronic carve-out I proposed, and Fable's
+    # `117` confirmed the reading against the live text of both editions: (5)
+    # is conditioned on the PROPOSED system's energy types with no hydronic
     # exclusion, (6) constrains a reference plant without replacing (5), and
     # (4) shows the Code writes "Except as provided in Sentence (5)" when it
     # intends an exception. Table -B's System 2 is inherently hydronic and
     # dual-fuel-capable, so a carve-out would silently exempt it.
-    #
-    # Pending phylroy's ruling on the cardinality-versus-fuel overlap, this
-    # emits ONE unresolved warning per serving plant. It does not claim the
-    # ratio is implemented, does not guess an allocation, and does not imply
-    # a green annual result is compliance with either article.
     if any(re.search(r'gas|oil|propane', str(f), re.IGNORECASE) for f in fuels):
         return 'gas', None
     if 'Electricity' in fuels:
