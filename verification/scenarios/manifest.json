@@ -2,10 +2,10 @@
  "version": 2,
  "spec_sha256": "ca661a5cfb1a69f6b16b7f0b4d2f2e4afb4a593e3fcb1af37f4107fcf050e107",
  "provenance": {
-  "commit": "5707f947aabb72bc4fdd223fcd24686466503b75",
+  "commit": "8983363095710c6506a41cb9993831b7f87686b5",
   "dirty": false,
   "freezer_sha256": "4d8c2ff76da26c5c75e95001c1e3405b78b33a4f163edcf5ff2032cde341804d",
-  "defs_sha256": "ff10872c31799b84999b072477116e1bf0a1510617abd6fd9fcae4486f86eaef",
+  "defs_sha256": "c7ed09c5476954b5e4bb09c4908b3878d33cd14cf555cf8809a349d3930fa4c1",
   "runner_sha256": "7333ea6fd76fc8e4c430958a40a37ab57ed48e4003808457988a39be871c813f",
   "api_worker_sha256": "fbd1870815b1078305a16d84669c7a7e1d5a735344ee17301bcb3539a213b417",
   "compare_runs_sha256": "b8f1f60f5e285047ede41cdcb933296564ec0130a8c3946ab03b5a6a014e08ec",
@@ -25,7 +25,7 @@
   },
   "active_seals": {
    "python-only:post-handoff": 31,
-   "python-only": 15
+   "python-only": 16
   },
   "retired_seals": {
    "ruby": 29,
@@ -45,7 +45,7 @@
  "counts": {
   "python": 34,
   "verify": 6,
-  "parity": 6
+  "parity": 7
  },
  "scenarios": [
   {
@@ -1485,6 +1485,66 @@
     "report.json": "d2ea0f59ec4ac1b3e91b2342f0cffd9717a375378d472a528f0cb5006a2d66f0",
     "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout.txt": "d88d9b9ea18f1a664d5c0799f0f75b2d355949b9387a357e38c5ab5053ef2950"
+   }
+  },
+  {
+   "id": "corpus-annual-09-water-source-hp",
+   "lane": "parity",
+   "kind": "cli",
+   "replaces": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "argv": [
+    "<CORPUS>/09-water-source-hp.osm",
+    "--simulate",
+    "annual",
+    "--quick",
+    "--epw",
+    "<EPW>",
+    "--hdd",
+    "3890",
+    "--storeys",
+    "1",
+    "--no-report",
+    "--quiet",
+    "-o",
+    "<RUN_DIR>"
+   ],
+   "env": {},
+   "expect_exit": 6,
+   "files": [
+    "audit.json",
+    "report.json"
+   ],
+   "text_files": {
+    "audit.txt": "normalized"
+   },
+   "streams": {
+    "stdout": "exact",
+    "stderr": "exact"
+   },
+   "seal": "python-only:first frozen for the 8.4.x.9.(5) conditional determination \u2014 authored after the Ruby product retired; no cross-language attestation exists for this scenario",
+   "asserts": [
+    {
+     "op": "json_gt",
+     "file": "report.json",
+     "path": "proposed.total_site_kwh",
+     "value": 0
+    },
+    {
+     "op": "json_exists",
+     "file": "report.json",
+     "path": "proposed.unmet_occupied_hours"
+    }
+   ],
+   "baseline_sha256": {
+    "audit.json": "d52a2bc4017b00b89020d69504f8820e9a1577f55303b6843c11eeea17bcf6be",
+    "audit.txt": "8945889aff1f2d3a1b27f6bc630e442253176aea090b0154326f14b8f609dbe0",
+    "report.json": "e6252ce5e24c696e233e350b040f180ed1380ef94b913aa084ea62792bf89c7a",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "39250cae7b5272bd271839f2ab6b6d41564fb5a8268039d18ff2587ec86ab2f4"
    }
   },
   {

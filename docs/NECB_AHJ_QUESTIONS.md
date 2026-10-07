@@ -262,8 +262,9 @@ mutually-exclusive-controls test AHJ-4 settled. A normal source-loop boiler
 that runs while compressors run does not qualify.
 
 **Was the hole.** Until `126` this entry said NOTHING fires for that shape and
-called it a hole rather than a disposition. It now has an answer, and the
-disclosure it implies is unimplemented rather than undecided.
+called it a hole rather than a disposition. That is now HISTORY, not present
+behaviour: the ruling landed, the predicate is fixed, and the disclosure
+fires.
 
 **The original observation.** In sample 09 `classify` types the `Heat Pump Loop` as
 hot-water with NaturalGas, while every WSHP group's heating energy types read
@@ -274,14 +275,12 @@ text does not settle.
 
 **Established by.** Fable `117` O2.
 
-**What the tool does meanwhile.** NOTHING — no disclosure fires for that
-shape, because the group's own fuel list is single-valued.
-
-**That is a HOLE, not a disposition.** Sol's `122`: under phylroy's standing
-direction this must either be resolved or surfaced at runtime, and listing it
-as open-but-silent contradicts the behaviour the README now documents. Until
-one or the other happens, the README's "if your building hits one, the run
-says so" is not true of this shape, and the README says so.
+**What the tool does now.** `service_set_heating_fuels` adds the source-loop
+plant's fuels to the group's service set, so 8.4.x.9.(5) is disclosed as
+UNRESOLVED once per affected serving group. MEASURED on frozen sample 09: its
+warnings went from 55 to 60 and twelve serving groups now disclose. The
+8.4.2.2.(5) backup exclusion is not detected, so a genuinely standby boiler is
+OVER-disclosed.
 
 ## AHJ-6 — the catalog offers no oil or propane variant
 
@@ -534,8 +533,16 @@ tie-break is in the text.
 
 **Established by.** Sol `122`, decision-log audit.
 
-**What the tool does meanwhile.** It applies D-18's rule and audits the
-assignment, so a reviewer can see which facade a corner block was given.
+**What the tool does meanwhile.** It applies D-18's rule — largest
+exterior-wall area with an N/E/S/W tie-break — and **the choice is NOT
+audited.** This entry previously claimed it was. Sol's `127` traced the
+deciding code to
+`btap.modeling.hvac.systems.vav_reheat.VAVReheat._dominant_orientation`, which
+has no audit object, and the later `multizone selection groups merged` entry
+records neither the corner block's identity nor the elected facade. So a
+reviewer today cannot see which facade a corner block was given. Closing that
+needs the generic grouping operation to return structured evidence for the
+NECB layer to audit — a metadata handoff, not a second copy of the rule.
 
 ## AHJ-11 — heating in a two-pipe System 5 reference
 
@@ -666,7 +673,10 @@ exists. D-93 and D-97 decline in those cases and retain a simulator default.
 
 **What the tool does meanwhile.** It DECLINES rather than guessing, emitting an
 unresolved warning per affected loop and leaving the simulator default in
-place — which is the conservative behaviour and still not a Code reading.
+place. That is NOT a conservative bound, which this entry previously
+claimed: D-97's runtime warning and Sol's `126` both say the retained
+default may bias the reference in EITHER direction. Declining to guess is
+defensible; calling the result conservative was not.
 
 ## AHJ-17 — no air-cooled chiller performance curve is shipped
 

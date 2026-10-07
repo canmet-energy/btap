@@ -89,7 +89,11 @@ class TestEveryEntryStatesItsInterimBehaviour(unittest.TestCase):
             ident = section.split(" ", 1)[0].strip()
             lowered = section.lower()
             self.assertTrue(
+                # "now" as well as "meanwhile": once a question is RULED and
+                # the fix has landed, "meanwhile" is the wrong tense — AHJ-5
+                # describes measured present behaviour, not a holding action.
                 "what the tool does meanwhile" in lowered
+                or "what the tool does now" in lowered
                 or "no referral needed" in lowered,
                 f"{ident} does not say what the tool does in the meantime")
 

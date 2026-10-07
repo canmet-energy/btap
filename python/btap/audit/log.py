@@ -13,7 +13,8 @@ ruling: WHICH adjudicated project decision(s) govern this code path — the D-XX
 ids of the family's decision record. Where `article` cites the CODE that
 mandates a value, `ruling` cites OUR judgement call about how that code was
 read. Multiple ids are ONE space-separated string ('D-19 D-21'); consumers
-scan r'\\bD-\\d{2}\\b'.
+scan r'\\bD-\\d+\\b'. Unbounded: `D-01` through `D-99` are all taken, so
+the next decision is `D-100` and a two-digit scan would not see it.
 
 building: WHICH model the entry is about ('input model', 'proposed building',
 'reference building'), stamped from the current building context a pipeline
