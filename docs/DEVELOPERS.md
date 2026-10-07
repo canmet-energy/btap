@@ -199,6 +199,22 @@ Do not open an entry for something implementable. A requirement the tool
 could satisfy is a coverage gap; a referral is for a question an authority has
 to answer.
 
+### The `editions` field
+
+Decision front matter carries `editions`: the code ids the decision governs,
+or `unverified`. Validated against the editions discovered under
+`btap/codes/necb/data/`, so a typo or a retired id fails the generator rather
+than quietly misinforming a reader. No collective words — list the ids.
+
+```bash
+cd python && .venv/bin/python -m unittest tests.necb.test_decisions_generator
+```
+
+98 of 99 decisions are `unverified`. Filling one in means checking the
+decision's reasoning against that edition's own text, not inferring from the
+article numbers: 2020's `8.4.4.x` and 2025's `8.4.5.x` are different spellings
+of articles that may or may not say the same thing.
+
 ## Frozen scenarios
 
 `verification/scenarios/` contains 46 scenarios in three lanes:

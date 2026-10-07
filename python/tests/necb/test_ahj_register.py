@@ -122,6 +122,16 @@ class TestTheStatusTaxonomyIsHonoured(unittest.TestCase):
                 out[m.group(1)] = m.group(2)
         return out
 
+    def _editions(self):
+        """The `editions` column, as (id, value)."""
+        out = {}
+        for line in _register_text().splitlines():
+            m = re.match(
+                r"\|\s*(AHJ-\d+)\s*\|[^|]*\|[^|]*\|\s*([a-z0-9, ]+?)\s*\|", line)
+            if m:
+                out[m.group(1)] = m.group(2).strip()
+        return out
+
     def test_every_entry_has_a_row_with_a_known_status(self):
         rows = self._rows()
         self.assertEqual(_register_ids(), set(rows),
@@ -148,6 +158,76 @@ class TestTheStatusTaxonomyIsHonoured(unittest.TestCase):
                 f"{ident} is cited by the conditional determination but its "
                 f"status is {rows.get(ident)!r}; only a referral or an "
                 f"alternative solution may set a run conditional")
+
+
+class TestEveryEntrySaysWhichEditionsItAffects(unittest.TestCase):
+    """phylroy asked whether the register should carry the affected edition.
+    It must: a decision taken against one edition's text otherwise reads as
+    applying to both, and NECB 2025 already differs in at least one way that
+    matters (its 8.4.2.12 exceptional-calculation route has no 2020
+    equivalent).
+
+    The vocabulary is `code`/`edition`. `vintage` is retired everywhere in
+    this repository, so the register must not reintroduce it.
+    """
+
+    @staticmethod
+    def _registered_codes():
+        """The code ids that actually exist, discovered rather than listed, so
+        adding an edition does not leave this gate stale."""
+        data = PRODUCT / "codes" / "necb" / "data"
+        return {p.parent.name for p in data.glob("*/manifest.json")}
+
+    def test_every_entry_lists_REAL_code_ids_or_is_unverified(self):
+        """phylroy: an authority must know WHICH code is affected, and a
+        collective noun does not scale past two editions. So the column holds
+        code ids, validated against the editions that exist."""
+        codes = self._registered_codes()
+        self.assertTrue(codes, "no registered editions discovered")
+        eds = TestTheStatusTaxonomyIsHonoured()._editions()
+        self.assertEqual(_register_ids(), set(eds),
+                         "every entry needs an editions value")
+        for ident, value in sorted(eds.items()):
+            if value == "unverified":
+                continue
+            listed = {v.strip() for v in value.split(",") if v.strip()}
+            self.assertTrue(
+                listed, f"{ident}: empty editions value")
+            unknown = listed - codes
+            self.assertEqual(
+                set(), unknown,
+                f"{ident} lists code id(s) that are not registered: "
+                f"{sorted(unknown)}; registered are {sorted(codes)}")
+
+    def test_no_entry_uses_a_COLLECTIVE_noun_for_the_editions(self):
+        """"both" was the first version of this column and it does not scale:
+        a third edition would make every such row claim coverage nobody
+        checked."""
+        eds = TestTheStatusTaxonomyIsHonoured()._editions()
+        for ident, value in sorted(eds.items()):
+            for banned in ("both", "all", "any", "every"):
+                self.assertNotEqual(
+                    banned, value.strip().lower(),
+                    f"{ident} says {value!r}; list the code ids instead")
+
+    def test_the_register_does_not_USE_the_retired_word_as_a_concept(self):
+        """`vintage` is retired as a field and a concept; `code`/`edition` is
+        the vocabulary. The register may NAME it to warn against it, and may
+        cite the `vintage-match` verification by its actual name — what it
+        must not do is use it as the label for an edition.
+
+        The gate's first version failed on this file's own warning sentence,
+        which is the difference between forbidding a word and forbidding a
+        usage."""
+        for line in _register_text().lower().splitlines():
+            if "vintage" not in line:
+                continue
+            allowed = ("vintage-match" in line or "vintage_match" in line
+                       or "retired" in line)
+            self.assertTrue(
+                allowed,
+                f"register uses 'vintage' as an edition label: "
+                f"{line.strip()[:90]}")
 
 
 if __name__ == "__main__":

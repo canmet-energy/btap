@@ -85,7 +85,8 @@ runs in the `verify` CI job. Live oracle checks run only in `parity`.
 ## Decisions and coverage
 
 One decision is one file: `docs/decisions/D-NN.md`, TOML front matter
-(`id`, `title`, `kind`, `articles`, `summary`) plus the authored Markdown body,
+(`id`, `title`, `kind`, `articles`, `editions`, `summary`) plus the authored
+Markdown body,
 whose first line is its own `## D-NN —` heading. That file is CANONICAL.
 Both `docs/necb_decisions.md` and `python/btap/codes/data/decisions.json` are
 GENERATED from the sources by `generate_decisions.py`, in numeric id order, and
@@ -94,6 +95,20 @@ convention a body does not declare its own `d-NN` anchor. The front-matter
 `title` is the
 compact index title and the body's heading is authored prose, which differ on
 purpose. A `kind: runtime` entry must be cited by product Python source.
+
+`editions` lists the CODE IDS a decision governs — `necb2020`, `necb2025`,
+both comma-separated — or the single literal `unverified`. It is validated
+against the editions DISCOVERED under `btap/codes/necb/data/`, so registering a
+new edition does not leave the check stale, and it never takes a collective
+word: "both" stops meaning anything once a third edition exists, and `vintage`
+is retired vocabulary. `unverified` may not be mixed with a code id — either a
+decision has been checked against that edition or it has not. Of the 99
+decisions, 98 are `unverified`: they were authored before the field existed,
+mostly against one edition's text, and asserting a list for them would be a
+guess. That is a DECLARED gap where it used to be a silent one; establishing
+them is open work. **The id grammar `^D-\d{2}$` is now EXHAUSTED** — D-01
+through D-99 all exist — so a new decision needs a grammar change, which is
+itself a decision with no id available to record it.
 
 ```bash
 python3 python/scripts/generate_decisions.py        # regenerate both outputs

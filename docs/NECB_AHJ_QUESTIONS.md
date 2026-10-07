@@ -28,29 +28,73 @@ contract this file had just stated:
 | `ruled` | settled against normative text; no authority needed | no |
 | `tool-gap` | implementable; a defect to close, NOT an interpretation | no |
 
+## Which editions an entry affects
+
+The `editions` column lists the CODE IDS an entry applies to, explicitly —
+`necb2020`, `necb2025`, both of them comma-separated, or `unverified` where it
+has not been checked per edition.
+
+**It never says "both", and never a collective noun.** An authority reading
+this has to know WHICH code their project is under, and a word like "both"
+stops meaning anything the moment a third edition is registered — every entry
+would silently read as covering an edition nobody checked it against. The code
+id is this repository's one public selector, so it is what the column carries.
+The vocabulary is `code` and `edition`; "vintage" is retired everywhere here.
+
+A listed id is asserted only where it was ESTABLISHED, not assumed. For AHJ-1 to
+AHJ-3 Sol fetched both editions and reported 8.4.4.9 and 8.4.5.9 word-for-word
+identical in the governing sentences. For AHJ-7 the codes service states the
+chiller defect is "identical in NECB 2020 (8.4.5.5-C) and 2025 (8.4.6.5-C)".
+For AHJ-8 it gives per-edition counts, "140 A and 163 B marks per edition", and
+both editions' shipped tables were inspected here. AHJ-9's vintage-match
+verdict is `identical` for both.
+
+**Adding an edition means revisiting this file.** A new code id does not
+retroactively join any entry's list, and `unverified` is the correct value for
+an entry nobody has checked against it. `test_ahj_register.py` validates every
+listed id against the editions actually registered under
+`python/btap/codes/necb/data/`, so a typo or a retired id fails rather than
+quietly misinforming a reader.
+
+AHJ-10 to AHJ-16 come from the decision-log audit and are `unverified`: the
+decisions they derive from carry NO edition applicability of their own, so
+asserting `both` would be a guess. One known asymmetry already matters — Sol
+noted NECB 2025 has an exceptional-calculation route at 8.4.2.12 with no 2020
+equivalent, which bears on how AHJ-1 could be remedied in one edition and not
+the other.
+
+**The decisions have the same gap, and it is larger.** All 99 `docs/decisions/
+D-NN.md` files carry exactly `id`, `title`, `kind`, `articles` and `summary` —
+no edition or applicability field — so a decision taken against one edition's
+text reads as applying to both. Recording applicability properly is queued work
+that would itself warrant a decision, and `^D-\d{2}$` is now exhausted at
+D-99, so that is blocked on a registry-grammar change. Until then, an
+`unverified` row here is honest and a `both` row is a claim with evidence
+behind it.
+
 Calling a tool gap a referral would launder a defect as an ambiguity. Sol
 listed twelve decisions in `122` that are tool or data gaps for exactly that
 reason, including D-92's variable-speed reference pumps, which are a plain
 nonconformity with 8.4.x.9.(6)(e).
 
-| id | article | status | sets a run conditional |
-| --- | --- | --- | --- |
-| AHJ-1 | 8.4.x.9.(5)(a)/(b) | alternative-solution | yes — `compliance_determination: conditional` |
-| AHJ-2 | 8.4.x.9.(5) vs 8.4.x.13 | referral | not yet (see the entry) |
-| AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | yes, where a hydronic plant carries both fuels |
-| AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | no |
-| AHJ-5 | WSHP source boiler as an "energy type" | referral | **no — and that is a hole, see the entry** |
-| AHJ-6 | 8.4.x.9.(4) oil/propane to a gas reference | tool-gap | no |
-| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | **no — see the entry; phylroy's call** |
-| AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | no |
-| AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | no |
-| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | not yet |
-| AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | not yet |
-| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | not yet |
-| AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | referral | not yet |
-| AHJ-14 | boiler/furnace part-load class selection | referral | not yet |
-| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | not yet |
-| AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | not yet |
+| id | article | status | editions | sets a run conditional |
+| --- | --- | --- | --- | --- |
+| AHJ-1 | 8.4.x.9.(5)(a)/(b) | alternative-solution | necb2020, necb2025 | yes — `compliance_determination: conditional` |
+| AHJ-2 | 8.4.x.9.(5) vs 8.4.x.13 | referral | necb2020, necb2025 | not yet (see the entry) |
+| AHJ-3 | 8.4.x.9.(6) cardinality vs a two-fuel ratio | referral | necb2020, necb2025 | yes, where a hydronic plant carries both fuels |
+| AHJ-4 | 8.4.2.2.(5) backup exclusion | ruled | necb2020, necb2025 | no |
+| AHJ-5 | WSHP source boiler as an "energy type" | referral | necb2020, necb2025 | **no — and that is a hole, see the entry** |
+| AHJ-6 | 8.4.x.9.(4) oil/propane to a gas reference | tool-gap | necb2020, necb2025 | no |
+| AHJ-7 | Table 8.4.5.5.-C / 8.4.6.5.-C chiller EIR_FT | referral | necb2020, necb2025 | **no — see the entry; phylroy's call** |
+| AHJ-8 | Table 4.2.1.6 Note (1) A/B control marks | tool-gap | necb2020, necb2025 | no |
+| AHJ-9 | Table A-8.4.3.2.(1)-G and the '12' column heads | ruled | necb2020, necb2025 | no |
+| AHJ-10 | Table 8.4.x.7.-B Note (3) corner-block grouping | referral | unverified | not yet |
+| AHJ-11 | 8.4.x.1.(5) vs Table 8.4.x.7.-B System 5 heating | referral | unverified | not yet |
+| AHJ-12 | Table 8.4.x.7.-B Note (1) "where present" humidification | referral | unverified | not yet |
+| AHJ-13 | Table 5.2.12.1.-K Path A vs Path B | referral | unverified | not yet |
+| AHJ-14 | boiler/furnace part-load class selection | referral | unverified | not yet |
+| AHJ-15 | 8.4.x.9.(3) terminal-vs-plant dispatch priority | referral | unverified | not yet |
+| AHJ-16 | 8.4.x.14 N:1 system correspondence | referral | unverified | not yet |
 
 ---
 
@@ -386,8 +430,20 @@ They are reading instructions for a consumer of the data. They are recorded
 because getting either wrong would silently shift a whole schedule: mapping
 the 21 rows to the wrong blocks, or reading `12a` as noon, would move every
 hourly profile by twelve hours or attribute one block's values to another.
-**Whether our loaders honour both instructions is unverified** and is worth a
-test, which is a tool-side task rather than a question for an authority.
+**VERIFIED 2026-10-07, and both are honoured.** The vintage-match pass
+compares `tables/schedules.json` against the MCP payloads for all eleven
+schedule tables, the label-less G table among them, and the verdict is
+**identical** in BOTH editions with zero differing leaves. Our values therefore
+equal the served form, so the 21-row block mapping and the noon/midnight
+disambiguation were carried correctly at extraction. No `12p`/`12a` key appears
+in our shipped data and no product code reads one; the schedules are stored as
+24-value hourly series.
+
+A weaker check was tried first and rejected: flagging occupancy-type rows whose
+value at 00:00 exceeds the value at noon. It returns 23 rows, and inspection
+shows they are flat 24/7 profiles and legitimately night-occupied building
+types, not shifted schedules. It cannot distinguish the two, so it is not
+evidence either way. The vintage-match verdict is.
 
 ---
 

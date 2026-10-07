@@ -28,6 +28,10 @@ GOOD_META = {
     "title": "A compact registry title",
     "kind": "process",
     "articles": ["8.4.4.14."],
+    # phylroy asked for the affected code to be explicit (2026-10-07);
+    # `unverified` is a first-class value, so the fixture uses a real
+    # code id to exercise the validated path.
+    "editions": ["necb2020"],
     "summary": "A paraphrase of what was decided.",
 }
 GOOD_BODY = "## D-01 {} An authored heading, not the title\n\nBody text.\n".format(EM)
@@ -492,6 +496,64 @@ class TestSplitIsNotAWriter(unittest.TestCase):
             registry = Path("unused")
 
         self.assertEqual(1, G.run_split(Args()))
+
+
+class TestTheEditionsField(unittest.TestCase):
+    """phylroy, 2026-10-07: a decision taken against one edition's text read as
+    applying to every edition, because the front matter said nothing about
+    which code it governs. An authority has to know WHICH code their project
+    is under.
+
+    The field lists CODE IDS, validated against the editions discovered under
+    `btap/codes/necb/data/`, or the single literal `unverified`. It is never a
+    collective word: "both" would stop meaning anything the moment a third
+    edition is registered, and `vintage` is retired vocabulary.
+    """
+
+    def test_a_registered_code_id_is_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["necb2025"]))
+            G.parse_source(Path(d) / "D-01.md")     # must not raise
+
+    def test_unverified_alone_is_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["unverified"]))
+            G.parse_source(Path(d) / "D-01.md")
+
+    def test_an_UNREGISTERED_code_id_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["necb2030"]))
+            with self.assertRaises(ValueError) as caught:
+                G.parse_source(Path(d) / "D-01.md")
+            self.assertIn("necb2030", str(caught.exception))
+
+    def test_a_COLLECTIVE_word_is_refused(self):
+        """The failure mode this field exists to prevent."""
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=["both"]))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_unverified_may_not_be_MIXED_with_a_code_id(self):
+        """Either it has been checked against that edition or it has not."""
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META,
+                               editions=["necb2020", "unverified"]))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_an_empty_list_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            write(d, meta=dict(GOOD_META, editions=[]))
+            with self.assertRaises(ValueError):
+                G.parse_source(Path(d) / "D-01.md")
+
+    def test_the_allowed_ids_are_DISCOVERED_not_hardcoded(self):
+        """So registering a new edition does not leave the validation stale."""
+        codes = G.registered_codes()
+        self.assertIn("necb2020", codes)
+        self.assertIn("necb2025", codes)
+        self.assertNotIn("unverified", codes)
 
 
 if __name__ == "__main__":

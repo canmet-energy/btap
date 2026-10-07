@@ -39,7 +39,7 @@ class TestFreezeSealTransition(unittest.TestCase):
         # step 3 (R-O-a), the 2 purchased-heating scenarios; and since DF-17,
         # the 4 hydronic-VAV scenarios — none of which has cross-language
         # history to convert from.
-        self.assertEqual({"python-only:post-handoff": 31, "python-only": 14}, active)
+        self.assertEqual({"python-only:post-handoff": 31, "python-only": 15}, active)
         self.assertEqual({"ruby": 29, "ruby-api": 2}, retired)
         self.assertEqual({
             "commit": "85ab14352677093e24038d933cf1071e5b03431a",
