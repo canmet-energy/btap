@@ -146,6 +146,7 @@ audit are drained and archived — see `docs/README.md`.
 - **D-96** — The package relicenses from LGPL-3.0-or-later to GPL-3.0-or-later _(process)_
 - **D-97** — 8.4.x.14.(2) combines pumps within one hydronic system, not across consolidated ones _(runtime)_
 - **D-98** — A baseline records its producer; freezing stays local until an image digest is obtainable _(process)_
+- **D-99** — A reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification _(runtime)_
 
 <!-- TOC END -->
 
@@ -6546,3 +6547,83 @@ So the follow-on is: `ci-image.yml` emitting the pushed digest, a freeze
 workflow running in that image and returning its output, and `freeze.py`
 filling `container_digest`. The fields recorded here are exactly what that end
 state records **plus** the digest, so nothing done now is wasted.
+
+<a id="d-99"></a>
+
+## D-99 — a reference that cannot satisfy a requirement yields a CONDITIONAL result, not a certification
+
+- **Decision:** where a reference model is known not to implement a
+  requirement that governs the building, the run reports its comparison and
+  **labels the determination as conditional** rather than returning a
+  compliance certification. The exit code is unchanged. The label states what
+  an authority having jurisdiction must accept, and what follows if it does
+  not.
+- **Scope today:** 8.4.x.9.(5), multi-energy proposed heating systems. The
+  mechanism is general; this is the only requirement that currently uses it.
+
+### Why (4) does not apply, and (5) is not satisfiable here
+
+Sentence 8.4.x.9.(4) opens **"Except as provided in Sentence (5)"**, which is
+how the Code writes an exception. For a group whose proposed heating system
+uses more than one energy type, (4) therefore has no reading at all — (5)
+governs, and requires both
+
+- **(5)(a)** the reference heating capacities to match the **ratio** of the
+  proposed building's capacity allocation per energy type, and
+- **(5)(b)** its operating schedule, priority of use and other operational
+  characteristics to apply.
+
+This tool elects one reference energy type and computes no ratio. Sol ruled on
+text fetched from the codes MCP that no single-fuel basis satisfies (5)(a):
+not the fossil-first cascade, not capacity-dominant, not lead-fuel, not
+annual-dominant. A capacity-dominant election was implemented, measured and
+abandoned on that ruling.
+
+### Why that cannot be reported as compliance
+
+8.4.1.2 defines the comparison, Division A defines the building energy target
+as requiring the same energy sources for the same functions, 8.4.2.10 governs
+the reference model's conformity, and Division C 2.2.2.8 governs what may be
+submitted. Together they mean a knowingly non-conforming reference cannot
+support an unqualified determination. The treatment is a product decision;
+phylroy chose informational **and** conditional, so the numbers stay useful
+while the claim stays honest.
+
+### What an authority is asked to accept, and why they differ
+
+- **An alternative solution.** (5)(a) decides the question — the capacities
+  "shall match the ratio" — and we do not comply. Accepting the comparison
+  means accepting a non-conforming modelling substitution, identified as
+  such. This is not an ambiguity and is not written as one.
+- **An interpretation.** How a two-fuel ratio may be **represented** when
+  (6) bands the reference plant's boiler count and each simulation boiler
+  object carries one fixed fuel is genuinely unsettled by the
+  acceptable-solution text. Raised only where one plant carries the group's
+  fuels, because (6) governs "where a hydronic system is modeled".
+
+### What is NOT claimed
+
+Nothing about the reference's final equipment. Four outcomes are reachable and
+the entry lists them without electing one: the proposed plant adopted; a
+different plant built by the selected variant after this one is torn down; no
+plant at all where the variant needs no boiler; or a hydronic plant staged
+after sizing by primary/secondary role, **blind to fuel** — which preserves an
+equal role-labelled pair in the two-boiler band, drives a recognised secondary
+below the single-boiler threshold to ~0 W, and does nothing at all to a plant
+whose devices take no recognised role, since the resolver requires exactly
+two.
+
+Six successive reviews each found this entry asserting one of those as
+general. The rule that ended it is narrower than "measure before claiming":
+**do not generalise a measurement past the configuration it was taken on.**
+
+### The register, and what this decision does not excuse
+
+`docs/NECB_AHJ_QUESTIONS.md` records these questions with four statuses.
+Only `referral` and `alternative-solution` may set a run conditional; `ruled`
+and `tool-gap` may not, so a defect is never dressed as an interpretation.
+
+This decision does **not** excuse the gap. Computing the allocation and
+verifying it is tool-side work, as is carrying Table 4.2.1.6's A and B control
+marks (AHJ-8) and the air-cooled chiller curves (AHJ-7). A conditional result
+is the honest interim state, not a destination.

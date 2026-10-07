@@ -484,7 +484,7 @@ def _mark_informational_if_multi_energy(run, audit):
                inputs={"serving_systems": names,
                        "determination": "conditional",
                        "condition": "AHJ approval of the interpretation"},
-               article=article)
+               article=article, ruling="D-99")
 
 
 # 8. Part 11 operational GHG performance level, for the editions that have
