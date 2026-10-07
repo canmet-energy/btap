@@ -18,8 +18,8 @@ compliance paths share — so nothing is silently missed.
 
 | | NECB 2020 | NECB 2025 |
 |---|---|---|
-| Implemented | 62 | 64 |
-| Partial (warns every run) | 28 | 29 |
+| Implemented | 61 | 63 |
+| Partial (warns every run) | 29 | 30 |
 | Not implemented (warns every run) | 4 | 4 |
 | Satisfied by construction (clone) | 3 | 3 |
 | Host / other-domain scope | 12 | 12 |
@@ -29,7 +29,7 @@ compliance paths share — so nothing is silently missed.
 <details>
 <summary><b>NECB 2020</b> — 119 entries (click to expand)</summary>
 
-### Implemented (62)
+### Implemented (61)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
@@ -52,7 +52,6 @@ compliance paths share — so nothing is silently missed.
 | hvac | 8.4.4.8. | Equipment Oversizing | Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded. — Code: `reference.py#_apply_oversizing_caps` |
 | hvac | 8.4.4.9.(1) | Heating System | reference heating system selected per Table 8.4.4.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.4.9.(2) | Heating System | purchased energy routes to Article 8.4.4.6. — Code: `reference.py#_reference_energy_type` |
-| hvac | 8.4.4.9.(4) | Heating System | reference heating energy type modeled identical to the proposed (structural election; see also 8.4.4.13.(2)(g)) — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.4.9.(8) | Heating System | heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.5.: Table 8.4.5.2.-A and the ten points of Table 8.4.5.2.-B for boilers, Table 8.4.5.3 for furnaces); the as-applied class, table row and curve points are audited per D-89 — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.4.10.(1) | Cooling Systems | reference cooling system selected per Table 8.4.4.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.4.10.(2) | Cooling Systems | purchased energy routes to Article 8.4.4.6. — Code: `reference.py#_reference_energy_type` |
@@ -96,7 +95,7 @@ compliance paths share — so nothing is silently missed.
 | shw | 8.4.3.2. (SWH loads) | Service water heating loads representative of the building | per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (openstudio-loads data) — Code: `demand.py#apply_shw`, `demand.py#_add_water_use` |
 | shw | 8.4.4.20.(2) | HP-source SWH -> air-source HP in the reference | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction — Code: `demand.py#_wrap_heat_pump`, `efficiency.py#apply_heat_pump_efficiency` |
 
-### Partial (warns every run) (28)
+### Partial (warns every run) (29)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
@@ -104,6 +103,7 @@ compliance paths share — so nothing is silently missed.
 | hvac | 8.4.4.6.(2) | Purchased Energy | purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config — Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#chilled_water` |
 | hvac | 8.4.4.6.(4) | Purchased Energy | operating schedules carry over to the representing equipment by clone — Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled — Code: `reference.py#_clone_model` |
 | hvac | 8.4.4.9.(3) | Heating System | terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50) — Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual — audited as an approximation, not claimed — Code: `reference.py#_audit_terminal_secondary_split`, `reference.py#_apply_zone_fan_rules` |
+| hvac | 8.4.4.9.(4) | Heating System | reference heating energy type modeled identical to the proposed, for a SINGLE-energy heating system (structural election; see also 8.4.4.13.(2)(g)) — Gaps: the sentence opens \u201cExcept as provided in Sentence (5)\u201d, so it does NOT govern a group whose proposed heating system uses more than one energy type — ruled on fetched normative text. For such a group the structural election is a SURROGATE for the unimplemented 8.4.4.9.(5), not an application of (4): no single-fuel basis — fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant — satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system and is not claimed as implemented here. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.4.9.(6) | Heating System | hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass — Gaps: the reference ADOPTS the proposed hot-water plant, so its device count and fuels are the proposed plant's — any number of boilers, not one per energy type. Sentence (6) bands the boiler count by the reference plant capacity, and no subclause is claimed at selection time because that capacity does not exist yet. What the implementation DOES do is set the plant's live capacity after sizing by primary/secondary ROLE — resolved from the builder feature, then the device name, then supply order — and BLIND to energy type: a secondary below the single-boiler threshold is driven to ~0 W. Three consequences are unverified against the Article. (i) The proposed installed allocation is NOT carried into the annual reference; it collapses onto whichever device holds the primary role, so 8.4.4.9.(5)(a) is not preserved by retaining the devices. (ii) Where the primary role falls on a device whose fuel is not the elected reference energy type, the surviving capacity is the rejected fuel. (iii) A plant with more than two heating devices has roles for only two, so the rest keep full capacity and more than one device can remain live below the single-boiler threshold. MEASURED on sample 11 only, under the previous edition: the boiler count made no difference to the annual result on the model fed to the sizing run, and that is not the model the annual run uses. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n. — Code: `plant_loops.py#hot_water`, `efficiency.py#_apply_boiler` |
 | hvac | 8.4.4.9.(7) | Heating System | furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized — Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning — EnergyPlus multispeed objects cannot hold a fifth (D-47) — Code: `efficiency.py#apply_staging`, `efficiency.py#_stage_multispeed_coil` |
 | hvac | 8.4.4.10.(7) | Cooling Systems | terminal/secondary split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50) — Gaps: systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such — Code: `reference.py#_audit_terminal_secondary_split` |
@@ -209,7 +209,7 @@ genuine open item to watch on a real run.
 <details>
 <summary><b>NECB 2025</b> — 122 entries (click to expand)</summary>
 
-### Implemented (64)
+### Implemented (63)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
@@ -232,7 +232,6 @@ genuine open item to watch on a real run.
 | hvac | 8.4.5.8. | Equipment Oversizing | Heating/cooling sizing factors set to min(proposed, 1.30/1.10) with the arithmetic recorded. — Code: `reference.py#_apply_oversizing_caps` |
 | hvac | 8.4.5.9.(1) | Heating System | reference heating system selected per Table 8.4.5.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.5.9.(2) | Heating System | purchased energy routes to Article 8.4.5.6. — Code: `reference.py#_reference_energy_type` |
-| hvac | 8.4.5.9.(4) | Heating System | reference heating energy type modeled identical to the proposed (structural election; see also 8.4.5.13.(2)(g)) — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.5.9.(8) | Heating System | heating part-load performance applied from this edition's own part-load tables by equipment class (Subsection 8.4.6.: Table 8.4.6.2 for boilers, Table 8.4.6.3 for furnaces); the as-applied class, table row and curve points are audited per D-89 — Code: `curves.py#build`, `efficiency.py#apply` |
 | hvac | 8.4.5.10.(1) | Cooling Systems | reference cooling system selected per Table 8.4.5.7.-A and this Article — Code: `reference.py#_assign` |
 | hvac | 8.4.5.10.(2) | Cooling Systems | purchased energy routes to Article 8.4.5.6. — Code: `reference.py#_reference_energy_type` |
@@ -278,7 +277,7 @@ genuine open item to watch on a real run.
 | shw | 8.4.3.2. (SWH loads) | Service water heating loads representative of the building | per-space WaterUseEquipment from the NECB space-type peak flows, target temperatures and NECB-<letter> SWH schedules (loads-domain data) — Code: `demand.py#apply_shw`, `demand.py#_add_water_use` |
 | shw | 8.4.5.20.(2) | HP-source SWH -> air-source HP in the reference | apply_shw(fuel: 'HeatPump') builds an air-source HPWH; a reference generated from it keeps the air-source energy type by construction — Code: `demand.py#_wrap_heat_pump`, `efficiency.py#apply_heat_pump_efficiency` |
 
-### Partial (warns every run) (29)
+### Partial (warns every run) (30)
 
 | Python domain | Article | Title | Notes |
 |---|---|---|---|
@@ -286,6 +285,7 @@ genuine open item to watch on a real run.
 | hvac | 8.4.5.6.(2) | Purchased Energy | purchased COOLING forces an air-cooled electric chiller ((2)(a)) via the chw_source config — Gaps: the (2)(b) capacity-ratio adjustment is sizing-time and not enforced — Code: `reference.py#_reference_energy_type`, `plant_loops.py#chilled_water` |
 | hvac | 8.4.5.6.(4) | Purchased Energy | operating schedules carry over to the representing equipment by clone — Gaps: priority-of-use and other operational characteristics of the purchased supply are not explicitly modelled — Code: `reference.py#_clone_model` |
 | hvac | 8.4.5.9.(3) | Heating System | terminal/secondary capacity split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting with a neutral supply-air strategy (D-50) — Gaps: systems 3, 4 and 6 mix outdoor air into the supply stream, so their split is approximated by ordinary mixed-air zone sizing with baseboards taking the residual — audited as an approximation, not claimed — Code: `reference.py#_audit_terminal_secondary_split`, `reference.py#_apply_zone_fan_rules` |
+| hvac | 8.4.5.9.(4) | Heating System | reference heating energy type modeled identical to the proposed, for a SINGLE-energy heating system (structural election; see also 8.4.5.13.(2)(g)) — Gaps: the sentence opens \u201cExcept as provided in Sentence (5)\u201d, so it does NOT govern a group whose proposed heating system uses more than one energy type — ruled on fetched normative text. For such a group the structural election is a SURROGATE for the unimplemented 8.4.5.9.(5), not an application of (4): no single-fuel basis — fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant — satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system and is not claimed as implemented here. — Code: `reference.py#_reference_energy_type` |
 | hvac | 8.4.5.9.(6) | Heating System | hydronic heating plant per the article: boiler staging 176/352 kW, modulating flow mode with the 25% floor, HWST 82/60 reset — plant defaults + the efficiency pass — Gaps: the reference ADOPTS the proposed hot-water plant, so its device count and fuels are the proposed plant's — any number of boilers, not one per energy type. Sentence (6) bands the boiler count by the reference plant capacity, and no subclause is claimed at selection time because that capacity does not exist yet. What the implementation DOES do is set the plant's live capacity after sizing by primary/secondary ROLE — resolved from the builder feature, then the device name, then supply order — and BLIND to energy type: a secondary below the single-boiler threshold is driven to ~0 W. Three consequences are unverified against the Article. (i) The proposed installed allocation is NOT carried into the annual reference; it collapses onto whichever device holds the primary role, so 8.4.5.9.(5)(a) is not preserved by retaining the devices. (ii) Where the primary role falls on a device whose fuel is not the elected reference energy type, the surviving capacity is the rejected fuel. (iii) A plant with more than two heating devices has roles for only two, so the rest keep full capacity and more than one device can remain live below the single-boiler threshold. NO ANNUAL MEASUREMENT HAS BEEN TAKEN FOR THIS EDITION. Separately, no boiler sizingFactor is set at all, so each parallel boiler sizes for the whole loop where the legacy realisation sets 1.0/n. — Code: `plant_loops.py#hot_water`, `efficiency.py#_apply_boiler` |
 | hvac | 8.4.5.9.(7) | Heating System | furnace staging IS modelled since D-46: gas-heated reference systems 3/4 build as an AirLoopHVACUnitarySystem holding a multi-stage gas coil, stage COUNT set post-sizing from the sized capacity with every stage capacity left autosized — Gaps: electric-resistance heating is not a furnace so it is not staged (D-49); zone-terminal and make-up-air equipment stays single-stage (D-48); more than four equal stages is CLAMPED at four with a shouted warning — EnergyPlus multispeed objects cannot hold a fifth (D-47) — Code: `efficiency.py#apply_staging`, `efficiency.py#_stage_multispeed_coil` |
 | hvac | 8.4.5.10.(7) | Cooling Systems | terminal/secondary split accounted for systems 1/2/5 via Sizing:Zone dedicated-outdoor-air accounting (D-50) — Gaps: systems 3, 4 and 6 have no separate ventilation stream, so their split is approximated by mixed-air zone sizing and audited as such — Code: `reference.py#_audit_terminal_secondary_split` |

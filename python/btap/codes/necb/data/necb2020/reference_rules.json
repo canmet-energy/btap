@@ -778,11 +778,12 @@
    {
     "article": "8.4.4.9.(4)",
     "title": "Heating System",
-    "status": "implemented",
-    "how": "reference heating energy type modeled identical to the proposed (structural election; see also 8.4.4.13.(2)(g))",
+    "status": "partial",
+    "how": "reference heating energy type modeled identical to the proposed, for a SINGLE-energy heating system (structural election; see also 8.4.4.13.(2)(g))",
     "code": [
      "python/btap/codes/necb/hvac/reference.py#_reference_energy_type"
-    ]
+    ],
+    "gaps": "the sentence opens \\u201cExcept as provided in Sentence (5)\\u201d, so it does NOT govern a group whose proposed heating system uses more than one energy type \u2014 ruled on fetched normative text. For such a group the structural election is a SURROGATE for the unimplemented 8.4.4.9.(5), not an application of (4): no single-fuel basis \u2014 fossil-first cascade, capacity-dominant, lead-fuel or annual-dominant \u2014 satisfies (5)(a)'s capacity ratio. The multi-energy case is disclosed as UNRESOLVED once per serving system and is not claimed as implemented here."
    },
    {
     "article": "8.4.4.9.(5)",

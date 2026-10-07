@@ -422,14 +422,14 @@ class TestTheEntryDescribesTheADOPTEDPlant(_Fixture):
         facts = self._facts(plants=[{
             "type": "hot_water", "name": "Three Boiler Loop",
             "fuels": ["NaturalGas", "Electricity"],
-            "heating_device_count": 3,
+            "boiler_count": 3,
             "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
         _r, warnings, _a = self._call(group, facts)
         entry = warnings[0]
         self.assertNotIn("one boiler per energy type", entry["action"])
         self.assertNotIn("retains one boiler", entry["action"])
-        self.assertEqual(3, entry["inputs"]["plant_heating_devices"],
-                         "the DEVICE COUNT is what distinguishes this from "
+        self.assertEqual(3, entry["inputs"]["plant_boiler_count"],
+                         "the BOILER COUNT is what distinguishes this from "
                          "'one per type'; the fuel set cannot")
 
     def _mixed(self):
@@ -437,25 +437,49 @@ class TestTheEntryDescribesTheADOPTEDPlant(_Fixture):
         facts = self._facts(plants=[{
             "type": "hot_water", "name": "Mixed Loop",
             "fuels": ["NaturalGas", "Electricity"],
-            "heating_device_count": 2,
+            "boiler_count": 2,
             "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
         _r, warnings, _a = self._call(group, facts)
         return warnings[0]
 
-    def test_the_PROSE_states_the_fuel_blind_staging(self):
+    def test_the_PROSE_asserts_NOTHING_about_the_reference_plant(self):
+        """Sol's `120`: my replacement text generalised samples 11/12 into
+        cases where it is false — an equal pair in the two-boiler band IS
+        preserved, a plant with no recognised role is not staged at all, and
+        a heat-pump variant needing no boiler has the plant torn down. So the
+        prose may state the possibilities and claim none of them."""
         entry = self._mixed()
-        self.assertIn("ADOPTS", entry["action"])
-        self.assertIn("BLIND to energy type", entry["action"])
-        self.assertIn("need not be the one elected", entry["action"])
-        self.assertNotIn(
-            "retained rather than collapsed", entry["action"].lower(),
-            "the staging pass collapses it on every run — the opposite")
+        action = entry["action"]
+        self.assertIn("PROPOSED heating system", action)
+        self.assertIn("not established", action.lower())
+        for overclaim in ("the reference ADOPTS", "is NOT carried through",
+                          "need not be the one elected",
+                          "retained rather than collapsed"):
+            self.assertNotIn(overclaim, action,
+                             f"{overclaim!r} is true of samples 11/12 only")
 
-    def test_the_INPUTS_record_the_role_basis_separately(self):
-        rule = self._mixed()["inputs"]["live_capacity_rule"]
-        self.assertIn("primary/secondary ROLE", rule)
-        self.assertIn("blind to energy type", rule)
-        self.assertNotIn("proposed allocation: a", rule)
+    def _outcome_text(self):
+        return self._mixed()["inputs"]["live_capacity_outcome"]
+
+    def test_the_outcome_is_declared_NOT_ESTABLISHED(self):
+        out = self._outcome_text()
+        self.assertIn("NOT ESTABLISHED", out)
+        self.assertIn("blind to energy", out)
+
+    def test_the_outcome_lists_the_TORN_DOWN_possibility(self):
+        """A heat-pump variant with `needs_boiler: false` has the plant
+        removed, so the reference plant may not exist at all."""
+        self.assertIn("torn down", self._outcome_text())
+
+    def test_the_outcome_lists_the_PRESERVED_band(self):
+        """Measured: two role-labelled 200 kW boilers become 100/100 kW in the
+        176-352 kW band, so an equal ratio IS carried through there."""
+        self.assertIn("PRESERVED", self._outcome_text())
+
+    def test_the_outcome_lists_the_NO_ROLE_case(self):
+        """Measured: three generically-named 52 kW boilers keep 52/52/52,
+        because `_plant_role` returns None unless there are exactly two."""
+        self.assertIn("no recognised role", self._outcome_text())
 
 
 class TestTheStagingPassIsFuelBLIND(unittest.TestCase):
@@ -517,6 +541,97 @@ class TestTheStagingPassIsFuelBLIND(unittest.TestCase):
                          "fuel-blind: an electric primary survives just as a "
                          "gas primary does, which is why the surviving fuel "
                          "need not be the elected reference energy type")
+
+
+class TestTheStagingOutcomeIsCONDITIONAL(unittest.TestCase):
+    """Sol's `120` counterexamples, exercised. My corrected entry said the
+    staging pass always discards the allocation; it does not.
+    """
+
+    @needs_sdk
+    def _plant(self, specs, names=("Primary Boiler", "Secondary Boiler",
+                                   "Third Boiler")):
+        import openstudio
+
+        from btap.audit import AuditLog
+        from btap.codes.necb import hvac
+
+        model = openstudio.model.Model()
+        loop = openstudio.model.PlantLoop(model)
+        loop.setName("Hot Water Loop")
+        loop.sizingPlant().setLoopType("Heating")
+        loop.setLoadDistributionScheme("SequentialLoad")
+        made = []
+        for i, (fuel, watts) in enumerate(specs):
+            b = openstudio.model.BoilerHotWater(model)
+            b.setName(names[i])
+            b.setFuelType(fuel)
+            b.setNominalCapacity(watts)
+            loop.addSupplyBranchForComponent(b)
+            made.append(b)
+        hvac.apply_efficiencies(model, code="necb2020", audit=AuditLog())
+        return [(b.fuelType(), b.nominalCapacity().get()) for b in made]
+
+    @needs_sdk
+    def test_an_equal_PAIR_in_the_two_boiler_band_is_PRESERVED(self):
+        """200 kW each lands in the 176-352 kW band, where (6)(c) wants two
+        equal boilers — so the 50/50 ratio survives, and the entry must not
+        say the allocation is never carried through."""
+        got = self._plant([("NaturalGas", 200_000.0),
+                           ("Electricity", 200_000.0)])
+        caps = [w for _f, w in got]
+        self.assertTrue(all(w > 1.0 for w in caps),
+                        f"neither is stubbed in this band; got {got}")
+        self.assertAlmostEqual(caps[0], caps[1], delta=1.0,
+                               msg=f"an EQUAL pair is preserved; got {got}")
+
+    @needs_sdk
+    def test_a_THREE_boiler_plant_takes_no_role_and_is_not_staged(self):
+        """`_plant_role` returns None unless there are exactly two boilers, so
+        every device keeps full capacity — NOT 'roles for only two', which is
+        what my gap text claimed."""
+        got = self._plant([("NaturalGas", 52_000.0),
+                           ("Electricity", 52_000.0),
+                           ("NaturalGas", 52_000.0)],
+                          names=("Boiler A", "Boiler B", "Boiler C"))
+        caps = [w for _f, w in got]
+        self.assertTrue(all(w > 1.0 for w in caps),
+                        f"no role recognised, so nothing is stubbed; got {got}")
+
+
+class TestPurchasedEnergyDoesNotSuppressUNRELATEDGroups(_Fixture):
+    """Sol's `120` blocker 4: the building-wide `purchased_energy.heating`
+    flag suppressed the (5) diagnostic everywhere, so district heat on one
+    primary system hid the finding for an unrelated gas+electric system.
+    8.4.x.6 governs the purchased system's CORRESPONDING system, not every
+    group.
+    """
+
+    def _selection(self):
+        sel = super()._selection()
+        sel["special_rules"]["heat_pump"] = {"article": "8.4.4.13.(1)-(2)"}
+        return sel
+
+    def test_an_unrelated_dual_fuel_group_still_warns(self):
+        group = self._group(("NaturalGas", "Electricity"))
+        facts = self._facts(plants=[{
+            "type": "hot_water", "name": "Mixed Loop",
+            "fuels": ["NaturalGas", "Electricity"], "boiler_count": 2,
+            "fuel_capacities_w": {"NaturalGas": None, "Electricity": None}}])
+        facts["purchased_energy"] = {"heating": True}   # elsewhere in the bldg
+        _r, warnings, _a = self._call(group, facts)
+        self.assertEqual(
+            1, len(warnings),
+            "purchased heat on another system must not hide this group's "
+            "unresolved multi-energy allocation")
+
+    def test_the_PURCHASED_group_itself_is_still_skipped(self):
+        """The control: 8.4.x.6 really is the route for a group that uses it."""
+        group = self._group(("Purchased", "Electricity"))
+        facts = self._facts(plants=[])
+        facts["purchased_energy"] = {"heating": True}
+        _r, warnings, _a = self._call(group, facts)
+        self.assertEqual([], warnings)
 
 
 class TestTheEditionComesFromTheManifest(unittest.TestCase):

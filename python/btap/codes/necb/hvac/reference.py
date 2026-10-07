@@ -373,9 +373,17 @@ def _finalize(assignment, group, definitions, selection, facts, audit,
     # structural one. It used to live inside _reference_energy_type, which
     # `_finalize` skips whenever heat_pump_aux_energy_type elects a type —
     # so an ANNUAL run of a mixed ASHP group produced the 8.4.4.13.(2)(g)
-    # election and NO multi-energy disclosure at all (Sol, `114`). Whether
-    # 8.4.4.13 supersedes (5) for such a group is an adjudication; until it
-    # is made, disclosing is the conservative side.
+    # election and NO multi-energy disclosure at all (Sol, `114`).
+    #
+    # The scope question is now RULED (`119`, on fetched normative text):
+    # 8.4.x.13 does NOT supersede 8.4.x.9.(5). They operate concurrently,
+    # with Article 13 controlling heat-pump topology and the terminal or
+    # auxiliary energy-type election under its own (2)(g), while (5)'s
+    # capacity-allocation and operating-characteristic obligations survive
+    # for the serving system. Clause 13.(2)(f) expressly incorporates
+    # Subsections 8.4.1, 8.4.2 and 8.4.4/8.4.5. So the disclosure belongs on
+    # this path as a matter of ruling, not of caution — and it must not say
+    # the auxiliary election eliminates electric reference heating.
     _disclose_multi_energy(group, selection, facts, audit,
                            ruleset=ruleset, disclosed=disclosed)
     definition = definitions[str(assignment.reference_system)]
@@ -2075,8 +2083,14 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
       establish which of (6)(b)/(c)/(d) even applies.
     """
     fuels = group.get('heating_energy_types') or ()
-    if 'Purchased' in fuels or (facts.get('purchased_energy') or {}).get('heating'):
-        return                      # 8.4.x.6 is the separate purchased route
+    # 8.4.x.6 is the separate route for THIS group only. The building-wide
+    # `facts.purchased_energy.heating` flag used to suppress the diagnostic
+    # everywhere, so district heat on one primary system hid the (5) finding
+    # for an unrelated gas+electric serving system. 8.4.x.6 governs the
+    # purchased-energy system's CORRESPONDING system, not every group
+    # (Sol, `119`/`120`).
+    if 'Purchased' in fuels:
+        return
     distinct = {str(f) for f in fuels}
     if len(distinct) < 2:
         return
@@ -2140,7 +2154,7 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     # Which of (6)(b)/(c)/(d) applies depends on the REFERENCE plant's
     # heating capacity, which does not exist at selection time. Cite the
     # sentence, never a subclause we cannot establish (Sol, `114`.4).
-    inputs['plant_heating_devices'] = plant.get('heating_device_count')
+    inputs['plant_boiler_count'] = plant.get('boiler_count')
     inputs['boiler_count_subclause'] = (
         f'NOT ESTABLISHED: {sentence_six} bands the requirement by the '
         f'reference plant capacity, which is not known at selection time, '
@@ -2153,11 +2167,26 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
     # So the installed allocation is NOT carried into the annual reference,
     # and on a plant whose primary is the non-elected fuel the surviving
     # capacity is the fuel the election rejected (Fable, `117`).
-    inputs['live_capacity_rule'] = (
-        'set after sizing by primary/secondary ROLE, blind to energy type: a '
-        'secondary below the single-boiler threshold is driven to ~0 W, so '
-        'the proposed installed allocation is NOT carried into the annual '
-        'reference and the surviving fuel need not be the elected one')
+    # What the staging pass does depends on things NOT established at
+    # selection time, and Sol reproduced three outcomes (`120`): in the
+    # two-boiler band a role-labelled equal pair is PRESERVED; below the
+    # single-boiler threshold a recognised secondary is driven to ~0 W blind
+    # to fuel; and a plant whose devices take no recognised role at all --
+    # `_plant_role` returns None unless there are exactly two boilers -- is
+    # not staged, so every device keeps full capacity. The reference may also
+    # not adopt this plant: a heat-pump variant with `needs_boiler: false`
+    # has its plant torn down. So the entry states the possibilities and
+    # claims none of them.
+    inputs['live_capacity_outcome'] = (
+        'NOT ESTABLISHED at selection time. The reference plant may be this '
+        'plant or may not exist at all (a heat-pump variant needing no '
+        'boiler has it torn down). If it is hydronic, the post-sizing '
+        'staging pass acts on primary/secondary ROLE and is blind to energy '
+        'type: an equal role-labelled pair in the two-boiler band is '
+        'PRESERVED, a recognised secondary below the single-boiler threshold '
+        'is driven to ~0 W, and a plant whose devices take no recognised '
+        'role is not staged at all. Which of these applies, and therefore '
+        'whether the proposed allocation survives, is not known here')
     if ratio_article.startswith(_MEASURED_SUBSECTION):
         inputs['fixture_measurement'] = _FIXTURE_MEASUREMENT
     else:
@@ -2167,13 +2196,14 @@ def _disclose_multi_energy(group, selection, facts, audit, ruleset=None,
             f'{_MEASURED_SUBSECTION} and say nothing about this one')
     audit.warn(
         'selection',
-        'UNRESOLVED: the proposed heating system puts MORE THAN ONE ENERGY '
+        'UNRESOLVED: the PROPOSED heating system puts MORE THAN ONE ENERGY '
         'TYPE on ONE BOILER PLANT that carries every energy type the group '
-        'uses, and the reference ADOPTS that plant with its own device count '
-        f'and fuels. After sizing, the staging pass sets the plant\'s live '
-        f'capacity by primary/secondary ROLE, BLIND to energy type, so the '
-        f'proposed installed allocation is NOT carried through and the '
-        f'surviving fuel need not be the one elected for the reference. '
+        'uses. What the REFERENCE plant ends up with is not established '
+        'here: it depends on the selected system variant, on whether the '
+        'plant is adopted or torn down, and on a post-sizing staging pass '
+        'that acts on primary/secondary ROLE blind to energy type and whose '
+        'effect differs by capacity band and by whether any role is '
+        'recognised at all. '
         f'Whether that conflicts with {sentence_six} is NOT established '
         f'here, because its applicable subclause depends on the reference '
         f'plant capacity. NEITHER {ratio_article}\'s capacity-ratio clause '

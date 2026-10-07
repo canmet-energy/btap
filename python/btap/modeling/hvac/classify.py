@@ -211,14 +211,14 @@ def _plant_facts(loop, audit):
     facts = {'name': loop.nameString(), 'type': type_,
              'fuels': list(dict.fromkeys(fuels)),
              'fuel_capacities_w': by_fuel,
-             # The NUMBER of heating devices, not just the set of fuels. The
-             # reference re-adopts the proposed plant whole, so this is the
-             # reference's boiler count too — a three-boiler proposed plant
-             # gives a three-boiler reference. The 8.4.4.9.(5) disclosure said
-             # "one boiler per energy type" while the plant could hold any
-             # number (Fable, `117`), and the count is what distinguishes the
-             # two: fuels alone cannot.
-             'heating_device_count': len(allocation),
+             # BOILERS on this plant, named for what it counts. `allocation`
+             # holds only `BoilerHotWater`, so the earlier name
+             # `heating_device_count` lied: a plant with one gas boiler and an
+             # electric WaterHeaterMixed reported two fuels and a count of 1
+             # (Sol, `120`, reproduced). Sentence (6) is about boilers, which
+             # is the count the (5) disclosure needs, so the field keeps that
+             # scope and says so.
+             'boiler_count': len(allocation),
              'purchased': purchased, 'heat_pump': heat_pump}
     if audit is not None:
         audit.info('characterize', 'plant loop classified', target=loop.nameString(),
