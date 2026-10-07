@@ -95,7 +95,19 @@ hostile tests must not flag them:
 
 - **Plenums** are skipped by design in the lighting transform.
 - **Follows-proposed rules** — e.g. reference heating energy type follows the
-  proposed (8.4.4.9.(4)).
+  proposed (8.4.x.9.(4)) — but ONLY for a single-energy system whose energy
+  source the catalog preserves. This exemption was written unqualified, which
+  told a test author not to flag two things a hostile test SHOULD flag:
+  - a proposed oil or propane system becomes a GAS reference.
+    `_reference_energy_type` elects by a cascade that returns `'gas'` for ANY
+    fossil fuel it recognises — `re.search(r'gas|oil|propane', fuel)` — so the
+    catalog variant is the same for all three. (4) says "identical" energy
+    type and Division A requires the same energy sources for the same
+    functions, so that is a tool gap, AHJ-6, not an exemption.
+  - a MULTI-energy system is not governed by (4) at all. (4) opens "Except as
+    provided in Sentence (5)", and (5) requires the reference capacities to
+    match the RATIO of the proposed allocation. That is unimplemented and
+    AHJ-1; a run carrying it is marked `conditional`.
 - **Lesser-of rules** — e.g. equipment oversizing (8.4.4.8) legitimately
   retains a proposed value already below the cap.
 - **`satisfied_by_clone` articles** — schedules and occupancy/receptacle loads
