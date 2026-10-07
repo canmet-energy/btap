@@ -201,7 +201,7 @@ to answer.
 
 ## Frozen scenarios
 
-`verification/scenarios/` contains 45 scenarios in three lanes:
+`verification/scenarios/` contains 46 scenarios in three lanes:
 
 - `python`: engine-free, every Python-suite run
 - `verify`: sizing, in the OpenStudio container

@@ -190,7 +190,7 @@ Add the entry in the same change as the condition that cites it.
 
 The post-R6 verification model has two independent parts:
 
-- `verification/scenarios/` holds 45 frozen Python pipeline scenarios across
+- `verification/scenarios/` holds 46 frozen Python pipeline scenarios across
   `python`, `verify`, and `parity` lanes. Intentional output changes use
   `verification/scenarios/freeze.py` on a clean tree and commit the baseline
   changes with the code.

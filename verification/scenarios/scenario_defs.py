@@ -73,6 +73,20 @@ DF17_SEAL = ("python-only:first frozen at DF-17 — authored after the Ruby "
              "product retired; no cross-language attestation exists for this "
              "scenario")
 
+#: The 8.4.x.9.(5) conditional determination is set AFTER the annual
+#: comparison, and no annual scenario was multi-energy: the dual-fuel samples
+#: existed only in the `none` and `sizing` tiers, which never reach a verdict.
+#: So the determination had fifteen focused tests and ZERO frozen coverage
+#: (Sol, `122`.5). Sample 11 joins the annual tier to pin it end to end.
+MULTI_ENERGY_SEAL = ("python-only:first frozen for the 8.4.x.9.(5) conditional "
+                     "determination — authored after the Ruby product "
+                     "retired; no cross-language attestation exists for this "
+                     "scenario")
+
+#: The dual-fuel plant whose reference cannot satisfy 8.4.x.9.(5). Annual, so
+#: the run reaches a verdict and the `conditional` determination is frozen.
+MULTI_ENERGY_ANNUAL_SUBSET = ["11-staged-boilers-gas-lead"]
+
 CORPUS_FILES = ["audit.json", "report.json"]
 CORPUS_TEXT = {"audit.txt": "normalized"}
 
@@ -177,6 +191,8 @@ def corpus_scenarios(slugs):
             for s in D89_ANNUAL_SUBSET]
     out += [_corpus(s, "sizing", "verify", seal=DF17_SEAL)
             for s in DF17_SIZING_SUBSET]
+    out += [_corpus(s, "annual", "parity", seal=MULTI_ENERGY_SEAL)
+            for s in MULTI_ENERGY_ANNUAL_SUBSET]
     return out
 
 
