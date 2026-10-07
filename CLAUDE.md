@@ -148,6 +148,36 @@ both in the decision and the provenance entry. When they disagree, the
 Code wins and the gem's version is recorded as a finding, not adopted;
 `docs/NECB_VINTAGE_MATCH.md` is the pattern.
 
+## Interpretations referred to an authority
+
+`docs/NECB_AHJ_QUESTIONS.md` is the AUTHORED register of Code questions the
+acceptable-solution text does not answer. It is tracked, unlike `.reviews/`,
+which is gitignored and so was never a record of them. Entries are `AHJ-NN`,
+each stating the ambiguity, who established it, what the tool does meanwhile,
+and where a reader meets it at runtime.
+
+An entry belongs there ONLY when the text does not decide the question. A
+requirement that *can* be implemented is a gap to close, not a referral:
+AHJ-6 (oil and propane rendered as a gas reference) sits there marked as
+fixable tool-side, and AHJ-4 is recorded as ruled and explicitly NOT a
+referral, so the register never looks more complete than it is.
+
+Where Claude, Sol and Fable cannot resolve a question after real effort,
+phylroy's direction (2026-10-07) is to emit a CONDITIONAL result naming the
+approval required rather than stall. That is
+`report['compliance_determination'] = 'conditional'`, set in
+`btap/codes/necb/path.py`, with a reason block carrying the condition, the
+serving systems, `ahj_must_approve`, `if_not_approved`, and `ahj_ids` citing
+the register. The CLI prints it inside the verdict string — not beside it —
+and the HTML report badges it beside the pass/fail badge, because the report
+is the AHJ-facing artifact. The exit code is deliberately unchanged, pinned by
+`test_the_exit_code_is_UNCHANGED_by_the_label`.
+
+`python/tests/necb/test_ahj_register.py` keeps the register honest: it fails
+if the runtime cites an id with no entry, if the file becomes gitignored, or
+if an entry omits its article, who established it, or its interim behaviour.
+Add the entry in the same change as the condition that cites it.
+
 ## Verification
 
 The post-R6 verification model has two independent parts:

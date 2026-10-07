@@ -51,6 +51,7 @@ Licensed **GPL-3.0-or-later** — see [LICENSE](LICENSE).
 | understand what it decided and why | [Reading the results](#reading-the-results) |
 | know which code articles are covered | [What is implemented](#what-is-implemented) |
 | know where it makes a judgement call | [Decisions and assumptions](#decisions-and-assumptions) |
+| know which readings **your authority** must approve | [Interpretations an authority must approve](#interpretations-an-authority-must-approve) |
 | know what it does **not** do | [Known limits](#known-limits) |
 | work on the code itself | [docs/DEVELOPERS.md](docs/DEVELOPERS.md) |
 
@@ -225,8 +226,8 @@ usefully, for each partial article's specific gap.
 ## Decisions and assumptions
 
 Where the code needs interpreting, the interpretation is written down rather than
-buried in the source. **84 decisions** are recorded in
-**[necb_decisions.md](docs/necb_decisions.md)** — 40 of them
+buried in the source. **98 decisions** are recorded in
+**[necb_decisions.md](docs/necb_decisions.md)** — 49 of them
 active at runtime, tagging the audit entries they govern.
 
 A decision records what the code says, how we read it, what we rejected, and why.
@@ -236,7 +237,48 @@ energy is represented.
 
 The HTML report's **"Decisions and assumptions applied"** appendix lists the ones
 that actually fired in *your* run — so a reviewer sees the judgement calls that
-affected this building, not all 84.
+affected this building, not all 98.
+
+---
+
+## Interpretations an authority must approve
+
+Some questions the Code does not answer. Where the acceptable-solution text does
+not settle how a requirement is to be modelled, no tool can decide it — an
+**authority having jurisdiction** has to accept the interpretation.
+
+Those questions are listed in
+**[NECB_AHJ_QUESTIONS.md](docs/NECB_AHJ_QUESTIONS.md)**. Each entry says what is
+ambiguous, who established that it is ambiguous, what this tool does in the
+meantime, and where you meet it in a run.
+
+**If your building hits one, the run says so.** The verdict is reported but
+marked as not a determination, and the report names what your authority must
+approve:
+
+```
+  *** NOT A CODE-COMPLIANT DETERMINATION ***
+  8.4.4.9.(5) governs the 1 multi-energy serving system(s) below and is
+  NOT implemented ...
+    - Hot Water Loop
+
+  CONDITIONAL: the authority having jurisdiction must accept the interpretation
+  below before this comparison can support compliance.
+
+  VERDICT: COMPLIANT - INFORMATIONAL, AND CONDITIONAL ON APPROVAL BY THE
+           AUTHORITY HAVING JURISDICTION
+```
+
+The HTML report carries the same thing as a **CONDITIONAL — AHJ APPROVAL
+REQUIRED** badge beside the pass/fail badge, so it travels with the submission.
+`report.json` carries it as `compliance_determination`, with the conditions and
+what follows if approval is not given.
+
+The commonest case today is a **proposed heating plant using two fuels**: the
+Code requires the reference building to carry both in the same capacity ratio,
+and how to do that when each simulated boiler has one fixed fuel is not
+resolved by the text. The exit code is unchanged for these runs — the
+qualification is in the verdict, not in the status code.
 
 ---
 

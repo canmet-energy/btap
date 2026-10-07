@@ -176,6 +176,29 @@ Refresh them only as a maintainer operation with
 `python3 python/scripts/fetch_necb_8_4_text.py` and review the generated-doc
 diff.
 
+## AHJ referrals
+
+`docs/NECB_AHJ_QUESTIONS.md` is AUTHORED, not generated — unlike
+`docs/necb_decisions.md` and `NECB_COVERAGE.md`, nothing regenerates it, so
+edit it directly and keep its entries in id order.
+
+It records the Code questions the acceptable-solution text does not answer.
+A runtime condition must cite its entry (`ahj_ids` in
+`path.py`'s determination reason), and `tests/necb/test_ahj_register.py` fails
+if the citation does not resolve, if the file stops being tracked, or if an
+entry omits its article, who established the ambiguity, or what the tool does
+in the meantime. Those properties are the difference between a register and a
+pile of correspondence: the `.reviews/` trail held the same questions for
+weeks and was gitignored, so none of it was a record.
+
+```bash
+cd python && .venv/bin/python -m pytest -q tests/necb/test_ahj_register.py
+```
+
+Do not open an entry for something implementable. A requirement the tool
+could satisfy is a coverage gap; a referral is for a question an authority has
+to answer.
+
 ## Frozen scenarios
 
 `verification/scenarios/` contains 45 scenarios in three lanes:
